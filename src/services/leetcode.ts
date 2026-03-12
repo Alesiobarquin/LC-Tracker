@@ -1,33 +1,28 @@
 import { problems } from '../data/problems';
 
 export interface LeetCodeSubmission {
+  title: string;
   titleSlug: string;
   timestamp: string;
   statusDisplay: string;
+  lang: string;
 }
 
 export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSubmission[]> => {
-  const endpoint = '/api/leetcode';
+  const endpoint = `https://alfa-leetcode-api.onrender.com/${username}/acSubmission`;
 
   try {
     const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username,
-        limit: 2000,
-      }),
+      method: 'GET',
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch from LeetCode API');
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch from LeetCode API: ${errorText}`);
     }
 
     const data = await response.json();
-    return data || [];
+    return data.submission || [];
   } catch (error) {
     console.error('LeetCode API Error:', error);
     throw error;

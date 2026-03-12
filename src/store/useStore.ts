@@ -13,6 +13,7 @@ export interface ProblemProgress {
   history: { date: string; rating: 1 | 2 | 3 }[];
   retired: boolean;
   consecutiveThrees: number;
+  consecutiveSuccesses?: number;
   notes?: string;
 }
 
@@ -33,14 +34,16 @@ interface AppState {
   lastSyncCount: number | null;
   syncError: string | null;
   targetInterviewDate: string;
-  
+
   logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string) => void;
+  logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean) => void;
   resetProgress: () => void;
-  getDailyPlan: () => { 
-    newProblem: string | null; 
-    reviewProblems: string[]; 
+  getDailyPlan: () => {
+    newProblem: string | null;
+    reviewProblems: string[];
     coldSolveProblem: string | null;
     recommendationReason?: string;
+    totalDueReviews?: number;
   };
   setLeetCodeUsername: (username: string) => void;
   syncLeetCode: () => Promise<void>;
@@ -76,7 +79,7 @@ export const useStore = create<AppState>()(
 
         try {
           const submissions = await fetchLeetCodeProfile(leetcodeUsername);
-          
+
           const newProgress = { ...progress };
           let updated = false;
           let pulledCount = 0;
@@ -85,16 +88,16 @@ export const useStore = create<AppState>()(
             const problemId = sub.titleSlug;
             // Check if it's in our library
             const existsInLibrary = problems.some(p => p.id === problemId);
-            
+
             if (existsInLibrary && !newProgress[problemId]) {
               // Add as solved with default rating of 3
               const solveDate = new Date(parseInt(sub.timestamp) * 1000);
               const solveDateStr = solveDate.toISOString();
-              
+
               // Calculate next review based on solve date (Day 3)
               const nextReview = new Date(solveDate);
               nextReview.setDate(nextReview.getDate() + 3);
-              
+
               newProgress[problemId] = {
                 firstSolvedAt: solveDateStr,
                 lastReviewedAt: solveDateStr,
@@ -103,14 +106,15 @@ export const useStore = create<AppState>()(
                 history: [{ date: solveDateStr, rating: 3 }],
                 retired: false,
                 consecutiveThrees: 1,
+                consecutiveSuccesses: 1,
               };
               updated = true;
               pulledCount++;
             }
           });
 
-          set({ 
-            syncError: null, 
+          set({
+            syncError: null,
             lastSync: new Date().toISOString(),
             lastSyncCount: pulledCount
           });
@@ -128,16 +132,18 @@ export const useStore = create<AppState>()(
           const today = startOfDay(new Date());
           const todayStr = today.toISOString();
           const dateKey = format(today, 'yyyy-MM-dd');
-          
+
           const existing = state.progress[problemId];
           const isFirstRating = !existing || existing.history.length === 0;
           const consecutiveThrees = rating === 3 ? (existing?.consecutiveThrees || 0) + 1 : 0;
-          const retired = consecutiveThrees >= 2;
+
+          const prevSuccesses = existing?.consecutiveSuccesses || 0;
+          const consecutiveSuccesses = rating >= 2 ? prevSuccesses + 1 : 0;
+
+          const retired = consecutiveSuccesses >= 4 && consecutiveThrees >= 2;
           const reviewCount = isFirstRating ? 0 : (existing ? existing.reviewCount + 1 : 0);
-          
-          const nextReviewAt = rating === 1 && !isFirstRating 
-            ? getNextReviewDate(1, 0).toISOString() // Reset to day 3
-            : getNextReviewDate(rating, reviewCount).toISOString();
+
+          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses).toISOString();
 
           const newProgress: ProblemProgress = {
             firstSolvedAt: existing ? existing.firstSolvedAt : todayStr,
@@ -147,6 +153,7 @@ export const useStore = create<AppState>()(
             history: [...(existing?.history || []), { date: todayStr, rating }],
             retired,
             consecutiveThrees,
+            consecutiveSuccesses,
             notes: notes !== undefined ? notes : existing?.notes,
           };
 
@@ -184,6 +191,16 @@ export const useStore = create<AppState>()(
         });
       },
 
+      logMockInterview: (problemId, evalSolved, evalSyntax, evalComplexity) => {
+        let rating: 1 | 2 | 3 = 2;
+        if (!evalSolved || !evalSyntax) {
+          rating = 1;
+        } else if (evalSolved && evalSyntax && evalComplexity) {
+          rating = 3;
+        }
+        get().logProblem(problemId, rating, false, "Mock Interview");
+      },
+
       resetProgress: () => set({ progress: {}, activityLog: {}, streak: { current: 0, max: 0, lastActiveDate: null } }),
 
       getDailyPlan: () => {
@@ -193,16 +210,24 @@ export const useStore = create<AppState>()(
         const dayOfWeek = getDay(today);
 
         // Review Problems
-        const reviewProblems = Object.entries(state.progress)
+        const allDueReviews = Object.entries(state.progress)
           .filter(([_, prog]) => !prog.retired && isDueToday(prog.nextReviewAt))
-          .map(([id]) => id)
+          .map(([id, prog]) => ({ id, prog }))
           .sort((a, b) => {
-             const probA = problems.find(p => p.id === a);
-             const probB = problems.find(p => p.id === b);
-             if (probA?.isBlind75 && !probB?.isBlind75) return -1;
-             if (!probA?.isBlind75 && probB?.isBlind75) return 1;
-             return 0;
+            const successA = a.prog.consecutiveSuccesses || 0;
+            const successB = b.prog.consecutiveSuccesses || 0;
+            if (successA !== successB) return successA - successB; // Lowest successes first
+
+            // Fallback to Blind75 priority
+            const probA = problems.find(p => p.id === a.id);
+            const probB = problems.find(p => p.id === b.id);
+            if (probA?.isBlind75 && !probB?.isBlind75) return -1;
+            if (!probA?.isBlind75 && probB?.isBlind75) return 1;
+            return 0;
           });
+
+        const totalDueReviews = allDueReviews.length;
+        const reviewProblems = allDueReviews.slice(0, 5).map(r => r.id);
 
         // Cold Solve Logic
         let coldSolveProblem: string | null = null;
@@ -212,11 +237,12 @@ export const useStore = create<AppState>()(
             const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
             return daysSinceLastReview > 30;
           })
+          .sort((a, b) => new Date(a[1].lastReviewedAt).getTime() - new Date(b[1].lastReviewedAt).getTime())
           .map(([id]) => id);
-        
+
         if (potentialColdSolves.length > 0) {
-          // Pick a random one
-          coldSolveProblem = potentialColdSolves[Math.floor(Math.random() * potentialColdSolves.length)];
+          // Pick the absolute oldest
+          coldSolveProblem = potentialColdSolves[0];
         }
 
         // New Problem Logic (Smart Recommendation)
@@ -234,7 +260,7 @@ export const useStore = create<AppState>()(
               solvedThisWeek++;
             }
           }
-          if (solvedThisWeek >= 1) {
+          if (solvedThisWeek >= 3) {
             shouldAssignNewProblem = false;
           }
         }
@@ -267,10 +293,11 @@ export const useStore = create<AppState>()(
           // Find the lowest confidence category that has unsolved problems
           for (const { category, avg } of categoryAverages) {
             if (!candidateCategories.includes(category)) continue;
-            
+            if (avg >= 2.5) continue; // Only prioritize if it's actually a weak category
+
             const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
             const unsolved = categoryProblems.find(p => !solvedIds.has(p.id));
-            
+
             if (unsolved) {
               newProblem = unsolved.id;
               recommendationReason = `Recommending this because your ${category} confidence average is ${avg.toFixed(1)}.`;
@@ -290,7 +317,7 @@ export const useStore = create<AppState>()(
               }
             }
           }
-          
+
           if (!newProblem && phase === 3) {
             const unsolved = problems.find(p => p.isNeetCode150 && !solvedIds.has(p.id));
             if (unsolved) {
@@ -300,7 +327,7 @@ export const useStore = create<AppState>()(
           }
         }
 
-        return { newProblem, reviewProblems, coldSolveProblem, recommendationReason };
+        return { newProblem, reviewProblems, coldSolveProblem, recommendationReason, totalDueReviews };
       },
     }),
     {

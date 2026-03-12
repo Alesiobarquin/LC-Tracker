@@ -12,7 +12,7 @@ export const Dashboard: React.FC = () => {
   const progress = useStore((state) => state.progress);
   const getDailyPlan = useStore((state) => state.getDailyPlan);
   const phase = getPhase();
-  const { newProblem, reviewProblems, coldSolveProblem, recommendationReason } = getDailyPlan();
+  const { newProblem, reviewProblems, coldSolveProblem, recommendationReason, totalDueReviews } = getDailyPlan();
 
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [isReview, setIsReview] = useState(false);
@@ -211,8 +211,13 @@ export const Dashboard: React.FC = () => {
           <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
               <Clock size={20} className="text-amber-400" />
-              Spaced Repetition Reviews ({reviewProblemsData.length})
+              Spaced Repetition Reviews ({reviewProblemsData.length}{(totalDueReviews && totalDueReviews > 5) ? ` of ${totalDueReviews}` : ''})
             </h2>
+            {(totalDueReviews && totalDueReviews > 5) ? (
+              <p className="text-sm text-zinc-400 mb-4 bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg">
+                <span className="text-amber-400 font-semibold">{totalDueReviews - 5} review{(totalDueReviews - 5) !== 1 ? 's' : ''} deferred</span> to tomorrow to maintain a healthy workload. The 5 hardest problems are prioritized.
+              </p>
+            ) : null}
             {reviewProblemsData.length > 0 ? (
               <div className="space-y-3">
                 {reviewProblemsData.map((prob) => {

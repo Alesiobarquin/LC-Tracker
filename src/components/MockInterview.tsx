@@ -7,6 +7,7 @@ import { clsx } from 'clsx';
 
 export const MockInterview: React.FC = () => {
   const progress = useStore((state) => state.progress);
+  const logMockInterview = useStore((state) => state.logMockInterview);
   const phase = getPhase();
 
   const [activeProblem, setActiveProblem] = useState<Problem | null>(null);
@@ -101,7 +102,10 @@ export const MockInterview: React.FC = () => {
             </div>
 
             <button
-              onClick={() => setActiveProblem(null)}
+              onClick={() => {
+                logMockInterview(activeProblem.id, evalSolved!, evalSyntax!, evalComplexity!);
+                setActiveProblem(null);
+              }}
               disabled={evalSolved === null || evalSyntax === null || evalComplexity === null}
               className="w-full mt-8 bg-indigo-500 hover:bg-indigo-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-50 font-semibold py-4 rounded-xl transition-colors"
             >

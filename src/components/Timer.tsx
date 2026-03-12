@@ -11,12 +11,13 @@ interface TimerProps {
   onComplete: () => void;
 }
 
-type TimerPhase = 'read' | 'attempt' | 'review' | 'rating';
+type TimerPhase = 'read' | 'attempt' | 'review' | 'retry' | 'rating';
 
 const PHASE_DURATIONS = {
   read: 5 * 60,
   attempt: 15 * 60,
-  review: 5 * 60,
+  review: 10 * 60,
+  retry: 5 * 60,
 };
 
 export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onComplete }) => {
@@ -53,6 +54,9 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       setPhase('review');
       setTimeLeft(PHASE_DURATIONS.review);
     } else if (phase === 'review') {
+      setPhase('retry');
+      setTimeLeft(PHASE_DURATIONS.retry);
+    } else if (phase === 'retry') {
       setPhase('rating');
     }
   };
@@ -81,7 +85,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           </div>
           <h2 className="text-2xl font-bold text-zinc-50 mb-2">Session Complete</h2>
           <p className="text-zinc-400 mb-6">How confident do you feel about {problem.title}?</p>
-          
+
           <div className="mb-8 text-left">
             <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
               <BookOpen size={16} className="text-emerald-400" />
@@ -96,23 +100,23 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           </div>
 
           <div className="space-y-4">
-            <button 
+            <button
               onClick={() => handleRating(3)}
               className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
               <span className="font-semibold text-lg group-hover:scale-105 transition-transform">3 - Mastered</span>
               <span className="text-sm opacity-80">Clean, fast, could explain it</span>
             </button>
-            
-            <button 
+
+            <button
               onClick={() => handleRating(2)}
               className="w-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
               <span className="font-semibold text-lg group-hover:scale-105 transition-transform">2 - Okay</span>
               <span className="text-sm opacity-80">Solved, but slow or had bugs</span>
             </button>
-            
-            <button 
+
+            <button
               onClick={() => handleRating(1)}
               className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
@@ -138,8 +142,8 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <span className={clsx(
               "font-medium",
               problem.difficulty === 'Easy' ? "text-emerald-400" :
-              problem.difficulty === 'Medium' ? "text-amber-400" :
-              "text-red-400"
+                problem.difficulty === 'Medium' ? "text-amber-400" :
+                  "text-red-400"
             )}>
               {problem.difficulty}
             </span>
@@ -168,15 +172,16 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       <div className="premium-card p-8 md:p-12 text-center relative overflow-hidden">
         {/* Progress Bar Background */}
         <div className="absolute top-0 left-0 h-1 bg-zinc-800 w-full">
-          <div 
+          <div
             className={clsx(
               "h-full transition-all duration-1000",
               isColdSolve ? "bg-blue-500" :
-              phase === 'read' ? "bg-indigo-500" :
-              phase === 'attempt' ? "bg-emerald-500" :
-              "bg-amber-500"
+                phase === 'read' ? "bg-indigo-500" :
+                  phase === 'attempt' ? "bg-emerald-500" :
+                    phase === 'review' ? "bg-amber-500" :
+                      "bg-purple-500"
             )}
-            style={{ width: `${(( (isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase]) - timeLeft) / (isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase])) * 100}%` }}
+            style={{ width: `${(((isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase]) - timeLeft) / (isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase])) * 100}%` }}
           />
         </div>
 
@@ -187,6 +192,8 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <span className={clsx(phase === 'attempt' && "text-emerald-400")}>2. Attempt</span>
             <ChevronRight size={14} className="text-zinc-600" />
             <span className={clsx(phase === 'review' && "text-amber-400")}>3. Review</span>
+            <ChevronRight size={14} className="text-zinc-600" />
+            <span className={clsx(phase === 'retry' && "text-purple-400")}>4. Re-try</span>
           </div>
         )}
 
@@ -195,21 +202,21 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         </div>
 
         <div className="flex items-center justify-center gap-4">
-          <button 
+          <button
             onClick={() => setIsRunning(!isRunning)}
             className="w-16 h-16 flex items-center justify-center bg-zinc-100 hover:bg-white text-zinc-950 rounded-full transition-colors shadow-lg"
           >
             {isRunning ? <Pause size={24} className="fill-current" /> : <Play size={24} className="fill-current ml-1" />}
           </button>
-          
-          <button 
+
+          <button
             onClick={skipPhase}
             className="px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-2xl font-medium transition-colors border border-zinc-700/50"
           >
             Skip Phase
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setPhase('rating')}
             className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors"
           >
@@ -221,10 +228,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           {isColdSolve && "Cold Solve: No hints, no videos. Test your true retention."}
           {!isColdSolve && phase === 'read' && "Read the problem carefully. Identify edge cases and constraints. Do not write code yet."}
           {!isColdSolve && phase === 'attempt' && "Write your solution. Focus on correctness first, then optimization."}
-          {!isColdSolve && phase === 'review' && "If stuck, watch the NeetCode video. Then close it and re-implement from scratch."}
+          {!isColdSolve && phase === 'review' && "If stuck, watch the NeetCode video. Focus carefully on the optimal algorithm."}
+          {!isColdSolve && phase === 'retry' && "Close the video and try to implement the optimal solution from scratch."}
         </div>
 
-        {!isColdSolve && phase === 'review' && existingNotes && (
+        {!isColdSolve && phase === 'retry' && existingNotes && (
           <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-left max-w-lg mx-auto">
             <h4 className="text-emerald-400 text-sm font-semibold mb-2 flex items-center gap-2">
               <BookOpen size={16} />

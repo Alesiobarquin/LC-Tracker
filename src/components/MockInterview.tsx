@@ -8,9 +8,9 @@ import { clsx } from 'clsx';
 export const MockInterview: React.FC = () => {
   const progress = useStore((state) => state.progress);
   const phase = getPhase();
-  
+
   const [activeProblem, setActiveProblem] = useState<Problem | null>(null);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [timeLeft, setTimeLeft] = useState(35 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
@@ -44,7 +44,7 @@ export const MockInterview: React.FC = () => {
       if (categoryFilter !== 'All' && p.category !== categoryFilter) return false;
       return true;
     });
-    
+
     if (eligibleProblems.length === 0) {
       alert("No solved problems match your selected filters. Try broadening your criteria.");
       return;
@@ -52,7 +52,7 @@ export const MockInterview: React.FC = () => {
 
     const randomProblem = eligibleProblems[Math.floor(Math.random() * eligibleProblems.length)];
     setActiveProblem(randomProblem);
-    setTimeLeft(25 * 60);
+    setTimeLeft(35 * 60);
     setIsRunning(true);
     setIsFinished(false);
     setEvalSolved(null);
@@ -66,17 +66,6 @@ export const MockInterview: React.FC = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  if (phase !== 3 && process.env.NODE_ENV !== 'development') {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8 animate-in fade-in duration-500">
-        <Lock size={64} className="text-zinc-700 mb-6" />
-        <h2 className="text-2xl font-bold text-zinc-50 mb-2">Mock Interviews Locked</h2>
-        <p className="text-zinc-400 max-w-md">
-          This feature unlocks in Phase 3 (August 2026), during the recruiting grind. Focus on building your foundation first.
-        </p>
-      </div>
-    );
-  }
 
   if (isFinished && activeProblem) {
     return (
@@ -85,7 +74,7 @@ export const MockInterview: React.FC = () => {
           <CircleCheck size={48} className="mx-auto text-indigo-500 mb-6" />
           <h2 className="text-2xl font-bold text-zinc-50 mb-2 text-center">Interview Complete</h2>
           <p className="text-zinc-400 mb-8 text-center">Self-Evaluation for {activeProblem.title}</p>
-          
+
           <div className="space-y-6">
             <div className="space-y-3">
               <p className="font-medium text-zinc-100">1. Did you solve the problem optimally?</p>
@@ -111,7 +100,7 @@ export const MockInterview: React.FC = () => {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => setActiveProblem(null)}
               disabled={evalSolved === null || evalSyntax === null || evalComplexity === null}
               className="w-full mt-8 bg-indigo-500 hover:bg-indigo-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-50 font-semibold py-4 rounded-xl transition-colors"
@@ -144,9 +133,9 @@ export const MockInterview: React.FC = () => {
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 h-1 bg-zinc-800 w-full">
-            <div 
+            <div
               className="h-full bg-indigo-500 transition-all duration-1000"
-              style={{ width: `${((25 * 60 - timeLeft) / (25 * 60)) * 100}%` }}
+              style={{ width: `${((35 * 60 - timeLeft) / (35 * 60)) * 100}%` }}
             />
           </div>
 
@@ -160,14 +149,14 @@ export const MockInterview: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <button 
+            <button
               onClick={() => setIsRunning(!isRunning)}
               className="w-16 h-16 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-950 rounded-full transition-colors"
             >
               {isRunning ? <Pause size={24} className="fill-current" /> : <Play size={24} className="fill-current ml-1" />}
             </button>
-            
-            <button 
+
+            <button
               onClick={() => { setIsRunning(false); setIsFinished(true); }}
               className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors"
             >
@@ -191,7 +180,7 @@ export const MockInterview: React.FC = () => {
           <Lock size={32} className="text-indigo-400" />
         </div>
         <h2 className="text-2xl font-bold text-zinc-50 mb-4">Ready for a challenge?</h2>
-        
+
         <div className="text-left max-w-md mx-auto mb-8 space-y-4">
           <div>
             <label className="block text-sm font-medium text-zinc-400 mb-2">Difficulty</label>
@@ -202,8 +191,8 @@ export const MockInterview: React.FC = () => {
                   onClick={() => setDifficultyFilter(diff as any)}
                   className={clsx(
                     "flex-1 py-2 rounded-lg text-sm font-medium transition-colors border",
-                    difficultyFilter === diff 
-                      ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-400" 
+                    difficultyFilter === diff
+                      ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-400"
                       : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
                   )}
                 >
@@ -212,10 +201,10 @@ export const MockInterview: React.FC = () => {
               ))}
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-zinc-400 mb-2">Category</label>
-            <select 
+            <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-zinc-100 focus:outline-none focus:border-indigo-500/50 transition-colors"
@@ -232,7 +221,7 @@ export const MockInterview: React.FC = () => {
           </li>
           <li className="flex items-center gap-3">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-            Strict 25-minute timer
+            Strict 35-minute timer
           </li>
           <li className="flex items-center gap-3">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
@@ -243,7 +232,7 @@ export const MockInterview: React.FC = () => {
             Self-evaluation at the end
           </li>
         </ul>
-        <button 
+        <button
           onClick={startMock}
           className="bg-indigo-500 hover:bg-indigo-600 text-zinc-50 font-semibold px-8 py-4 rounded-xl transition-colors inline-flex items-center gap-2"
         >

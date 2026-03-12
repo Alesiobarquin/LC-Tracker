@@ -13,7 +13,7 @@ export const Dashboard: React.FC = () => {
   const getDailyPlan = useStore((state) => state.getDailyPlan);
   const phase = getPhase();
   const { newProblem, reviewProblems, coldSolveProblem, recommendationReason } = getDailyPlan();
-  
+
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [isReview, setIsReview] = useState(false);
   const [isColdSolve, setIsColdSolve] = useState(false);
@@ -22,7 +22,7 @@ export const Dashboard: React.FC = () => {
   const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
   const coldSolveData = coldSolveProblem ? problems.find(p => p.id === coldSolveProblem) : null;
 
-  const newProblemTime = newProblem ? 25 : 0;
+  const newProblemTime = newProblem ? 35 : 0;
   const reviewTime = reviewProblems.length * 15;
   const coldSolveTime = coldSolveProblem ? 20 : 0;
   const totalTime = newProblemTime + reviewTime + coldSolveTime;
@@ -42,7 +42,7 @@ export const Dashboard: React.FC = () => {
   const phase1TargetDate = new Date('2026-05-01T00:00:00Z');
   const daysUntilPhase1Target = Math.max(1, Math.ceil((phase1TargetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
   const problemsRemaining = Math.max(0, 75 - solvedCount);
-  
+
   let solvedLast14Days = 0;
   for (let i = 0; i < 14; i++) {
     const dateKey = new Date(today.getTime() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -50,15 +50,15 @@ export const Dashboard: React.FC = () => {
       solvedLast14Days += activityLog[dateKey].solved;
     }
   }
-  
+
   // Default to 1 problem per day if no data to avoid infinity
-  const solveRate = solvedLast14Days === 0 ? 1 : solvedLast14Days / 14; 
+  const solveRate = solvedLast14Days === 0 ? 1 : solvedLast14Days / 14;
   const daysNeeded = problemsRemaining / solveRate;
   const estimatedFinishDate = new Date(today.getTime() + daysNeeded * 24 * 60 * 60 * 1000);
-  
+
   let pacingStatus = 'green';
   let pacingMessage = '';
-  
+
   if (problemsRemaining === 0) {
     pacingStatus = 'green';
     pacingMessage = 'Phase 1 complete!';
@@ -68,7 +68,7 @@ export const Dashboard: React.FC = () => {
   } else {
     const requiredRate = problemsRemaining / daysUntilPhase1Target;
     const extraPerDay = requiredRate - solveRate;
-    
+
     if (extraPerDay > 0) {
       const daysPerExtraProblem = 1 / extraPerDay;
       if (daysPerExtraProblem <= 2) {
@@ -97,7 +97,7 @@ export const Dashboard: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Daily Plan</h1>
           <p className="text-zinc-400 mt-1">Don't think, just execute.</p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 premium-card px-4 py-2">
             <Flame className="text-orange-500" size={20} />
@@ -117,7 +117,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content - Problems */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* New Problem */}
           <section>
             <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
@@ -139,8 +139,8 @@ export const Dashboard: React.FC = () => {
                       <span className={clsx(
                         "px-2.5 py-1 rounded-md font-medium border",
                         newProblemData.difficulty === 'Easy' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                        newProblemData.difficulty === 'Medium' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                        "bg-red-500/10 text-red-400 border-red-500/20"
+                          newProblemData.difficulty === 'Medium' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                            "bg-red-500/10 text-red-400 border-red-500/20"
                       )}>
                         {newProblemData.difficulty}
                       </span>
@@ -163,12 +163,12 @@ export const Dashboard: React.FC = () => {
                     </a>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => { setActiveSession(newProblemData.id); setIsReview(false); setIsColdSolve(false); }}
                   className="w-full mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]"
                 >
                   <Play size={18} className="fill-current" />
-                  Start 25m Session
+                  Start 35m Session
                 </button>
               </div>
             ) : (
@@ -195,7 +195,7 @@ export const Dashboard: React.FC = () => {
                     <h3 className="text-lg font-medium text-zinc-100">{coldSolveData.title}</h3>
                     <p className="text-xs text-zinc-400 mt-1">Not touched in &gt;30 days. No hints. 20 mins.</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => { setActiveSession(coldSolveData.id); setIsReview(true); setIsColdSolve(true); }}
                     className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg transition-colors border border-blue-500/20 flex items-center gap-2"
                   >
@@ -219,7 +219,7 @@ export const Dashboard: React.FC = () => {
                   if (!prob) return null;
                   const probProgress = progress[prob.id];
                   const lastRating = probProgress?.history[probProgress.history.length - 1]?.rating;
-                  
+
                   return (
                     <div key={prob.id} className="premium-card p-4 flex items-center justify-between group">
                       <div>
@@ -229,15 +229,15 @@ export const Dashboard: React.FC = () => {
                           <span className={clsx(
                             "px-2 py-0.5 rounded border",
                             lastRating === 1 ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                            lastRating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                            lastRating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                            "bg-zinc-800/50 text-zinc-400 border-zinc-700/50"
+                              lastRating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                                lastRating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                  "bg-zinc-800/50 text-zinc-400 border-zinc-700/50"
                           )}>
                             {lastRating ? `Last Rating: ${lastRating}` : 'Needs Rating'}
                           </span>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => { setActiveSession(prob.id); setIsReview(true); setIsColdSolve(false); }}
                         className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500"
                       >
@@ -264,18 +264,18 @@ export const Dashboard: React.FC = () => {
           <div className="premium-card p-6">
             <h3 className="font-semibold text-zinc-100 mb-2">Phase {phase} Status</h3>
             <p className="text-sm text-zinc-400 mb-5">
-              {phase === 1 ? "NeetCode 75 Core (No Graphs/DP)" : 
-               phase === 2 ? "Internship Mode (3x/week)" : 
-               "Recruiting Grind (NC 150 + Mocks)"}
+              {phase === 1 ? "NeetCode 75 Core (No Graphs/DP)" :
+                phase === 2 ? "Internship Mode (3x/week)" :
+                  "Recruiting Grind (NC 150 + Mocks)"}
             </p>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Progress</span>
                 <span className="text-zinc-100 font-medium">{solvedCount} / {targetCount}</span>
               </div>
               <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
-                <div 
+                <div
                   className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative"
                   style={{ width: `${progressPercent}%` }}
                 >
@@ -287,8 +287,8 @@ export const Dashboard: React.FC = () => {
                   <div className={clsx(
                     "flex items-start gap-2 p-3 rounded-lg border",
                     pacingStatus === 'green' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
-                    pacingStatus === 'yellow' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
-                    "bg-red-500/10 border-red-500/20 text-red-400"
+                      pacingStatus === 'yellow' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
+                        "bg-red-500/10 border-red-500/20 text-red-400"
                   )}>
                     <Target size={16} className="mt-0.5 flex-shrink-0" />
                     <span>{pacingMessage}</span>
@@ -301,20 +301,24 @@ export const Dashboard: React.FC = () => {
           <div className="premium-card p-6">
             <h3 className="font-semibold text-zinc-100 mb-4 flex items-center gap-2">
               <CircleAlert size={18} className="text-indigo-400" />
-              The 25 Min Rule
+              The 35 Min Rule
             </h3>
             <ul className="space-y-4 text-sm text-zinc-400">
               <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">5m</span> 
+                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">5m</span>
                 <span className="pt-0.5">Read, understand, edge cases.</span>
               </li>
               <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">15m</span> 
+                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">15m</span>
                 <span className="pt-0.5">Attempt solution.</span>
               </li>
               <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">5m</span> 
-                <span className="pt-0.5">Watch video & re-implement if stuck.</span>
+                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">10m</span>
+                <span className="pt-0.5">Watch video & understand the optimal solution.</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="flex-shrink-0 w-8 h-6 rounded bg-zinc-800 flex items-center justify-center text-zinc-100 font-medium text-xs border border-zinc-700">5m</span>
+                <span className="pt-0.5">Re-try / implement the optimal solution.</span>
               </li>
             </ul>
           </div>

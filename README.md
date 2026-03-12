@@ -1,5 +1,4 @@
-View your app in AI Studio: https://aistudio.google.com/apps/993f2478-3746-4ea5-9491-b17fbf7b2357?fullscreenApplet=true&showPreview=true&showAssistant=true
-
+View App: https://lc-tracker-alpha.vercel.app/
 ## Run Locally
 
 **Prerequisites:**  Node.js

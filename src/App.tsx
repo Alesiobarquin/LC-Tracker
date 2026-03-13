@@ -9,6 +9,7 @@ import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
 import { Analytics } from './components/Analytics';
 import { MockInterview } from './components/MockInterview';
+import { SyntaxReference } from './components/SyntaxReference';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -19,6 +20,7 @@ export default function App() {
       {activeTab === 'library' && <ProblemLibrary />}
       {activeTab === 'analytics' && <Analytics />}
       {activeTab === 'mock' && <MockInterview />}
+      {activeTab === 'syntax' && <SyntaxReference />}
     </Layout>
   );
 }

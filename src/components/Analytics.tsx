@@ -1,18 +1,23 @@
 import React, { useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { problems, Category } from '../data/problems';
+import { allSyntaxCards } from '../data/syntaxCards';
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Activity, Brain, Target, Trophy, Lightbulb, TrendingUp, AlertTriangle, History, Clock } from 'lucide-react';
+import { Activity, Brain, Target, Trophy, Lightbulb, TrendingUp, AlertTriangle, History, Clock, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Analytics: React.FC = () => {
   const progress = useStore((state) => state.progress);
   const activityLog = useStore((state) => state.activityLog);
+  const syntaxProgress = useStore((state) => state.syntaxProgress);
 
   const solvedCount = Object.keys(progress).length;
   const activeRotationCount = Object.values(progress).filter(p => !p.retired).length;
   const retiredCount = Object.values(progress).filter(p => p.retired).length;
+
+  const totalSyntaxCards = allSyntaxCards.length;
+  const confidentSyntaxCards = Object.values(syntaxProgress).filter(p => p.confidenceRating === 3).length;
 
   // Calculate average confidence per category
   const categoryStats = useMemo(() => {
@@ -28,7 +33,7 @@ export const Analytics: React.FC = () => {
         const lastRating = prog.history[prog.history.length - 1].rating;
         stats[prob.category].totalRating += lastRating;
         stats[prob.category].count += 1;
-        stats[prob.category].totalSolveTime += (4 - lastRating) * 10; 
+        stats[prob.category].totalSolveTime += (4 - lastRating) * 10;
       }
     });
     return stats;
@@ -50,7 +55,7 @@ export const Analytics: React.FC = () => {
     const sortedByWeakness = [...activeData].sort((a, b) => a.avg - b.avg);
     const weakest = sortedByWeakness[0];
     const strongest = sortedByWeakness[sortedByWeakness.length - 1];
-    
+
     const generatedInsights = [];
 
     if (weakest && weakest.avg < 2.0) {
@@ -90,11 +95,11 @@ export const Analytics: React.FC = () => {
   // Session History
   const sessionHistory = useMemo(() => {
     const allSessions: { problemId: string; title: string; category: string; date: string; rating: number; timeSpent: string }[] = [];
-    
+
     Object.entries(progress).forEach(([problemId, prog]) => {
       const prob = problems.find(p => p.id === problemId);
       if (!prob) return;
-      
+
       prog.history.forEach(entry => {
         allSessions.push({
           problemId,
@@ -106,28 +111,28 @@ export const Analytics: React.FC = () => {
         });
       });
     });
-    
+
     return allSessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 20);
   }, [progress]);
 
   // Heatmap generation
   const today = new Date();
   const targetDate = new Date('2026-09-15T00:00:00Z');
-  
+
   // End the heatmap 14 days after the target date so the marker isn't right on the edge
   const endDate = new Date(targetDate);
   endDate.setDate(endDate.getDate() + 14);
-  
+
   const startDate = subDays(endDate, 364); // 365 days total
   const days = eachDayOfInterval({ start: startDate, end: endDate });
   const startDayOfWeek = startDate.getDay(); // 0 is Sunday
-  
+
   // Pad the beginning with nulls
   const paddedDays = Array(startDayOfWeek).fill(null).concat(days);
-  
+
   const targetIndex = paddedDays.findIndex(d => d && isSameDay(d, targetDate));
   const targetColumn = targetIndex >= 0 ? Math.floor(targetIndex / 7) : -1;
-  
+
   const todayIndex = paddedDays.findIndex(d => d && isSameDay(d, today));
   const todayColumn = todayIndex >= 0 ? Math.floor(todayIndex / 7) : -1;
 
@@ -140,7 +145,7 @@ export const Analytics: React.FC = () => {
         <p className="text-zinc-400 mt-1">Track your progress and identify weaknesses.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="premium-card p-6">
           <div className="flex items-center gap-3 mb-2">
             <Trophy className="text-emerald-400" size={20} />
@@ -148,7 +153,7 @@ export const Analytics: React.FC = () => {
           </div>
           <p className="text-3xl font-bold text-zinc-50">{solvedCount}</p>
         </div>
-        
+
         <div className="premium-card p-6">
           <div className="flex items-center gap-3 mb-2">
             <Activity className="text-amber-400" size={20} />
@@ -171,9 +176,19 @@ export const Analytics: React.FC = () => {
             <h3 className="text-zinc-400 font-medium">Overall Avg Rating</h3>
           </div>
           <p className="text-3xl font-bold text-zinc-50">
-            {activeChartData.length > 0 
-              ? (activeChartData.reduce((acc, curr) => acc + curr.avg, 0) / activeChartData.length).toFixed(1) 
+            {activeChartData.length > 0
+              ? (activeChartData.reduce((acc, curr) => acc + curr.avg, 0) / activeChartData.length).toFixed(1)
               : '0.0'}
+          </p>
+        </div>
+
+        <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5">
+          <div className="flex items-center gap-3 mb-2">
+            <BookOpen className="text-emerald-400" size={20} />
+            <h3 className="text-zinc-400 font-medium">Syntax Mastery</h3>
+          </div>
+          <p className="text-3xl font-bold text-zinc-50 flex items-baseline gap-2">
+            {confidentSyntaxCards} <span className="text-sm font-medium text-zinc-500">/ {totalSyntaxCards}</span>
           </p>
         </div>
       </div>
@@ -200,9 +215,9 @@ export const Analytics: React.FC = () => {
               ))}
             </div>
           ) : (
-             <div className="premium-card p-6 text-center text-zinc-500 border-dashed border-zinc-800">
-               Solve more problems to generate AI insights.
-             </div>
+            <div className="premium-card p-6 text-center text-zinc-500 border-dashed border-zinc-800">
+              Solve more problems to generate AI insights.
+            </div>
           )}
         </div>
 
@@ -223,16 +238,16 @@ export const Analytics: React.FC = () => {
                 <span>More</span>
               </div>
             </div>
-            
+
             <div className="relative overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
               <div className="grid grid-rows-7 grid-flow-col gap-1 min-w-max">
                 {paddedDays.map((day, i) => {
                   if (!day) return <div key={`empty-${i}`} className="w-3 h-3" />;
-                  
+
                   const dateKey = format(day, 'yyyy-MM-dd');
                   const activity = activityLog[dateKey];
                   const totalActivity = activity ? activity.solved + activity.reviewed : 0;
-                  
+
                   let colorClass = "bg-zinc-800/50 border border-zinc-800";
                   if (totalActivity > 0) colorClass = "bg-emerald-900/50 border-emerald-800";
                   if (totalActivity > 2) colorClass = "bg-emerald-700/60 border-emerald-600";
@@ -240,18 +255,18 @@ export const Analytics: React.FC = () => {
                   if (totalActivity > 6) colorClass = "bg-emerald-400 border-emerald-300";
 
                   return (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className={`w-3 h-3 rounded-sm ${colorClass} transition-colors hover:ring-2 ring-zinc-400 ring-offset-1 ring-offset-zinc-950`}
                       title={`${dateKey}: ${totalActivity} problems`}
                     />
                   );
                 })}
               </div>
-              
+
               {/* Today Marker */}
               {todayColumn >= 0 && (
-                <div 
+                <div
                   className="absolute top-0 bottom-4 w-px bg-emerald-500/50 border-r border-dashed border-emerald-400/50 z-10 pointer-events-none"
                   style={{ left: `${todayColumn * 16 - 2}px` }}
                 >
@@ -260,10 +275,10 @@ export const Analytics: React.FC = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Target Date Marker */}
               {targetColumn >= 0 && (
-                <div 
+                <div
                   className="absolute top-0 bottom-4 w-px bg-indigo-500/50 border-r border-dashed border-indigo-400/50 z-10 pointer-events-none"
                   style={{ left: `${targetColumn * 16 - 2}px` }}
                 >
@@ -282,7 +297,7 @@ export const Analytics: React.FC = () => {
               <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
                 <XAxis type="number" domain={[0, 3]} hide />
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#a1a1aa', fontSize: 12 }} width={120} />
-                <Tooltip 
+                <Tooltip
                   cursor={{ fill: '#27272a', opacity: 0.4 }}
                   contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
                   itemStyle={{ color: '#f4f4f5' }}
@@ -305,7 +320,7 @@ export const Analytics: React.FC = () => {
           <History size={20} className="text-indigo-400" />
           Recent Sessions
         </h3>
-        
+
         {sessionHistory.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -338,8 +353,8 @@ export const Analytics: React.FC = () => {
                       <span className={clsx(
                         "px-2.5 py-1 rounded text-xs font-medium border",
                         session.rating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                        session.rating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                        "bg-red-500/10 text-red-400 border-red-500/20"
+                          session.rating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                            "bg-red-500/10 text-red-400 border-red-500/20"
                       )}>
                         {session.rating === 3 ? '3 - Mastered' : session.rating === 2 ? '2 - Okay' : '1 - Struggled'}
                       </span>

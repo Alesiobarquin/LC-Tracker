@@ -17,6 +17,13 @@ export interface ProblemProgress {
   notes?: string;
 }
 
+export interface SyntaxProgress {
+  lastPracticedAt: string;
+  nextReviewAt: string;
+  confidenceRating: number;
+  reviewCount: number;
+}
+
 export interface ActivityLog {
   [dateString: string]: { solved: number; reviewed: number };
 }
@@ -24,6 +31,7 @@ export interface ActivityLog {
 interface AppState {
   progress: Record<string, ProblemProgress>;
   activityLog: ActivityLog;
+  syntaxProgress: Record<string, SyntaxProgress>;
   streak: {
     current: number;
     max: number;
@@ -37,11 +45,13 @@ interface AppState {
 
   logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string) => void;
   logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean) => void;
+  logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => void;
   resetProgress: () => void;
   getDailyPlan: () => {
     newProblem: string | null;
     reviewProblems: string[];
     coldSolveProblem: string | null;
+    dueSyntaxCards: string[];
     recommendationReason?: string;
     totalDueReviews?: number;
   };
@@ -55,6 +65,7 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       progress: {},
       activityLog: {},
+      syntaxProgress: {},
       streak: {
         current: 0,
         max: 0,
@@ -201,7 +212,38 @@ export const useStore = create<AppState>()(
         get().logProblem(problemId, rating, false, "Mock Interview");
       },
 
-      resetProgress: () => set({ progress: {}, activityLog: {}, streak: { current: 0, max: 0, lastActiveDate: null } }),
+      logSyntaxPractice: (cardId, rating) => {
+        set((state) => {
+          const today = startOfDay(new Date());
+          const todayStr = today.toISOString();
+
+          const existing = state.syntaxProgress[cardId];
+          const reviewCount = existing ? existing.reviewCount + 1 : 1;
+
+          // Re-use existing spaced repetition logic
+          // For syntax, we don't track consecutive successes explicitly right now, so we pass 0
+          // If rated 3, it schedules it for 3 days out by default in getNextReviewDate (if consecutive=0)
+          // We can just use the rating to schedule it.
+          // Or we can simulate consecutive successes.
+          let consecutiveSuccesses = existing && existing.confidenceRating >= 2 ? 1 : 0;
+          if (rating >= 2) consecutiveSuccesses += 1;
+
+          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses).toISOString();
+
+          const newProgress: SyntaxProgress = {
+            lastPracticedAt: todayStr,
+            nextReviewAt,
+            confidenceRating: rating,
+            reviewCount,
+          };
+
+          return {
+            syntaxProgress: { ...state.syntaxProgress, [cardId]: newProgress }
+          };
+        });
+      },
+
+      resetProgress: () => set({ progress: {}, activityLog: {}, syntaxProgress: {}, streak: { current: 0, max: 0, lastActiveDate: null } }),
 
       getDailyPlan: () => {
         const state = get();
@@ -228,6 +270,14 @@ export const useStore = create<AppState>()(
 
         const totalDueReviews = allDueReviews.length;
         const reviewProblems = allDueReviews.slice(0, 5).map(r => r.id);
+
+        // Syntax Due Reviews
+        const allDueSyntax = Object.entries(state.syntaxProgress || {})
+          .filter(([_, prog]) => isDueToday(prog.nextReviewAt))
+          .sort((a, b) => a[1].confidenceRating - b[1].confidenceRating)
+          .map(([id]) => id);
+
+        const dueSyntaxCards = allDueSyntax.slice(0, 5);
 
         // Cold Solve Logic
         let coldSolveProblem: string | null = null;
@@ -327,7 +377,7 @@ export const useStore = create<AppState>()(
           }
         }
 
-        return { newProblem, reviewProblems, coldSolveProblem, recommendationReason, totalDueReviews };
+        return { newProblem, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews };
       },
     }),
     {

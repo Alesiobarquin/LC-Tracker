@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { problems } from '../data/problems';
+import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
-import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake } from 'lucide-react';
+import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
@@ -12,7 +13,7 @@ export const Dashboard: React.FC = () => {
   const progress = useStore((state) => state.progress);
   const getDailyPlan = useStore((state) => state.getDailyPlan);
   const phase = getPhase();
-  const { newProblem, reviewProblems, coldSolveProblem, recommendationReason, totalDueReviews } = getDailyPlan();
+  const { newProblem, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews } = getDailyPlan();
 
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [isReview, setIsReview] = useState(false);
@@ -21,6 +22,7 @@ export const Dashboard: React.FC = () => {
   const newProblemData = newProblem ? problems.find(p => p.id === newProblem) : null;
   const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
   const coldSolveData = coldSolveProblem ? problems.find(p => p.id === coldSolveProblem) : null;
+  const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
 
   const newProblemTime = newProblem ? 35 : 0;
   const reviewTime = reviewProblems.length * 15;
@@ -262,6 +264,44 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </section>
+
+          {/* Syntax Drills */}
+          {syntaxDrillsData && syntaxDrillsData.length > 0 && (
+            <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.25s' }}>
+              <div className="flex justify-between items-end mb-4">
+                <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
+                  <BookOpen size={20} className="text-purple-400" />
+                  Syntax Drills ({syntaxDrillsData.length})
+                </h2>
+                <div className="text-xs text-zinc-500">Takes ~{syntaxDrillsData.length * 2}m to complete</div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {syntaxDrillsData.map((card) => {
+                  if (!card) return null;
+                  return (
+                    <div key={card.id} className="premium-card p-4 flex flex-col justify-between group h-full">
+                      <div>
+                        <div className="text-xs font-medium text-purple-400 mb-1 truncate">{card.category}</div>
+                        <h4 className="text-sm font-medium text-zinc-100 group-hover:text-purple-400 transition-colors line-clamp-2">{card.description}</h4>
+                      </div>
+                      <button
+                        onClick={() => {
+                          // Could just navigate them to the Syntax Reference page
+                          // For now, let's keep it simple. Ideally they use the sidebar to go to the page and drill.
+                          const syntaxTabBtn = document.querySelector('button[aria-label="Syntax Reference"]') as HTMLButtonElement ||
+                            Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes('Syntax Reference'));
+                          if (syntaxTabBtn) syntaxTabBtn.click();
+                        }}
+                        className="mt-4 w-full py-1.5 px-3 bg-purple-500/10 hover:bg-purple-500 hover:text-white text-purple-400 text-xs font-medium rounded-lg transition-all border border-purple-500/20 hover:border-purple-500"
+                      >
+                        Drill Now
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </div>
 
         {/* Sidebar Content */}

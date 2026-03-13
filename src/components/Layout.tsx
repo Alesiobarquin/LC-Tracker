@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Bell, Settings, Calendar, RefreshCw, CheckCircle } from 'lucide-react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Bell, Settings, Calendar, RefreshCw, CheckCircle, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useStore } from '../store/useStore';
 import { differenceInDays } from 'date-fns';
@@ -26,7 +26,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const syncError = useStore((state) => state.syncError);
   const targetInterviewDate = useStore((state) => state.targetInterviewDate);
   const setTargetInterviewDate = useStore((state) => state.setTargetInterviewDate);
-  
+
   const [tempUsername, setTempUsername] = useState(leetcodeUsername || '');
   const [tempDate, setTempDate] = useState(targetInterviewDate);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -70,6 +70,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     { id: 'library', label: 'Problem Library', icon: Library },
     { id: 'analytics', label: 'Analytics', icon: LineChart },
     { id: 'mock', label: 'Mock Interview', icon: Code2 },
+    { id: 'syntax', label: 'Syntax Reference', icon: BookOpen },
   ];
 
   const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
@@ -94,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         <div className="p-6 hidden md:block">
           <div className="font-bold text-2xl tracking-tight text-emerald-400">LC Tracker</div>
         </div>
-        
+
         <nav className="mt-2 px-4 space-y-1 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -113,7 +114,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 )}
               >
                 {activeTab === item.id && (
-                  <motion.div 
+                  <motion.div
                     layoutId="activeNav"
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-500 rounded-r-full"
                     initial={false}
@@ -126,7 +127,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             );
           })}
         </nav>
-        
+
         <div className="p-4 border-t border-zinc-800/50">
           <div className="mb-4 p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
             <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
@@ -141,7 +142,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => setIsSettingsOpen(true)}
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-colors text-sm font-medium"
           >
@@ -155,10 +156,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto">
         {children}
       </main>
-      
+
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -177,12 +178,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Target Interview Date</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   value={tempDate}
                   onChange={(e) => setTempDate(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
@@ -192,14 +193,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">LeetCode Username</label>
                 <div className="flex gap-2">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={tempUsername}
                     onChange={(e) => setTempUsername(e.target.value)}
                     placeholder="e.g., neetcode"
                     className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
                   />
-                  <button 
+                  <button
                     onClick={handleManualSync}
                     disabled={isSyncing || !tempUsername}
                     className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-xl text-zinc-300 transition-colors flex items-center justify-center"
@@ -210,7 +211,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 {syncError && <p className="text-red-400 text-xs mt-2">{syncError}</p>}
                 {lastSync && !syncError && (
                   <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">
-                    <CheckCircle size={12} /> Last synced: {new Date(lastSync).toLocaleString()} 
+                    <CheckCircle size={12} /> Last synced: {new Date(lastSync).toLocaleString()}
                     {lastSyncCount !== null && ` (${lastSyncCount} new added)`}
                   </p>
                 )}
@@ -220,20 +221,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-zinc-300 font-medium">Enable Reminders</span>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer" 
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
                       checked={reminderEnabled}
                       onChange={(e) => setReminderEnabled(e.target.checked)}
                     />
                     <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                   </label>
                 </div>
-                
+
                 <div className={clsx("transition-opacity", reminderEnabled ? "opacity-100" : "opacity-50 pointer-events-none")}>
                   <label className="block text-sm font-medium text-zinc-400 mb-2">Reminder Time</label>
-                  <input 
-                    type="time" 
+                  <input
+                    type="time"
                     value={reminderTime}
                     onChange={(e) => setReminderTime(e.target.value)}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
@@ -241,7 +242,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={handleSaveSettings}
                 className="w-full bg-zinc-100 hover:bg-white text-zinc-900 font-semibold py-3 rounded-xl transition-colors"
               >

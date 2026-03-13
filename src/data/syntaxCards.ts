@@ -455,6 +455,15 @@ export const pythonSyntaxCards: SyntaxCard[] = [
         timeComplexity: "O(N)"
     },
     {
+        id: "py-deque-monotonic",
+        language: "python",
+        category: "Deque and Stack",
+        description: "Monotonic deque pattern",
+        syntax: "while q and q[-1] > val: q.pop()\nq.append(val)",
+        useCase: "Maintaining sorted candidates. Pop right to maintain order.",
+        timeComplexity: "O(1) amortized"
+    },
+    {
         id: "py-deque-left-operations",
         language: "python",
         category: "Deque and Stack",
@@ -464,12 +473,12 @@ export const pythonSyntaxCards: SyntaxCard[] = [
         timeComplexity: "O(1)"
     },
     {
-        id: "py-stack-list",
+        id: "py-deque-ordered-dict",
         language: "python",
         category: "Deque and Stack",
-        description: "Using standard list as Stack",
-        syntax: "stack = []\nstack.append(val)\nlast = stack.pop()",
-        useCase: "DFS traversals or Monotonic Stack problems (e.g., Daily Temperatures).",
+        description: "OrderedDict import and usage pattern for LRU Cache",
+        syntax: "from collections import OrderedDict\nod = OrderedDict()\nod.move_to_end(key)\noldest = od.popitem(last=False)",
+        useCase: "LRU Cache implementation requiring O(1) pop from front and move to back.",
         timeComplexity: "O(1)"
     },
     {
@@ -480,6 +489,15 @@ export const pythonSyntaxCards: SyntaxCard[] = [
         syntax: "while q and q[-1] < val: q.pop()\nq.append(val)",
         useCase: "Maintaining monotonically decreasing candidates for Sliding Window Maximum.",
         timeComplexity: "O(1) amortized"
+    },
+    {
+        id: "py-stack-list",
+        language: "python",
+        category: "Deque and Stack",
+        description: "Using standard list as Stack",
+        syntax: "stack = []\nstack.append(val)\nlast = stack.pop()",
+        useCase: "DFS traversals or Monotonic Stack problems (e.g., Daily Temperatures).",
+        timeComplexity: "O(1)"
     },
 
     // --- Sorting with Custom Keys ---
@@ -522,6 +540,24 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 
     // --- Two Pointer and Sliding Window Patterns ---
     {
+        id: "py-two-pointer-fast-slow",
+        language: "python",
+        category: "Two Pointer and Sliding Window Patterns",
+        description: "Fast and slow pointer initialization for Floyd's cycle detection",
+        syntax: "slow, fast = head, head\nwhile fast and fast.next:\n    slow = slow.next\n    fast = fast.next.next\n    if slow == fast: return True",
+        useCase: "Detecting cycles in linked lists or finding the middle of a linked list.",
+        timeComplexity: "O(N)"
+    },
+    {
+        id: "py-sliding-window-fixed",
+        language: "python",
+        category: "Two Pointer and Sliding Window Patterns",
+        description: "Fixed size sliding window maintaining exactly k elements",
+        syntax: "window = sum(arr[:k])\nfor i in range(k, len(arr)):\n    window += arr[i] - arr[i-k]\n    # update result",
+        useCase: "Maximum sum subarray of size k, or anagram search of fixed length.",
+        timeComplexity: "O(N)"
+    },
+    {
         id: "py-two-pointer-init",
         language: "python",
         category: "Two Pointer and Sliding Window Patterns",
@@ -562,6 +598,42 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 
     // --- Tree and Graph Traversal ---
     {
+        id: "py-graph-adj-list",
+        language: "python",
+        category: "Tree and Graph Traversal",
+        description: "Adjacency list initialization",
+        syntax: "adj = defaultdict(list)\nfor u, v in edges:\n    adj[u].append(v)\n    adj[v].append(u)",
+        useCase: "Converting arrays of edges into a traversable graph structure.",
+        timeComplexity: "O(V + E)"
+    },
+    {
+        id: "py-bfs-visited",
+        language: "python",
+        category: "Tree and Graph Traversal",
+        description: "BFS template with visited set for graphs with cycles",
+        syntax: "q = deque([start])\nvisited = {start}\nwhile q:\n    node = q.popleft()\n    for nei in adj[node]:\n        if nei not in visited:\n            visited.add(nei)\n            q.append(nei)",
+        useCase: "Shortest path in unweighted graphs or connected components in cyclic graphs.",
+        timeComplexity: "O(V + E)"
+    },
+    {
+        id: "py-dijkstra",
+        language: "python",
+        category: "Tree and Graph Traversal",
+        description: "Dijkstra shortest path combining min heap and visited set",
+        syntax: "pq = [(0, start)]\nvisited = set()\nwhile pq:\n    dist, node = heapq.heappop(pq)\n    if node in visited: continue\n    visited.add(node)\n    for nei, weight in adj[node]:\n        heapq.heappush(pq, (dist + weight, nei))",
+        useCase: "Shortest path in a graph with non-negative edge weights.",
+        timeComplexity: "O(E log V)"
+    },
+    {
+        id: "py-dfs-iterative",
+        language: "python",
+        category: "Tree and Graph Traversal",
+        description: "Iterative DFS using an explicit stack",
+        syntax: "stack = [root]\nwhile stack:\n    node = stack.pop()\n    # visit node\n    if node.right: stack.append(node.right)\n    if node.left: stack.append(node.left)",
+        useCase: "When recursion depth might exceed limits, or specifically avoiding the call stack.",
+        timeComplexity: "O(V + E)"
+    },
+    {
         id: "py-bfs-template",
         language: "python",
         category: "Tree and Graph Traversal",
@@ -589,12 +661,12 @@ export const pythonSyntaxCards: SyntaxCard[] = [
         timeComplexity: "N/A"
     },
     {
-        id: "py-graph-adj-list",
+        id: "py-topological-sort",
         language: "python",
         category: "Tree and Graph Traversal",
-        description: "Adjacency list initialization",
-        syntax: "adj = defaultdict(list)\nfor u, v in edges:\n    adj[u].append(v)\n    adj[v].append(u)",
-        useCase: "Converting arrays of edges into a traversable graph structure.",
+        description: "Topological sort using BFS with in-degree counting",
+        syntax: "q = deque([n for n in range(num) if indegree[n] == 0])\nwhile q:\n    node = q.popleft()\n    res.append(node)\n    for nei in adj[node]:\n        indegree[nei] -= 1\n        if indegree[nei] == 0: q.append(nei)",
+        useCase: "Course schedule dependencies or validating DAG structures (Kahn's Algorithm).",
         timeComplexity: "O(V + E)"
     },
 
@@ -656,6 +728,113 @@ export const pythonSyntaxCards: SyntaxCard[] = [
         syntax: "digits = [int(d) for d in str(num)]\nnum = int(''.join(map(str, digits)))",
         useCase: "Happy Number problem, processing each digit mathematically.",
         timeComplexity: "O(N)"
+    },
+
+    // --- Backtracking ---
+    {
+        id: "py-backtracking-template",
+        language: "python",
+        category: "Backtracking",
+        description: "Standard backtracking template (choose, explore, unchoose)",
+        syntax: "def backtrack(start, path):\n    if base_case:\n        res.append(path[:])\n        return\n    for i in range(start, len(choices)):\n        path.append(choices[i])\n        backtrack(i + 1, path)\n        path.pop()",
+        useCase: "Combinations, permutations, subsets, and puzzle solving.",
+        timeComplexity: "O(2^N) or O(N!) depending on problem"
+    },
+
+    // --- Dynamic Programming ---
+    {
+        id: "py-dp-1d",
+        language: "python",
+        category: "Dynamic Programming",
+        description: "1D DP array initialization and bottom-up iteration",
+        syntax: "dp = [0] * (n + 1)\ndp[0] = base_val\nfor i in range(1, n + 1):\n    dp[i] = dp[i-1] + arr[i]",
+        useCase: "Fibonacci sequence, climbing stairs, or 1D knapsack style problems.",
+        timeComplexity: "O(N)"
+    },
+    {
+        id: "py-dp-2d",
+        language: "python",
+        category: "Dynamic Programming",
+        description: "2D DP table initialization for grid or string comparison problems",
+        syntax: "dp = [[0] * cols for _ in range(rows)]\nfor r in range(1, rows):\n    for c in range(1, cols):\n        dp[r][c] = dp[r-1][c] + dp[r][c-1]",
+        useCase: "Unique paths, longest common subsequence, edit distance.",
+        timeComplexity: "O(rows * cols)"
+    },
+    {
+        id: "py-dp-memoization",
+        language: "python",
+        category: "Dynamic Programming",
+        description: "Memoization template using functools lru_cache",
+        syntax: "from functools import lru_cache\n@lru_cache(None)\ndef dp(i, j):\n    if base_case: return 0\n    return max(dp(i+1, j), dp(i, j+1))",
+        useCase: "Top-down dynamic programming avoiding manual visited dicts.",
+        timeComplexity: "O(states)"
+    },
+
+    // --- Linked List Patterns ---
+    {
+        id: "py-linked-list-dummy",
+        language: "python",
+        category: "Linked List Patterns",
+        description: "Dummy node initialization pattern",
+        syntax: "dummy = ListNode(0)\ndummy.next = head\ncurr = dummy\n# traverse...\nreturn dummy.next",
+        useCase: "Whenever the head of a linked list might change (e.g., removing heads, merging).",
+        timeComplexity: "O(1)"
+    },
+    {
+        id: "py-linked-list-reverse",
+        language: "python",
+        category: "Linked List Patterns",
+        description: "Iterative linked list reversal template",
+        syntax: "prev, curr = None, head\nwhile curr:\n    nxt = curr.next\n    curr.next = prev\n    prev = curr\n    curr = nxt\nhead = prev",
+        useCase: "Reversing entire lists or sublists (Reverse Linked List II or Palindrome Linked List).",
+        timeComplexity: "O(N)"
+    },
+    {
+        id: "py-linked-list-node",
+        language: "python",
+        category: "Linked List Patterns",
+        description: "ListNode class definition matching standard LeetCode format",
+        syntax: "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next",
+        useCase: "Standard node structure for all LeetCode linked list problems.",
+        timeComplexity: "N/A"
+    },
+
+    // --- Utility ---
+    {
+        id: "py-util-any-all",
+        language: "python",
+        category: "Utility",
+        description: "any() and all() with lambda examples",
+        syntax: "is_valid = all(x > 0 for x in arr)\nhas_zero = any(x == 0 for x in arr)",
+        useCase: "Quickly asserting facts about iterables without writing full loops.",
+        timeComplexity: "O(N)"
+    },
+    {
+        id: "py-util-recursion-limit",
+        language: "python",
+        category: "Utility",
+        description: "sys.setrecursionlimit with standard high value for deep recursion",
+        syntax: "import sys\nsys.setrecursionlimit(2000)",
+        useCase: "Preventing RecursionError / Maximum recursion depth exceeded on large test cases.",
+        timeComplexity: "O(1)"
+    },
+    {
+        id: "py-util-unpacking",
+        language: "python",
+        category: "Utility",
+        description: "Unpacking operator used to pass a list as arguments",
+        syntax: "arr = [1, 2, 3]\nprint(*arr) # equivalent to print(1, 2, 3)",
+        useCase: "Passing array elements as arguments to functions (like zip, max) dynamically.",
+        timeComplexity: "O(N)"
+    },
+    {
+        id: "py-util-zip-longest",
+        language: "python",
+        category: "Utility",
+        description: "zip_longest from itertools with fillvalue example",
+        syntax: "from itertools import zip_longest\nfor a, b in zip_longest(l1, l2, fillvalue=0):",
+        useCase: "Iterating over two lists of unequal length seamlessly.",
+        timeComplexity: "O(max(N, M))"
     }
 ];
 

@@ -1,6 +1,6 @@
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
-export type Category = 
+export type Category =
   | 'Arrays & Hashing'
   | 'Two Pointers'
   | 'Sliding Window'
@@ -20,6 +20,8 @@ export type Category =
   | 'Math & Geometry'
   | 'Bit Manipulation';
 
+import { MockInterviewContent, mockProblemContent } from './mockProblems';
+
 export interface Problem {
   id: string;
   title: string;
@@ -30,9 +32,10 @@ export interface Problem {
   isNeetCode75: boolean;
   isBlind75: boolean;
   isNeetCode150: boolean;
+  mockInterviewContent?: MockInterviewContent;
 }
 
-export const problems: Problem[] = [
+export const problems: Problem[] = ([
   { id: 'contains-duplicate', title: 'Contains Duplicate', difficulty: 'Easy', category: 'Arrays & Hashing', leetcodeUrl: 'https://leetcode.com/problems/contains-duplicate/', videoUrl: '', isNeetCode75: true, isBlind75: true, isNeetCode150: true },
   { id: 'valid-anagram', title: 'Valid Anagram', difficulty: 'Easy', category: 'Arrays & Hashing', leetcodeUrl: 'https://leetcode.com/problems/valid-anagram/', videoUrl: '', isNeetCode75: true, isBlind75: true, isNeetCode150: true },
   { id: 'two-sum', title: 'Two Sum', difficulty: 'Easy', category: 'Arrays & Hashing', leetcodeUrl: 'https://leetcode.com/problems/two-sum/', videoUrl: '', isNeetCode75: true, isBlind75: true, isNeetCode150: true },
@@ -183,7 +186,10 @@ export const problems: Problem[] = [
   { id: 'missing-number', title: 'Missing Number', difficulty: 'Easy', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/missing-number/', videoUrl: '', isNeetCode75: true, isBlind75: true, isNeetCode150: true },
   { id: 'sum-of-two-integers', title: 'Sum of Two Integers', difficulty: 'Medium', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/sum-of-two-integers/', videoUrl: '', isNeetCode75: true, isBlind75: true, isNeetCode150: true },
   { id: 'reverse-integer', title: 'Reverse Integer', difficulty: 'Medium', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/reverse-integer/', videoUrl: '', isNeetCode75: false, isBlind75: false, isNeetCode150: true }
-];
+] as Problem[]).map(problem => ({
+  ...problem,
+  mockInterviewContent: mockProblemContent[problem.id]
+}) as Problem);
 
 export const PHASE_1_CATEGORIES: Category[] = [
   'Arrays & Hashing',

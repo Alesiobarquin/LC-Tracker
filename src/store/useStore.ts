@@ -10,7 +10,7 @@ export interface ProblemProgress {
   lastReviewedAt: string;
   nextReviewAt: string;
   reviewCount: number;
-  history: { date: string; rating: 1 | 2 | 3 }[];
+  history: { date: string; rating: 1 | 2 | 3; rawCode?: string; optimalSolution?: string; approachSimilarity?: number; usedInAppEditor?: boolean }[];
   retired: boolean;
   consecutiveThrees: number;
   consecutiveSuccesses?: number;
@@ -43,8 +43,8 @@ interface AppState {
   syncError: string | null;
   targetInterviewDate: string;
 
-  logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string) => void;
-  logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean) => void;
+  logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string, additionalHistoryData?: any) => void;
+  logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean, approachSimilarity: number, rawCode: string, optimalSolution: string, usedInAppEditor: boolean) => void;
   logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => void;
   resetProgress: () => void;
   getDailyPlan: () => {
@@ -138,7 +138,7 @@ export const useStore = create<AppState>()(
         }
       },
 
-      logProblem: (problemId, rating, isNew, notes) => {
+      logProblem: (problemId, rating, isNew, notes, additionalHistoryData) => {
         set((state) => {
           const today = startOfDay(new Date());
           const todayStr = today.toISOString();
@@ -161,7 +161,7 @@ export const useStore = create<AppState>()(
             lastReviewedAt: todayStr,
             nextReviewAt,
             reviewCount,
-            history: [...(existing?.history || []), { date: todayStr, rating }],
+            history: [...(existing?.history || []), { date: todayStr, rating, ...additionalHistoryData }],
             retired,
             consecutiveThrees,
             consecutiveSuccesses,
@@ -202,14 +202,19 @@ export const useStore = create<AppState>()(
         });
       },
 
-      logMockInterview: (problemId, evalSolved, evalSyntax, evalComplexity) => {
+      logMockInterview: (problemId, evalSolved, evalSyntax, evalComplexity, approachSimilarity, rawCode, optimalSolution, usedInAppEditor) => {
         let rating: 1 | 2 | 3 = 2;
-        if (!evalSolved || !evalSyntax) {
+        if (!evalSolved || !evalSyntax || (approachSimilarity === 1)) {
           rating = 1;
-        } else if (evalSolved && evalSyntax && evalComplexity) {
+        } else if (evalSolved && evalSyntax && evalComplexity && approachSimilarity === 3) {
           rating = 3;
         }
-        get().logProblem(problemId, rating, false, "Mock Interview");
+        get().logProblem(problemId, rating, false, "Mock Interview", {
+          rawCode,
+          optimalSolution,
+          approachSimilarity,
+          usedInAppEditor
+        });
       },
 
       logSyntaxPractice: (cardId, rating) => {

@@ -4,13 +4,17 @@ import { problems, Category } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Activity, Brain, Target, Trophy, Lightbulb, TrendingUp, AlertTriangle, History, Clock, BookOpen } from 'lucide-react';
+import { Activity, Brain, Target, Trophy, Lightbulb, TrendingUp, AlertTriangle, History, Clock, BookOpen, FileCode2, X, CheckSquare } from 'lucide-react';
 import { clsx } from 'clsx';
+import CodeMirror from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
 
 export const Analytics: React.FC = () => {
   const progress = useStore((state) => state.progress);
   const activityLog = useStore((state) => state.activityLog);
   const syntaxProgress = useStore((state) => state.syntaxProgress);
+
+  const [viewingSession, setViewingSession] = React.useState<any>(null);
 
   const solvedCount = Object.keys(progress).length;
   const activeRotationCount = Object.values(progress).filter(p => !p.retired).length;
@@ -94,7 +98,18 @@ export const Analytics: React.FC = () => {
 
   // Session History
   const sessionHistory = useMemo(() => {
-    const allSessions: { problemId: string; title: string; category: string; date: string; rating: number; timeSpent: string }[] = [];
+    const allSessions: {
+      problemId: string;
+      title: string;
+      category: string;
+      date: string;
+      rating: number;
+      timeSpent: string;
+      rawCode?: string;
+      optimalSolution?: string;
+      approachSimilarity?: number;
+      usedInAppEditor?: boolean;
+    }[] = [];
 
     Object.entries(progress).forEach(([problemId, prog]) => {
       const prob = problems.find(p => p.id === problemId);
@@ -107,7 +122,11 @@ export const Analytics: React.FC = () => {
           category: prob.category,
           date: entry.date,
           rating: entry.rating,
-          timeSpent: entry.rating === 3 ? '10m' : entry.rating === 2 ? '20m' : '30m'
+          timeSpent: entry.rating === 3 ? '10m' : entry.rating === 2 ? '20m' : '30m',
+          rawCode: entry.rawCode,
+          optimalSolution: entry.optimalSolution,
+          approachSimilarity: entry.approachSimilarity,
+          usedInAppEditor: entry.usedInAppEditor
         });
       });
     });
@@ -329,8 +348,9 @@ export const Analytics: React.FC = () => {
                   <th className="px-4 py-3 font-medium rounded-tl-lg">Problem</th>
                   <th className="px-4 py-3 font-medium">Category</th>
                   <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Time Spent</th>
-                  <th className="px-4 py-3 font-medium rounded-tr-lg">Confidence</th>
+                  <th className="px-4 py-3 font-medium">Time/Env</th>
+                  <th className="px-4 py-3 font-medium">Confidence</th>
+                  <th className="px-4 py-3 font-medium rounded-tr-lg">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50">
@@ -345,19 +365,46 @@ export const Analytics: React.FC = () => {
                     <td className="px-4 py-3 text-zinc-400">
                       {format(new Date(session.date), 'MMM d, h:mm a')}
                     </td>
-                    <td className="px-4 py-3 text-zinc-400 flex items-center gap-1.5">
-                      <Clock size={14} className="text-zinc-500" />
-                      {session.timeSpent}
+                    <td className="px-4 py-3 text-zinc-400">
+                      <div className="flex flex-col gap-1">
+                        <span className="flex items-center gap-1.5 text-xs">
+                          <Clock size={12} className="text-zinc-500" />
+                          {session.timeSpent}
+                        </span>
+                        {session.usedInAppEditor !== undefined && (
+                          <span className="text-[10px] uppercase text-indigo-400/80 bg-indigo-500/10 px-1.5 py-0.5 rounded w-fit border border-indigo-500/20">
+                            {session.usedInAppEditor ? 'In-App IDE' : 'External'}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={clsx(
-                        "px-2.5 py-1 rounded text-xs font-medium border",
-                        session.rating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                          session.rating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                            "bg-red-500/10 text-red-400 border-red-500/20"
-                      )}>
-                        {session.rating === 3 ? '3 - Mastered' : session.rating === 2 ? '2 - Okay' : '1 - Struggled'}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={clsx(
+                          "px-2.5 py-1 rounded text-xs font-medium border w-fit",
+                          session.rating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                            session.rating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                              "bg-red-500/10 text-red-400 border-red-500/20"
+                        )}>
+                          {session.rating === 3 ? '3 - Mastered' : session.rating === 2 ? '2 - Okay' : '1 - Struggled'}
+                        </span>
+                        {session.approachSimilarity !== undefined && (
+                          <span className="text-[10px] text-zinc-500">
+                            Approach: {session.approachSimilarity === 1 ? 'Different' : session.approachSimilarity === 2 ? 'Same Pattern' : 'Identical'}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {session.rawCode && (
+                        <button
+                          onClick={() => setViewingSession(session)}
+                          className="text-indigo-400 hover:text-indigo-300 font-medium text-xs flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-colors border border-indigo-500/20"
+                        >
+                          <FileCode2 size={14} />
+                          View Code
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -370,6 +417,67 @@ export const Analytics: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Code Review Modal */}
+      {viewingSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+              <div>
+                <h2 className="text-2xl font-bold text-zinc-100">{viewingSession.title}</h2>
+                <div className="flex items-center gap-3 mt-1 text-sm text-zinc-400">
+                  <span>{format(new Date(viewingSession.date), 'MMMM d, yyyy \u00B7 h:mm a')}</span>
+                  <span className="text-zinc-600">•</span>
+                  <span className="flex items-center gap-1">
+                    Approach: {viewingSession.approachSimilarity === 1 ? <span className="text-red-400">Different</span> : viewingSession.approachSimilarity === 2 ? <span className="text-amber-400">Same Pattern</span> : <span className="text-emerald-400">Identical</span>}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingSession(null)}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 bg-zinc-950/50">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[500px]">
+                <div className="flex flex-col space-y-3">
+                  <h3 className="text-zinc-400 font-medium flex items-center gap-2">
+                    <History size={16} /> Past Attempt
+                  </h3>
+                  <div className="flex-1 rounded-xl border border-zinc-800 overflow-hidden bg-zinc-950 shadow-inner">
+                    <CodeMirror
+                      value={viewingSession.rawCode}
+                      extensions={[python()]}
+                      theme="dark"
+                      editable={false}
+                      className="text-sm h-full"
+                      height="100%"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col space-y-3">
+                  <h3 className="text-emerald-400/80 font-medium flex items-center gap-2">
+                    <CheckSquare size={16} /> Optimal Solution
+                  </h3>
+                  <div className="flex-1 rounded-xl border border-emerald-500/20 overflow-hidden bg-zinc-950 shadow-inner">
+                    <CodeMirror
+                      value={viewingSession.optimalSolution}
+                      extensions={[python()]}
+                      theme="dark"
+                      editable={false}
+                      className="text-sm h-full"
+                      height="100%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

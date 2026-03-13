@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { PHASE_1_CATEGORIES } from '../data/problems';
-import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Settings: React.FC = () => {
@@ -60,6 +60,19 @@ export const Settings: React.FC = () => {
     const handleRemoveBlackoutDate = (index: number) => {
         const newDates = settings.studySchedule.blackoutDates.filter((_, i) => i !== index);
         updateSettings({ studySchedule: { ...settings.studySchedule, blackoutDates: newDates } });
+    };
+
+    const handleExportData = () => {
+        const raw = localStorage.getItem('leetcode-tracker-storage');
+        if (!raw) return;
+        const blob = new Blob([raw], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateTag = new Date().toISOString().split('T')[0];
+        a.href = url;
+        a.download = `lc-tracker-backup-${dateTag}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     const renderTierBar = () => {
@@ -391,6 +404,25 @@ export const Settings: React.FC = () => {
                     </section>
 
                 </div>
+
+                {/* Data Management */}
+                <section className="premium-card p-6 border-emerald-500/20">
+                    <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
+                        <Download className="text-emerald-400" size={20} />
+                        Data Management
+                    </h2>
+                    <p className="text-sm text-zinc-400 mb-5">
+                        All your data is stored only in this browser. Export a backup regularly — especially before clearing your cache.
+                    </p>
+                    <button
+                        onClick={handleExportData}
+                        className="flex items-center gap-2 px-5 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl transition-all duration-200 text-sm font-medium"
+                    >
+                        <Download size={16} />
+                        Export Data
+                    </button>
+                    <p className="text-xs text-zinc-500 mt-3">Downloads all your progress, settings, and history as a single JSON file.</p>
+                </section>
 
             </div>
         </div>

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Problem } from '../data/problems';
 import { useStore } from '../store/useStore';
-import { Play, Pause, Square, ExternalLink, Youtube, ChevronRight, CircleCheck, BookOpen } from 'lucide-react';
+import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface TimerProps {
@@ -11,100 +11,137 @@ interface TimerProps {
   onComplete: () => void;
 }
 
-type TimerPhase = 'read' | 'attempt' | 'review' | 'retry' | 'rating';
-
-const PHASE_DURATIONS = {
-  read: 5 * 60,
-  attempt: 15 * 60,
-  review: 10 * 60,
-  retry: 5 * 60,
+/** Format seconds → MM:SS */
+const fmtTime = (totalSeconds: number): string => {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
 export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onComplete }) => {
-  const logProblem = useStore((state) => state.logProblem);
+  const activeSession = useStore((state) => state.activeSession);
+  const startSession = useStore((state) => state.startSession);
+  const endSession = useStore((state) => state.endSession);
+  const abandonSession = useStore((state) => state.abandonSession);
   const progress = useStore((state) => state.progress);
-  const [phase, setPhase] = useState<TimerPhase>(isColdSolve ? 'attempt' : 'read');
-  const [timeLeft, setTimeLeft] = useState(isColdSolve ? 20 * 60 : PHASE_DURATIONS.read);
-  const [isRunning, setIsRunning] = useState(false);
+  const personalBestTimes = useStore((state) => state.personalBestTimes);
+
   const [notes, setNotes] = useState(progress[problem.id]?.notes || '');
+  const [phase, setPhase] = useState<'idle' | 'running' | 'rating'>('idle');
+  const [elapsed, setElapsed] = useState(0);
+  const [frozenElapsed, setFrozenElapsed] = useState(0);
+  const intervalRef = useRef<number | null>(null);
+  const [isNewPB, setIsNewPB] = useState(false);
 
+  // If there's already an active session for this problem, pick it up
   useEffect(() => {
-    let interval: number;
-    if (isRunning && timeLeft > 0) {
-      interval = window.setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      handlePhaseComplete();
+    if (activeSession && activeSession.problemId === problem.id) {
+      setPhase('running');
     }
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft]);
+  }, []); // eslint-disable-line
 
-  const handlePhaseComplete = () => {
-    setIsRunning(false);
-    if (isColdSolve) {
-      setPhase('rating');
-      return;
+  // Tick every second — uses Date.now() math so it's drift-free
+  useEffect(() => {
+    if (phase === 'running' && activeSession) {
+      const tick = () => {
+        const e = Math.floor((Date.now() - activeSession.startTimestamp) / 1000);
+        setElapsed(e);
+      };
+      tick();
+      intervalRef.current = window.setInterval(tick, 1000);
     }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [phase, activeSession]);
 
-    if (phase === 'read') {
-      setPhase('attempt');
-      setTimeLeft(PHASE_DURATIONS.attempt);
-    } else if (phase === 'attempt') {
-      setPhase('review');
-      setTimeLeft(PHASE_DURATIONS.review);
-    } else if (phase === 'review') {
-      setPhase('retry');
-      setTimeLeft(PHASE_DURATIONS.retry);
-    } else if (phase === 'retry') {
-      setPhase('rating');
-    }
+  const handleStart = () => {
+    startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false);
+    setPhase('running');
   };
 
-  const skipPhase = () => {
-    handlePhaseComplete();
-  };
+  const handleDone = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    const finalElapsed = activeSession
+      ? Math.floor((Date.now() - activeSession.startTimestamp) / 1000)
+      : elapsed;
+    setFrozenElapsed(finalElapsed);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    // Check if this is a personal best
+    const currentBest = personalBestTimes[problem.id];
+    if (currentBest === undefined || finalElapsed < currentBest) {
+      setIsNewPB(true);
+    }
+
+    setPhase('rating');
   };
 
   const handleRating = (rating: 1 | 2 | 3) => {
-    logProblem(problem.id, rating, isNew, notes);
+    endSession(frozenElapsed, rating, notes);
     onComplete();
   };
 
+  // ── Rating Screen ────────────────────────────────────────────────────────
   if (phase === 'rating') {
+    const minutes = Math.floor(frozenElapsed / 60);
+    const seconds = frozenElapsed % 60;
+    const timeLabel = minutes > 0
+      ? `${minutes}m ${seconds}s`
+      : `${seconds}s`;
+
+    const existingNotes = progress[problem.id]?.notes;
+
     return (
       <div className="max-w-xl mx-auto mt-12 animate-in slide-in-from-bottom-4 fade-in duration-500">
         <div className="premium-card p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
-            <CircleCheck size={32} className="text-emerald-500" />
+          {/* Time taken banner */}
+          <div className="mb-6 p-4 rounded-xl bg-zinc-800/60 border border-zinc-700/50">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <TimerIcon size={16} className="text-emerald-400" />
+              <span className="text-zinc-400 text-sm">Time spent</span>
+            </div>
+            <div className="font-mono text-4xl font-bold text-zinc-50 tracking-tighter">
+              {fmtTime(frozenElapsed)}
+            </div>
+            <div className="text-zinc-500 text-xs mt-1">{timeLabel} elapsed</div>
+            {isNewPB && (
+              <div className="mt-2 flex items-center justify-center gap-1.5 text-amber-400 text-xs font-semibold">
+                <Trophy size={14} className="fill-current" />
+                New Personal Best!
+              </div>
+            )}
           </div>
-          <h2 className="text-2xl font-bold text-zinc-50 mb-2">Session Complete</h2>
-          <p className="text-zinc-400 mb-6">How confident do you feel about {problem.title}?</p>
 
-          <div className="mb-8 text-left">
+          <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+            <CircleCheck size={28} className="text-emerald-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
+          <p className="text-zinc-400 mb-6 text-sm">How confident do you feel about {problem.title}?</p>
+
+          <div className="mb-6 text-left">
             <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
               <BookOpen size={16} className="text-emerald-400" />
               Key Insight / Notes (Optional)
             </label>
+            {existingNotes && (
+              <div className="mb-2 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-lg text-xs text-zinc-400">
+                <span className="text-emerald-400 font-medium">Previous: </span>{existingNotes}
+              </div>
+            )}
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Jot down the key trick or pattern for this problem..."
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-24 text-sm"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-20 text-sm"
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={() => handleRating(3)}
               className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">3 - Mastered</span>
+              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">3 — Mastered</span>
               <span className="text-sm opacity-80">Clean, fast, could explain it</span>
             </button>
 
@@ -112,7 +149,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               onClick={() => handleRating(2)}
               className="w-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">2 - Okay</span>
+              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">2 — Okay</span>
               <span className="text-sm opacity-80">Solved, but slow or had bugs</span>
             </button>
 
@@ -120,7 +157,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               onClick={() => handleRating(1)}
               className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
             >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">1 - Struggled</span>
+              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">1 — Struggled</span>
               <span className="text-sm opacity-80">Needed video, couldn't finish</span>
             </button>
           </div>
@@ -129,7 +166,8 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     );
   }
 
-  const existingNotes = progress[problem.id]?.notes;
+  // ── Idle / Running Screen ───────────────────────────────────────────────
+  const displayElapsed = phase === 'running' ? elapsed : 0;
 
   return (
     <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
@@ -140,10 +178,10 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <span className="text-zinc-400">{problem.category}</span>
             <span className="text-zinc-600">•</span>
             <span className={clsx(
-              "font-medium",
-              problem.difficulty === 'Easy' ? "text-emerald-400" :
-                problem.difficulty === 'Medium' ? "text-amber-400" :
-                  "text-red-400"
+              'font-medium',
+              problem.difficulty === 'Easy' ? 'text-emerald-400' :
+                problem.difficulty === 'Medium' ? 'text-amber-400' :
+                  'text-red-400'
             )}>
               {problem.difficulty}
             </span>
@@ -153,15 +191,32 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                 <span className="text-blue-400 font-medium">Cold Solve</span>
               </>
             )}
+            {!isNew && !isColdSolve && (
+              <>
+                <span className="text-zinc-600">•</span>
+                <span className="text-amber-400 font-medium">Review</span>
+              </>
+            )}
           </div>
         </div>
+
         <div className="flex gap-3">
-          <a href={problem.leetcodeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors border border-zinc-700/50 hover:border-zinc-600">
+          <a
+            href={problem.leetcodeUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors border border-zinc-700/50 hover:border-zinc-600"
+          >
             <ExternalLink size={18} />
             <span className="hidden sm:inline">LeetCode</span>
           </a>
           {!isColdSolve && (
-            <a href={problem.videoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-red-400 transition-colors border border-zinc-700/50 hover:border-zinc-600">
+            <a
+              href={problem.videoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-red-400 transition-colors border border-zinc-700/50 hover:border-zinc-600"
+            >
               <Youtube size={18} />
               <span className="hidden sm:inline">NeetCode</span>
             </a>
@@ -170,77 +225,71 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       </div>
 
       <div className="premium-card p-8 md:p-12 text-center relative overflow-hidden">
-        {/* Progress Bar Background */}
+        {/* Thin progress "vibe" bar that pulses when running */}
         <div className="absolute top-0 left-0 h-1 bg-zinc-800 w-full">
-          <div
-            className={clsx(
-              "h-full transition-all duration-1000",
-              isColdSolve ? "bg-blue-500" :
-                phase === 'read' ? "bg-indigo-500" :
-                  phase === 'attempt' ? "bg-emerald-500" :
-                    phase === 'review' ? "bg-amber-500" :
-                      "bg-purple-500"
-            )}
-            style={{ width: `${(((isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase]) - timeLeft) / (isColdSolve ? 20 * 60 : PHASE_DURATIONS[phase])) * 100}%` }}
-          />
+          {phase === 'running' && (
+            <div className="h-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite]" style={{ width: '100%' }} />
+          )}
         </div>
 
-        {!isColdSolve && (
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/80 text-zinc-300 text-sm font-medium mb-8 border border-zinc-700/50">
-            <span className={clsx(phase === 'read' && "text-indigo-400")}>1. Read</span>
-            <ChevronRight size={14} className="text-zinc-600" />
-            <span className={clsx(phase === 'attempt' && "text-emerald-400")}>2. Attempt</span>
-            <ChevronRight size={14} className="text-zinc-600" />
-            <span className={clsx(phase === 'review' && "text-amber-400")}>3. Review</span>
-            <ChevronRight size={14} className="text-zinc-600" />
-            <span className={clsx(phase === 'retry' && "text-purple-400")}>4. Re-try</span>
-          </div>
-        )}
+        {/* Label */}
+        <div className={clsx(
+          "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-8 border transition-colors",
+          phase === 'running'
+            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+            : "bg-zinc-800/80 text-zinc-400 border-zinc-700/50"
+        )}>
+          <TimerIcon size={14} className={phase === 'running' ? 'animate-[spin_3s_linear_infinite]' : ''} />
+          {phase === 'idle' ? 'Ready to start' : 'Session in progress'}
+        </div>
 
+        {/* Stopwatch Display */}
         <div className="font-mono text-7xl md:text-9xl font-bold tracking-tighter text-zinc-50 mb-12">
-          {formatTime(timeLeft)}
+          {fmtTime(displayElapsed)}
         </div>
 
         <div className="flex items-center justify-center gap-4">
-          <button
-            onClick={() => setIsRunning(!isRunning)}
-            className="w-16 h-16 flex items-center justify-center bg-zinc-100 hover:bg-white text-zinc-950 rounded-full transition-colors shadow-lg"
-          >
-            {isRunning ? <Pause size={24} className="fill-current" /> : <Play size={24} className="fill-current ml-1" />}
-          </button>
+          {phase === 'idle' ? (
+            <button
+              onClick={handleStart}
+              className="px-10 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-lg rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-3"
+            >
+              Start Session
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={handleDone}
+                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-2"
+              >
+                <CircleCheck size={20} className="fill-current" />
+                I'm Done
+              </button>
 
-          <button
-            onClick={skipPhase}
-            className="px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-2xl font-medium transition-colors border border-zinc-700/50"
-          >
-            Skip Phase
-          </button>
-
-          <button
-            onClick={() => setPhase('rating')}
-            className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors"
-          >
-            End Session
-          </button>
+              <button
+                onClick={() => {
+                  abandonSession();
+                  onComplete();
+                }}
+                className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors"
+              >
+                Abandon
+              </button>
+            </>
+          )}
         </div>
 
-        <div className="mt-12 text-zinc-400 max-w-md mx-auto">
-          {isColdSolve && "Cold Solve: No hints, no videos. Test your true retention."}
-          {!isColdSolve && phase === 'read' && "Read the problem carefully. Identify edge cases and constraints. Do not write code yet."}
-          {!isColdSolve && phase === 'attempt' && "Write your solution. Focus on correctness first, then optimization."}
-          {!isColdSolve && phase === 'review' && "If stuck, watch the NeetCode video. Focus carefully on the optimal algorithm."}
-          {!isColdSolve && phase === 'retry' && "Close the video and try to implement the optimal solution from scratch."}
+        <div className="mt-10 text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
+          {phase === 'idle' && (
+            <span>Open the problem in LeetCode, then click Start Session. The timer runs while you work.</span>
+          )}
+          {phase === 'running' && isColdSolve && (
+            <span>Cold Solve: No hints, no videos. Test your true retention.</span>
+          )}
+          {phase === 'running' && !isColdSolve && (
+            <span>Work through the problem at your own pace. Click I'm Done whenever you're finished.</span>
+          )}
         </div>
-
-        {!isColdSolve && phase === 'retry' && existingNotes && (
-          <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-left max-w-lg mx-auto">
-            <h4 className="text-emerald-400 text-sm font-semibold mb-2 flex items-center gap-2">
-              <BookOpen size={16} />
-              Your Previous Notes
-            </h4>
-            <p className="text-zinc-300 text-sm">{existingNotes}</p>
-          </div>
-        )}
       </div>
     </div>
   );

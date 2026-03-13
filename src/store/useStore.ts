@@ -10,7 +10,18 @@ export interface ProblemProgress {
   lastReviewedAt: string;
   nextReviewAt: string;
   reviewCount: number;
-  history: { date: string; rating: 1 | 2 | 3; rawCode?: string; optimalSolution?: string; approachSimilarity?: number; usedInAppEditor?: boolean }[];
+  history: {
+    date: string;
+    rating: 1 | 2 | 3;
+    elapsedSeconds?: number;
+    sessionType?: 'new' | 'review' | 'cold_solve' | 'mock';
+    rawCode?: string;
+    optimalSolution?: string;
+    approachSimilarity?: number;
+    usedInAppEditor?: boolean;
+    mockTimeLimitSeconds?: number;
+    mockActualSecondsUsed?: number;
+  }[];
   retired: boolean;
   consecutiveThrees: number;
   consecutiveSuccesses?: number;
@@ -28,6 +39,17 @@ export interface ActivityLog {
   [dateString: string]: { solved: number; reviewed: number };
 }
 
+/** One timed session record stored for analytics */
+export interface SessionTiming {
+  id: string;
+  problemId: string;
+  category: string;
+  date: string;
+  elapsedSeconds: number;
+  sessionType: 'new' | 'review' | 'cold_solve' | 'mock';
+  rating: 1 | 2 | 3;
+}
+
 interface AppState {
   progress: Record<string, ProblemProgress>;
   activityLog: ActivityLog;
@@ -42,6 +64,31 @@ interface AppState {
   lastSyncCount: number | null;
   syncError: string | null;
   targetInterviewDate: string;
+
+  // ── Session Timing ──────────────────────────────────────────────
+  /** Persisted active session — survives tab switches via localStorage */
+  activeSession: {
+    problemId: string;
+    startTimestamp: number; // Date.now() at session start
+    isReview: boolean;
+    isColdSolve: boolean;
+  } | null;
+
+  /** All completed session timing records (append-only) */
+  sessionTimings: SessionTiming[];
+
+  /** Rolling avg new-solve time per category */
+  categoryAvgSolveTimes: Record<string, { totalSeconds: number; count: number }>;
+
+  /** Rolling avg review time per category */
+  categoryAvgReviewTimes: Record<string, { totalSeconds: number; count: number }>;
+
+  /** Personal best (fastest solve) time in seconds per problem id */
+  personalBestTimes: Record<string, number>;
+
+  /** Timestamp of last time category averages were updated (for "recalculated" badge) */
+  lastCategoryAvgUpdate: number | null;
+  // ────────────────────────────────────────────────────────────────
 
   settings: {
     studySchedule: {
@@ -84,8 +131,25 @@ interface AppState {
   resetGraceDayIfNeeded: () => void;
   updatePersonalRecords: (updates: Partial<AppState['personalRecords']>) => void;
 
+  // ── Session Timing Actions ───────────────────────────────────────
+  startSession: (problemId: string, isReview: boolean, isColdSolve?: boolean) => void;
+  endSession: (elapsedSeconds: number, rating: 1 | 2 | 3, notes?: string, additionalHistoryData?: any) => void;
+  abandonSession: () => void;
+  // ────────────────────────────────────────────────────────────────
+
   logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string, additionalHistoryData?: any) => void;
-  logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean, approachSimilarity: number, rawCode: string, optimalSolution: string, usedInAppEditor: boolean) => void;
+  logMockInterview: (
+    problemId: string,
+    evalSolved: boolean,
+    evalSyntax: boolean,
+    evalComplexity: boolean,
+    approachSimilarity: number,
+    rawCode: string,
+    optimalSolution: string,
+    usedInAppEditor: boolean,
+    actualSecondsUsed?: number,
+    timeLimitSeconds?: number
+  ) => void;
   logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => void;
   resetProgress: () => void;
   getDailyPlan: () => {
@@ -119,7 +183,16 @@ export const useStore = create<AppState>()(
       lastSync: null,
       lastSyncCount: null,
       syncError: null,
-      targetInterviewDate: '2026-09-15', // Default to Sept 15, 2026
+      targetInterviewDate: '2026-09-15',
+
+      // ── Session Timing defaults ──────────────────────────────────
+      activeSession: null,
+      sessionTimings: [],
+      categoryAvgSolveTimes: {},
+      categoryAvgReviewTimes: {},
+      personalBestTimes: {},
+      lastCategoryAvgUpdate: null,
+      // ─────────────────────────────────────────────────────────────
 
       settings: {
         studySchedule: { weekdayMinutes: 60, weekendMinutes: 120, restDay: 0, blackoutDates: [] },
@@ -150,7 +223,6 @@ export const useStore = create<AppState>()(
       addTargetEvent: (event: Omit<{ id: string; title: string; type: string; date: string }, "id">) => set((state) => {
         const newEvent = { ...event, id: crypto.randomUUID() };
         const newEvents = [...state.targetEvents, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        // Find next upcoming event
         const today = new Date().toISOString().split('T')[0];
         const nextEvent = newEvents.find(e => e.date >= today);
         return {
@@ -207,7 +279,7 @@ export const useStore = create<AppState>()(
       resetGraceDayIfNeeded: () => set((state) => {
         const today = new Date();
         const mondayOfThisWeek = new Date(today);
-        mondayOfThisWeek.setDate(today.getDate() - today.getDay() + 1); // Get Monday
+        mondayOfThisWeek.setDate(today.getDate() - today.getDay() + 1);
         mondayOfThisWeek.setHours(0, 0, 0, 0);
 
         if (!state.graceDay.lastResetDate || new Date(state.graceDay.lastResetDate) < mondayOfThisWeek) {
@@ -238,15 +310,11 @@ export const useStore = create<AppState>()(
 
           submissions.forEach(sub => {
             const problemId = sub.titleSlug;
-            // Check if it's in our library
             const existsInLibrary = problems.some(p => p.id === problemId);
 
             if (existsInLibrary && !newProgress[problemId]) {
-              // Add as solved with default rating of 3
               const solveDate = new Date(parseInt(sub.timestamp) * 1000);
               const solveDateStr = solveDate.toISOString();
-
-              // Calculate next review based on solve date (Day 3)
               const nextReview = new Date(solveDate);
               nextReview.setDate(nextReview.getDate() + 3);
 
@@ -279,6 +347,93 @@ export const useStore = create<AppState>()(
         }
       },
 
+      // ── Session Timing Actions ─────────────────────────────────────────────
+
+      startSession: (problemId, isReview, isColdSolve = false) => {
+        set({
+          activeSession: {
+            problemId,
+            startTimestamp: Date.now(),
+            isReview,
+            isColdSolve,
+          }
+        });
+      },
+
+      endSession: (elapsedSeconds, rating, notes, additionalHistoryData) => {
+        const state = get();
+        const session = state.activeSession;
+        if (!session) return;
+
+        const { problemId, isReview, isColdSolve } = session;
+        const prob = problems.find(p => p.id === problemId);
+        const category = prob?.category ?? 'Unknown';
+        const sessionType: SessionTiming['sessionType'] = isReview
+          ? 'review'
+          : isColdSolve
+            ? 'cold_solve'
+            : 'new';
+
+        // Build session timing record
+        const timingRecord: SessionTiming = {
+          id: crypto.randomUUID(),
+          problemId,
+          category,
+          date: new Date().toISOString(),
+          elapsedSeconds,
+          sessionType,
+          rating,
+        };
+
+        // Update category averages
+        const newCategoryAvgSolveTimes = { ...state.categoryAvgSolveTimes };
+        const newCategoryAvgReviewTimes = { ...state.categoryAvgReviewTimes };
+
+        if (sessionType === 'review') {
+          const existing = newCategoryAvgReviewTimes[category] ?? { totalSeconds: 0, count: 0 };
+          newCategoryAvgReviewTimes[category] = {
+            totalSeconds: existing.totalSeconds + elapsedSeconds,
+            count: existing.count + 1,
+          };
+        } else {
+          const existing = newCategoryAvgSolveTimes[category] ?? { totalSeconds: 0, count: 0 };
+          newCategoryAvgSolveTimes[category] = {
+            totalSeconds: existing.totalSeconds + elapsedSeconds,
+            count: existing.count + 1,
+          };
+        }
+
+        // Update personal best
+        const newPersonalBestTimes = { ...state.personalBestTimes };
+        const currentBest = newPersonalBestTimes[problemId];
+        if (currentBest === undefined || elapsedSeconds < currentBest) {
+          newPersonalBestTimes[problemId] = elapsedSeconds;
+        }
+
+        // Call logProblem with timing data
+        const isNew = !isReview && !isColdSolve;
+        get().logProblem(problemId, rating, isNew, notes, {
+          elapsedSeconds,
+          sessionType,
+          ...additionalHistoryData,
+        });
+
+        set({
+          activeSession: null,
+          sessionTimings: [...state.sessionTimings, timingRecord],
+          categoryAvgSolveTimes: newCategoryAvgSolveTimes,
+          categoryAvgReviewTimes: newCategoryAvgReviewTimes,
+          personalBestTimes: newPersonalBestTimes,
+          lastCategoryAvgUpdate: Date.now(),
+        });
+      },
+
+      abandonSession: () => {
+        set({ activeSession: null });
+      },
+
+      // ──────────────────────────────────────────────────────────────────────
+
       logProblem: (problemId, rating, isNew, notes, additionalHistoryData) => {
         set((state) => {
           const today = startOfDay(new Date());
@@ -310,7 +465,6 @@ export const useStore = create<AppState>()(
             notes: notes !== undefined ? notes : existing?.notes,
           };
 
-          // Update Activity Log
           const currentLog = state.activityLog[dateKey] || { solved: 0, reviewed: 0 };
           const newLog = {
             ...state.activityLog,
@@ -320,7 +474,6 @@ export const useStore = create<AppState>()(
             },
           };
 
-          // Update Streak
           let newStreak = { ...state.streak };
           let newGraceDayObj = { ...state.graceDay };
 
@@ -331,22 +484,18 @@ export const useStore = create<AppState>()(
             const diffInDays = differenceInDays(today, lastActive);
 
             if (diffInDays === 1) {
-              // Perfect consecutive day
               newStreak.current += 1;
               newStreak.max = Math.max(newStreak.current, newStreak.max);
               newStreak.lastActiveDate = todayStr;
             } else if (diffInDays === 2 && !state.graceDay.usedThisWeek) {
-              // Grace day activated!
               newGraceDayObj.usedThisWeek = true;
-              newStreak.current += 1; // Preserve the streak as if they hadn't missed it
+              newStreak.current += 1;
               newStreak.max = Math.max(newStreak.current, newStreak.max);
               newStreak.lastActiveDate = todayStr;
             } else if (diffInDays > 1) {
-              // Streak broken
               newStreak.current = 1;
               newStreak.lastActiveDate = todayStr;
             }
-            // diffInDays === 0 means multiple problems in one day, streak stays the same but activity date updates
           }
 
           return {
@@ -358,18 +507,42 @@ export const useStore = create<AppState>()(
         });
       },
 
-      logMockInterview: (problemId, evalSolved, evalSyntax, evalComplexity, approachSimilarity, rawCode, optimalSolution, usedInAppEditor) => {
+      logMockInterview: (
+        problemId, evalSolved, evalSyntax, evalComplexity, approachSimilarity,
+        rawCode, optimalSolution, usedInAppEditor, actualSecondsUsed, timeLimitSeconds = 25 * 60
+      ) => {
         let rating: 1 | 2 | 3 = 2;
         if (!evalSolved || !evalSyntax || (approachSimilarity === 1)) {
           rating = 1;
         } else if (evalSolved && evalSyntax && evalComplexity && approachSimilarity === 3) {
           rating = 3;
         }
+
+        // Also store timing record if we have time data
+        if (actualSecondsUsed !== undefined) {
+          const prob = problems.find(p => p.id === problemId);
+          const category = prob?.category ?? 'Unknown';
+          const timingRecord: SessionTiming = {
+            id: crypto.randomUUID(),
+            problemId,
+            category,
+            date: new Date().toISOString(),
+            elapsedSeconds: actualSecondsUsed,
+            sessionType: 'mock',
+            rating,
+          };
+          set(state => ({ sessionTimings: [...state.sessionTimings, timingRecord] }));
+        }
+
         get().logProblem(problemId, rating, false, "Mock Interview", {
           rawCode,
           optimalSolution,
           approachSimilarity,
-          usedInAppEditor
+          usedInAppEditor,
+          sessionType: 'mock',
+          elapsedSeconds: actualSecondsUsed,
+          mockTimeLimitSeconds: timeLimitSeconds,
+          mockActualSecondsUsed: actualSecondsUsed,
         });
       },
 
@@ -381,11 +554,6 @@ export const useStore = create<AppState>()(
           const existing = state.syntaxProgress[cardId];
           const reviewCount = existing ? existing.reviewCount + 1 : 1;
 
-          // Re-use existing spaced repetition logic
-          // For syntax, we don't track consecutive successes explicitly right now, so we pass 0
-          // If rated 3, it schedules it for 3 days out by default in getNextReviewDate (if consecutive=0)
-          // We can just use the rating to schedule it.
-          // Or we can simulate consecutive successes.
           let consecutiveSuccesses = existing && existing.confidenceRating >= 2 ? 1 : 0;
           if (rating >= 2) consecutiveSuccesses += 1;
 
@@ -405,7 +573,18 @@ export const useStore = create<AppState>()(
         });
       },
 
-      resetProgress: () => set({ progress: {}, activityLog: {}, syntaxProgress: {}, streak: { current: 0, max: 0, lastActiveDate: null } }),
+      resetProgress: () => set({
+        progress: {},
+        activityLog: {},
+        syntaxProgress: {},
+        streak: { current: 0, max: 0, lastActiveDate: null },
+        activeSession: null,
+        sessionTimings: [],
+        categoryAvgSolveTimes: {},
+        categoryAvgReviewTimes: {},
+        personalBestTimes: {},
+        lastCategoryAvgUpdate: null,
+      }),
 
       getDailyPlan: () => {
         const state = get();
@@ -413,16 +592,14 @@ export const useStore = create<AppState>()(
         const today = new Date();
         const dayOfWeek = getDay(today);
 
-        // Review Problems
         const allDueReviews = Object.entries(state.progress)
           .filter(([_, prog]) => !prog.retired && isDueToday(prog.nextReviewAt))
           .map(([id, prog]) => ({ id, prog }))
           .sort((a, b) => {
             const successA = a.prog.consecutiveSuccesses || 0;
             const successB = b.prog.consecutiveSuccesses || 0;
-            if (successA !== successB) return successA - successB; // Lowest successes first
+            if (successA !== successB) return successA - successB;
 
-            // Fallback to Blind75 priority
             const probA = problems.find(p => p.id === a.id);
             const probB = problems.find(p => p.id === b.id);
             if (probA?.isBlind75 && !probB?.isBlind75) return -1;
@@ -433,7 +610,6 @@ export const useStore = create<AppState>()(
         const totalDueReviews = allDueReviews.length;
         const reviewProblems = allDueReviews.slice(0, 5).map(r => r.id);
 
-        // Syntax Due Reviews
         const allDueSyntax = Object.entries(state.syntaxProgress || {})
           .filter(([_, prog]) => isDueToday(prog.nextReviewAt))
           .sort((a, b) => a[1].confidenceRating - b[1].confidenceRating)
@@ -441,11 +617,9 @@ export const useStore = create<AppState>()(
 
         const dueSyntaxCards = allDueSyntax.slice(0, 5);
 
-        // Day Mode logic
         const isEasyDay = state.dayMode.type === 'EASY' && state.dayMode.dateSet && isSameDay(today, new Date(state.dayMode.dateSet));
         const isHardDay = state.dayMode.type === 'HARD' && state.dayMode.dateSet && isSameDay(today, new Date(state.dayMode.dateSet));
 
-        // Cold Solve Logic (Skip if Easy Day)
         let coldSolveProblem: string | null = null;
         if (!isEasyDay) {
           const potentialColdSolves = Object.entries(state.progress)
@@ -458,14 +632,12 @@ export const useStore = create<AppState>()(
             .map(([id]) => id);
 
           if (potentialColdSolves.length > 0) {
-            // Pick the absolute oldest
             coldSolveProblem = potentialColdSolves[0];
           }
         }
 
-        // New Problem Logic (Smart Recommendation)
         let newProblem: string | null = null;
-        let additionalProblems: string[] = []; // In case of catch-up mode
+        let additionalProblems: string[] = [];
         let recommendationReason = undefined;
         const solvedIds = new Set(Object.keys(state.progress));
 
@@ -473,13 +645,10 @@ export const useStore = create<AppState>()(
         let targetNewProblemCount = 1;
 
         if (state.catchUpPlan?.active && state.catchUpPlan?.type === 'CATCH_UP') {
-          targetNewProblemCount = 2; // Assign an extra problem per day while catching up
-
-          // Check expiration
+          targetNewProblemCount = 2;
           if (state.catchUpPlan.startedAt) {
             const daysSinceStart = differenceInDays(today, new Date(state.catchUpPlan.startedAt));
             if (daysSinceStart >= (state.catchUpPlan.durationDays || 0)) {
-              // Schedule clear but locally just treat it as 1 for now, let's not mutate store in a getter
               targetNewProblemCount = 1;
             }
           }
@@ -490,7 +659,6 @@ export const useStore = create<AppState>()(
         }
 
         if (phase === 2 && shouldAssignNewProblem) {
-          const startOfWeek = subDays(today, dayOfWeek);
           let solvedThisWeek = 0;
           for (let i = 0; i <= dayOfWeek; i++) {
             const dateKey = format(subDays(today, i), 'yyyy-MM-dd');
@@ -511,7 +679,6 @@ export const useStore = create<AppState>()(
             candidateCategories = [...PHASE_1_CATEGORIES, ...PHASE_2_CATEGORIES];
           }
 
-          // Calculate category averages
           const categoryStats: Record<string, { total: number; count: number }> = {};
           Object.entries(state.progress).forEach(([id, prog]) => {
             const prob = problems.find(p => p.id === id);
@@ -528,10 +695,9 @@ export const useStore = create<AppState>()(
             avg: stats.total / stats.count
           })).sort((a, b) => a.avg - b.avg);
 
-          // Find the lowest confidence category that has unsolved problems
           for (const { category, avg } of categoryAverages) {
             if (!candidateCategories.includes(category)) continue;
-            if (avg >= 2.5) continue; // Only prioritize if it's actually a weak category
+            if (avg >= 2.5) continue;
 
             const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
             const unsolved = categoryProblems.find(p => !solvedIds.has(p.id));
@@ -543,10 +709,8 @@ export const useStore = create<AppState>()(
             }
           }
 
-          // Fallback to sequential if no recommendation found
           if (!newProblem) {
-            // Determine target difficulty based on settings
-            let easyRatio = 33, medRatio = 34; // default mixed
+            let easyRatio = 33, medRatio = 34;
             if (state.settings.targetCompanyTier === 'FAANG') { easyRatio = 20; medRatio = 60; }
             else if (state.settings.targetCompanyTier === 'FINTECH') { easyRatio = 30; medRatio = 60; }
             else if (state.settings.targetCompanyTier === 'GENERAL') { easyRatio = 50; medRatio = 45; }
@@ -558,7 +722,6 @@ export const useStore = create<AppState>()(
             else if (rand < easyRatio) targetDifficulty = 'Easy';
             else if (rand < easyRatio + medRatio) targetDifficulty = 'Medium';
 
-            // Try to find a problem matching the target difficulty
             for (const category of candidateCategories) {
               const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
               const unsolvedOfDifficulty = categoryProblems.find(p => !solvedIds.has(p.id) && p.difficulty === targetDifficulty);
@@ -570,7 +733,6 @@ export const useStore = create<AppState>()(
               }
             }
 
-            // If we couldn't find one of the exact difficulty, just pick the next available
             if (!newProblem) {
               for (const category of candidateCategories) {
                 const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
@@ -592,7 +754,6 @@ export const useStore = create<AppState>()(
             }
           }
 
-          // If we need a second problem for catch up mode
           if (newProblem && targetNewProblemCount > 1) {
             const secondUnsolved = problems.find(p => (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) && !solvedIds.has(p.id) && p.id !== newProblem && (isEasyDay ? p.difficulty === 'Easy' : true));
             if (secondUnsolved) {
@@ -609,4 +770,3 @@ export const useStore = create<AppState>()(
     }
   )
 );
-

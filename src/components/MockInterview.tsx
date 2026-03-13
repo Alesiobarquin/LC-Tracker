@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { problems, Problem } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
-import { Play, Pause, ExternalLink, TriangleAlert, CircleCheck, Lock, CheckSquare, Square } from 'lucide-react';
+import { Play, Pause, ExternalLink, TriangleAlert, CircleCheck, Lock, CheckSquare, Square, Timer } from 'lucide-react';
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -15,8 +15,10 @@ export const MockInterview: React.FC = () => {
 
   const [activeProblem, setActiveProblem] = useState<Problem | null>(null);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [timeLimitSeconds, setTimeLimitSeconds] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const mockStartTimestampRef = useRef<number | null>(null);
 
   const [useExternalLeetCode, setUseExternalLeetCode] = useState(false);
   const [code, setCode] = useState('');
@@ -71,7 +73,10 @@ export const MockInterview: React.FC = () => {
       setIsRunning(false);
       setIsFinished(true);
     } else {
-      setTimeLeft(randomProblem.mockInterviewContent ? 25 * 60 : 35 * 60);
+      const limit = randomProblem.mockInterviewContent ? 25 * 60 : 35 * 60;
+      setTimeLeft(limit);
+      setTimeLimitSeconds(limit);
+      mockStartTimestampRef.current = Date.now();
       setIsRunning(true);
       setIsFinished(false);
     }
@@ -128,7 +133,17 @@ export const MockInterview: React.FC = () => {
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-2xl mx-auto">
           <CircleCheck size={48} className="mx-auto text-indigo-500 mb-6" />
           <h2 className="text-2xl font-bold text-zinc-50 mb-2 text-center">Interview Complete</h2>
-          <p className="text-zinc-400 mb-8 text-center">Self-Evaluation for {activeProblem.title}</p>
+          <p className="text-zinc-400 mb-2 text-center">Self-Evaluation for {activeProblem.title}</p>
+          {mockStartTimestampRef.current && (
+            <div className="flex items-center justify-center gap-4 mb-6 text-sm">
+              <span className="flex items-center gap-1.5 text-cyan-400 font-mono font-semibold">
+                <Timer size={14} />
+                Finished in {Math.round((Date.now() - (mockStartTimestampRef.current ?? Date.now())) / 60000)}m
+              </span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-500">Limit: {Math.round(timeLimitSeconds / 60)}m</span>
+            </div>
+          )}
 
           <div className="space-y-6">
             <div className="space-y-3">
@@ -177,6 +192,9 @@ export const MockInterview: React.FC = () => {
 
             <button
               onClick={() => {
+                const actualSecondsUsed = mockStartTimestampRef.current
+                  ? Math.round((Date.now() - mockStartTimestampRef.current) / 1000)
+                  : undefined;
                 logMockInterview(
                   activeProblem.id,
                   evalSolved!,
@@ -185,9 +203,12 @@ export const MockInterview: React.FC = () => {
                   approachSimilarity || 0,
                   code,
                   activeProblem.mockInterviewContent?.optimalSolution || '',
-                  !useExternalLeetCode && !!activeProblem.mockInterviewContent
+                  !useExternalLeetCode && !!activeProblem.mockInterviewContent,
+                  actualSecondsUsed,
+                  timeLimitSeconds
                 );
                 setActiveProblem(null);
+                mockStartTimestampRef.current = null;
               }}
               disabled={evalSolved === null || evalSyntax === null || evalComplexity === null || (!!activeProblem.mockInterviewContent && approachSimilarity === null)}
               className="w-full mt-8 bg-indigo-500 hover:bg-indigo-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-50 font-semibold py-4 rounded-xl transition-colors"

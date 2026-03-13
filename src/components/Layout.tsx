@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Bell, Settings, Calendar, RefreshCw, CheckCircle, BookOpen } from 'lucide-react';
+import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { useStore } from '../store/useStore';
 import { differenceInDays } from 'date-fns';
@@ -133,6 +134,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
+
+      {/* Floating active session indicator — visible on every page */}
+      <FloatingSessionIndicator setActiveTab={setActiveTab} />
     </div>
   );
 };

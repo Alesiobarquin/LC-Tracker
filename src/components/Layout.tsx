@@ -11,59 +11,13 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [reminderTime, setReminderTime] = useState('09:00');
-  const [reminderEnabled, setReminderEnabled] = useState(false);
-
-  const leetcodeUsername = useStore((state) => state.leetcodeUsername);
-  const setLeetCodeUsername = useStore((state) => state.setLeetCodeUsername);
-  const syncLeetCode = useStore((state) => state.syncLeetCode);
-  const lastSync = useStore((state) => state.lastSync);
-  const lastSyncCount = useStore((state) => state.lastSyncCount);
-  const syncError = useStore((state) => state.syncError);
   const targetInterviewDate = useStore((state) => state.targetInterviewDate);
-  const setTargetInterviewDate = useStore((state) => state.setTargetInterviewDate);
-
-  const [tempUsername, setTempUsername] = useState(leetcodeUsername || '');
-  const [tempDate, setTempDate] = useState(targetInterviewDate);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  useEffect(() => {
-    setTempUsername(leetcodeUsername || '');
-  }, [leetcodeUsername]);
-
-  useEffect(() => {
-    setTempDate(targetInterviewDate);
-  }, [targetInterviewDate]);
-
-  useEffect(() => {
-    const savedTime = localStorage.getItem('reminderTime');
-    const savedEnabled = localStorage.getItem('reminderEnabled');
-    if (savedTime) setReminderTime(savedTime);
-    if (savedEnabled) setReminderEnabled(savedEnabled === 'true');
-  }, []);
-
-  const handleSaveSettings = () => {
-    localStorage.setItem('reminderTime', reminderTime);
-    localStorage.setItem('reminderEnabled', reminderEnabled.toString());
-    if (reminderEnabled && 'Notification' in window) {
-      Notification.requestPermission();
-    }
-    setTargetInterviewDate(tempDate);
-    if (tempUsername !== leetcodeUsername) {
-      setLeetCodeUsername(tempUsername);
-    }
-    setIsSettingsOpen(false);
-  };
-
-  const handleManualSync = async () => {
-    setIsSyncing(true);
-    await syncLeetCode();
-    setIsSyncing(false);
-  };
+  const targetEvents = useStore((state) => state.targetEvents);
+  const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
+  const phase = getPhase();
+  const phaseProgress = phase === 1 ? 'Phase 1 (Foundations)' : phase === 2 ? 'Phase 2 (Internship)' : 'Phase 3 (Grind)';
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -71,11 +25,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     { id: 'analytics', label: 'Analytics', icon: LineChart },
     { id: 'mock', label: 'Mock Interview', icon: Code2 },
     { id: 'syntax', label: 'Syntax Reference', icon: BookOpen },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
-
-  const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
-  const phase = getPhase();
-  const phaseProgress = phase === 1 ? 'Phase 1 (Foundations)' : phase === 2 ? 'Phase 2 (Internship)' : 'Phase 3 (Grind)';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans flex flex-col md:flex-row">
@@ -128,11 +79,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           })}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800/50">
-          <div className="mb-4 p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
+        <div className="p-4 border-t border-zinc-800/50 space-y-4">
+          <div className="p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
             <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
               <Calendar size={12} />
-              <span>Target: {targetInterviewDate}</span>
+              <span>Next Target</span>
             </div>
             <div className="text-lg font-semibold text-zinc-100">
               {daysUntilInterview > 0 ? `${daysUntilInterview} days` : 'It\'s time!'}
@@ -142,13 +93,31 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             </div>
           </div>
 
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-colors text-sm font-medium"
-          >
-            <Settings size={18} />
-            <span>Settings</span>
-          </button>
+          {targetEvents.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider pl-1">Target Timeline</div>
+              <div className="relative pl-3 space-y-3 before:absolute before:inset-y-2 before:left-[5px] before:w-[2px] before:bg-zinc-800">
+                {targetEvents.map((event) => {
+                  const isNext = event.date === targetInterviewDate;
+                  const isPast = new Date(event.date) < new Date(targetInterviewDate);
+                  return (
+                    <div key={event.id} className="relative">
+                      <div className={clsx(
+                        "absolute -left-[14px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-zinc-900",
+                        isNext ? "bg-emerald-500" : isPast ? "bg-zinc-600" : "bg-zinc-400"
+                      )} />
+                      <div className={clsx("text-sm font-medium", isNext ? "text-emerald-400" : isPast ? "text-zinc-600 line-through" : "text-zinc-300")}>
+                        {event.title}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -163,94 +132,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
-      )}
-
-      {/* Settings Modal */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-300 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-zinc-50 flex items-center gap-2">
-                <Settings size={20} className="text-emerald-400" />
-                Settings
-              </h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="text-zinc-400 hover:text-zinc-100">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Target Interview Date</label>
-                <input
-                  type="date"
-                  value={tempDate}
-                  onChange={(e) => setTempDate(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">LeetCode Username</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tempUsername}
-                    onChange={(e) => setTempUsername(e.target.value)}
-                    placeholder="e.g., neetcode"
-                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  />
-                  <button
-                    onClick={handleManualSync}
-                    disabled={isSyncing || !tempUsername}
-                    className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-xl text-zinc-300 transition-colors flex items-center justify-center"
-                  >
-                    <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
-                  </button>
-                </div>
-                {syncError && <p className="text-red-400 text-xs mt-2">{syncError}</p>}
-                {lastSync && !syncError && (
-                  <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">
-                    <CheckCircle size={12} /> Last synced: {new Date(lastSync).toLocaleString()}
-                    {lastSyncCount !== null && ` (${lastSyncCount} new added)`}
-                  </p>
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-zinc-800/50">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-zinc-300 font-medium">Enable Reminders</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={reminderEnabled}
-                      onChange={(e) => setReminderEnabled(e.target.checked)}
-                    />
-                    <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
-                </div>
-
-                <div className={clsx("transition-opacity", reminderEnabled ? "opacity-100" : "opacity-50 pointer-events-none")}>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Reminder Time</label>
-                  <input
-                    type="time"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleSaveSettings}
-                className="w-full bg-zinc-100 hover:bg-white text-zinc-900 font-semibold py-3 rounded-xl transition-colors"
-              >
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

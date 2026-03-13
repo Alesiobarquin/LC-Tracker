@@ -43,17 +43,60 @@ interface AppState {
   syncError: string | null;
   targetInterviewDate: string;
 
+  settings: {
+    studySchedule: {
+      weekdayMinutes: number;
+      weekendMinutes: number;
+      restDay: number; // 0 = Sunday
+      blackoutDates: { start: string; end: string }[];
+    };
+    skillLevels: Record<string, 'not_familiar' | 'some_exposure' | 'comfortable'>;
+    targetCompanyTier: 'FAANG' | 'FINTECH' | 'GENERAL' | 'MIXED';
+    interviewType: 'INTERNSHIP' | 'FULL_TIME';
+    srAggressiveness: 'RELAXED' | 'AGGRESSIVE';
+    language: 'Python' | 'Java' | 'JavaScript';
+  };
+  targetEvents: { id: string; title: string; type: string; date: string }[];
+  dayMode: { type: 'NORMAL' | 'EASY' | 'HARD'; dateSet: string | null };
+  catchUpPlan: { active: boolean; type: 'EXTEND' | 'CATCH_UP' | null; startedAt: string | null; durationDays: number };
+  graceDay: { usedThisWeek: boolean; lastResetDate: string | null };
+  personalRecords: {
+    longestStreak: number;
+    currentStreak: number;
+    fastestMockByCategory: Record<string, number>;
+    mostProblemsInDay: number;
+    highestReadinessScore: number;
+    firstProblemSolvedDate: string | null;
+    totalStudyTimeHours: number;
+  };
+
+  onboardingComplete: boolean;
+  setOnboardingComplete: () => void;
+
+  updateSettings: (newSettings: Partial<AppState['settings']>) => void;
+  recalcSpacedRepetition: () => void;
+  addTargetEvent: (event: Omit<AppState['targetEvents'][0], 'id'>) => void;
+  removeTargetEvent: (id: string) => void;
+  setDayMode: (mode: 'NORMAL' | 'EASY' | 'HARD') => void;
+  setCatchUpPlan: (type: 'EXTEND' | 'CATCH_UP', durationDays: number) => void;
+  dismissCatchUpBanner: () => void;
+  useGraceDay: () => void;
+  resetGraceDayIfNeeded: () => void;
+  updatePersonalRecords: (updates: Partial<AppState['personalRecords']>) => void;
+
   logProblem: (problemId: string, rating: 1 | 2 | 3, isNew: boolean, notes?: string, additionalHistoryData?: any) => void;
   logMockInterview: (problemId: string, evalSolved: boolean, evalSyntax: boolean, evalComplexity: boolean, approachSimilarity: number, rawCode: string, optimalSolution: string, usedInAppEditor: boolean) => void;
   logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => void;
   resetProgress: () => void;
   getDailyPlan: () => {
     newProblem: string | null;
+    additionalProblems: string[];
     reviewProblems: string[];
     coldSolveProblem: string | null;
     dueSyntaxCards: string[];
     recommendationReason?: string;
     totalDueReviews?: number;
+    dayModeType: 'EASY' | 'HARD' | 'NORMAL';
   };
   setLeetCodeUsername: (username: string) => void;
   syncLeetCode: () => Promise<void>;
@@ -71,13 +114,111 @@ export const useStore = create<AppState>()(
         max: 0,
         lastActiveDate: null,
       },
+      onboardingComplete: false,
       leetcodeUsername: null,
       lastSync: null,
       lastSyncCount: null,
       syncError: null,
       targetInterviewDate: '2026-09-15', // Default to Sept 15, 2026
 
+      settings: {
+        studySchedule: { weekdayMinutes: 60, weekendMinutes: 120, restDay: 0, blackoutDates: [] },
+        skillLevels: {},
+        targetCompanyTier: 'MIXED',
+        interviewType: 'INTERNSHIP',
+        srAggressiveness: 'RELAXED',
+        language: 'Python'
+      },
+      targetEvents: [],
+      dayMode: { type: 'NORMAL', dateSet: null },
+      catchUpPlan: { active: false, type: null, startedAt: null, durationDays: 0 },
+      graceDay: { usedThisWeek: false, lastResetDate: null },
+      personalRecords: {
+        longestStreak: 0,
+        currentStreak: 0,
+        fastestMockByCategory: {},
+        mostProblemsInDay: 0,
+        highestReadinessScore: 0,
+        firstProblemSolvedDate: null,
+        totalStudyTimeHours: 0
+      },
+
+      setOnboardingComplete: () => set({ onboardingComplete: true }),
+
       setTargetInterviewDate: (date) => set({ targetInterviewDate: date }),
+
+      addTargetEvent: (event: Omit<{ id: string; title: string; type: string; date: string }, "id">) => set((state) => {
+        const newEvent = { ...event, id: crypto.randomUUID() };
+        const newEvents = [...state.targetEvents, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        // Find next upcoming event
+        const today = new Date().toISOString().split('T')[0];
+        const nextEvent = newEvents.find(e => e.date >= today);
+        return {
+          targetEvents: newEvents,
+          targetInterviewDate: nextEvent ? nextEvent.date : state.targetInterviewDate
+        };
+      }),
+
+      removeTargetEvent: (id) => set((state) => {
+        const newEvents = state.targetEvents.filter(e => e.id !== id);
+        const today = new Date().toISOString().split('T')[0];
+        const nextEvent = newEvents.find(e => e.date >= today);
+        return {
+          targetEvents: newEvents,
+          targetInterviewDate: nextEvent ? nextEvent.date : (newEvents.length > 0 ? newEvents[newEvents.length - 1].date : state.targetInterviewDate)
+        };
+      }),
+
+      updateSettings: (newSettings) => {
+        set((state) => ({ settings: { ...state.settings, ...newSettings } }));
+        if (newSettings.srAggressiveness) {
+          get().recalcSpacedRepetition();
+        }
+      },
+
+      recalcSpacedRepetition: () => set((state) => {
+        const isAggressive = state.settings.srAggressiveness === 'AGGRESSIVE';
+        const newProgress = { ...state.progress };
+        let updated = false;
+
+        Object.keys(newProgress).forEach(id => {
+          const prog = newProgress[id];
+          if (!prog.retired && prog.history.length > 0) {
+            const lastRating = prog.history[prog.history.length - 1].rating;
+            const newNextReviewAt = getNextReviewDate(lastRating, prog.consecutiveSuccesses || 0, isAggressive).toISOString();
+            if (prog.nextReviewAt !== newNextReviewAt) {
+              newProgress[id] = { ...prog, nextReviewAt: newNextReviewAt };
+              updated = true;
+            }
+          }
+        });
+
+        return updated ? { progress: newProgress } : {};
+      }),
+
+      setDayMode: (mode) => set({ dayMode: { type: mode, dateSet: new Date().toISOString() } }),
+
+      setCatchUpPlan: (type, durationDays) => set({ catchUpPlan: { active: true, type, startedAt: new Date().toISOString(), durationDays } }),
+
+      dismissCatchUpBanner: () => set((state) => ({ catchUpPlan: { ...state.catchUpPlan, active: false } })),
+
+      useGraceDay: () => set((state) => ({ graceDay: { ...state.graceDay, usedThisWeek: true } })),
+
+      resetGraceDayIfNeeded: () => set((state) => {
+        const today = new Date();
+        const mondayOfThisWeek = new Date(today);
+        mondayOfThisWeek.setDate(today.getDate() - today.getDay() + 1); // Get Monday
+        mondayOfThisWeek.setHours(0, 0, 0, 0);
+
+        if (!state.graceDay.lastResetDate || new Date(state.graceDay.lastResetDate) < mondayOfThisWeek) {
+          return { graceDay: { usedThisWeek: false, lastResetDate: mondayOfThisWeek.toISOString() } };
+        }
+        return {};
+      }),
+
+      updatePersonalRecords: (updates) => set((state) => ({
+        personalRecords: { ...state.personalRecords, ...updates }
+      })),
 
       setLeetCodeUsername: (username) => {
         set({ leetcodeUsername: username });
@@ -154,7 +295,8 @@ export const useStore = create<AppState>()(
           const retired = consecutiveSuccesses >= 4 && consecutiveThrees >= 2;
           const reviewCount = isFirstRating ? 0 : (existing ? existing.reviewCount + 1 : 0);
 
-          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses).toISOString();
+          const isAggressive = state.settings?.srAggressiveness === 'AGGRESSIVE';
+          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, isAggressive).toISOString();
 
           const newProgress: ProblemProgress = {
             firstSolvedAt: existing ? existing.firstSolvedAt : todayStr,
@@ -180,24 +322,38 @@ export const useStore = create<AppState>()(
 
           // Update Streak
           let newStreak = { ...state.streak };
+          let newGraceDayObj = { ...state.graceDay };
+
           if (!state.streak.lastActiveDate) {
             newStreak = { current: 1, max: Math.max(1, state.streak.max), lastActiveDate: todayStr };
           } else {
             const lastActive = startOfDay(new Date(state.streak.lastActiveDate));
-            if (isSameDay(lastActive, subDays(today, 1))) {
+            const diffInDays = differenceInDays(today, lastActive);
+
+            if (diffInDays === 1) {
+              // Perfect consecutive day
               newStreak.current += 1;
               newStreak.max = Math.max(newStreak.current, newStreak.max);
               newStreak.lastActiveDate = todayStr;
-            } else if (!isSameDay(lastActive, today)) {
+            } else if (diffInDays === 2 && !state.graceDay.usedThisWeek) {
+              // Grace day activated!
+              newGraceDayObj.usedThisWeek = true;
+              newStreak.current += 1; // Preserve the streak as if they hadn't missed it
+              newStreak.max = Math.max(newStreak.current, newStreak.max);
+              newStreak.lastActiveDate = todayStr;
+            } else if (diffInDays > 1) {
+              // Streak broken
               newStreak.current = 1;
               newStreak.lastActiveDate = todayStr;
             }
+            // diffInDays === 0 means multiple problems in one day, streak stays the same but activity date updates
           }
 
           return {
             progress: { ...state.progress, [problemId]: newProgress },
             activityLog: newLog,
             streak: newStreak,
+            graceDay: newGraceDayObj
           };
         });
       },
@@ -233,7 +389,8 @@ export const useStore = create<AppState>()(
           let consecutiveSuccesses = existing && existing.confidenceRating >= 2 ? 1 : 0;
           if (rating >= 2) consecutiveSuccesses += 1;
 
-          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses).toISOString();
+          const isAggressive = state.settings?.srAggressiveness === 'AGGRESSIVE';
+          const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, isAggressive).toISOString();
 
           const newProgress: SyntaxProgress = {
             lastPracticedAt: todayStr,
@@ -284,29 +441,55 @@ export const useStore = create<AppState>()(
 
         const dueSyntaxCards = allDueSyntax.slice(0, 5);
 
-        // Cold Solve Logic
-        let coldSolveProblem: string | null = null;
-        const potentialColdSolves = Object.entries(state.progress)
-          .filter(([_, prog]) => {
-            if (prog.history.length === 0) return false;
-            const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
-            return daysSinceLastReview > 30;
-          })
-          .sort((a, b) => new Date(a[1].lastReviewedAt).getTime() - new Date(b[1].lastReviewedAt).getTime())
-          .map(([id]) => id);
+        // Day Mode logic
+        const isEasyDay = state.dayMode.type === 'EASY' && state.dayMode.dateSet && isSameDay(today, new Date(state.dayMode.dateSet));
+        const isHardDay = state.dayMode.type === 'HARD' && state.dayMode.dateSet && isSameDay(today, new Date(state.dayMode.dateSet));
 
-        if (potentialColdSolves.length > 0) {
-          // Pick the absolute oldest
-          coldSolveProblem = potentialColdSolves[0];
+        // Cold Solve Logic (Skip if Easy Day)
+        let coldSolveProblem: string | null = null;
+        if (!isEasyDay) {
+          const potentialColdSolves = Object.entries(state.progress)
+            .filter(([_, prog]) => {
+              if (prog.history.length === 0) return false;
+              const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
+              return daysSinceLastReview > 30;
+            })
+            .sort((a, b) => new Date(a[1].lastReviewedAt).getTime() - new Date(b[1].lastReviewedAt).getTime())
+            .map(([id]) => id);
+
+          if (potentialColdSolves.length > 0) {
+            // Pick the absolute oldest
+            coldSolveProblem = potentialColdSolves[0];
+          }
         }
 
         // New Problem Logic (Smart Recommendation)
         let newProblem: string | null = null;
+        let additionalProblems: string[] = []; // In case of catch-up mode
         let recommendationReason = undefined;
         const solvedIds = new Set(Object.keys(state.progress));
 
         let shouldAssignNewProblem = true;
-        if (phase === 2) {
+        let targetNewProblemCount = 1;
+
+        if (state.catchUpPlan?.active && state.catchUpPlan?.type === 'CATCH_UP') {
+          targetNewProblemCount = 2; // Assign an extra problem per day while catching up
+
+          // Check expiration
+          if (state.catchUpPlan.startedAt) {
+            const daysSinceStart = differenceInDays(today, new Date(state.catchUpPlan.startedAt));
+            if (daysSinceStart >= (state.catchUpPlan.durationDays || 0)) {
+              // Schedule clear but locally just treat it as 1 for now, let's not mutate store in a getter
+              targetNewProblemCount = 1;
+            }
+          }
+        }
+
+        if (state.settings.studySchedule.restDay === dayOfWeek) {
+          shouldAssignNewProblem = false;
+        }
+
+        if (phase === 2 && shouldAssignNewProblem) {
           const startOfWeek = subDays(today, dayOfWeek);
           let solvedThisWeek = 0;
           for (let i = 0; i <= dayOfWeek; i++) {
@@ -362,27 +545,63 @@ export const useStore = create<AppState>()(
 
           // Fallback to sequential if no recommendation found
           if (!newProblem) {
+            // Determine target difficulty based on settings
+            let easyRatio = 33, medRatio = 34; // default mixed
+            if (state.settings.targetCompanyTier === 'FAANG') { easyRatio = 20; medRatio = 60; }
+            else if (state.settings.targetCompanyTier === 'FINTECH') { easyRatio = 30; medRatio = 60; }
+            else if (state.settings.targetCompanyTier === 'GENERAL') { easyRatio = 50; medRatio = 45; }
+
+            const rand = Math.random() * 100;
+            let targetDifficulty: 'Easy' | 'Medium' | 'Hard' = 'Hard';
+            if (isEasyDay) targetDifficulty = 'Easy';
+            else if (isHardDay) targetDifficulty = 'Hard';
+            else if (rand < easyRatio) targetDifficulty = 'Easy';
+            else if (rand < easyRatio + medRatio) targetDifficulty = 'Medium';
+
+            // Try to find a problem matching the target difficulty
             for (const category of candidateCategories) {
               const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
-              const unsolved = categoryProblems.find(p => !solvedIds.has(p.id));
-              if (unsolved) {
-                newProblem = unsolved.id;
-                recommendationReason = `Next up in your sequential plan.`;
+              const unsolvedOfDifficulty = categoryProblems.find(p => !solvedIds.has(p.id) && p.difficulty === targetDifficulty);
+
+              if (unsolvedOfDifficulty) {
+                newProblem = unsolvedOfDifficulty.id;
+                recommendationReason = isEasyDay ? `Selected an Easy problem because you have Easy Mode enabled.` : isHardDay ? `Selected a Hard problem because you're on Hard Mode.` : `Selected a ${targetDifficulty} problem to match your ${state.settings.targetCompanyTier} company tier target.`;
                 break;
+              }
+            }
+
+            // If we couldn't find one of the exact difficulty, just pick the next available
+            if (!newProblem) {
+              for (const category of candidateCategories) {
+                const categoryProblems = problems.filter(p => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75));
+                const unsolved = categoryProblems.find(p => !solvedIds.has(p.id));
+                if (unsolved) {
+                  newProblem = unsolved.id;
+                  recommendationReason = `Next up in your sequential plan.`;
+                  break;
+                }
               }
             }
           }
 
           if (!newProblem && phase === 3) {
-            const unsolved = problems.find(p => p.isNeetCode150 && !solvedIds.has(p.id));
+            const unsolved = problems.find(p => p.isNeetCode150 && !solvedIds.has(p.id) && (isEasyDay ? p.difficulty === 'Easy' : true));
             if (unsolved) {
               newProblem = unsolved.id;
               recommendationReason = `Next up in NeetCode 150.`;
             }
           }
+
+          // If we need a second problem for catch up mode
+          if (newProblem && targetNewProblemCount > 1) {
+            const secondUnsolved = problems.find(p => (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) && !solvedIds.has(p.id) && p.id !== newProblem && (isEasyDay ? p.difficulty === 'Easy' : true));
+            if (secondUnsolved) {
+              additionalProblems.push(secondUnsolved.id);
+            }
+          }
         }
 
-        return { newProblem, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews };
+        return { newProblem, additionalProblems, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews, dayModeType: isEasyDay ? 'EASY' : isHardDay ? 'HARD' : 'NORMAL' };
       },
     }),
     {

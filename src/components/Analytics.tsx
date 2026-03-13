@@ -51,6 +51,30 @@ export const Analytics: React.FC = () => {
     })).sort((a, b) => b.avg - a.avg);
   }, [categoryStats]);
 
+  // Calculate Mastery Badges
+  const earnedBadges = useMemo(() => {
+    const allCategories = Array.from(new Set(problems.map(p => p.category)));
+    const badges: string[] = [];
+
+    allCategories.forEach(category => {
+      // Find all phase 1 problems for this category
+      const phase1CatProblems = problems.filter(p => p.category === category && p.isNeetCode75);
+
+      // Check if all are solved
+      const allSolved = phase1CatProblems.every(p => progress[p.id]);
+
+      // Check avg confidence logic
+      const stat = categoryStats[category];
+      const avgConfidence = stat && stat.count > 0 ? stat.totalRating / stat.count : 0;
+
+      if (phase1CatProblems.length > 0 && allSolved && avgConfidence >= 2.5) {
+        badges.push(category);
+      }
+    });
+
+    return badges;
+  }, [progress, categoryStats]);
+
   // Generate Insights
   const insights = useMemo(() => {
     const activeData = chartData.filter(d => d.avg > 0);

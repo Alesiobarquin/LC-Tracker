@@ -9,7 +9,7 @@ export const getPhase = (date: Date = new Date()) => {
   return 3;
 };
 
-export const getNextReviewDate = (rating: 1 | 2 | 3, consecutiveSuccesses: number) => {
+export const getNextReviewDate = (rating: 1 | 2 | 3, consecutiveSuccesses: number, isAggressive: boolean = false) => {
   const today = startOfDay(new Date());
 
   if (rating === 1) {
@@ -17,10 +17,16 @@ export const getNextReviewDate = (rating: 1 | 2 | 3, consecutiveSuccesses: numbe
   }
 
   if (rating === 2 || rating === 3) {
-    if (consecutiveSuccesses <= 1) return addDays(today, 3);
-    if (consecutiveSuccesses === 2) return addDays(today, 7);
-    if (consecutiveSuccesses === 3) return addDays(today, 14);
-    return addDays(today, 30);
+    if (isAggressive) {
+      if (consecutiveSuccesses <= 1) return addDays(today, 1);
+      if (consecutiveSuccesses === 2) return addDays(today, 3);
+      if (consecutiveSuccesses === 3) return addDays(today, 7);
+      return addDays(today, 14);
+    } else {
+      if (consecutiveSuccesses <= 1) return addDays(today, 3);
+      if (consecutiveSuccesses === 2) return addDays(today, 7);
+      return addDays(today, 21);
+    }
   }
 
   return addDays(today, 3);

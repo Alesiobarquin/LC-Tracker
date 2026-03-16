@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { useStore } from '../store/useStore';
-import { problems, Category } from '../data/problems';
+import { useStore, SPRINT_DESCRIPTIONS } from '../store/useStore';
+import { problems, Category, PHASE_1_CATEGORIES } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
-import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, subDays, eachDayOfInterval, isSameDay, addDays } from 'date-fns';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line, CartesianGrid, Legend
 } from 'recharts';
 import {
   Activity, Brain, Target, Trophy, Lightbulb, TrendingUp, AlertTriangle, History,
-  Clock, BookOpen, FileCode2, X, CheckSquare, Timer, TrendingDown, Zap, Filter
+  Clock, BookOpen, FileCode2, X, CheckSquare, Timer, TrendingDown, Zap, Filter, Swords, CheckCircle2, RotateCcw
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
@@ -30,6 +30,9 @@ export const Analytics: React.FC = () => {
   const categoryAvgSolveTimes = useStore((state) => state.categoryAvgSolveTimes);
   const categoryAvgReviewTimes = useStore((state) => state.categoryAvgReviewTimes);
   const personalBestTimes = useStore((state) => state.personalBestTimes);
+  const sprintState = useStore((state) => state.sprintState);
+  const sprintHistory = useStore((state) => state.sprintHistory);
+  const settings = useStore((state) => state.settings);
 
   const [viewingSession, setViewingSession] = useState<any>(null);
   const [timeFilter, setTimeFilter] = useState<'all' | 'above' | 'below'>('all');
@@ -642,6 +645,107 @@ export const Analytics: React.FC = () => {
             No sessions recorded yet. Start solving problems to see your history!
           </div>
         )}
+
+        {/* Sprint Schedule Visualization */}
+        <section className="premium-card p-6 border-indigo-500/20">
+          <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
+            <Swords size={20} className="text-indigo-400" />
+            Sprint Schedule
+          </h2>
+          <p className="text-sm text-zinc-400 mb-6">Your Phase 1 learning sprints — each band is one category block.</p>
+
+          <div className="space-y-3 mb-8">
+            {PHASE_1_CATEGORIES.map((cat, index) => {
+              const historyEntry = sprintHistory.find(h => h.category === cat);
+              const isCurrent = sprintState?.currentCategory === cat && sprintState.sprintStatus !== 'complete';
+              const isCompleted = !!historyEntry;
+              const skillLevel = settings.skillLevels?.[cat] ?? 'not_familiar';
+              const baseLen = skillLevel === 'comfortable' ? 2 : skillLevel === 'some_exposure' ? 4 : 6;
+              const multiplier = settings.sprintSettings?.lengthMultiplier ?? 1.0;
+              const estLen = isCompleted
+                ? historyEntry!.sprintLength
+                : isCurrent
+                  ? (sprintState!.sprintLength + sprintState!.extensionDays)
+                  : Math.round(baseLen * multiplier);
+              return (
+                <div key={cat} className={clsx(
+                  'relative rounded-xl border px-5 py-4 transition-all duration-300',
+                  isCurrent ? 'bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.1)]' :
+                  isCompleted ? 'bg-zinc-900/30 border-zinc-800/40 opacity-70' :
+                  'bg-zinc-900/20 border-zinc-800/30'
+                )}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {isCompleted ? (
+                        <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                      ) : isCurrent ? (
+                        <div className="w-4 h-4 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-zinc-700 shrink-0" />
+                      )}
+                      <div>
+                        <p className={clsx('font-semibold text-sm', isCurrent ? 'text-zinc-50' : isCompleted ? 'text-zinc-400' : 'text-zinc-500')}>{cat}</p>
+                        <p className="text-xs text-zinc-600 mt-0.5">{(SPRINT_DESCRIPTIONS[cat] ?? '').substring(0, 60)}...</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-right">
+                      <div>
+                        <p className="text-xs text-zinc-500">{estLen} day{estLen !== 1 ? 's' : ''}</p>
+                        {isCurrent && <p className="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider mt-0.5">Active</p>}
+                        {isCompleted && <p className={clsx('text-[10px] font-semibold uppercase tracking-wider mt-0.5', historyEntry!.passed ? 'text-emerald-400' : 'text-red-400')}>{historyEntry!.passed ? 'Passed' : 'Extended'}</p>}
+                      </div>
+                      <span className={clsx(
+                        'text-[10px] font-bold uppercase px-2 py-1 rounded-md border',
+                        isCompleted ? 'bg-zinc-800/50 text-zinc-600 border-zinc-700/30' :
+                        isCurrent ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' :
+                        'bg-zinc-800/30 text-zinc-700 border-zinc-800/30'
+                      )}>Sprint {index + 1}</span>
+                    </div>
+                  </div>
+                  {isCurrent && sprintState && (() => {
+                    const start = new Date(sprintState.sprintStartDate);
+                    const day = Math.min(Math.ceil((Date.now() - start.getTime()) / 86400000), estLen);
+                    const pct = Math.min(100, Math.round((day / estLen) * 100));
+                    return (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-[10px] text-zinc-500 mb-1"><span>Day {day} of {estLen}</span><span>{pct}%</span></div>
+                        <div className="h-1 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} /></div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              );
+            })}
+          </div>
+
+          {sprintHistory.length > 0 && (
+            <>
+              <h3 className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2"><History size={16} className="text-zinc-500" /> Sprint History</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-zinc-500 border-b border-zinc-800">
+                    <tr>
+                      <th className="pb-2 pr-4 font-medium">Category</th>
+                      <th className="pb-2 pr-4 font-medium">Duration</th>
+                      <th className="pb-2 pr-4 font-medium">Avg Solve</th>
+                      <th className="pb-2 font-medium">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {sprintHistory.map((entry, i) => (
+                      <tr key={i} className="text-xs">
+                        <td className="py-2.5 pr-4 text-zinc-200 font-medium">{entry.category}</td>
+                        <td className="py-2.5 pr-4 text-zinc-400">{entry.sprintLength}d</td>
+                        <td className="py-2.5 pr-4 text-zinc-400">{entry.avgSolveSeconds > 0 ? `${Math.round(entry.avgSolveSeconds / 60)}m` : '—'}</td>
+                        <td className="py-2.5">{entry.passed ? <span className="flex items-center gap-1 text-emerald-400"><CheckCircle2 size={13} /> Passed</span> : <span className="flex items-center gap-1 text-amber-400"><RotateCcw size={13} /> Extended</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
       </div>
 
       {/* Code Review Modal */}

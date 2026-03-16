@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Problem } from '../data/problems';
 import { useStore } from '../store/useStore';
-import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy } from 'lucide-react';
+import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface TimerProps {
@@ -32,6 +32,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const [frozenElapsed, setFrozenElapsed] = useState(0);
   const intervalRef = useRef<number | null>(null);
   const [isNewPB, setIsNewPB] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  // Total seconds that the timer was paused — subtracted from elapsed so only work time counts.
+  const pausedSecondsRef = useRef(0);
+  const pausedAtRef = useRef<number | null>(null);
 
   // If there's already an active session for this problem, pick it up
   useEffect(() => {
@@ -40,31 +45,54 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     }
   }, []); // eslint-disable-line
 
-  // Tick every second — uses Date.now() math so it's drift-free
+  // Tick every second — uses Date.now() math so it's drift-free.
+  // Paused seconds are subtracted so elapsed = actual working time only.
   useEffect(() => {
-    if (phase === 'running' && activeSession) {
+    if (phase === 'running' && !isPaused && activeSession) {
       const tick = () => {
-        const e = Math.floor((Date.now() - activeSession.startTimestamp) / 1000);
-        setElapsed(e);
+        const raw = Math.floor((Date.now() - activeSession.startTimestamp) / 1000);
+        setElapsed(Math.max(0, raw - pausedSecondsRef.current));
       };
       tick();
       intervalRef.current = window.setInterval(tick, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [phase, activeSession]);
+  }, [phase, isPaused, activeSession]);
 
   const handleStart = () => {
     startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false);
     setPhase('running');
   };
 
+  const handlePauseResume = () => {
+    if (isPaused) {
+      // Resuming: accumulate how long we were paused
+      if (pausedAtRef.current !== null) {
+        pausedSecondsRef.current += Math.floor((Date.now() - pausedAtRef.current) / 1000);
+        pausedAtRef.current = null;
+      }
+      setIsPaused(false);
+    } else {
+      // Pausing: record when we paused
+      pausedAtRef.current = Date.now();
+      setIsPaused(true);
+    }
+  };
+
   const handleDone = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    const finalElapsed = activeSession
+    // If paused when Done is clicked, add remaining paused time first
+    if (isPaused && pausedAtRef.current !== null) {
+      pausedSecondsRef.current += Math.floor((Date.now() - pausedAtRef.current) / 1000);
+    }
+    const raw = activeSession
       ? Math.floor((Date.now() - activeSession.startTimestamp) / 1000)
       : elapsed;
+    const finalElapsed = Math.max(0, raw - pausedSecondsRef.current);
     setFrozenElapsed(finalElapsed);
 
     // Check if this is a personal best
@@ -73,6 +101,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       setIsNewPB(true);
     }
 
+    setIsPaused(false);
     setPhase('rating');
   };
 
@@ -256,24 +285,59 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             >
               Start Session
             </button>
+          ) : showCancelConfirm ? (
+            <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-200">
+              <p className="text-sm font-medium text-red-400 flex items-center gap-2">
+                <AlertTriangle size={16} /> Discard this session? No progress will be saved.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl font-medium transition-colors"
+                >
+                  Go Back
+                </button>
+                <button
+                  onClick={() => {
+                    abandonSession();
+                    onComplete();
+                  }}
+                  className="px-6 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-500/20"
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               <button
+                onClick={handlePauseResume}
+                className={clsx(
+                  "w-12 h-12 flex items-center justify-center rounded-full transition-all border",
+                  isPaused
+                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                    : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300"
+                )}
+                title={isPaused ? 'Resume' : 'Pause'}
+              >
+                {isPaused ? <Play size={18} className="fill-current ml-0.5" /> : <Pause size={18} className="fill-current" />}
+              </button>
+
+              <button
                 onClick={handleDone}
-                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-2"
+                disabled={isPaused}
+                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-2"
               >
                 <CircleCheck size={20} className="fill-current" />
                 I'm Done
               </button>
 
               <button
-                onClick={() => {
-                  abandonSession();
-                  onComplete();
-                }}
-                className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors"
+                onClick={() => setShowCancelConfirm(true)}
+                className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors flex items-center gap-2"
               >
-                Abandon
+                <X size={18} />
+                Cancel
               </button>
             </>
           )}
@@ -283,10 +347,13 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           {phase === 'idle' && (
             <span>Open the problem in LeetCode, then click Start Session. The timer runs while you work.</span>
           )}
-          {phase === 'running' && isColdSolve && (
+          {phase === 'running' && isPaused && (
+            <span className="text-amber-400/80">Timer paused. Click resume when you're ready to continue.</span>
+          )}
+          {phase === 'running' && !isPaused && isColdSolve && (
             <span>Cold Solve: No hints, no videos. Test your true retention.</span>
           )}
-          {phase === 'running' && !isColdSolve && (
+          {phase === 'running' && !isPaused && !isColdSolve && (
             <span>Work through the problem at your own pace. Click I'm Done whenever you're finished.</span>
           )}
         </div>

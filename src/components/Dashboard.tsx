@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { useStore } from '../store/useStore';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useStore, SPRINT_DESCRIPTIONS } from '../store/useStore';
 import { problems } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
-import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown } from 'lucide-react';
+import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
 import { clsx } from 'clsx';
 import { differenceInDays, startOfDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
@@ -12,6 +12,37 @@ import { WeeklySummary } from './WeeklySummary';
 const DEFAULT_NEW_MINUTES = 20;
 const DEFAULT_REVIEW_MINUTES = 10;
 const MIN_DATA_POINTS = 3;
+
+/** Minimal countdown clock for sprint retrospective (no active session involved) */
+const RetroCountdown: React.FC<{ limitSeconds: number; onExpire: () => void }> = ({ limitSeconds, onExpire }) => {
+  const [remaining, setRemaining] = useState(limitSeconds);
+  const expiredRef = useRef(false);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setRemaining(r => {
+        if (r <= 1) {
+          if (!expiredRef.current) { expiredRef.current = true; onExpire(); }
+          clearInterval(id);
+          return 0;
+        }
+        return r - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const pct = Math.max(0, remaining / limitSeconds) * 100;
+  const isLow = remaining < limitSeconds * 0.25;
+  const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+  const s = (remaining % 60).toString().padStart(2, '0');
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className={clsx('font-mono text-4xl font-bold tracking-tighter', isLow ? 'text-red-400' : 'text-amber-400')}>{m}:{s}</div>
+      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+        <div className={clsx('h-full rounded-full transition-all duration-1000', isLow ? 'bg-red-500' : 'bg-amber-500')} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+};
 
 export const Dashboard: React.FC = () => {
   const streak = useStore((state) => state.streak);
@@ -32,15 +63,42 @@ export const Dashboard: React.FC = () => {
   const sessionTimings = useStore((state) => state.sessionTimings);
   const lastCategoryAvgUpdate = useStore((state) => state.lastCategoryAvgUpdate);
 
-  const { newProblem, additionalProblems, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews, dayModeType } = getDailyPlan();
+  // Sprint state
+  const sprintState = useStore((state) => state.sprintState);
+  const sprintHistory = useStore((state) => state.sprintHistory);
+  const recordSprintRetro = useStore((state) => state.recordSprintRetro);
+  const proactiveNeetCodeProblemId = useStore((state) => state.proactiveNeetCodeProblemId);
+  const dismissProactiveNeetCode = useStore((state) => state.dismissProactiveNeetCode);
+
+  const { newProblem, additionalProblems, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews, dayModeType, isStabilizer, isRetro, sprintCategory, sprintDayInfo } = getDailyPlan();
+
+  const [retroTimedOut, setRetroTimedOut] = useState(false);
+  const [retroCompleted, setRetroCompleted] = useState(false);
+  const [sprintCompletionDismissed, setSprintCompletionDismissed] = useState(false);
 
   const [isReview, setIsReview] = useState(false);
   const [isColdSolve, setIsColdSolve] = useState(false);
+  const [skippedNewProblemIds, setSkippedNewProblemIds] = useState<Set<string>>(new Set());
 
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneDismissed, setMilestoneDismissed] = useState(false);
 
-  const newProblemData = newProblem ? problems.find(p => p.id === newProblem) : null;
+  // Resolve the recommended new problem, excluding any the user has skipped this session
+  const effectiveNewProblemId = useMemo(() => {
+    if (!newProblem) return null;
+    if (!skippedNewProblemIds.has(newProblem)) return newProblem;
+    // Find the next unsolved problem not in the skip set
+    const solvedIds = new Set(Object.keys(progress));
+    const phase = getPhase();
+    const allCandidates = problems.filter(p =>
+      (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) &&
+      !solvedIds.has(p.id) &&
+      !skippedNewProblemIds.has(p.id)
+    );
+    return allCandidates.length > 0 ? allCandidates[0].id : null;
+  }, [newProblem, skippedNewProblemIds, progress]);
+
+  const newProblemData = effectiveNewProblemId ? problems.find(p => p.id === effectiveNewProblemId) : null;
   const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
   const coldSolveData = coldSolveProblem ? problems.find(p => p.id === coldSolveProblem) : null;
   const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
@@ -441,24 +499,96 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
 
-          {/* New Problem */}
+          {/* Proactive NeetCode Recommendation */}
+          {proactiveNeetCodeProblemId && (() => {
+            const ncp = problems.find(p => p.id === proactiveNeetCodeProblemId);
+            if (!ncp) return null;
+            return (
+              <div className="premium-card p-4 border-red-500/30 bg-red-500/5 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                  <Youtube size={18} className="text-red-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-red-400 mb-0.5">You've struggled with this pattern twice in a row</p>
+                  <p className="text-xs text-zinc-400 mb-3">Here's the NeetCode explanation for <span className="text-zinc-200 font-medium">{ncp.title}</span> to build your foundation.</p>
+                  <div className="flex gap-2">
+                    {ncp.videoUrl && <a href={ncp.videoUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg border border-red-500/20 flex items-center gap-1.5 transition-colors"><Youtube size={12} /> Watch Explanation</a>}
+                    <button onClick={dismissProactiveNeetCode} className="px-3 py-1.5 bg-zinc-800/80 text-zinc-400 text-xs rounded-lg border border-zinc-700/50 hover:text-zinc-200 transition-colors">Dismiss</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* New Problem / Sprint Retro */}
           <section>
             <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-              <Target size={20} className="text-emerald-400" />
-              Today's Focus
+              {isRetro ? <Swords size={20} className="text-amber-400" /> : <Target size={20} className="text-emerald-400" />}
+              {isRetro ? 'Sprint Check' : "Today's Focus"}
             </h2>
 
-            {newProblemData ? (
+            {isRetro && newProblemData ? (() => {
+              const avgCatSeconds = categoryAvgSolveTimes[newProblemData.category];
+              const avgSec = avgCatSeconds && avgCatSeconds.count >= 2
+                ? Math.round(avgCatSeconds.totalSeconds / avgCatSeconds.count)
+                : 20 * 60;
+              const limitSeconds = Math.round(avgSec * 1.5);
+              return (
+                <div className="premium-card p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center gap-2 text-xs text-amber-400 font-semibold">
+                    <Swords size={14} /> Sprint Check — Pass this to advance to the next category
+                  </div>
+                  <div className="mt-8 flex flex-col md:flex-row md:items-start gap-6">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-zinc-50 mb-3">{newProblemData.title}</h3>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className={clsx('px-2.5 py-1 rounded-md font-medium border', newProblemData.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : newProblemData.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20')}>{newProblemData.difficulty}</span>
+                        <span className="px-2.5 py-1 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50">{newProblemData.category}</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
+                      <div className="flex gap-2 mt-4">
+                        <a href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
+                        <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all">
+                          <Play size={16} className="fill-current" /> Start Sprint Check
+                        </button>
+                      </div>
+                    </div>
+                    <div className="md:w-48 shrink-0 flex flex-col items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl p-4">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Time Limit</p>
+                      {retroTimedOut
+                        ? <p className="text-red-400 font-semibold text-sm text-center">Time's up! Rate your attempt below.</p>
+                        : <RetroCountdown limitSeconds={limitSeconds} onExpire={() => setRetroTimedOut(true)} />}
+                      <p className="text-[10px] text-zinc-600 text-center mt-1">Based on your avg × 1.5 buffer</p>
+                    </div>
+                  </div>
+                  {/* Quick rating after timeout or completion */}
+                  {(retroTimedOut || retroCompleted) && (
+                    <div className="mt-4 pt-4 border-t border-amber-500/20">
+                      <p className="text-sm text-zinc-300 mb-3">How did the Sprint Check go?</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => { recordSprintRetro(true, 3); setRetroCompleted(false); setRetroTimedOut(false); }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (2–3)</button>
+                        <button onClick={() => { recordSprintRetro(false, 1); setRetroCompleted(false); setRetroTimedOut(false); }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
+                      </div>
+                    </div>
+                  )}
+                  {!retroTimedOut && !retroCompleted && (
+                    <button onClick={() => setRetroCompleted(true)} className="mt-4 text-xs text-zinc-500 hover:text-zinc-300 underline transition-colors">I finished — rate my attempt</button>
+                  )}
+                </div>
+              );
+            })() : newProblemData ? (
               <div className="space-y-4">
                 {[newProblemData, ...(additionalProblems || []).map(id => problems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
                   if (!prob) return null;
                   const isPrimary = idx === 0;
                   const est = getNewProblemMinutes(prob.category);
+                  const showStabilizer = isPrimary && isStabilizer;
                   return (
-                    <div key={prob.id} className={clsx("premium-card p-6 relative overflow-hidden group border", isPrimary ? "border-emerald-500/20" : "border-amber-500/20")}>
+                    <div key={prob.id} className={clsx('premium-card p-6 relative overflow-hidden group border', isPrimary ? 'border-emerald-500/20' : 'border-amber-500/20')}>
                       {isPrimary && recommendationReason && (
-                        <div className="absolute top-0 left-0 w-full bg-emerald-500/10 border-b border-emerald-500/20 px-4 py-2 flex items-center gap-2 text-xs text-emerald-400 font-medium">
-                          <Sparkles size={14} /> {recommendationReason}
+                        <div className={clsx('absolute top-0 left-0 w-full border-b px-4 py-2 flex items-center gap-2 text-xs font-medium', showStabilizer ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400')}>
+                          {showStabilizer ? <TrendingDown size={14} /> : <Sparkles size={14} />}
+                          {recommendationReason}
                         </div>
                       )}
                       {!isPrimary && (
@@ -466,22 +596,32 @@ export const Dashboard: React.FC = () => {
                           <Zap size={14} /> Catch-Up Mode Additional Problem
                         </div>
                       )}
-                      <div className={clsx("flex justify-between items-start mb-4", (isPrimary && recommendationReason) || !isPrimary ? "mt-8" : "")}>
+                      <div className={clsx('flex justify-between items-start mb-4', (isPrimary && recommendationReason) || !isPrimary ? 'mt-8' : '')}>
                         <div>
-                          <h3 className={clsx("text-xl font-semibold transition-colors", isPrimary ? "text-zinc-50 group-hover:text-emerald-400" : "text-zinc-200 group-hover:text-amber-400")}>{prob.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className={clsx('text-xl font-semibold transition-colors', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
+                            {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">Stabilizer</span>}
+                          </div>
                           <div className="flex flex-wrap gap-2 mt-3 text-xs">
-                            <span className={clsx("px-2.5 py-1 rounded-md font-medium border", prob.difficulty === 'Easy' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : prob.difficulty === 'Medium' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-red-500/10 text-red-400 border-red-500/20")}>
-                              {prob.difficulty}
-                            </span>
+                            <span className={clsx('px-2.5 py-1 rounded-md font-medium border', prob.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : prob.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20')}>{prob.difficulty}</span>
                             <span className="px-2.5 py-1 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50">{prob.category}</span>
                             {prob.isBlind75 && <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Blind 75</span>}
-                            <span className={clsx("px-2.5 py-1 rounded-md border flex items-center gap-1", est.isDefault ? "bg-zinc-800/50 text-zinc-500 border-zinc-700/30" : "bg-emerald-500/5 text-emerald-500 border-emerald-500/20")}>
+                            <span className={clsx('px-2.5 py-1 rounded-md border flex items-center gap-1', est.isDefault ? 'bg-zinc-800/50 text-zinc-500 border-zinc-700/30' : 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20')}>
                               <Timer size={10} />
                               ~{est.minutes}m {est.isDefault ? '(default est.)' : 'avg'}
                             </span>
                           </div>
                         </div>
                         <div className="flex gap-2">
+                          {isPrimary && (
+                            <button
+                              onClick={() => setSkippedNewProblemIds(prev => new Set([...prev, prob.id]))}
+                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50"
+                              title="Skip this problem"
+                            >
+                              <SkipForward size={18} />
+                            </button>
+                          )}
                           <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
                           <a href={prob.videoUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-red-400 transition-colors border border-zinc-700/50 hover:border-zinc-600"><Youtube size={18} /></a>
                         </div>
@@ -489,8 +629,8 @@ export const Dashboard: React.FC = () => {
                       <button
                         onClick={() => startSession(prob.id, false, false)}
                         className={clsx(
-                          "w-full mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]",
-                          !isPrimary && "bg-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]"
+                          'w-full mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]',
+                          !isPrimary && 'bg-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]'
                         )}
                       >
                         <Play size={18} className="fill-current" />
@@ -624,34 +764,72 @@ export const Dashboard: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
-          <div className="premium-card p-6">
-            <h3 className="font-semibold text-zinc-100 mb-2">Phase {phase} Status</h3>
-            <p className="text-sm text-zinc-400 mb-5">
-              {phase === 1 ? "NeetCode 75 Core (No Graphs/DP)" : phase === 2 ? "Internship Mode (3x/week)" : "Recruiting Grind (NC 150 + Mocks)"}
-            </p>
-            <div className="space-y-2">
+          {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
+          {phase === 1 && sprintState && sprintState.sprintStatus !== 'complete' ? (
+            <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5">
+              <div className="flex items-center gap-2 mb-1">
+                <Swords size={18} className="text-indigo-400" />
+                <h3 className="font-semibold text-zinc-100">Current Sprint</h3>
+              </div>
+              <p className="text-xs text-indigo-400 font-semibold mb-3 uppercase tracking-wider">{sprintState.currentCategory}</p>
+              {sprintDayInfo && (
+                <>
+                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                    <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
+                    <span>{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
+                  </div>
+                  <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mb-3">
+                    <div className="h-full bg-indigo-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100))}%` }} />
+                  </div>
+                </>
+              )}
+              <p className="text-xs text-zinc-400 leading-relaxed mb-4">{SPRINT_DESCRIPTIONS[sprintState.currentCategory] ?? 'Focused pattern drilling.'}</p>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Progress</span>
+                <span className="text-zinc-400">Overall Progress</span>
                 <span className="text-zinc-100 font-medium">{solvedCount} / {targetCount}</span>
               </div>
-              <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
-                <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${progressPercent}%` }}>
-                  <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />
-                </div>
+              <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mt-1">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
               </div>
               {phase === 1 && (
-                <div className="mt-4 text-sm">
-                  <div className={clsx("flex items-start gap-2 p-3 rounded-lg border", pacingStatus === 'green' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : pacingStatus === 'yellow' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-red-500/10 border-red-500/20 text-red-400")}>
-                    <Target size={16} className="mt-0.5 flex-shrink-0" />
+                <div className="mt-3 text-xs">
+                  <div className={clsx('flex items-start gap-2 p-2.5 rounded-lg border', pacingStatus === 'green' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : pacingStatus === 'yellow' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-red-500/10 border-red-500/20 text-red-400')}>
+                    <Target size={14} className="mt-0.5 flex-shrink-0" />
                     <span>{pacingMessage}</span>
                   </div>
-                  {Object.keys(categoryAvgSolveTimes).length >= 1 && (
-                    <p className="text-[10px] text-zinc-600 mt-1 pl-1">Projection uses your real solve-time data.</p>
-                  )}
                 </div>
               )}
             </div>
-          </div>
+          ) : (
+            <div className="premium-card p-6">
+              <h3 className="font-semibold text-zinc-100 mb-2">Phase {phase} Status</h3>
+              <p className="text-sm text-zinc-400 mb-5">
+                {phase === 1 ? 'NeetCode 75 Core (No Graphs/DP)' : phase === 2 ? 'Internship Mode (3x/week)' : 'Recruiting Grind (NC 150 + Mocks)'}
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-400">Progress</span>
+                  <span className="text-zinc-100 font-medium">{solvedCount} / {targetCount}</span>
+                </div>
+                <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${progressPercent}%` }}>
+                    <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />
+                  </div>
+                </div>
+                {phase === 1 && (
+                  <div className="mt-4 text-sm">
+                    <div className={clsx('flex items-start gap-2 p-3 rounded-lg border', pacingStatus === 'green' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : pacingStatus === 'yellow' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-red-500/10 border-red-500/20 text-red-400')}>
+                      <Target size={16} className="mt-0.5 flex-shrink-0" />
+                      <span>{pacingMessage}</span>
+                    </div>
+                    {Object.keys(categoryAvgSolveTimes).length >= 1 && (
+                      <p className="text-[10px] text-zinc-600 mt-1 pl-1">Projection uses your real solve-time data.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Readiness Score */}
           <div className="premium-card p-6">

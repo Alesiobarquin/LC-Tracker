@@ -9,27 +9,37 @@ export const getPhase = (date: Date = new Date()) => {
   return 3;
 };
 
-export const getNextReviewDate = (rating: 1 | 2 | 3, consecutiveSuccesses: number, isAggressive: boolean = false) => {
+export const getNextReviewDate = (
+  rating: 1 | 2 | 3,
+  consecutiveSuccesses: number,
+  isAggressive: boolean = false,
+  difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium'
+) => {
   const today = startOfDay(new Date());
 
   if (rating === 1) {
     return addDays(today, 1);
   }
 
-  if (rating === 2 || rating === 3) {
-    if (isAggressive) {
-      if (consecutiveSuccesses <= 1) return addDays(today, 1);
-      if (consecutiveSuccesses === 2) return addDays(today, 3);
-      if (consecutiveSuccesses === 3) return addDays(today, 7);
-      return addDays(today, 14);
-    } else {
-      if (consecutiveSuccesses <= 1) return addDays(today, 3);
-      if (consecutiveSuccesses === 2) return addDays(today, 7);
-      return addDays(today, 21);
-    }
+  // Opinionated scaling: Coding is about patterns, not rote memory.
+  // Easies should back off very fast. Hards should stay closer.
+  const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
+  const aggMultiplier = isAggressive ? 0.7 : 1.0;
+
+  let days = 3;
+  if (consecutiveSuccesses === 1) {
+    days = Math.round(4 * diffMultiplier * aggMultiplier);
+  } else if (consecutiveSuccesses === 2) {
+    days = Math.round(14 * diffMultiplier * aggMultiplier);
+  } else if (consecutiveSuccesses >= 3) {
+    days = Math.round(45 * diffMultiplier * aggMultiplier);
   }
 
-  return addDays(today, 3);
+  // Cap intervals based on difficulty to ensure Hards don't drift too far
+  const maxGap = difficulty === 'Easy' ? 180 : difficulty === 'Medium' ? 90 : 45;
+  const finalDays = Math.max(1, Math.min(Math.round(days), maxGap));
+
+  return addDays(today, finalDays);
 };
 
 export const isDueToday = (nextReviewAt: string) => {

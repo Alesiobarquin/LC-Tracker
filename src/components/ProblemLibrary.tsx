@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { problems, Category } from '../data/problems';
 import { useStore } from '../store/useStore';
-import { Search, Play, CircleCheck, Clock, Filter } from 'lucide-react';
+import { Search, Play, CircleCheck, Clock, Filter, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 
@@ -12,6 +12,13 @@ export const ProblemLibrary: React.FC = () => {
   const [activeSession, setActiveSession] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'NeetCode 75' | 'Blind 75' | 'NeetCode 150'>('NeetCode 75');
+
+  // Reserved problems (those with full mock interview content)
+  const reservedProblems = useMemo(() => new Set(
+    problems
+      .filter(p => p.mockInterviewContent?.statement && p.mockInterviewContent?.optimalSolution && p.mockInterviewContent?.explanation)
+      .map(p => p.id)
+  ), []);
 
   const tabProblems = problems.filter(p => {
     if (activeTab === 'NeetCode 75') return p.isNeetCode75;
@@ -132,11 +139,18 @@ export const ProblemLibrary: React.FC = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 font-medium text-zinc-100">
-                      {prob.title}
-                      {activeTab === 'NeetCode 75' && prob.isBlind75 && <span className="ml-2 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
-                      {activeTab === 'Blind 75' && prob.isNeetCode75 && <span className="ml-2 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
-                      {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-2 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
-                      {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-2 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                      <span className="flex items-center gap-2">
+                        {prob.title}
+                        {reservedProblems.has(prob.id) && (
+                          <span title="Reserved for Mock Interviews — not shown in daily plan" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20">
+                            <Lock size={9} /> Mock Only
+                          </span>
+                        )}
+                        {activeTab === 'NeetCode 75' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
+                        {activeTab === 'Blind 75' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                        {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
+                        {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-zinc-400">{prob.category}</td>
                     <td className="px-6 py-4">

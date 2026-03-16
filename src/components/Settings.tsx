@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { PHASE_1_CATEGORIES } from '../data/problems';
-import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Lock, Unlock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Settings: React.FC = () => {
@@ -400,6 +400,79 @@ export const Settings: React.FC = () => {
                                     </select>
                                 </div>
                             ))}
+                        </div>
+                    </section>
+
+                    {/* Sprint Settings */}
+                    <section className="premium-card p-6 border-indigo-500/20">
+                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
+                            <Swords className="text-indigo-400" size={20} />
+                            Sprint Settings
+                        </h2>
+                        <p className="text-sm text-zinc-400 mb-6">Control how sprints work and how long each category block lasts.</p>
+
+                        <div className="space-y-6">
+                            {/* Strict vs Flexible */}
+                            <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-zinc-200">{settings.sprintSettings?.strictMode ?? true ? 'Strict Sprint Mode' : 'Flexible Mode'}</p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">
+                                            {settings.sprintSettings?.strictMode ?? true
+                                                ? 'New problems locked to the current sprint category.'
+                                                : 'One free-pick per week from any category.'}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => updateSettings({
+                                            sprintSettings: {
+                                                ...( settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0 }),
+                                                strictMode: !(settings.sprintSettings?.strictMode ?? true)
+                                            }
+                                        })}
+                                        className={clsx(
+                                            'relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none border',
+                                            (settings.sprintSettings?.strictMode ?? true)
+                                                ? 'bg-indigo-500 border-indigo-400'
+                                                : 'bg-zinc-700 border-zinc-600'
+                                        )}
+                                        title="Toggle sprint mode"
+                                    >
+                                        <span className={clsx(
+                                            'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200',
+                                            (settings.sprintSettings?.strictMode ?? true) ? 'translate-x-6' : 'translate-x-0'
+                                        )} />
+                                    </button>
+                                </div>
+                                {!(settings.sprintSettings?.strictMode ?? true) && (
+                                    <p className="text-xs text-indigo-400">✓ Flexible mode active — you can deviate from sprint once/week via the skip button.</p>
+                                )}
+                            </div>
+
+                            {/* Sprint Length Multiplier */}
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-sm font-medium text-zinc-300">Sprint Length Multiplier</label>
+                                    <span className="text-indigo-400 font-medium">{(settings.sprintSettings?.lengthMultiplier ?? 1.0).toFixed(2)}×</span>
+                                </div>
+                                <input
+                                    type="range" min="0.5" max="2" step="0.25"
+                                    value={settings.sprintSettings?.lengthMultiplier ?? 1.0}
+                                    onChange={(e) => updateSettings({
+                                        sprintSettings: {
+                                            ...(settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0 }),
+                                            lengthMultiplier: parseFloat(e.target.value)
+                                        }
+                                    })}
+                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                />
+                                <div className="flex justify-between text-xs text-zinc-600 mt-1">
+                                    <span>0.5× (Faster)</span>
+                                    <span>1× (Default)</span>
+                                    <span>2× (Deeper)</span>
+                                </div>
+                                <p className="text-xs text-zinc-500 mt-2">Scales all sprint lengths globally. A 6-day sprint becomes 3 days at 0.5× or 12 days at 2×.</p>
+                            </div>
                         </div>
                     </section>
 

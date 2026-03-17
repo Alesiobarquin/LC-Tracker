@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useStore, SPRINT_DESCRIPTIONS } from '../store/useStore';
 import { problems } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
@@ -451,46 +451,14 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-          <div className="flex bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50 mr-2">
-            <button
-              onClick={() => setDayMode(dayModeType === 'EASY' ? 'NORMAL' : 'EASY')}
-              className={clsx(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                dayModeType === 'EASY' ? "bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50"
-              )}
-            >
-              <Snowflake size={14} /> Easy
-            </button>
-            <button
-              onClick={() => setDayMode(dayModeType === 'HARD' ? 'NORMAL' : 'HARD')}
-              className={clsx(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                dayModeType === 'HARD' ? "bg-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50"
-              )}
-            >
-              <Flame size={14} /> Hard
-            </button>
-          </div>
-
           <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2">
             <Flame className="text-orange-500" size={18} />
             <span className="font-medium text-sm sm:text-base text-zinc-100">{streak.current} Day Streak</span>
             {graceDay.usedThisWeek ? <ShieldAlert size={14} className="text-zinc-500 ml-1" /> : <Shield size={14} className="text-emerald-400 ml-1" />}
           </div>
 
-          {/* Dynamic time estimate */}
-          <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2" title={timeItems.map(t => `${t.label}: ${t.minutes}m${t.isDefault ? ' (default)' : ''}`).join('\n')}>
-            <Clock className="text-emerald-400 shrink-0" size={18} />
-            <div className="flex flex-col">
-              <span className="font-medium text-sm text-zinc-100">
-                ~{totalTime}m today
-                {wasRecentlyRecalculated && <span className="ml-1.5 text-[10px] text-emerald-400 font-normal uppercase tracking-wider">↻ updated</span>}
-              </span>
-              {hasRealData && (
-                <span className="text-[10px] text-zinc-500">using your solve data</span>
-              )}
-            </div>
-          </div>
+          {/* Actual time spent today */}
+          <TodayTimer sessionTimings={sessionTimings} activeSession={activeSession} />
         </div>
       </header>
 

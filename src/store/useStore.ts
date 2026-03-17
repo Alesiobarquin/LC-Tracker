@@ -771,7 +771,7 @@ export const useStore = create<AppState>()(
         const sprintLength = computeSprintLength(
           category,
           state.settings.skillLevels,
-          state.settings.sprintSettings.lengthMultiplier
+          state.settings.sprintSettings?.lengthMultiplier ?? 1.0
         );
         const sprintState: SprintState = {
           currentCategory: category,
@@ -818,7 +818,7 @@ export const useStore = create<AppState>()(
         const nextLength = computeSprintLength(
           nextCategory,
           state.settings.skillLevels,
-          state.settings.sprintSettings.lengthMultiplier
+          state.settings.sprintSettings?.lengthMultiplier ?? 1.0
         );
 
         set({

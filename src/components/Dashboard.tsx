@@ -421,13 +421,13 @@ export const Dashboard: React.FC = () => {
 
   if (showMilestone) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-zinc-950/90 backdrop-blur-xl animate-in fade-in duration-500">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.15),transparent_70%)]" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-2xl animate-in fade-in duration-700">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.1),transparent_70%)]" />
         <div className="relative max-w-2xl w-full premium-card p-8 sm:p-12 text-center border-emerald-500/30 overflow-hidden slide-in-from-bottom-8">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-20 -mb-20" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20 animate-[pulse_4s_infinite]" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-20 -mb-20 animate-[pulse_4s_infinite_1s]" />
           <div className="relative z-10">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8 border-4 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-[bounce_3s_infinite]">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8 border-4 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-in zoom-in duration-700">
               <Target size={48} className="text-emerald-400" />
             </div>
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">Phase 1 Complete</h1>
@@ -452,9 +452,10 @@ export const Dashboard: React.FC = () => {
             </div>
             <button
               onClick={() => { setShowMilestone(false); setMilestoneDismissed(true); }}
-              className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-lg rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all flex items-center justify-center gap-3 w-full sm:w-auto mx-auto"
+              className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-lg rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all hover:-translate-y-1 active:translate-y-0 active:scale-95 flex items-center justify-center gap-3 w-full sm:w-auto mx-auto group overflow-hidden relative"
             >
-              Enter Phase 2 <Sparkles size={20} className="fill-current" />
+              <div className="absolute inset-0 block h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+              <span className="relative z-10 flex items-center gap-3">Enter Phase 2 <Sparkles size={20} className="fill-current" /></span>
             </button>
             <p className="text-zinc-500 text-sm mt-4">Phase 2 shifts focus to mock interviews and harder problems.</p>
           </div>
@@ -554,15 +555,15 @@ export const Dashboard: React.FC = () => {
                   <div className="mt-8 flex flex-col md:flex-row md:items-start gap-6">
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-zinc-50 mb-3">{newProblemData.title}</h3>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <span className={clsx('px-2.5 py-1 rounded-md font-medium border', newProblemData.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : newProblemData.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20')}>{newProblemData.difficulty}</span>
-                        <span className="px-2.5 py-1 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50">{newProblemData.category}</span>
+                      <div className="flex flex-wrap gap-3 text-[10px]">
+                        <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', newProblemData.difficulty === 'Easy' ? 'text-emerald-400' : newProblemData.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{newProblemData.difficulty}</span>
+                        <span className="px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full text-zinc-300 font-bold uppercase tracking-wide">{newProblemData.category}</span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
                         <a href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
-                        <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all">
-                          <Play size={16} className="fill-current" /> Start Sprint Check
+                        <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
+                          <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
                       </div>
                     </div>
@@ -615,13 +616,13 @@ export const Dashboard: React.FC = () => {
                             <h3 className={clsx('text-xl font-semibold transition-colors', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
                             {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">Stabilizer</span>}
                           </div>
-                          <div className="flex flex-wrap gap-2 mt-3 text-xs">
-                            <span className={clsx('px-2.5 py-1 rounded-md font-medium border', prob.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : prob.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20')}>{prob.difficulty}</span>
-                            <span className="px-2.5 py-1 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50">{prob.category}</span>
-                            {prob.isBlind75 && <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Blind 75</span>}
-                            <span className={clsx('px-2.5 py-1 rounded-md border flex items-center gap-1', est.isDefault ? 'bg-zinc-800/50 text-zinc-500 border-zinc-700/30' : 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20')}>
+                          <div className="flex flex-wrap gap-3 mt-3 text-[10px]">
+                            <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', prob.difficulty === 'Easy' ? 'text-emerald-400' : prob.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{prob.difficulty}</span>
+                            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-zinc-300 font-bold uppercase tracking-wide">{prob.category}</span>
+                            {prob.isBlind75 && <span className="px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 font-bold uppercase tracking-wide">Blind 75</span>}
+                            <span className={clsx('px-3 py-1 rounded-full border flex items-center gap-1 font-bold uppercase tracking-wide', est.isDefault ? 'bg-white/5 text-zinc-400 border-white/10 backdrop-blur-sm' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 backdrop-blur-sm')}>
                               <Timer size={10} />
-                              ~{est.minutes}m {est.isDefault ? '(default est.)' : 'avg'}
+                              ~{est.minutes}m {est.isDefault ? '(est.)' : 'avg'}
                             </span>
                           </div>
                         </div>
@@ -642,11 +643,11 @@ export const Dashboard: React.FC = () => {
                       <button
                         onClick={() => startSession(prob.id, false, false)}
                         className={clsx(
-                          'w-full mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]',
-                          !isPrimary && 'bg-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+                          'w-full group mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-95 active:translate-y-0',
+                          !isPrimary && 'bg-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]'
                         )}
                       >
-                        <Play size={18} className="fill-current" />
+                        <Play size={18} className="fill-current transition-transform group-hover:scale-110" />
                         Start Session
                       </button>
                     </div>

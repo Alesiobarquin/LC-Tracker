@@ -311,8 +311,12 @@ export const Analytics: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="premium-card p-6 text-center text-zinc-500 border-dashed border-zinc-800">
-              Solve more problems to generate AI insights.
+            <div className="premium-card p-8 text-center relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-purple-500/5 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center mx-auto mb-4 relative z-10 shadow-[0_0_15px_rgba(255,255,255,0.02)] group-hover:shadow-[0_0_20px_rgba(245,158,11,0.1)] transition-all duration-500">
+                <Lightbulb size={20} className="text-zinc-600 group-hover:text-amber-400 transition-colors duration-500" />
+              </div>
+              <p className="text-zinc-400 text-sm relative z-10 group-hover:text-zinc-300 transition-colors">Solve more problems to unlock <span className="text-amber-400/80 font-medium">AI insights</span>.</p>
             </div>
           )}
         </div>
@@ -325,11 +329,11 @@ export const Analytics: React.FC = () => {
               <div className="flex items-center gap-2 text-xs text-zinc-400">
                 <span>Less</span>
                 <div className="flex gap-1">
-                  <div className="w-3 h-3 rounded-sm bg-zinc-800/50 border border-zinc-800" />
-                  <div className="w-3 h-3 rounded-sm bg-emerald-900/50 border border-emerald-800" />
-                  <div className="w-3 h-3 rounded-sm bg-emerald-700/60 border border-emerald-600" />
-                  <div className="w-3 h-3 rounded-sm bg-emerald-500/80 border border-emerald-400" />
-                  <div className="w-3 h-3 rounded-sm bg-emerald-400 border border-emerald-300" />
+                  <div className="w-3.5 h-3.5 rounded-[4px] bg-zinc-900/30 border border-zinc-800/50" />
+                  <div className="w-3.5 h-3.5 rounded-[4px] bg-emerald-900/40 border border-emerald-800/50" />
+                  <div className="w-3.5 h-3.5 rounded-[4px] bg-emerald-700/60 border border-emerald-600/50" />
+                  <div className="w-3.5 h-3.5 rounded-[4px] bg-emerald-500/80 border border-emerald-400/50" />
+                  <div className="w-3.5 h-3.5 rounded-[4px] bg-emerald-400 border border-emerald-300/50 shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
                 </div>
                 <span>More</span>
               </div>
@@ -337,16 +341,16 @@ export const Analytics: React.FC = () => {
             <div className="relative overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
               <div className="grid grid-rows-7 grid-flow-col gap-1 min-w-max">
                 {paddedDays.map((day, i) => {
-                  if (!day) return <div key={`empty-${i}`} className="w-3 h-3" />;
+                  if (!day) return <div key={`empty-${i}`} className="w-3.5 h-3.5" />;
                   const dateKey = format(day, 'yyyy-MM-dd');
                   const activity = activityLog[dateKey];
                   const totalActivity = activity ? activity.solved + activity.reviewed : 0;
-                  let colorClass = "bg-zinc-800/50 border border-zinc-800";
-                  if (totalActivity > 0) colorClass = "bg-emerald-900/50 border-emerald-800";
-                  if (totalActivity > 2) colorClass = "bg-emerald-700/60 border-emerald-600";
-                  if (totalActivity > 4) colorClass = "bg-emerald-500/80 border-emerald-400";
-                  if (totalActivity > 6) colorClass = "bg-emerald-400 border-emerald-300";
-                  return <div key={i} className={`w-3 h-3 rounded-sm ${colorClass} transition-colors hover:ring-2 ring-zinc-400 ring-offset-1 ring-offset-zinc-950`} title={`${dateKey}: ${totalActivity} problems`} />;
+                  let colorClass = "bg-zinc-900/30 border border-zinc-800/50";
+                  if (totalActivity > 0) colorClass = "bg-emerald-900/40 border-emerald-800/50";
+                  if (totalActivity > 2) colorClass = "bg-emerald-700/60 border-emerald-600/50";
+                  if (totalActivity > 4) colorClass = "bg-emerald-500/80 border-emerald-400/50";
+                  if (totalActivity > 6) colorClass = "bg-emerald-400 border-emerald-300/50 shadow-[0_0_8px_rgba(52,211,153,0.3)] z-10 relative";
+                  return <div key={i} className={`w-3.5 h-3.5 rounded-[4px] ${colorClass} transition-all duration-300 hover:scale-125 hover:z-20 hover:shadow-[0_0_12px_rgba(52,211,153,0.6)] hover:border-emerald-400 cursor-pointer`} title={`${dateKey}: ${totalActivity} problem${totalActivity !== 1 ? 's' : ''}`} />;
                 })}
               </div>
               {todayColumn >= 0 && (
@@ -641,8 +645,13 @@ export const Analytics: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
-            No sessions recorded yet. Start solving problems to see your history!
+          <div className="premium-card p-12 text-center relative overflow-hidden group border border-zinc-800/50">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.03),transparent_60%)] group-hover:bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.08),transparent_70%)] transition-all duration-700" />
+            <div className="w-16 h-16 rounded-full bg-zinc-900/80 border border-zinc-800/80 flex items-center justify-center mx-auto mb-4 relative z-10 group-hover:border-emerald-500/30 transition-colors duration-500">
+              <History size={24} className="text-zinc-600 group-hover:text-emerald-400 transition-colors duration-500" />
+            </div>
+            <h3 className="text-lg font-medium text-zinc-100 mb-1 relative z-10">No sessions recorded yet</h3>
+            <p className="text-zinc-500 text-sm relative z-10">Start solving problems to see your history!</p>
           </div>
         )}
 

@@ -198,6 +198,7 @@ interface AppState {
   ) => void;
   logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => void;
   resetProgress: () => void;
+  removeProblem: (problemId: string) => void;
   getDailyPlan: () => {
     newProblem: string | null;
     additionalProblems: string[];
@@ -759,6 +760,12 @@ export const useStore = create<AppState>()(
         consecutiveLowConfTotal: 0,
         proactiveNeetCodeProblemId: null,
         sprintFreePick: { usedThisWeek: false, lastResetDate: null },
+      }),
+
+      removeProblem: (problemId) => set((state) => {
+        const newProgress = { ...state.progress };
+        delete newProgress[problemId];
+        return { progress: newProgress };
       }),
 
       // ── Sprint Actions ─────────────────────────────────────────────────────

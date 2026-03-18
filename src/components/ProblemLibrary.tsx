@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { problems, Category } from '../data/problems';
 import { useStore } from '../store/useStore';
-import { Search, Play, CircleCheck, Clock, Filter, Lock } from 'lucide-react';
+import { Search, Play, CircleCheck, Check, Filter, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 
@@ -11,7 +11,11 @@ export const ProblemLibrary: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeSession, setActiveSession] = useState<string | null>(null);
 
+  const logProblem = useStore((state) => state.logProblem);
+  const removeProblem = useStore((state) => state.removeProblem);
+
   const [activeTab, setActiveTab] = useState<'NeetCode 75' | 'Blind 75' | 'NeetCode 150'>('NeetCode 75');
+  const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
 
   // Reserved problems (those with full mock interview content)
   const reservedProblems = useMemo(() => new Set(
@@ -29,11 +33,52 @@ export const ProblemLibrary: React.FC = () => {
 
   const categories = ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
 
-  const filteredProblems = tabProblems.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProblems = useMemo(() => {
+    let result = tabProblems.filter(p => {
+      const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+
+    if (sortConfig) {
+      result.sort((a, b) => {
+        let aValue: any = a[sortConfig.key as keyof typeof a];
+        let bValue: any = b[sortConfig.key as keyof typeof b];
+
+        if (sortConfig.key === 'status') {
+          const aProg = progress[a.id];
+          const bProg = progress[b.id];
+          aValue = aProg ? (aProg.retired ? 2 : 1) : 0;
+          bValue = bProg ? (bProg.retired ? 2 : 1) : 0;
+        } else if (sortConfig.key === 'difficulty') {
+          const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+          aValue = difficultyOrder[a.difficulty as keyof typeof difficultyOrder];
+          bValue = difficultyOrder[b.difficulty as keyof typeof difficultyOrder];
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [tabProblems, search, activeCategory, sortConfig, progress]);
+
+  const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const toggleSolved = (problemId: string, isSolved: boolean) => {
+    if (isSolved) {
+      removeProblem(problemId);
+    } else {
+      logProblem(problemId, 3, true, "Quick solve");
+    }
+  };
   
   const solvedInTab = tabProblems.filter(p => progress[p.id]).length;
   const totalInTab = tabProblems.length;
@@ -114,10 +159,38 @@ export const ProblemLibrary: React.FC = () => {
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
               <tr>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Problem</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Difficulty</th>
+                <th 
+                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                  onClick={() => handleSort('status')}
+                >
+                  <div className="flex items-center gap-1">
+                    Status {sortConfig?.key === 'status' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center gap-1">
+                    Problem {sortConfig?.key === 'title' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                  onClick={() => handleSort('category')}
+                >
+                  <div className="flex items-center gap-1">
+                    Category {sortConfig?.key === 'category' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                  onClick={() => handleSort('difficulty')}
+                >
+                  <div className="flex items-center gap-1">
+                    Difficulty {sortConfig?.key === 'difficulty' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                  </div>
+                </th>
                 <th className="px-6 py-4 font-medium text-right">Action</th>
               </tr>
             </thead>
@@ -130,13 +203,19 @@ export const ProblemLibrary: React.FC = () => {
                 return (
                   <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group">
                     <td className="px-6 py-4">
-                      {isRetired ? (
-                        <CircleCheck size={20} className="text-emerald-500" />
-                      ) : isSolved ? (
-                        <Clock size={20} className="text-amber-500" />
-                      ) : (
-                        <div className="w-5 h-5 rounded-full border-2 border-zinc-700" />
-                      )}
+                      <button 
+                         onClick={() => toggleSolved(prob.id, isSolved)}
+                         className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
+                         title={isSolved ? "Mark as unsolved" : "Mark as solved"}
+                      >
+                        {isRetired ? (
+                          <CircleCheck size={20} className="text-emerald-500" />
+                        ) : isSolved ? (
+                          <Check size={20} className="text-amber-500" />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 hover:border-emerald-500/50 transition-colors" />
+                        )}
+                      </button>
                     </td>
                     <td className="px-6 py-4 font-medium text-zinc-100">
                       <span className="flex items-center gap-2">

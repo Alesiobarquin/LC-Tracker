@@ -154,111 +154,118 @@ export const ProblemLibrary: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
-              <tr>
-                <th 
-                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center gap-1">
-                    Status {sortConfig?.key === 'status' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                  </div>
-                </th>
-                <th 
-                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                  onClick={() => handleSort('title')}
-                >
-                  <div className="flex items-center gap-1">
-                    Problem {sortConfig?.key === 'title' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                  </div>
-                </th>
-                <th 
-                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                  onClick={() => handleSort('category')}
-                >
-                  <div className="flex items-center gap-1">
-                    Category {sortConfig?.key === 'category' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                  </div>
-                </th>
-                <th 
-                  className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                  onClick={() => handleSort('difficulty')}
-                >
-                  <div className="flex items-center gap-1">
-                    Difficulty {sortConfig?.key === 'difficulty' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                  </div>
-                </th>
-                <th className="px-6 py-4 font-medium text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {filteredProblems.map(prob => {
-                const prog = progress[prob.id];
-                const isSolved = !!prog;
-                const isRetired = prog?.retired;
-                
-                return (
-                  <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <button 
-                         onClick={() => toggleSolved(prob.id, isSolved)}
-                         className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
-                         title={isSolved ? "Mark as unsolved" : "Mark as solved"}
-                      >
-                        {isRetired ? (
-                          <CircleCheck size={20} className="text-emerald-500" />
-                        ) : isSolved ? (
-                          <Check size={20} className="text-amber-500" />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 hover:border-emerald-500/50 transition-colors" />
-                        )}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-zinc-100">
-                      <span className="flex items-center gap-2">
-                        {prob.title}
-                        {reservedProblems.has(prob.id) && (
-                          <span title="Reserved for Mock Interviews — not shown in daily plan" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20">
-                            <Lock size={9} /> Mock Only
-                          </span>
-                        )}
-                        {activeTab === 'NeetCode 75' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
-                        {activeTab === 'Blind 75' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
-                        {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
-                        {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-zinc-400">{prob.category}</td>
-                    <td className="px-6 py-4">
-                      <span className={clsx(
-                        prob.difficulty === 'Easy' ? "text-emerald-400" :
-                        prob.difficulty === 'Medium' ? "text-amber-400" :
-                        "text-red-400"
-                      )}>
-                        {prob.difficulty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => setActiveSession(prob.id)}
-                        className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                      >
-                        <Play size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {filteredProblems.length === 0 && (
-          <div className="p-12 text-center text-zinc-500">
+      <div className="space-y-6">
+        {filteredProblems.length === 0 ? (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 text-center text-zinc-500">
             No problems found matching your criteria.
           </div>
+        ) : (
+          Object.entries(
+            filteredProblems.reduce((acc, prob) => {
+              if (!acc[prob.category]) acc[prob.category] = [];
+              acc[prob.category].push(prob);
+              return acc;
+            }, {} as Record<string, typeof filteredProblems>)
+          ).map(([category, problems]) => (
+            <div key={category} className="space-y-3">
+              <div className="text-center text-sm font-medium text-zinc-300 py-2">
+                {category}
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
+                      <tr>
+                        <th 
+                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                          onClick={() => handleSort('status')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Status {sortConfig?.key === 'status' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                          </div>
+                        </th>
+                        <th 
+                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                          onClick={() => handleSort('title')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Problem {sortConfig?.key === 'title' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                          </div>
+                        </th>
+                        <th 
+                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
+                          onClick={() => handleSort('difficulty')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Difficulty {sortConfig?.key === 'difficulty' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 font-medium text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800">
+                      {problems.map(prob => {
+                        const prog = progress[prob.id];
+                        const isSolved = !!prog;
+                        const isRetired = prog?.retired;
+                        
+                        return (
+                          <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group">
+                            <td className="px-6 py-4">
+                              <button 
+                                 onClick={() => toggleSolved(prob.id, isSolved)}
+                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
+                                 title={isSolved ? "Mark as unsolved" : "Mark as solved"}
+                              >
+                                {isRetired ? (
+                                  <CircleCheck size={20} className="text-emerald-500" />
+                                ) : isSolved ? (
+                                  <Check size={20} className="text-amber-500" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full border-2 border-zinc-700 hover:border-emerald-500/50 transition-colors" />
+                                )}
+                              </button>
+                            </td>
+                            <td className="px-6 py-4 font-medium text-zinc-100">
+                              <span className="flex items-center gap-2">
+                                {prob.title}
+                                {reservedProblems.has(prob.id) && (
+                                  <span title="Reserved for Mock Interviews — not shown in daily plan" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                    <Lock size={9} /> Mock Only
+                                  </span>
+                                )}
+                                {activeTab === 'NeetCode 75' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
+                                {activeTab === 'Blind 75' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                                {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
+                                {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={clsx(
+                                prob.difficulty === 'Easy' ? "text-emerald-400" :
+                                prob.difficulty === 'Medium' ? "text-amber-400" :
+                                "text-red-400"
+                              )}>
+                                {prob.difficulty}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button 
+                                onClick={() => setActiveSession(prob.id)}
+                                className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                              >
+                                <Play size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

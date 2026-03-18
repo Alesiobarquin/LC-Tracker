@@ -257,7 +257,7 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <header>
-        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-400 to-indigo-400 drop-shadow-sm">Analytics</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-extruded-indigo">Analytics</h1>
         <p className="text-zinc-400 mt-1">Track your progress and identify weaknesses.</p>
       </header>
 

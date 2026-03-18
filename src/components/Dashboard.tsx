@@ -13,36 +13,7 @@ const DEFAULT_NEW_MINUTES = 20;
 const DEFAULT_REVIEW_MINUTES = 10;
 const MIN_DATA_POINTS = 3;
 
-/** Minimal countdown clock for sprint retrospective (no active session involved) */
-const RetroCountdown: React.FC<{ limitSeconds: number; onExpire: () => void }> = ({ limitSeconds, onExpire }) => {
-  const [remaining, setRemaining] = useState(limitSeconds);
-  const expiredRef = useRef(false);
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setRemaining(r => {
-        if (r <= 1) {
-          if (!expiredRef.current) { expiredRef.current = true; onExpire(); }
-          clearInterval(id);
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-  const pct = Math.max(0, remaining / limitSeconds) * 100;
-  const isLow = remaining < limitSeconds * 0.25;
-  const m = Math.floor(remaining / 60).toString().padStart(2, '0');
-  const s = (remaining % 60).toString().padStart(2, '0');
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className={clsx('font-mono text-4xl font-bold tracking-tighter', isLow ? 'text-red-400' : 'text-amber-400')}>{m}:{s}</div>
-      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-        <div className={clsx('h-full rounded-full transition-all duration-1000', isLow ? 'bg-red-500' : 'bg-amber-500')} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-};
+
 
 /** Timer component for the dashboard header showing total time spent today */
 const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any }> = ({ sessionTimings, activeSession }) => {
@@ -428,7 +399,7 @@ export const Dashboard: React.FC = () => {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-20 -mb-20 animate-[pulse_4s_infinite_1s]" />
           <div className="relative z-10">
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8 border-4 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-in zoom-in duration-700">
-              <Target size={48} className="text-emerald-400" />
+              <Target size={48} aria-hidden="true" className="text-emerald-400" />
             </div>
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">Phase 1 Complete</h1>
             <p className="text-xl sm:text-2xl text-emerald-400 font-medium mb-8">You've mastered the NeetCode 75 Core.</p>
@@ -492,7 +463,7 @@ export const Dashboard: React.FC = () => {
 
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-emerald-400 to-cyan-400 drop-shadow-sm">Daily Plan</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-extruded-emerald">Daily Plan</h1>
           <p className="text-zinc-400 mt-1">Don't think, just execute.</p>
         </div>
 
@@ -549,7 +520,7 @@ export const Dashboard: React.FC = () => {
               const limitSeconds = Math.round(avgSec * 1.5);
               return (
                 <div className="premium-card p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden group">
-                  <Swords size={200} className="absolute -bottom-12 -right-12 text-amber-500-[0.03] opacity-5 select-none pointer-events-none group-hover:-rotate-12 transition-transform duration-1000" />
+                  <Swords size={200} aria-hidden="true" className="hidden sm:block absolute -bottom-12 -right-12 text-amber-500-[0.03] opacity-5 select-none pointer-events-none group-hover:-rotate-12 transition-transform duration-1000" />
                   <div className="absolute top-0 left-0 w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center gap-2 text-xs text-amber-400 font-semibold relative z-10">
                     <Swords size={14} /> Sprint Check — Pass this to advance to the next category
                   </div>
@@ -567,13 +538,6 @@ export const Dashboard: React.FC = () => {
                           <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
                       </div>
-                    </div>
-                    <div className="md:w-48 shrink-0 flex flex-col items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl p-4">
-                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Time Limit</p>
-                      {retroTimedOut
-                        ? <p className="text-red-400 font-semibold text-sm text-center">Time's up! Rate your attempt below.</p>
-                        : <RetroCountdown limitSeconds={limitSeconds} onExpire={() => setRetroTimedOut(true)} />}
-                      <p className="text-[10px] text-zinc-600 text-center mt-1">Based on your avg × 1.5 buffer</p>
                     </div>
                   </div>
                   {/* Quick rating after timeout or completion */}
@@ -600,7 +564,7 @@ export const Dashboard: React.FC = () => {
                   const showStabilizer = isPrimary && isStabilizer;
                   return (
                     <div key={prob.id} className={clsx('premium-card p-6 relative overflow-hidden group border', isPrimary ? 'border-emerald-500/20' : 'border-amber-500/20')}>
-                      <Target size={240} className={clsx("absolute -bottom-16 -right-16 select-none pointer-events-none transition-transform duration-[1500ms]", isPrimary ? "text-emerald-500/[0.03] group-hover:rotate-12" : "text-amber-500/[0.03] group-hover:-rotate-12")} />
+                      <Target size={240} aria-hidden="true" className={clsx("hidden sm:block absolute -bottom-16 -right-16 select-none pointer-events-none transition-transform duration-[1500ms]", isPrimary ? "text-emerald-500/[0.03] group-hover:rotate-12" : "text-amber-500/[0.03] group-hover:-rotate-12")} />
                       {isPrimary && recommendationReason && (
                         <div className={clsx('absolute top-0 left-0 w-full border-b px-4 py-2 flex items-center gap-2 text-xs font-medium', showStabilizer ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400')}>
                           {showStabilizer ? <TrendingDown size={14} /> : <Sparkles size={14} />}
@@ -783,7 +747,7 @@ export const Dashboard: React.FC = () => {
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
           {phase === 1 && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
-              <Swords size={140} className="absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
+              <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
               <div className="flex items-center gap-2 mb-1 relative z-10">
                 <Swords size={18} className="text-indigo-400" />

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useStore, SPRINT_DESCRIPTIONS } from '../store/useStore';
+import { useStore, SPRINT_DESCRIPTIONS, SessionTiming } from '../store/useStore';
 import { problems } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
@@ -39,6 +39,51 @@ const RetroCountdown: React.FC<{ limitSeconds: number; onExpire: () => void }> =
       <div className={clsx('font-mono text-4xl font-bold tracking-tighter', isLow ? 'text-red-400' : 'text-amber-400')}>{m}:{s}</div>
       <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
         <div className={clsx('h-full rounded-full transition-all duration-1000', isLow ? 'bg-red-500' : 'bg-amber-500')} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+};
+
+/** Timer component for the dashboard header showing total time spent today */
+const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any }> = ({ sessionTimings, activeSession }) => {
+  const [activeElapsed, setActiveElapsed] = useState(0);
+
+  const completedTodaySeconds = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return sessionTimings
+      .filter(t => t.date.startsWith(todayStr))
+      .reduce((sum, t) => sum + t.elapsedSeconds, 0);
+  }, [sessionTimings]);
+
+  useEffect(() => {
+    if (!activeSession) {
+      setActiveElapsed(0);
+      return;
+    }
+
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - activeSession.startTimestamp) / 1000);
+      setActiveElapsed(Math.max(0, elapsed));
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [activeSession]);
+
+  const totalSeconds = completedTodaySeconds + activeElapsed;
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  return (
+    <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2 border-emerald-500/20 bg-emerald-500/5">
+      <Clock className="text-emerald-400 shrink-0" size={18} />
+      <div className="flex flex-col">
+        <span className="font-mono font-bold text-sm text-zinc-100 tabular-nums">
+          {h > 0 ? `${h}h ` : ''}{m}m {s}s
+        </span>
+        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Spent Today</span>
       </div>
     </div>
   );

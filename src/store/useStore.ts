@@ -990,26 +990,21 @@ export const useStore = create<AppState>()(
             const currentDay = Math.min(daysSinceStart + 1, totalDays);
             sprintDayInfo = { day: currentDay, total: totalDays };
 
+            const findRetroCandidate = () => {
+              const cat = sprint!.currentCategory;
+              return problems.find(p => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id) && p.difficulty === 'Medium')
+                ?? problems.find(p => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id))
+                ?? problems.find(p => p.category === cat && !solvedIds.has(p.id) && !reservedIds.has(p.id))
+                ?? problems.find(p => p.category === cat && !reservedIds.has(p.id));
+            };
+
             // Check if it's the retrospective phase
             if (sprint.sprintStatus === 'retrospective') {
               isRetro = true;
               // Surface the retro problem (a medium from the sprint category not yet solved)
               let retroId = sprint.retroProblemId;
               if (!retroId) {
-                const retroCandidate = problems.find(
-                  p =>
-                    p.category === sprint!.currentCategory &&
-                    p.isNeetCode75 &&
-                    !solvedIds.has(p.id) &&
-                    !reservedIds.has(p.id) &&
-                    p.difficulty === 'Medium'
-                ) ?? problems.find(
-                  p =>
-                    p.category === sprint!.currentCategory &&
-                    p.isNeetCode75 &&
-                    !solvedIds.has(p.id) &&
-                    !reservedIds.has(p.id)
-                );
+                const retroCandidate = findRetroCandidate();
                 if (retroCandidate) {
                   retroId = retroCandidate.id;
                   // Persist the retro problem id
@@ -1032,20 +1027,7 @@ export const useStore = create<AppState>()(
                     : null
                 }));
                 isRetro = true;
-                const retroCandidate = problems.find(
-                  p =>
-                    p.category === sprint!.currentCategory &&
-                    p.isNeetCode75 &&
-                    !solvedIds.has(p.id) &&
-                    !reservedIds.has(p.id) &&
-                    p.difficulty === 'Medium'
-                ) ?? problems.find(
-                  p =>
-                    p.category === sprint!.currentCategory &&
-                    p.isNeetCode75 &&
-                    !solvedIds.has(p.id) &&
-                    !reservedIds.has(p.id)
-                );
+                const retroCandidate = findRetroCandidate();
                 if (retroCandidate) {
                   set(s => ({
                     sprintState: s.sprintState

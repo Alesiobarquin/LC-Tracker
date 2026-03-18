@@ -492,7 +492,7 @@ export const Dashboard: React.FC = () => {
 
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Daily Plan</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-emerald-400 to-cyan-400 drop-shadow-sm">Daily Plan</h1>
           <p className="text-zinc-400 mt-1">Don't think, just execute.</p>
         </div>
 
@@ -548,8 +548,9 @@ export const Dashboard: React.FC = () => {
                 : 20 * 60;
               const limitSeconds = Math.round(avgSec * 1.5);
               return (
-                <div className="premium-card p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center gap-2 text-xs text-amber-400 font-semibold">
+                <div className="premium-card p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden group">
+                  <Swords size={200} className="absolute -bottom-12 -right-12 text-amber-500-[0.03] opacity-5 select-none pointer-events-none group-hover:-rotate-12 transition-transform duration-1000" />
+                  <div className="absolute top-0 left-0 w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center gap-2 text-xs text-amber-400 font-semibold relative z-10">
                     <Swords size={14} /> Sprint Check — Pass this to advance to the next category
                   </div>
                   <div className="mt-8 flex flex-col md:flex-row md:items-start gap-6">
@@ -599,6 +600,7 @@ export const Dashboard: React.FC = () => {
                   const showStabilizer = isPrimary && isStabilizer;
                   return (
                     <div key={prob.id} className={clsx('premium-card p-6 relative overflow-hidden group border', isPrimary ? 'border-emerald-500/20' : 'border-amber-500/20')}>
+                      <Target size={240} className={clsx("absolute -bottom-16 -right-16 select-none pointer-events-none transition-transform duration-[1500ms]", isPrimary ? "text-emerald-500/[0.03] group-hover:rotate-12" : "text-amber-500/[0.03] group-hover:-rotate-12")} />
                       {isPrimary && recommendationReason && (
                         <div className={clsx('absolute top-0 left-0 w-full border-b px-4 py-2 flex items-center gap-2 text-xs font-medium', showStabilizer ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400')}>
                           {showStabilizer ? <TrendingDown size={14} /> : <Sparkles size={14} />}
@@ -780,8 +782,10 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
           {phase === 1 && sprintState && sprintState.sprintStatus !== 'complete' ? (
-            <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
+              <Swords size={140} className="absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
+              <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
+              <div className="flex items-center gap-2 mb-1 relative z-10">
                 <Swords size={18} className="text-indigo-400" />
                 <h3 className="font-semibold text-zinc-100">Current Sprint</h3>
               </div>

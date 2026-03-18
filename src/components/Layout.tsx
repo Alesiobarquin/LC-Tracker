@@ -20,6 +20,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const phase = getPhase();
   const phaseProgress = phase === 1 ? 'Phase 1 (Foundations)' : phase === 2 ? 'Phase 2 (Internship)' : 'Phase 3 (Grind)';
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'library', label: 'Problem Library', icon: Library },
@@ -30,7 +39,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans flex flex-col md:flex-row">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans flex flex-col md:flex-row relative z-0">
+      {/* Environmental Lighting */}
+      <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.1),rgba(255,255,255,0))] pointer-events-none" />
+      <div className="fixed inset-0 z-[-1] opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+      
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950 sticky top-0 z-50">
         <div className="font-bold text-xl tracking-tight text-emerald-400">LC Tracker</div>

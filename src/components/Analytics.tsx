@@ -257,25 +257,25 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Analytics</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-400 to-indigo-400 drop-shadow-sm">Analytics</h1>
         <p className="text-zinc-400 mt-1">Track your progress and identify weaknesses.</p>
       </header>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="premium-card p-6">
+        <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '50ms' }}>
           <div className="flex items-center gap-3 mb-2"><Trophy className="text-emerald-400" size={20} /><h3 className="text-zinc-400 font-medium">Total Solved</h3></div>
           <p className="text-3xl font-bold text-zinc-50">{solvedCount}</p>
         </div>
-        <div className="premium-card p-6">
+        <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center gap-3 mb-2"><Activity className="text-amber-400" size={20} /><h3 className="text-zinc-400 font-medium">Active Rotation</h3></div>
           <p className="text-3xl font-bold text-zinc-50">{activeRotationCount}</p>
         </div>
-        <div className="premium-card p-6">
+        <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center gap-3 mb-2"><Brain className="text-indigo-400" size={20} /><h3 className="text-zinc-400 font-medium">Mastered</h3></div>
           <p className="text-3xl font-bold text-zinc-50">{retiredCount}</p>
         </div>
-        <div className="premium-card p-6">
+        <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center gap-3 mb-2"><Timer className="text-rose-400" size={20} /><h3 className="text-zinc-400 font-medium">Time Invested</h3></div>
           <p className="text-3xl font-bold text-zinc-50">
             {totalSecondsAllTime >= 3600
@@ -283,7 +283,7 @@ export const Analytics: React.FC = () => {
               : `${Math.round(totalSecondsAllTime / 60)}m`}
           </p>
         </div>
-        <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5">
+        <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5 slide-in-from-bottom-4" style={{ animationDelay: '250ms' }}>
           <div className="flex items-center gap-3 mb-2"><BookOpen className="text-emerald-400" size={20} /><h3 className="text-zinc-400 font-medium">Syntax Mastery</h3></div>
           <p className="text-3xl font-bold text-zinc-50 flex items-baseline gap-2">{confidentSyntaxCards} <span className="text-sm font-medium text-zinc-500">/ {totalSyntaxCards}</span></p>
         </div>
@@ -291,7 +291,7 @@ export const Analytics: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Insights Panel */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-4 slide-in-from-bottom-4" style={{ animationDelay: '300ms' }}>
           <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
             <Lightbulb size={20} className="text-amber-400" />
             Pattern Insights
@@ -323,7 +323,7 @@ export const Analytics: React.FC = () => {
 
         <div className="lg:col-span-2 space-y-6">
           {/* Heatmap */}
-          <div className="premium-card p-6 overflow-hidden">
+          <div className="premium-card p-6 overflow-hidden slide-in-from-bottom-4" style={{ animationDelay: '350ms' }}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-zinc-100">Activity (365 Days)</h3>
               <div className="flex items-center gap-2 text-xs text-zinc-400">
@@ -367,12 +367,12 @@ export const Analytics: React.FC = () => {
           </div>
 
           {/* Category Confidence */}
-          <div className="premium-card p-6 h-[500px]">
+          <div className="premium-card p-6 h-[500px] slide-in-from-bottom-4" style={{ animationDelay: '400ms' }}>
             <h3 className="text-lg font-semibold text-zinc-100 mb-6">Confidence by Category</h3>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
+              <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
                 <XAxis type="number" domain={[0, 3]} hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#a1a1aa', fontSize: 12 }} width={120} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#a1a1aa', fontSize: 11 }} width={160} interval={0} />
                 <Tooltip cursor={{ fill: '#27272a', opacity: 0.4 }} contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }} itemStyle={{ color: '#f4f4f5' }} formatter={(value: number) => [value === 0 ? 'N/A' : value, 'Confidence']} />
                 <Bar dataKey="avg" radius={[0, 4, 4, 0]} barSize={16}>
                   {chartData.map((entry, index) => (

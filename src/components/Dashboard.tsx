@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useStore, SPRINT_DESCRIPTIONS, SessionTiming } from '../store/useStore';
-import { problems } from '../data/problems';
+import { problems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
 import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
@@ -86,6 +86,7 @@ export const Dashboard: React.FC = () => {
   const recordSprintRetro = useStore((state) => state.recordSprintRetro);
   const proactiveNeetCodeProblemId = useStore((state) => state.proactiveNeetCodeProblemId);
   const dismissProactiveNeetCode = useStore((state) => state.dismissProactiveNeetCode);
+  const setSprintCategory = useStore((state) => state.setSprintCategory);
 
   const { newProblem, additionalProblems, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews, dayModeType, isStabilizer, isRetro, sprintCategory, sprintDayInfo } = getDailyPlan();
 
@@ -766,11 +767,28 @@ export const Dashboard: React.FC = () => {
             <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
               <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
-              <div className="flex items-center gap-2 mb-1 relative z-10">
-                <Swords size={18} className="text-indigo-400" />
-                <h3 className="font-semibold text-zinc-100">Current Sprint</h3>
+              <div className="flex items-center justify-between mb-1 relative z-10">
+                <div className="flex items-center gap-2">
+                  <Swords size={18} className="text-indigo-400" />
+                  <h3 className="font-semibold text-zinc-100">Current Sprint</h3>
+                </div>
+                <select
+                  value={sprintState.currentCategory}
+                  onChange={(e) => setSprintCategory(e.target.value)}
+                  className="bg-transparent text-[10px] font-bold text-indigo-400 uppercase tracking-wider outline-none cursor-pointer border-b border-indigo-400/20 hover:border-indigo-400 transition-all text-right"
+                >
+                  <optgroup label="Phase 1">
+                    {PHASE_1_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat} className="bg-zinc-900">{cat}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Phase 2">
+                    {PHASE_2_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat} className="bg-zinc-900">{cat}</option>
+                    ))}
+                  </optgroup>
+                </select>
               </div>
-              <p className="text-xs text-indigo-400 font-semibold mb-3 uppercase tracking-wider">{sprintState.currentCategory}</p>
               {sprintDayInfo && (
                 <>
                   <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">

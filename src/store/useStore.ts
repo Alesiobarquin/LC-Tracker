@@ -180,6 +180,7 @@ interface AppState {
   advanceSprint: () => void;
   extendSprint: (days: number) => void;
   recordSprintRetro: (passed: boolean, rating: 1 | 2 | 3) => void;
+  setSprintCategory: (category: string) => void;
   dismissProactiveNeetCode: () => void;
   useSprintFreePick: () => void;
   resetSprintFreePickIfNeeded: () => void;
@@ -889,11 +890,38 @@ export const useStore = create<AppState>()(
       },
 
       recordSprintRetro: (passed, rating) => {
-        if (passed) {
-          get().advanceSprint();
-        } else {
-          get().extendSprint(2);
-        }
+        // ALWAYS advance the sprint now, "no matter how you did"
+        get().advanceSprint();
+      },
+
+      setSprintCategory: (category) => {
+        const state = get();
+        const solvedIds = new Set(Object.keys(state.progress));
+        const idx1 = PHASE_1_CATEGORIES.indexOf(category as any);
+        const idx2 = PHASE_2_CATEGORIES.indexOf(category as any);
+        
+        const isPhase2 = idx2 !== -1;
+        const idx = isPhase2 ? idx2 : idx1 !== -1 ? idx1 : 0;
+        
+        const newLength = computeSprintLength(
+          category,
+          state.settings.skillLevels,
+          state.settings.sprintSettings?.lengthMultiplier ?? 1.0,
+          state.settings.sprintSettings?.targetDays ?? 7
+        );
+
+        set({
+          sprintState: {
+            currentCategory: category,
+            sprintStartDate: startOfDay(new Date()).toISOString(),
+            sprintLength: newLength,
+            sprintStatus: 'active',
+            sprintIndex: idx,
+            extensionDays: 0,
+            retroProblemId: null,
+            retroAttempted: false,
+          }
+        });
       },
 
       dismissProactiveNeetCode: () => set({ proactiveNeetCodeProblemId: null, consecutiveLowConfTotal: 0 }),

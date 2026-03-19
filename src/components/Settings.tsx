@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { PHASE_1_CATEGORIES } from '../data/problems';
+import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
 import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Lock, Unlock } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -10,6 +10,8 @@ export const Settings: React.FC = () => {
     const targetEvents = useStore((state) => state.targetEvents);
     const addTargetEvent = useStore((state) => state.addTargetEvent);
     const removeTargetEvent = useStore((state) => state.removeTargetEvent);
+    const sprintState = useStore((state) => state.sprintState);
+    const setSprintCategory = useStore((state) => state.setSprintCategory);
 
     const leetcodeUsername = useStore((state) => state.leetcodeUsername);
     const setLeetCodeUsername = useStore((state) => state.setLeetCodeUsername);
@@ -416,20 +418,20 @@ export const Settings: React.FC = () => {
                             <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-xl p-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <div>
-                                        <p className="text-sm font-medium text-zinc-200">{settings.learningMode === 'SPRINT' ? 'Sprint Mode' : 'Random Mode'}</p>
+                                        <p className="text-sm font-medium text-zinc-200">{settings.learningMode !== 'RANDOM' ? 'Sprint Mode' : 'Random Mode'}</p>
                                         <p className="text-xs text-zinc-500 mt-0.5">
-                                            {settings.learningMode === 'SPRINT'
+                                            {settings.learningMode !== 'RANDOM'
                                                 ? 'Focus intensively on one pattern before advancing.'
                                                 : 'Mix problems from all categories for comprehensive practice.'}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => updateSettings({
-                                            learningMode: settings.learningMode === 'SPRINT' ? 'RANDOM' : 'SPRINT'
+                                            learningMode: settings.learningMode !== 'RANDOM' ? 'RANDOM' : 'SPRINT'
                                         })}
                                         className={clsx(
                                             'relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none border',
-                                            settings.learningMode === 'SPRINT'
+                                            settings.learningMode !== 'RANDOM'
                                                 ? 'bg-indigo-500 border-indigo-400'
                                                 : 'bg-zinc-700 border-zinc-600'
                                         )}
@@ -437,7 +439,7 @@ export const Settings: React.FC = () => {
                                     >
                                         <span className={clsx(
                                             'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200',
-                                            settings.learningMode === 'SPRINT' ? 'translate-x-6' : 'translate-x-0'
+                                            settings.learningMode !== 'RANDOM' ? 'translate-x-6' : 'translate-x-0'
                                         )} />
                                     </button>
                                 </div>
@@ -503,6 +505,30 @@ export const Settings: React.FC = () => {
                                         <span>14 Days (Deep)</span>
                                     </div>
                                     <p className="text-xs text-zinc-500 mt-2">Explicitly sets the number of days you will spend drilling a single pattern.</p>
+                                </div>
+                            )}
+
+                            {/* Manual Category Selection */}
+                            {settings.learningMode !== 'RANDOM' && (
+                                <div className="pt-4 border-t border-zinc-800/50">
+                                    <label className="block text-sm font-medium text-zinc-300 mb-2">Jump to Sprint Category</label>
+                                    <select
+                                        value={sprintState?.currentCategory || ''}
+                                        onChange={(e) => setSprintCategory(e.target.value)}
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                                    >
+                                        <optgroup label="Phase 1">
+                                            {PHASE_1_CATEGORIES.map(cat => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </optgroup>
+                                        <optgroup label="Phase 2">
+                                            {PHASE_2_CATEGORIES.map(cat => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </optgroup>
+                                    </select>
+                                    <p className="text-xs text-zinc-500 mt-2">Forces the sprint to the selected category and resets progress within the category.</p>
                                 </div>
                             )}
                         </div>

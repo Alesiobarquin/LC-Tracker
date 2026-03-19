@@ -1037,7 +1037,7 @@ export const useStore = create<AppState>()(
         }
 
         // ── Phase 1 Sprint Logic ─────────────────────────────────────────────
-        const useSprintLogic = phase === 1 && state.settings.learningMode === 'SPRINT';
+        const useSprintLogic = phase === 1 && state.settings.learningMode !== 'RANDOM';
         if (shouldAssignNewProblem && useSprintLogic) {
           // Ensure sprint is initialized
           let sprint = state.sprintState;

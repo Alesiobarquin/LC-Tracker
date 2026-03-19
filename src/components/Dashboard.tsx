@@ -763,7 +763,7 @@ export const Dashboard: React.FC = () => {
         {/* Sidebar */}
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
-          {phase === 1 && settings.learningMode === 'SPRINT' && sprintState && sprintState.sprintStatus !== 'complete' ? (
+          {phase === 1 && settings.learningMode !== 'RANDOM' && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
               <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>

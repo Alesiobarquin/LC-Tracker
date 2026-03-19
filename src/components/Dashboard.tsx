@@ -5,7 +5,7 @@ import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
 import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
 import { clsx } from 'clsx';
-import { differenceInDays, startOfDay } from 'date-fns';
+import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 
@@ -20,9 +20,9 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
   const [activeElapsed, setActiveElapsed] = useState(0);
 
   const completedTodaySeconds = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const today = new Date();
     return sessionTimings
-      .filter(t => t.date.startsWith(todayStr))
+      .filter(t => isSameDay(new Date(t.date), today))
       .reduce((sum, t) => sum + t.elapsedSeconds, 0);
   }, [sessionTimings]);
 
@@ -113,6 +113,14 @@ export const Dashboard: React.FC = () => {
     );
     return allCandidates.length > 0 ? allCandidates[0].id : null;
   }, [newProblem, skippedNewProblemIds, progress]);
+
+  // Clean up sprint check state
+  useEffect(() => {
+    if (!isRetro) {
+      setRetroCompleted(false);
+      setRetroTimedOut(false);
+    }
+  }, [isRetro]);
 
   const newProblemData = effectiveNewProblemId ? problems.find(p => p.id === effectiveNewProblemId) : null;
   const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
@@ -577,9 +585,9 @@ export const Dashboard: React.FC = () => {
                         </div>
                       )}
                       <div className={clsx('flex justify-between items-start mb-4', (isPrimary && recommendationReason) || !isPrimary ? 'mt-8' : '')}>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className={clsx('text-xl font-semibold transition-colors', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
+                            <h3 className={clsx('text-xl font-semibold transition-colors truncate', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
                             {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">Stabilizer</span>}
                           </div>
                           <div className="flex flex-wrap gap-3 mt-3 text-[10px]">
@@ -674,8 +682,8 @@ export const Dashboard: React.FC = () => {
                   const reviewEst = getReviewMinutes(prob.category);
                   return (
                     <div key={prob.id} className="premium-card p-4 flex items-center justify-between group">
-                      <div>
-                        <h4 className="font-medium text-zinc-100 group-hover:text-amber-400 transition-colors">{prob.title}</h4>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-zinc-100 group-hover:text-amber-400 transition-colors truncate">{prob.title}</h4>
                         <div className="flex items-center gap-2 mt-1.5 text-xs text-zinc-500">
                           <span className="px-2 py-0.5 rounded bg-zinc-800/50 border border-zinc-700/50">{prob.category}</span>
                           <span className={clsx("px-2 py-0.5 rounded border", lastRating === 1 ? "bg-red-500/10 text-red-400 border-red-500/20" : lastRating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : lastRating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-zinc-800/50 text-zinc-400 border-zinc-700/50")}>
@@ -745,7 +753,7 @@ export const Dashboard: React.FC = () => {
         {/* Sidebar */}
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
-          {phase === 1 && sprintState && sprintState.sprintStatus !== 'complete' ? (
+          {phase === 1 && settings.learningMode === 'SPRINT' && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
               <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>

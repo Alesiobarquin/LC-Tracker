@@ -134,9 +134,11 @@ interface AppState {
     interviewType: 'INTERNSHIP' | 'FULL_TIME';
     srAggressiveness: 'RELAXED' | 'AGGRESSIVE';
     language: 'Python' | 'Java' | 'JavaScript';
+    learningMode: 'SPRINT' | 'RANDOM';
     sprintSettings: {
       strictMode: boolean;
       lengthMultiplier: number; // 0.5 – 2.0
+      targetDays: number; // 1 - 14
     };
   };
   targetEvents: { id: string; title: string; type: string; date: string }[];
@@ -232,14 +234,16 @@ export const SPRINT_DESCRIPTIONS: Record<string, string> = {
   'Heap / Priority Queue': 'Top-K, streaming median, and priority-based scheduling patterns.',
 };
 
-/** Compute sprint length in days given skill level and multiplier */
+/** Compute sprint length in days given skill level and multiplier/target */
 function computeSprintLength(
   category: string,
   skillLevels: Record<string, 'not_familiar' | 'some_exposure' | 'comfortable'>,
-  multiplier: number
+  multiplier: number,
+  targetDays?: number
 ): number {
+  if (targetDays !== undefined && targetDays > 0) return targetDays;
   const skill = skillLevels[category] ?? 'not_familiar';
-  const base = skill === 'comfortable' ? 2 : skill === 'some_exposure' ? 4 : 6;
+  const base = skill === 'comfortable' ? 2 : skill === 'some_exposure' ? 4 : 7;
   return Math.max(1, Math.round(base * multiplier));
 }
 
@@ -316,9 +320,11 @@ export const useStore = create<AppState>()(
         interviewType: 'INTERNSHIP',
         srAggressiveness: 'RELAXED',
         language: 'Python',
+        learningMode: 'SPRINT',
         sprintSettings: {
           strictMode: true,
           lengthMultiplier: 1.0,
+          targetDays: 7,
         },
       },
       targetEvents: [],
@@ -365,15 +371,16 @@ export const useStore = create<AppState>()(
         if (newSettings.srAggressiveness) {
           get().recalcSpacedRepetition();
         }
-        // If sprint multiplier changed, recompute sprint length
-        if (newSettings.sprintSettings?.lengthMultiplier !== undefined) {
+        // If sprint multiplier or targetDays changed, recompute sprint length
+        if (newSettings.sprintSettings?.lengthMultiplier !== undefined || newSettings.sprintSettings?.targetDays !== undefined) {
           const state = get();
           if (state.sprintState) {
             const { currentCategory, sprintIndex } = state.sprintState;
             const newLength = computeSprintLength(
               currentCategory,
               state.settings.skillLevels,
-              newSettings.sprintSettings.lengthMultiplier
+              newSettings.sprintSettings?.lengthMultiplier ?? state.settings.sprintSettings.lengthMultiplier,
+              newSettings.sprintSettings?.targetDays ?? state.settings.sprintSettings.targetDays
             );
             set(s => ({
               sprintState: s.sprintState ? { ...s.sprintState, sprintLength: newLength } : null
@@ -618,7 +625,9 @@ export const useStore = create<AppState>()(
             const lastActive = startOfDay(new Date(state.streak.lastActiveDate));
             const diffInDays = differenceInDays(today, lastActive);
 
-            if (diffInDays === 1) {
+            if (diffInDays === 0) {
+              newStreak.lastActiveDate = todayStr;
+            } else if (diffInDays === 1) {
               newStreak.current += 1;
               newStreak.max = Math.max(newStreak.current, newStreak.max);
               newStreak.lastActiveDate = todayStr;
@@ -787,7 +796,8 @@ export const useStore = create<AppState>()(
         const sprintLength = computeSprintLength(
           category,
           state.settings.skillLevels,
-          state.settings.sprintSettings?.lengthMultiplier ?? 1.0
+          state.settings.sprintSettings?.lengthMultiplier ?? 1.0,
+          state.settings.sprintSettings?.targetDays ?? 7
         );
         const sprintState: SprintState = {
           currentCategory: category,
@@ -845,7 +855,8 @@ export const useStore = create<AppState>()(
         const nextLength = computeSprintLength(
           nextCategory,
           state.settings.skillLevels,
-          state.settings.sprintSettings?.lengthMultiplier ?? 1.0
+          state.settings.sprintSettings?.lengthMultiplier ?? 1.0,
+          state.settings.sprintSettings?.targetDays ?? 7
         );
 
         set({
@@ -998,7 +1009,8 @@ export const useStore = create<AppState>()(
         }
 
         // ── Phase 1 Sprint Logic ─────────────────────────────────────────────
-        if (shouldAssignNewProblem && phase === 1) {
+        const useSprintLogic = phase === 1 && state.settings.learningMode === 'SPRINT';
+        if (shouldAssignNewProblem && useSprintLogic) {
           // Ensure sprint is initialized
           let sprint = state.sprintState;
           if (!sprint) {
@@ -1129,8 +1141,8 @@ export const useStore = create<AppState>()(
           }
         }
 
-        // ── Phase 2+ fallback (original weakest-category logic) ──────────────
-        if (shouldAssignNewProblem && phase !== 1 && !newProblem) {
+        // ── Phase 2+ or RANDOM fallback (original weakest-category logic) ──────────────
+        if (shouldAssignNewProblem && !useSprintLogic && !newProblem) {
           const candidateCategories: string[] = [...PHASE_1_CATEGORIES, ...PHASE_2_CATEGORIES];
 
           const categoryStats: Record<string, { total: number; count: number }> = {};

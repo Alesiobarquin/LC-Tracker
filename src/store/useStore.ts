@@ -820,7 +820,18 @@ export const useStore = create<AppState>()(
           sprintLength: sprintLength + extensionDays,
         };
 
-        const nextIdx = sprintIndex + 1;
+        const solvedIds = new Set(Object.keys(state.progress));
+        const reservedIds = getReservedProblemIds();
+        let nextIdx = sprintIndex + 1;
+        while (nextIdx < PHASE_1_CATEGORIES.length) {
+          const cat = PHASE_1_CATEGORIES[nextIdx];
+          const hasUnsolved = problems.some(
+            p => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id)
+          );
+          if (hasUnsolved) break;
+          nextIdx++;
+        }
+
         if (nextIdx >= PHASE_1_CATEGORIES.length) {
           // All Phase 1 sprints done
           set({
@@ -1023,12 +1034,14 @@ export const useStore = create<AppState>()(
                 const retroCandidate = findRetroCandidate();
                 if (retroCandidate) {
                   retroId = retroCandidate.id;
-                  // Persist the retro problem id
-                  set(s => ({
-                    sprintState: s.sprintState
-                      ? { ...s.sprintState, retroProblemId: retroId }
-                      : null
-                  }));
+                  // Persist the retro problem id only if it's a new ID
+                  if (sprint.retroProblemId !== retroId) {
+                    set(s => ({
+                      sprintState: s.sprintState
+                        ? { ...s.sprintState, retroProblemId: retroId }
+                        : null
+                    }));
+                  }
                 }
               }
               newProblem = retroId;
@@ -1037,11 +1050,13 @@ export const useStore = create<AppState>()(
               // Check if today goes past the sprint length → transition to retrospective
               if (daysSinceStart >= totalDays) {
                 // Time for retrospective
-                set(s => ({
-                  sprintState: s.sprintState
-                    ? { ...s.sprintState, sprintStatus: 'retrospective' }
-                    : null
-                }));
+                if ((sprint.sprintStatus as string) !== 'retrospective') {
+                  set(s => ({
+                    sprintState: s.sprintState
+                      ? { ...s.sprintState, sprintStatus: 'retrospective' }
+                      : null
+                  }));
+                }
                 isRetro = true;
                 const retroCandidate = findRetroCandidate();
                 if (retroCandidate) {
@@ -1089,11 +1104,13 @@ export const useStore = create<AppState>()(
                   }
                 } else {
                   // Sprint category exhausted → transition to retrospective
-                  set(s => ({
-                    sprintState: s.sprintState
-                      ? { ...s.sprintState, sprintStatus: 'retrospective' }
-                      : null
-                  }));
+                  if ((sprint.sprintStatus as string) !== 'retrospective') {
+                    set(s => ({
+                      sprintState: s.sprintState
+                        ? { ...s.sprintState, sprintStatus: 'retrospective' }
+                        : null
+                    }));
+                  }
                   isRetro = true;
                   recommendationReason = `${sprintCat} problems exhausted — Sprint Check coming.`;
                 }

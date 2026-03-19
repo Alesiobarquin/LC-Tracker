@@ -78,6 +78,7 @@ export const Dashboard: React.FC = () => {
   const categoryAvgReviewTimes = useStore((state) => state.categoryAvgReviewTimes);
   const sessionTimings = useStore((state) => state.sessionTimings);
   const lastCategoryAvgUpdate = useStore((state) => state.lastCategoryAvgUpdate);
+  const logProblem = useStore((state) => state.logProblem);
 
   // Sprint state
   const sprintState = useStore((state) => state.sprintState);
@@ -553,8 +554,16 @@ export const Dashboard: React.FC = () => {
                     <div className="mt-4 pt-4 border-t border-amber-500/20">
                       <p className="text-sm text-zinc-300 mb-3">How did the Sprint Check go?</p>
                       <div className="flex gap-2">
-                        <button onClick={() => { recordSprintRetro(true, 3); setRetroCompleted(false); setRetroTimedOut(false); }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (2–3)</button>
-                        <button onClick={() => { recordSprintRetro(false, 1); setRetroCompleted(false); setRetroTimedOut(false); }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
+                        <button onClick={() => { 
+                          if (newProblemData) logProblem(newProblemData.id, 3, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
+                          setRetroCompleted(false); 
+                          setRetroTimedOut(false); 
+                        }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (2–3)</button>
+                        <button onClick={() => { 
+                          if (newProblemData) logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard"); 
+                          setRetroCompleted(false); 
+                          setRetroTimedOut(false); 
+                        }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
                       </div>
                     </div>
                   )}
@@ -764,9 +773,13 @@ export const Dashboard: React.FC = () => {
               <p className="text-xs text-indigo-400 font-semibold mb-3 uppercase tracking-wider">{sprintState.currentCategory}</p>
               {sprintDayInfo && (
                 <>
-                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                  <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">
                     <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
-                    <span>{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
+                    <div className="flex items-center gap-2">
+                       <button onClick={() => useStore.getState().extendSprint(-1)} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
+                       <button onClick={() => useStore.getState().extendSprint(1)} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
+                       <span className="ml-1 w-6 text-right">{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
+                    </div>
                   </div>
                   <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mb-3">
                     <div className="h-full bg-indigo-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100))}%` }} />

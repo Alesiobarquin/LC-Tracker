@@ -675,6 +675,15 @@ export const useStore = create<AppState>()(
             proactiveNeetCodeProblemId: newProactiveId,
           };
         });
+
+        // Auto-handle sprint retrospective if this is the retro problem
+        const newState = get();
+        if (
+          newState.sprintState?.sprintStatus === 'retrospective' &&
+          newState.sprintState.retroProblemId === problemId
+        ) {
+          get().recordSprintRetro(rating >= 2, rating);
+        }
       },
 
       logMockInterview: (

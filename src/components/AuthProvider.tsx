@@ -68,6 +68,17 @@ function mergeStates(
   return merged;
 }
 
+// ─── Timeout helper ──────────────────────────────────────────────────────────
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => {
+      console.warn(`[AuthProvider] Cloud operation timed out after ${ms}ms, proceeding with local data`);
+      resolve(fallback);
+    }, ms)),
+  ]);
+}
+
 // ─── Hydration orchestration ───────────────────────────────────────────────────
 async function orchestrateHydration(userId: string, storageKey: string) {
   // Phase 1: Hydrate from localStorage immediately (sync read, no flicker)
@@ -75,8 +86,8 @@ async function orchestrateHydration(userId: string, storageKey: string) {
   await useStore.persist.rehydrate();
   console.log('[AuthProvider] Phase 1: Local hydration complete');
 
-  // Phase 2: Fetch cloud state and merge
-  const cloudState = await fetchCloudState(userId);
+  // Phase 2: Fetch cloud state and merge (with 5s timeout to prevent hanging)
+  const cloudState = await withTimeout(fetchCloudState(userId), 5000, null);
   if (cloudState) {
     const localRaw = window.localStorage.getItem(storageKey);
     let localState: Record<string, unknown> = {};
@@ -105,20 +116,22 @@ async function orchestrateHydration(userId: string, storageKey: string) {
     console.log('[AuthProvider] Phase 2: No cloud state found, keeping local data');
   }
 
-  // Phase 3: Enable cloud sync and push merged state as the new cloud truth
+  // Phase 3: Enable cloud sync. Push merged state in background (non-blocking).
   enableCloudSync();
   const finalState = window.localStorage.getItem(storageKey);
   if (finalState) {
-    // Parse out inner state object for the upsert
+    // Fire-and-forget — don't block the UI on the initial cloud push
     try {
       const parsed = JSON.parse(finalState);
       const innerState = parsed?.state ?? parsed;
-      await pushStateToCloud(userId, JSON.stringify(innerState));
+      pushStateToCloud(userId, JSON.stringify(innerState)).catch((err) =>
+        console.warn('[AuthProvider] Background cloud push failed:', err)
+      );
     } catch {
-      await pushStateToCloud(userId, finalState);
+      // ignore — local-only for now
     }
   }
-  console.log('[AuthProvider] Phase 3: Cloud sync enabled and initial push complete');
+  console.log('[AuthProvider] Phase 3: Cloud sync enabled');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -139,18 +152,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session?.user) {
-        await orchestrateHydration(session.user.id, STORAGE_KEY);
-      } else {
-        // Not logged in — still hydrate from localStorage so the Login page
-        // can render immediately, but do NOT enable cloud sync.
-        await useStore.persist.rehydrate();
-        console.log('[AuthProvider] No session, local-only hydration');
-      }
-
-      if (isMounted) {
-        setHydrated(true);
-        setLoading(false);
+      try {
+        if (session?.user) {
+          await orchestrateHydration(session.user.id, STORAGE_KEY);
+        } else {
+          // Not logged in — still hydrate from localStorage so the Login page
+          // can render immediately, but do NOT enable cloud sync.
+          await useStore.persist.rehydrate();
+          console.log('[AuthProvider] No session, local-only hydration');
+        }
+      } catch (err) {
+        console.error('[AuthProvider] Hydration error (non-fatal, proceeding):', err);
+      } finally {
+        if (isMounted) {
+          setHydrated(true);
+          setLoading(false);
+        }
       }
     });
 
@@ -161,20 +178,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session?.user) {
-        // Re-run the full hydration sequence on sign-in (e.g., after OAuth redirect)
-        setHydrated(false);
-        await orchestrateHydration(session.user.id, STORAGE_KEY);
-        if (isMounted) setHydrated(true);
-      } else {
-        // Sign-out: disable cloud sync, clear local state
-        disableCloudSync();
-        window.localStorage.removeItem(STORAGE_KEY);
-        useStore.getState().resetProgress();
-        if (isMounted) setHydrated(true);
+      try {
+        if (session?.user) {
+          // Re-run the full hydration sequence on sign-in (e.g., after OAuth redirect)
+          setHydrated(false);
+          await orchestrateHydration(session.user.id, STORAGE_KEY);
+        } else {
+          // Sign-out: disable cloud sync, clear local state
+          disableCloudSync();
+          window.localStorage.removeItem(STORAGE_KEY);
+          useStore.getState().resetProgress();
+        }
+      } catch (err) {
+        console.error('[AuthProvider] Auth state change error (non-fatal):', err);
+      } finally {
+        if (isMounted) {
+          setHydrated(true);
+          setLoading(false);
+        }
       }
-
-      if (isMounted) setLoading(false);
     });
 
     return () => {

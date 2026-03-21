@@ -13,24 +13,24 @@ import { SyntaxReference } from './components/SyntaxReference';
 import { Settings } from './components/Settings';
 import { Onboarding } from './components/Onboarding';
 import { Login } from './components/Login';
-import { useStore } from './store/useStore';
 import { useAuth } from './components/AuthProvider';
+import { useUserSettings } from './hooks/useUserData';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const onboardingComplete = useStore((s) => s.onboardingComplete);
-  const { session, loading, hydrated } = useAuth();
+  const { onboardingComplete } = useUserSettings();
+  const { session, loading } = useAuth();
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
   };
 
-  // Wait for Supabase auth AND Zustand hydration (local + cloud merge) to both
-  // complete before rendering. This prevents the onboarding flicker.
-  if (loading || !hydrated) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-zinc-950">
+        <div className="h-1 w-full bg-zinc-900 border-b border-zinc-800">
+          <div className="h-full w-1/3 bg-emerald-500/40 animate-pulse" />
+        </div>
       </div>
     );
   }

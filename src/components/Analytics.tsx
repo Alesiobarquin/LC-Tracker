@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from 'react';
-import { useStore, SPRINT_DESCRIPTIONS } from '../store/useStore';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { problems, Category, PHASE_1_CATEGORIES } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { format, subDays, eachDayOfInterval, isSameDay, addDays } from 'date-fns';
@@ -14,6 +13,21 @@ import {
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
+import {
+  SPRINT_DESCRIPTIONS,
+  fetchSessionTimingsBefore,
+  getSessionTimingsWindowStartIso,
+  useActivityLog,
+  useProblemProgress,
+  useSessionTimings,
+  useSprintState,
+  useSyntaxProgress,
+  useUserSettings,
+} from '../hooks/useUserData';
+import { calculateSessionAggregates } from '../utils/progressHelpers';
+import type { SessionTiming } from '../types';
+import { useAuth } from './AuthProvider';
+import { AnalyticsSkeleton } from './loadingSkeletons';
 
 const fmtSeconds = (s: number): string => {
   if (s < 60) return `${s}s`;
@@ -23,20 +37,61 @@ const fmtSeconds = (s: number): string => {
 };
 
 export const Analytics: React.FC = () => {
-  const progress = useStore((state) => state.progress);
-  const activityLog = useStore((state) => state.activityLog);
-  const syntaxProgress = useStore((state) => state.syntaxProgress);
-  const sessionTimings = useStore((state) => state.sessionTimings);
-  const categoryAvgSolveTimes = useStore((state) => state.categoryAvgSolveTimes);
-  const categoryAvgReviewTimes = useStore((state) => state.categoryAvgReviewTimes);
-  const personalBestTimes = useStore((state) => state.personalBestTimes);
-  const sprintState = useStore((state) => state.sprintState);
-  const sprintHistory = useStore((state) => state.sprintHistory);
-  const settings = useStore((state) => state.settings);
+  const { user } = useAuth();
+  const { progress, isLoading: progressLoading } = useProblemProgress();
+  const { data: activityLog } = useActivityLog();
+  const { syntaxProgress } = useSyntaxProgress();
+  const { sessionTimings, isLoading: timingsLoading } = useSessionTimings();
+  const { sprintState, sprintHistory } = useSprintState();
+  const { settings } = useUserSettings();
 
+  const [olderTimings, setOlderTimings] = useState<SessionTiming[]>([]);
+  const [olderCursor, setOlderCursor] = useState<string | null>(null);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
   const [viewingSession, setViewingSession] = useState<any>(null);
   const [timeFilter, setTimeFilter] = useState<'all' | 'above' | 'below'>('all');
   const [timeFilterMinutes, setTimeFilterMinutes] = useState(30);
+
+  useEffect(() => {
+    setOlderTimings([]);
+    setOlderCursor(null);
+    setHasMoreOlder(true);
+  }, [user?.id]);
+
+  const combinedTimings = useMemo(() => {
+    const map = new Map<string, SessionTiming>();
+    for (const t of sessionTimings) map.set(t.id, t);
+    for (const t of olderTimings) map.set(t.id, t);
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [sessionTimings, olderTimings]);
+
+  const { personalBestTimes } = useMemo(
+    () => calculateSessionAggregates(combinedTimings),
+    [combinedTimings]
+  );
+
+  const handleLoadMoreTimings = useCallback(async () => {
+    if (!user?.id || loadingOlder || !hasMoreOlder) return;
+    setLoadingOlder(true);
+    try {
+      const cursor = olderCursor ?? getSessionTimingsWindowStartIso();
+      const batch = await fetchSessionTimingsBefore(user.id, cursor, 500);
+      if (batch.length === 0) {
+        setHasMoreOlder(false);
+      } else {
+        setOlderTimings((prev) => [...prev, ...batch]);
+        setOlderCursor(batch[batch.length - 1].date);
+        if (batch.length < 500) setHasMoreOlder(false);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [user?.id, loadingOlder, hasMoreOlder, olderCursor]);
 
   const solvedCount = Object.keys(progress).length;
   const activeRotationCount = Object.values(progress).filter(p => !p.retired).length;
@@ -183,21 +238,21 @@ export const Analytics: React.FC = () => {
   // Total time by session type
   const totalTimeByType = useMemo(() => {
     const totals: Record<string, number> = { new: 0, review: 0, cold_solve: 0, mock: 0 };
-    sessionTimings.forEach(t => {
+    combinedTimings.forEach(t => {
       totals[t.sessionType] = (totals[t.sessionType] || 0) + t.elapsedSeconds;
     });
     return totals;
-  }, [sessionTimings]);
+  }, [combinedTimings]);
 
   const totalSecondsAllTime = Object.values(totalTimeByType).reduce((a, b) => a + b, 0);
 
   // Category avg solve time chart (from real session timings)
   const categoryTimeChartData = useMemo(() => {
-    if (sessionTimings.length === 0) return [];
+    if (combinedTimings.length === 0) return [];
 
     // Group new-solve timings by category, split into first half and recent half
     const byCat: Record<string, number[]> = {};
-    sessionTimings
+    combinedTimings
       .filter(t => t.sessionType === 'new' || t.sessionType === 'cold_solve')
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .forEach(t => {
@@ -224,11 +279,11 @@ export const Analytics: React.FC = () => {
         };
       })
       .sort((a, b) => b.avgMinutes - a.avgMinutes); // slowest first
-  }, [sessionTimings]);
+  }, [combinedTimings]);
 
   // Last 30 sessions trend
   const trendData = useMemo(() => {
-    return [...sessionTimings]
+    return [...combinedTimings]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(-30)
       .map((t, i) => ({
@@ -236,7 +291,7 @@ export const Analytics: React.FC = () => {
         minutes: Math.round(t.elapsedSeconds / 60),
         type: t.sessionType,
       }));
-  }, [sessionTimings]);
+  }, [combinedTimings]);
 
   // Heatmap
   const today = new Date();
@@ -253,6 +308,10 @@ export const Analytics: React.FC = () => {
   const todayColumn = todayIndex >= 0 ? Math.floor(todayIndex / 7) : -1;
 
   const activeChartData = chartData.filter(d => d.avg > 0);
+
+  if (progressLoading || timingsLoading) {
+    return <AnalyticsSkeleton />;
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -393,14 +452,46 @@ export const Analytics: React.FC = () => {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-zinc-100">Solve Time Insights</h2>
-            <p className="text-zinc-500 text-sm">Real timing data from your sessions</p>
+            <p className="text-zinc-500 text-sm">Real timing data from your sessions (last 90 days by default)</p>
           </div>
         </div>
 
-        {sessionTimings.length === 0 ? (
+        {combinedTimings.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p className="text-xs text-zinc-500">
+              {olderTimings.length > 0
+                ? `Including ${olderTimings.length} older session rows loaded on demand.`
+                : 'Older rows are not fetched until you load more.'}
+            </p>
+            {hasMoreOlder && user?.id ? (
+              <button
+                type="button"
+                onClick={() => void handleLoadMoreTimings()}
+                disabled={loadingOlder}
+                className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 disabled:opacity-50"
+              >
+                {loadingOlder ? 'Loading…' : 'Load older sessions'}
+              </button>
+            ) : null}
+          </div>
+        )}
+
+        {combinedTimings.length === 0 ? (
           <div className="premium-card p-10 text-center border-dashed border-zinc-800">
             <Timer size={32} className="text-zinc-700 mx-auto mb-3" />
-            <p className="text-zinc-500">Complete sessions with the new stopwatch timer to see solve time analytics here.</p>
+            <p className="text-zinc-500">
+              No session timings in the last 90 days. Use the timer when you practice, or load older sessions if you have history.
+            </p>
+            {hasMoreOlder && user?.id && (
+              <button
+                type="button"
+                onClick={() => void handleLoadMoreTimings()}
+                disabled={loadingOlder}
+                className="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 disabled:opacity-50"
+              >
+                {loadingOlder ? 'Loading…' : 'Load older sessions'}
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -418,7 +509,7 @@ export const Analytics: React.FC = () => {
                     {seconds >= 3600 ? `${(seconds / 3600).toFixed(1)}h` : `${Math.round(seconds / 60)}m`}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {sessionTimings.filter(t => t.sessionType === label.toLowerCase().replace(' ', '_')).length} sessions
+                    {combinedTimings.filter(t => t.sessionType === label.toLowerCase().replace(' ', '_')).length} sessions
                   </div>
                 </div>
               ))}
@@ -499,7 +590,7 @@ export const Analytics: React.FC = () => {
               <div className="premium-card p-6 h-64">
                 <h3 className="text-base font-semibold text-zinc-100 mb-4 flex items-center gap-2">
                   <TrendingUp size={16} className="text-indigo-400" />
-                  Solve Time Trend (last {Math.min(30, sessionTimings.length)} sessions)
+                  Solve Time Trend (last {Math.min(30, combinedTimings.length)} sessions)
                 </h3>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>

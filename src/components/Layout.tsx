@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Bell, Settings, Calendar, RefreshCw, CheckCircle, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut } from 'lucide-react';
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
-import { useStore } from '../store/useStore';
 import { differenceInDays } from 'date-fns';
 import { getPhase } from '../utils/dateUtils';
 import { motion } from 'motion/react';
+import { useUserSettings } from '../hooks/useUserData';
+import { useAuth } from './AuthProvider';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,8 +15,8 @@ interface LayoutProps {
 }
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const targetInterviewDate = useStore((state) => state.targetInterviewDate);
-  const targetEvents = useStore((state) => state.targetEvents);
+  const { signOut } = useAuth();
+  const { targetInterviewDate, targetEvents } = useUserSettings();
   const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
   const phase = getPhase();
   const phaseProgress = phase === 1 ? 'Phase 1 (Foundations)' : phase === 2 ? 'Phase 2 (Internship)' : 'Phase 3 (Grind)';
@@ -132,6 +133,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               </div>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
+          >
+            <LogOut size={16} />
+            Sign out
+          </button>
         </div>
       </div>
 

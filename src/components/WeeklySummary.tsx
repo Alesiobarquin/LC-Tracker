@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
-import { useStore } from '../store/useStore';
 import { problems } from '../data/problems';
-import { startOfWeek, endOfWeek, format, subDays, isWithinInterval } from 'date-fns';
+import { startOfWeek, endOfWeek, format, isWithinInterval } from 'date-fns';
 import { Trophy, Target, TrendingUp, AlertCircle } from 'lucide-react';
+import { useActivityLog, useProblemProgress, useStreak } from '../hooks/useUserData';
 
 export const WeeklySummary: React.FC = () => {
-  const progress = useStore((state) => state.progress);
-  const activityLog = useStore((state) => state.activityLog);
-  const streak = useStore((state) => state.streak);
+  const { progress } = useProblemProgress();
+  const { data: activityLog } = useActivityLog();
+  const { streak } = useStreak();
 
   const summary = useMemo(() => {
     const today = new Date();

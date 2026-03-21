@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStore } from '../store/useStore';
 import { problems, Problem } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
 import { Play, Pause, ExternalLink, TriangleAlert, CircleCheck, Lock, CheckSquare, Square, Timer } from 'lucide-react';
@@ -7,10 +6,10 @@ import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import ReactMarkdown from 'react-markdown';
+import { useProblemProgress } from '../hooks/useUserData';
 
 export const MockInterview: React.FC = () => {
-  const progress = useStore((state) => state.progress);
-  const logMockInterview = useStore((state) => state.logMockInterview);
+  const { logMockInterview } = useProblemProgress();
   const phase = getPhase();
 
   const [activeProblem, setActiveProblem] = useState<Problem | null>(null);
@@ -195,7 +194,7 @@ export const MockInterview: React.FC = () => {
                 const actualSecondsUsed = mockStartTimestampRef.current
                   ? Math.round((Date.now() - mockStartTimestampRef.current) / 1000)
                   : undefined;
-                logMockInterview(
+                void logMockInterview(
                   activeProblem.id,
                   evalSolved!,
                   evalSyntax!,

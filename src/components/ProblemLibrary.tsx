@@ -1,18 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { problems, Category } from '../data/problems';
-import { useStore } from '../store/useStore';
 import { Search, Play, CircleCheck, Check, Filter, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
+import { useProblemProgress } from '../hooks/useUserData';
+import { ProblemLibrarySkeleton } from './loadingSkeletons';
+
+const VIRTUALIZE_THRESHOLD = 200;
 
 export const ProblemLibrary: React.FC = () => {
-  const progress = useStore((state) => state.progress);
+  const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeSession, setActiveSession] = useState<string | null>(null);
-
-  const logProblem = useStore((state) => state.logProblem);
-  const removeProblem = useStore((state) => state.removeProblem);
 
   const [activeTab, setActiveTab] = useState<'NeetCode 75' | 'Blind 75' | 'NeetCode 150'>('NeetCode 75');
   const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
@@ -74,15 +74,24 @@ export const ProblemLibrary: React.FC = () => {
 
   const toggleSolved = (problemId: string, isSolved: boolean) => {
     if (isSolved) {
-      removeProblem(problemId);
+      void removeProblem(problemId);
     } else {
-      logProblem(problemId, 3, true, "Quick solve");
+      void logProblem(problemId, 3, true, "Quick solve");
     }
   };
   
   const solvedInTab = tabProblems.filter(p => progress[p.id]).length;
   const totalInTab = tabProblems.length;
   const progressPercent = totalInTab > 0 ? Math.round((solvedInTab / totalInTab) * 100) : 0;
+
+  const virtualRowStyle: React.CSSProperties | undefined =
+    filteredProblems.length >= VIRTUALIZE_THRESHOLD
+      ? { contentVisibility: 'auto', containIntrinsicSize: 'auto 52px' }
+      : undefined;
+
+  if (isLoading) {
+    return <ProblemLibrarySkeleton />;
+  }
 
   if (activeSession) {
     const problem = problems.find(p => p.id === activeSession);
@@ -210,7 +219,7 @@ export const ProblemLibrary: React.FC = () => {
                         const isRetired = prog?.retired;
                         
                         return (
-                          <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group">
+                          <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group" style={virtualRowStyle}>
                             <td className="px-6 py-4">
                               <button 
                                  onClick={() => toggleSolved(prob.id, isSolved)}

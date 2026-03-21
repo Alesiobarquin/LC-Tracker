@@ -3,6 +3,7 @@ import { Problem } from '../data/problems';
 import { useStore } from '../store/useStore';
 import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 
 interface TimerProps {
   problem: Problem;
@@ -23,8 +24,8 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const startSession = useStore((state) => state.startSession);
   const endSession = useStore((state) => state.endSession);
   const abandonSession = useStore((state) => state.abandonSession);
-  const progress = useStore((state) => state.progress);
-  const personalBestTimes = useStore((state) => state.personalBestTimes);
+  const { progress, logProblem } = useProblemProgress();
+  const { personalBestTimes, recordSession } = useSessionTimings();
 
   const [notes, setNotes] = useState(progress[problem.id]?.notes || '');
   const [phase, setPhase] = useState<'idle' | 'running' | 'rating'>('idle');
@@ -106,8 +107,27 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   };
 
   const handleRating = (rating: 1 | 2 | 3) => {
-    endSession(frozenElapsed, rating, notes);
-    onComplete();
+    const sessionType = activeSession?.isReview
+      ? 'review'
+      : activeSession?.isColdSolve
+        ? 'cold_solve'
+        : 'new';
+
+    void recordSession({
+      id: crypto.randomUUID(),
+      problemId: problem.id,
+      category: problem.category,
+      date: new Date().toISOString(),
+      elapsedSeconds: frozenElapsed,
+      sessionType,
+      rating,
+    }).then(() => logProblem(problem.id, rating, isNew, notes, {
+      elapsedSeconds: frozenElapsed,
+      sessionType,
+    })).finally(() => {
+      endSession();
+      onComplete();
+    });
   };
 
   // ── Rating Screen ────────────────────────────────────────────────────────

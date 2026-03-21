@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
-import { useStore } from '../store/useStore';
 import { Clock, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useSyntaxProgress } from '../hooks/useUserData';
 
 interface SyntaxCardComponentProps {
     card: SyntaxCard;
@@ -13,8 +13,7 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
     const [userInput, setUserInput] = useState('');
     const [hasSubmitted, setHasSubmitted] = useState(false);
 
-    const syntaxProgress = useStore((state) => state.syntaxProgress);
-    const logSyntaxPractice = useStore((state) => state.logSyntaxPractice);
+    const { syntaxProgress, logSyntaxPractice } = useSyntaxProgress();
 
     const progress = syntaxProgress[card.id];
     const inputRef = useRef<HTMLInputElement>(null);

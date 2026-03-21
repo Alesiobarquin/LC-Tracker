@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { allSyntaxCards } from '../data/syntaxCards';
-import { useStore } from '../store/useStore';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
 import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSyntaxProgress } from '../hooks/useUserData';
 
 export const SyntaxReference: React.FC = () => {
-    const syntaxProgress = useStore((state) => state.syntaxProgress);
+    const { syntaxProgress } = useSyntaxProgress();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript'>('python');
     const [showOnlyWeak, setShowOnlyWeak] = useState(false);

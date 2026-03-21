@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useStore, SPRINT_DESCRIPTIONS, SessionTiming } from '../store/useStore';
+import { useStore } from '../store/useStore';
 import { problems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
@@ -8,6 +8,9 @@ import { clsx } from 'clsx';
 import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
+import { type SessionTiming } from '../types';
+import { buildDailyPlan, SPRINT_DESCRIPTIONS, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
+import { DashboardSkeleton } from './loadingSkeletons';
 
 const DEFAULT_NEW_MINUTES = 20;
 const DEFAULT_REVIEW_MINUTES = 10;
@@ -61,34 +64,55 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
 };
 
 export const Dashboard: React.FC = () => {
-  const streak = useStore((state) => state.streak);
-  const progress = useStore((state) => state.progress);
+  const { streak, graceDay } = useStreak();
+  const {
+    progress,
+    categoryStruggling,
+    proactiveNeetCodeProblemId: derivedProactiveId,
+    logProblem,
+    isLoading: progressLoading,
+  } = useProblemProgress();
   const phase = getPhase();
-  const settings = useStore((state) => state.settings);
-  const graceDay = useStore((state) => state.graceDay);
-  const catchUpPlan = useStore((state) => state.catchUpPlan);
-  const setCatchUpPlan = useStore((state) => state.setCatchUpPlan);
-  const dismissCatchUpBanner = useStore((state) => state.dismissCatchUpBanner);
-  const setDayMode = useStore((state) => state.setDayMode);
-  const getDailyPlan = useStore((state) => state.getDailyPlan);
-  const activityLog = useStore((state) => state.activityLog);
+  const { settings, catchUpPlan, dayMode, setCatchUpPlan, dismissCatchUpBanner, setDayMode, isLoading: settingsLoading } = useUserSettings();
+  const { data: activityLog } = useActivityLog();
   const activeSession = useStore((state) => state.activeSession);
   const startSession = useStore((state) => state.startSession);
-  const categoryAvgSolveTimes = useStore((state) => state.categoryAvgSolveTimes);
-  const categoryAvgReviewTimes = useStore((state) => state.categoryAvgReviewTimes);
-  const sessionTimings = useStore((state) => state.sessionTimings);
-  const lastCategoryAvgUpdate = useStore((state) => state.lastCategoryAvgUpdate);
-  const logProblem = useStore((state) => state.logProblem);
+  const { categoryAvgSolveTimes, categoryAvgReviewTimes, sessionTimings, lastCategoryAvgUpdate } = useSessionTimings();
 
-  // Sprint state
-  const sprintState = useStore((state) => state.sprintState);
-  const sprintHistory = useStore((state) => state.sprintHistory);
-  const recordSprintRetro = useStore((state) => state.recordSprintRetro);
-  const proactiveNeetCodeProblemId = useStore((state) => state.proactiveNeetCodeProblemId);
-  const dismissProactiveNeetCode = useStore((state) => state.dismissProactiveNeetCode);
-  const setSprintCategory = useStore((state) => state.setSprintCategory);
+  const { sprintState, sprintHistory, recordSprintRetro, setSprintCategory, updateSprintState } = useSprintState();
+  const { syntaxProgress } = useSyntaxProgress();
 
-  const { newProblem, additionalProblems, reviewProblems, coldSolveProblem, dueSyntaxCards, recommendationReason, totalDueReviews, dayModeType, isStabilizer, isRetro, sprintCategory, sprintDayInfo } = getDailyPlan();
+  const [dismissedProactiveId, setDismissedProactiveId] = useState<string | null>(null);
+  const proactiveNeetCodeProblemId =
+    dismissedProactiveId === derivedProactiveId ? null : derivedProactiveId;
+
+  const {
+    newProblem,
+    additionalProblems,
+    reviewProblems,
+    coldSolveProblem,
+    dueSyntaxCards,
+    recommendationReason,
+    totalDueReviews,
+    dayModeType,
+    isStabilizer,
+    isRetro,
+    sprintCategory,
+    sprintDayInfo,
+  } = useMemo(
+    () =>
+      buildDailyPlan({
+        progress,
+        syntaxProgress,
+        settings,
+        catchUpPlan,
+        dayMode,
+        activityLog,
+        sprintState,
+        categoryStruggling,
+      }),
+    [progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog, sprintState, categoryStruggling]
+  );
 
   const [retroTimedOut, setRetroTimedOut] = useState(false);
   const [retroCompleted, setRetroCompleted] = useState(false);
@@ -123,6 +147,10 @@ export const Dashboard: React.FC = () => {
       setRetroTimedOut(false);
     }
   }, [isRetro]);
+
+  if (progressLoading || settingsLoading) {
+    return <DashboardSkeleton />;
+  }
 
   const newProblemData = effectiveNewProblemId ? problems.find(p => p.id === effectiveNewProblemId) : null;
   const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
@@ -342,7 +370,6 @@ export const Dashboard: React.FC = () => {
   const avgMockRating = mockCount > 0 ? mockRatingTotal / mockCount : 0;
   mockScore = Math.min(15, (avgMockRating / 3.0) * 15);
 
-  const syntaxProgress = useStore((state) => state.syntaxProgress);
   let syntaxRatingTotal = 0;
   let syntaxCount = 0;
   Object.values(syntaxProgress).forEach(prog => {
@@ -508,7 +535,7 @@ export const Dashboard: React.FC = () => {
                   <p className="text-xs text-zinc-400 mb-3">Here's the NeetCode explanation for <span className="text-zinc-200 font-medium">{ncp.title}</span> to build your foundation.</p>
                   <div className="flex gap-2">
                     {ncp.videoUrl && <a href={ncp.videoUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg border border-red-500/20 flex items-center gap-1.5 transition-colors"><Youtube size={12} /> Watch Explanation</a>}
-                    <button onClick={dismissProactiveNeetCode} className="px-3 py-1.5 bg-zinc-800/80 text-zinc-400 text-xs rounded-lg border border-zinc-700/50 hover:text-zinc-200 transition-colors">Dismiss</button>
+                    <button onClick={() => setDismissedProactiveId(derivedProactiveId ?? null)} className="px-3 py-1.5 bg-zinc-800/80 text-zinc-400 text-xs rounded-lg border border-zinc-700/50 hover:text-zinc-200 transition-colors">Dismiss</button>
                   </div>
                 </div>
               </div>
@@ -556,12 +583,12 @@ export const Dashboard: React.FC = () => {
                       <p className="text-sm text-zinc-300 mb-3">How did the Sprint Check go?</p>
                       <div className="flex gap-2">
                         <button onClick={() => { 
-                          if (newProblemData) logProblem(newProblemData.id, 3, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
+                          if (newProblemData) void logProblem(newProblemData.id, 3, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
                           setRetroCompleted(false); 
                           setRetroTimedOut(false); 
                         }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (2–3)</button>
                         <button onClick={() => { 
-                          if (newProblemData) logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard"); 
+                          if (newProblemData) void logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard"); 
                           setRetroCompleted(false); 
                           setRetroTimedOut(false); 
                         }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
@@ -763,7 +790,7 @@ export const Dashboard: React.FC = () => {
         {/* Sidebar */}
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
-          {phase === 1 && settings.learningMode !== 'RANDOM' && sprintState && sprintState.sprintStatus !== 'complete' ? (
+          {phase === 1 && settings.learningMode === 'SPRINT' && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
               <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
@@ -794,8 +821,8 @@ export const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">
                     <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
                     <div className="flex items-center gap-2">
-                       <button onClick={() => useStore.getState().extendSprint(-1)} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
-                       <button onClick={() => useStore.getState().extendSprint(1)} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
+                       <button onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
+                       <button onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
                        <span className="ml-1 w-6 text-right">{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
                     </div>
                   </div>

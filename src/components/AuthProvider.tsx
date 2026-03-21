@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useStore } from '../store/useStore';
 
 interface AuthContextType {
   session: Session | null;
@@ -22,6 +23,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        useStore.persist.rehydrate();
+      }
       setLoading(false);
     });
 
@@ -31,6 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        useStore.persist.rehydrate();
+      } else {
+        useStore.getState().resetProgress();
+      }
       setLoading(false);
     });
 

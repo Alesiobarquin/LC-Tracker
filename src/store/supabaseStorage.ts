@@ -31,33 +31,46 @@ const debounceSave = (userId: string, stateStr: string, delay: number) => {
 
 export const supabaseStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    const localData = window.localStorage.getItem(name);
+    
     // When Zustand tries to load state, fetch it from Supabase
     const userId = await getUserId();
     if (!userId) {
-      // If not logged in, we shouldn't have any state. Wait for auth to trigger.
-      return null;
+      // If not logged in, fallback to local storage
+      return localData;
     }
 
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('state')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('state')
+        .eq('id', userId)
+        .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error fetching state from Supabase:', error);
-      return null;
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error fetching state from Supabase:', error);
+        return localData;
+      }
+
+      if (data?.state) {
+        // If the cloud has our state, save it locally to sync them up
+        const cloudDataStr = JSON.stringify(data.state);
+        window.localStorage.setItem(name, cloudDataStr);
+        return cloudDataStr;
+      }
+    } catch (e) {
+      console.error('Exception fetching from Supabase:', e);
     }
 
-    if (data?.state) {
-      // Zustand persist middleware expects a JSON string
-      return JSON.stringify(data.state);
-    }
-
-    return null;
+    // If there is no cloud data (first time migrating), return existing local data
+    // It will be pushed up on the next `setItem` call.
+    return localData;
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
+    // ALWAYS save to local browser storage first for instant reliability
+    window.localStorage.setItem(name, value);
+    
     const userId = await getUserId();
     if (!userId) return;
 

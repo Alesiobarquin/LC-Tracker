@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { supabaseStorage } from './supabaseStorage';
 import { startOfDay, format, isSameDay, subDays, getDay, differenceInDays, addDays } from 'date-fns';
 import { getNextReviewDate, isDueToday, getPhase } from '../utils/dateUtils';
 import { problems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
@@ -1290,6 +1291,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'leetcode-tracker-storage',
+      storage: createJSONStorage(() => supabaseStorage),
     }
   )
 );

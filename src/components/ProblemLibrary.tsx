@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { problems, Category } from '../data/problems';
-import { Search, Play, CircleCheck, Check, Filter, Lock } from 'lucide-react';
+import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress } from '../hooks/useUserData';
@@ -209,7 +209,7 @@ export const ProblemLibrary: React.FC = () => {
                             Difficulty {sortConfig?.key === 'difficulty' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
                           </div>
                         </th>
-                        <th className="px-6 py-4 font-medium text-right">Action</th>
+                        <th className="px-6 py-4 font-medium text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800">
@@ -259,12 +259,27 @@ export const ProblemLibrary: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <button 
-                                onClick={() => setActiveSession(prob.id)}
-                                className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                              >
-                                <Play size={16} />
-                              </button>
+                              <div className="inline-flex items-center justify-end gap-2">
+                                <a
+                                  href={prob.leetcodeUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 hover:border-zinc-600 text-xs font-medium"
+                                  title="Open on LeetCode to view your submission status"
+                                  aria-label={`Open ${prob.title} on LeetCode`}
+                                >
+                                  <ExternalLink size={14} className="shrink-0" />
+                                  <span className="hidden sm:inline">LeetCode</span>
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveSession(prob.id)}
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  title="Start practice timer"
+                                >
+                                  <Play size={16} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );

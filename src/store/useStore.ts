@@ -1292,6 +1292,59 @@ export const useStore = create<AppState>()(
     {
       name: 'leetcode-tracker-storage',
       storage: createJSONStorage(() => supabaseStorage),
+      // skipHydration: AuthProvider will call rehydrate() at the right time,
+      // after localStorage is available but before Supabase writes are enabled.
+      skipHydration: true,
+      // Deep merge: Zustand's default is a shallow merge, which would wipe
+      // nested objects like `settings` and `streak` if only some sub-keys exist
+      // in the persisted state. We deep-merge to preserve all nested fields.
+      merge: (persistedState: unknown, currentState: AppState): AppState => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return currentState;
+        }
+        const persisted = persistedState as Partial<AppState>;
+        return {
+          ...currentState,
+          ...persisted,
+          // Deep merge nested objects so sub-keys from defaults are preserved
+          settings: {
+            ...currentState.settings,
+            ...(persisted.settings ?? {}),
+            studySchedule: {
+              ...currentState.settings.studySchedule,
+              ...(persisted.settings?.studySchedule ?? {}),
+            },
+            sprintSettings: {
+              ...currentState.settings.sprintSettings,
+              ...(persisted.settings?.sprintSettings ?? {}),
+            },
+          },
+          streak: {
+            ...currentState.streak,
+            ...(persisted.streak ?? {}),
+          },
+          personalRecords: {
+            ...currentState.personalRecords,
+            ...(persisted.personalRecords ?? {}),
+          },
+          sprintFreePick: {
+            ...currentState.sprintFreePick,
+            ...(persisted.sprintFreePick ?? {}),
+          },
+          graceDay: {
+            ...currentState.graceDay,
+            ...(persisted.graceDay ?? {}),
+          },
+          dayMode: {
+            ...currentState.dayMode,
+            ...(persisted.dayMode ?? {}),
+          },
+          catchUpPlan: {
+            ...currentState.catchUpPlan,
+            ...(persisted.catchUpPlan ?? {}),
+          },
+        };
+      },
     }
   )
 );

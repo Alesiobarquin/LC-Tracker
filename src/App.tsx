@@ -19,13 +19,15 @@ import { useAuth } from './components/AuthProvider';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const onboardingComplete = useStore((s) => s.onboardingComplete);
-  const { session, loading } = useAuth();
+  const { session, loading, hydrated } = useAuth();
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
   };
 
-  if (loading) {
+  // Wait for Supabase auth AND Zustand hydration (local + cloud merge) to both
+  // complete before rendering. This prevents the onboarding flicker.
+  if (loading || !hydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950">
         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>

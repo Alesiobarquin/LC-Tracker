@@ -9,7 +9,7 @@ import { useSyntaxProgress } from '../hooks/useUserData';
 export const SyntaxReference: React.FC = () => {
     const { syntaxProgress } = useSyntaxProgress();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript'>('python');
+    const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript' | 'cpp'>('python');
     const [showOnlyWeak, setShowOnlyWeak] = useState(false);
 
     // Collapse state for categories
@@ -108,6 +108,7 @@ export const SyntaxReference: React.FC = () => {
                             className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none min-w-[140px]"
                         >
                             <option value="python">Python</option>
+                            <option value="cpp">C++</option>
                             <option value="java" disabled>Java (Coming Soon)</option>
                             <option value="javascript" disabled>JavaScript (Coming Soon)</option>
                         </select>

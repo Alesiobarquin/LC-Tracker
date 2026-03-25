@@ -1,4 +1,6 @@
-export type SyntaxLanguage = 'python' | 'java' | 'javascript';
+import { cppSyntaxCards } from './cppSyntaxCards';
+
+export type SyntaxLanguage = 'python' | 'java' | 'javascript' | 'cpp';
 
 export interface SyntaxCard {
     id: string;
@@ -838,4 +840,4 @@ export const pythonSyntaxCards: SyntaxCard[] = [
     }
 ];
 
-export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards];
+export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];

@@ -356,15 +356,8 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
     };
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)' }}
-            onClick={(e) => e.stopPropagation()}
-        >
-            <div
-                className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-zinc-950 border border-zinc-800/60 rounded-3xl shadow-2xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-            >
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-zinc-950 border border-zinc-800/60 rounded-3xl shadow-2xl overflow-hidden">
                 <div className="px-8 pt-8 pb-0 shrink-0">
                     <StepIndicator current={step} total={TOTAL_STEPS} />
                 </div>

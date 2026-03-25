@@ -18,14 +18,14 @@ import { useUserSettings } from './hooks/useUserData';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { onboardingComplete } = useUserSettings();
-  const { session, loading } = useAuth();
+  const { onboardingComplete, isLoading: settingsLoading } = useUserSettings();
+  const { session, loading: authLoading } = useAuth();
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
   };
 
-  if (loading) {
+  if (authLoading || (session && settingsLoading)) {
     return (
       <div className="min-h-screen bg-zinc-950">
         <div className="h-1 w-full bg-zinc-900 border-b border-zinc-800">
@@ -39,20 +39,18 @@ export default function App() {
     return <Login />;
   }
 
-  return (
-    <>
-      <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'library' && <ProblemLibrary />}
-        {activeTab === 'analytics' && <Analytics />}
-        {activeTab === 'mock' && <MockInterview />}
-        {activeTab === 'syntax' && <SyntaxReference />}
-        {activeTab === 'settings' && <Settings />}
-      </Layout>
+  if (!onboardingComplete) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
 
-      {!onboardingComplete && (
-        <Onboarding onComplete={handleOnboardingComplete} />
-      )}
-    </>
+  return (
+    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+      {activeTab === 'dashboard' && <Dashboard />}
+      {activeTab === 'library' && <ProblemLibrary />}
+      {activeTab === 'analytics' && <Analytics />}
+      {activeTab === 'mock' && <MockInterview />}
+      {activeTab === 'syntax' && <SyntaxReference />}
+      {activeTab === 'settings' && <Settings />}
+    </Layout>
   );
 }

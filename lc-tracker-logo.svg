@@ -1,0 +1,37 @@
+<svg 
+  width="512" 
+  height="512" 
+  viewBox="-10 -10 120 120" 
+  fill="none" 
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#34d399" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#34d399" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <g 
+    stroke="#34d399" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+    filter="url(#neonGlow)"
+  >
+    <!-- Outer Mountain Outline -->
+    <path 
+      d="M 12 80 L 28 45 L 34 53 L 50 18 L 58 40 L 66 32 L 76 58 L 79 53 L 90 80 Z" 
+      stroke-width="3.5" 
+    />
+    
+    <!-- Continuous Snow Cap Zig-Zag -->
+    <path 
+      d="M 39 42 L 45 35 L 50 45 L 54 36 L 58 40 L 62 36 L 71 45" 
+      stroke-width="2" 
+    />
+    
+    <!-- Inner peak dynamic shading lines -->
+    <path d="M 48 24 L 51 32" stroke-width="2" />
+    <path d="M 46 30 L 49 38" stroke-width="2" />
+  </g>
+</svg>

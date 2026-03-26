@@ -42,7 +42,7 @@ export function Login() {
           </div>
         </div>
 
-        {/* Card */}
+        {/* Clerk card */}
         <div
           className="w-full rounded-2xl overflow-hidden"
           style={{
@@ -123,6 +123,23 @@ export function Login() {
             }}
           />
         </div>
+      </div>
+
+      {/* Footer — satisfies Google's requirement for a visible privacy policy link */}
+      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4">
+        <a
+          href="/privacy"
+          className="text-zinc-600 hover:text-zinc-400 text-[11px] transition-colors"
+        >
+          Privacy Policy
+        </a>
+        <span className="text-zinc-800 text-[11px]">·</span>
+        <a
+          href="/terms"
+          className="text-zinc-600 hover:text-zinc-400 text-[11px] transition-colors"
+        >
+          Terms of Service
+        </a>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, startOfDay, subDays } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { queryClient } from '../lib/queryClient';
-import { useAuth } from '../components/AuthProvider';
+import { useUser } from '@clerk/clerk-react';
 import { fetchLeetCodeProfile } from '../services/leetcode';
 import {
   DEFAULT_SETTINGS,
@@ -314,7 +314,7 @@ async function fetchSprintState(userId: string) {
 }
 
 function useUserId() {
-  const { user } = useAuth();
+  const { user } = useUser();
   return user?.id ?? null;
 }
 

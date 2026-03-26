@@ -25,6 +25,22 @@ import type {
 } from '../types';
 import { DEFAULT_GRACE_DAY, DEFAULT_STREAK } from '../types';
 
+/**
+ * Baseline time estimates used for scheduling.
+ * These are the fallback defaults when a user has no personal timing data yet.
+ * New problem times are roughly interview-pace; review times are ~50-55% of that
+ * since the solution pattern is already familiar.
+ */
+export function getEstimatedMinutesByDifficulty(
+  difficulty: 'Easy' | 'Medium' | 'Hard',
+  isNew: boolean
+): number {
+  if (isNew) {
+    return difficulty === 'Easy' ? 12 : difficulty === 'Hard' ? 38 : 22;
+  }
+  return difficulty === 'Easy' ? 7 : difficulty === 'Hard' ? 18 : 12;
+}
+
 export const SPRINT_DESCRIPTIONS: Record<string, string> = {
   'Arrays & Hashing': 'Mastering hash maps, frequency counts, and conflict detection.',
   'Two Pointers': 'Scanning arrays from both ends to eliminate nested loops.',
@@ -132,8 +148,9 @@ export function computeNewSyntaxProgress(
   const todayStr = today.toISOString();
   const reviewCount = existing ? existing.reviewCount + 1 : 1;
 
-  let consecutiveSuccesses = existing && existing.confidenceRating >= 2 ? 1 : 0;
-  if (rating >= 2) consecutiveSuccesses += 1;
+  // Use the stored count directly so it can grow past 2 and reach the 45-day tier.
+  const prevSuccesses = existing?.consecutiveSuccesses ?? 0;
+  const consecutiveSuccesses = rating >= 2 ? prevSuccesses + 1 : 0;
 
   const isAggressive = srAggressiveness === 'AGGRESSIVE';
   const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, isAggressive).toISOString();
@@ -143,6 +160,7 @@ export function computeNewSyntaxProgress(
     nextReviewAt,
     confidenceRating: rating,
     reviewCount,
+    consecutiveSuccesses,
   };
 }
 
@@ -441,13 +459,19 @@ export function applyLeetCodeSubmissions(
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const nextReview = new Date(solveDate);
-      nextReview.setDate(nextReview.getDate() + 3);
+      const prob = problems.find((p) => p.id === problemId);
+      const difficulty = prob?.difficulty ?? 'Medium';
+      // Compute the first-success interval from the actual solve date so old
+      // imports surface as overdue today rather than being pushed into the future.
+      const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
+      const intervalDays = Math.round(4 * diffMultiplier); // consecutiveSuccesses=1, rating=3 (assumed)
+      const nextReview = startOfDay(new Date(solveDate));
+      nextReview.setDate(nextReview.getDate() + intervalDays);
 
       nextProgress[problemId] = {
         firstSolvedAt: solveDateStr,
         lastReviewedAt: solveDateStr,
-        nextReviewAt: startOfDay(nextReview).toISOString(),
+        nextReviewAt: nextReview.toISOString(),
         reviewCount: 0,
         history: [{ date: solveDateStr, rating: 3 }],
         retired: false,
@@ -461,6 +485,73 @@ export function applyLeetCodeSubmissions(
   return { progress: nextProgress, pulledCount };
 }
 
+const MIN_TIMING_DATA_POINTS = 3;
+
+/**
+ * Compute how many reviews fit in the remaining time budget after reserving
+ * time for the new problem, additional problems, cold solve and syntax cards.
+ * Exported so the Dashboard can re-run it reactively when the user skips.
+ */
+export function computeReviewProblems(params: {
+  allDueReviewIds: string[];
+  newProblemId: string | null;
+  additionalProblemIds: string[];
+  coldSolveProblemId: string | null;
+  dueSyntaxCardCount: number;
+  settings: AppSettings;
+  categoryAvgSolveTimes?: Record<string, { totalSeconds: number; count: number }>;
+  categoryAvgReviewTimes?: Record<string, { totalSeconds: number; count: number }>;
+}): string[] {
+  const {
+    allDueReviewIds, newProblemId, additionalProblemIds, coldSolveProblemId,
+    dueSyntaxCardCount, settings, categoryAvgSolveTimes, categoryAvgReviewTimes,
+  } = params;
+
+  const getSolveMins = (id: string): number => {
+    const prob = problems.find((p) => p.id === id);
+    if (!prob) return 22;
+    const data = categoryAvgSolveTimes?.[prob.category];
+    if (data && data.count >= MIN_TIMING_DATA_POINTS) {
+      return Math.max(1, Math.round(data.totalSeconds / data.count / 60));
+    }
+    return getEstimatedMinutesByDifficulty(prob.difficulty, true);
+  };
+
+  const getReviewMins = (id: string): number => {
+    const prob = problems.find((p) => p.id === id);
+    if (!prob) return 12;
+    const data = categoryAvgReviewTimes?.[prob.category];
+    if (data && data.count >= MIN_TIMING_DATA_POINTS) {
+      return Math.max(1, Math.round(data.totalSeconds / data.count / 60));
+    }
+    return getEstimatedMinutesByDifficulty(prob.difficulty, false);
+  };
+
+  const dayOfWeek = getDay(new Date());
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const availableMinutes = isWeekend
+    ? settings.studySchedule.weekendMinutes
+    : settings.studySchedule.weekdayMinutes;
+
+  const reservedNew = newProblemId ? getSolveMins(newProblemId) : 0;
+  const reservedAdditional = additionalProblemIds.reduce((sum, id) => sum + getSolveMins(id), 0);
+  const reservedColdSolve = coldSolveProblemId ? getSolveMins(coldSolveProblemId) : 0;
+  const reservedSyntax = dueSyntaxCardCount * 3;
+
+  let budget = Math.max(
+    0,
+    availableMinutes - reservedNew - reservedAdditional - reservedColdSolve - reservedSyntax
+  );
+  const result: string[] = [];
+  for (const id of allDueReviewIds) {
+    const est = getReviewMins(id);
+    if (budget <= 0 && result.length >= 1) break;
+    result.push(id);
+    budget -= est;
+  }
+  return result;
+}
+
 export function buildDailyPlan(params: {
   progress: Record<string, ProblemProgress>;
   syntaxProgress: Record<string, SyntaxProgress>;
@@ -470,9 +561,14 @@ export function buildDailyPlan(params: {
   activityLog: ActivityLog;
   sprintState: SprintState | null;
   categoryStruggling: Record<string, boolean>;
+  categoryAvgSolveTimes?: Record<string, { totalSeconds: number; count: number }>;
+  categoryAvgReviewTimes?: Record<string, { totalSeconds: number; count: number }>;
 }) {
-  const { progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog, sprintState, categoryStruggling } =
-    params;
+  const {
+    progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog,
+    sprintState, categoryStruggling,
+    categoryAvgSolveTimes, categoryAvgReviewTimes,
+  } = params;
   const phase = getPhase();
   const today = new Date();
   const dayOfWeek = getDay(today);
@@ -481,19 +577,18 @@ export function buildDailyPlan(params: {
     .filter(([, prog]) => !prog.retired && isDueToday(prog.nextReviewAt))
     .map(([id, prog]) => ({ id, prog }))
     .sort((a, b) => {
+      // Primary: fewest consecutive successes first (weakest items reviewed first).
       const successA = a.prog.consecutiveSuccesses || 0;
       const successB = b.prog.consecutiveSuccesses || 0;
       if (successA !== successB) return successA - successB;
 
-      const probA = problems.find((p) => p.id === a.id);
-      const probB = problems.find((p) => p.id === b.id);
-      if (probA?.isBlind75 && !probB?.isBlind75) return -1;
-      if (!probA?.isBlind75 && probB?.isBlind75) return 1;
-      return 0;
+      // Secondary: most overdue first — items that have been waiting longest
+      // relative to their scheduled date get priority within the same tier.
+      return new Date(a.prog.nextReviewAt).getTime() - new Date(b.prog.nextReviewAt).getTime();
     });
 
   const totalDueReviews = allDueReviews.length;
-  const reviewProblems = allDueReviews.slice(0, 5).map((item) => item.id);
+  // reviewProblems is computed after newProblem is known (see end of function).
 
   const allDueSyntax = Object.entries(syntaxProgress || {})
     .filter(([, prog]) => isDueToday(prog.nextReviewAt))
@@ -680,9 +775,23 @@ export function buildDailyPlan(params: {
     }
   }
 
+  const allDueReviewIds = allDueReviews.map((item) => item.id);
+
+  const reviewProblems = computeReviewProblems({
+    allDueReviewIds,
+    newProblemId: newProblem,
+    additionalProblemIds: additionalProblems,
+    coldSolveProblemId: coldSolveProblem,
+    dueSyntaxCardCount: dueSyntaxCards.length,
+    settings,
+    categoryAvgSolveTimes,
+    categoryAvgReviewTimes,
+  });
+
   return {
     newProblem,
     additionalProblems,
+    allDueReviewIds,
     reviewProblems,
     coldSolveProblem,
     dueSyntaxCards,

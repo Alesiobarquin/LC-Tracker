@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { allSyntaxCards } from '../data/syntaxCards';
+import { allSyntaxCards, SyntaxCard } from '../data/syntaxCards';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
-import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle } from 'lucide-react';
+import { SyntaxFlashcardSession } from './SyntaxFlashcardSession';
+import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSyntaxProgress } from '../hooks/useUserData';
@@ -11,6 +12,8 @@ export const SyntaxReference: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript' | 'cpp'>('python');
     const [showOnlyWeak, setShowOnlyWeak] = useState(false);
+    const [sessionCards, setSessionCards] = useState<SyntaxCard[] | null>(null);
+    const [sessionTitle, setSessionTitle] = useState('');
 
     // Collapse state for categories
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -59,12 +62,39 @@ export const SyntaxReference: React.FC = () => {
         return Array.from(map.entries());
     }, [filteredCards]);
 
+    // Due cards: never practiced OR nextReviewAt <= now, for current language
+    const dueCards = useMemo(() => {
+        const now = new Date();
+        return allSyntaxCards.filter(card => {
+            if (card.language !== selectedLanguage) return false;
+            const prog = syntaxProgress[card.id];
+            if (!prog) return true;
+            return new Date(prog.nextReviewAt) <= now;
+        });
+    }, [selectedLanguage, syntaxProgress]);
+
+    const launchSession = (cards: SyntaxCard[], title: string) => {
+        if (cards.length === 0) return;
+        // Shuffle for interleaved practice
+        const shuffled = [...cards].sort(() => Math.random() - 0.5);
+        setSessionCards(shuffled);
+        setSessionTitle(title);
+    };
+
     // Overall stats
     const totalCardsForLang = allSyntaxCards.filter(c => c.language === selectedLanguage).length;
     const practicedCards = Object.values(syntaxProgress).length;
     const confidentCards = Object.values(syntaxProgress).filter(p => p.confidenceRating === 3).length;
 
     return (
+        <>
+        {sessionCards && (
+            <SyntaxFlashcardSession
+                cards={sessionCards}
+                title={sessionTitle}
+                onClose={() => setSessionCards(null)}
+            />
+        )}
         <div className="space-y-8 animate-in w-full pb-20">
             <header className="flex flex-col gap-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -76,14 +106,49 @@ export const SyntaxReference: React.FC = () => {
                         <p className="text-zinc-400 mt-1">Drill syntax patterns until they become muscle memory.</p>
                     </div>
 
-                    <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden p-1">
-                        <div className="px-4 py-2 flex flex-col items-center justify-center border-r border-zinc-800/50 min-w-[120px]">
-                            <span className="text-sm font-semibold text-zinc-100">{practicedCards} / {totalCardsForLang}</span>
-                            <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Practiced</span>
-                        </div>
-                        <div className="px-4 py-2 flex flex-col items-center justify-center min-w-[120px]">
-                            <span className="text-sm font-semibold text-emerald-400">{confidentCards}</span>
-                            <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Confident</span>
+                    <div className="flex items-center gap-3 flex-wrap justify-end">
+                        {/* Practice session launchers */}
+                        <button
+                            onClick={() => launchSession(dueCards, `Due Now · ${selectedLanguage}`)}
+                            disabled={dueCards.length === 0}
+                            className={clsx(
+                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors",
+                                dueCards.length > 0
+                                    ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20"
+                                    : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 cursor-not-allowed"
+                            )}
+                        >
+                            <Zap size={15} />
+                            Practice Due
+                            <span className={clsx(
+                                "px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums",
+                                dueCards.length > 0 ? "bg-emerald-500/20 text-emerald-300" : "bg-zinc-700 text-zinc-500"
+                            )}>
+                                {dueCards.length}
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={() => launchSession(
+                                allSyntaxCards.filter(c => c.language === selectedLanguage),
+                                `All ${selectedLanguage} cards`
+                            )}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/70 text-sm font-medium transition-colors"
+                        >
+                            <Layers size={15} />
+                            Practice All
+                        </button>
+
+                        {/* Stats panel */}
+                        <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                            <div className="px-4 py-2 flex flex-col items-center justify-center border-r border-zinc-800/50 min-w-[100px]">
+                                <span className="text-sm font-semibold text-zinc-100">{practicedCards} / {totalCardsForLang}</span>
+                                <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Practiced</span>
+                            </div>
+                            <div className="px-4 py-2 flex flex-col items-center justify-center min-w-[100px]">
+                                <span className="text-sm font-semibold text-emerald-400">{confidentCards}</span>
+                                <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Confident</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,18 +221,25 @@ export const SyntaxReference: React.FC = () => {
 
                         return (
                             <section key={category} id={anchorId} className="scroll-mt-6">
-                                <button
-                                    onClick={() => toggleCategory(category)}
-                                    className="w-full flex items-center justify-between py-3 mb-4 group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-1 rounded-md bg-zinc-800/80 text-zinc-400 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-colors">
+                                <div className="flex items-center gap-3 py-3 mb-4">
+                                    <button
+                                        onClick={() => toggleCategory(category)}
+                                        className="flex items-center gap-3 group flex-1 min-w-0"
+                                    >
+                                        <div className="p-1 rounded-md bg-zinc-800/80 text-zinc-400 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-colors flex-shrink-0">
                                             {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
-                                        <h2 className="text-xl font-bold text-zinc-100">{category} <span className="text-sm font-normal text-zinc-500 ml-2">({cards.length})</span></h2>
-                                    </div>
-                                    <div className="h-px bg-zinc-800/80 flex-1 ml-6 group-hover:bg-emerald-500/20 transition-colors" />
-                                </button>
+                                        <h2 className="text-xl font-bold text-zinc-100 whitespace-nowrap">{category} <span className="text-sm font-normal text-zinc-500 ml-2">({cards.length})</span></h2>
+                                        <div className="h-px bg-zinc-800/80 flex-1 ml-2 group-hover:bg-emerald-500/20 transition-colors" />
+                                    </button>
+                                    <button
+                                        onClick={() => launchSession(cards, category)}
+                                        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700/60 bg-zinc-800/50 hover:bg-zinc-700/60 text-zinc-400 hover:text-emerald-400 text-xs font-medium transition-colors"
+                                    >
+                                        <Zap size={12} />
+                                        Practice
+                                    </button>
+                                </div>
 
                                 <AnimatePresence initial={false}>
                                     {!isCollapsed && (
@@ -191,6 +263,7 @@ export const SyntaxReference: React.FC = () => {
                     })
                 )}
             </div>
-        </div >
+        </div>
+        </>
     );
 };

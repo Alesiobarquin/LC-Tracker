@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
-import { Clock, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
 
@@ -16,7 +16,7 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
     const { syntaxProgress, logSyntaxPractice } = useSyntaxProgress();
 
     const progress = syntaxProgress[card.id];
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         if (isPracticeMode && inputRef.current) {
@@ -128,35 +128,35 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
                     <div>
                         <div className="text-xs font-medium text-emerald-500 mb-2 tracking-wider">TYPE THE SYNTAX:</div>
 
-                        {/* Diff View */}
-                        <div className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm min-h-[4rem] flex flex-wrap break-all items-center shadow-inner relative">
-                            {userInput.length === 0 && <span className="text-zinc-600 italic absolute">Start typing...</span>}
-                            {renderDiff()}
+                        <div className="rounded-lg border border-zinc-800 bg-zinc-950 shadow-inner overflow-hidden focus-within:border-emerald-500/40 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-colors">
+                            <textarea
+                                ref={inputRef}
+                                value={userInput}
+                                onChange={(e) => {
+                                    if (e.target.value.includes('\n')) {
+                                        setHasSubmitted(true);
+                                        return;
+                                    }
+                                    setUserInput(e.target.value);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        if (userInput.length > 0) setHasSubmitted(true);
+                                    }
+                                }}
+                                className="w-full min-h-[5.5rem] bg-transparent px-3 py-3 text-sm text-zinc-100 font-mono placeholder:text-zinc-600 focus:outline-none resize-none border-0"
+                                placeholder="Type the syntax from memory…"
+                                spellCheck={false}
+                                autoComplete="off"
+                                rows={3}
+                            />
+                            {userInput.length > 0 && (
+                                <div className="border-t border-zinc-800/80 px-3 py-2.5 text-sm flex flex-wrap break-all items-center bg-zinc-950/50">
+                                    {renderDiff()}
+                                </div>
+                            )}
                         </div>
-
-                        <textarea
-                            ref={inputRef as any}
-                            value={userInput}
-                            onChange={(e) => {
-                                // Prevent multi-line enter
-                                if (e.target.value.includes('\n')) {
-                                    setHasSubmitted(true);
-                                    return;
-                                }
-                                setUserInput(e.target.value);
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    if (userInput.length > 0) setHasSubmitted(true);
-                                }
-                            }}
-                            className="mt-3 w-full bg-zinc-950 border border-zinc-700/50 rounded-lg px-3 py-2 text-zinc-100 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors font-mono resize-none shadow-inner"
-                            placeholder="e.g. res = s.replace('old', 'new')"
-                            spellCheck={false}
-                            autoComplete="off"
-                            rows={2}
-                        />
                     </div>
 
                     <div className={clsx(

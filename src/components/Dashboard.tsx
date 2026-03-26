@@ -10,10 +10,10 @@ import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, SPRINT_DESCRIPTIONS, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
+import { computeReviewProblems, getEstimatedMinutesByDifficulty, getReservedProblemIds } from '../utils/progressHelpers';
 import { DashboardSkeleton } from './loadingSkeletons';
+import type { Difficulty } from '../data/problems';
 
-const DEFAULT_NEW_MINUTES = 20;
-const DEFAULT_REVIEW_MINUTES = 10;
 const MIN_DATA_POINTS = 3;
 
 
@@ -89,7 +89,7 @@ export const Dashboard: React.FC = () => {
   const {
     newProblem,
     additionalProblems,
-    reviewProblems,
+    allDueReviewIds,
     coldSolveProblem,
     dueSyntaxCards,
     recommendationReason,
@@ -110,8 +110,10 @@ export const Dashboard: React.FC = () => {
         activityLog,
         sprintState,
         categoryStruggling,
+        categoryAvgSolveTimes,
+        categoryAvgReviewTimes,
       }),
-    [progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog, sprintState, categoryStruggling]
+    [progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog, sprintState, categoryStruggling, categoryAvgSolveTimes, categoryAvgReviewTimes]
   );
 
   const [retroTimedOut, setRetroTimedOut] = useState(false);
@@ -125,20 +127,53 @@ export const Dashboard: React.FC = () => {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneDismissed, setMilestoneDismissed] = useState(false);
 
-  // Resolve the recommended new problem, excluding any the user has skipped this session
+  // Resolve the recommended new problem, excluding any the user has skipped this session.
+  // In sprint mode, skips stay within the sprint category so the drill focus is preserved.
   const effectiveNewProblemId = useMemo(() => {
     if (!newProblem) return null;
     if (!skippedNewProblemIds.has(newProblem)) return newProblem;
-    // Find the next unsolved problem not in the skip set
+
     const solvedIds = new Set(Object.keys(progress));
+    const reservedIds = getReservedProblemIds();
     const phase = getPhase();
+
+    if (sprintCategory && sprintState?.sprintStatus === 'active') {
+      // Stay inside the sprint category — skipping should give the next sprint problem
+      const sprintCandidates = problems.filter(p =>
+        p.category === sprintCategory &&
+        p.isNeetCode75 &&
+        !solvedIds.has(p.id) &&
+        !skippedNewProblemIds.has(p.id) &&
+        !reservedIds.has(p.id)
+      );
+      return sprintCandidates.length > 0 ? sprintCandidates[0].id : null;
+    }
+
+    // Random mode: next unsolved from the full target list
     const allCandidates = problems.filter(p =>
       (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) &&
       !solvedIds.has(p.id) &&
-      !skippedNewProblemIds.has(p.id)
+      !skippedNewProblemIds.has(p.id) &&
+      !reservedIds.has(p.id)
     );
     return allCandidates.length > 0 ? allCandidates[0].id : null;
-  }, [newProblem, skippedNewProblemIds, progress]);
+  }, [newProblem, skippedNewProblemIds, progress, sprintCategory, sprintState]);
+
+  // Recompute the review list whenever the effective new problem changes.
+  // This means skipping a Hard→Medium immediately frees time for more reviews.
+  const effectiveReviewProblems = useMemo(() =>
+    computeReviewProblems({
+      allDueReviewIds,
+      newProblemId: effectiveNewProblemId,
+      additionalProblemIds: additionalProblems,
+      coldSolveProblemId: coldSolveProblem,
+      dueSyntaxCardCount: dueSyntaxCards.length,
+      settings,
+      categoryAvgSolveTimes,
+      categoryAvgReviewTimes,
+    }),
+    [allDueReviewIds, effectiveNewProblemId, additionalProblems, coldSolveProblem, dueSyntaxCards.length, settings, categoryAvgSolveTimes, categoryAvgReviewTimes]
+  );
 
   // Clean up sprint check state
   useEffect(() => {
@@ -153,49 +188,56 @@ export const Dashboard: React.FC = () => {
   }
 
   const newProblemData = effectiveNewProblemId ? problems.find(p => p.id === effectiveNewProblemId) : null;
-  const reviewProblemsData = reviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
+  const reviewProblemsData = effectiveReviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
   const coldSolveData = coldSolveProblem ? problems.find(p => p.id === coldSolveProblem) : null;
   const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
 
   // ── Dynamic Time Estimates ───────────────────────────────────────────────
-  const getNewProblemMinutes = (category?: string): { minutes: number; isDefault: boolean } => {
-    if (!category) return { minutes: DEFAULT_NEW_MINUTES, isDefault: true };
+  const getNewProblemMinutes = (category?: string, difficulty?: Difficulty): { minutes: number; isDefault: boolean } => {
+    const defaultMinutes = getEstimatedMinutesByDifficulty(difficulty ?? 'Medium', true);
+    if (!category) return { minutes: defaultMinutes, isDefault: true };
     const data = categoryAvgSolveTimes[category];
-    if (!data || data.count < MIN_DATA_POINTS) return { minutes: DEFAULT_NEW_MINUTES, isDefault: true };
+    if (!data || data.count < MIN_DATA_POINTS) return { minutes: defaultMinutes, isDefault: true };
     return { minutes: Math.round(data.totalSeconds / data.count / 60), isDefault: false };
   };
 
-  const getReviewMinutes = (category?: string): { minutes: number; isDefault: boolean } => {
-    if (!category) return { minutes: DEFAULT_REVIEW_MINUTES, isDefault: true };
+  const getReviewMinutes = (category?: string, difficulty?: Difficulty): { minutes: number; isDefault: boolean } => {
+    const defaultMinutes = getEstimatedMinutesByDifficulty(difficulty ?? 'Medium', false);
+    if (!category) return { minutes: defaultMinutes, isDefault: true };
     const data = categoryAvgReviewTimes[category];
-    if (!data || data.count < MIN_DATA_POINTS) return { minutes: DEFAULT_REVIEW_MINUTES, isDefault: true };
+    if (!data || data.count < MIN_DATA_POINTS) return { minutes: defaultMinutes, isDefault: true };
     return { minutes: Math.round(data.totalSeconds / data.count / 60), isDefault: false };
   };
 
   const timeItems: { label: string; minutes: number; isDefault: boolean }[] = [];
 
   if (newProblemData) {
-    const est = getNewProblemMinutes(newProblemData.category);
+    const est = getNewProblemMinutes(newProblemData.category, newProblemData.difficulty);
     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
   additionalProblems.forEach(id => {
     const prob = problems.find(p => p.id === id);
     if (prob) {
-      const est = getNewProblemMinutes(prob.category);
+      const est = getNewProblemMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
-  reviewProblems.forEach(id => {
+  effectiveReviewProblems.forEach(id => {
     const prob = problems.find(p => p.id === id);
     if (prob) {
-      const est = getReviewMinutes(prob.category);
+      const est = getReviewMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
   if (coldSolveData) {
-    const est = getNewProblemMinutes(coldSolveData.category);
+    const est = getNewProblemMinutes(coldSolveData.category, coldSolveData.difficulty);
     timeItems.push({ label: `1 cold solve (${coldSolveData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
+
+  const todayIsWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+  const todayTargetMinutes = todayIsWeekend
+    ? settings.studySchedule.weekendMinutes
+    : settings.studySchedule.weekdayMinutes;
 
   const totalTime = timeItems.reduce((sum, t) => sum + t.minutes, 0);
   const hasRealData = timeItems.some(t => !t.isDefault);
@@ -703,11 +745,11 @@ export const Dashboard: React.FC = () => {
           <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
               <RotateCcw size={20} className="text-amber-400" />
-              Spaced Repetition Reviews ({reviewProblemsData.length}{(totalDueReviews && totalDueReviews > 5) ? ` of ${totalDueReviews}` : ''})
+              Spaced Repetition Reviews ({reviewProblemsData.length}{totalDueReviews > reviewProblemsData.length ? ` of ${totalDueReviews}` : ''})
             </h2>
-            {(totalDueReviews && totalDueReviews > 5) ? (
+            {totalDueReviews > reviewProblemsData.length ? (
               <p className="text-sm text-zinc-400 mb-4 bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg">
-                <span className="text-amber-400 font-semibold">{totalDueReviews - 5} review{(totalDueReviews - 5) !== 1 ? 's' : ''} deferred</span> to tomorrow to maintain a healthy workload. The 5 hardest problems are prioritized.
+                <span className="text-amber-400 font-semibold">{totalDueReviews - reviewProblemsData.length} review{(totalDueReviews - reviewProblemsData.length) !== 1 ? 's' : ''} deferred</span> to keep today's session within your <span className="text-amber-400 font-semibold">{todayTargetMinutes}min</span> target. Weakest and most overdue problems shown first.
               </p>
             ) : null}
             {reviewProblemsData.length > 0 ? (
@@ -716,7 +758,7 @@ export const Dashboard: React.FC = () => {
                   if (!prob) return null;
                   const probProgress = progress[prob.id];
                   const lastRating = probProgress?.history[probProgress.history.length - 1]?.rating;
-                  const reviewEst = getReviewMinutes(prob.category);
+                  const reviewEst = getReviewMinutes(prob.category, prob.difficulty);
                   return (
                     <div key={prob.id} className="premium-card p-4 flex items-center justify-between group">
                       <div className="flex-1 min-w-0">
@@ -925,7 +967,7 @@ export const Dashboard: React.FC = () => {
             <div className="premium-card p-5">
               <h3 className="font-semibold text-zinc-100 mb-3 flex items-center gap-2 text-sm">
                 <Clock size={16} className="text-emerald-400" />
-                Time Breakdown
+                Estimated Time Breakdown
               </h3>
               <div className="space-y-2">
                 {timeItems.map((item, i) => (

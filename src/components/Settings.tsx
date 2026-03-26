@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
-import { Settings as SettingsIcon, Clock, Brain, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Lock, Unlock } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Lock, Unlock, Shuffle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
+
+function formatMinutes(minutes: number): string {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (mins === 0) return `${hours} hr`;
+    return `${hours} hr ${mins} min`;
+}
 
 export const Settings: React.FC = () => {
     const {
@@ -163,75 +171,92 @@ export const Settings: React.FC = () => {
                             <Swords className="text-indigo-400" size={20} />
                             Learning Strategy
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-6">Choose how you want to progress through the problem sets.</p>
+                        <p className="text-sm text-zinc-400 mb-5">Choose how you want to progress through the problem sets.</p>
 
                         <div className="space-y-6">
-                            <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-xl p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div>
-                                        <p className="text-sm font-medium text-zinc-200">{settings.learningMode === 'SPRINT' ? 'Sprint Mode' : 'Random Mode'}</p>
-                                        <p className="text-xs text-zinc-500 mt-0.5">
-                                            {settings.learningMode === 'SPRINT'
-                                                ? 'Focus intensively on one pattern before advancing.'
-                                                : 'Mix problems from all categories for comprehensive practice.'}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => updateSettings({
-                                            learningMode: settings.learningMode === 'SPRINT' ? 'RANDOM' : 'SPRINT'
-                                        })}
-                                        className={clsx(
-                                            'relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none border',
-                                            settings.learningMode === 'SPRINT'
-                                                ? 'bg-indigo-500 border-indigo-400'
-                                                : 'bg-zinc-700 border-zinc-600'
-                                        )}
-                                        title="Toggle learning mode"
-                                    >
-                                        <span className={clsx(
-                                            'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200',
-                                            settings.learningMode === 'SPRINT' ? 'translate-x-6' : 'translate-x-0'
-                                        )} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-xl p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div>
-                                        <p className="text-sm font-medium text-zinc-200">{settings.sprintSettings?.strictMode ?? true ? 'Strict Sprint Mode' : 'Flexible Mode'}</p>
-                                        <p className="text-xs text-zinc-500 mt-0.5">
-                                            {settings.sprintSettings?.strictMode ?? true
-                                                ? 'New problems locked to the current sprint category.'
-                                                : 'One free-pick per week from any category.'}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => updateSettings({
-                                            sprintSettings: {
-                                                ...(settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0, targetDays: 7 }),
-                                                strictMode: !(settings.sprintSettings?.strictMode ?? true)
-                                            }
-                                        })}
-                                        className={clsx(
-                                            'relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none border',
-                                            (settings.sprintSettings?.strictMode ?? true)
-                                                ? 'bg-indigo-500 border-indigo-400'
-                                                : 'bg-zinc-700 border-zinc-600'
-                                        )}
-                                        title="Toggle sprint mode"
-                                    >
-                                        <span className={clsx(
-                                            'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200',
-                                            (settings.sprintSettings?.strictMode ?? true) ? 'translate-x-6' : 'translate-x-0'
-                                        )} />
-                                    </button>
-                                </div>
-                                {!(settings.sprintSettings?.strictMode ?? true) && (
-                                    <p className="text-xs text-indigo-400">✓ Flexible mode active — you can deviate from sprint once/week via the skip button.</p>
-                                )}
+                            {/* Mode picker — radio cards */}
+                            <div className="grid grid-cols-2 gap-3">
+                                {([ 
+                                    { value: 'SPRINT', icon: Swords, label: 'Sprint Mode', desc: 'Focus intensively on one pattern before advancing.' },
+                                    { value: 'RANDOM', icon: Shuffle, label: 'Random Mode', desc: 'Mix problems from all categories for broad coverage.' },
+                                ] as const).map(({ value, icon: Icon, label, desc }) => {
+                                    const active = settings.learningMode === value;
+                                    return (
+                                        <button
+                                            key={value}
+                                            onClick={() => updateSettings({ learningMode: value })}
+                                            className={clsx(
+                                                'group text-left rounded-xl border p-4 transition-all duration-200 focus:outline-none',
+                                                active
+                                                    ? 'bg-indigo-500/10 border-indigo-500/60 ring-1 ring-indigo-500/40'
+                                                    : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                            )}
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <Icon
+                                                    size={18}
+                                                    className={active ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-400'}
+                                                />
+                                                <span className={clsx(
+                                                    'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors',
+                                                    active ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-600'
+                                                )}>
+                                                    {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                </span>
+                                            </div>
+                                            <p className={clsx('text-sm font-semibold mb-1', active ? 'text-indigo-300' : 'text-zinc-300')}>{label}</p>
+                                            <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+                                        </button>
+                                    );
+                                })}
                             </div>
 
-                            {settings.learningMode === 'SPRINT' && (
+                            {/* Strict / Flexible picker — only relevant when Sprint is active */}
+                            <div className={clsx('space-y-4 transition-opacity duration-200', settings.learningMode !== 'SPRINT' && 'opacity-40 pointer-events-none')}>
+                                <div>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Sprint Discipline</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {([
+                                            { strict: true,  icon: Lock,   label: 'Strict',   desc: 'Problems locked to the current sprint category.' },
+                                            { strict: false, icon: Unlock, label: 'Flexible', desc: 'One free-pick per week from any category.' },
+                                        ] as const).map(({ strict, icon: Icon, label, desc }) => {
+                                            const active = (settings.sprintSettings?.strictMode ?? true) === strict;
+                                            return (
+                                                <button
+                                                    key={label}
+                                                    onClick={() => updateSettings({
+                                                        sprintSettings: {
+                                                            ...(settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0, targetDays: 7 }),
+                                                            strictMode: strict,
+                                                        }
+                                                    })}
+                                                    className={clsx(
+                                                        'group text-left rounded-xl border p-4 transition-all duration-200 focus:outline-none',
+                                                        active
+                                                            ? 'bg-indigo-500/10 border-indigo-500/60 ring-1 ring-indigo-500/40'
+                                                            : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                                    )}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <Icon
+                                                            size={16}
+                                                            className={active ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-400'}
+                                                        />
+                                                        <span className={clsx(
+                                                            'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors',
+                                                            active ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-600'
+                                                        )}>
+                                                            {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                        </span>
+                                                    </div>
+                                                    <p className={clsx('text-sm font-semibold mb-1', active ? 'text-indigo-300' : 'text-zinc-300')}>{label}</p>
+                                                    <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                                 <div>
                                     <div className="flex justify-between mb-2">
                                         <label className="text-sm font-medium text-zinc-300">Target Sprint Length</label>
@@ -253,17 +278,14 @@ export const Settings: React.FC = () => {
                                         <span>7 Days (Balanced)</span>
                                         <span>14 Days (Deep)</span>
                                     </div>
-                                    <p className="text-xs text-zinc-500 mt-2">Explicitly sets the number of days you will spend drilling a single pattern.</p>
                                 </div>
-                            )}
 
-                            {settings.learningMode === 'SPRINT' && (
-                                <div className="pt-4 border-t border-zinc-800/50">
+                                <div className="pt-2 border-t border-zinc-800/50">
                                     <label className="block text-sm font-medium text-zinc-300 mb-2">Jump to Sprint Category</label>
                                     <select
                                         value={sprintState?.currentCategory || ''}
                                         onChange={(e) => setSprintCategory(e.target.value)}
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-indigo-500/50"
                                     >
                                         <optgroup label="Phase 1">
                                             {PHASE_1_CATEGORIES.map(cat => (
@@ -276,9 +298,9 @@ export const Settings: React.FC = () => {
                                             ))}
                                         </optgroup>
                                     </select>
-                                    <p className="text-xs text-zinc-500 mt-2">Forces the sprint to the selected category and resets progress within the category.</p>
+                                    <p className="text-xs text-zinc-500 mt-2">Forces the sprint to the selected category and resets progress within it.</p>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </section>
 
@@ -293,27 +315,37 @@ export const Settings: React.FC = () => {
                             <div>
                                 <div className="flex justify-between mb-2">
                                     <label className="text-sm font-medium text-zinc-300">Weekday Daily Target</label>
-                                    <span className="text-emerald-400 font-medium">{settings.studySchedule.weekdayMinutes} min</span>
+                                    <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekdayMinutes)}</span>
                                 </div>
                                 <input
-                                    type="range" min="20" max="120" step="15"
+                                    type="range" min="15" max="120" step="15"
                                     value={settings.studySchedule.weekdayMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekdayMinutes: parseInt(e.target.value) } })}
                                     className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                                 />
+                                <div className="flex justify-between text-xs text-zinc-600 mt-1">
+                                    <span>15 min</span>
+                                    <span>1 hr</span>
+                                    <span>2 hr</span>
+                                </div>
                             </div>
 
                             <div>
                                 <div className="flex justify-between mb-2">
                                     <label className="text-sm font-medium text-zinc-300">Weekend Daily Target</label>
-                                    <span className="text-emerald-400 font-medium">{settings.studySchedule.weekendMinutes} min</span>
+                                    <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekendMinutes)}</span>
                                 </div>
                                 <input
-                                    type="range" min="20" max="120" step="15"
+                                    type="range" min="15" max="120" step="15"
                                     value={settings.studySchedule.weekendMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekendMinutes: parseInt(e.target.value) } })}
                                     className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                                 />
+                                <div className="flex justify-between text-xs text-zinc-600 mt-1">
+                                    <span>15 min</span>
+                                    <span>1 hr</span>
+                                    <span>2 hr</span>
+                                </div>
                             </div>
 
                             <div>
@@ -323,6 +355,7 @@ export const Settings: React.FC = () => {
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, restDay: parseInt(e.target.value) } })}
                                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
                                 >
+                                    <option value={-1}>None — study every day</option>
                                     {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, idx) => (
                                         <option key={idx} value={idx}>{day}</option>
                                     ))}
@@ -413,105 +446,103 @@ export const Settings: React.FC = () => {
 
                     {/* Target Company Tier */}
                     <section className="premium-card p-6">
-                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
+                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
                             <Target className="text-red-400" size={20} />
                             Target Company Tier
                         </h2>
-                        <select
-                            value={settings.targetCompanyTier}
-                            onChange={(e) => updateSettings({ targetCompanyTier: e.target.value as any })}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
-                        >
-                            <option value="FAANG">FAANG Level</option>
-                            <option value="FINTECH">Fintech (Amex, Stripe, etc)</option>
-                            <option value="GENERAL">General SWE</option>
-                            <option value="MIXED">Mixed (Balanced)</option>
-                        </select>
+                        <p className="text-sm text-zinc-400 mb-5">Adjusts the Easy / Medium / Hard problem ratio assigned to you.</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {([
+                                { value: 'FAANG',   label: 'FAANG',   sub: 'Big Tech' },
+                                { value: 'FINTECH', label: 'Fintech',  sub: 'Amex, Stripe…' },
+                                { value: 'GENERAL', label: 'General',  sub: 'SWE roles' },
+                                { value: 'MIXED',   label: 'Mixed',    sub: 'Balanced' },
+                            ] as const).map(({ value, label, sub }) => {
+                                const active = settings.targetCompanyTier === value;
+                                return (
+                                    <button
+                                        key={value}
+                                        onClick={() => updateSettings({ targetCompanyTier: value })}
+                                        className={clsx(
+                                            'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                            active
+                                                ? 'bg-red-500/10 border-red-500/50 ring-1 ring-red-500/30'
+                                                : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                        )}
+                                    >
+                                        <p className={clsx('text-sm font-semibold', active ? 'text-red-300' : 'text-zinc-300')}>{label}</p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
                         {renderTierBar()}
                     </section>
 
                     {/* Interview Type & Spaced Repetition */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <section className="premium-card p-6 border-amber-500/20">
-                            <h2 className="text-zinc-100 font-medium flex gap-2 items-center mb-4">
+                            <h2 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
                                 <Briefcase className="text-amber-400" size={18} />
                                 Interview Type
                             </h2>
+                            <p className="text-xs text-zinc-500 mb-4">Calibrates problem difficulty expectations.</p>
                             <div className="flex flex-col gap-2">
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="radio" name="int-type" value="INTERNSHIP"
-                                        checked={settings.interviewType === 'INTERNSHIP'}
-                                        onChange={() => updateSettings({ interviewType: 'INTERNSHIP' })}
-                                        className="accent-emerald-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm text-zinc-300">Internship</span>
-                                </label>
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="radio" name="int-type" value="FULL_TIME"
-                                        checked={settings.interviewType === 'FULL_TIME'}
-                                        onChange={() => updateSettings({ interviewType: 'FULL_TIME' })}
-                                        className="accent-emerald-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm text-zinc-300">Full Time</span>
-                                </label>
+                                {([
+                                    { value: 'INTERNSHIP', label: 'Internship', sub: 'Easier warmup problems' },
+                                    { value: 'FULL_TIME',  label: 'Full Time',  sub: 'Full difficulty range' },
+                                ] as const).map(({ value, label, sub }) => {
+                                    const active = settings.interviewType === value;
+                                    return (
+                                        <button
+                                            key={value}
+                                            onClick={() => updateSettings({ interviewType: value })}
+                                            className={clsx(
+                                                'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                                active
+                                                    ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
+                                                    : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                            )}
+                                        >
+                                            <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
+                                            <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </section>
 
                         <section className="premium-card p-6 border-purple-500/20">
-                            <h2 className="text-zinc-100 font-medium flex gap-2 items-center mb-4">
+                            <h2 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
                                 <Zap className="text-purple-400" size={18} />
                                 Spaced Repetition
                             </h2>
+                            <p className="text-xs text-zinc-500 mb-4">Controls how soon solved problems resurface for review.</p>
                             <div className="flex flex-col gap-2">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <input
-                                        type="radio" name="sr-agg" value="RELAXED"
-                                        checked={settings.srAggressiveness === 'RELAXED'}
-                                        onChange={() => updateSettings({ srAggressiveness: 'RELAXED' })}
-                                        className="accent-emerald-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm text-zinc-300 group-hover:text-emerald-400">Relaxed</span>
-                                </label>
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <input
-                                        type="radio" name="sr-agg" value="AGGRESSIVE"
-                                        checked={settings.srAggressiveness === 'AGGRESSIVE'}
-                                        onChange={() => updateSettings({ srAggressiveness: 'AGGRESSIVE' })}
-                                        className="accent-emerald-500 w-4 h-4"
-                                    />
-                                    <span className="text-sm text-zinc-300 group-hover:text-emerald-400">Aggressive</span>
-                                </label>
+                                {([
+                                    { value: 'RELAXED',    label: 'Relaxed',    sub: 'Longer review intervals' },
+                                    { value: 'AGGRESSIVE', label: 'Aggressive', sub: 'Frequent re-testing' },
+                                ] as const).map(({ value, label, sub }) => {
+                                    const active = settings.srAggressiveness === value;
+                                    return (
+                                        <button
+                                            key={value}
+                                            onClick={() => updateSettings({ srAggressiveness: value })}
+                                            className={clsx(
+                                                'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                                active
+                                                    ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30'
+                                                    : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                            )}
+                                        >
+                                            <p className={clsx('text-sm font-semibold', active ? 'text-purple-300' : 'text-zinc-300')}>{label}</p>
+                                            <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </section>
                     </div>
-
-                    {/* Skill Level */}
-                    <section className="premium-card p-6">
-                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
-                            <Brain className="text-pink-400" size={20} />
-                            Skill Assessments
-                        </h2>
-                        <p className="text-sm text-zinc-400 mb-4">Rate your familiarity with Phase 1 topics to adjust pacing estimates and early-phase problem recommendations.</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {PHASE_1_CATEGORIES.map(category => (
-                                <div key={category} className="bg-zinc-950/50 border border-zinc-800/50 p-3 rounded-xl">
-                                    <label className="block text-xs font-semibold text-zinc-300 mb-2 truncate" title={category}>{category}</label>
-                                    <select
-                                        value={settings.skillLevels[category] || 'not_familiar'}
-                                        onChange={(e) => updateSettings({ skillLevels: { ...settings.skillLevels, [category]: e.target.value as any } })}
-                                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500/50"
-                                    >
-                                        <option value="not_familiar">Not familiar</option>
-                                        <option value="some_exposure">Some exposure</option>
-                                        <option value="comfortable">Comfortable</option>
-                                    </select>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
 
                     {/* Programming Language */}
                     <section className="premium-card p-6">
@@ -531,11 +562,11 @@ export const Settings: React.FC = () => {
                         <p className="text-xs text-zinc-500 mt-2">Sets the default language everywhere, including Mock Interview IDE.</p>
                     </section>
 
-                    {/* Export backup */}
+                    {/* Export Backup */}
                     <section className="premium-card p-6 border-emerald-500/20">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
                             <Download className="text-emerald-400" size={20} />
-                            Export backup
+                            Export Backup
                         </h2>
                         <p className="text-sm text-zinc-400 mb-5">
                             Progress and settings are saved to your account. Download JSON anytime for an extra offline copy or to move your data between environments.
@@ -550,7 +581,6 @@ export const Settings: React.FC = () => {
                         </button>
                         <p className="text-xs text-zinc-500 mt-3">Includes progress, settings, activity, and sprint state in one file.</p>
                     </section>
-
             </div>
         </div>
     );

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut, MessageSquarePlus, Shield } from 'lucide-react';
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
 import { getPhase } from '../utils/dateUtils';
 import { motion } from 'motion/react';
 import { useUserSettings } from '../hooks/useUserData';
-import { useAuth } from './AuthProvider';
+import { useUser, useClerk } from '@clerk/clerk-react';
+import { FeedbackModal } from './FeedbackModal';
+import { Logo } from './Logo';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,7 +17,10 @@ interface LayoutProps {
 }
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { signOut } = useAuth();
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const isAdmin = user?.id === import.meta.env.VITE_ADMIN_USER_ID;
   const { targetInterviewDate, targetEvents } = useUserSettings();
   const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
   const phase = getPhase();
@@ -47,7 +52,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950 sticky top-0 z-50">
-        <div className="font-bold text-xl tracking-tight text-emerald-400">LC Tracker</div>
+        <div className="flex items-center gap-2">
+          <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
+          <div className="font-bold text-xl tracking-tight text-emerald-400">LC Tracker</div>
+        </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -59,7 +67,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 hidden md:block">
-          <div className="font-bold text-2xl tracking-tight text-emerald-400">LC Tracker</div>
+          <div className="flex items-center gap-3">
+            <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={32} />
+            <div className="font-bold text-2xl tracking-tight text-emerald-400">LC Tracker</div>
+          </div>
         </div>
 
         <nav className="mt-2 px-4 space-y-1 flex-1">
@@ -134,14 +145,36 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => void signOut()}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
-          >
-            <LogOut size={16} />
-            Sign out
-          </button>
+          <div className="space-y-2">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => window.location.href = '/admin'}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+              >
+                <Shield size={16} />
+                Admin Panel
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setIsFeedbackOpen(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
+            >
+              <MessageSquarePlus size={16} />
+              Get Something Fixed
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
+            >
+              <LogOut size={16} />
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
 
@@ -160,6 +193,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
       {/* Floating active session indicator — visible on every page */}
       <FloatingSessionIndicator setActiveTab={setActiveTab} />
+      
+      {/* Absolute Viewport Modal (fixes scrolling issues) */}
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </div>
   );
 };

@@ -28,6 +28,7 @@ export interface SyntaxProgress {
   nextReviewAt: string;
   confidenceRating: number;
   reviewCount: number;
+  consecutiveSuccesses?: number;
 }
 
 export interface ActivityLogEntry {

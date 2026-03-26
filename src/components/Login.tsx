@@ -36,8 +36,8 @@ export function Login() {
             <h1 className="text-[1.75rem] font-bold font-mono tracking-tight text-white leading-none mb-2">
               LC Tracker
             </h1>
-            <p className="text-zinc-500 text-[13px] leading-relaxed max-w-[220px]">
-              Your personal LeetCode progress companion
+            <p className="text-zinc-500 text-[13px] leading-relaxed max-w-[240px]">
+              Track your LeetCode problem-solving progress, review solved problems with spaced repetition, and prepare for technical interviews.
             </p>
           </div>
         </div>

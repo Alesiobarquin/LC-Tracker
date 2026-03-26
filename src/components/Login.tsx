@@ -14,6 +14,13 @@ export function Login() {
         }}
       />
 
+      <a
+        href="/"
+        className="absolute top-5 left-6 z-20 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+      >
+        ← Back
+      </a>
+
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10">
         {/* Logo + wordmark */}
         <div className="flex flex-col items-center gap-5">

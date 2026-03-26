@@ -8,6 +8,7 @@ import { SyntaxReference } from './components/SyntaxReference';
 import { Settings } from './components/Settings';
 import { Onboarding } from './components/Onboarding';
 import { Login } from './components/Login';
+import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
 import { useUser } from '@clerk/clerk-react';
 import { useUserSettings } from './hooks/useUserData';
@@ -31,9 +32,15 @@ export default function App() {
   };
 
   const path = window.location.pathname;
+
+  // Public routes — no auth needed
   if (path === '/privacy') return <PrivacyPolicy />;
   if (path === '/terms') return <TermsOfService />;
 
+  // Landing page — show immediately without waiting for auth
+  if (path === '/' && authLoaded && !user) return <LandingPage />;
+
+  // Auth loading state
   if (!authLoaded || (user && settingsLoading)) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-6">
@@ -54,8 +61,11 @@ export default function App() {
     );
   }
 
+  // Not logged in — /login shows the sign-in widget, everything else goes to landing
   if (!user) {
-    return <Login />;
+    if (path === '/login') return <Login />;
+    window.location.href = '/';
+    return null;
   }
 
   if (path === '/admin') {

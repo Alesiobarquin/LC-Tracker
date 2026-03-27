@@ -48,7 +48,11 @@ const clerkAppearance = {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ClerkProvider publishableKey={clerkPubKey || ''} afterSignOutUrl="/" appearance={clerkAppearance}>
+      <ClerkProvider 
+        publishableKey={clerkPubKey || ''} 
+        afterSignOutUrl="/"
+        appearance={clerkAppearance}
+      >
         <App />
       </ClerkProvider>
     </QueryClientProvider>

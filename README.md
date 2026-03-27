@@ -2,6 +2,8 @@
 
 View Live: [https://lc-tracker.app/](https://lc-tracker.app/)
 
+![LC-Tracker Dashboard](./Dashboard.png)
+
 ## Why I Built This
 
 I am a student who knows I need consistent LeetCode practice to get interview-ready.
@@ -33,7 +35,6 @@ The first version was a local tool using browser cache for my own prep. Once a f
   
 - **In-app feedback submission**: Users can submit bugs or feature ideas directly from the app, including screenshots when needed.
 
-![LC-Tracker Dashboard](./Dashboard.png)
 
 ## Tech Stack And Technologies Used
 

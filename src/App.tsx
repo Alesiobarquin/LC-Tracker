@@ -24,7 +24,7 @@ function RealtimeSyncHost({ userId }: { userId: string | null }) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { onboardingComplete, isLoading: settingsLoading } = useUserSettings();
+  const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
 
   const handleOnboardingComplete = () => {
@@ -40,8 +40,10 @@ export default function App() {
   // Landing page — show immediately without waiting for auth
   if (path === '/' && authLoaded && !user) return <LandingPage />;
 
-  // Auth loading state
-  if (!authLoaded || (user && settingsLoading)) {
+  // Auth loading state — bail out of loading if settings errored (prevents infinite hang)
+  const showLoading = !authLoaded || (user && settingsLoading && !settingsError);
+
+  if (showLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-6">
         <div className="flex flex-col items-center gap-4 animate-in">

@@ -11,7 +11,8 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
   global: {
     fetch: async (url, options: RequestInit = {}) => {
       // @ts-ignore - Clerk injects itself onto the window object
-      const clerkToken = await window.Clerk?.session?.getToken({ template: 'supabase' });
+      // Third-Party Auth (JWKS): use the standard Clerk JWT — no template needed.
+      const clerkToken = await window.Clerk?.session?.getToken();
 
       // Build Headers safely
       const headers = new Headers(options?.headers);

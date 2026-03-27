@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut, MessageSquarePlus, Shield } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut, MessageSquarePlus, Shield, Sparkles } from 'lucide-react';
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
@@ -8,7 +8,9 @@ import { motion } from 'motion/react';
 import { useUserSettings } from '../hooks/useUserData';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { FeedbackModal } from './FeedbackModal';
+import { FeaturesModal } from './FeaturesModal';
 import { Logo } from './Logo';
+import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants/featuresModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,6 +20,8 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const featuresAutoOpenRef = useRef(false);
   const { user } = useUser();
   const { signOut } = useClerk();
   const isAdmin = user?.id === import.meta.env.VITE_ADMIN_USER_ID;
@@ -34,6 +38,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'dashboard') return;
+    if (featuresAutoOpenRef.current) return;
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(FEATURES_MODAL_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    if (stored === FEATURES_MODAL_VERSION) return;
+    featuresAutoOpenRef.current = true;
+    setIsFeaturesOpen(true);
+  }, [activeTab]);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -159,6 +177,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
             <button
               type="button"
+              onClick={() => {
+                setIsFeaturesOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-colors"
+            >
+              <Sparkles size={16} />
+              Features
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsFeedbackOpen(true)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
             >
@@ -195,6 +225,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       <FloatingSessionIndicator setActiveTab={setActiveTab} />
       
       {/* Absolute Viewport Modal (fixes scrolling issues) */}
+      <FeaturesModal
+        isOpen={isFeaturesOpen}
+        onClose={() => setIsFeaturesOpen(false)}
+        setActiveTab={setActiveTab}
+      />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </div>
   );

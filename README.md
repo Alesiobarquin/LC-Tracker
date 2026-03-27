@@ -18,12 +18,19 @@ The first version was a local tool using browser cache for my own prep. Once a f
 ## Key Features
 
 - **Spaced repetition for LeetCode problems**: Every problem can be reviewed on a schedule based on your past performance, so you spend more time where retention is weakest.
+  
 - **Structured sprint-based preparation**: Study in focused sprints with clear progress, pacing, and historical sprint context instead of random daily problem picking.
+  
 - **Problem library and filtering**: Browse and search problems by topic and difficulty, then quickly see what is solved, active, or needs review.
+  
 - **Progress analytics and mastery trends**: Visual analytics highlight completion patterns and weaker categories so your next study block is data-driven.
+  
 - **Session timing and review history**: Track how long sessions take and how your confidence changes over time for each problem.
+  
 - **Onboarding and study setup**: New users can define goals and preferences quickly, then start with an actionable plan.
+  
 - **Cross-device accounts and sync**: Sign in once and continue your prep from different devices without losing history.
+  
 - **In-app feedback submission**: Users can submit bugs or feature ideas directly from the app, including screenshots when needed.
 
 ## Tech Stack And Technologies Used

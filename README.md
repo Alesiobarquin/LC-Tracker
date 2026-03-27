@@ -1,6 +1,6 @@
 # LC-Tracker 🚀
 
-View Live: [lc-tracker-alpha.vercel.app](https://lc-tracker-alpha.vercel.app/)
+View Live: [https://lc-tracker.app/](https://lc-tracker.app/)
 
 ## Why I Built This
 

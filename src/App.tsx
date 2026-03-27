@@ -10,7 +10,7 @@ import { Onboarding } from './components/Onboarding';
 import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { useUserSettings } from './hooks/useUserData';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
@@ -36,6 +36,7 @@ export default function App() {
   // Public routes — no auth needed
   if (path === '/privacy') return <PrivacyPolicy />;
   if (path === '/terms') return <TermsOfService />;
+  if (path === '/sso-callback') return <AuthenticateWithRedirectCallback />;
 
   // Landing page — show immediately without waiting for auth
   if (path === '/' && authLoaded && !user) return <LandingPage />;

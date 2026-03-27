@@ -1,8 +1,49 @@
-import React from 'react';
-import { SignIn } from '@clerk/clerk-react';
+import React, { useState } from 'react';
+import { useSignIn } from '@clerk/clerk-react';
 import { Logo } from './Logo';
 
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path
+        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+        fill="#4285F4"
+      />
+      <path
+        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+        fill="#34A853"
+      />
+      <path
+        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
+
 export function Login() {
+  const { signIn, isLoaded } = useSignIn();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    if (!isLoaded || !signIn) return;
+    setIsLoading(true);
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: `${window.location.origin}/`,
+      });
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 overflow-hidden">
       {/* Ambient glow — gives the page depth */}
@@ -49,9 +90,9 @@ export function Login() {
           </div>
         </div>
 
-        {/* Clerk card */}
+        {/* Sign-in card */}
         <div
-          className="w-full rounded-2xl overflow-hidden"
+          className="w-full rounded-2xl p-6"
           style={{
             background: 'linear-gradient(160deg, #1c1c1f 0%, #141416 100%)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -59,76 +100,24 @@ export function Login() {
               '0 0 0 1px rgba(0,0,0,0.6), 0 24px 64px -12px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.06)',
           }}
         >
-          <SignIn
-            routing="hash"
-            appearance={{
-              variables: {
-                colorBackground: '#1a1a1d',
-                colorInputBackground: '#111113',
-                colorText: '#f4f4f5',
-                colorTextSecondary: '#71717a',
-                colorPrimary: '#10b981',
-                colorDanger: '#ef4444',
-                colorInputText: '#f4f4f5',
-                colorNeutral: '#52525b',
-                borderRadius: '10px',
-                fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif',
-                fontSize: '14px',
-                spacingUnit: '16px',
-              },
-              elements: {
-                rootBox: 'w-full',
-                cardBox: 'w-full shadow-none border-0 rounded-none',
-                card: 'shadow-none rounded-none p-0',
-                main: 'p-6',
-                headerTitle: 'hidden',
-                headerSubtitle: 'hidden',
-                header: 'hidden',
-                // Social button — use a visibly lighter surface so it reads clearly
-                socialButtonsBlockButton: {
-                  backgroundColor: '#27272a',
-                  border: '1px solid #3f3f46',
-                  borderRadius: '10px',
-                  height: '44px',
-                  color: '#f4f4f5',
-                  fontWeight: '500',
-                  transition: 'background-color 0.15s, border-color 0.15s',
-                },
-                socialButtonsBlockButtonText: { color: '#f4f4f5', fontWeight: '500' },
-                dividerLine: { backgroundColor: '#27272a' },
-                dividerText: { color: '#52525b', fontSize: '11px', letterSpacing: '0.08em' },
-                formFieldLabel: { color: '#a1a1aa', fontSize: '12px', fontWeight: '600', letterSpacing: '0.04em' },
-                formFieldInput: {
-                  backgroundColor: '#111113',
-                  border: '1px solid #27272a',
-                  borderRadius: '10px',
-                  height: '44px',
-                  color: '#f4f4f5',
-                },
-                formButtonPrimary: {
-                  backgroundColor: '#10b981',
-                  borderRadius: '10px',
-                  height: '44px',
-                  color: '#052e16',
-                  fontWeight: '600',
-                  boxShadow: '0 4px 20px -4px rgba(16,185,129,0.4)',
-                },
-                footerAction: {
-                  backgroundColor: '#111113',
-                  borderTop: '1px solid #27272a',
-                  padding: '14px 24px',
-                },
-                footerActionText: { color: '#52525b', fontSize: '12px' },
-                footerActionLink: { color: '#34d399', fontWeight: '600' },
-                identityPreviewText: { color: '#d4d4d8' },
-                identityPreviewEditButtonIcon: { color: '#34d399' },
-                // Hide the development mode badge
-                badge: { display: 'none' },
-                // Hide the "Secured by Clerk" footer branding in dev
-                footer: { display: 'none' },
-              },
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={!isLoaded || isLoading}
+            className="w-full flex items-center justify-center gap-3 h-11 rounded-[10px] font-medium text-[14px] text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: '#27272a',
+              border: '1px solid #3f3f46',
             }}
-          />
+            onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#3f3f46'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#27272a'; }}
+          >
+            {isLoading ? (
+              <span className="w-4 h-4 rounded-full border-2 border-zinc-600 border-t-zinc-300 animate-spin" />
+            ) : (
+              <GoogleIcon />
+            )}
+            {isLoading ? 'Redirecting…' : 'Continue with Google'}
+          </button>
         </div>
       </div>
 

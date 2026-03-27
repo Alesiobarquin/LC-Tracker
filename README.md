@@ -1,69 +1,75 @@
 # LC-Tracker 🚀
 
-LC-Tracker is a comprehensive LeetCode tracking and study application designed to help users prepare for coding interviews through structured sprints, data-driven analytics, and an integrated AI-powered mock interview environment.
-
 View Live: [lc-tracker-alpha.vercel.app](https://lc-tracker-alpha.vercel.app/)
 
-## ✨ Key Features
+## Why I Built This
 
-- **📊 Advanced Analytics**: Track your progress with detailed charts, sprint history, and category-level mastery badges.
-- **🎯 Structured Sprints**: Follow a guided study schedule with adaptive pacing and problem recommendations.
-- **🤖 AI Mock Interviews**: Practice in an integrated coding environment (Python/JS) with real-time feedback and solution analysis powered by Google Gemini.
-- **🏠 Intelligent Dashboard**: Stay focused with daily goals, problem timers, and quick access to your current sprint.
-- **📚 Problem Library**: Browse and filter a curated list of LeetCode problems categorized by difficulty and topic.
-- **⌨️ Syntax Reference**: Quick-access cards for common data structures and algorithms in Python and JavaScript.
-- **🚀 Seamless Onboarding**: Get started quickly with a guided setup process for your study goals and skill levels.
+I am a student who knows I need consistent LeetCode practice to get interview-ready.
 
-## 🛠 Tech Stack
+I liked the NeetCode approach, but I still needed a better way to answer two questions every week:
 
-- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Code Editor**: [CodeMirror](https://codemirror.net/)
-- **AI Integration**: [Google Gemini API](https://ai.google.dev/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+- Which problems should I do next?
+- Which problems should I repeat, and when, using spaced repetition?
 
-## 🚀 Getting Started
+I was originally planning to manage this with a spreadsheet, but I realized I wanted something more structured and faster to use every day, so I started building LC-Tracker.
 
-### Prerequisites
+The first version was a local tool using browser cache for my own prep. Once a friend asked to use it too, I decided to turn it into a full web app with real user accounts and cross-device sync.
 
-- **Node.js**: Ensure you have Node.js installed.
-- **Gemini API Key**: You'll need an API key from [Google AI Studio](https://aistudio.google.com/) for mock interview features.
+## Key Features
 
-### Installation
+- **Spaced repetition for LeetCode problems**: Every problem can be reviewed on a schedule based on your past performance, so you spend more time where retention is weakest.
+- **Structured sprint-based preparation**: Study in focused sprints with clear progress, pacing, and historical sprint context instead of random daily problem picking.
+- **Problem library and filtering**: Browse and search problems by topic and difficulty, then quickly see what is solved, active, or needs review.
+- **Progress analytics and mastery trends**: Visual analytics highlight completion patterns and weaker categories so your next study block is data-driven.
+- **Session timing and review history**: Track how long sessions take and how your confidence changes over time for each problem.
+- **Onboarding and study setup**: New users can define goals and preferences quickly, then start with an actionable plan.
+- **Cross-device accounts and sync**: Sign in once and continue your prep from different devices without losing history.
+- **In-app feedback submission**: Users can submit bugs or feature ideas directly from the app, including screenshots when needed.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/alesiobarquin/LC-Tracker.git
-   cd LC-Tracker
-   ```
+## Tech Stack And Technologies Used
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling and UI**: Tailwind CSS 4, Lucide icons, Motion (Framer Motion)
+- **State and data fetching**: Zustand, TanStack React Query
+- **Charts and visualization**: Recharts
+- **Backend and database**: Supabase (PostgreSQL + row level security)
+- **Authentication**: Clerk
+- **Deployment**: Vercel
 
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory and add your Gemini API key:
-   ```env
-   VITE_GEMINI_API_KEY=your_gemini_api_key_here
-   ```
+## Key Takeaways
 
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
+- Building this moved me from ad hoc practice to a repeatable system.
+- Spaced repetition is much easier to follow when scheduling is embedded into the workflow.
+- Local-first prototypes are great for speed, but real usage quickly pushes you toward auth, sync, and better data design.
+- Product feedback from real users changes priorities in a good way and helps focus on what actually improves daily prep.
 
-## 📂 Project Structure
+## Feedback And Requests
 
-- `src/components`: React UI components (Dashboard, Analytics, MockInterview, etc.).
-- `src/store`: Global state management with Zustand.
-- `src/services`: External API integrations (LeetCode, Gemini).
-- `src/data`: Curated problem lists and syntax references.
-- `src/utils`: Helper functions and formatting utilities.
+There is a feedback button in the application where users can send feature requests, bug reports, and improvement ideas.
 
-## 📄 License
+If something feels missing or broken, that button is the fastest path for getting it reviewed and added to the roadmap.
 
-This project is licensed under the Apache-2.0 License.
+## Contributing
+
+To keep support and requests in one place, please use the in-app feedback button for bug reports and feature requests.
+
+When submitting feedback, include:
+
+- What happened
+- What you expected to happen
+- Steps to reproduce
+- A screenshot (if UI-related)
+
+## Project Structure
+
+- `src/components`: Core UI surfaces (dashboard, analytics, settings, and onboarding)
+- `src/store`: Global client state with Zustand
+- `src/hooks`: Realtime and user-data synchronization hooks
+- `src/lib`: Supabase client and query client setup
+- `src/services`: External service integrations
+- `src/data`: Problem datasets and syntax card content
+- `supabase/migrations`: Database schema and migration history
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.

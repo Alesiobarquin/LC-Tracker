@@ -1,4 +1,4 @@
-# LC-Tracker 🚀
+# LC-Tracker <img src="./lc-tracker-logo.svg" alt="LC-Tracker logo" width="26" />
 
 View Live: [https://lc-tracker.app/](https://lc-tracker.app/)
 
@@ -32,6 +32,8 @@ The first version was a local tool using browser cache for my own prep. Once a f
 - **Cross-device accounts and sync**: Sign in once and continue your prep from different devices without losing history.
   
 - **In-app feedback submission**: Users can submit bugs or feature ideas directly from the app, including screenshots when needed.
+
+![LC-Tracker Dashboard](./Dashboard.png)
 
 ## Tech Stack And Technologies Used
 

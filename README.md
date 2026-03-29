@@ -2,8 +2,6 @@
 
 View Live: [https://lc-tracker.app/](https://lc-tracker.app/)
 
-![LC-Tracker Dashboard](./Dashboard.png)
-
 ## Why I Built This
 
 I am a student who knows I need consistent LeetCode practice to get interview-ready.

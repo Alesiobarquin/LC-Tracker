@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useInView, animate } from 'framer-motion';
-import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database } from 'lucide-react';
+import { motion, useInView, animate, useMotionValue, useSpring } from 'framer-motion';
+import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu } from 'lucide-react';
+import { Logo } from './Logo';
 
 // --- MAGNETIC CANVAS BACKGROUND ---
 const MagnetCanvas = () => {
@@ -184,36 +185,37 @@ const ScrambleText = ({ text }: { text: string }) => {
 // --- TYPEWRITER TERMINAL EVENT LOG ---
 const TerminalLog = () => {
     const [logs, setLogs] = useState<{text: string, type: 'info' | 'success' | 'warn' | 'error'}[]>([
-        { text: '> INIT session_tracker...', type: 'info' }
+        { text: '> INIT local_storage_layer...', type: 'info' }
     ]);
     const maxLogs = 6;
 
     useEffect(() => {
         const possibleLogs = [
-            { text: "> SOLVED: Reverse Linked List (Easy) - 3m 12s", type: "success" },
-            { text: "> RATING: OPTIMAL. Pushing review +7 days.", type: "success" },
-            { text: "> FAILED: DP Edge Case detected.", type: "error" },
-            { text: "> RE-SCHEDULING: 2D Matrix Search.", type: "warn" },
-            { text: "> SYNCING: User Data to Cloud...", type: "info" },
-            { text: "> VELOCITY: +14% compared to last week.", type: "info" }
+            { text: "> SOLVED: LRU Cache (Medium) - 12m 04s", type: "success" },
+            { text: "> RATING: OPTIMAL. Pushing review +14 days.", type: "success" },
+            { text: "> FAILED: Cycle detection missing.", type: "error" },
+            { text: "> COMPILING: syntax_tree.ast...", type: "info" },
+            { text: "> RE-SCHEDULING: Graph Traversal.", type: "warn" },
+            { text: "> SYNC: 100% Data integrity verified.", type: "info" },
+            { text: "> VELOCITY: +22% compared to average.", type: "success" }
         ];
 
-        const intervalId = setInterval(() => {
+        let intervalId = setInterval(() => {
             setLogs(prevLogs => {
                 const newLog = possibleLogs[Math.floor(Math.random() * possibleLogs.length)];
                 const updatedLogs = [...prevLogs, newLog as any];
                 if (updatedLogs.length > maxLogs) updatedLogs.shift();
                 return updatedLogs;
             });
-        }, 2200);
+        }, 2500);
 
         return () => clearInterval(intervalId);
     }, []);
 
     return (
-        <div className="bg-[#0c0c0e] border border-zinc-800/80 rounded-xl p-6 font-mono text-sm shadow-2xl relative overflow-hidden h-full group">
+        <div className="bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-6 font-mono text-sm shadow-2xl relative overflow-hidden h-full group">
             {/* Terminal reflection/glare effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
             
             <div className="absolute top-0 left-0 w-full h-10 bg-[#121214] border-b border-zinc-800/80 flex items-center px-4 gap-2 z-10">
                 <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
@@ -226,26 +228,32 @@ const TerminalLog = () => {
             </div>
             
             <div className="mt-8 flex flex-col gap-2 relative z-0">
-                {logs.map((log, i) => (
-                    <motion.div 
-                        key={i + log.text} 
-                        initial={{ opacity: 0, x: -10 }} 
-                        animate={{ opacity: 1, x: 0 }}
-                        className={`
-                            ${log.type === 'error' ? 'text-red-400' : ''}
-                            ${log.type === 'success' ? 'text-emerald-400' : ''}
-                            ${log.type === 'warn' ? 'text-yellow-400' : ''}
-                            ${log.type === 'info' ? 'text-zinc-400' : ''}
-                        `}
-                    >
-                        {log.text}
-                    </motion.div>
-                ))}
-                <motion.div 
-                    animate={{ opacity: [1, 0] }} 
-                    transition={{ repeat: Infinity, duration: 0.8 }}
-                    className="w-2.5 h-4 bg-emerald-500 mt-1"
-                />
+                {logs.map((log, i) => {
+                    const isLast = i === logs.length - 1;
+                    return (
+                        <motion.div 
+                            key={i + log.text} 
+                            initial={{ opacity: 0, x: -10 }} 
+                            animate={{ opacity: 1, x: 0 }}
+                            className={`
+                                ${log.type === 'error' ? 'text-red-400' : ''}
+                                ${log.type === 'success' ? 'text-emerald-400' : ''}
+                                ${log.type === 'warn' ? 'text-yellow-400' : ''}
+                                ${log.type === 'info' ? 'text-zinc-400' : ''}
+                            `}
+                        >
+                            {log.text}
+                            {/* Blinking cursor only on the most recent log */}
+                            {isLast && (
+                                <motion.span 
+                                    animate={{ opacity: [1, 0] }} 
+                                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                                    className="inline-block w-2 h-3.5 bg-emerald-500 ml-2 align-middle -translate-y-[1px]"
+                                />
+                            )}
+                        </motion.div>
+                    )
+                })}
             </div>
         </div>
     );
@@ -275,7 +283,7 @@ const Counter = ({ from, to, suffix = "", duration = 2 }: { from: number, to: nu
 // --- SPACED REPETITION VISUAL ---
 const SpacedRepetitionVisual = () => {
     return (
-        <div className="relative h-full min-h-[250px] border border-zinc-800/80 rounded-xl bg-[#0c0c0e] p-6 overflow-hidden flex items-end">
+        <div className="relative h-full min-h-[250px] border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-6 overflow-hidden flex items-end">
             {/* Grid overlay */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
             
@@ -304,14 +312,14 @@ const SpacedRepetitionVisual = () => {
             
             {/* Flashcard Pop */}
             <motion.div 
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-emerald-500/50 text-emerald-400 px-4 py-2 rounded-md shadow-[0_0_20px_rgba(16,185,129,0.25)] font-mono text-sm z-10 whitespace-nowrap backdrop-blur-md"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-emerald-500/50 text-emerald-400 px-4 py-2 rounded-md shadow-[0_0_30px_rgba(16,185,129,0.25)] font-mono text-sm z-10 whitespace-nowrap backdrop-blur-md"
                 initial={{ scale: 0, opacity: 0, y: 20 }}
                 animate={{ scale: [0, 1.1, 1], opacity: [0, 1, 1, 0], y: [20, 0, 0, -20] }}
                 transition={{ duration: 4, repeat: Infinity, times: [0, 0.1, 0.8, 1], ease: "anticipate" }}
             >
                 <div className="flex gap-2 items-center">
                     <Code2 className="w-4 h-4" />
-                    Review: Reverse Linked List
+                    Review: Topological Sort
                 </div>
             </motion.div>
         </div>
@@ -328,8 +336,10 @@ const HeatmapVisual = () => {
     const days = Array.from({ length: cols * rows });
 
     return (
-        <div ref={containerRef} className="border border-zinc-800/80 rounded-xl bg-[#0c0c0e] p-6 overflow-hidden h-full flex flex-col justify-center">
-            <div className="grid grid-rows-6 grid-flow-col gap-1.5 w-full justify-between overflow-hidden">
+        <div ref={containerRef} className="border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-6 overflow-hidden h-full flex flex-col justify-center relative">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-32 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none"></div>
+            
+            <div className="grid grid-rows-6 grid-flow-col gap-1.5 w-full justify-between overflow-hidden relative z-10">
                 {days.map((_, i) => {
                     const intensity = Math.random();
                      let bgClass = "bg-zinc-800/50";
@@ -353,10 +363,10 @@ const HeatmapVisual = () => {
                     )
                 })}
             </div>
-            <div className="mt-6 flex justify-between text-xs text-zinc-500 font-mono items-center">
-                <span className="flex items-center gap-1.5 border border-zinc-800 px-2 py-1 rounded bg-zinc-900/50 shadow-inner">
+            <div className="mt-6 flex justify-between text-xs text-zinc-500 font-mono items-center relative z-10">
+                <span className="flex items-center gap-1.5 border border-zinc-800 px-2 py-1 rounded bg-zinc-900/80 shadow-inner">
                     <Activity className="w-3 h-3 text-emerald-500" />
-                    Current Streak: <span className="text-emerald-400 font-bold">14 Days</span>
+                    Sprint Streak: <span className="text-emerald-400 font-bold">14 Days</span>
                 </span>
                 <span className="flex gap-1.5 items-center">
                     Less 
@@ -371,29 +381,54 @@ const HeatmapVisual = () => {
     )
 }
 
-// --- GLOWING SPOTLIGHT CARD ---
+// --- GLOWING SPOTLIGHT CARD WITH 3D TILT ---
 const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
     const divRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
 
+    const rotateX = useMotionValue(0);
+    const rotateY = useMotionValue(0);
+    const springX = useSpring(rotateX, { stiffness: 300, damping: 30, mass: 0.8 });
+    const springY = useSpring(rotateY, { stiffness: 300, damping: 30, mass: 0.8 });
+
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!divRef.current) return;
         const rect = divRef.current.getBoundingClientRect();
-        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setPosition({ x, y });
+
+        // Calculate 3D tilt
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        rotateX.set((y - centerY) / -30); // Negative to tilt towards mouse
+        rotateY.set((x - centerX) / 30);
+    };
+
+    const handleMouseLeave = () => {
+        setOpacity(0);
+        rotateX.set(0);
+        rotateY.set(0);
     };
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
+            style={{
+                rotateX: springX,
+                rotateY: springY,
+                transformStyle: "preserve-3d",
+                perspective: 1000
+            }}
             ref={divRef}
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setOpacity(1)}
-            onMouseLeave={() => setOpacity(0)}
-            className={`relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-black/40 shadow-2xl transition-colors duration-500 hover:border-zinc-700/80 ${className}`}
+            onMouseLeave={handleMouseLeave}
+            className={`relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-[#0a0a0c]/80 shadow-2xl transition-colors duration-500 hover:border-zinc-700/80 ${className}`}
         >
             <div
                 className="pointer-events-none absolute inset-0 transition-opacity duration-500 z-0"
@@ -402,10 +437,30 @@ const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode
                     background: `radial-gradient(800px circle at ${position.x}px ${position.y}px, rgba(16,185,129,0.06), transparent 40%)`,
                 }}
             />
-            <div className="relative z-10 h-full">{children}</div>
+            {/* The content container translated up in Z space slightly for depth */}
+            <div className="relative z-10 h-full" style={{ transform: "translateZ(30px)" }}>
+                {children}
+            </div>
         </motion.div>
     );
 }
+
+// --- FLOATING HERO BADGES ---
+const FloatingBadge = ({ text, icon: Icon, top, left, delay }: { text: string, icon: any, top: string, left: string, delay: number }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: [0.2, 0.5, 0.2], y: [0, -15, 0] }}
+        transition={{ 
+            opacity: { duration: 4, repeat: Infinity, delay }, 
+            y: { duration: 6, repeat: Infinity, delay, ease: "easeInOut" } 
+        }}
+        className="absolute hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-800 bg-black/40 backdrop-blur-md text-zinc-500 font-mono text-xs shadow-xl pointer-events-none"
+        style={{ top, left }}
+    >
+        <Icon className="w-3 h-3 text-emerald-500/50" />
+        {text}
+    </motion.div>
+);
 
 // --- MAIN PAGE COMPONENT ---
 export const LandingPage = () => {
@@ -419,10 +474,10 @@ export const LandingPage = () => {
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2 font-mono font-bold text-white group cursor-pointer">
                     <div className="relative">
-                        <TerminalSquare className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
-                        <div className="absolute inset-0 bg-emerald-400 blur-md opacity-20 group-hover:opacity-60 transition-opacity duration-300"></div>
+                        <Logo className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
+                        <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-20 group-hover:opacity-60 transition-opacity duration-300"></div>
                     </div>
-                    <span className="tracking-tight text-lg">LC_TRACKER<span className="text-emerald-400 animate-pulse">_</span></span>
+                    <span className="tracking-tight text-lg">LC Tracker</span>
                 </div>
                 <div className="flex items-center gap-6">
                      <a href="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group">
@@ -431,8 +486,7 @@ export const LandingPage = () => {
                     </a>
                      <a href="/login" className="relative group overflow-hidden px-5 py-2 text-sm font-semibold rounded bg-white text-black hover:bg-zinc-100 transition-colors">
                         <span className="relative z-10">Start Sprint</span>
-                        {/* Shimmer effect */}
-                        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                        <div className="absolute inset-0 -translate-x-[150%] skew-x-[-20deg] bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
                     </a>
                 </div>
             </div>
@@ -442,6 +496,15 @@ export const LandingPage = () => {
 
         {/* Hero Section */}
         <section className="relative z-10 pt-40 pb-20 px-6 max-w-5xl mx-auto min-h-[95vh] flex flex-col justify-center gap-12">
+            
+            {/* Floating Context Badges */}
+            <div className="absolute inset-0 pointer-events-none overflow-visible">
+                <FloatingBadge icon={Network} text="O(n log n)" top="25%" left="-5%" delay={0} />
+                <FloatingBadge icon={Cpu} text="Dynamic Programming" top="70%" left="90%" delay={1.5} />
+                <FloatingBadge icon={Database} text="Memoization" top="35%" left="85%" delay={0.8} />
+                <FloatingBadge icon={BrainCircuit} text="Spaced Repetition" top="80%" left="10%" delay={2.2} />
+            </div>
+
             {/* Subtle background glow for hero */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
@@ -449,13 +512,13 @@ export const LandingPage = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="space-y-8"
+                className="space-y-8 relative z-20"
             >
                 <motion.div 
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-[#09090b] shadow-[0_0_15px_rgba(16,185,129,0.15)] text-emerald-400 text-xs font-mono mb-4 w-fit"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-[#09090b]/80 backdrop-blur shadow-[0_0_15px_rgba(16,185,129,0.15)] text-emerald-400 text-xs font-mono mb-4 w-fit"
                 >
                     <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -471,7 +534,7 @@ export const LandingPage = () => {
                     <br />
                     <span className="bg-gradient-to-br from-emerald-300 via-emerald-500 to-teal-700 bg-clip-text text-transparent relative">
                         Forgetting Curve.
-                        <div className="absolute -inset-2 bg-emerald-500/10 blur-2xl -z-10 rounded-full"></div>
+                        <div className="absolute -inset-2 bg-emerald-500/10 blur-[40px] -z-10 rounded-full"></div>
                     </span>
                 </h1>
 
@@ -491,8 +554,7 @@ export const LandingPage = () => {
                                 Initialize Sprint
                             </span>
                             <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                            {/* Inner animated gradient line */}
-                            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </motion.button>
                     </a>
                     <a href="https://github.com" target="_blank" rel="noreferrer" className="group px-8 py-4 flex items-center justify-center gap-3 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
@@ -507,22 +569,22 @@ export const LandingPage = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-600 font-mono text-xs"
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-600 font-mono text-xs z-10"
             >
                 <span>SCROLL_DOWN</span>
-                <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-600 to-transparent">
+                <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-600 to-transparent overflow-hidden">
                     <motion.div 
                         className="w-full h-1/2 bg-emerald-500" 
-                        animate={{ y: [0, 24, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        animate={{ y: [-24, 24] }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                     />
                 </div>
             </motion.div>
         </section>
 
         {/* Features Grids */}
-        <section className="relative z-10 py-32 px-6 border-y border-zinc-800/50 bg-[#09090b]/80 backdrop-blur-2xl">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <section className="relative z-10 py-32 px-6 border-y border-zinc-800/50 bg-[#09090b]/80 backdrop-blur-3xl">
+            <div className="max-w-7xl mx-auto space-y-8 perspective-[2000px]">
                 
                 {/* Feature 1 */}
                 <SpotlightCard className="p-8 md:p-12">
@@ -538,13 +600,13 @@ export const LandingPage = () => {
                             </p>
                             <ul className="space-y-4 text-sm font-mono text-zinc-500">
                                 <li className="flex gap-3 items-center">
-                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
                                     Dynamic decay intervals computed per problem
                                 </li>
                                 <li className="flex gap-3 items-center">
-                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
                                     Attack weaknesses, not memorized solutions
@@ -562,8 +624,9 @@ export const LandingPage = () => {
                     {/* Feature 2 */}
                     <SpotlightCard className="p-8 md:p-10 flex flex-col justify-between">
                         <div className="mb-10">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6 relative group">
                                 <Activity className="w-6 h-6 text-emerald-400" />
+                                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
                             <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Data-Driven Sprints</h2>
                             <p className="text-zinc-400 leading-relaxed">
@@ -578,8 +641,9 @@ export const LandingPage = () => {
                     {/* Feature 3 */}
                     <SpotlightCard className="p-8 md:p-10 flex flex-col justify-between">
                         <div className="mb-10">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6 relative group">
                                 <TerminalSquare className="w-6 h-6 text-emerald-400" />
+                                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
                             <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Track Every Edge Case</h2>
                             <p className="text-zinc-400 leading-relaxed">
@@ -595,8 +659,52 @@ export const LandingPage = () => {
             </div>
         </section>
 
+        {/* Massive Final CTA Section */}
+        <section className="relative z-10 py-32 px-6 overflow-hidden bg-black">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-emerald-900/20 via-[#09090b] to-[#09090b] pointer-events-none"></div>
+            
+            {/* Ambient abstract shapes */}
+             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[150px] rounded-full pointer-events-none"></div>
+             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-teal-500/5 blur-[150px] rounded-full pointer-events-none"></div>
+
+            <div className="max-w-4xl mx-auto text-center space-y-10 relative z-10">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6">
+                        Ready to <span className="text-emerald-400 inline-block">Execute?</span>
+                    </h2>
+                    <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                        Treat your interview prep like a highly optimized CI/CD pipeline. No more grinding blind. Start tracking your progress today.
+                    </p>
+                </motion.div>
+                
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="pt-8"
+                >
+                    <a href="/login" className="inline-block relative group">
+                        {/* Huge glow matching button curve */}
+                        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-25 group-hover:opacity-70 transition duration-500 group-hover:duration-200"></div>
+                        <button className="relative px-12 py-5 bg-[#09090b] border border-emerald-500/50 text-emerald-400 font-bold font-mono text-lg rounded-xl flex items-center gap-3 overflow-hidden shadow-2xl transition-all group-hover:bg-emerald-500/10 group-hover:scale-[1.02] active:scale-[0.98]">
+                            <span>INITIALIZE_ACCOUNT</span>
+                            <Cpu className="w-5 h-5 group-hover:animate-pulse" />
+                            {/* Matrix shine effect */}
+                            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(16,185,129,0.2),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                        </button>
+                    </a>
+                </motion.div>
+            </div>
+        </section>
+
         {/* Metrics Footer */}
-        <section className="relative z-10 py-32 px-6 bg-zinc-950/80 border-t border-zinc-900">
+        <section className="relative z-10 py-24 px-6 bg-zinc-950/90 border-t border-zinc-900">
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
                     <motion.div 
@@ -607,10 +715,10 @@ export const LandingPage = () => {
                         className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <Database className="w-4 h-4" /> Problems Indexed
+                            <Database className="w-4 h-4" /> LeetCode Problems
                         </div>
                         <div className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-                            <Counter from={0} to={1248} />
+                            <Counter from={0} to={3300} suffix="+" />
                         </div>
                     </motion.div>
                     
@@ -622,10 +730,10 @@ export const LandingPage = () => {
                         className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <BrainCircuit className="w-4 h-4" /> Retention Rate
+                            <BrainCircuit className="w-4 h-4" /> Target Retention
                         </div>
                         <div className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-                            <Counter from={0} to={94} suffix="%" />
+                            <Counter from={0} to={100} suffix="%" />
                         </div>
                     </motion.div>
 
@@ -637,15 +745,15 @@ export const LandingPage = () => {
                         className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <Activity className="w-4 h-4" /> Active Engineers
+                            <Activity className="w-4 h-4" /> Core Patterns
                         </div>
                         <div className="text-white">
-                            <Counter from={0} to={8500} suffix="+" />
+                            <Counter from={0} to={20} suffix="+" />
                         </div>
                     </motion.div>
                 </div>
                 
-                <div className="mt-32 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-mono text-zinc-600 uppercase">
+                <div className="mt-24 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-mono text-zinc-600 uppercase">
                     <div className="flex items-center gap-3 opacity-80">
                         <TerminalSquare className="w-4 h-4" />
                         © 2026 LC Tracker System
@@ -665,7 +773,7 @@ export const LandingPage = () => {
         {/* Adds keyframe definition for shimmer effects used in buttons & nav */}
         <style dangerouslySetInnerHTML={{__html: `
             @keyframes shimmer {
-                100% { transform: translateX(100%); }
+                100% { transform: translateX(150%) skewX(-20deg); }
             }
             @keyframes scanline {
                 0% { transform: scaleX(0); opacity: 0; }

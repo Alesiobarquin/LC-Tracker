@@ -526,6 +526,10 @@ export const LandingPage = () => {
                     </span>
                     SYSTEM ONLINE / KERNEL v2.0
                 </motion.div>
+
+                <p className="mb-4 text-xs sm:text-sm uppercase tracking-[0.35em] text-emerald-300/75 font-semibold">
+                    LeetCode Tracker for Spaced Repetition
+                </p>
                 
                 <h1 className="text-6xl md:text-[5.5rem] font-black tracking-tighter text-white leading-[1.05]">
                     <ScrambleText text="Master Algorithms." />
@@ -539,7 +543,7 @@ export const LandingPage = () => {
                 </h1>
 
                 <p className="max-w-2xl text-xl text-zinc-400 font-medium leading-relaxed">
-                    Stop grinding blindly. Track every LeetCode session, reveal your weak points, and let our spaced repetition engine schedule your reviews.
+                    Track LeetCode problems, schedule spaced repetition reviews, and measure progress toward interview readiness with a clear study loop.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-5 pt-8">
@@ -557,9 +561,9 @@ export const LandingPage = () => {
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </motion.button>
                     </a>
-                    <a href="https://github.com" target="_blank" rel="noreferrer" className="group px-8 py-4 flex items-center justify-center gap-3 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
+                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="group px-8 py-4 flex items-center justify-center gap-3 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
                         <Github className="w-5 h-5 group-hover:text-white transition-colors" /> 
-                        <span className="group-hover:text-white transition-colors">View Architect</span>
+                        <span className="group-hover:text-white transition-colors">View Source</span>
                     </a>
                 </div>
             </motion.div>
@@ -759,8 +763,8 @@ export const LandingPage = () => {
                         © 2026 LC Tracker System
                     </div>
                     <div className="flex gap-6">
-                        <a href="#" className="hover:text-emerald-400 transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-emerald-400 transition-colors">Terms</a>
+                        <a href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy</a>
+                        <a href="/terms" className="hover:text-emerald-400 transition-colors">Terms</a>
                         <a href="#" className="flex items-center gap-2 text-emerald-500/80 hover:text-emerald-400 transition-colors">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             Status: Extant

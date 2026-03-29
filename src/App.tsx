@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
@@ -22,16 +22,96 @@ function RealtimeSyncHost({ userId }: { userId: string | null }) {
   return null;
 }
 
+function updateMeta(attribute: 'name' | 'property', value: string, content: string) {
+  let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${value}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attribute, value);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function updateCanonical(href: string) {
+  let tag = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!tag) {
+    tag = document.createElement('link');
+    tag.setAttribute('rel', 'canonical');
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('href', href);
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
+  const path = window.location.pathname;
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
   };
 
-  const path = window.location.pathname;
+  useEffect(() => {
+    const origin = window.location.origin;
+    const pageConfig = {
+      '/': {
+        title: 'LC Tracker | LeetCode Tracker for Spaced Repetition',
+        description: 'LC Tracker is a LeetCode tracker for spaced repetition, progress analytics, and technical interview prep. Review solved problems, stay consistent, and improve retention.',
+        canonical: `${origin}/`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/login': {
+        title: 'Sign In | LC Tracker',
+        description: 'Sign in to LC Tracker to track LeetCode progress, schedule spaced repetition reviews, and continue your interview prep.',
+        canonical: `${origin}/login`,
+        robots: 'noindex,nofollow',
+      },
+      '/privacy': {
+        title: 'Privacy Policy | LC Tracker',
+        description: 'Read the LC Tracker privacy policy and learn how user data is collected, stored, and protected.',
+        canonical: `${origin}/privacy`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/terms': {
+        title: 'Terms of Service | LC Tracker',
+        description: 'Review the LC Tracker terms of service and usage guidelines for the LeetCode tracker web app.',
+        canonical: `${origin}/terms`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/sso-callback': {
+        title: 'Signing In | LC Tracker',
+        description: 'Completing LC Tracker sign in and authentication.',
+        canonical: `${origin}/sso-callback`,
+        robots: 'noindex,nofollow',
+      },
+      '/admin': {
+        title: 'Admin | LC Tracker',
+        description: 'LC Tracker admin dashboard.',
+        canonical: `${origin}/admin`,
+        robots: 'noindex,nofollow',
+      },
+    } as const;
+
+    const config = pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/'];
+
+    document.title = config.title;
+    updateMeta('name', 'description', config.description);
+    updateMeta('name', 'robots', config.robots);
+    updateMeta('name', 'application-name', 'LC Tracker');
+    updateMeta('property', 'og:title', config.title);
+    updateMeta('property', 'og:description', config.description);
+    updateMeta('property', 'og:url', config.canonical);
+    updateMeta('property', 'og:image', `${origin}/og-image.svg`);
+    updateMeta('property', 'og:image:width', '1200');
+    updateMeta('property', 'og:image:height', '630');
+    updateMeta('property', 'og:image:type', 'image/svg+xml');
+    updateMeta('name', 'twitter:card', 'summary_large_image');
+    updateMeta('name', 'twitter:title', config.title);
+    updateMeta('name', 'twitter:description', config.description);
+    updateMeta('name', 'twitter:image', `${origin}/og-image.svg`);
+    updateCanonical(config.canonical);
+  }, [path]);
 
   // Public routes — no auth needed
   if (path === '/privacy') return <PrivacyPolicy />;

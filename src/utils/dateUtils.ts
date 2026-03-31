@@ -1,4 +1,19 @@
 import { isBefore, startOfDay, addDays, isSameDay } from 'date-fns';
+import type { ProblemSessionRating, SrAggressiveness } from '../types';
+
+/** Shorter gaps between reviews as aggressiveness increases (RELAXED → BALANCED → AGGRESSIVE). */
+export function getSrIntervalMultiplier(sr: SrAggressiveness): number {
+  switch (sr) {
+    case 'RELAXED':
+      return 1.0;
+    case 'BALANCED':
+      return 0.85;
+    case 'AGGRESSIVE':
+      return 0.7;
+    default:
+      return 1.0;
+  }
+}
 
 export const getPhase = (date: Date = new Date()) => {
   const phase1End = new Date('2026-05-01T00:00:00Z');
@@ -9,11 +24,18 @@ export const getPhase = (date: Date = new Date()) => {
   return 3;
 };
 
+/**
+ * Problem session ratings (1–5). Syntax cards still pass 1–3 only (see `syntaxCard`).
+ * Future improvement: per-item stability (FSRS / SM-2 ease) using review history — would
+ * replace fixed multipliers without changing the 1–5 self-rating UX.
+ */
 export const getNextReviewDate = (
-  rating: 1 | 2 | 3,
+  rating: ProblemSessionRating,
   consecutiveSuccesses: number,
-  isAggressive: boolean = false,
-  difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium'
+  srAggressiveness: SrAggressiveness = 'RELAXED',
+  difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium',
+  /** Syntax cards use a 1–3 scale where 3 = “good”; problems use 1–5 where 4–5 are the strong tiers. */
+  syntaxCard: boolean = false
 ) => {
   const today = startOfDay(new Date());
 
@@ -26,10 +48,14 @@ export const getNextReviewDate = (
   // Opinionated scaling: Coding is about patterns, not rote memory.
   // Easies should back off very fast. Hards should stay closer.
   const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
-  const aggMultiplier = isAggressive ? 0.7 : 1.0;
-  // Rating 3 = solved cold with no hints → reward with 25% longer interval.
-  // Rating 2 = solved but needed hints → baseline interval.
-  const qualityMultiplier = rating === 3 ? 1.25 : 1.0;
+  const aggMultiplier = getSrIntervalMultiplier(srAggressiveness);
+  let qualityMultiplier = 1.0;
+  if (syntaxCard) {
+    if (rating === 3) qualityMultiplier = 1.25;
+  } else {
+    if (rating === 4) qualityMultiplier = 1.25;
+    else if (rating === 5) qualityMultiplier = 1.55;
+  }
 
   let days = 3;
   if (consecutiveSuccesses === 1) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
-import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Lock, Unlock, Shuffle } from 'lucide-react';
+import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES, TARGET_CURRICULUM_LABELS } from '../data/problems';
+import { getPhase } from '../utils/dateUtils';
+import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
 
@@ -45,6 +46,8 @@ export const Settings: React.FC = () => {
     const [newEventTitle, setNewEventTitle] = useState('');
     const [newEventType, setNewEventType] = useState('Phone Screen');
     const [newEventDate, setNewEventDate] = useState('');
+    const [sprintHowOpen, setSprintHowOpen] = useState(false);
+    const calendarPhase = getPhase();
 
     useEffect(() => {
         setTempUsername(leetcodeUsername || '');
@@ -176,9 +179,45 @@ export const Settings: React.FC = () => {
                             <Swords className="text-indigo-400" size={20} />
                             Learning Strategy
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-5">Choose how you want to progress through the problem sets.</p>
+                        <p className="text-sm text-zinc-400 mb-5">
+                            Target list, study mode, interview calibration, and review spacing. These drive Dashboard recommendations, analytics, and (in Random mode) which problems are eligible next.
+                        </p>
 
                         <div className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Target problem list</label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {(
+                                        [
+                                            { value: 'NEET_75' as const, sub: 'Core patterns first' },
+                                            { value: 'NEET_150' as const, sub: 'Broader coverage' },
+                                            { value: 'NEET_250' as const, sub: 'Full NeetCode list' },
+                                            { value: 'EXTENDED' as const, sub: '250 + extra catalog problems' },
+                                        ] as const
+                                    ).map(({ value, sub }) => {
+                                        const active = (settings.targetCurriculum ?? 'NEET_75') === value;
+                                        return (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => updateSettings({ targetCurriculum: value })}
+                                                className={clsx(
+                                                    'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                                    active
+                                                        ? 'bg-cyan-500/10 border-cyan-500/50 ring-1 ring-cyan-500/30'
+                                                        : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                                )}
+                                            >
+                                                <p className={clsx('text-sm font-semibold', active ? 'text-cyan-300' : 'text-zinc-300')}>
+                                                    {TARGET_CURRICULUM_LABELS[value]}
+                                                </p>
+                                                <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
                             {/* Mode picker — radio cards */}
                             <div className="grid grid-cols-2 gap-3">
                                 {([ 
@@ -216,50 +255,122 @@ export const Settings: React.FC = () => {
                                 })}
                             </div>
 
-                            {/* Strict / Flexible picker — only relevant when Sprint is active */}
-                            <div className={clsx('space-y-4 transition-opacity duration-200', settings.learningMode !== 'SPRINT' && 'opacity-40 pointer-events-none')}>
-                                <div>
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Sprint Discipline</label>
-                                    <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div className="rounded-xl border border-amber-500/20 bg-zinc-950/40 p-4">
+                                    <h3 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
+                                        <Briefcase className="text-amber-400" size={18} />
+                                        Interview type
+                                    </h3>
+                                    <p className="text-xs text-zinc-500 mb-3">Biases new-problem difficulty in Random mode (internship favors easier picks).</p>
+                                    <div className="flex flex-col gap-2">
                                         {([
-                                            { strict: true,  icon: Lock,   label: 'Strict',   desc: 'Problems locked to the current sprint category.' },
-                                            { strict: false, icon: Unlock, label: 'Flexible', desc: 'One free-pick per week from any category.' },
-                                        ] as const).map(({ strict, icon: Icon, label, desc }) => {
-                                            const active = (settings.sprintSettings?.strictMode ?? true) === strict;
+                                            { value: 'INTERNSHIP' as const, label: 'Internship', sub: 'Prefer easier problems when available' },
+                                            { value: 'FULL_TIME' as const, label: 'Full time', sub: 'Balanced difficulty mix from your company tier' },
+                                        ] as const).map(({ value, label, sub }) => {
+                                            const active = settings.interviewType === value;
                                             return (
                                                 <button
-                                                    key={label}
-                                                    onClick={() => updateSettings({
-                                                        sprintSettings: {
-                                                            ...(settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0, targetDays: 7 }),
-                                                            strictMode: strict,
-                                                        }
-                                                    })}
+                                                    key={value}
+                                                    type="button"
+                                                    onClick={() => updateSettings({ interviewType: value })}
                                                     className={clsx(
-                                                        'group text-left rounded-xl border p-4 transition-all duration-200 focus:outline-none',
+                                                        'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
                                                         active
-                                                            ? 'bg-indigo-500/10 border-indigo-500/60 ring-1 ring-indigo-500/40'
+                                                            ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
                                                             : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
                                                     )}
                                                 >
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <Icon
-                                                            size={16}
-                                                            className={active ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-400'}
-                                                        />
-                                                        <span className={clsx(
-                                                            'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors',
-                                                            active ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-600'
-                                                        )}>
-                                                            {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                                        </span>
-                                                    </div>
-                                                    <p className={clsx('text-sm font-semibold mb-1', active ? 'text-indigo-300' : 'text-zinc-300')}>{label}</p>
-                                                    <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+                                                    <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
+                                                    <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
                                                 </button>
                                             );
                                         })}
                                     </div>
+                                </div>
+
+                                <div className="rounded-xl border border-purple-500/20 bg-zinc-950/40 p-4">
+                                    <h3 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
+                                        <Zap className="text-purple-400" size={18} />
+                                        Spaced repetition
+                                    </h3>
+                                    <p className="text-xs text-zinc-500 mb-3">
+                                        Controls review spacing after each session. Rating 1 → short revisit; higher ratings expand the gap. Aggressive shortens intervals (~30% vs Relaxed); Balanced sits in the middle (~15%). Difficulty still scales intervals (Hard reviewed sooner than Easy).
+                                        Future: optional FSRS-style per-card stability — for now this fixed staircase stays easy to reason about.
+                                    </p>
+                                    <div className="flex flex-col gap-2">
+                                        {([
+                                            { value: 'RELAXED' as const, label: 'Relaxed', sub: 'Longest gaps between reviews' },
+                                            { value: 'BALANCED' as const, label: 'Balanced', sub: 'Default spacing between Relaxed and Aggressive' },
+                                            { value: 'AGGRESSIVE' as const, label: 'Aggressive', sub: 'Most frequent reviews' },
+                                        ] as const).map(({ value, label, sub }) => {
+                                            const active = settings.srAggressiveness === value;
+                                            return (
+                                                <button
+                                                    key={value}
+                                                    type="button"
+                                                    onClick={() => updateSettings({ srAggressiveness: value })}
+                                                    className={clsx(
+                                                        'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                                        active
+                                                            ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30'
+                                                            : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                                    )}
+                                                >
+                                                    <p className={clsx('text-sm font-semibold', active ? 'text-purple-300' : 'text-zinc-300')}>{label}</p>
+                                                    <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className={clsx('space-y-4 transition-opacity duration-200', settings.learningMode !== 'SPRINT' && 'opacity-40 pointer-events-none')}>
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Sprint setup</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSprintHowOpen(true)}
+                                        className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800/80 border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:border-zinc-600 transition-colors"
+                                    >
+                                        <Info size={14} className="text-indigo-400" />
+                                        How sprint works
+                                    </button>
+                                </div>
+                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                    Sprint mode always drills in your <strong className="text-zinc-300">active category</strong> until the sprint window ends or the pool is exhausted. New problems are drawn from the NeetCode tier order (see below); you can align that order with your <strong className="text-zinc-300">target problem list</strong> setting.
+                                </p>
+                                <div className="flex items-center justify-between gap-2 rounded-xl border border-zinc-800 bg-zinc-950/40 px-4 py-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-zinc-200">Align sprint pool with target list</p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">
+                                            When on, your target list tier (e.g. NeetCode 150) changes which NeetCode tier is tried first in sprint. Off = classic 75 → 150 → 250 → extended.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={settings.sprintSettings?.alignPoolToTargetCurriculum ?? false}
+                                        onClick={() =>
+                                            updateSettings({
+                                                sprintSettings: {
+                                                    ...settings.sprintSettings,
+                                                    alignPoolToTargetCurriculum: !(settings.sprintSettings?.alignPoolToTargetCurriculum ?? false),
+                                                },
+                                            })
+                                        }
+                                        className={clsx(
+                                            'relative w-11 h-6 rounded-full transition-colors shrink-0',
+                                            settings.sprintSettings?.alignPoolToTargetCurriculum ? 'bg-indigo-500' : 'bg-zinc-700'
+                                        )}
+                                    >
+                                        <span
+                                            className={clsx(
+                                                'absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform',
+                                                settings.sprintSettings?.alignPoolToTargetCurriculum && 'translate-x-5'
+                                            )}
+                                        />
+                                    </button>
                                 </div>
 
                                 <div>
@@ -272,7 +383,7 @@ export const Settings: React.FC = () => {
                                         value={settings.sprintSettings?.targetDays ?? 7}
                                         onChange={(e) => updateSettings({
                                             sprintSettings: {
-                                                ...(settings.sprintSettings ?? { strictMode: true, lengthMultiplier: 1.0, targetDays: 7 }),
+                                                ...settings.sprintSettings,
                                                 targetDays: parseInt(e.target.value)
                                             }
                                         })}
@@ -440,7 +551,7 @@ export const Settings: React.FC = () => {
                                     onChange={(e) => setNewEventDate(e.target.value)}
                                     className="w-36 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                                 />
-                                <button onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center">
+                                <button type="button" onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center">
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -471,7 +582,9 @@ export const Settings: React.FC = () => {
                             <Target className="text-red-400" size={20} />
                             Target Company Tier
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-5">Adjusts the Easy / Medium / Hard problem ratio assigned to you.</p>
+                        <p className="text-sm text-zinc-400 mb-5">
+                            In Random mode (full-time path), biases which difficulty gets picked next based on the mix below. Internship mode still prefers easier problems when available.
+                        </p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {([
                                 { value: 'FAANG',   label: 'FAANG',   sub: 'Big Tech' },
@@ -499,71 +612,6 @@ export const Settings: React.FC = () => {
                         </div>
                         {renderTierBar()}
                     </section>
-
-                    {/* Interview Type & Spaced Repetition */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <section className="premium-card p-6 border-amber-500/20">
-                            <h2 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
-                                <Briefcase className="text-amber-400" size={18} />
-                                Interview Type
-                            </h2>
-                            <p className="text-xs text-zinc-500 mb-4">Calibrates problem difficulty expectations.</p>
-                            <div className="flex flex-col gap-2">
-                                {([
-                                    { value: 'INTERNSHIP', label: 'Internship', sub: 'Easier warmup problems' },
-                                    { value: 'FULL_TIME',  label: 'Full Time',  sub: 'Full difficulty range' },
-                                ] as const).map(({ value, label, sub }) => {
-                                    const active = settings.interviewType === value;
-                                    return (
-                                        <button
-                                            key={value}
-                                            onClick={() => updateSettings({ interviewType: value })}
-                                            className={clsx(
-                                                'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
-                                                active
-                                                    ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
-                                                    : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
-                                            )}
-                                        >
-                                            <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
-                                            <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </section>
-
-                        <section className="premium-card p-6 border-purple-500/20">
-                            <h2 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
-                                <Zap className="text-purple-400" size={18} />
-                                Spaced Repetition
-                            </h2>
-                            <p className="text-xs text-zinc-500 mb-4">Controls how soon solved problems resurface for review.</p>
-                            <div className="flex flex-col gap-2">
-                                {([
-                                    { value: 'RELAXED',    label: 'Relaxed',    sub: 'Longer review intervals' },
-                                    { value: 'AGGRESSIVE', label: 'Aggressive', sub: 'Frequent re-testing' },
-                                ] as const).map(({ value, label, sub }) => {
-                                    const active = settings.srAggressiveness === value;
-                                    return (
-                                        <button
-                                            key={value}
-                                            onClick={() => updateSettings({ srAggressiveness: value })}
-                                            className={clsx(
-                                                'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
-                                                active
-                                                    ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30'
-                                                    : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
-                                            )}
-                                        >
-                                            <p className={clsx('text-sm font-semibold', active ? 'text-purple-300' : 'text-zinc-300')}>{label}</p>
-                                            <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    </div>
 
                     {/* Programming Language */}
                     <section className="premium-card p-6">
@@ -602,6 +650,46 @@ export const Settings: React.FC = () => {
                         </button>
                         <p className="text-xs text-zinc-500 mt-3">Includes progress, settings, activity, and sprint state in one file.</p>
                     </section>
+
+                    {sprintHowOpen && (
+                        <div
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="sprint-how-title"
+                        >
+                            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-4">
+                                <h3 id="sprint-how-title" className="text-lg font-semibold text-zinc-50">
+                                    How sprint mode works
+                                </h3>
+                                <ul className="text-sm text-zinc-300 space-y-2 list-disc pl-5">
+                                    <li>
+                                        Sprint scheduling runs only when <strong className="text-zinc-200">Learning mode</strong> is Sprint{' '}
+                                        <strong className="text-zinc-200">and</strong> the calendar is in phase 1 (before May 2026 in the app’s season clock). You are currently in phase {calendarPhase}.
+                                    </li>
+                                    <li>
+                                        Each day, the next <strong className="text-zinc-200">new</strong> problem comes from your <strong className="text-zinc-200">current sprint category</strong>. Within that category, the app walks NeetCode tiers in order. <strong className="text-zinc-200">Default:</strong> NeetCode 75 → problems only in 150 → only in 250 → extended catalog. If <strong className="text-zinc-200">Align sprint pool with target list</strong> is on, the first tier tried matches your target list (e.g. NeetCode 150 starts with 150-only additions, then 250, then core 75, then extended).
+                                    </li>
+                                    <li>
+                                        Sprint length uses your <strong className="text-zinc-200">target days</strong> and skill multipliers. When the window ends (or the category pool is exhausted), you get a <strong className="text-zinc-200">sprint check</strong> (retrospective) on a representative problem before advancing.
+                                    </li>
+                                    <li>
+                                        <strong className="text-zinc-200">Easy / Hard days</strong> and <strong className="text-zinc-200">stabilizer easies</strong> still apply on top of this when you’re struggling in a category.
+                                    </li>
+                                    <li>
+                                        Your <strong className="text-zinc-200">target problem list</strong> setting always controls Random mode and analytics. With alignment off, sprint uses the default waterfall; with alignment on, sprint tier order follows your target list as described above.
+                                    </li>
+                                </ul>
+                                <button
+                                    type="button"
+                                    onClick={() => setSprintHowOpen(false)}
+                                    className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm font-medium transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
             </div>
         </div>
     );

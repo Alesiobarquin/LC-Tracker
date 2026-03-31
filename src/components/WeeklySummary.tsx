@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
-import { allProblems } from '../data/problems';
+import { allProblems, TARGET_CURRICULUM_LABELS } from '../data/problems';
 import { startOfWeek, endOfWeek, format, isWithinInterval } from 'date-fns';
 import { Trophy, Target, TrendingUp, AlertCircle } from 'lucide-react';
-import { useActivityLog, useProblemProgress, useStreak } from '../hooks/useUserData';
+import { useActivityLog, useProblemProgress, useStreak, useUserSettings } from '../hooks/useUserData';
 
 export const WeeklySummary: React.FC = () => {
   const { progress } = useProblemProgress();
   const { data: activityLog } = useActivityLog();
   const { streak } = useStreak();
+  const { settings } = useUserSettings();
 
   const summary = useMemo(() => {
     const today = new Date();
@@ -91,6 +92,9 @@ export const WeeklySummary: React.FC = () => {
         </h2>
         <p className="text-sm text-zinc-400 mb-6">
           {summary.weekStartStr} - {summary.weekEndStr}
+          <span className="block text-xs mt-1.5 text-zinc-500">
+            Target list: {TARGET_CURRICULUM_LABELS[settings.targetCurriculum ?? 'NEET_75']}
+          </span>
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

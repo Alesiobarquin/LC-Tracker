@@ -1,6 +1,15 @@
+/**
+ * Problem session self-rating: how confident you felt after **this session** (not a test score).
+ * 1–2: unreliable · 3: acceptable but rough · 4: strong recall · 5: could solve cold / automatic.
+ */
+export type ProblemSessionRating = 1 | 2 | 3 | 4 | 5;
+
+/** How aggressively the app schedules the next review (shorter gaps = more frequent). */
+export type SrAggressiveness = 'RELAXED' | 'BALANCED' | 'AGGRESSIVE';
+
 export interface ProblemHistoryEntry {
   date: string;
-  rating: 1 | 2 | 3;
+  rating: ProblemSessionRating;
   elapsedSeconds?: number;
   sessionType?: 'new' | 'review' | 'cold_solve' | 'mock';
   rawCode?: string;
@@ -47,7 +56,7 @@ export interface SessionTiming {
   date: string;
   elapsedSeconds: number;
   sessionType: 'new' | 'review' | 'cold_solve' | 'mock';
-  rating: 1 | 2 | 3;
+  rating: ProblemSessionRating;
 }
 
 export interface SprintState {
@@ -107,6 +116,9 @@ export interface CatchUpPlanState {
   durationDays: number;
 }
 
+/** Which curated list drives recommendations and “target list” progress. */
+export type TargetCurriculum = 'NEET_75' | 'NEET_150' | 'NEET_250' | 'EXTENDED';
+
 export interface AppSettings {
   studySchedule: {
     weekdayMinutes: number;
@@ -117,13 +129,15 @@ export interface AppSettings {
   skillLevels: Record<string, 'not_familiar' | 'some_exposure' | 'comfortable'>;
   targetCompanyTier: 'FAANG' | 'FINTECH' | 'GENERAL' | 'MIXED';
   interviewType: 'INTERNSHIP' | 'FULL_TIME';
-  srAggressiveness: 'RELAXED' | 'AGGRESSIVE';
+  srAggressiveness: SrAggressiveness;
   language: 'Python' | 'Java' | 'JavaScript';
   learningMode: 'SPRINT' | 'RANDOM';
+  targetCurriculum: TargetCurriculum;
   sprintSettings: {
-    strictMode: boolean;
     lengthMultiplier: number;
     targetDays: number;
+    /** When true, sprint new-problem tier order follows target list (see sprint help modal). */
+    alignPoolToTargetCurriculum: boolean;
   };
 }
 
@@ -132,6 +146,8 @@ export interface UserSettingsData {
   leetcodeUsername: string | null;
   targetInterviewDate: string;
   settings: AppSettings;
+  /** Set to 1 after legacy 1–3 “mastered=3” history migration runs (see progressHelpers). */
+  ratingHistoryMigrationVersion: number;
   targetEvents: TargetEvent[];
   dayMode: DayModeState;
   catchUpPlan: CatchUpPlanState;
@@ -151,10 +167,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
   srAggressiveness: 'RELAXED',
   language: 'Python',
   learningMode: 'SPRINT',
+  targetCurriculum: 'NEET_75',
   sprintSettings: {
-    strictMode: true,
     lengthMultiplier: 1.0,
     targetDays: 7,
+    alignPoolToTargetCurriculum: false,
   },
 };
 
@@ -175,6 +192,7 @@ export const DEFAULT_USER_SETTINGS: UserSettingsData = {
   leetcodeUsername: null,
   targetInterviewDate: '2026-09-15',
   settings: DEFAULT_SETTINGS,
+  ratingHistoryMigrationVersion: 0,
   targetEvents: [],
   dayMode: DEFAULT_DAY_MODE,
   catchUpPlan: DEFAULT_CATCH_UP_PLAN,

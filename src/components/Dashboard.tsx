@@ -1,6 +1,13 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '../store/useStore';
-import { problems, allProblems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
+import {
+  problems,
+  allProblems,
+  PHASE_1_CATEGORIES,
+  PHASE_2_CATEGORIES,
+  problemsPoolForTargetCurriculum,
+  TARGET_CURRICULUM_LABELS,
+} from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
 import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
@@ -15,6 +22,7 @@ import {
   getEstimatedMinutesByDifficulty,
   getReservedProblemIds,
   getSprintPoolProblems,
+  pickUnsolvedForRandomRecommendation,
 } from '../utils/progressHelpers';
 import { DashboardSkeleton } from './loadingSkeletons';
 import type { Difficulty } from '../data/problems';
@@ -79,6 +87,8 @@ export const Dashboard: React.FC = () => {
   } = useProblemProgress();
   const phase = getPhase();
   const { settings, catchUpPlan, dayMode, setCatchUpPlan, dismissCatchUpBanner, setDayMode, isLoading: settingsLoading } = useUserSettings();
+  const curriculum = settings.targetCurriculum ?? 'NEET_75';
+  const targetCurriculumPool = useMemo(() => problemsPoolForTargetCurriculum(curriculum), [curriculum]);
   const { data: activityLog } = useActivityLog();
   const activeSession = useStore((state) => state.activeSession);
   const startSession = useStore((state) => state.startSession);
@@ -140,24 +150,26 @@ export const Dashboard: React.FC = () => {
 
     const solvedIds = new Set(Object.keys(progress));
     const reservedIds = getReservedProblemIds();
-    const phase = getPhase();
 
     if (sprintCategory && sprintState?.sprintStatus === 'active') {
-      const sprintCandidates = getSprintPoolProblems(sprintCategory, solvedIds, reservedIds).filter(
+      const sprintCandidates = getSprintPoolProblems(sprintCategory, solvedIds, reservedIds, {
+        alignPoolToTargetCurriculum: settings.sprintSettings.alignPoolToTargetCurriculum,
+        targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
+      }).filter(
         (p) => !skippedNewProblemIds.has(p.id)
       );
       return sprintCandidates.length > 0 ? sprintCandidates[0].id : null;
     }
 
-    // Random mode: next unsolved from the full target list
-    const allCandidates = problems.filter(p =>
-      (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) &&
-      !solvedIds.has(p.id) &&
-      !skippedNewProblemIds.has(p.id) &&
-      !reservedIds.has(p.id)
+    const pool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75');
+    const allCandidates = pool.filter(
+      (p) =>
+        !solvedIds.has(p.id) &&
+        !skippedNewProblemIds.has(p.id) &&
+        !reservedIds.has(p.id)
     );
-    return allCandidates.length > 0 ? allCandidates[0].id : null;
-  }, [newProblem, skippedNewProblemIds, progress, sprintCategory, sprintState]);
+    return pickUnsolvedForRandomRecommendation(allCandidates, solvedIds, settings, progress)?.id ?? null;
+  }, [newProblem, skippedNewProblemIds, progress, sprintCategory, sprintState, settings]);
 
   // Recompute the review list whenever the effective new problem changes.
   // This means skipping a Hard→Medium immediately frees time for more reviews.
@@ -247,11 +259,9 @@ export const Dashboard: React.FC = () => {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const solvedCount = Object.keys(progress).length;
-  const targetCount = phase === 3 ? 150 : 75;
-  const progressPercent = Math.round((solvedCount / targetCount) * 100);
-
-  const phase1Problems = problems.filter(p => p.isNeetCode75);
-  const phase1SolvedCount = phase1Problems.filter(p => progress[p.id]).length;
+  const targetCount = Math.max(1, targetCurriculumPool.length);
+  const curriculumSolvedCount = targetCurriculumPool.filter((p) => progress[p.id]).length;
+  const progressPercent = Math.round((curriculumSolvedCount / targetCount) * 100);
 
   let totalRating = 0;
   let ratingCount = 0;
@@ -264,7 +274,7 @@ export const Dashboard: React.FC = () => {
   const avgConfidence = ratingCount > 0 ? totalRating / ratingCount : 0;
 
   if (phase === 1 && !showMilestone && !milestoneDismissed) {
-    if (phase1SolvedCount === 75 && avgConfidence >= 2.0) {
+    if (curriculumSolvedCount === targetCurriculumPool.length && targetCurriculumPool.length > 0 && avgConfidence >= 3) {
       setTimeout(() => setShowMilestone(true), 500);
     }
   }
@@ -274,8 +284,8 @@ export const Dashboard: React.FC = () => {
   const phase1TargetDate = new Date('2026-05-01T00:00:00Z');
 
   let effectiveProblemsRemaining = 0;
-  problems.forEach(p => {
-    if (p.isNeetCode75 && !progress[p.id]) {
+  targetCurriculumPool.forEach((p) => {
+    if (!progress[p.id]) {
       const skill = settings.skillLevels[p.category];
       if (skill === 'comfortable') {
         effectiveProblemsRemaining += 0;
@@ -345,7 +355,7 @@ export const Dashboard: React.FC = () => {
   let pacingMessage = '';
   if (effectiveProblemsRemaining === 0) {
     pacingStatus = 'green';
-    pacingMessage = 'Phase 1 complete!';
+    pacingMessage = 'Target curriculum complete!';
   } else if (projectedFinishDate <= phase1TargetDate) {
     pacingStatus = 'green';
     pacingMessage = `On track to finish Phase 1 by ${projectedFinishDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.`;
@@ -377,9 +387,10 @@ export const Dashboard: React.FC = () => {
   let syntaxScore = 0;
   let speedBonusScore = 0;
 
-  const readinessPhase1Problems = problems.filter(p => p.isNeetCode75);
-  const readinessPhase1Solved = readinessPhase1Problems.filter(p => progress[p.id]).length;
-  phaseScore = Math.min(30, (readinessPhase1Solved / 75) * 30);
+  const readinessTargetProblems = targetCurriculumPool;
+  const readinessTargetSolved = readinessTargetProblems.filter((p) => progress[p.id]).length;
+  const readinessTargetTotal = Math.max(1, readinessTargetProblems.length);
+  phaseScore = Math.min(30, (readinessTargetSolved / readinessTargetTotal) * 30);
 
   let readinessTotalRating = 0;
   let readinessRatingCount = 0;
@@ -392,7 +403,7 @@ export const Dashboard: React.FC = () => {
     }
   });
   const readinessAvgConfidence = readinessRatingCount > 0 ? readinessTotalRating / readinessRatingCount : 0;
-  confidenceScore = Math.min(25, (readinessAvgConfidence / 3.0) * 25);
+  confidenceScore = Math.min(25, (readinessAvgConfidence / 5.0) * 25);
 
   const totalActive = Object.values(progress).filter(p => !p.retired).length;
   const overdueCount = Object.values(progress).filter(p => !p.retired && new Date(p.nextReviewAt) < new Date(today.setHours(0, 0, 0, 0))).length;
@@ -410,7 +421,7 @@ export const Dashboard: React.FC = () => {
     });
   });
   const avgMockRating = mockCount > 0 ? mockRatingTotal / mockCount : 0;
-  mockScore = Math.min(15, (avgMockRating / 3.0) * 15);
+  mockScore = Math.min(15, (avgMockRating / 5.0) * 15);
 
   let syntaxRatingTotal = 0;
   let syntaxCount = 0;
@@ -480,16 +491,16 @@ export const Dashboard: React.FC = () => {
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8 border-4 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-in zoom-in duration-700">
               <Target size={48} aria-hidden="true" className="text-emerald-400" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">Phase 1 Complete</h1>
-            <p className="text-xl sm:text-2xl text-emerald-400 font-medium mb-8">You've mastered the NeetCode 75 Core.</p>
+            <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">Curriculum complete</h1>
+            <p className="text-xl sm:text-2xl text-emerald-400 font-medium mb-8">You've finished {TARGET_CURRICULUM_LABELS[curriculum]}.</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10 text-left">
               <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
                 <div className="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider">Problems</div>
-                <div className="text-2xl font-bold text-zinc-100">{phase1SolvedCount}<span className="text-sm text-zinc-500 font-normal">/75</span></div>
+                <div className="text-2xl font-bold text-zinc-100">{curriculumSolvedCount}<span className="text-sm text-zinc-500 font-normal">/{targetCount}</span></div>
               </div>
               <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
                 <div className="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider">Avg Confidence</div>
-                <div className="text-2xl font-bold text-emerald-400">{avgConfidence.toFixed(1)}<span className="text-sm text-zinc-500 font-normal">/3.0</span></div>
+                <div className="text-2xl font-bold text-emerald-400">{avgConfidence.toFixed(1)}<span className="text-sm text-zinc-500 font-normal">/5.0</span></div>
               </div>
               <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
                 <div className="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider">Total Reviews</div>
@@ -625,10 +636,10 @@ export const Dashboard: React.FC = () => {
                       <p className="text-sm text-zinc-300 mb-3">How did the Sprint Check go?</p>
                       <div className="flex gap-2">
                         <button onClick={() => { 
-                          if (newProblemData) void logProblem(newProblemData.id, 3, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
+                          if (newProblemData) void logProblem(newProblemData.id, 4, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
                           setRetroCompleted(false); 
                           setRetroTimedOut(false); 
-                        }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (2–3)</button>
+                        }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (4+)</button>
                         <button onClick={() => { 
                           if (newProblemData) void logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard"); 
                           setRetroCompleted(false); 
@@ -876,7 +887,7 @@ export const Dashboard: React.FC = () => {
               <p className="text-xs text-zinc-400 leading-relaxed mb-4">{SPRINT_DESCRIPTIONS[sprintState.currentCategory] ?? 'Focused pattern drilling.'}</p>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Overall Progress</span>
-                <span className="text-zinc-100 font-medium">{solvedCount} / {targetCount}</span>
+                <span className="text-zinc-100 font-medium">{curriculumSolvedCount} / {targetCount}</span>
               </div>
               <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mt-1">
                 <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
@@ -902,8 +913,8 @@ export const Dashboard: React.FC = () => {
               </p>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Progress</span>
-                  <span className="text-zinc-100 font-medium">{solvedCount} / {targetCount}</span>
+                  <span className="text-zinc-400">Progress ({TARGET_CURRICULUM_LABELS[curriculum]})</span>
+                  <span className="text-zinc-100 font-medium">{curriculumSolvedCount} / {targetCount}</span>
                 </div>
                 <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
                   <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${progressPercent}%` }}>

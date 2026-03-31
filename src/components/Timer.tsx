@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Problem } from '../data/problems';
+import type { ProblemSessionRating } from '../types';
 import { useStore } from '../store/useStore';
 import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -106,7 +107,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     setPhase('rating');
   };
 
-  const handleRating = (rating: 1 | 2 | 3) => {
+  const handleRating = (rating: ProblemSessionRating) => {
     const sessionType = activeSession?.isReview
       ? 'review'
       : activeSession?.isColdSolve
@@ -165,7 +166,9 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <CircleCheck size={28} className="text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
-          <p className="text-zinc-400 mb-6 text-sm">How confident do you feel about {problem.title}?</p>
+          <p className="text-zinc-400 mb-6 text-sm">
+            Rate how you’d perform on <strong className="text-zinc-200">{problem.title}</strong> if you saw it again soon — not whether the code compiled once.
+          </p>
 
           <div className="mb-6 text-left">
             <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
@@ -185,30 +188,54 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             />
           </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={() => handleRating(3)}
-              className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
-            >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">3 — Mastered</span>
-              <span className="text-sm opacity-80">Clean, fast, could explain it</span>
-            </button>
-
-            <button
-              onClick={() => handleRating(2)}
-              className="w-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
-            >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">2 — Okay</span>
-              <span className="text-sm opacity-80">Solved, but slow or had bugs</span>
-            </button>
-
-            <button
-              onClick={() => handleRating(1)}
-              className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 p-4 rounded-xl flex items-center justify-between transition-colors group"
-            >
-              <span className="font-semibold text-lg group-hover:scale-105 transition-transform">1 — Struggled</span>
-              <span className="text-sm opacity-80">Needed video, couldn't finish</span>
-            </button>
+          <div className="space-y-2">
+            {(
+              [
+                {
+                  r: 5 as const,
+                  title: '5 — Cold / automatic',
+                  hint: 'Could solve again without prep; pattern feels automatic. Use when you’d trust yourself in an interview cold.',
+                  tone: 'text-violet-300 border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20',
+                },
+                {
+                  r: 4 as const,
+                  title: '4 — Strong',
+                  hint: 'Solid solve you could explain out loud; small slips ok. Stronger than “acceptable” but not fully muscle-memory yet.',
+                  tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20',
+                },
+                {
+                  r: 3 as const,
+                  title: '3 — Acceptable',
+                  hint: 'You finished or mostly got it, but it was slow, messy, or you needed small nudges. Honest middle tier.',
+                  tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20',
+                },
+                {
+                  r: 2 as const,
+                  title: '2 — Shaky',
+                  hint: 'Heavy hints, bugs, wrong approach first, or only a partial solution.',
+                  tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20',
+                },
+                {
+                  r: 1 as const,
+                  title: '1 — Could not',
+                  hint: 'Did not finish, or needed a full walkthrough. Schedules a quick revisit.',
+                  tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20',
+                },
+              ] as const
+            ).map(({ r, title, hint, tone }) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => handleRating(r)}
+                className={clsx(
+                  'w-full border p-3 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 text-left transition-colors group',
+                  tone
+                )}
+              >
+                <span className="font-semibold text-base group-hover:scale-[1.02] transition-transform">{title}</span>
+                <span className="text-xs opacity-85 sm:text-right">{hint}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

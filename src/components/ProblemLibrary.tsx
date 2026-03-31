@@ -93,7 +93,7 @@ export const ProblemLibrary: React.FC = () => {
     if (isSolved) {
       void removeProblem(problemId);
     } else {
-      void logProblem(problemId, 3, true, "Quick solve");
+      void logProblem(problemId, 4, true, "Quick solve");
     }
   };
   

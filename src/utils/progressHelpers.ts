@@ -12,7 +12,9 @@ import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   allProblems,
+  problemMatchesTargetCurriculum,
   problems,
+  problemsPoolForTargetCurriculum,
   type Problem,
 } from '../data/problems';
 import type {
@@ -23,11 +25,13 @@ import type {
   DayModeState,
   GraceDayState,
   ProblemProgress,
+  ProblemSessionRating,
   SessionTiming,
   SprintHistoryEntry,
   SprintState,
   StreakState,
   SyntaxProgress,
+  TargetCurriculum,
 } from '../types';
 import { DEFAULT_GRACE_DAY, DEFAULT_STREAK } from '../types';
 
@@ -84,35 +88,106 @@ export function getReservedProblemIds(): Set<string> {
   );
 }
 
+export type SprintPoolOptions = {
+  /** When true with a non-NEET_75 target, reorder tiers so sprint matches target list intent. */
+  alignPoolToTargetCurriculum?: boolean;
+  targetCurriculum?: TargetCurriculum;
+};
+
 /**
- * Sprint drills NeetCode curriculum in tiered order: NeetCode 75, then NeetCode 150-only,
- * then NeetCode 250-only (not in 150), then extended LeetCode catalog (same category).
+ * Sprint drills NeetCode curriculum in tiered order (default: NeetCode 75 → 150-only → 250-only → extended).
+ * With `alignPoolToTargetCurriculum`, tier order follows the user’s target list setting.
  */
 export function getSprintPoolProblems(
   category: string,
   solvedIds: Set<string>,
-  reservedIds: Set<string>
+  reservedIds: Set<string>,
+  options?: SprintPoolOptions
 ): Problem[] {
   const base = allProblems.filter(
     (p) => p.category === category && !solvedIds.has(p.id) && !reservedIds.has(p.id)
   );
   const tier75 = base.filter((p) => p.isNeetCode75);
-  if (tier75.length) return tier75;
   const tier150 = base.filter((p) => p.isNeetCode150 && !p.isNeetCode75);
-  if (tier150.length) return tier150;
   const tier250 = base.filter((p) => p.isNeetCode250 && !p.isNeetCode150);
-  if (tier250.length) return tier250;
-  const tierCatalog = base.filter((p) => p.isExtendedCatalog);
-  if (tierCatalog.length) return tierCatalog;
+  const tierCatalog = base.filter((p) => !!p.isExtendedCatalog);
+
+  const tiers = { tier75, tier150, tier250, tierCatalog } as const;
+  type TierKey = keyof typeof tiers;
+
+  const defaultOrder: TierKey[] = ['tier75', 'tier150', 'tier250', 'tierCatalog'];
+  let order: TierKey[] = defaultOrder;
+
+  if (options?.alignPoolToTargetCurriculum && options.targetCurriculum) {
+    switch (options.targetCurriculum) {
+      case 'NEET_150':
+        order = ['tier150', 'tier250', 'tier75', 'tierCatalog'];
+        break;
+      case 'NEET_250':
+        order = ['tier250', 'tier150', 'tier75', 'tierCatalog'];
+        break;
+      case 'EXTENDED':
+        order = ['tierCatalog', 'tier250', 'tier150', 'tier75'];
+        break;
+      default:
+        order = defaultOrder;
+    }
+  }
+
+  for (const key of order) {
+    if (tiers[key].length) return tiers[key];
+  }
   return [];
+}
+
+/**
+ * If the account never recorded 4 or 5, historic “3” may mean old “mastered” — remap to 4 (current “strong” band).
+ */
+export function migrateLegacyRatingHistoryIfNeeded(
+  progress: Record<string, ProblemProgress>
+): { map: Record<string, ProblemProgress>; changed: boolean } {
+  let has45 = false;
+  for (const p of Object.values(progress)) {
+    for (const h of p.history) {
+      if (h.rating >= 4) {
+        has45 = true;
+        break;
+      }
+    }
+    if (has45) break;
+  }
+  if (has45) {
+    return { map: progress, changed: false };
+  }
+  let has3 = false;
+  for (const p of Object.values(progress)) {
+    if (p.history.some((h) => h.rating === 3)) {
+      has3 = true;
+      break;
+    }
+  }
+  if (!has3) {
+    return { map: progress, changed: false };
+  }
+  const map: Record<string, ProblemProgress> = {};
+  for (const [id, prog] of Object.entries(progress)) {
+    map[id] = {
+      ...prog,
+      history: prog.history.map((h) =>
+        h.rating === 3 ? { ...h, rating: 4 as ProblemSessionRating } : h
+      ),
+    };
+  }
+  return { map, changed: true };
 }
 
 export function categoryHasSprintWork(
   category: string,
   solvedIds: Set<string>,
-  reservedIds: Set<string>
+  reservedIds: Set<string>,
+  options?: SprintPoolOptions
 ): boolean {
-  return getSprintPoolProblems(category, solvedIds, reservedIds).length > 0;
+  return getSprintPoolProblems(category, solvedIds, reservedIds, options).length > 0;
 }
 
 export function findInitialSprintIndex(solvedIds: Set<string>, phase1Cats: readonly string[]): number {
@@ -124,10 +199,65 @@ export function findInitialSprintIndex(solvedIds: Set<string>, phase1Cats: reado
   return phase1Cats.length - 1;
 }
 
+function tierDifficultyWeights(tier: AppSettings['targetCompanyTier']): Record<'Easy' | 'Medium' | 'Hard', number> {
+  switch (tier) {
+    case 'FAANG':
+      return { Easy: 20, Medium: 60, Hard: 20 };
+    case 'FINTECH':
+      return { Easy: 30, Medium: 60, Hard: 10 };
+    case 'GENERAL':
+      return { Easy: 50, Medium: 45, Hard: 5 };
+    default:
+      return { Easy: 33, Medium: 34, Hard: 33 };
+  }
+}
+
+/**
+ * Pick one unsolved problem from a candidate list using interview type + company tier heuristics.
+ */
+export function pickUnsolvedForRandomRecommendation(
+  candidates: Problem[],
+  solvedIds: Set<string>,
+  settings: AppSettings,
+  progress: Record<string, ProblemProgress>
+): Problem | undefined {
+  const unsolved = candidates.filter((p) => !solvedIds.has(p.id));
+  if (unsolved.length === 0) return undefined;
+  if (unsolved.length === 1) return unsolved[0];
+
+  if (settings.interviewType === 'INTERNSHIP') {
+    const order = { Easy: 0, Medium: 1, Hard: 2 } as const;
+    return [...unsolved].sort((a, b) => order[a.difficulty] - order[b.difficulty])[0];
+  }
+
+  const weights = tierDifficultyWeights(settings.targetCompanyTier);
+  const curriculum = settings.targetCurriculum ?? 'NEET_75';
+  const solvedCounts: Record<'Easy' | 'Medium' | 'Hard', number> = { Easy: 0, Medium: 0, Hard: 0 };
+  Object.entries(progress).forEach(([id, prog]) => {
+    if (prog.history.length === 0) return;
+    const p = allProblems.find((x) => x.id === id);
+    if (!p || !problemMatchesTargetCurriculum(p, curriculum)) return;
+    solvedCounts[p.difficulty] += 1;
+  });
+
+  let best = unsolved[0];
+  let bestScore = -1;
+  for (const p of unsolved) {
+    const w = weights[p.difficulty];
+    const c = solvedCounts[p.difficulty];
+    const score = w / (1 + c);
+    if (score > bestScore) {
+      bestScore = score;
+      best = p;
+    }
+  }
+  return best;
+}
+
 export function computeNewProblemProgress(
   existing: ProblemProgress | undefined,
   problemId: string,
-  rating: 1 | 2 | 3,
+  rating: ProblemSessionRating,
   isNew: boolean,
   notes: string | undefined,
   additionalHistoryData: Record<string, unknown> | undefined,
@@ -137,20 +267,14 @@ export function computeNewProblemProgress(
   const todayStr = today.toISOString();
   const prob = allProblems.find((p) => p.id === problemId);
   const isFirstRating = !existing || existing.history.length === 0;
-  const consecutiveThrees = rating === 3 ? (existing?.consecutiveThrees || 0) + 1 : 0;
+  const consecutiveThrees = rating >= 4 ? (existing?.consecutiveThrees || 0) + 1 : 0;
   const prevSuccesses = existing?.consecutiveSuccesses || 0;
-  const consecutiveSuccesses = rating >= 2 ? prevSuccesses + 1 : 0;
+  const consecutiveSuccesses = rating >= 3 ? prevSuccesses + 1 : 0;
   const difficulty = prob?.difficulty || 'Medium';
   const retireThreshold = difficulty === 'Easy' ? 2 : difficulty === 'Hard' ? 6 : 4;
   const retired = consecutiveSuccesses >= retireThreshold && consecutiveThrees >= 2;
   const reviewCount = isFirstRating ? 0 : existing ? existing.reviewCount + 1 : 0;
-  const isAggressive = srAggressiveness === 'AGGRESSIVE';
-  const nextReviewAt = getNextReviewDate(
-    rating,
-    consecutiveSuccesses,
-    isAggressive,
-    difficulty
-  ).toISOString();
+  const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, srAggressiveness, difficulty, false).toISOString();
 
   return {
     firstSolvedAt: existing ? existing.firstSolvedAt : todayStr,
@@ -189,8 +313,7 @@ export function computeNewSyntaxProgress(
   const prevSuccesses = existing?.consecutiveSuccesses ?? 0;
   const consecutiveSuccesses = rating >= 2 ? prevSuccesses + 1 : 0;
 
-  const isAggressive = srAggressiveness === 'AGGRESSIVE';
-  const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, isAggressive).toISOString();
+  const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, srAggressiveness, 'Medium', true).toISOString();
 
   return {
     lastPracticedAt: todayStr,
@@ -293,7 +416,7 @@ export function calculateSessionAggregates(sessionTimings: SessionTiming[]) {
 export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
   const events: Array<{
     problemId: string;
-    rating: 1 | 2 | 3;
+    rating: ProblemSessionRating;
     date: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
     category: string;
@@ -338,7 +461,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
         categoryStruggling[event.category] = true;
       }
     } else if (
-      event.rating >= 2 &&
+      event.rating >= 3 &&
       event.difficulty === 'Easy' &&
       categoryStruggling[event.category]
     ) {
@@ -498,7 +621,7 @@ export function applyLeetCodeSubmissions(
       // Compute the first-success interval from the actual solve date so old
       // imports surface as overdue today rather than being pushed into the future.
       const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
-      const intervalDays = Math.round(4 * diffMultiplier); // consecutiveSuccesses=1, rating=3 (assumed)
+      const intervalDays = Math.round(4 * diffMultiplier); // consecutiveSuccesses=1, assumed strong first pass (rating 4)
       const nextReview = startOfDay(new Date(solveDate));
       nextReview.setDate(nextReview.getDate() + intervalDays);
 
@@ -507,7 +630,7 @@ export function applyLeetCodeSubmissions(
         lastReviewedAt: solveDateStr,
         nextReviewAt: nextReview.toISOString(),
         reviewCount: 0,
-        history: [{ date: solveDateStr, rating: 3 }],
+        history: [{ date: solveDateStr, rating: 4 }],
         retired: false,
         consecutiveThrees: 1,
         consecutiveSuccesses: 1,
@@ -604,6 +727,11 @@ export function buildDailyPlan(params: {
     categoryAvgSolveTimes, categoryAvgReviewTimes,
   } = params;
   const phase = getPhase();
+  const targetPool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75');
+  const sprintPoolOpts: SprintPoolOptions = {
+    alignPoolToTargetCurriculum: settings.sprintSettings.alignPoolToTargetCurriculum,
+    targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
+  };
   const today = new Date();
   const dayOfWeek = getDay(today);
 
@@ -703,7 +831,7 @@ export function buildDailyPlan(params: {
 
     const findRetroCandidate = () => {
       const cat = effectiveSprint.currentCategory;
-      const pool = getSprintPoolProblems(cat, solvedIds, reservedIds);
+      const pool = getSprintPoolProblems(cat, solvedIds, reservedIds, sprintPoolOpts);
       return (
         pool.find((p) => p.difficulty === 'Medium') ??
         pool[0] ??
@@ -719,7 +847,7 @@ export function buildDailyPlan(params: {
     } else {
       const sprintCat = effectiveSprint.currentCategory;
       const isStruggling = categoryStruggling[sprintCat] ?? false;
-      const categoryProblems = getSprintPoolProblems(sprintCat, solvedIds, reservedIds);
+      const categoryProblems = getSprintPoolProblems(sprintCat, solvedIds, reservedIds, sprintPoolOpts);
 
       let candidate = null;
 
@@ -776,25 +904,24 @@ export function buildDailyPlan(params: {
 
     for (const { category, avg } of categoryAverages) {
       if (!candidateCategories.includes(category)) continue;
-      if (avg >= 2.5) continue;
+      if (avg >= 3) continue;
 
-      const categoryProblems = problems.filter(
-        (p) => p.category === category && (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) && !reservedIds.has(p.id)
+      const categoryProblems = targetPool.filter(
+        (p) => p.category === category && !reservedIds.has(p.id)
       );
-      const unsolved = categoryProblems.find((p) => !solvedIds.has(p.id));
+      const picked = pickUnsolvedForRandomRecommendation(categoryProblems, solvedIds, settings, progress);
 
-      if (unsolved) {
-        newProblem = unsolved.id;
+      if (picked) {
+        newProblem = picked.id;
         recommendationReason = `Recommending this because your ${category} confidence average is ${avg.toFixed(1)}.`;
         break;
       }
     }
 
     if (!newProblem) {
-      const unsolved = problems.find(
-        (p) => (phase === 3 ? p.isNeetCode150 : p.isNeetCode75) && !solvedIds.has(p.id) && !reservedIds.has(p.id)
-      );
-      newProblem = unsolved?.id ?? null;
+      const allCandidates = targetPool.filter((p) => !reservedIds.has(p.id));
+      const picked = pickUnsolvedForRandomRecommendation(allCandidates, solvedIds, settings, progress);
+      newProblem = picked?.id ?? null;
       if (newProblem) recommendationReason = 'Best next unsolved problem from your target list.';
     }
   }

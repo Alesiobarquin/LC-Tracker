@@ -20,6 +20,7 @@ export type Category =
   | 'Math & Geometry'
   | 'Bit Manipulation';
 
+import type { TargetCurriculum } from '../types';
 import { MockInterviewContent, mockProblemContent } from './mockProblems';
 import leetcodeExtendedCatalogJson from './leetcodeExtendedCatalog.json';
 
@@ -38,6 +39,29 @@ export interface Problem {
   /** Extra LeetCode problems beyond NeetCode 250 (full catalog browse / sprint tier 4). */
   isExtendedCatalog?: boolean;
   mockInterviewContent?: MockInterviewContent;
+}
+
+export const TARGET_CURRICULUM_LABELS: Record<TargetCurriculum, string> = {
+  NEET_75: 'NeetCode 75',
+  NEET_150: 'NeetCode 150',
+  NEET_250: 'NeetCode 250',
+  EXTENDED: 'NeetCode 250 + extended catalog',
+};
+
+/** Whether a problem belongs to the user’s selected target curriculum. */
+export function problemMatchesTargetCurriculum(p: Problem, target: TargetCurriculum): boolean {
+  switch (target) {
+    case 'NEET_75':
+      return p.isNeetCode75;
+    case 'NEET_150':
+      return p.isNeetCode150;
+    case 'NEET_250':
+      return p.isNeetCode250;
+    case 'EXTENDED':
+      return p.isNeetCode250 || !!p.isExtendedCatalog;
+    default:
+      return p.isNeetCode75;
+  }
 }
 
 export const problems: Problem[] = ([
@@ -304,6 +328,16 @@ export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson a
 );
 
 export const allProblems: Problem[] = [...problems, ...extendedCatalogProblems];
+
+/** Pool used for recommendations: main list for curated tiers; full list for extended. */
+export function problemsPoolForTargetCurriculum(curriculum: TargetCurriculum): Problem[] {
+  const base = curriculum === 'EXTENDED' ? allProblems : problems;
+  return base.filter((p) => problemMatchesTargetCurriculum(p, curriculum));
+}
+
+export function countTargetCurriculumProblems(curriculum: TargetCurriculum): number {
+  return problemsPoolForTargetCurriculum(curriculum).length;
+}
 
 export const PHASE_1_CATEGORIES: Category[] = [
   'Arrays & Hashing',

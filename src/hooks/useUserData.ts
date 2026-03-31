@@ -11,6 +11,7 @@ import {
   type ActivityLog,
   type AppSettings,
   type ProblemProgress,
+  type ProblemSessionRating,
   type SessionTiming,
   type SprintHistoryEntry,
   type SprintState,
@@ -30,6 +31,7 @@ import {
   computeUpdatedActivityEntry,
   createInitialSprintState,
   deriveMomentumState,
+  migrateLegacyRatingHistoryIfNeeded,
   setSprintCategoryState,
   SPRINT_DESCRIPTIONS,
 } from '../utils/progressHelpers';
@@ -43,6 +45,7 @@ export { userDataQueryKeys };
 
 type StoredSettingsJson = {
   settings?: Partial<AppSettings>;
+  ratingHistoryMigrationVersion?: number;
   targetEvents?: TargetEvent[];
   dayMode?: UserSettingsData['dayMode'];
   catchUpPlan?: UserSettingsData['catchUpPlan'];
@@ -69,7 +72,7 @@ type SessionTimingRow = {
   recorded_at: string;
   elapsed_seconds: number;
   session_type: SessionTiming['sessionType'];
-  rating: 1 | 2 | 3;
+  rating: ProblemSessionRating;
 };
 
 type SprintStateRow = {
@@ -93,8 +96,11 @@ function mergeSettings(defaults: AppSettings, partial?: Partial<AppSettings>): A
       ...(partial?.studySchedule ?? {}),
     },
     sprintSettings: {
-      ...defaults.sprintSettings,
-      ...(partial?.sprintSettings ?? {}),
+      lengthMultiplier: partial?.sprintSettings?.lengthMultiplier ?? defaults.sprintSettings.lengthMultiplier,
+      targetDays: partial?.sprintSettings?.targetDays ?? defaults.sprintSettings.targetDays,
+      alignPoolToTargetCurriculum:
+        partial?.sprintSettings?.alignPoolToTargetCurriculum ??
+        defaults.sprintSettings.alignPoolToTargetCurriculum,
     },
   };
 }
@@ -112,6 +118,8 @@ function normalizeUserSettingsRow(row: {
     leetcodeUsername: row?.leetcode_username ?? DEFAULT_USER_SETTINGS.leetcodeUsername,
     targetInterviewDate: row?.target_interview_date ?? DEFAULT_USER_SETTINGS.targetInterviewDate,
     settings: mergeSettings(DEFAULT_SETTINGS, settingsJson.settings),
+    ratingHistoryMigrationVersion:
+      settingsJson.ratingHistoryMigrationVersion ?? DEFAULT_USER_SETTINGS.ratingHistoryMigrationVersion,
     targetEvents: settingsJson.targetEvents ?? DEFAULT_USER_SETTINGS.targetEvents,
     dayMode: settingsJson.dayMode ?? DEFAULT_USER_SETTINGS.dayMode,
     catchUpPlan: settingsJson.catchUpPlan ?? DEFAULT_USER_SETTINGS.catchUpPlan,
@@ -127,6 +135,7 @@ function userSettingsToRow(userId: string, data: UserSettingsData) {
     target_interview_date: data.targetInterviewDate,
     settings_json: {
       settings: data.settings,
+      ratingHistoryMigrationVersion: data.ratingHistoryMigrationVersion,
       targetEvents: data.targetEvents,
       dayMode: data.dayMode,
       catchUpPlan: data.catchUpPlan,
@@ -250,7 +259,39 @@ async function fetchProblemProgress(userId: string) {
     .eq('user_id', userId);
 
   if (error) throw error;
-  return rowToProgressMap((data as ProblemProgressRow[]) ?? []);
+  let map = rowToProgressMap((data as ProblemProgressRow[]) ?? []);
+
+  const { data: settingsRow, error: settingsErr } = await supabase
+    .from('user_settings')
+    .select('onboarding_complete, leetcode_username, target_interview_date, settings_json')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (settingsErr) throw settingsErr;
+
+  if (!settingsRow) {
+    return map;
+  }
+
+  const userData = normalizeUserSettingsRow(settingsRow);
+  if (userData.ratingHistoryMigrationVersion >= 1) {
+    return map;
+  }
+
+  const { map: migrated, changed } = migrateLegacyRatingHistoryIfNeeded(map);
+  const nextVersion = { ...userData, ratingHistoryMigrationVersion: 1 as const };
+
+  if (changed) {
+    const rows = Object.entries(migrated).map(([problemId, prog]) => progressToRow(userId, problemId, prog));
+    const { error: upErr } = await supabase.from('problem_progress').upsert(rows);
+    if (upErr) throw upErr;
+    map = migrated;
+  }
+
+  const { error: verErr } = await supabase.from('user_settings').upsert(userSettingsToRow(userId, nextVersion));
+  if (verErr) throw verErr;
+  await queryClient.invalidateQueries({ queryKey: queryKeys.settings(userId) });
+
+  return map;
 }
 
 async function fetchActivityLog(userId: string) {
@@ -331,15 +372,19 @@ export function useUserSettings() {
   });
 
   const applySettingsMutation = useMutation({
-    mutationFn: async (updater: (current: UserSettingsData) => UserSettingsData) => {
+    mutationFn: async ({
+      previous,
+      next,
+    }: {
+      previous: UserSettingsData;
+      next: UserSettingsData;
+    }) => {
       if (!userId) throw new Error('No authenticated user');
-      const current = queryClient.getQueryData<UserSettingsData>(queryKeys.settings(userId)) ?? DEFAULT_USER_SETTINGS;
-      const next = updater(current);
 
       const { error } = await supabase.from('user_settings').upsert(userSettingsToRow(userId, next));
       if (error) throw error;
 
-      if (current.settings.srAggressiveness !== next.settings.srAggressiveness) {
+      if (previous.settings.srAggressiveness !== next.settings.srAggressiveness) {
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const updatedRows = Object.entries(progress).flatMap(([problemId, prog]) => {
           const problem = allProblems.find((item) => item.id === problemId);
@@ -348,7 +393,7 @@ export function useUserSettings() {
           const nextReviewAt = getNextReviewDate(
             lastRating,
             prog.consecutiveSuccesses || 0,
-            next.settings.srAggressiveness === 'AGGRESSIVE',
+            next.settings.srAggressiveness,
             problem.difficulty
           ).toISOString();
           if (nextReviewAt === prog.nextReviewAt) return [];
@@ -361,11 +406,9 @@ export function useUserSettings() {
         }
       }
     },
-    onMutate: async (updater) => {
+    onMutate: async ({ previous, next }) => {
       if (!userId) return {};
       await queryClient.cancelQueries({ queryKey: queryKeys.settings(userId) });
-      const previous = queryClient.getQueryData<UserSettingsData>(queryKeys.settings(userId)) ?? DEFAULT_USER_SETTINGS;
-      const next = updater(previous);
       queryClient.setQueryData(queryKeys.settings(userId), next);
 
       if (previous.settings.srAggressiveness !== next.settings.srAggressiveness) {
@@ -380,7 +423,7 @@ export function useUserSettings() {
             nextReviewAt: getNextReviewDate(
               lastRating,
               prog.consecutiveSuccesses || 0,
-              next.settings.srAggressiveness === 'AGGRESSIVE',
+              next.settings.srAggressiveness,
               problem.difficulty
             ).toISOString(),
           };
@@ -390,9 +433,9 @@ export function useUserSettings() {
 
       return { previous };
     },
-    onError: (_error, _updater, context) => {
-      if (!userId || !context?.previous) return;
-      queryClient.setQueryData(queryKeys.settings(userId), context.previous);
+    onError: (_error, variables) => {
+      if (!userId || !variables) return;
+      queryClient.setQueryData(queryKeys.settings(userId), variables.previous);
     },
     onSettled: () => {
       if (!userId) return;
@@ -401,8 +444,12 @@ export function useUserSettings() {
     },
   });
 
-  const updateUserSettings = (updater: (current: UserSettingsData) => UserSettingsData) =>
-    applySettingsMutation.mutateAsync(updater);
+  const updateUserSettings = (updater: (current: UserSettingsData) => UserSettingsData) => {
+    if (!userId) throw new Error('No authenticated user');
+    const previous = queryClient.getQueryData<UserSettingsData>(queryKeys.settings(userId)) ?? DEFAULT_USER_SETTINGS;
+    const next = updater(previous);
+    return applySettingsMutation.mutateAsync({ previous, next });
+  };
 
   const data = query.data ?? DEFAULT_USER_SETTINGS;
 
@@ -524,7 +571,7 @@ export function useProblemProgress() {
   const logProblemMutation = useMutation({
     mutationFn: async (variables: {
       problemId: string;
-      rating: 1 | 2 | 3;
+      rating: ProblemSessionRating;
       isNew: boolean;
       notes?: string;
       additionalData?: Record<string, unknown>;
@@ -696,7 +743,7 @@ export function useProblemProgress() {
       timeLimitSeconds?: number;
     }) => {
       if (!userId) throw new Error('No authenticated user');
-      let rating: 1 | 2 | 3 = 2;
+      let rating: ProblemSessionRating = 3;
       if (!variables.evalSolved || !variables.evalSyntax || variables.approachSimilarity === 1) {
         rating = 1;
       } else if (
@@ -705,7 +752,7 @@ export function useProblemProgress() {
         variables.evalComplexity &&
         variables.approachSimilarity === 3
       ) {
-        rating = 3;
+        rating = 4;
       }
 
       const problem = allProblems.find((item) => item.id === variables.problemId);
@@ -754,7 +801,7 @@ export function useProblemProgress() {
     ...momentum,
     logProblem: (
       problemId: string,
-      rating: 1 | 2 | 3,
+      rating: ProblemSessionRating,
       isNew: boolean,
       notes?: string,
       additionalData?: Record<string, unknown>
@@ -921,7 +968,7 @@ export function useSprintState() {
         sprintState: setSprintCategoryState(category, progress, settingsData.settings),
         sprintHistory: sprintData.sprintHistory,
       }),
-    recordSprintRetro: (_passed: boolean, _rating: 1 | 2 | 3) =>
+    recordSprintRetro: (_passed: boolean, _rating: ProblemSessionRating) =>
       upsertSprintMutation.mutateAsync(
         sprintData.sprintState
           ? advanceSprintState(

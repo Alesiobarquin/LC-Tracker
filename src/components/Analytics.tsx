@@ -1,5 +1,12 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { problems, allProblems, PHASE_1_CATEGORIES } from '../data/problems';
+import {
+  problems,
+  allProblems,
+  PHASE_1_CATEGORIES,
+  problemsPoolForTargetCurriculum,
+  countTargetCurriculumProblems,
+  TARGET_CURRICULUM_LABELS,
+} from '../data/problems';
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import {
   Trophy, Lightbulb, TrendingUp, AlertTriangle, History,
@@ -31,8 +38,7 @@ const fmtSeconds = (s: number): string => {
 };
 
 const SESSION_HISTORY_DEFAULT_COUNT = 5;
-const neetcode75Total = problems.filter(p => p.isNeetCode75).length;
-const neetcode250Total = problems.filter(p => p.isNeetCode250).length;
+const neetcode250Total = problems.filter((p) => p.isNeetCode250).length;
 
 export const Analytics: React.FC = () => {
   const { user } = useUser();
@@ -93,11 +99,14 @@ export const Analytics: React.FC = () => {
   const activeRotationCount = Object.values(progress).filter(p => !p.retired).length;
   const retiredCount = Object.values(progress).filter(p => p.retired).length;
 
-  const neetcode75Solved = useMemo(
-    () => problems.filter(p => p.isNeetCode75 && !!progress[p.id]).length,
-    [progress]
+  const curriculum = settings.targetCurriculum ?? 'NEET_75';
+  const targetCurriculumTotal = countTargetCurriculumProblems(curriculum);
+  const targetCurriculumSolved = useMemo(
+    () => problemsPoolForTargetCurriculum(curriculum).filter((p) => !!progress[p.id]).length,
+    [progress, curriculum]
   );
-  const neetcode75Pct = neetcode75Total > 0 ? Math.round((neetcode75Solved / neetcode75Total) * 100) : 0;
+  const targetCurriculumPct =
+    targetCurriculumTotal > 0 ? Math.round((targetCurriculumSolved / targetCurriculumTotal) * 100) : 0;
 
   const neetcode250Solved = useMemo(
     () => problems.filter(p => p.isNeetCode250 && !!progress[p.id]).length,
@@ -141,7 +150,7 @@ export const Analytics: React.FC = () => {
     if (weakest && weakest.avg < 2.0) {
       result.push({
         title: `Needs Work: ${weakest.name}`,
-        description: `Your confidence in ${weakest.name} is low (${weakest.avg}/3). Prioritize foundational problems here.`,
+        description: `Your confidence in ${weakest.name} is low (${weakest.avg}/5). Prioritize foundational problems here.`,
         icon: <AlertTriangle className="text-red-400" size={18} />,
         color: 'border-red-500/20 bg-red-500/5',
       });
@@ -150,7 +159,7 @@ export const Analytics: React.FC = () => {
     if (developing) {
       result.push({
         title: `Developing: ${developing.name}`,
-        description: `Getting there on ${developing.name} (${developing.avg}/3) — focus on optimizing time complexity.`,
+        description: `Getting there on ${developing.name} (${developing.avg}/5) — focus on optimizing time complexity.`,
         icon: <TrendingUp className="text-amber-400" size={18} />,
         color: 'border-amber-500/20 bg-amber-500/5',
       });
@@ -158,7 +167,7 @@ export const Analytics: React.FC = () => {
     if (strongest && strongest.avg >= 2.5) {
       result.push({
         title: `Strong: ${strongest.name}`,
-        description: `${strongest.name} is your strongest area (${strongest.avg}/3). Keep maintaining it.`,
+        description: `${strongest.name} is your strongest area (${strongest.avg}/5). Keep maintaining it.`,
         icon: <Trophy className="text-emerald-400" size={18} />,
         color: 'border-emerald-500/20 bg-emerald-500/5',
       });
@@ -478,24 +487,25 @@ export const Analytics: React.FC = () => {
           <p className="text-xs text-zinc-500 mt-2">{retiredCount} mastered · {activeRotationCount} in queue</p>
         </div>
 
-        {/* NeetCode 75 — progress toward the primary goal */}
+        {/* Target curriculum (Settings) — same list the planner uses */}
         <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center gap-3 mb-3">
             <Target className="text-indigo-400" size={20} />
-            <h3 className="text-zinc-400 font-medium">NeetCode 75</h3>
+            <h3 className="text-zinc-400 font-medium">Target list</h3>
           </div>
+          <p className="text-xs text-zinc-500 mb-2">{TARGET_CURRICULUM_LABELS[curriculum]}</p>
           <p className="text-3xl font-bold text-zinc-50 flex items-baseline gap-2">
-            {neetcode75Solved}
-            <span className="text-sm font-medium text-zinc-500">/ {neetcode75Total}</span>
+            {targetCurriculumSolved}
+            <span className="text-sm font-medium text-zinc-500">/ {targetCurriculumTotal}</span>
           </p>
           <div className="mt-3">
             <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-500 rounded-full transition-all duration-700"
-                style={{ width: `${neetcode75Pct}%` }}
+                style={{ width: `${targetCurriculumPct}%` }}
               />
             </div>
-            <p className="text-xs text-zinc-500 mt-1.5">{neetcode75Pct}% complete</p>
+            <p className="text-xs text-zinc-500 mt-1.5">{targetCurriculumPct}% complete</p>
           </div>
         </div>
 
@@ -644,7 +654,7 @@ export const Analytics: React.FC = () => {
           <div>
             <h2 className="text-xl font-semibold text-zinc-100">Category Performance</h2>
             <p className="text-xs text-zinc-500 mt-1">
-              Confidence rating (1–3) · avg new-solve time · sorted weakest first
+              Confidence rating (1–5) · avg new-solve time · sorted weakest first
             </p>
           </div>
           {hasMoreOlder && user?.id && combinedTimings.length > 0 && (
@@ -799,13 +809,25 @@ export const Analytics: React.FC = () => {
                           <td className="px-4 py-3">
                             <span className={clsx(
                               'px-2.5 py-1 rounded text-xs font-medium border',
-                              session.rating === 3
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : session.rating === 2
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                  : 'bg-red-500/10 text-red-400 border-red-500/20'
+                              session.rating >= 5
+                                ? 'bg-violet-500/10 text-violet-300 border-violet-500/20'
+                                : session.rating === 4
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                  : session.rating === 3
+                                    ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                                    : session.rating === 2
+                                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                      : 'bg-red-500/10 text-red-400 border-red-500/20'
                             )}>
-                              {session.rating === 3 ? 'Mastered' : session.rating === 2 ? 'Okay' : 'Struggled'}
+                              {session.rating >= 5
+                                ? 'Cold / auto'
+                                : session.rating === 4
+                                  ? 'Strong'
+                                  : session.rating === 3
+                                    ? 'Acceptable'
+                                    : session.rating === 2
+                                      ? 'Shaky'
+                                      : 'Could not'}
                             </span>
                           </td>
                           <td className="px-4 py-3">

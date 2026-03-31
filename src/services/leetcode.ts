@@ -1,5 +1,3 @@
-import { problems } from '../data/problems';
-
 export interface LeetCodeSubmission {
   title: string;
   titleSlug: string;

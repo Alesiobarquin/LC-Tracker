@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { problems, Category } from '../data/problems';
+import React, { useState, useMemo, useEffect } from 'react';
+import { problems, allProblems, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
@@ -7,6 +7,9 @@ import { useProblemProgress } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
 
 const VIRTUALIZE_THRESHOLD = 200;
+/** Initial rows to render per tab/filter (large lists load more on demand). */
+const PROBLEM_LIST_INITIAL_CHUNK = 100;
+const PROBLEM_LIST_LOAD_MORE_CHUNK = 200;
 
 export const ProblemLibrary: React.FC = () => {
   const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
@@ -14,7 +17,10 @@ export const ProblemLibrary: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeSession, setActiveSession] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'NeetCode 75' | 'Blind 75' | 'NeetCode 150'>('NeetCode 75');
+  const [activeTab, setActiveTab] = useState<
+    'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog'
+  >('NeetCode 75');
+  const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);
   const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
 
   // Reserved problems (those with full mock interview content)
@@ -24,12 +30,17 @@ export const ProblemLibrary: React.FC = () => {
       .map(p => p.id)
   ), []);
 
-  const tabProblems = problems.filter(p => {
-    if (activeTab === 'NeetCode 75') return p.isNeetCode75;
-    if (activeTab === 'Blind 75') return p.isBlind75;
-    if (activeTab === 'NeetCode 150') return p.isNeetCode150;
-    return false;
-  });
+  const tabProblems = useMemo(() => {
+    if (activeTab === 'NeetCode 75') return problems.filter((p) => p.isNeetCode75);
+    if (activeTab === 'NeetCode 150') return problems.filter((p) => p.isNeetCode150);
+    if (activeTab === 'NeetCode 250') return problems.filter((p) => p.isNeetCode250);
+    if (activeTab === 'Full Catalog') return allProblems;
+    return [];
+  }, [activeTab]);
+
+  useEffect(() => {
+    setVisibleLimit(PROBLEM_LIST_INITIAL_CHUNK);
+  }, [activeTab, search, activeCategory, sortConfig]);
 
   const categories = ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
 
@@ -64,6 +75,12 @@ export const ProblemLibrary: React.FC = () => {
     return result;
   }, [tabProblems, search, activeCategory, sortConfig, progress]);
 
+  const displayedProblems = useMemo(
+    () => filteredProblems.slice(0, visibleLimit),
+    [filteredProblems, visibleLimit]
+  );
+  const hiddenCount = Math.max(0, filteredProblems.length - displayedProblems.length);
+
   const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -85,7 +102,7 @@ export const ProblemLibrary: React.FC = () => {
   const progressPercent = totalInTab > 0 ? Math.round((solvedInTab / totalInTab) * 100) : 0;
 
   const virtualRowStyle: React.CSSProperties | undefined =
-    filteredProblems.length >= VIRTUALIZE_THRESHOLD
+    displayedProblems.length >= VIRTUALIZE_THRESHOLD
       ? { contentVisibility: 'auto', containIntrinsicSize: 'auto 52px' }
       : undefined;
 
@@ -94,7 +111,7 @@ export const ProblemLibrary: React.FC = () => {
   }
 
   if (activeSession) {
-    const problem = problems.find(p => p.id === activeSession);
+    const problem = allProblems.find(p => p.id === activeSession);
     if (!problem) return null;
     return <Timer problem={problem} isNew={!progress[problem.id]} onComplete={() => setActiveSession(null)} />;
   }
@@ -103,16 +120,18 @@ export const ProblemLibrary: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Problem Library</h1>
-        <p className="text-zinc-400 mt-1">Curated lists for interview preparation</p>
+        <p className="text-zinc-400 mt-1">
+          Curated NeetCode lists plus the full LeetCode catalog for search and practice.
+        </p>
       </header>
 
       <div className="flex flex-col gap-4">
         {/* Tabs */}
-        <div className="flex space-x-2 border-b border-zinc-800 pb-2">
-          {['NeetCode 75', 'Blind 75', 'NeetCode 150'].map((tab) => (
+        <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
+          {(['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
               className={clsx(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                 activeTab === tab 
@@ -170,11 +189,11 @@ export const ProblemLibrary: React.FC = () => {
           </div>
         ) : (
           Object.entries(
-            filteredProblems.reduce((acc, prob) => {
+            displayedProblems.reduce((acc, prob) => {
               if (!acc[prob.category]) acc[prob.category] = [];
               acc[prob.category].push(prob);
               return acc;
-            }, {} as Record<string, typeof filteredProblems>)
+            }, {} as Record<string, typeof displayedProblems>)
           ).map(([category, problems]) => (
             <div key={category} className="space-y-3">
               <div className="text-center text-sm font-medium text-zinc-300 py-2">
@@ -243,10 +262,14 @@ export const ProblemLibrary: React.FC = () => {
                                     <Lock size={9} /> Mock Only
                                   </span>
                                 )}
-                                {activeTab === 'NeetCode 75' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
-                                {activeTab === 'Blind 75' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
                                 {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
                                 {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                                {activeTab === 'NeetCode 250' && prob.isNeetCode150 && !prob.isNeetCode75 && (
+                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/20">NC150+</span>
+                                )}
+                                {activeTab === 'Full Catalog' && prob.isExtendedCatalog && (
+                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-zinc-500/10 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-500/20">Catalog</span>
+                                )}
                               </span>
                             </td>
                             <td className="px-6 py-4">
@@ -290,6 +313,24 @@ export const ProblemLibrary: React.FC = () => {
               </div>
             </div>
           ))
+        )}
+        {hiddenCount > 0 && (
+          <div className="flex flex-col items-center gap-2 pt-4 pb-2">
+            <p className="text-xs text-zinc-500">
+              Showing {displayedProblems.length} of {filteredProblems.length} problems
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                setVisibleLimit((prev) =>
+                  Math.min(prev + PROBLEM_LIST_LOAD_MORE_CHUNK, filteredProblems.length)
+                )
+              }
+              className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm font-medium border border-zinc-700 transition-colors"
+            >
+              Show more ({hiddenCount} remaining)
+            </button>
+          </div>
         )}
       </div>
     </div>

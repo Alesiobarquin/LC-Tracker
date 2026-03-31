@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '../store/useStore';
-import { problems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
+import { problems, allProblems, PHASE_1_CATEGORIES, PHASE_2_CATEGORIES } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
 import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
@@ -10,7 +10,12 @@ import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, SPRINT_DESCRIPTIONS, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
-import { computeReviewProblems, getEstimatedMinutesByDifficulty, getReservedProblemIds } from '../utils/progressHelpers';
+import {
+  computeReviewProblems,
+  getEstimatedMinutesByDifficulty,
+  getReservedProblemIds,
+  getSprintPoolProblems,
+} from '../utils/progressHelpers';
 import { DashboardSkeleton } from './loadingSkeletons';
 import type { Difficulty } from '../data/problems';
 
@@ -138,13 +143,8 @@ export const Dashboard: React.FC = () => {
     const phase = getPhase();
 
     if (sprintCategory && sprintState?.sprintStatus === 'active') {
-      // Stay inside the sprint category — skipping should give the next sprint problem
-      const sprintCandidates = problems.filter(p =>
-        p.category === sprintCategory &&
-        p.isNeetCode75 &&
-        !solvedIds.has(p.id) &&
-        !skippedNewProblemIds.has(p.id) &&
-        !reservedIds.has(p.id)
+      const sprintCandidates = getSprintPoolProblems(sprintCategory, solvedIds, reservedIds).filter(
+        (p) => !skippedNewProblemIds.has(p.id)
       );
       return sprintCandidates.length > 0 ? sprintCandidates[0].id : null;
     }
@@ -187,9 +187,9 @@ export const Dashboard: React.FC = () => {
     return <DashboardSkeleton />;
   }
 
-  const newProblemData = effectiveNewProblemId ? problems.find(p => p.id === effectiveNewProblemId) : null;
-  const reviewProblemsData = effectiveReviewProblems.map(id => problems.find(p => p.id === id)).filter(Boolean);
-  const coldSolveData = coldSolveProblem ? problems.find(p => p.id === coldSolveProblem) : null;
+  const newProblemData = effectiveNewProblemId ? allProblems.find(p => p.id === effectiveNewProblemId) : null;
+  const reviewProblemsData = effectiveReviewProblems.map(id => allProblems.find(p => p.id === id)).filter(Boolean);
+  const coldSolveData = coldSolveProblem ? allProblems.find(p => p.id === coldSolveProblem) : null;
   const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
 
   // ── Dynamic Time Estimates ───────────────────────────────────────────────
@@ -216,14 +216,14 @@ export const Dashboard: React.FC = () => {
     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
   additionalProblems.forEach(id => {
-    const prob = problems.find(p => p.id === id);
+    const prob = allProblems.find(p => p.id === id);
     if (prob) {
       const est = getNewProblemMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
   effectiveReviewProblems.forEach(id => {
-    const prob = problems.find(p => p.id === id);
+    const prob = allProblems.find(p => p.id === id);
     if (prob) {
       const est = getReviewMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
@@ -457,7 +457,7 @@ export const Dashboard: React.FC = () => {
 
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
-    const problem = problems.find(p => p.id === activeSession.problemId);
+    const problem = allProblems.find(p => p.id === activeSession.problemId);
     if (!problem) return null;
     return (
       <TimerComp
@@ -565,7 +565,7 @@ export const Dashboard: React.FC = () => {
 
           {/* Proactive NeetCode Recommendation */}
           {proactiveNeetCodeProblemId && (() => {
-            const ncp = problems.find(p => p.id === proactiveNeetCodeProblemId);
+            const ncp = allProblems.find(p => p.id === proactiveNeetCodeProblemId);
             if (!ncp) return null;
             return (
               <div className="premium-card p-4 border-red-500/30 bg-red-500/5 flex items-start gap-4">
@@ -644,7 +644,7 @@ export const Dashboard: React.FC = () => {
               );
             })() : newProblemData ? (
               <div className="space-y-4">
-                {[newProblemData, ...(additionalProblems || []).map(id => problems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
+                {[newProblemData, ...(additionalProblems || []).map(id => allProblems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
                   if (!prob) return null;
                   const isPrimary = idx === 0;
                   const est = getNewProblemMinutes(prob.category);
@@ -894,7 +894,11 @@ export const Dashboard: React.FC = () => {
             <div className="premium-card p-6">
               <h3 className="font-semibold text-zinc-100 mb-2">Phase {phase} Status</h3>
               <p className="text-sm text-zinc-400 mb-5">
-                {phase === 1 ? 'NeetCode 75 Core (No Graphs/DP)' : phase === 2 ? 'Internship Mode (3x/week)' : 'Recruiting Grind (NC 150 + Mocks)'}
+                {phase === 1
+                  ? 'Sprint: NC75 → NC150 → NC250 → full catalog (same topic)'
+                  : phase === 2
+                    ? 'Internship Mode (3x/week)'
+                    : 'Recruiting Grind (NC 150 + Mocks)'}
               </p>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">

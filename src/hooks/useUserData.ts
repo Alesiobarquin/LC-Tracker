@@ -34,7 +34,7 @@ import {
   SPRINT_DESCRIPTIONS,
 } from '../utils/progressHelpers';
 import { getNextReviewDate } from '../utils/dateUtils';
-import { problems } from '../data/problems';
+import { allProblems } from '../data/problems';
 import { userDataQueryKeys } from '../lib/userDataQueryKeys';
 
 const queryKeys = userDataQueryKeys;
@@ -342,7 +342,7 @@ export function useUserSettings() {
       if (current.settings.srAggressiveness !== next.settings.srAggressiveness) {
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const updatedRows = Object.entries(progress).flatMap(([problemId, prog]) => {
-          const problem = problems.find((item) => item.id === problemId);
+          const problem = allProblems.find((item) => item.id === problemId);
           if (!problem || prog.retired || prog.history.length === 0) return [];
           const lastRating = prog.history[prog.history.length - 1].rating;
           const nextReviewAt = getNextReviewDate(
@@ -372,7 +372,7 @@ export function useUserSettings() {
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const optimisticProgress = { ...progress };
         Object.entries(optimisticProgress).forEach(([problemId, prog]) => {
-          const problem = problems.find((item) => item.id === problemId);
+          const problem = allProblems.find((item) => item.id === problemId);
           if (!problem || prog.retired || prog.history.length === 0) return;
           const lastRating = prog.history[prog.history.length - 1].rating;
           optimisticProgress[problemId] = {
@@ -708,7 +708,7 @@ export function useProblemProgress() {
         rating = 3;
       }
 
-      const problem = problems.find((item) => item.id === variables.problemId);
+      const problem = allProblems.find((item) => item.id === variables.problemId);
       if (variables.actualSecondsUsed !== undefined && problem) {
         const timing: SessionTiming = {
           id: crypto.randomUUID(),

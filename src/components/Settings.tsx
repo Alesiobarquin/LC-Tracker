@@ -12,6 +12,11 @@ function formatMinutes(minutes: number): string {
     return `${hours} hr ${mins} min`;
 }
 
+/** Study sliders use min 15 / max 120; 60 min is not the numeric midpoint, so tick labels must match linear track position. */
+const STUDY_MINUTES_RANGE = { min: 15, max: 120 } as const;
+const ONE_HOUR_TICK_LEFT_PCT =
+    ((60 - STUDY_MINUTES_RANGE.min) / (STUDY_MINUTES_RANGE.max - STUDY_MINUTES_RANGE.min)) * 100;
+
 export const Settings: React.FC = () => {
     const {
         data: userSettings,
@@ -318,15 +323,23 @@ export const Settings: React.FC = () => {
                                     <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekdayMinutes)}</span>
                                 </div>
                                 <input
-                                    type="range" min="15" max="120" step="15"
+                                    type="range"
+                                    min={STUDY_MINUTES_RANGE.min}
+                                    max={STUDY_MINUTES_RANGE.max}
+                                    step="15"
                                     value={settings.studySchedule.weekdayMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekdayMinutes: parseInt(e.target.value) } })}
                                     className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                                 />
-                                <div className="flex justify-between text-xs text-zinc-600 mt-1">
-                                    <span>15 min</span>
-                                    <span>1 hr</span>
-                                    <span>2 hr</span>
+                                <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
+                                    <span className="absolute left-0 top-0">15 min</span>
+                                    <span
+                                        className="absolute top-0 -translate-x-1/2"
+                                        style={{ left: `${ONE_HOUR_TICK_LEFT_PCT}%` }}
+                                    >
+                                        1 hr
+                                    </span>
+                                    <span className="absolute right-0 top-0">2 hr</span>
                                 </div>
                             </div>
 
@@ -336,15 +349,23 @@ export const Settings: React.FC = () => {
                                     <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekendMinutes)}</span>
                                 </div>
                                 <input
-                                    type="range" min="15" max="120" step="15"
+                                    type="range"
+                                    min={STUDY_MINUTES_RANGE.min}
+                                    max={STUDY_MINUTES_RANGE.max}
+                                    step="15"
                                     value={settings.studySchedule.weekendMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekendMinutes: parseInt(e.target.value) } })}
                                     className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                                 />
-                                <div className="flex justify-between text-xs text-zinc-600 mt-1">
-                                    <span>15 min</span>
-                                    <span>1 hr</span>
-                                    <span>2 hr</span>
+                                <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
+                                    <span className="absolute left-0 top-0">15 min</span>
+                                    <span
+                                        className="absolute top-0 -translate-x-1/2"
+                                        style={{ left: `${ONE_HOUR_TICK_LEFT_PCT}%` }}
+                                    >
+                                        1 hr
+                                    </span>
+                                    <span className="absolute right-0 top-0">2 hr</span>
                                 </div>
                             </div>
 

@@ -8,7 +8,13 @@ import {
   subDays,
 } from 'date-fns';
 import { getNextReviewDate, getPhase, isDueToday } from './dateUtils';
-import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES, problems } from '../data/problems';
+import {
+  PHASE_1_CATEGORIES,
+  PHASE_2_CATEGORIES,
+  allProblems,
+  problems,
+  type Problem,
+} from '../data/problems';
 import type {
   ActivityLog,
   ActivityLogEntry,
@@ -78,11 +84,42 @@ export function getReservedProblemIds(): Set<string> {
   );
 }
 
+/**
+ * Sprint drills NeetCode curriculum in tiered order: NeetCode 75, then NeetCode 150-only,
+ * then NeetCode 250-only (not in 150), then extended LeetCode catalog (same category).
+ */
+export function getSprintPoolProblems(
+  category: string,
+  solvedIds: Set<string>,
+  reservedIds: Set<string>
+): Problem[] {
+  const base = allProblems.filter(
+    (p) => p.category === category && !solvedIds.has(p.id) && !reservedIds.has(p.id)
+  );
+  const tier75 = base.filter((p) => p.isNeetCode75);
+  if (tier75.length) return tier75;
+  const tier150 = base.filter((p) => p.isNeetCode150 && !p.isNeetCode75);
+  if (tier150.length) return tier150;
+  const tier250 = base.filter((p) => p.isNeetCode250 && !p.isNeetCode150);
+  if (tier250.length) return tier250;
+  const tierCatalog = base.filter((p) => p.isExtendedCatalog);
+  if (tierCatalog.length) return tierCatalog;
+  return [];
+}
+
+export function categoryHasSprintWork(
+  category: string,
+  solvedIds: Set<string>,
+  reservedIds: Set<string>
+): boolean {
+  return getSprintPoolProblems(category, solvedIds, reservedIds).length > 0;
+}
+
 export function findInitialSprintIndex(solvedIds: Set<string>, phase1Cats: readonly string[]): number {
+  const reservedIds = getReservedProblemIds();
   for (let i = 0; i < phase1Cats.length; i += 1) {
     const cat = phase1Cats[i];
-    const unsolved = problems.filter((p) => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id));
-    if (unsolved.length > 0) return i;
+    if (categoryHasSprintWork(cat, solvedIds, reservedIds)) return i;
   }
   return phase1Cats.length - 1;
 }
@@ -98,7 +135,7 @@ export function computeNewProblemProgress(
 ): ProblemProgress {
   const today = startOfDay(new Date());
   const todayStr = today.toISOString();
-  const prob = problems.find((p) => p.id === problemId);
+  const prob = allProblems.find((p) => p.id === problemId);
   const isFirstRating = !existing || existing.history.length === 0;
   const consecutiveThrees = rating === 3 ? (existing?.consecutiveThrees || 0) + 1 : 0;
   const prevSuccesses = existing?.consecutiveSuccesses || 0;
@@ -264,7 +301,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
   }> = [];
 
   Object.entries(progress).forEach(([problemId, prog]) => {
-    const problem = problems.find((item) => item.id === problemId);
+    const problem = allProblems.find((item) => item.id === problemId);
     if (!problem) return;
 
     prog.history.forEach((entry, index) => {
@@ -408,10 +445,7 @@ export function advanceSprintState(
 
   while (nextIdx < PHASE_1_CATEGORIES.length) {
     const cat = PHASE_1_CATEGORIES[nextIdx];
-    const hasUnsolved = problems.some(
-      (p) => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id)
-    );
-    if (hasUnsolved) break;
+    if (categoryHasSprintWork(cat, solvedIds, reservedIds)) break;
     nextIdx += 1;
   }
 
@@ -454,12 +488,12 @@ export function applyLeetCodeSubmissions(
 
   submissions.forEach((sub) => {
     const problemId = sub.titleSlug;
-    const existsInLibrary = problems.some((p) => p.id === problemId);
+    const existsInLibrary = allProblems.some((p) => p.id === problemId);
 
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const prob = problems.find((p) => p.id === problemId);
+      const prob = allProblems.find((p) => p.id === problemId);
       const difficulty = prob?.difficulty ?? 'Medium';
       // Compute the first-success interval from the actual solve date so old
       // imports surface as overdue today rather than being pushed into the future.
@@ -508,7 +542,7 @@ export function computeReviewProblems(params: {
   } = params;
 
   const getSolveMins = (id: string): number => {
-    const prob = problems.find((p) => p.id === id);
+    const prob = allProblems.find((p) => p.id === id);
     if (!prob) return 22;
     const data = categoryAvgSolveTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -518,7 +552,7 @@ export function computeReviewProblems(params: {
   };
 
   const getReviewMins = (id: string): number => {
-    const prob = problems.find((p) => p.id === id);
+    const prob = allProblems.find((p) => p.id === id);
     if (!prob) return 12;
     const data = categoryAvgReviewTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -669,20 +703,12 @@ export function buildDailyPlan(params: {
 
     const findRetroCandidate = () => {
       const cat = effectiveSprint.currentCategory;
+      const pool = getSprintPoolProblems(cat, solvedIds, reservedIds);
       return (
-        problems.find(
-          (p) =>
-            p.category === cat &&
-            p.isNeetCode75 &&
-            !solvedIds.has(p.id) &&
-            !reservedIds.has(p.id) &&
-            p.difficulty === 'Medium'
-        ) ??
-        problems.find(
-          (p) => p.category === cat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id)
-        ) ??
-        problems.find((p) => p.category === cat && !solvedIds.has(p.id) && !reservedIds.has(p.id)) ??
-        problems.find((p) => p.category === cat && !reservedIds.has(p.id))
+        pool.find((p) => p.difficulty === 'Medium') ??
+        pool[0] ??
+        allProblems.find((p) => p.category === cat && !solvedIds.has(p.id) && !reservedIds.has(p.id)) ??
+        allProblems.find((p) => p.category === cat && !reservedIds.has(p.id))
       );
     };
 
@@ -693,9 +719,7 @@ export function buildDailyPlan(params: {
     } else {
       const sprintCat = effectiveSprint.currentCategory;
       const isStruggling = categoryStruggling[sprintCat] ?? false;
-      const categoryProblems = problems.filter(
-        (p) => p.category === sprintCat && p.isNeetCode75 && !solvedIds.has(p.id) && !reservedIds.has(p.id)
-      );
+      const categoryProblems = getSprintPoolProblems(sprintCat, solvedIds, reservedIds);
 
       let candidate = null;
 
@@ -737,7 +761,7 @@ export function buildDailyPlan(params: {
     const categoryStats: Record<string, { total: number; count: number }> = {};
 
     Object.entries(progress).forEach(([id, prog]) => {
-      const prob = problems.find((item) => item.id === id);
+      const prob = allProblems.find((item) => item.id === id);
       if (prob && prog.history.length > 0) {
         const lastRating = prog.history[prog.history.length - 1].rating;
         if (!categoryStats[prob.category]) categoryStats[prob.category] = { total: 0, count: 0 };

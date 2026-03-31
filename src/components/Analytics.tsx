@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { problems, PHASE_1_CATEGORIES } from '../data/problems';
+import { problems, allProblems, PHASE_1_CATEGORIES } from '../data/problems';
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import {
   Trophy, Lightbulb, TrendingUp, AlertTriangle, History,
@@ -32,6 +32,7 @@ const fmtSeconds = (s: number): string => {
 
 const SESSION_HISTORY_DEFAULT_COUNT = 5;
 const neetcode75Total = problems.filter(p => p.isNeetCode75).length;
+const neetcode250Total = problems.filter(p => p.isNeetCode250).length;
 
 export const Analytics: React.FC = () => {
   const { user } = useUser();
@@ -98,21 +99,23 @@ export const Analytics: React.FC = () => {
   );
   const neetcode75Pct = neetcode75Total > 0 ? Math.round((neetcode75Solved / neetcode75Total) * 100) : 0;
 
+  const neetcode250Solved = useMemo(
+    () => problems.filter(p => p.isNeetCode250 && !!progress[p.id]).length,
+    [progress]
+  );
+  const neetcode250Pct = neetcode250Total > 0 ? Math.round((neetcode250Solved / neetcode250Total) * 100) : 0;
+
   // ── Category Stats ─────────────────────────────────────────────────────────
   const categoryStats = useMemo(() => {
-    const allCategories = Array.from(new Set(problems.map(p => p.category)));
-    const stats = allCategories.reduce((acc, cat) => {
-      acc[cat] = { totalRating: 0, count: 0 };
-      return acc;
-    }, {} as Record<string, { totalRating: number; count: number }>);
+    const stats: Record<string, { totalRating: number; count: number }> = {};
 
-    problems.forEach((prob) => {
-      const prog = progress[prob.id];
-      if (prog && prog.history.length > 0) {
-        const lastRating = prog.history[prog.history.length - 1].rating;
-        stats[prob.category].totalRating += lastRating;
-        stats[prob.category].count += 1;
-      }
+    Object.entries(progress).forEach(([problemId, prog]) => {
+      const prob = allProblems.find((p) => p.id === problemId);
+      if (!prob || prog.history.length === 0) return;
+      const lastRating = prog.history[prog.history.length - 1].rating;
+      if (!stats[prob.category]) stats[prob.category] = { totalRating: 0, count: 0 };
+      stats[prob.category].totalRating += lastRating;
+      stats[prob.category].count += 1;
     });
     return stats;
   }, [progress]);
@@ -181,7 +184,7 @@ export const Analytics: React.FC = () => {
     }[] = [];
 
     Object.entries(progress).forEach(([problemId, prog]) => {
-      const prob = problems.find(p => p.id === problemId);
+      const prob = allProblems.find(p => p.id === problemId);
       if (!prob) return;
       prog.history.forEach(entry => {
         allSessions.push({
@@ -464,7 +467,7 @@ export const Analytics: React.FC = () => {
       })()}
 
       {/* ── Stat Cards — 3 metrics that matter ──────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Solved */}
         <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '50ms' }}>
           <div className="flex items-center gap-3 mb-3">
@@ -493,6 +496,27 @@ export const Analytics: React.FC = () => {
               />
             </div>
             <p className="text-xs text-zinc-500 mt-1.5">{neetcode75Pct}% complete</p>
+          </div>
+        </div>
+
+        {/* NeetCode 250 — full beginner curriculum */}
+        <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '125ms' }}>
+          <div className="flex items-center gap-3 mb-3">
+            <Target className="text-cyan-400" size={20} />
+            <h3 className="text-zinc-400 font-medium">NeetCode 250</h3>
+          </div>
+          <p className="text-3xl font-bold text-zinc-50 flex items-baseline gap-2">
+            {neetcode250Solved}
+            <span className="text-sm font-medium text-zinc-500">/ {neetcode250Total}</span>
+          </p>
+          <div className="mt-3">
+            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-cyan-500 rounded-full transition-all duration-700"
+                style={{ width: `${neetcode250Pct}%` }}
+              />
+            </div>
+            <p className="text-xs text-zinc-500 mt-1.5">{neetcode250Pct}% complete</p>
           </div>
         </div>
 

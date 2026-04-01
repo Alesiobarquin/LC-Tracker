@@ -39,7 +39,13 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           .from('feedback_images')
           .upload(filePath, imageFile);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          const isPermissionIssue = /row-level security|permission denied|not allowed/i.test(uploadError.message || '');
+          if (isPermissionIssue) {
+            throw new Error('Image upload was blocked by storage permissions. Please retry in a moment or contact support.');
+          }
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('feedback_images')

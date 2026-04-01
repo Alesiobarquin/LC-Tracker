@@ -13,6 +13,15 @@ import { Logo } from './Logo';
 import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants/featuresModal';
 import { BRAND } from '../constants/brand';
 import { isAdminUser } from '../utils/adminAuth';
+import { supabase } from '../lib/supabase';
+
+interface FeedbackRow {
+  id: string;
+}
+
+interface FeedbackReadRow {
+  feedback_id: string;
+}
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,6 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const [unreadAdminTicketCount, setUnreadAdminTicketCount] = useState(0);
   const featuresAutoOpenRef = useRef(false);
   const { user } = useUser();
   const { signOut } = useClerk();
@@ -55,6 +65,72 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     setIsFeaturesOpen(true);
   }, [activeTab]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadAdminCount = async () => {
+      if (!isAdmin || !user?.id) {
+        if (!cancelled) {
+          setUnreadAdminTicketCount(0);
+        }
+        return;
+      }
+
+      const { data: feedbackRows, error: feedbackError } = await supabase
+        .from('user_feedback')
+        .select('id');
+
+      if (feedbackError) {
+        console.error('Failed to load feedback ticket count:', feedbackError);
+        return;
+      }
+
+      const ticketRows = (feedbackRows ?? []) as FeedbackRow[];
+
+      const { data: readRows, error: readError } = await supabase
+        .from('admin_feedback_reads')
+        .select('feedback_id')
+        .eq('admin_user_id', user.id);
+
+      if (readError) {
+        if (readError.code === '42P01') {
+          if (!cancelled) {
+            setUnreadAdminTicketCount(ticketRows.length);
+          }
+          return;
+        }
+
+        console.error('Failed to load admin read markers:', readError);
+        return;
+      }
+
+      const viewedSet = new Set(((readRows ?? []) as FeedbackReadRow[]).map((row) => row.feedback_id));
+      const unreadCount = ticketRows.reduce((count, row) => count + (viewedSet.has(row.id) ? 0 : 1), 0);
+
+      if (!cancelled) {
+        setUnreadAdminTicketCount(unreadCount);
+      }
+    };
+
+    void loadUnreadAdminCount();
+
+    const intervalId = window.setInterval(() => {
+      void loadUnreadAdminCount();
+    }, 45000);
+
+    const onFocus = () => {
+      void loadUnreadAdminCount();
+    };
+
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [isAdmin, user?.id]);
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'library', label: 'Problem Library', icon: Library },
@@ -83,17 +159,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
       {/* Sidebar */}
       <div className={clsx(
-        "fixed inset-y-0 left-0 z-40 w-64 md:w-56 bg-zinc-900/92 border-r border-zinc-800/90 backdrop-blur transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-40 w-[14rem] md:w-[12.75rem] bg-zinc-900/92 border-r border-zinc-800/90 backdrop-blur transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 hidden md:block">
+        <div className="p-4 hidden md:block">
           <div className="flex items-center gap-3">
             <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={32} />
             <div className="font-semibold text-lg tracking-[0.03em] text-emerald-300">{BRAND.name}</div>
           </div>
         </div>
 
-        <nav className="mt-2 px-4 space-y-1 flex-1">
+        <nav className="mt-1 px-3 space-y-1 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -104,7 +180,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   setIsMobileMenuOpen(false);
                 }}
                 className={clsx(
-                  "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium relative border",
+                  "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-medium relative border",
                   activeTab === item.id
                     ? "bg-emerald-500/[0.08] border-emerald-500/35 text-zinc-100"
                     : "text-zinc-400 border-transparent hover:bg-zinc-800/30 hover:text-zinc-200"
@@ -125,7 +201,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           })}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800/50 space-y-4">
+        <div className="p-3 border-t border-zinc-800/50 space-y-4">
           <div className="p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
             <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
               <Calendar size={12} />
@@ -173,7 +249,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
               >
                 <Shield size={16} />
-                Admin Panel
+                <span>Admin Panel</span>
+                {unreadAdminTicketCount > 0 && (
+                  <span className="inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-amber-300 text-amber-950 text-[11px] font-black px-1.5 leading-none">
+                    {unreadAdminTicketCount > 99 ? '99+' : unreadAdminTicketCount}
+                  </span>
+                )}
               </button>
             )}
 

@@ -154,9 +154,9 @@ export const cppSyntaxCards: SyntaxCard[] = [
         id: "cpp-map-insert-bracket",
         language: "cpp",
         category: "Map and Set Operations",
-        description: "Insert or update via operator[]",
-        syntax: "umap[key] = val;\numap[key]++; // default constructs to 0",
-        useCase: "Counting frequencies safely without checking if key exists.",
+        description: "operator[] default insert, increment, and overwrite",
+        syntax: "int x = umap[key];   // missing key is inserted with value 0\numap[key]++;         // 0 -> 1 for new key\numap[key] = val;      // explicit insert or overwrite",
+        useCase: "Frequency counting and updates when you want missing keys to auto-initialize.",
         timeComplexity: "O(1) amortized"
     },
     {

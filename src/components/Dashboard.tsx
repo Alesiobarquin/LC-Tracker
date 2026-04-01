@@ -81,7 +81,6 @@ export const Dashboard: React.FC = () => {
   const {
     progress,
     categoryStruggling,
-    proactiveNeetCodeProblemId: derivedProactiveId,
     logProblem,
     isLoading: progressLoading,
   } = useProblemProgress();
@@ -96,10 +95,6 @@ export const Dashboard: React.FC = () => {
 
   const { sprintState, sprintHistory, recordSprintRetro, setSprintCategory, updateSprintState } = useSprintState();
   const { syntaxProgress } = useSyntaxProgress();
-
-  const [dismissedProactiveId, setDismissedProactiveId] = useState<string | null>(null);
-  const proactiveNeetCodeProblemId =
-    dismissedProactiveId === derivedProactiveId ? null : derivedProactiveId;
 
   const {
     newProblem,
@@ -575,26 +570,6 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-
-          {/* Proactive NeetCode Recommendation */}
-          {proactiveNeetCodeProblemId && (() => {
-            const ncp = allProblems.find(p => p.id === proactiveNeetCodeProblemId);
-            if (!ncp) return null;
-            return (
-              <div className="premium-card p-4 border-red-500/30 bg-red-500/5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                  <BookOpen size={18} className="text-red-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-red-400 mb-0.5">You've struggled with this pattern twice in a row</p>
-                  <p className="text-xs text-zinc-400 mb-3">Here's the NeetCode explanation for <span className="text-zinc-200 font-medium">{ncp.title}</span> to build your foundation.</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => setDismissedProactiveId(derivedProactiveId ?? null)} className="px-3 py-1.5 bg-zinc-800/80 text-zinc-400 text-xs rounded-lg border border-zinc-700/50 hover:text-zinc-200 transition-colors">Dismiss</button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* New Problem / Sprint Retro */}
           <section>

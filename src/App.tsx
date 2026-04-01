@@ -16,6 +16,7 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
+import { isAdminUser } from './utils/adminAuth';
 
 function RealtimeSyncHost({ userId }: { userId: string | null }) {
   useRealtimeSync(userId);
@@ -48,7 +49,6 @@ export default function App() {
   const { user, isLoaded: authLoaded } = useUser();
   const rawPath = window.location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
-  const adminUserId = (import.meta.env.VITE_ADMIN_USER_ID ?? '').trim();
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
@@ -154,7 +154,7 @@ export default function App() {
   }
 
   if (path === '/admin') {
-    if (adminUserId && user.id === adminUserId) {
+    if (isAdminUser(user)) {
       return <AdminDashboard />;
     } else {
       window.location.href = '/';

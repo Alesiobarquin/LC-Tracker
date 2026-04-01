@@ -12,6 +12,7 @@ import { FeaturesModal } from './FeaturesModal';
 import { Logo } from './Logo';
 import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants/featuresModal';
 import { BRAND } from '../constants/brand';
+import { isAdminUser } from '../utils/adminAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const featuresAutoOpenRef = useRef(false);
   const { user } = useUser();
   const { signOut } = useClerk();
-  const isAdmin = user?.id === import.meta.env.VITE_ADMIN_USER_ID;
+  const isAdmin = isAdminUser(user);
   const { targetInterviewDate, targetEvents } = useUserSettings();
   const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
   const phase = getPhase();

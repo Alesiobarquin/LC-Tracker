@@ -213,11 +213,11 @@ const TerminalLog = () => {
     }, []);
 
     return (
-        <div className="bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-6 font-mono text-sm shadow-2xl relative overflow-hidden h-full group">
+        <div className="bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-5 font-mono text-xs sm:text-sm shadow-2xl relative overflow-hidden h-full group">
             {/* Terminal reflection/glare effect */}
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
             
-            <div className="absolute top-0 left-0 w-full h-10 bg-[#121214] border-b border-zinc-800/80 flex items-center px-4 gap-2 z-10">
+            <div className="absolute top-0 left-0 w-full h-9 bg-[#121214] border-b border-zinc-800/80 flex items-center px-3 gap-2 z-10">
                 <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
@@ -227,7 +227,7 @@ const TerminalLog = () => {
                 </div>
             </div>
             
-            <div className="mt-8 flex flex-col gap-2 relative z-0">
+            <div className="mt-7 flex flex-col gap-1.5 relative z-0">
                 {logs.map((log, i) => {
                     const isLast = i === logs.length - 1;
                     return (
@@ -277,13 +277,13 @@ const Counter = ({ from, to, suffix = "", duration = 2 }: { from: number, to: nu
         return controls.stop;
     }, [from, to, inView, duration, suffix]);
 
-    return <span ref={ref} className="font-mono text-4xl font-bold text-white tracking-tight">{from}{suffix}</span>;
+    return <span ref={ref} className="font-mono text-3xl font-bold text-white tracking-tight">{from}{suffix}</span>;
 }
 
 // --- SPACED REPETITION VISUAL ---
 const SpacedRepetitionVisual = () => {
     return (
-        <div className="relative h-full min-h-[250px] border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-6 overflow-hidden flex items-end">
+        <div className="relative h-full min-h-[200px] border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-5 overflow-hidden flex items-end">
             {/* Grid overlay */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
             
@@ -312,13 +312,13 @@ const SpacedRepetitionVisual = () => {
             
             {/* Flashcard Pop */}
             <motion.div 
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-emerald-500/50 text-emerald-400 px-4 py-2 rounded-md shadow-[0_0_30px_rgba(16,185,129,0.25)] font-mono text-sm z-10 whitespace-nowrap backdrop-blur-md"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-emerald-500/50 text-emerald-400 px-3 py-1.5 rounded-md shadow-[0_0_30px_rgba(16,185,129,0.25)] font-mono text-xs z-10 whitespace-nowrap backdrop-blur-md"
                 initial={{ scale: 0, opacity: 0, y: 20 }}
                 animate={{ scale: [0, 1.1, 1], opacity: [0, 1, 1, 0], y: [20, 0, 0, -20] }}
                 transition={{ duration: 4, repeat: Infinity, times: [0, 0.1, 0.8, 1], ease: "anticipate" }}
             >
                 <div className="flex gap-2 items-center">
-                    <Code2 className="w-4 h-4" />
+                    <Code2 className="w-3.5 h-3.5" />
                     Review: Topological Sort
                 </div>
             </motion.div>
@@ -336,10 +336,10 @@ const HeatmapVisual = () => {
     const days = Array.from({ length: cols * rows });
 
     return (
-        <div ref={containerRef} className="border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-6 overflow-hidden h-full flex flex-col justify-center relative">
+        <div ref={containerRef} className="border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-5 overflow-hidden h-full flex flex-col justify-center relative">
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-32 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none"></div>
             
-            <div className="grid grid-rows-6 grid-flow-col gap-1.5 w-full justify-between overflow-hidden relative z-10">
+            <div className="grid grid-rows-6 grid-flow-col gap-1 w-full justify-between overflow-hidden relative z-10">
                 {days.map((_, i) => {
                     const intensity = Math.random();
                      let bgClass = "bg-zinc-800/50";
@@ -350,7 +350,7 @@ const HeatmapVisual = () => {
                     return (
                         <motion.div
                             key={i}
-                            className={`w-3.5 h-3.5 rounded-[3px] ${bgClass}`}
+                            className={`w-3 h-3 rounded-[2px] ${bgClass}`}
                             initial={{ scale: 0, opacity: 0 }}
                             animate={inView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
                             transition={{ 
@@ -363,7 +363,7 @@ const HeatmapVisual = () => {
                     )
                 })}
             </div>
-            <div className="mt-6 flex justify-between text-xs text-zinc-500 font-mono items-center relative z-10">
+            <div className="mt-4 flex justify-between text-[10px] text-zinc-500 font-mono items-center relative z-10">
                 <span className="flex items-center gap-1.5 border border-zinc-800 px-2 py-1 rounded bg-zinc-900/80 shadow-inner">
                     <Activity className="w-3 h-3 text-emerald-500" />
                     Sprint Streak: <span className="text-emerald-400 font-bold">14 Days</span>
@@ -454,10 +454,10 @@ const FloatingBadge = ({ text, icon: Icon, top, left, delay }: { text: string, i
             opacity: { duration: 4, repeat: Infinity, delay }, 
             y: { duration: 6, repeat: Infinity, delay, ease: "easeInOut" } 
         }}
-        className="absolute hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-800 bg-black/40 backdrop-blur-md text-zinc-500 font-mono text-xs shadow-xl pointer-events-none"
+        className="absolute hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-black/40 backdrop-blur-md text-zinc-500 font-mono text-[10px] shadow-xl pointer-events-none"
         style={{ top, left }}
     >
-        <Icon className="w-3 h-3 text-emerald-500/50" />
+        <Icon className="w-2.5 h-2.5 text-emerald-500/50" />
         {text}
     </motion.div>
 );
@@ -471,20 +471,24 @@ export const LandingPage = () => {
         
         {/* Navigation */}
         <nav className="fixed top-0 w-full z-50 border-b border-white/[0.08] backdrop-blur-xl bg-[#09090b]/60 transition-all duration-300">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-2 font-mono font-bold text-white group cursor-pointer">
-                    <div className="relative">
-                        <Logo className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
-                        <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-20 group-hover:opacity-60 transition-opacity duration-300"></div>
-                    </div>
-                    <span className="tracking-tight text-lg">LC Tracker</span>
+            <div className="max-w-[52rem] mx-auto px-6 h-14 flex items-center justify-between">
+                <div className="flex items-center gap-2 font-semibold text-white group cursor-pointer">
+                    <motion.div
+                        animate={{ y: [0, -1.5, 0] }}
+                        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                        className="relative"
+                    >
+                        <Logo className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" size={18} />
+                        <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-15 group-hover:opacity-45 transition-opacity duration-300"></div>
+                    </motion.div>
+                    <span className="tracking-tight text-base">LC Tracker</span>
                 </div>
-                <div className="flex items-center gap-6">
-                     <a href="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group">
+                <div className="flex items-center gap-5">
+                     <a href="/login" className="text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
                         Log In
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
                     </a>
-                     <a href="/login" className="relative group overflow-hidden px-5 py-2 text-sm font-semibold rounded bg-white text-black hover:bg-zinc-100 transition-colors">
+                     <a href="/login" className="relative group overflow-hidden px-4 py-1.5 text-xs font-semibold rounded bg-white text-black hover:bg-zinc-100 transition-colors">
                         <span className="relative z-10">Start Sprint</span>
                         <div className="absolute inset-0 -translate-x-[150%] skew-x-[-20deg] bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
                     </a>
@@ -495,43 +499,26 @@ export const LandingPage = () => {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative z-10 pt-40 pb-20 px-6 max-w-5xl mx-auto min-h-[95vh] flex flex-col justify-center gap-12">
+        <section className="relative z-10 pt-36 pb-20 px-6 max-w-[52rem] mx-auto min-h-[95vh] flex flex-col justify-center gap-12">
             
             {/* Floating Context Badges */}
             <div className="absolute inset-0 pointer-events-none overflow-visible">
-                <FloatingBadge icon={Network} text="O(n log n)" top="25%" left="-5%" delay={0} />
-                <FloatingBadge icon={Cpu} text="Dynamic Programming" top="70%" left="90%" delay={1.5} />
-                <FloatingBadge icon={Database} text="Memoization" top="35%" left="85%" delay={0.8} />
-                <FloatingBadge icon={BrainCircuit} text="Spaced Repetition" top="80%" left="10%" delay={2.2} />
+                <FloatingBadge icon={Network} text="Pattern fluency" top="25%" left="-5%" delay={0} />
+                <FloatingBadge icon={Cpu} text="Daily momentum" top="70%" left="90%" delay={1.5} />
+                <FloatingBadge icon={Database} text="Review memory" top="35%" left="85%" delay={0.8} />
+                <FloatingBadge icon={BrainCircuit} text="Spaced repetition" top="80%" left="10%" delay={2.2} />
             </div>
 
             {/* Subtle background glow for hero */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[620px] h-[400px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="space-y-8 relative z-20"
+                className="space-y-5 relative z-20 max-w-[34rem] mx-auto lg:mr-auto lg:ml-8 w-full"
             >
-                <motion.div 
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-[#09090b]/80 backdrop-blur shadow-[0_0_15px_rgba(16,185,129,0.15)] text-emerald-400 text-xs font-mono mb-4 w-fit"
-                >
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    SYSTEM ONLINE / KERNEL v2.0
-                </motion.div>
-
-                <p className="mb-4 text-xs sm:text-sm uppercase tracking-[0.35em] text-emerald-300/75 font-semibold">
-                    LeetCode Tracker for Spaced Repetition
-                </p>
-                
-                <h1 className="text-6xl md:text-[5.5rem] font-black tracking-tighter text-white leading-[1.05]">
+                <h1 className="text-[2.2rem] md:text-[3.35rem] font-black tracking-tight text-white leading-[1.07]">
                     <ScrambleText text="Master Algorithms." />
                     <br />
                     <span className="text-zinc-600 inline-block drop-shadow-md">Destroy The</span>
@@ -542,28 +529,28 @@ export const LandingPage = () => {
                     </span>
                 </h1>
 
-                <p className="max-w-2xl text-xl text-zinc-400 font-medium leading-relaxed">
-                    Track LeetCode problems, schedule spaced repetition reviews, and measure progress toward interview readiness with a clear study loop.
+                <p className="max-w-md text-[15px] text-zinc-400 font-medium leading-relaxed">
+                    Stop grinding blindly. Track every LeetCode session, reveal your weak points, and let our spaced repetition engine schedule your reviews.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-5 pt-8">
+                <div className="flex flex-col sm:flex-row gap-3 pt-5">
                      <a href="/login" className="block w-full sm:w-auto">
                         <motion.button 
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="group relative px-8 py-4 bg-emerald-500 text-[#09090b] font-bold rounded-lg flex items-center gap-2 overflow-hidden w-full sm:w-auto justify-center shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-shadow hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]"
+                            className="group relative px-5 py-2.5 bg-emerald-500 text-[#09090b] font-semibold rounded-lg flex items-center gap-2 overflow-hidden w-full sm:w-auto justify-center shadow-[0_0_24px_rgba(16,185,129,0.26)] transition-shadow hover:shadow-[0_0_36px_rgba(16,185,129,0.35)]"
                         >
                             <span className="relative z-10 flex items-center gap-2">
-                                <TerminalSquare className="w-5 h-5" />
-                                Initialize Sprint
+                                <TerminalSquare className="w-4 h-4" />
+                                Start sprint
                             </span>
-                            <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                            <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </motion.button>
                     </a>
-                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="group px-8 py-4 flex items-center justify-center gap-3 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
-                        <Github className="w-5 h-5 group-hover:text-white transition-colors" /> 
-                        <span className="group-hover:text-white transition-colors">View Source</span>
+                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="group px-5 py-2.5 flex items-center justify-center gap-2.5 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
+                        <Github className="w-4 h-4 group-hover:text-white transition-colors" /> 
+                        <span className="group-hover:text-white transition-colors">GitHub</span>
                     </a>
                 </div>
             </motion.div>
@@ -587,22 +574,22 @@ export const LandingPage = () => {
         </section>
 
         {/* Features Grids */}
-        <section className="relative z-10 py-32 px-6 border-y border-zinc-800/50 bg-[#09090b]/80 backdrop-blur-3xl">
-            <div className="max-w-7xl mx-auto space-y-8 perspective-[2000px]">
+        <section className="relative z-10 py-28 px-6 border-y border-zinc-800/50 bg-[#09090b]/80 backdrop-blur-3xl">
+            <div className="max-w-[52rem] mx-auto space-y-6 perspective-[2000px]">
                 
                 {/* Feature 1 */}
-                <SpotlightCard className="p-8 md:p-12">
-                    <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
+                <SpotlightCard className="p-5 md:p-7">
+                    <div className="grid md:grid-cols-2 gap-7 md:gap-12 items-center">
                         <div>
-                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-8 relative group">
-                                <BrainCircuit className="w-7 h-7 text-emerald-400" />
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-5 relative group">
+                                <BrainCircuit className="w-5 h-5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">Automated Review Scheduling</h2>
-                            <p className="text-zinc-400 text-lg leading-relaxed mb-8">
+                            <h2 className="text-xl md:text-[1.65rem] font-bold text-white mb-4 tracking-tight">Automated Review Scheduling</h2>
+                            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
                                 Our SuperMemo-2 derived algorithm tracks your performance metrics. It autonomously schedules reviews exactly when you are about to forget them.
                             </p>
-                            <ul className="space-y-4 text-sm font-mono text-zinc-500">
+                            <ul className="space-y-2.5 text-xs font-mono text-zinc-500">
                                 <li className="flex gap-3 items-center">
                                     <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                                         <ChevronRight className="w-3 h-3"/>
@@ -617,44 +604,44 @@ export const LandingPage = () => {
                                 </li>
                             </ul>
                         </div>
-                        <div className="h-full min-h-[300px]">
+                        <div className="h-full min-h-[220px]">
                             <SpacedRepetitionVisual />
                         </div>
                     </div>
                 </SpotlightCard>
 
                 {/* Feature 2 & 3 in a grid */}
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid md:grid-cols-2 gap-4">
                     {/* Feature 2 */}
-                    <SpotlightCard className="p-8 md:p-10 flex flex-col justify-between">
-                        <div className="mb-10">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6 relative group">
-                                <Activity className="w-6 h-6 text-emerald-400" />
+                    <SpotlightCard className="p-5 md:p-6 flex flex-col justify-between">
+                        <div className="mb-7">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-4 relative group">
+                                <Activity className="w-4.5 h-4.5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Data-Driven Sprints</h2>
-                            <p className="text-zinc-400 leading-relaxed">
+                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">Data-Driven Sprints</h2>
+                            <p className="text-zinc-400 text-xs leading-relaxed">
                                 Visualize your solve velocity. Treat tactical interview prep like a continuous production deployment schedule.
                             </p>
                         </div>
-                        <div className="h-48 mt-auto">
+                        <div className="h-36 mt-auto">
                             <HeatmapVisual />
                         </div>
                     </SpotlightCard>
 
                     {/* Feature 3 */}
-                    <SpotlightCard className="p-8 md:p-10 flex flex-col justify-between">
-                        <div className="mb-10">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-6 relative group">
-                                <TerminalSquare className="w-6 h-6 text-emerald-400" />
+                    <SpotlightCard className="p-5 md:p-6 flex flex-col justify-between">
+                        <div className="mb-7">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-4 relative group">
+                                <TerminalSquare className="w-4.5 h-4.5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Track Every Edge Case</h2>
-                            <p className="text-zinc-400 leading-relaxed">
+                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">Track Every Edge Case</h2>
+                            <p className="text-zinc-400 text-xs leading-relaxed">
                                 Log attempts, execution times, and time complexities. Build a personal database of solutions for immediate reference.
                             </p>
                         </div>
-                        <div className="h-48 mt-auto">
+                        <div className="h-36 mt-auto">
                             <TerminalLog />
                         </div>
                     </SpotlightCard>
@@ -664,25 +651,25 @@ export const LandingPage = () => {
         </section>
 
         {/* Massive Final CTA Section */}
-        <section className="relative z-10 py-32 px-6 overflow-hidden bg-black">
+        <section className="relative z-10 py-28 px-6 overflow-hidden bg-black">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-emerald-900/20 via-[#09090b] to-[#09090b] pointer-events-none"></div>
             
             {/* Ambient abstract shapes */}
              <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[150px] rounded-full pointer-events-none"></div>
              <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-teal-500/5 blur-[150px] rounded-full pointer-events-none"></div>
 
-            <div className="max-w-4xl mx-auto text-center space-y-10 relative z-10">
+            <div className="max-w-xl mx-auto text-center space-y-7 relative z-10">
                 <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6">
-                        Ready to <span className="text-emerald-400 inline-block">Execute?</span>
+                    <h2 className="text-2xl md:text-[2.8rem] font-black text-white tracking-tight mb-4">
+                        Ready to <span className="text-emerald-400 inline-block">prepare better?</span>
                     </h2>
-                    <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-                        Treat your interview prep like a highly optimized CI/CD pipeline. No more grinding blind. Start tracking your progress today.
+                    <p className="text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
+                        Build consistency with a focused plan, not random grinding.
                     </p>
                 </motion.div>
                 
@@ -696,9 +683,9 @@ export const LandingPage = () => {
                     <a href="/login" className="inline-block relative group">
                         {/* Huge glow matching button curve */}
                         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-25 group-hover:opacity-70 transition duration-500 group-hover:duration-200"></div>
-                        <button className="relative px-12 py-5 bg-[#09090b] border border-emerald-500/50 text-emerald-400 font-bold font-mono text-lg rounded-xl flex items-center gap-3 overflow-hidden shadow-2xl transition-all group-hover:bg-emerald-500/10 group-hover:scale-[1.02] active:scale-[0.98]">
-                            <span>INITIALIZE_ACCOUNT</span>
-                            <Cpu className="w-5 h-5 group-hover:animate-pulse" />
+                        <button className="relative px-7 py-3 bg-[#09090b] border border-emerald-500/50 text-emerald-400 font-semibold text-sm rounded-xl flex items-center gap-2.5 overflow-hidden shadow-2xl transition-all group-hover:bg-emerald-500/10 group-hover:scale-[1.02] active:scale-[0.98]">
+                            <span>Create account</span>
+                            <ChevronRight className="w-4 h-4" />
                             {/* Matrix shine effect */}
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(16,185,129,0.2),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </button>
@@ -709,17 +696,17 @@ export const LandingPage = () => {
 
         {/* Metrics Footer */}
         <section className="relative z-10 py-24 px-6 bg-zinc-950/90 border-t border-zinc-900">
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+            <div className="max-w-[52rem] mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
+                        className="space-y-3 border-l-2 border-emerald-500/30 pl-4 bg-gradient-to-r from-emerald-500/5 to-transparent py-3 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <Database className="w-4 h-4" /> LeetCode Problems
+                            <Database className="w-4 h-4" /> Problems Indexed
                         </div>
                         <div className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
                             <Counter from={0} to={3300} suffix="+" />
@@ -731,13 +718,13 @@ export const LandingPage = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
+                        className="space-y-3 border-l-2 border-emerald-500/30 pl-4 bg-gradient-to-r from-emerald-500/5 to-transparent py-3 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <BrainCircuit className="w-4 h-4" /> Target Retention
+                            <BrainCircuit className="w-4 h-4" /> Retention Rate
                         </div>
                         <div className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-                            <Counter from={0} to={100} suffix="%" />
+                            <Counter from={0} to={94} suffix="%" />
                         </div>
                     </motion.div>
 
@@ -746,29 +733,29 @@ export const LandingPage = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 }}
-                        className="space-y-4 border-l-2 border-emerald-500/30 pl-6 bg-gradient-to-r from-emerald-500/5 to-transparent py-4 rounded-r-lg"
+                        className="space-y-3 border-l-2 border-emerald-500/30 pl-4 bg-gradient-to-r from-emerald-500/5 to-transparent py-3 rounded-r-lg"
                     >
                         <div className="flex items-center gap-2 text-zinc-500 font-mono text-sm md:justify-start justify-center">
-                            <Activity className="w-4 h-4" /> Core Patterns
+                            <Activity className="w-4 h-4" /> Active Engineers
                         </div>
                         <div className="text-white">
-                            <Counter from={0} to={20} suffix="+" />
+                            <Counter from={0} to={8500} suffix="+" />
                         </div>
                     </motion.div>
                 </div>
                 
-                <div className="mt-24 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-mono text-zinc-600 uppercase">
+                <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-zinc-600 uppercase tracking-wide">
                     <div className="flex items-center gap-3 opacity-80">
-                        <TerminalSquare className="w-4 h-4" />
-                        © 2026 LC Tracker System
+                        <TerminalSquare className="w-3.5 h-3.5" />
+                        © 2026 LC Tracker
                     </div>
                     <div className="flex gap-6">
                         <a href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy</a>
                         <a href="/terms" className="hover:text-emerald-400 transition-colors">Terms</a>
-                        <a href="#" className="flex items-center gap-2 text-emerald-500/80 hover:text-emerald-400 transition-colors">
+                        <span className="flex items-center gap-2 text-emerald-500/80">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Status: Extant
-                        </a>
+                            Built in public
+                        </span>
                     </div>
                 </div>
             </div>

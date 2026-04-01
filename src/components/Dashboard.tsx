@@ -10,7 +10,7 @@ import {
 } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
-import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, Youtube, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Youtube as YT, Lock, ChevronRight, Swords } from 'lucide-react';
+import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Lock, ChevronRight, Swords } from 'lucide-react';
 import { clsx } from 'clsx';
 import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
@@ -581,13 +581,12 @@ export const Dashboard: React.FC = () => {
             return (
               <div className="premium-card p-4 border-red-500/30 bg-red-500/5 flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                  <Youtube size={18} className="text-red-400" />
+                  <BookOpen size={18} className="text-red-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-red-400 mb-0.5">You've struggled with this pattern twice in a row</p>
                   <p className="text-xs text-zinc-400 mb-3">Here's the NeetCode explanation for <span className="text-zinc-200 font-medium">{ncp.title}</span> to build your foundation.</p>
                   <div className="flex gap-2">
-                    {ncp.videoUrl && <a href={ncp.videoUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium rounded-lg border border-red-500/20 flex items-center gap-1.5 transition-colors"><Youtube size={12} /> Watch Explanation</a>}
                     <button onClick={() => setDismissedProactiveId(derivedProactiveId ?? null)} className="px-3 py-1.5 bg-zinc-800/80 text-zinc-400 text-xs rounded-lg border border-zinc-700/50 hover:text-zinc-200 transition-colors">Dismiss</button>
                   </div>
                 </div>
@@ -701,7 +700,6 @@ export const Dashboard: React.FC = () => {
                             </button>
                           )}
                           <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
-                          <a href={prob.videoUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-red-400 transition-colors border border-zinc-700/50 hover:border-zinc-600"><Youtube size={18} /></a>
                         </div>
                       </div>
                       <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Problem } from '../data/problems';
 import type { ProblemSessionRating } from '../types';
 import { useStore } from '../store/useStore';
-import { ExternalLink, Youtube, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
+import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 
@@ -286,17 +286,6 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <ExternalLink size={18} />
             <span className="hidden sm:inline">LeetCode</span>
           </a>
-          {!isColdSolve && (
-            <a
-              href={problem.videoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-red-400 transition-colors border border-zinc-700/50 hover:border-zinc-600"
-            >
-              <Youtube size={18} />
-              <span className="hidden sm:inline">NeetCode</span>
-            </a>
-          )}
         </div>
       </div>
 

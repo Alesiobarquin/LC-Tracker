@@ -46,7 +46,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
-  const path = window.location.pathname;
+  const rawPath = window.location.pathname;
+  const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
+  const adminUserId = (import.meta.env.VITE_ADMIN_USER_ID ?? '').trim();
 
   const handleOnboardingComplete = () => {
     setActiveTab('dashboard');
@@ -152,7 +154,7 @@ export default function App() {
   }
 
   if (path === '/admin') {
-    if (user.id === import.meta.env.VITE_ADMIN_USER_ID) {
+    if (adminUserId && user.id === adminUserId) {
       return <AdminDashboard />;
     } else {
       window.location.href = '/';

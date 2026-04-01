@@ -917,9 +917,10 @@ export const Dashboard: React.FC = () => {
                   <span className="text-zinc-100 font-medium">{curriculumSolvedCount} / {targetCount}</span>
                 </div>
                 <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
-                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${progressPercent}%` }}>
-                    <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />
-                  </div>
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000 animate-[pulse_2s_ease-in-out_infinite]"
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
                 {phase === 1 && (
                   <div className="mt-4 text-sm">

@@ -11,6 +11,7 @@ import { FeedbackModal } from './FeedbackModal';
 import { FeaturesModal } from './FeaturesModal';
 import { Logo } from './Logo';
 import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants/featuresModal';
+import { BRAND } from '../constants/brand';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -63,16 +64,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans flex flex-col md:flex-row relative z-0">
+    <div className="brand-shell min-h-screen text-zinc-50 font-sans flex flex-col md:flex-row relative z-0">
       {/* Environmental Lighting */}
       <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.1),rgba(255,255,255,0))] pointer-events-none" />
       <div className="fixed inset-0 z-[-1] opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
       
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950 sticky top-0 z-50">
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
-          <div className="font-bold text-xl tracking-tight text-emerald-400">LC Tracker</div>
+          <div className="font-semibold text-lg tracking-[0.02em] text-emerald-300">{BRAND.name}</div>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -81,13 +82,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
       {/* Sidebar */}
       <div className={clsx(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-zinc-900 border-r border-zinc-800 transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-40 w-64 md:w-56 bg-zinc-900/92 border-r border-zinc-800/90 backdrop-blur transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 hidden md:block">
           <div className="flex items-center gap-3">
             <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={32} />
-            <div className="font-bold text-2xl tracking-tight text-emerald-400">LC Tracker</div>
+            <div className="font-semibold text-lg tracking-[0.03em] text-emerald-300">{BRAND.name}</div>
           </div>
         </div>
 
@@ -102,16 +103,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   setIsMobileMenuOpen(false);
                 }}
                 className={clsx(
-                  "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium relative",
+                  "w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium relative border",
                   activeTab === item.id
-                    ? "bg-zinc-800/50 text-zinc-100"
-                    : "text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200"
+                    ? "bg-emerald-500/[0.08] border-emerald-500/35 text-zinc-100"
+                    : "text-zinc-400 border-transparent hover:bg-zinc-800/30 hover:text-zinc-200"
                 )}
               >
                 {activeTab === item.id && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-500 rounded-r-full"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-emerald-400 rounded-r-full"
                     initial={false}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
@@ -184,16 +185,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-colors"
             >
               <Sparkles size={16} />
-              Features
+              {BRAND.shell.featuresButton}
             </button>
 
             <button
               type="button"
               onClick={() => setIsFeedbackOpen(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
             >
               <MessageSquarePlus size={16} />
-              Get Something Fixed
+              {BRAND.shell.feedbackButton}
             </button>
             
             <button
@@ -202,15 +203,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
             >
               <LogOut size={16} />
-              Sign out
+              {BRAND.shell.logoutButton}
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto">
-        {children}
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden w-full">
+        <div className="max-w-7xl mx-auto auth-content-zoom">
+          {children}
+        </div>
       </main>
 
       {/* Overlay for mobile */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { problems, Problem } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
-import { Play, Pause, ExternalLink, TriangleAlert, CircleCheck, Lock, CheckSquare, Square, Timer } from 'lucide-react';
+import { Play, Pause, ExternalLink, TriangleAlert, CircleCheck, Lock, CheckSquare, Square, Timer, Code2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -364,7 +364,10 @@ export const MockInterview: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Mock Interview</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
+          <Code2 className="text-emerald-400" size={32} />
+          Mock Interview
+        </h1>
         <p className="text-zinc-400 mt-1">Simulate the live coding environment.</p>
       </header>
 

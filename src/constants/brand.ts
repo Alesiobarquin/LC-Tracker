@@ -1,0 +1,30 @@
+export const BRAND = {
+  name: 'LC Tracker',
+  wordmark: 'LC TRACKER',
+  seoTagline: 'LeetCode tracker for spaced repetition',
+  landing: {
+    badges: ['Pattern fluency', 'Daily momentum', 'Review memory', 'Spaced repetition'],
+    headlineTop: 'Train With Structure.',
+    headlineBottom: 'Keep What You Learn.',
+    body: 'Track every LeetCode session, surface weak patterns, and review on schedule with a practical retention loop.',
+    ctaPrimary: 'Start sprint',
+    ctaSecondary: 'GitHub',
+    featuresHeadlineA: 'Retention-first review scheduling',
+    featuresHeadlineB: 'Data-backed practice loops',
+    featuresHeadlineC: 'Session traceability',
+    finalCtaTitle: 'Ready to prepare better?',
+    finalCtaBody: 'Build consistency with a focused plan, not random grinding.',
+    finalCtaAction: 'Create account',
+    footerStatus: 'Built in public',
+  },
+  shell: {
+    featuresButton: 'Product tour',
+    feedbackButton: 'Report issue',
+    logoutButton: 'Sign out',
+  },
+  login: {
+    title: 'LC Tracker',
+    subtitle: 'Structured LeetCode tracking, review scheduling, and interview prep in one focused workflow.',
+    backLabel: 'Back',
+  },
+} as const;

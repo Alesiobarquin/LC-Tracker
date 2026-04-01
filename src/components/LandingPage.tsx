@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView, animate, useMotionValue, useSpring } from 'framer-motion';
 import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu } from 'lucide-react';
 import { Logo } from './Logo';
+import { BRAND } from '../constants/brand';
 
 // --- MAGNETIC CANVAS BACKGROUND ---
 const MagnetCanvas = () => {
@@ -156,31 +157,6 @@ const NoiseOverlay = () => (
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
     </div>
 );
-
-// --- SCRAMBLE TEXT EFFECT ---
-const ScrambleText = ({ text }: { text: string }) => {
-  const [displayText, setDisplayText] = useState('');
-  
-  useEffect(() => {
-    let iteration = 0;
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=";
-    const interval = setInterval(() => {
-      setDisplayText(text.split('').map((letter, index) => {
-        if(index < iteration) return text[index];
-        return chars[Math.floor(Math.random() * chars.length)];
-      }).join(''));
-      
-      if(iteration >= text.length){
-        clearInterval(interval);
-      }
-      iteration += 1 / 3;
-    }, 30);
-    
-    return () => clearInterval(interval);
-  }, [text]);
-
-  return <span>{displayText}</span>;
-}
 
 // --- TYPEWRITER TERMINAL EVENT LOG ---
 const TerminalLog = () => {
@@ -465,7 +441,10 @@ const FloatingBadge = ({ text, icon: Icon, top, left, delay }: { text: string, i
 // --- MAIN PAGE COMPONENT ---
 export const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-100 font-sans relative overflow-x-hidden">
+                <div
+                        className="brand-shell min-h-screen text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-100 font-sans relative overflow-x-hidden"
+                        style={{ fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}
+                >
         <NoiseOverlay />
         <MagnetCanvas />
         
@@ -481,21 +460,21 @@ export const LandingPage = () => {
                         <Logo className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" size={18} />
                         <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-15 group-hover:opacity-45 transition-opacity duration-300"></div>
                     </motion.div>
-                    <span className="tracking-tight text-base">LC Tracker</span>
+                    <span className="tracking-tight text-base">{BRAND.name}</span>
                 </div>
                 <div className="flex items-center gap-5">
                      <a href="/login" className="text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
                         Log In
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
                     </a>
-                     <a href="/login" className="relative group overflow-hidden px-4 py-1.5 text-xs font-semibold rounded bg-white text-black hover:bg-zinc-100 transition-colors">
-                        <span className="relative z-10">Start Sprint</span>
+                     <a href="/login" className="brand-button-primary relative group overflow-hidden px-4 py-1.5 text-xs font-semibold rounded transition-colors">
+                        <span className="relative z-10">{BRAND.landing.ctaPrimary}</span>
                         <div className="absolute inset-0 -translate-x-[150%] skew-x-[-20deg] bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
                     </a>
                 </div>
             </div>
             {/* Scanning line indicator underneath nav */}
-            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent scale-x-0 animate-[scanline_3s_ease-in-out_infinite_alternate]"></div>
+            <div className="brand-scanline"></div>
         </nav>
 
         {/* Hero Section */}
@@ -503,10 +482,10 @@ export const LandingPage = () => {
             
             {/* Floating Context Badges */}
             <div className="absolute inset-0 pointer-events-none overflow-visible">
-                <FloatingBadge icon={Network} text="Pattern fluency" top="25%" left="-5%" delay={0} />
-                <FloatingBadge icon={Cpu} text="Daily momentum" top="70%" left="90%" delay={1.5} />
-                <FloatingBadge icon={Database} text="Review memory" top="35%" left="85%" delay={0.8} />
-                <FloatingBadge icon={BrainCircuit} text="Spaced repetition" top="80%" left="10%" delay={2.2} />
+                <FloatingBadge icon={Network} text={BRAND.landing.badges[0]} top="25%" left="-5%" delay={0} />
+                <FloatingBadge icon={Cpu} text={BRAND.landing.badges[1]} top="70%" left="90%" delay={1.5} />
+                <FloatingBadge icon={Database} text={BRAND.landing.badges[2]} top="35%" left="85%" delay={0.8} />
+                <FloatingBadge icon={BrainCircuit} text={BRAND.landing.badges[3]} top="80%" left="10%" delay={2.2} />
             </div>
 
             {/* Subtle background glow for hero */}
@@ -519,18 +498,16 @@ export const LandingPage = () => {
                 className="space-y-5 relative z-20 max-w-[34rem] mx-auto lg:mr-auto lg:ml-8 w-full"
             >
                 <h1 className="text-[2.2rem] md:text-[3.35rem] font-black tracking-tight text-white leading-[1.07]">
-                    <ScrambleText text="Master Algorithms." />
+                    {BRAND.landing.headlineTop}
                     <br />
-                    <span className="text-zinc-600 inline-block drop-shadow-md">Destroy The</span>
-                    <br />
-                    <span className="bg-gradient-to-br from-emerald-300 via-emerald-500 to-teal-700 bg-clip-text text-transparent relative">
-                        Forgetting Curve.
+                    <span className="bg-gradient-to-br from-emerald-200 via-emerald-400 to-teal-500 bg-clip-text text-transparent relative">
+                        {BRAND.landing.headlineBottom}
                         <div className="absolute -inset-2 bg-emerald-500/10 blur-[40px] -z-10 rounded-full"></div>
                     </span>
                 </h1>
 
                 <p className="max-w-md text-[15px] text-zinc-400 font-medium leading-relaxed">
-                    Stop grinding blindly. Track every LeetCode session, reveal your weak points, and let our spaced repetition engine schedule your reviews.
+                    {BRAND.landing.body}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-5">
@@ -538,19 +515,19 @@ export const LandingPage = () => {
                         <motion.button 
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="group relative px-5 py-2.5 bg-emerald-500 text-[#09090b] font-semibold rounded-lg flex items-center gap-2 overflow-hidden w-full sm:w-auto justify-center shadow-[0_0_24px_rgba(16,185,129,0.26)] transition-shadow hover:shadow-[0_0_36px_rgba(16,185,129,0.35)]"
+                            className="brand-button-primary group relative px-5 py-2.5 font-semibold rounded-lg flex items-center gap-2 overflow-hidden w-full sm:w-auto justify-center transition-shadow"
                         >
                             <span className="relative z-10 flex items-center gap-2">
                                 <TerminalSquare className="w-4 h-4" />
-                                Start sprint
+                                {BRAND.landing.ctaPrimary}
                             </span>
                             <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </motion.button>
                     </a>
-                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="group px-5 py-2.5 flex items-center justify-center gap-2.5 bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-lg font-medium text-zinc-300 hover:bg-zinc-800 hover:border-zinc-700 transition-all">
+                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="brand-button-secondary group px-5 py-2.5 flex items-center justify-center gap-2.5 backdrop-blur-md rounded-lg font-medium transition-all">
                         <Github className="w-4 h-4 group-hover:text-white transition-colors" /> 
-                        <span className="group-hover:text-white transition-colors">GitHub</span>
+                        <span className="group-hover:text-white transition-colors">{BRAND.landing.ctaSecondary}</span>
                     </a>
                 </div>
             </motion.div>
@@ -562,7 +539,7 @@ export const LandingPage = () => {
                 transition={{ delay: 1.5, duration: 1 }}
                 className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-600 font-mono text-xs z-10"
             >
-                <span>SCROLL_DOWN</span>
+                <span>Explore</span>
                 <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-600 to-transparent overflow-hidden">
                     <motion.div 
                         className="w-full h-1/2 bg-emerald-500" 
@@ -585,7 +562,7 @@ export const LandingPage = () => {
                                 <BrainCircuit className="w-5 h-5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-xl md:text-[1.65rem] font-bold text-white mb-4 tracking-tight">Automated Review Scheduling</h2>
+                            <h2 className="text-xl md:text-[1.65rem] font-bold text-white mb-4 tracking-tight">{BRAND.landing.featuresHeadlineA}</h2>
                             <p className="text-zinc-400 text-sm leading-relaxed mb-5">
                                 Our SuperMemo-2 derived algorithm tracks your performance metrics. It autonomously schedules reviews exactly when you are about to forget them.
                             </p>
@@ -619,7 +596,7 @@ export const LandingPage = () => {
                                 <Activity className="w-4.5 h-4.5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">Data-Driven Sprints</h2>
+                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineB}</h2>
                             <p className="text-zinc-400 text-xs leading-relaxed">
                                 Visualize your solve velocity. Treat tactical interview prep like a continuous production deployment schedule.
                             </p>
@@ -636,7 +613,7 @@ export const LandingPage = () => {
                                 <TerminalSquare className="w-4.5 h-4.5 text-emerald-400" />
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">Track Every Edge Case</h2>
+                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineC}</h2>
                             <p className="text-zinc-400 text-xs leading-relaxed">
                                 Log attempts, execution times, and time complexities. Build a personal database of solutions for immediate reference.
                             </p>
@@ -665,11 +642,9 @@ export const LandingPage = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-2xl md:text-[2.8rem] font-black text-white tracking-tight mb-4">
-                        Ready to <span className="text-emerald-400 inline-block">prepare better?</span>
-                    </h2>
+                    <h2 className="text-2xl md:text-[2.8rem] font-black text-white tracking-tight mb-4">{BRAND.landing.finalCtaTitle}</h2>
                     <p className="text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
-                        Build consistency with a focused plan, not random grinding.
+                        {BRAND.landing.finalCtaBody}
                     </p>
                 </motion.div>
                 
@@ -683,8 +658,8 @@ export const LandingPage = () => {
                     <a href="/login" className="inline-block relative group">
                         {/* Huge glow matching button curve */}
                         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-25 group-hover:opacity-70 transition duration-500 group-hover:duration-200"></div>
-                        <button className="relative px-7 py-3 bg-[#09090b] border border-emerald-500/50 text-emerald-400 font-semibold text-sm rounded-xl flex items-center gap-2.5 overflow-hidden shadow-2xl transition-all group-hover:bg-emerald-500/10 group-hover:scale-[1.02] active:scale-[0.98]">
-                            <span>Create account</span>
+                        <button className="brand-button-secondary relative px-7 py-3 font-semibold text-sm rounded-xl flex items-center gap-2.5 overflow-hidden shadow-2xl transition-all group-hover:scale-[1.02] active:scale-[0.98]">
+                            <span>{BRAND.landing.finalCtaAction}</span>
                             <ChevronRight className="w-4 h-4" />
                             {/* Matrix shine effect */}
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(16,185,129,0.2),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
@@ -747,31 +722,19 @@ export const LandingPage = () => {
                 <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-zinc-600 uppercase tracking-wide">
                     <div className="flex items-center gap-3 opacity-80">
                         <TerminalSquare className="w-3.5 h-3.5" />
-                        © 2026 LC Tracker
+                        © 2026 {BRAND.name}
                     </div>
                     <div className="flex gap-6">
                         <a href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy</a>
                         <a href="/terms" className="hover:text-emerald-400 transition-colors">Terms</a>
                         <span className="flex items-center gap-2 text-emerald-500/80">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Built in public
+                            {BRAND.landing.footerStatus}
                         </span>
                     </div>
                 </div>
             </div>
         </section>
-        
-        {/* Adds keyframe definition for shimmer effects used in buttons & nav */}
-        <style dangerouslySetInnerHTML={{__html: `
-            @keyframes shimmer {
-                100% { transform: translateX(150%) skewX(-20deg); }
-            }
-            @keyframes scanline {
-                0% { transform: scaleX(0); opacity: 0; }
-                50% { opacity: 1; }
-                100% { transform: scaleX(1); opacity: 0; }
-            }
-        `}} />
     </div>
   );
 };

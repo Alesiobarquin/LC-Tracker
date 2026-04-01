@@ -98,7 +98,7 @@ const StepLeetCode: React.FC<{
                     <BookOpen className="text-emerald-400" size={32} />
                 </div>
                 <h1 className="text-3xl font-bold text-zinc-50 tracking-tight">Welcome to LC Tracker</h1>
-                <p className="text-zinc-400 text-lg">A few quick choices — then you are in. You can change everything later in Settings.</p>
+                                <p className="text-zinc-400 text-lg">Set your baseline in under a minute. You can adjust everything later in Settings.</p>
                 <p className="text-xs text-zinc-500 max-w-md mx-auto">
                     Beta: behavior may change. LeetCode sync uses their public API and only sees recent submissions.
                 </p>

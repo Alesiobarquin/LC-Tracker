@@ -57,13 +57,13 @@ export default function App() {
     const pageConfig = {
       '/': {
         title: 'LC Tracker | LeetCode Tracker for Spaced Repetition',
-        description: 'LC Tracker is a LeetCode tracker for spaced repetition, progress analytics, and technical interview prep. Review solved problems, stay consistent, and improve retention.',
+        description: 'LC Tracker is a LeetCode tracker for spaced repetition. Track sessions, expose weak patterns, and schedule reviews to improve interview retention.',
         canonical: `${origin}/`,
         robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
       },
       '/login': {
         title: 'Sign In | LC Tracker',
-        description: 'Sign in to LC Tracker to track LeetCode progress, schedule spaced repetition reviews, and continue your interview prep.',
+        description: 'Sign in to LC Tracker to continue tracking LeetCode sessions, review scheduling, and interview prep workflows.',
         canonical: `${origin}/login`,
         robots: 'noindex,nofollow',
       },

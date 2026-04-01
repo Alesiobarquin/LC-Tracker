@@ -10,7 +10,7 @@ import {
 } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
-import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Lock, ChevronRight, Swords } from 'lucide-react';
+import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Lock, ChevronRight, Swords, LayoutDashboard } from 'lucide-react';
 import { clsx } from 'clsx';
 import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
@@ -553,10 +553,12 @@ export const Dashboard: React.FC = () => {
 
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-extruded-emerald">Daily Plan</h1>
-          <p className="text-zinc-400 mt-1">Don't think, just execute.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
+            <LayoutDashboard className="text-emerald-400" size={32} />
+            Daily Plan
+          </h1>
+          <p className="text-zinc-400 mt-1">Today's queued work. Run it end-to-end.</p>
         </div>
-
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2">
             <Flame className="text-orange-500" size={18} />

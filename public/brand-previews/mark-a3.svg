@@ -1,0 +1,33 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="a3Stroke" x1="140" y1="130" x2="860" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A0FFE1" />
+      <stop offset="0.5" stop-color="#49EFC4" />
+      <stop offset="1" stop-color="#12B48A" />
+    </linearGradient>
+    <radialGradient id="a3Core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 558) rotate(90) scale(300 330)">
+      <stop offset="0" stop-color="#74FAD3" stop-opacity="0.96" />
+      <stop offset="0.68" stop-color="#2ED0A8" stop-opacity="0.46" />
+      <stop offset="1" stop-color="#0A2A21" stop-opacity="0" />
+    </radialGradient>
+    <filter id="a3Glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#54F7CF" flood-opacity="0.78" />
+      <feDropShadow dx="0" dy="0" stdDeviation="34" flood-color="#1FC497" flood-opacity="0.58" />
+      <feDropShadow dx="0" dy="0" stdDeviation="55" flood-color="#128F6E" flood-opacity="0.34" />
+    </filter>
+  </defs>
+
+  <ellipse cx="512" cy="637" rx="320" ry="265" fill="url(#a3Core)" />
+
+  <g fill="none" stroke="url(#a3Stroke)" stroke-linecap="round" stroke-linejoin="round" filter="url(#a3Glow)">
+    <path d="M512 122C598 122 679 165 742 238C814 322 888 466 889 618C889 775 790 888 628 916H396C235 888 135 775 135 618C136 468 208 323 281 238C345 166 426 122 512 122Z" stroke-width="48" opacity="0.15" />
+    <path d="M512 146C590 146 663 184 720 250C786 325 852 456 853 607C853 748 764 839 622 864H402C260 839 171 748 171 607C172 458 237 325 304 250C360 184 434 146 512 146Z" stroke-width="39" opacity="0.24" />
+    <path d="M512 170C582 170 648 203 699 262C758 328 816 446 817 596C817 722 738 796 616 816H408C286 796 207 722 207 596C208 447 266 328 326 262C377 203 442 170 512 170Z" stroke-width="32" opacity="0.35" />
+    <path d="M512 196C575 196 635 224 681 274C734 333 783 438 784 586C784 698 714 760 611 773H413C310 760 240 698 240 586C241 439 291 333 344 274C390 224 450 196 512 196Z" stroke-width="26" opacity="0.48" />
+    <path d="M512 223C568 223 622 246 663 286C711 335 752 430 753 575C753 674 690 726 606 735H418C334 726 271 674 271 575C272 432 315 335 362 286C403 246 456 223 512 223Z" stroke-width="21" opacity="0.62" />
+    <path d="M512 252C561 252 610 271 648 298C691 336 722 422 723 564C723 651 666 697 601 701H423C358 697 301 651 301 564C302 426 333 336 376 298C414 271 463 252 512 252Z" stroke-width="16" opacity="0.78" />
+    <path d="M512 283C554 283 599 299 633 309C670 337 694 412 695 553C695 628 643 671 596 672H428C381 671 329 628 329 553C330 421 354 337 391 309C425 299 470 283 512 283Z" stroke-width="11" opacity="0.92" />
+  </g>
+
+  <path d="M512 585C531 585 551 592 565 606C579 620 586 639 585 660C583 683 568 701 546 708H478C456 701 441 683 439 660C438 639 445 620 459 606C473 592 493 585 512 585Z" fill="#04100D" stroke="#8FFFE0" stroke-opacity="0.82" stroke-width="9" filter="url(#a3Glow)" />
+</svg>

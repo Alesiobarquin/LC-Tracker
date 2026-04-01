@@ -1,5 +1,5 @@
 {
   "name": "LC Tracker",
-  "description": "A personalized LeetCode study tracker and interview prep planner.",
+  "description": "LeetCode tracker for spaced repetition, retention-focused reviews, and technical interview prep.",
   "requestFramePermissions": []
 }

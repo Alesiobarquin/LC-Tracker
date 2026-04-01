@@ -37,22 +37,13 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
 
     return (
-        <div
-            className="fixed bottom-5 right-5 z-50 select-none"
-            style={{
-                animation: 'floatingPulse 2.5s ease-in-out infinite',
-            }}
-        >
-            <style>{`
-        @keyframes floatingPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4), 0 4px 24px rgba(0,0,0,0.5); }
-          50%       { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.0), 0 4px 24px rgba(0,0,0,0.5); }
-        }
-      `}</style>
+        <div className="fixed bottom-5 right-5 z-50 select-none">
+            <div className="relative">
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-emerald-500/25 blur-lg opacity-60 animate-[pulse_2.5s_ease-in-out_infinite]" />
 
-            <div
-                className="bg-zinc-900 border border-emerald-500/40 rounded-2xl px-4 py-3 flex flex-col gap-2 min-w-[220px] max-w-[280px] shadow-2xl"
-            >
+                <div
+                    className="relative bg-zinc-900 border border-emerald-500/40 rounded-2xl px-4 py-3 flex flex-col gap-2 min-w-[220px] max-w-[280px] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+                >
                 {/* Header */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
@@ -116,6 +107,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                         </div>
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );

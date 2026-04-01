@@ -1,0 +1,38 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgA3" x1="76" y1="44" x2="1132" y2="614" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#040606" />
+      <stop offset="0.48" stop-color="#060F0D" />
+      <stop offset="1" stop-color="#041716" />
+    </linearGradient>
+    <linearGradient id="lineA3" x1="0" y1="315" x2="1200" y2="315" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0D2D25" stop-opacity="0" />
+      <stop offset="0.5" stop-color="#64F8D2" stop-opacity="0.5" />
+      <stop offset="1" stop-color="#0D2D25" stop-opacity="0" />
+    </linearGradient>
+    <filter id="wordGlowA3" x="-40%" y="-60%" width="220%" height="240%">
+      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#63F9D3" flood-opacity="0.3" />
+      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#22C79A" flood-opacity="0.22" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" rx="34" fill="url(#bgA3)" />
+  <rect x="46" y="46" width="1108" height="538" rx="26" stroke="#1A4339" stroke-opacity="0.9" />
+
+  <g opacity="0.36">
+    <path d="M80 116H1120" stroke="url(#lineA3)" stroke-width="1" />
+    <path d="M80 514H1120" stroke="url(#lineA3)" stroke-width="1" />
+    <path d="M600 88V542" stroke="#174137" stroke-opacity="0.55" stroke-width="1" />
+  </g>
+
+  <image href="mark-a3.svg" x="70" y="100" width="440" height="440" />
+
+  <g transform="translate(550 166)">
+    <text x="0" y="100" fill="#ECFFF9" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="90" font-weight="650" letter-spacing="0.11em" filter="url(#wordGlowA3)">LC TRACKER</text>
+    <text x="2" y="178" fill="#96F6D8" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="27" font-weight="500" letter-spacing="0.16em">LEETCODE TRACKER FOR SPACED REPETITION</text>
+    <text x="2" y="240" fill="#B0CBC3" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="23" font-weight="400" letter-spacing="0.03em">Track recall. Schedule reviews. Expose weak patterns.</text>
+
+    <rect x="0" y="286" width="525" height="1" fill="#2A5F52" fill-opacity="0.88" />
+    <text x="2" y="330" fill="#78C6B0" font-family="'IBM Plex Mono', 'SFMono-Regular', monospace" font-size="18" font-weight="500" letter-spacing="0.2em">BRAND PREVIEW A3 / PREMIUM EMPHASIS</text>
+  </g>
+</svg>

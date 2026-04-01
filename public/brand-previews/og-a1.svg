@@ -1,0 +1,37 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgA1" x1="90" y1="44" x2="1118" y2="626" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#040606" />
+      <stop offset="0.5" stop-color="#070C0B" />
+      <stop offset="1" stop-color="#041210" />
+    </linearGradient>
+    <linearGradient id="lineA1" x1="0" y1="315" x2="1200" y2="315" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E2B24" stop-opacity="0" />
+      <stop offset="0.5" stop-color="#3DE9BF" stop-opacity="0.42" />
+      <stop offset="1" stop-color="#0E2B24" stop-opacity="0" />
+    </linearGradient>
+    <filter id="wordGlowA1" x="-30%" y="-40%" width="160%" height="220%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#3FECC1" flood-opacity="0.26" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" rx="34" fill="url(#bgA1)" />
+  <rect x="46" y="46" width="1108" height="538" rx="26" stroke="#17372F" stroke-opacity="0.8" />
+
+  <g opacity="0.35">
+    <path d="M80 120H1120" stroke="url(#lineA1)" stroke-width="1" />
+    <path d="M80 510H1120" stroke="url(#lineA1)" stroke-width="1" />
+    <path d="M600 80V550" stroke="#123028" stroke-opacity="0.45" stroke-width="1" />
+  </g>
+
+  <image href="mark-a1.svg" x="76" y="104" width="430" height="430" />
+
+  <g transform="translate(546 164)">
+    <text x="0" y="98" fill="#E7FFF7" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="88" font-weight="700" letter-spacing="0.1em" filter="url(#wordGlowA1)">LC TRACKER</text>
+    <text x="2" y="176" fill="#8BEFD0" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="27" font-weight="500" letter-spacing="0.14em">LEETCODE TRACKER FOR SPACED REPETITION</text>
+    <text x="2" y="238" fill="#A8C5BC" font-family="'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif" font-size="23" font-weight="400" letter-spacing="0.02em">Track recall. Schedule reviews. Expose weak patterns.</text>
+
+    <rect x="0" y="282" width="522" height="1" fill="#245447" fill-opacity="0.85" />
+    <text x="2" y="326" fill="#6DBAA4" font-family="'IBM Plex Mono', 'SFMono-Regular', monospace" font-size="18" font-weight="500" letter-spacing="0.18em">BRAND PREVIEW A1 / BASELINE PRECISION</text>
+  </g>
+</svg>

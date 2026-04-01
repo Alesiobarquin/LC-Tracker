@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LC Tracker Brand Preview Pack</title>
+    <style>
+      :root {
+        --bg: #040808;
+        --panel: #0b1110;
+        --panel-border: #1f3f36;
+        --text-main: #e8fff8;
+        --text-muted: #8eb8ad;
+        --accent: #51ebc4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 10% -10%, #123127 0%, var(--bg) 40%);
+        color: var(--text-main);
+      }
+
+      .wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+        font-size: clamp(2.1rem, 4.8vw, 3.4rem);
+        letter-spacing: 0.12em;
+        font-weight: 700;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.55;
+        max-width: 940px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 16px;
+        margin-top: 26px;
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(11, 17, 16, 0.84), rgba(7, 13, 12, 0.96));
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .meta h2 {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+      }
+
+      .tag {
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 0.14em;
+      }
+
+      img {
+        width: 100%;
+        display: block;
+      }
+
+      .icon-row {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .icon-stage {
+        border: 1px solid #295447;
+        border-radius: 14px;
+        padding: 12px;
+        display: grid;
+        place-items: center;
+        min-height: 120px;
+        background: #040908;
+      }
+
+      .og-stage {
+        border: 1px solid #295447;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #040908;
+      }
+
+      .notes {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 760px) {
+        .icon-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>LC TRACKER BRAND IMAGE PREVIEW</h1>
+      <p class="sub">
+        Phase 0 package for approval only. Production assets remain unchanged.
+        Compare icon legibility and OG composition across controlled variants.
+      </p>
+
+      <section class="grid">
+        <article class="card">
+          <div class="meta">
+            <h2>A1 BASELINE PRECISION</h2>
+            <span class="tag">MEDIUM CONTOUR / TIGHT GLOW</span>
+          </div>
+          <div class="icon-row">
+            <div class="icon-stage">
+              <img src="mark-a1.svg" alt="A1 mark preview" />
+            </div>
+            <p class="notes">
+              Reference balance model. Preserves rounded contour flow and small center cutout.
+              Glow is assertive but constrained.
+            </p>
+          </div>
+          <div class="og-stage">
+            <img src="og-a1.svg" alt="A1 OG preview" />
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="meta">
+            <h2>A2 SHARPENED TECHNICAL</h2>
+            <span class="tag">CRISPER EDGES / CLEANER HALO</span>
+          </div>
+          <div class="icon-row">
+            <div class="icon-stage">
+              <img src="mark-a2.svg" alt="A2 mark preview" />
+            </div>
+            <p class="notes">
+              Angular precision variant. Slightly reduced glow and narrower center aperture for a stricter technical read.
+            </p>
+          </div>
+          <div class="og-stage">
+            <img src="og-a2.svg" alt="A2 OG preview" />
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="meta">
+            <h2>A3 PREMIUM EMPHASIS</h2>
+            <span class="tag">WIDER TRACKING / DEEP HALO</span>
+          </div>
+          <div class="icon-row">
+            <div class="icon-stage">
+              <img src="mark-a3.svg" alt="A3 mark preview" />
+            </div>
+            <p class="notes">
+              Same core geometry with stronger atmospheric glow and wider wordmark spacing for a premium technical signature.
+            </p>
+          </div>
+          <div class="og-stage">
+            <img src="og-a3.svg" alt="A3 OG preview" />
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -10,7 +10,7 @@ import {
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import {
   Trophy, Lightbulb, TrendingUp, AlertTriangle, History,
-  Timer, FileCode2, X, CheckSquare, Swords, CheckCircle2, RotateCcw, Target,
+  Timer, FileCode2, X, CheckSquare, Swords, CheckCircle2, RotateCcw, Target, LineChart,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
@@ -425,7 +425,10 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <header>
-        <h1 className="text-3xl font-extrabold tracking-tight text-extruded-indigo">Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
+          <LineChart className="text-emerald-400" size={32} />
+          Analytics
+        </h1>
         <p className="text-zinc-400 mt-1">Track your progress and identify areas to improve.</p>
       </header>
 

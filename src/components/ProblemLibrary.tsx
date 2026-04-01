@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { problems, allProblems, Category } from '../data/problems';
-import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink } from 'lucide-react';
+import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink, Library } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress } from '../hooks/useUserData';
@@ -119,7 +119,10 @@ export const ProblemLibrary: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-50">Problem Library</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
+          <Library className="text-emerald-400" size={32} />
+          Problem Library
+        </h1>
         <p className="text-zinc-400 mt-1">
           Curated NeetCode lists plus the full LeetCode catalog for search and practice.
         </p>

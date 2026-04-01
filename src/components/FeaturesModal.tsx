@@ -77,7 +77,7 @@ export function FeaturesModal({ isOpen, onClose, setActiveTab, initialSlide = 0 
       >
         <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
           <h2 id={titleId} className="text-lg sm:text-xl font-semibold text-white leading-snug pr-2">
-            What you can do in LC Tracker
+            How LC Tracker Works
           </h2>
           <button
             type="button"
@@ -168,7 +168,7 @@ export function FeaturesModal({ isOpen, onClose, setActiveTab, initialSlide = 0 
             onClick={handleDismiss}
             className="w-full py-3.5 sm:py-4 text-base sm:text-lg font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
           >
-            Got it
+            Continue
           </button>
         </div>
       </div>

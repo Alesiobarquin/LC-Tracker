@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-react';
 import { Logo } from './Logo';
+import { BRAND } from '../constants/brand';
 
 function GoogleIcon() {
   return (
@@ -45,21 +46,34 @@ export function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 overflow-hidden">
-      {/* Ambient glow — gives the page depth */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(16,185,129,0.07) 0%, transparent 70%)',
-        }}
-      />
+    <div className="brand-shell relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
+      {/* Atmospheric background layers */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 62% 52% at 50% 38%, rgba(16,185,129,0.09) 0%, transparent 72%), radial-gradient(circle at 16% 82%, rgba(20,184,166,0.08) 0%, transparent 42%), radial-gradient(circle at 84% 16%, rgba(34,197,94,0.07) 0%, transparent 38%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.14]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+            backgroundSize: '34px 34px',
+            maskImage: 'radial-gradient(circle at 50% 45%, black 0%, transparent 78%)',
+          }}
+        />
+        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/20 opacity-40" />
+        <div className="absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10 opacity-35" />
+      </div>
 
       <a
         href="/"
         className="absolute top-5 left-6 z-20 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
       >
-        ← Back
+        ← {BRAND.login.backLabel}
       </a>
 
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10">
@@ -81,43 +95,49 @@ export function Login() {
           </div>
 
           <div className="text-center">
-            <h1 className="text-[1.75rem] font-bold font-mono tracking-tight text-white leading-none mb-2">
-              LC Tracker
+            <h1 className="text-[1.5rem] font-semibold tracking-[0.1em] text-white leading-none mb-2">
+              {BRAND.wordmark}
             </h1>
             <p className="text-zinc-500 text-[13px] leading-relaxed max-w-[240px]">
-              Track your LeetCode problem-solving progress, review solved problems with spaced repetition, and prepare for technical interviews.
+              {BRAND.login.subtitle}
             </p>
           </div>
         </div>
 
         {/* Sign-in card */}
-        <div
-          className="w-full rounded-2xl p-6"
-          style={{
-            background: 'linear-gradient(160deg, #1c1c1f 0%, #141416 100%)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow:
-              '0 0 0 1px rgba(0,0,0,0.6), 0 24px 64px -12px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.06)',
-          }}
-        >
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={!isLoaded || isLoading}
-            className="w-full flex items-center justify-center gap-3 h-11 rounded-[10px] font-medium text-[14px] text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        <div className="relative w-full">
+          <div className="pointer-events-none absolute -inset-8 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.16),transparent_68%)] blur-2xl opacity-60" />
+          <div className="pointer-events-none absolute inset-x-10 -top-3 h-px bg-gradient-to-r from-transparent via-emerald-400/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-10 -bottom-3 h-px bg-gradient-to-r from-transparent via-emerald-400/35 to-transparent" />
+
+          <div
+            className="relative brand-panel w-full rounded-2xl p-6"
             style={{
-              backgroundColor: '#27272a',
-              border: '1px solid #3f3f46',
+              background: 'linear-gradient(160deg, #1c1c1f 0%, #141416 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow:
+                '0 0 0 1px rgba(0,0,0,0.6), 0 24px 64px -12px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.06)',
             }}
-            onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#3f3f46'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#27272a'; }}
           >
-            {isLoading ? (
-              <span className="w-4 h-4 rounded-full border-2 border-zinc-600 border-t-zinc-300 animate-spin" />
-            ) : (
-              <GoogleIcon />
-            )}
-            {isLoading ? 'Redirecting…' : 'Continue with Google'}
-          </button>
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={!isLoaded || isLoading}
+              className="w-full flex items-center justify-center gap-3 h-11 rounded-[10px] font-medium text-[14px] text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed brand-button-secondary"
+              style={{
+                backgroundColor: '#1a2522',
+                border: '1px solid #2f4740',
+              }}
+              onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#223330'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#1a2522'; }}
+            >
+              {isLoading ? (
+                <span className="w-4 h-4 rounded-full border-2 border-zinc-600 border-t-zinc-300 animate-spin" />
+              ) : (
+                <GoogleIcon />
+              )}
+              {isLoading ? 'Redirecting…' : 'Continue with Google'}
+            </button>
+          </div>
         </div>
       </div>
 

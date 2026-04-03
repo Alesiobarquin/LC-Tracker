@@ -1,5 +1,5 @@
 /**
- * Fetches free LeetCode problems via GraphQL and writes leetcodeExtendedCatalog.json
+ * Fetches LeetCode problems via GraphQL and writes leetcodeExtendedCatalog.json
  * (problems not already in the curated NeetCode 250 list). Run from repo root:
  *   node scripts/build-extended-catalog.mjs
  */
@@ -84,7 +84,6 @@ async function main() {
     const batch = await fetchPage(skip);
     if (!batch.length) break;
     for (const q of batch) {
-      if (q.paidOnly) continue;
       if (curatedIds.has(q.titleSlug)) continue;
       const diff = diffToDifficulty(q.difficulty);
       const category = mapCategory(q.topicTags || []);
@@ -100,6 +99,7 @@ async function main() {
         isNeetCode150: false,
         isNeetCode250: false,
         isExtendedCatalog: true,
+        isPremium: Boolean(q.paidOnly),
       });
     }
     skip += 50;

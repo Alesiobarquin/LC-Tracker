@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES, TARGET_CURRICULUM_LABELS } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
-import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
 
@@ -138,9 +138,9 @@ export const Settings: React.FC = () => {
             <div className="space-y-8">
 
                     {/* LeetCode — first for visibility */}
-                    <section className="premium-card p-6 border-indigo-500/20">
+                    <section className="premium-card p-6 border-emerald-500/20">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
-                            <RefreshCw className="text-indigo-400" size={20} />
+                            <RefreshCw className="text-emerald-400" size={20} />
                             LeetCode Integration
                         </h2>
                         <div className="space-y-4">
@@ -152,7 +152,7 @@ export const Settings: React.FC = () => {
                                         value={tempUsername}
                                         onChange={(e) => setTempUsername(e.target.value)}
                                         placeholder="e.g., neetcode"
-                                        className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                        className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-amber-500/50 transition-colors"
                                     />
                                     <button
                                         onClick={handleManualSync}
@@ -174,9 +174,9 @@ export const Settings: React.FC = () => {
                     </section>
 
                     {/* Learning Strategy */}
-                    <section className="premium-card p-6 border-indigo-500/20">
+                    <section className="premium-card p-6 border-emerald-500/20">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
-                            <Swords className="text-indigo-400" size={20} />
+                            <Swords className="text-emerald-400" size={20} />
                             Learning Strategy
                         </h2>
                         <p className="text-sm text-zinc-400 mb-5">
@@ -204,11 +204,11 @@ export const Settings: React.FC = () => {
                                                 className={clsx(
                                                     'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
                                                     active
-                                                        ? 'bg-cyan-500/10 border-cyan-500/50 ring-1 ring-cyan-500/30'
+                                                        ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
                                                         : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
                                                 )}
                                             >
-                                                <p className={clsx('text-sm font-semibold', active ? 'text-cyan-300' : 'text-zinc-300')}>
+                                                <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>
                                                     {TARGET_CURRICULUM_LABELS[value]}
                                                 </p>
                                                 <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
@@ -232,23 +232,23 @@ export const Settings: React.FC = () => {
                                             className={clsx(
                                                 'group text-left rounded-xl border p-4 transition-all duration-200 focus:outline-none',
                                                 active
-                                                    ? 'bg-indigo-500/10 border-indigo-500/60 ring-1 ring-indigo-500/40'
+                                                    ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/40'
                                                     : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
                                             )}
                                         >
                                             <div className="flex items-center justify-between mb-2">
                                                 <Icon
                                                     size={18}
-                                                    className={active ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-400'}
+                                                    className={active ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-400'}
                                                 />
                                                 <span className={clsx(
                                                     'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors',
-                                                    active ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-600'
+                                                    active ? 'border-amber-500 bg-amber-500' : 'border-zinc-600'
                                                 )}>
                                                     {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                                                 </span>
                                             </div>
-                                            <p className={clsx('text-sm font-semibold mb-1', active ? 'text-indigo-300' : 'text-zinc-300')}>{label}</p>
+                                            <p className={clsx('text-sm font-semibold mb-1', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
                                             <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
                                         </button>
                                     );
@@ -258,7 +258,7 @@ export const Settings: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div className="rounded-xl border border-amber-500/20 bg-zinc-950/40 p-4">
                                     <h3 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
-                                        <Briefcase className="text-amber-400" size={18} />
+                                        <Briefcase className="text-emerald-400" size={18} />
                                         Interview type
                                     </h3>
                                     <p className="text-xs text-zinc-500 mb-3">Biases new-problem difficulty in Random mode (internship favors easier picks).</p>
@@ -288,9 +288,9 @@ export const Settings: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border border-purple-500/20 bg-zinc-950/40 p-4">
+                                <div className="rounded-xl border border-emerald-500/20 bg-zinc-950/40 p-4">
                                     <h3 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
-                                        <Zap className="text-purple-400" size={18} />
+                                        <Zap className="text-emerald-400" size={18} />
                                         Spaced repetition
                                     </h3>
                                     <p className="text-xs text-zinc-500 mb-3">
@@ -312,11 +312,11 @@ export const Settings: React.FC = () => {
                                                     className={clsx(
                                                         'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
                                                         active
-                                                            ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30'
+                                                            ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
                                                             : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
                                                     )}
                                                 >
-                                                    <p className={clsx('text-sm font-semibold', active ? 'text-purple-300' : 'text-zinc-300')}>{label}</p>
+                                                    <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
                                                     <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
                                                 </button>
                                             );
@@ -333,7 +333,7 @@ export const Settings: React.FC = () => {
                                         onClick={() => setSprintHowOpen(true)}
                                         className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800/80 border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:border-zinc-600 transition-colors"
                                     >
-                                        <Info size={14} className="text-indigo-400" />
+                                        <Info size={14} className="text-emerald-400" />
                                         How sprint works
                                     </button>
                                 </div>
@@ -361,7 +361,7 @@ export const Settings: React.FC = () => {
                                         }
                                         className={clsx(
                                             'relative w-11 h-6 rounded-full transition-colors shrink-0',
-                                            settings.sprintSettings?.alignPoolToTargetCurriculum ? 'bg-indigo-500' : 'bg-zinc-700'
+                                            settings.sprintSettings?.alignPoolToTargetCurriculum ? 'bg-amber-500' : 'bg-zinc-700'
                                         )}
                                     >
                                         <span
@@ -376,7 +376,7 @@ export const Settings: React.FC = () => {
                                 <div>
                                     <div className="flex justify-between mb-2">
                                         <label className="text-sm font-medium text-zinc-300">Target Sprint Length</label>
-                                        <span className="text-indigo-400 font-medium">{settings.sprintSettings?.targetDays ?? 7} Days</span>
+                                            <span className="text-amber-400 font-medium">{settings.sprintSettings?.targetDays ?? 7} Days</span>
                                     </div>
                                     <input
                                         type="range" min="3" max="14" step="1"
@@ -387,7 +387,7 @@ export const Settings: React.FC = () => {
                                                 targetDays: parseInt(e.target.value)
                                             }
                                         })}
-                                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                     />
                                     <div className="flex justify-between text-xs text-zinc-600 mt-1">
                                         <span>3 Days (Fast)</span>
@@ -401,7 +401,7 @@ export const Settings: React.FC = () => {
                                     <select
                                         value={sprintState?.currentCategory || ''}
                                         onChange={(e) => setSprintCategory(e.target.value)}
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-indigo-500/50"
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-amber-500/50"
                                     >
                                         <optgroup label="Phase 1">
                                             {PHASE_1_CATEGORIES.map(cat => (
@@ -417,13 +417,71 @@ export const Settings: React.FC = () => {
                                     <p className="text-xs text-zinc-500 mt-2">Forces the sprint to the selected category and resets progress within it.</p>
                                 </div>
                             </div>
+
+                            <div className="rounded-xl border border-amber-500/20 bg-zinc-950/40 p-4">
+                                <h3 className="text-zinc-100 font-semibold flex gap-2 items-center mb-1">
+                                    <Lock className="text-emerald-400" size={16} />
+                                    LeetCode Premium assignment policy
+                                </h3>
+                                <p className="text-xs text-zinc-500 mb-3">
+                                    This controls automatic assignment and review eligibility only. It does not affect list visibility and is unrelated to any LC-Tracker subscription.
+                                </p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => updateSettings({ includePremiumInAssignments: true })}
+                                        className={clsx(
+                                            'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                            settings.includePremiumInAssignments
+                                                ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
+                                                : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                        )}
+                                    >
+                                        <p className={clsx('text-sm font-semibold', settings.includePremiumInAssignments ? 'text-amber-300' : 'text-zinc-300')}>
+                                            Include LC Premium
+                                        </p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">Dashboard recommendations and review queue may include paid-only LeetCode problems.</p>
+                                        {settings.includePremiumInAssignments && (
+                                            <p className="text-[11px] font-semibold text-amber-300 mt-2 flex items-center gap-1">
+                                                <CheckCircle size={12} /> Active
+                                            </p>
+                                        )}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => updateSettings({ includePremiumInAssignments: false })}
+                                        className={clsx(
+                                            'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
+                                            !settings.includePremiumInAssignments
+                                                ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
+                                                : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
+                                        )}
+                                    >
+                                        <p className={clsx('text-sm font-semibold', !settings.includePremiumInAssignments ? 'text-amber-300' : 'text-zinc-300')}>
+                                            Exclude LC Premium
+                                        </p>
+                                        <p className="text-xs text-zinc-500 mt-0.5">Dashboard recommendations and review queue use free-access LeetCode problems only.</p>
+                                        {!settings.includePremiumInAssignments && (
+                                            <p className="text-[11px] font-semibold text-amber-300 mt-2 flex items-center gap-1">
+                                                <CheckCircle size={12} /> Active
+                                            </p>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <p className="text-[11px] text-zinc-500 mt-3">
+                                    Current policy: <span className="font-semibold text-zinc-300">{settings.includePremiumInAssignments ? 'Include LC Premium' : 'Exclude LC Premium'}</span>
+                                </p>
+                            </div>
                         </div>
                     </section>
 
                     {/* Study Schedule */}
                     <section className="premium-card p-6">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
-                            <Clock className="text-blue-400" size={20} />
+                            <Clock className="text-emerald-400" size={20} />
                             Study Schedule
                         </h2>
 
@@ -440,7 +498,7 @@ export const Settings: React.FC = () => {
                                     step="15"
                                     value={settings.studySchedule.weekdayMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekdayMinutes: parseInt(e.target.value) } })}
-                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                 />
                                 <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
                                     <span className="absolute left-0 top-0">15 min</span>
@@ -466,7 +524,7 @@ export const Settings: React.FC = () => {
                                     step="15"
                                     value={settings.studySchedule.weekendMinutes}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekendMinutes: parseInt(e.target.value) } })}
-                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                 />
                                 <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
                                     <span className="absolute left-0 top-0">15 min</span>
@@ -485,7 +543,7 @@ export const Settings: React.FC = () => {
                                 <select
                                     value={settings.studySchedule.restDay}
                                     onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, restDay: parseInt(e.target.value) } })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-amber-500/50"
                                 >
                                     <option value={-1}>None — study every day</option>
                                     {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, idx) => (
@@ -579,7 +637,7 @@ export const Settings: React.FC = () => {
                     {/* Target Company Tier */}
                     <section className="premium-card p-6">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
-                            <Target className="text-red-400" size={20} />
+                            <Target className="text-emerald-400" size={20} />
                             Target Company Tier
                         </h2>
                         <p className="text-sm text-zinc-400 mb-5">
@@ -600,11 +658,11 @@ export const Settings: React.FC = () => {
                                         className={clsx(
                                             'text-left rounded-xl border px-4 py-3 transition-all duration-200 focus:outline-none',
                                             active
-                                                ? 'bg-red-500/10 border-red-500/50 ring-1 ring-red-500/30'
+                                                ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
                                                 : 'bg-zinc-950/50 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50'
                                         )}
                                     >
-                                        <p className={clsx('text-sm font-semibold', active ? 'text-red-300' : 'text-zinc-300')}>{label}</p>
+                                        <p className={clsx('text-sm font-semibold', active ? 'text-amber-300' : 'text-zinc-300')}>{label}</p>
                                         <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
                                     </button>
                                 );
@@ -616,13 +674,13 @@ export const Settings: React.FC = () => {
                     {/* Programming Language */}
                     <section className="premium-card p-6">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
-                            <Code2 className="text-indigo-400" size={20} />
+                            <Code2 className="text-emerald-400" size={20} />
                             Programming Language
                         </h2>
                         <select
                             value={settings.language}
                             onChange={(e) => updateSettings({ language: e.target.value as any })}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-amber-500/50"
                         >
                             <option value="Python">Python</option>
                             <option value="Java">Java</option>
@@ -643,7 +701,7 @@ export const Settings: React.FC = () => {
                         <button
                             type="button"
                             onClick={handleExportData}
-                            className="flex items-center gap-2 px-5 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl transition-all duration-200 text-sm font-medium"
+                            className="flex items-center gap-2 px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl transition-all duration-200 text-sm font-medium"
                         >
                             <Download size={16} />
                             Export Data

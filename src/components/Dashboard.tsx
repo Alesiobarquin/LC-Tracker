@@ -5,8 +5,10 @@ import {
   allProblems,
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
+  isProblemPremium,
   problemsPoolForTargetCurriculum,
   TARGET_CURRICULUM_LABELS,
+  type Difficulty,
 } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
 import { getPhase } from '../utils/dateUtils';
@@ -25,7 +27,6 @@ import {
   pickUnsolvedForRandomRecommendation,
 } from '../utils/progressHelpers';
 import { DashboardSkeleton } from './loadingSkeletons';
-import type { Difficulty } from '../data/problems';
 
 const MIN_DATA_POINTS = 3;
 
@@ -150,6 +151,7 @@ export const Dashboard: React.FC = () => {
       const sprintCandidates = getSprintPoolProblems(sprintCategory, solvedIds, reservedIds, {
         alignPoolToTargetCurriculum: settings.sprintSettings.alignPoolToTargetCurriculum,
         targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
+        includePremiumInAssignments: settings.includePremiumInAssignments,
       }).filter(
         (p) => !skippedNewProblemIds.has(p.id)
       );
@@ -161,7 +163,8 @@ export const Dashboard: React.FC = () => {
       (p) =>
         !solvedIds.has(p.id) &&
         !skippedNewProblemIds.has(p.id) &&
-        !reservedIds.has(p.id)
+        !reservedIds.has(p.id) &&
+        (settings.includePremiumInAssignments || !isProblemPremium(p))
     );
     return pickUnsolvedForRandomRecommendation(allCandidates, solvedIds, settings, progress)?.id ?? null;
   }, [newProblem, skippedNewProblemIds, progress, sprintCategory, sprintState, settings]);
@@ -596,6 +599,11 @@ export const Dashboard: React.FC = () => {
                       <div className="flex flex-wrap gap-3 text-[10px]">
                         <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', newProblemData.difficulty === 'Easy' ? 'text-emerald-400' : newProblemData.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{newProblemData.difficulty}</span>
                         <span className="px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full text-zinc-300 font-bold uppercase tracking-wide">{newProblemData.category}</span>
+                        {isProblemPremium(newProblemData) && (
+                          <span className="px-3 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-300 font-bold uppercase tracking-wide inline-flex items-center gap-1">
+                            <Lock size={10} /> LC Premium
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
@@ -655,11 +663,15 @@ export const Dashboard: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <h3 className={clsx('text-xl font-semibold transition-colors truncate', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
                             {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">Stabilizer</span>}
+                            {isProblemPremium(prob) && (
+                              <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/25 rounded-full font-bold inline-flex items-center gap-1">
+                                <Lock size={10} /> LC Premium
+                              </span>
+                            )}
                           </div>
                           <div className="flex flex-wrap gap-3 mt-3 text-[10px]">
                             <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', prob.difficulty === 'Easy' ? 'text-emerald-400' : prob.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{prob.difficulty}</span>
                             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-zinc-300 font-bold uppercase tracking-wide">{prob.category}</span>
-                            {prob.isBlind75 && <span className="px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 font-bold uppercase tracking-wide">Blind 75</span>}
                             <span className={clsx('px-3 py-1 rounded-full border flex items-center gap-1 font-bold uppercase tracking-wide', est.isDefault ? 'bg-white/5 text-zinc-400 border-white/10 backdrop-blur-sm' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 backdrop-blur-sm')}>
                               <Timer size={10} />
                               ~{est.minutes}m {est.isDefault ? '(est.)' : 'avg'}
@@ -712,7 +724,14 @@ export const Dashboard: React.FC = () => {
               <div className="premium-card p-5 border-blue-500/20 hover:border-blue-500/40">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-medium text-zinc-100">{coldSolveData.title}</h3>
+                    <h3 className="text-lg font-medium text-zinc-100 inline-flex items-center gap-2">
+                      {coldSolveData.title}
+                      {isProblemPremium(coldSolveData) && (
+                        <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/25 rounded-full font-bold inline-flex items-center gap-1">
+                          <Lock size={10} /> LC Premium
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-xs text-zinc-400 mt-1">Not touched in &gt;30 days. No hints. Your pace.</p>
                   </div>
                   <button
@@ -748,7 +767,14 @@ export const Dashboard: React.FC = () => {
                   return (
                     <div key={prob.id} className="premium-card p-4 flex items-center justify-between group">
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-zinc-100 group-hover:text-amber-400 transition-colors truncate">{prob.title}</h4>
+                        <h4 className="font-medium text-zinc-100 group-hover:text-amber-400 transition-colors truncate inline-flex items-center gap-2">
+                          {prob.title}
+                          {isProblemPremium(prob) && (
+                            <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/25 rounded-full font-bold inline-flex items-center gap-1">
+                              <Lock size={10} /> LC Premium
+                            </span>
+                          )}
+                        </h4>
                         <div className="flex items-center gap-2 mt-1.5 text-xs text-zinc-500">
                           <span className="px-2 py-0.5 rounded bg-zinc-800/50 border border-zinc-700/50">{prob.category}</span>
                           <span className={clsx("px-2 py-0.5 rounded border", lastRating === 1 ? "bg-red-500/10 text-red-400 border-red-500/20" : lastRating === 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : lastRating === 3 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-zinc-800/50 text-zinc-400 border-zinc-700/50")}>
@@ -915,7 +941,7 @@ export const Dashboard: React.FC = () => {
           {/* Readiness Score */}
           <div className="premium-card p-6">
             <h3 className="font-semibold text-zinc-100 mb-1 flex items-center gap-2">
-              <Brain size={18} className="text-indigo-400" />
+              <Brain size={18} className="text-emerald-400" />
               Interview Readiness
             </h3>
             <p className="text-xs text-zinc-500 mb-4">{readinessMessage}</p>
@@ -935,7 +961,7 @@ export const Dashboard: React.FC = () => {
                     <span>{Math.round(c.value)}/{c.max}</span>
                   </div>
                   <div className="h-1 bg-zinc-800 rounded-full">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(c.value / c.max) * 100}%` }} />
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(c.value / c.max) * 100}%` }} />
                   </div>
                 </div>
               ))}

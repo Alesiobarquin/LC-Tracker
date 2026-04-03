@@ -130,12 +130,12 @@ export const MockInterview: React.FC = () => {
         )}
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-2xl mx-auto">
-          <CircleCheck size={48} className="mx-auto text-indigo-500 mb-6" />
+          <CircleCheck size={48} className="mx-auto text-emerald-500 mb-6" />
           <h2 className="text-2xl font-bold text-zinc-50 mb-2 text-center">Interview Complete</h2>
           <p className="text-zinc-400 mb-2 text-center">Self-Evaluation for {activeProblem.title}</p>
           {mockStartTimestampRef.current && (
             <div className="flex items-center justify-center gap-4 mb-6 text-sm">
-              <span className="flex items-center gap-1.5 text-cyan-400 font-mono font-semibold">
+              <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-semibold">
                 <Timer size={14} />
                 Finished in {Math.round((Date.now() - (mockStartTimestampRef.current ?? Date.now())) / 60000)}m
               </span>
@@ -210,7 +210,7 @@ export const MockInterview: React.FC = () => {
                 mockStartTimestampRef.current = null;
               }}
               disabled={evalSolved === null || evalSyntax === null || evalComplexity === null || (!!activeProblem.mockInterviewContent && approachSimilarity === null)}
-              className="w-full mt-8 bg-indigo-500 hover:bg-indigo-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-50 font-semibold py-4 rounded-xl transition-colors"
+              className="w-full mt-8 bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-50 font-semibold py-4 rounded-xl transition-colors"
             >
               Finish Review
             </button>
@@ -276,7 +276,7 @@ export const MockInterview: React.FC = () => {
               {/* Left Panel: Problem Content */}
               <div className="w-[40%] bg-[#1c1c1e] border border-zinc-800 rounded-2xl overflow-y-auto custom-scrollbar p-6">
                 <div className="text-zinc-300 space-y-4">
-                  <div className="[&>p]:mb-4 [&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>code]:bg-zinc-800 [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-indigo-300">
+                  <div className="[&>p]:mb-4 [&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>code]:bg-zinc-800 [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-emerald-300">
                     <ReactMarkdown>{activeProblem.mockInterviewContent.statement}</ReactMarkdown>
                   </div>
 
@@ -287,7 +287,7 @@ export const MockInterview: React.FC = () => {
 
                   <h3 className="text-lg font-semibold text-zinc-100 mt-8 mb-4 border-b border-zinc-800 pb-2">Constraints</h3>
                   <div className="bg-[#121212] p-4 rounded-xl border border-zinc-800/80 text-sm shadow-inner">
-                    <div className="[&>p]:mb-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:text-zinc-400 [&>code]:bg-zinc-800 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-indigo-300">
+                    <div className="[&>p]:mb-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:text-zinc-400 [&>code]:bg-zinc-800 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-emerald-300">
                       <ReactMarkdown>{activeProblem.mockInterviewContent.constraints}</ReactMarkdown>
                     </div>
                   </div>
@@ -341,11 +341,11 @@ export const MockInterview: React.FC = () => {
               <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden w-full max-w-2xl shadow-lg">
                 <div className="absolute top-0 left-0 h-1 bg-zinc-800 w-full">
                   <div
-                    className="h-full bg-indigo-500 transition-all duration-1000"
+                    className="h-full bg-emerald-500 transition-all duration-1000"
                     style={{ width: `${((35 * 60 - timeLeft) / (35 * 60)) * 100}%` }}
                   />
                 </div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-medium mb-8 border border-indigo-500/20">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-8 border border-emerald-500/20">
                   <TriangleAlert size={16} />
                   Strict Mode: No Hints
                 </div>
@@ -372,8 +372,8 @@ export const MockInterview: React.FC = () => {
       </header>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center max-w-2xl mx-auto mt-12">
-        <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Lock size={32} className="text-indigo-400" />
+        <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Lock size={32} className="text-emerald-400" />
         </div>
         <h2 className="text-2xl font-bold text-zinc-50 mb-4">Ready for a challenge?</h2>
 
@@ -388,7 +388,7 @@ export const MockInterview: React.FC = () => {
                   className={clsx(
                     "flex-1 py-2 rounded-lg text-sm font-medium transition-colors border",
                     difficultyFilter === diff
-                      ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-400"
+                      ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
                       : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
                   )}
                 >
@@ -403,7 +403,7 @@ export const MockInterview: React.FC = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-zinc-100 focus:outline-none focus:border-indigo-500/50 transition-colors"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
             >
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -411,7 +411,7 @@ export const MockInterview: React.FC = () => {
         </div>
 
         <div className="flex items-center justify-start max-w-md mx-auto mb-8 px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl cursor-pointer" onClick={() => setUseExternalLeetCode(!useExternalLeetCode)}>
-          {useExternalLeetCode ? <CheckSquare className="text-indigo-400 mr-3" /> : <Square className="text-zinc-500 mr-3" />}
+          {useExternalLeetCode ? <CheckSquare className="text-emerald-400 mr-3" /> : <Square className="text-zinc-500 mr-3" />}
           <div>
             <p className="text-zinc-200 font-medium">Open in LeetCode instead</p>
             <p className="text-zinc-400 text-sm">Skips the in-app editor and opens problem in a new tab</p>
@@ -420,25 +420,25 @@ export const MockInterview: React.FC = () => {
 
         <ul className="text-zinc-400 space-y-3 mb-8 text-left max-w-md mx-auto">
           <li className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Random problem matching your filters
           </li>
           <li className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Strict {useExternalLeetCode ? 'timer on your own' : '25-minute timer (or 35m for old)'}
           </li>
           <li className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             No hints, no solution videos allowed
           </li>
           <li className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Self-evaluation at the end
           </li>
         </ul>
         <button
           onClick={startMock}
-          className="bg-indigo-500 hover:bg-indigo-600 text-zinc-50 font-semibold px-8 py-4 rounded-xl transition-colors inline-flex items-center gap-2"
+          className="bg-emerald-500 hover:bg-emerald-600 text-zinc-50 font-semibold px-8 py-4 rounded-xl transition-colors inline-flex items-center gap-2"
         >
           <Play size={20} />
           Start Mock Interview

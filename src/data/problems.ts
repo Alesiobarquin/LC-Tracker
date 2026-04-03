@@ -23,6 +23,7 @@ export type Category =
 import type { TargetCurriculum } from '../types';
 import { MockInterviewContent, mockProblemContent } from './mockProblems';
 import leetcodeExtendedCatalogJson from './leetcodeExtendedCatalog.json';
+import leetcodePremiumStatusJson from './leetcodePremiumStatus.json';
 
 export interface Problem {
   id: string;
@@ -36,9 +37,25 @@ export interface Problem {
   isNeetCode150: boolean;
   /** True for all 250 NeetCode 250 curriculum problems (includes full NeetCode 150). */
   isNeetCode250: boolean;
+  /** LeetCode paidOnly status fetched from GraphQL metadata refresh. */
+  isPremium?: boolean;
   /** Extra LeetCode problems beyond NeetCode 250 (full catalog browse / sprint tier 4). */
   isExtendedCatalog?: boolean;
   mockInterviewContent?: MockInterviewContent;
+}
+
+type PremiumStatusPayload = {
+  statusById?: Record<string, boolean>;
+};
+
+const premiumStatusById = ((leetcodePremiumStatusJson as PremiumStatusPayload).statusById ?? {}) as Record<
+  string,
+  boolean
+>;
+
+export function isProblemPremium(problem: Pick<Problem, 'id' | 'isPremium'>): boolean {
+  if (typeof problem.isPremium === 'boolean') return problem.isPremium;
+  return Boolean(premiumStatusById[problem.id]);
 }
 
 export const TARGET_CURRICULUM_LABELS: Record<TargetCurriculum, string> = {
@@ -317,12 +334,14 @@ export const problems: Problem[] = ([
   { id: 'shuffle-the-array', title: 'Shuffle the Array', difficulty: 'Easy', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/shuffle-the-array/', videoUrl: '', isNeetCode75: false, isBlind75: false, isNeetCode150: false, isNeetCode250: true },
 ] as Problem[]).map(problem => ({
   ...problem,
+  isPremium: isProblemPremium(problem),
   mockInterviewContent: mockProblemContent[problem.id]
 }) as Problem);
 
 export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson as Problem[]).map(
   (p) => ({
     ...p,
+    isPremium: isProblemPremium(p),
     mockInterviewContent: mockProblemContent[p.id],
   }) as Problem
 );

@@ -44,6 +44,16 @@ The first version was a local tool using browser cache for my own prep. Once a f
 - **Authentication**: Clerk
 - **Deployment**: Vercel
 
+## Catalog Maintenance
+
+Problem metadata is generated from LeetCode GraphQL and versioned in the repository.
+
+- `npm run build:extended-catalog`: Rebuilds `src/data/leetcodeExtendedCatalog.json`.
+- `npm run build:premium-status`: Rebuilds `src/data/leetcodePremiumStatus.json` for all local problem ids.
+- `npm run refresh:catalog`: Runs both commands in sequence.
+
+Recommended cadence: run `npm run refresh:catalog` weekly (or before releases) so Premium labels stay accurate.
+
 ## Key Takeaways
 
 - Building this moved me from ad hoc practice to a repeatable system.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { allProblems, problemMatchesTargetCurriculum } from '../data/problems';
+import { allProblems, isProblemPremium, problemMatchesTargetCurriculum } from '../data/problems';
 import {
   getSprintPoolProblems,
   migrateLegacyRatingHistoryIfNeeded,
@@ -82,6 +82,28 @@ describe('getSprintPoolProblems', () => {
     const first = pool[0];
     expect(first.isNeetCode150 && !first.isNeetCode75).toBe(true);
   });
+
+  it('excludes premium by default and includes when setting allows it', () => {
+    const category = [...new Set(allProblems.map((p) => p.category))].find((candidateCategory) => {
+      const inCategory = allProblems.filter((p) => p.category === candidateCategory);
+      return inCategory.some((p) => isProblemPremium(p)) && inCategory.some((p) => !isProblemPremium(p));
+    });
+
+    expect(category).toBeTruthy();
+    if (!category) return;
+
+    const inCategory = allProblems.filter((p) => p.category === category);
+    const solvedNonPremium = new Set(inCategory.filter((p) => !isProblemPremium(p)).map((p) => p.id));
+
+    const defaultPool = getSprintPoolProblems(category, solvedNonPremium, emptyReserved);
+    expect(defaultPool.length).toBe(0);
+
+    const premiumEnabledPool = getSprintPoolProblems(category, solvedNonPremium, emptyReserved, {
+      includePremiumInAssignments: true,
+    });
+    expect(premiumEnabledPool.length).toBeGreaterThan(0);
+    expect(premiumEnabledPool.every((p) => isProblemPremium(p))).toBe(true);
+  });
 });
 
 describe('pickUnsolvedForRandomRecommendation', () => {
@@ -102,5 +124,33 @@ describe('pickUnsolvedForRandomRecommendation', () => {
     const solved = new Set(candidates.slice(0, 2).map((c) => c.id));
     const picked = pickUnsolvedForRandomRecommendation(candidates, solved, baseSettings, {});
     expect(picked?.id).toBe(candidates[2].id);
+  });
+
+  it('skips premium-only candidates when premium assignment is disabled', () => {
+    const premiumCandidate = allProblems.find((p) => isProblemPremium(p));
+    expect(premiumCandidate).toBeTruthy();
+    if (!premiumCandidate) return;
+
+    const picked = pickUnsolvedForRandomRecommendation(
+      [premiumCandidate],
+      new Set(),
+      { ...baseSettings, includePremiumInAssignments: false },
+      {}
+    );
+    expect(picked).toBeUndefined();
+  });
+
+  it('allows premium-only candidates when premium assignment is enabled', () => {
+    const premiumCandidate = allProblems.find((p) => isProblemPremium(p));
+    expect(premiumCandidate).toBeTruthy();
+    if (!premiumCandidate) return;
+
+    const picked = pickUnsolvedForRandomRecommendation(
+      [premiumCandidate],
+      new Set(),
+      { ...baseSettings, includePremiumInAssignments: true },
+      {}
+    );
+    expect(picked?.id).toBe(premiumCandidate.id);
   });
 });

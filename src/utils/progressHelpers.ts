@@ -12,6 +12,7 @@ import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   allProblems,
+  isProblemPremium,
   problemMatchesTargetCurriculum,
   problems,
   problemsPoolForTargetCurriculum,
@@ -92,6 +93,8 @@ export type SprintPoolOptions = {
   /** When true with a non-NEET_75 target, reorder tiers so sprint matches target list intent. */
   alignPoolToTargetCurriculum?: boolean;
   targetCurriculum?: TargetCurriculum;
+  /** When false, premium problems are excluded from automatic sprint assignment. */
+  includePremiumInAssignments?: boolean;
 };
 
 /**
@@ -104,8 +107,13 @@ export function getSprintPoolProblems(
   reservedIds: Set<string>,
   options?: SprintPoolOptions
 ): Problem[] {
+  const includePremium = options?.includePremiumInAssignments === true;
   const base = allProblems.filter(
-    (p) => p.category === category && !solvedIds.has(p.id) && !reservedIds.has(p.id)
+    (p) =>
+      p.category === category &&
+      !solvedIds.has(p.id) &&
+      !reservedIds.has(p.id) &&
+      (includePremium || !isProblemPremium(p))
   );
   const tier75 = base.filter((p) => p.isNeetCode75);
   const tier150 = base.filter((p) => p.isNeetCode150 && !p.isNeetCode75);
@@ -221,7 +229,8 @@ export function pickUnsolvedForRandomRecommendation(
   settings: AppSettings,
   progress: Record<string, ProblemProgress>
 ): Problem | undefined {
-  const unsolved = candidates.filter((p) => !solvedIds.has(p.id));
+  const includePremium = settings.includePremiumInAssignments === true;
+  const unsolved = candidates.filter((p) => !solvedIds.has(p.id) && (includePremium || !isProblemPremium(p)));
   if (unsolved.length === 0) return undefined;
   if (unsolved.length === 1) return unsolved[0];
 
@@ -689,6 +698,7 @@ export function computeReviewProblems(params: {
   const availableMinutes = isWeekend
     ? settings.studySchedule.weekendMinutes
     : settings.studySchedule.weekdayMinutes;
+  const includePremium = settings.includePremiumInAssignments === true;
 
   const reservedNew = newProblemId ? getSolveMins(newProblemId) : 0;
   const reservedAdditional = additionalProblemIds.reduce((sum, id) => sum + getSolveMins(id), 0);
@@ -701,6 +711,9 @@ export function computeReviewProblems(params: {
   );
   const result: string[] = [];
   for (const id of allDueReviewIds) {
+    const prob = allProblems.find((p) => p.id === id);
+    if (!prob) continue;
+    if (!includePremium && isProblemPremium(prob)) continue;
     const est = getReviewMins(id);
     if (budget <= 0 && result.length >= 1) break;
     result.push(id);
@@ -727,16 +740,26 @@ export function buildDailyPlan(params: {
     categoryAvgSolveTimes, categoryAvgReviewTimes,
   } = params;
   const phase = getPhase();
-  const targetPool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75');
+  const includePremium = settings.includePremiumInAssignments === true;
+  const problemById = new Map(allProblems.map((p) => [p.id, p] as const));
+  const targetPool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75').filter(
+    (p) => includePremium || !isProblemPremium(p)
+  );
   const sprintPoolOpts: SprintPoolOptions = {
     alignPoolToTargetCurriculum: settings.sprintSettings.alignPoolToTargetCurriculum,
     targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
+    includePremiumInAssignments: includePremium,
   };
   const today = new Date();
   const dayOfWeek = getDay(today);
 
   const allDueReviews = Object.entries(progress)
-    .filter(([, prog]) => !prog.retired && isDueToday(prog.nextReviewAt))
+    .filter(([id, prog]) => {
+      if (prog.retired || !isDueToday(prog.nextReviewAt)) return false;
+      const problem = problemById.get(id);
+      if (!problem) return false;
+      return includePremium || !isProblemPremium(problem);
+    })
     .map(([id, prog]) => ({ id, prog }))
     .sort((a, b) => {
       // Primary: fewest consecutive successes first (weakest items reviewed first).
@@ -764,8 +787,11 @@ export function buildDailyPlan(params: {
   let coldSolveProblem: string | null = null;
   if (!isEasyDay) {
     const potentialColdSolves = Object.entries(progress)
-      .filter(([, prog]) => {
+      .filter(([id, prog]) => {
         if (prog.history.length === 0) return false;
+        const problem = problemById.get(id);
+        if (!problem) return false;
+        if (!includePremium && isProblemPremium(problem)) return false;
         const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
         return daysSinceLastReview > 30;
       })
@@ -835,8 +861,16 @@ export function buildDailyPlan(params: {
       return (
         pool.find((p) => p.difficulty === 'Medium') ??
         pool[0] ??
-        allProblems.find((p) => p.category === cat && !solvedIds.has(p.id) && !reservedIds.has(p.id)) ??
-        allProblems.find((p) => p.category === cat && !reservedIds.has(p.id))
+        allProblems.find(
+          (p) =>
+            p.category === cat &&
+            !solvedIds.has(p.id) &&
+            !reservedIds.has(p.id) &&
+            (includePremium || !isProblemPremium(p))
+        ) ??
+        allProblems.find(
+          (p) => p.category === cat && !reservedIds.has(p.id) && (includePremium || !isProblemPremium(p))
+        )
       );
     };
 

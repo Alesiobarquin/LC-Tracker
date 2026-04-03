@@ -12,6 +12,9 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "build:extended-catalog": "node scripts/build-extended-catalog.mjs",
+    "build:premium-status": "node scripts/build-problem-premium-status.mjs",
+    "refresh:catalog": "npm run build:extended-catalog && npm run build:premium-status",
     "migrate:legacy": "tsx scripts/migrate-legacy-data.ts"
   },
   "dependencies": {

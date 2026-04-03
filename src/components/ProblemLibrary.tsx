@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, Category } from '../data/problems';
+import { problems, allProblems, isProblemPremium, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink, Library } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
-import { useProblemProgress } from '../hooks/useUserData';
+import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
 
 const VIRTUALIZE_THRESHOLD = 200;
@@ -13,22 +13,17 @@ const PROBLEM_LIST_LOAD_MORE_CHUNK = 200;
 
 export const ProblemLibrary: React.FC = () => {
   const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
+  const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [pendingPremiumStartId, setPendingPremiumStartId] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<
     'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog'
   >('NeetCode 75');
   const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);
   const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
-
-  // Reserved problems (those with full mock interview content)
-  const reservedProblems = useMemo(() => new Set(
-    problems
-      .filter(p => p.mockInterviewContent?.statement && p.mockInterviewContent?.optimalSolution && p.mockInterviewContent?.explanation)
-      .map(p => p.id)
-  ), []);
 
   const tabProblems = useMemo(() => {
     if (activeTab === 'NeetCode 75') return problems.filter((p) => p.isNeetCode75);
@@ -80,6 +75,9 @@ export const ProblemLibrary: React.FC = () => {
     [filteredProblems, visibleLimit]
   );
   const hiddenCount = Math.max(0, filteredProblems.length - displayedProblems.length);
+  const pendingPremiumProblem = pendingPremiumStartId
+    ? allProblems.find((p) => p.id === pendingPremiumStartId) ?? null
+    : null;
 
   const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -95,6 +93,20 @@ export const ProblemLibrary: React.FC = () => {
     } else {
       void logProblem(problemId, 4, true, "Quick solve");
     }
+  };
+
+  const handleStartSession = (problemId: string, isPremium: boolean) => {
+    if (isPremium && !settings.includePremiumInAssignments) {
+      setPendingPremiumStartId(problemId);
+      return;
+    }
+    setActiveSession(problemId);
+  };
+
+  const confirmPremiumStart = () => {
+    if (!pendingPremiumStartId) return;
+    setActiveSession(pendingPremiumStartId);
+    setPendingPremiumStartId(null);
   };
   
   const solvedInTab = tabProblems.filter(p => progress[p.id]).length;
@@ -185,6 +197,35 @@ export const ProblemLibrary: React.FC = () => {
         </div>
       </div>
 
+      {pendingPremiumProblem && (
+        <div className="premium-card p-4 border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm text-amber-300 font-medium flex items-center gap-2">
+              <Lock size={14} /> LeetCode Premium problem selected
+            </p>
+            <p className="text-xs text-zinc-300 mt-1">
+              {pendingPremiumProblem.title} requires LeetCode Premium. This label is about LeetCode access, not any LC-Tracker plan.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingPremiumStartId(null)}
+              className="px-3 py-2 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmPremiumStart}
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-zinc-950"
+            >
+              Start anyway
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
         {filteredProblems.length === 0 ? (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 text-center text-zinc-500">
@@ -239,6 +280,7 @@ export const ProblemLibrary: React.FC = () => {
                         const prog = progress[prob.id];
                         const isSolved = !!prog;
                         const isRetired = prog?.retired;
+                        const isPremium = isProblemPremium(prob);
                         
                         return (
                           <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group" style={virtualRowStyle}>
@@ -260,12 +302,11 @@ export const ProblemLibrary: React.FC = () => {
                             <td className="px-6 py-4 font-medium text-zinc-100">
                               <span className="flex items-center gap-2">
                                 {prob.title}
-                                {reservedProblems.has(prob.id) && (
-                                  <span title="Reserved for Mock Interviews — not shown in daily plan" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20">
-                                    <Lock size={9} /> Mock Only
+                                {isPremium && (
+                                  <span title="Requires LeetCode Premium" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/25">
+                                    <Lock size={9} /> LC Premium
                                   </span>
                                 )}
-                                {activeTab === 'NeetCode 150' && prob.isBlind75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">Blind 75</span>}
                                 {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
                                 {activeTab === 'NeetCode 250' && prob.isNeetCode150 && !prob.isNeetCode75 && (
                                   <span className="ml-1 text-[10px] uppercase tracking-wider bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/20">NC150+</span>
@@ -299,9 +340,9 @@ export const ProblemLibrary: React.FC = () => {
                                 </a>
                                 <button
                                   type="button"
-                                  onClick={() => setActiveSession(prob.id)}
+                                  onClick={() => handleStartSession(prob.id, isPremium)}
                                   className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                  title="Start practice timer"
+                                  title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
                                 >
                                   <Play size={16} />
                                 </button>

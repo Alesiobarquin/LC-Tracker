@@ -131,6 +131,8 @@ export interface AppSettings {
   interviewType: 'INTERNSHIP' | 'FULL_TIME';
   srAggressiveness: SrAggressiveness;
   language: 'Python' | 'Java' | 'JavaScript';
+  /** When false, premium problems stay visible but are excluded from automatic assignment and reviews. */
+  includePremiumInAssignments: boolean;
   learningMode: 'SPRINT' | 'RANDOM';
   targetCurriculum: TargetCurriculum;
   sprintSettings: {
@@ -166,6 +168,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   interviewType: 'INTERNSHIP',
   srAggressiveness: 'RELAXED',
   language: 'Python',
+  includePremiumInAssignments: false,
   learningMode: 'SPRINT',
   targetCurriculum: 'NEET_75',
   sprintSettings: {

@@ -294,10 +294,10 @@ export const Analytics: React.FC = () => {
 
   // ── Sprint Schedule (conditionally positioned) ─────────────────────────────
   const SprintScheduleSection = (
-    <section className="premium-card p-6 border-indigo-500/20">
+    <section className="premium-card p-6 border-emerald-500/20">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-          <Swords size={16} className="text-indigo-400" />
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+          <Swords size={16} className="text-emerald-400" />
         </div>
         <div>
           <h2 className="text-xl font-semibold text-zinc-100">Sprint Schedule</h2>
@@ -315,7 +315,7 @@ export const Analytics: React.FC = () => {
             <div key={cat} className={clsx(
               'relative rounded-xl border px-5 py-4 transition-all duration-300',
               isCurrent
-                ? 'bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
+                ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.1)]'
                 : isCompleted
                   ? 'bg-zinc-900/30 border-zinc-800/40 opacity-70'
                   : 'bg-zinc-900/20 border-zinc-800/30'
@@ -325,7 +325,7 @@ export const Analytics: React.FC = () => {
                   {isCompleted ? (
                     <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
                   ) : isCurrent ? (
-                    <div className="w-4 h-4 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                    <div className="w-4 h-4 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   ) : (
                     <div className="w-4 h-4 rounded-full border-2 border-zinc-700 shrink-0" />
                   )}
@@ -343,7 +343,7 @@ export const Analytics: React.FC = () => {
                   <div>
                     <p className="text-xs text-zinc-500">{estLen} day{estLen !== 1 ? 's' : ''}</p>
                     {isCurrent && (
-                      <p className="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider mt-0.5">Active</p>
+                      <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider mt-0.5">Active</p>
                     )}
                     {isCompleted && (
                       <p className={clsx(
@@ -359,7 +359,7 @@ export const Analytics: React.FC = () => {
                     isCompleted
                       ? 'bg-zinc-800/50 text-zinc-600 border-zinc-700/30'
                       : isCurrent
-                        ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                         : 'bg-zinc-800/30 text-zinc-700 border-zinc-800/30'
                   )}>Sprint {index + 1}</span>
                 </div>
@@ -374,7 +374,7 @@ export const Analytics: React.FC = () => {
                       <span>Day {day} of {estLen}</span><span>{pct}%</span>
                     </div>
                     <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -439,16 +439,16 @@ export const Analytics: React.FC = () => {
         const day = Math.min(Math.ceil((Date.now() - start.getTime()) / 86400000), estLen);
         const pct = Math.min(100, Math.round((day / estLen) * 100));
         return (
-          <div className="premium-card p-6 border-indigo-500/30 bg-indigo-500/5 slide-in-from-bottom-4 shadow-[0_0_30px_rgba(99,102,241,0.08)]">
+          <div className="premium-card p-6 border-emerald-500/30 bg-emerald-500/5 slide-in-from-bottom-4 shadow-[0_0_30px_rgba(52,211,153,0.08)]">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                  <Swords size={20} className="text-indigo-400" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                  <Swords size={20} className="text-emerald-400" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h2 className="text-lg font-semibold text-zinc-100">Active Sprint</h2>
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 tracking-wider">
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wider">
                       In Progress
                     </span>
                   </div>
@@ -459,14 +459,14 @@ export const Analytics: React.FC = () => {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-2xl font-bold text-indigo-400">{pct}%</p>
+                <p className="text-2xl font-bold text-emerald-400">{pct}%</p>
                 <p className="text-xs text-zinc-500">complete</p>
               </div>
             </div>
             <div className="mt-5">
               <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-700"
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -493,7 +493,7 @@ export const Analytics: React.FC = () => {
         {/* Target curriculum (Settings) — same list the planner uses */}
         <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center gap-3 mb-3">
-            <Target className="text-indigo-400" size={20} />
+            <Target className="text-emerald-400" size={20} />
             <h3 className="text-zinc-400 font-medium">Target list</h3>
           </div>
           <p className="text-xs text-zinc-500 mb-2">{TARGET_CURRICULUM_LABELS[curriculum]}</p>
@@ -504,7 +504,7 @@ export const Analytics: React.FC = () => {
           <div className="mt-3">
             <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-500 rounded-full transition-all duration-700"
+                className="h-full bg-emerald-500 rounded-full transition-all duration-700"
                 style={{ width: `${targetCurriculumPct}%` }}
               />
             </div>
@@ -515,7 +515,7 @@ export const Analytics: React.FC = () => {
         {/* NeetCode 250 — full beginner curriculum */}
         <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '125ms' }}>
           <div className="flex items-center gap-3 mb-3">
-            <Target className="text-cyan-400" size={20} />
+            <Target className="text-emerald-400" size={20} />
             <h3 className="text-zinc-400 font-medium">NeetCode 250</h3>
           </div>
           <p className="text-3xl font-bold text-zinc-50 flex items-baseline gap-2">
@@ -525,7 +525,7 @@ export const Analytics: React.FC = () => {
           <div className="mt-3">
             <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-cyan-500 rounded-full transition-all duration-700"
+                className="h-full bg-emerald-500 rounded-full transition-all duration-700"
                 style={{ width: `${neetcode250Pct}%` }}
               />
             </div>
@@ -575,7 +575,7 @@ export const Analytics: React.FC = () => {
             </div>
           ) : (
             <div className="premium-card p-8 text-center relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-purple-500/5 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center mx-auto mb-4 relative z-10">
                 <Lightbulb size={20} className="text-zinc-600 group-hover:text-amber-400 transition-colors duration-500" />
               </div>
@@ -635,10 +635,10 @@ export const Analytics: React.FC = () => {
             )}
             {targetColumn >= 0 && (
               <div
-                className="absolute top-0 bottom-4 w-px bg-indigo-500/50 border-r border-dashed border-indigo-400/50 z-10 pointer-events-none"
+                className="absolute top-0 bottom-4 w-px bg-emerald-500/50 border-r border-dashed border-emerald-400/50 z-10 pointer-events-none"
                 style={{ left: `${targetColumn * 16 - 2}px` }}
               >
-                <div className="absolute -top-6 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                <div className="absolute -top-6 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                   Target: Sep 15
                 </div>
               </div>
@@ -739,7 +739,7 @@ export const Analytics: React.FC = () => {
       {/* ── Session History ─────────────────────────────────────────────────── */}
       <div className="premium-card p-6">
         <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2 mb-6">
-          <History size={20} className="text-indigo-400" />
+          <History size={20} className="text-emerald-400" />
           Session History
         </h3>
 
@@ -797,11 +797,11 @@ export const Analytics: React.FC = () => {
                                 <span className={clsx(
                                   'text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border',
                                   session.sessionType === 'mock'
-                                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                     : session.sessionType === 'review'
                                       ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                       : session.sessionType === 'cold_solve'
-                                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                         : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 )}>
                                   {session.sessionType === 'cold_solve' ? 'Cold' : session.sessionType}
@@ -813,7 +813,7 @@ export const Analytics: React.FC = () => {
                             <span className={clsx(
                               'px-2.5 py-1 rounded text-xs font-medium border',
                               session.rating >= 5
-                                ? 'bg-violet-500/10 text-violet-300 border-violet-500/20'
+                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
                                 : session.rating === 4
                                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                   : session.rating === 3
@@ -837,7 +837,7 @@ export const Analytics: React.FC = () => {
                             {session.rawCode && (
                               <button
                                 onClick={() => setViewingSession(session)}
-                                className="text-indigo-400 hover:text-indigo-300 font-medium text-xs flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-colors border border-indigo-500/20"
+                                className="text-emerald-400 hover:text-emerald-300 font-medium text-xs flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20"
                               >
                                 <FileCode2 size={14} />
                                 View
@@ -894,7 +894,7 @@ export const Analytics: React.FC = () => {
                   {viewingSession.elapsedSeconds !== undefined && (
                     <>
                       <span className="text-zinc-600">•</span>
-                      <span className="flex items-center gap-1 text-cyan-400">
+                      <span className="flex items-center gap-1 text-emerald-400">
                         <Timer size={12} />
                         {fmtSeconds(viewingSession.elapsedSeconds)}
                       </span>

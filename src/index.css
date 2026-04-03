@@ -73,7 +73,7 @@ body {
 }
 
 @utility text-extruded-indigo {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-300 via-cyan-300 to-emerald-300 drop-shadow-sm;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-400 drop-shadow-sm;
 }
 
 .brand-shell {

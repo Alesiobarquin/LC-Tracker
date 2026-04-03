@@ -368,7 +368,6 @@ export const MockInterview: React.FC = () => {
           <Code2 className="text-emerald-400" size={32} />
           Mock Interview
         </h1>
-        <p className="text-zinc-400 mt-1">Simulate the live coding environment.</p>
       </header>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center max-w-2xl mx-auto mt-12">

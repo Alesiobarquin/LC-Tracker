@@ -281,7 +281,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                   r: 5 as const,
                   title: '5 — Cold / automatic',
                   hint: 'Could solve again without prep; pattern feels automatic. Use when you’d trust yourself in an interview cold.',
-                  tone: 'text-violet-300 border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20',
+                  tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20',
                 },
                 {
                   r: 4 as const,
@@ -350,7 +350,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             {isColdSolve && (
               <>
                 <span className="text-zinc-600">•</span>
-                <span className="text-blue-400 font-medium">Cold Solve</span>
+                <span className="text-emerald-400 font-medium">Cold Solve</span>
               </>
             )}
             {!isNew && !isColdSolve && (

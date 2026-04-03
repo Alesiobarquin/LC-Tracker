@@ -132,7 +132,6 @@ export const Settings: React.FC = () => {
                     <SettingsIcon className="text-emerald-400" size={32} />
                     Plan Customization
                 </h1>
-                <p className="text-zinc-400">Configure your study plan and preferences. Changes save automatically to your account.</p>
             </header>
 
             <div className="space-y-8">
@@ -179,9 +178,6 @@ export const Settings: React.FC = () => {
                             <Swords className="text-emerald-400" size={20} />
                             Learning Strategy
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-5">
-                            Target list, study mode, interview calibration, and review spacing. These drive Dashboard recommendations, analytics, and (in Random mode) which problems are eligible next.
-                        </p>
 
                         <div className="space-y-6">
                             <div>
@@ -261,7 +257,6 @@ export const Settings: React.FC = () => {
                                         <Briefcase className="text-emerald-400" size={18} />
                                         Interview type
                                     </h3>
-                                    <p className="text-xs text-zinc-500 mb-3">Biases new-problem difficulty in Random mode (internship favors easier picks).</p>
                                     <div className="flex flex-col gap-2">
                                         {([
                                             { value: 'INTERNSHIP' as const, label: 'Internship', sub: 'Prefer easier problems when available' },
@@ -293,10 +288,6 @@ export const Settings: React.FC = () => {
                                         <Zap className="text-emerald-400" size={18} />
                                         Spaced repetition
                                     </h3>
-                                    <p className="text-xs text-zinc-500 mb-3">
-                                        Controls review spacing after each session. Rating 1 → short revisit; higher ratings expand the gap. Aggressive shortens intervals (~30% vs Relaxed); Balanced sits in the middle (~15%). Difficulty still scales intervals (Hard reviewed sooner than Easy).
-                                        Future: optional FSRS-style per-card stability — for now this fixed staircase stays easy to reason about.
-                                    </p>
                                     <div className="flex flex-col gap-2">
                                         {([
                                             { value: 'RELAXED' as const, label: 'Relaxed', sub: 'Longest gaps between reviews' },
@@ -337,9 +328,6 @@ export const Settings: React.FC = () => {
                                         How sprint works
                                     </button>
                                 </div>
-                                <p className="text-xs text-zinc-500 leading-relaxed">
-                                    Sprint mode always drills in your <strong className="text-zinc-300">active category</strong> until the sprint window ends or the pool is exhausted. New problems are drawn from the NeetCode tier order (see below); you can align that order with your <strong className="text-zinc-300">target problem list</strong> setting.
-                                </p>
                                 <div className="flex items-center justify-between gap-2 rounded-xl border border-zinc-800 bg-zinc-950/40 px-4 py-3">
                                     <div>
                                         <p className="text-sm font-medium text-zinc-200">Align sprint pool with target list</p>
@@ -414,7 +402,6 @@ export const Settings: React.FC = () => {
                                             ))}
                                         </optgroup>
                                     </select>
-                                    <p className="text-xs text-zinc-500 mt-2">Forces the sprint to the selected category and resets progress within it.</p>
                                 </div>
                             </div>
 
@@ -640,9 +627,6 @@ export const Settings: React.FC = () => {
                             <Target className="text-emerald-400" size={20} />
                             Target Company Tier
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-5">
-                            In Random mode (full-time path), biases which difficulty gets picked next based on the mix below. Internship mode still prefers easier problems when available.
-                        </p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {([
                                 { value: 'FAANG',   label: 'FAANG',   sub: 'Big Tech' },
@@ -686,7 +670,6 @@ export const Settings: React.FC = () => {
                             <option value="Java">Java</option>
                             <option value="JavaScript">JavaScript</option>
                         </select>
-                        <p className="text-xs text-zinc-500 mt-2">Sets the default language everywhere, including Mock Interview IDE.</p>
                     </section>
 
                     {/* Export Backup */}
@@ -695,9 +678,6 @@ export const Settings: React.FC = () => {
                             <Download className="text-emerald-400" size={20} />
                             Export Backup
                         </h2>
-                        <p className="text-sm text-zinc-400 mb-5">
-                            Progress and settings are saved to your account. Download JSON anytime for an extra offline copy or to move your data between environments.
-                        </p>
                         <button
                             type="button"
                             onClick={handleExportData}
@@ -706,7 +686,6 @@ export const Settings: React.FC = () => {
                             <Download size={16} />
                             Export Data
                         </button>
-                        <p className="text-xs text-zinc-500 mt-3">Includes progress, settings, activity, and sprint state in one file.</p>
                     </section>
 
                     {sprintHowOpen && (

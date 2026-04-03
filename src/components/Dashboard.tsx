@@ -18,7 +18,7 @@ import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
-import { buildDailyPlan, SPRINT_DESCRIPTIONS, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
+import { buildDailyPlan, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
 import {
   computeReviewProblems,
   getEstimatedMinutesByDifficulty,
@@ -449,11 +449,6 @@ export const Dashboard: React.FC = () => {
 
   const readinessScore = Math.min(100, Math.round(phaseScore + confidenceScore + srHealthScore + mockScore + syntaxScore + speedBonusScore));
 
-  let readinessMessage = "Just getting started. Keep building your foundation.";
-  if (readinessScore >= 80) readinessMessage = "Highly prepared. Ready for onsite interviews.";
-  else if (readinessScore >= 60) readinessMessage = "Solid progress. Good for phone screens, push harder for onsites.";
-  else if (readinessScore >= 40) readinessMessage = "Building momentum. Focus on consistency and weak areas.";
-
   // ── Catch-Up Logic ─────────────────────────────────────────────────────────
   let missedDaysCount = 0;
   if (streak.lastActiveDate) {
@@ -506,7 +501,7 @@ export const Dashboard: React.FC = () => {
               </div>
               <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
                 <div className="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider">Study Days</div>
-                <div className="text-2xl font-bold text-indigo-400">{totalStudyDays}</div>
+                <div className="text-2xl font-bold text-emerald-400">{totalStudyDays}</div>
               </div>
             </div>
             <button
@@ -516,7 +511,6 @@ export const Dashboard: React.FC = () => {
               <div className="absolute inset-0 block h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
               <span className="relative z-10 flex items-center gap-3">Enter Phase 2 <Sparkles size={20} className="fill-current" /></span>
             </button>
-            <p className="text-zinc-500 text-sm mt-4">Phase 2 shifts focus to mock interviews and harder problems.</p>
           </div>
         </div>
       </div>
@@ -648,7 +642,7 @@ export const Dashboard: React.FC = () => {
                     <div key={prob.id} className={clsx('premium-card p-6 relative overflow-hidden group border', isPrimary ? 'border-emerald-500/20' : 'border-amber-500/20')}>
                       <Target size={240} aria-hidden="true" className={clsx("hidden sm:block absolute -bottom-16 -right-16 select-none pointer-events-none transition-transform duration-[1500ms]", isPrimary ? "text-emerald-500/[0.03] group-hover:rotate-12" : "text-amber-500/[0.03] group-hover:-rotate-12")} />
                       {isPrimary && recommendationReason && (
-                        <div className={clsx('absolute top-0 left-0 w-full border-b px-4 py-2 flex items-center gap-2 text-xs font-medium', showStabilizer ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400')}>
+                        <div className={clsx('absolute top-0 left-0 w-full border-b px-4 py-2 flex items-center gap-2 text-xs font-medium', showStabilizer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400')}>
                           {showStabilizer ? <TrendingDown size={14} /> : <Sparkles size={14} />}
                           {recommendationReason}
                         </div>
@@ -662,7 +656,7 @@ export const Dashboard: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <h3 className={clsx('text-xl font-semibold transition-colors truncate', isPrimary ? 'text-zinc-50 group-hover:text-emerald-400' : 'text-zinc-200 group-hover:text-amber-400')}>{prob.title}</h3>
-                            {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-bold">Stabilizer</span>}
+                            {showStabilizer && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold">Stabilizer</span>}
                             {isProblemPremium(prob) && (
                               <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/25 rounded-full font-bold inline-flex items-center gap-1">
                                 <Lock size={10} /> LC Premium
@@ -718,10 +712,10 @@ export const Dashboard: React.FC = () => {
           {coldSolveData && (
             <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.1s' }}>
               <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-                <Snowflake size={20} className="text-blue-400" />
+                <Snowflake size={20} className="text-emerald-400" />
                 Cold Solve Challenge
               </h2>
-              <div className="premium-card p-5 border-blue-500/20 hover:border-blue-500/40">
+              <div className="premium-card p-5 border-emerald-500/20 hover:border-emerald-500/40">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-zinc-100 inline-flex items-center gap-2">
@@ -732,11 +726,10 @@ export const Dashboard: React.FC = () => {
                         </span>
                       )}
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-1">Not touched in &gt;30 days. No hints. Your pace.</p>
                   </div>
                   <button
                     onClick={() => startSession(coldSolveData.id, true, true)}
-                    className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg transition-colors border border-blue-500/20 flex items-center gap-2"
+                    className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-2"
                   >
                     <Play size={16} className="fill-current" />
                     Start
@@ -810,7 +803,7 @@ export const Dashboard: React.FC = () => {
             <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.25s' }}>
               <div className="flex justify-between items-end mb-4">
                 <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
-                  <BookOpen size={20} className="text-purple-400" />
+                  <BookOpen size={20} className="text-emerald-400" />
                   Syntax Drills ({syntaxDrillsData.length})
                 </h2>
                 <div className="text-xs text-zinc-500">Takes ~{syntaxDrillsData.length * 2}m to complete</div>
@@ -821,15 +814,15 @@ export const Dashboard: React.FC = () => {
                   return (
                     <div key={card.id} className="premium-card p-4 flex flex-col justify-between group h-full">
                       <div>
-                        <div className="text-xs font-medium text-purple-400 mb-1 truncate">{card.category}</div>
-                        <h4 className="text-sm font-medium text-zinc-100 group-hover:text-purple-400 transition-colors line-clamp-2">{card.description}</h4>
+                        <div className="text-xs font-medium text-emerald-400 mb-1 truncate">{card.category}</div>
+                        <h4 className="text-sm font-medium text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2">{card.description}</h4>
                       </div>
                       <button
                         onClick={() => {
                           const syntaxTabBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes('Syntax Reference'));
                           if (syntaxTabBtn) syntaxTabBtn.click();
                         }}
-                        className="mt-4 w-full py-1.5 px-3 bg-purple-500/10 hover:bg-purple-500 hover:text-white text-purple-400 text-xs font-medium rounded-lg transition-all border border-purple-500/20 hover:border-purple-500"
+                        className="mt-4 w-full py-1.5 px-3 bg-emerald-500/10 hover:bg-emerald-500 hover:text-zinc-950 text-emerald-400 text-xs font-medium rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500"
                       >
                         Drill Now
                       </button>
@@ -845,18 +838,18 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
           {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
           {phase === 1 && settings.learningMode === 'SPRINT' && sprintState && sprintState.sprintStatus !== 'complete' ? (
-            <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
-              <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-indigo-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
-              <div className="absolute -top-2 -right-2 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(99,102,241,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
+            <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
+              <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-emerald-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
+              <div className="absolute -top-2 -right-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(16,185,129,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>
               <div className="flex items-center justify-between mb-1 relative z-10">
                 <div className="flex items-center gap-2">
-                  <Swords size={18} className="text-indigo-400" />
+                  <Swords size={18} className="text-emerald-400" />
                   <h3 className="font-semibold text-zinc-100">Current Sprint</h3>
                 </div>
                 <select
                   value={sprintState.currentCategory}
                   onChange={(e) => setSprintCategory(e.target.value)}
-                  className="bg-transparent text-[10px] font-bold text-indigo-400 uppercase tracking-wider outline-none cursor-pointer border-b border-indigo-400/20 hover:border-indigo-400 transition-all text-right"
+                  className="bg-transparent text-[10px] font-bold text-emerald-400 uppercase tracking-wider outline-none cursor-pointer border-b border-emerald-400/20 hover:border-emerald-400 transition-all text-right"
                 >
                   <optgroup label="Phase 1">
                     {PHASE_1_CATEGORIES.map(cat => (
@@ -875,17 +868,16 @@ export const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">
                     <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
                     <div className="flex items-center gap-2">
-                       <button onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
-                       <button onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-indigo-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
+                       <button onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
+                       <button onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
                        <span className="ml-1 w-6 text-right">{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
                     </div>
                   </div>
                   <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mb-3">
-                    <div className="h-full bg-indigo-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100))}%` }} />
+                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100))}%` }} />
                   </div>
                 </>
               )}
-              <p className="text-xs text-zinc-400 leading-relaxed mb-4">{SPRINT_DESCRIPTIONS[sprintState.currentCategory] ?? 'Focused pattern drilling.'}</p>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Overall Progress</span>
                 <span className="text-zinc-100 font-medium">{curriculumSolvedCount} / {targetCount}</span>
@@ -904,14 +896,7 @@ export const Dashboard: React.FC = () => {
             </div>
           ) : (
             <div className="premium-card p-6">
-              <h3 className="font-semibold text-zinc-100 mb-2">Phase {phase} Status</h3>
-              <p className="text-sm text-zinc-400 mb-5">
-                {phase === 1
-                  ? 'Sprint: NC75 → NC150 → NC250 → full catalog (same topic)'
-                  : phase === 2
-                    ? 'Internship Mode (3x/week)'
-                    : 'Recruiting Grind (NC 150 + Mocks)'}
-              </p>
+              <h3 className="font-semibold text-zinc-100 mb-5">Phase {phase} Status</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-zinc-400">Progress ({TARGET_CURRICULUM_LABELS[curriculum]})</span>
@@ -940,11 +925,10 @@ export const Dashboard: React.FC = () => {
 
           {/* Readiness Score */}
           <div className="premium-card p-6">
-            <h3 className="font-semibold text-zinc-100 mb-1 flex items-center gap-2">
+            <h3 className="font-semibold text-zinc-100 mb-4 flex items-center gap-2">
               <Brain size={18} className="text-emerald-400" />
               Interview Readiness
             </h3>
-            <p className="text-xs text-zinc-500 mb-4">{readinessMessage}</p>
             <div className="text-5xl font-black text-zinc-50 mb-4">{readinessScore}<span className="text-xl text-zinc-500">/100</span></div>
 
             <div className="space-y-2 text-xs">

@@ -171,7 +171,7 @@ export function AdminDashboard() {
   const getTypeIcon = (type: string) => {
     if (type === 'bug') return <AlertCircle className="w-5 h-5 text-red-400" />;
     if (type === 'feature_request') return <Lightbulb className="w-5 h-5 text-yellow-400" />;
-    return <MessageSquare className="w-5 h-5 text-blue-400" />;
+    return <MessageSquare className="w-5 h-5 text-emerald-400" />;
   };
 
   const getStatusClassName = (status: Ticket['status']) => {
@@ -186,7 +186,7 @@ export function AdminDashboard() {
 
   return (
     <div className="brand-shell min-h-screen relative overflow-hidden">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_6%_0%,rgba(16,185,129,0.15),transparent_34%),radial-gradient(circle_at_92%_8%,rgba(59,130,246,0.12),transparent_36%),radial-gradient(circle_at_78%_82%,rgba(245,158,11,0.08),transparent_34%)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_6%_0%,rgba(16,185,129,0.15),transparent_34%),radial-gradient(circle_at_92%_8%,rgba(52,211,153,0.1),transparent_36%),radial-gradient(circle_at_78%_82%,rgba(245,158,11,0.08),transparent_34%)]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.12] mix-blend-screen" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6 animate-in">

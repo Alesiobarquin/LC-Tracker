@@ -103,7 +103,6 @@ export const SyntaxReference: React.FC = () => {
                             <BookOpen className="text-emerald-400" size={32} />
                             Syntax Reference
                         </h1>
-                        <p className="text-zinc-400 mt-1">Drill syntax patterns until they become muscle memory.</p>
                     </div>
 
                     <div className="flex items-center gap-3 flex-wrap justify-end">

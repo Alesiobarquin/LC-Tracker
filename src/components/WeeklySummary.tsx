@@ -82,12 +82,12 @@ export const WeeklySummary: React.FC = () => {
   }
 
   return (
-    <div className="premium-card p-6 mb-8 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+    <div className="premium-card p-6 mb-8 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
       
       <div className="relative z-10">
         <h2 className="text-xl font-bold text-zinc-50 mb-1 flex items-center gap-2">
-          <Trophy className="text-indigo-400" size={24} />
+          <Trophy className="text-emerald-400" size={24} />
           Weekly Debrief
         </h2>
         <p className="text-sm text-zinc-400 mb-6">
@@ -112,7 +112,7 @@ export const WeeklySummary: React.FC = () => {
           </div>
           <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
             <div className="text-zinc-400 text-xs mb-1">Categories Touched</div>
-            <div className="text-2xl font-bold text-blue-400">{summary.categoriesCount}</div>
+            <div className="text-2xl font-bold text-emerald-400">{summary.categoriesCount}</div>
           </div>
         </div>
 

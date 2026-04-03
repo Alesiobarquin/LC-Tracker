@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { problems, allProblems, isProblemPremium, Category } from '../data/problems';
-import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink, Library } from 'lucide-react';
+import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
@@ -135,9 +135,6 @@ export const ProblemLibrary: React.FC = () => {
           <Library className="text-emerald-400" size={32} />
           Problem Library
         </h1>
-        <p className="text-zinc-400 mt-1">
-          Curated NeetCode lists plus the full LeetCode catalog for search and practice.
-        </p>
       </header>
 
       <div className="flex flex-col gap-4">
@@ -195,6 +192,26 @@ export const ProblemLibrary: React.FC = () => {
           </select>
           <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-zinc-800/70 bg-zinc-900/40 px-3 py-2 text-[11px] text-zinc-400">
+        <span className="uppercase tracking-wider text-zinc-500">Status key</span>
+        <span className="inline-flex items-center gap-1.5">
+          <CircleCheck size={13} className="text-emerald-500" />
+          Mastered (retired)
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <CircleCheck size={13} className="text-amber-500" />
+          Solved (active queue)
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <CircleCheck size={13} className="text-red-500" />
+          Needs work (last rating 1)
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-[13px] h-[13px] rounded-full border-2 border-zinc-700" />
+          Unsolved
+        </span>
       </div>
 
       {pendingPremiumProblem && (
@@ -280,7 +297,18 @@ export const ProblemLibrary: React.FC = () => {
                         const prog = progress[prob.id];
                         const isSolved = !!prog;
                         const isRetired = prog?.retired;
+                        const lastRating = prog && prog.history.length > 0
+                          ? prog.history[prog.history.length - 1].rating
+                          : undefined;
+                        const needsWork = isSolved && !isRetired && lastRating === 1;
                         const isPremium = isProblemPremium(prob);
+                        const statusTitle = isRetired
+                          ? 'Mastered (retired) — mark as unsolved'
+                          : needsWork
+                            ? 'Solved but struggling (last rating 1) — mark as unsolved'
+                            : isSolved
+                            ? 'Solved (active queue) — mark as unsolved'
+                            : 'Mark as solved';
                         
                         return (
                           <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group" style={virtualRowStyle}>
@@ -288,12 +316,15 @@ export const ProblemLibrary: React.FC = () => {
                               <button 
                                  onClick={() => toggleSolved(prob.id, isSolved)}
                                  className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
-                                 title={isSolved ? "Mark as unsolved" : "Mark as solved"}
+                                 title={statusTitle}
+                                 aria-label={statusTitle}
                               >
                                 {isRetired ? (
                                   <CircleCheck size={20} className="text-emerald-500" />
+                                ) : needsWork ? (
+                                  <CircleCheck size={20} className="text-red-500" />
                                 ) : isSolved ? (
-                                  <Check size={20} className="text-amber-500" />
+                                  <CircleCheck size={20} className="text-amber-500" />
                                 ) : (
                                   <div className="w-5 h-5 rounded-full border-2 border-zinc-700 hover:border-emerald-500/50 transition-colors" />
                                 )}
@@ -309,7 +340,7 @@ export const ProblemLibrary: React.FC = () => {
                                 )}
                                 {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
                                 {activeTab === 'NeetCode 250' && prob.isNeetCode150 && !prob.isNeetCode75 && (
-                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/20">NC150+</span>
+                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/20">NC150+</span>
                                 )}
                                 {activeTab === 'Full Catalog' && prob.isExtendedCatalog && (
                                   <span className="ml-1 text-[10px] uppercase tracking-wider bg-zinc-500/10 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-500/20">Catalog</span>

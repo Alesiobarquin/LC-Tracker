@@ -3,10 +3,10 @@ import { FileText } from 'lucide-react';
 
 export function TermsOfService() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 p-8 sm:p-12 font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 p-8 sm:p-12 font-sans selection:bg-emerald-500/30">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center gap-3 border-b border-zinc-800 pb-6 mb-8">
-          <FileText className="w-8 h-8 text-blue-500" />
+          <FileText className="w-8 h-8 text-emerald-500" />
           <h1 className="text-3xl font-bold text-white tracking-tight">Terms of Service</h1>
         </div>
 
@@ -50,7 +50,7 @@ export function TermsOfService() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-zinc-800">
-          <a href="/" className="text-blue-500 hover:text-blue-400 font-medium transition-colors">
+          <a href="/" className="text-emerald-500 hover:text-emerald-400 font-medium transition-colors">
             &larr; Return to Application
           </a>
         </div>

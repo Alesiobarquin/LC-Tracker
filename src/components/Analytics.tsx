@@ -429,7 +429,6 @@ export const Analytics: React.FC = () => {
           <LineChart className="text-emerald-400" size={32} />
           Analytics
         </h1>
-        <p className="text-zinc-400 mt-1">Track your progress and identify areas to improve.</p>
       </header>
 
       {/* ── Active Sprint Banner ──────────────────────────────────────────────── */}
@@ -536,7 +535,7 @@ export const Analytics: React.FC = () => {
         {/* Time Invested */}
         <div className="premium-card p-6 slide-in-from-bottom-4" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center gap-3 mb-3">
-            <Timer className="text-rose-400" size={20} />
+            <Timer className="text-emerald-400" size={20} />
             <h3 className="text-zinc-400 font-medium">Time Invested</h3>
           </div>
           <p className="text-3xl font-bold text-zinc-50">
@@ -656,9 +655,6 @@ export const Analytics: React.FC = () => {
         <div className="flex items-start justify-between gap-4 mb-1">
           <div>
             <h2 className="text-xl font-semibold text-zinc-100">Category Performance</h2>
-            <p className="text-xs text-zinc-500 mt-1">
-              Confidence rating (1–5) · avg new-solve time · sorted weakest first
-            </p>
           </div>
           {hasMoreOlder && user?.id && combinedTimings.length > 0 && (
             <button

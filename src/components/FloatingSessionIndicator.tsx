@@ -60,7 +60,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                 {/* Session type badge */}
                 <div className="flex items-center gap-1.5">
                     <span className={`text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${activeSession.isColdSolve
-                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                             : activeSession.isReview
                                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                 : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'

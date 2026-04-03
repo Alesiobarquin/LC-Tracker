@@ -199,12 +199,12 @@ const StepLearningMode: React.FC<{
                 className={clsx(
                     'rounded-2xl border p-5 text-left transition-all duration-200',
                     learningMode === 'SPRINT'
-                        ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 ring-offset-2 ring-offset-zinc-950'
+                        ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
                         : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
                 )}
             >
                 <div className="flex items-center gap-2 mb-2">
-                    <Swords className="text-indigo-400" size={22} />
+                    <Swords className="text-emerald-400" size={22} />
                     <span className="text-lg font-semibold text-zinc-100">Sprint</span>
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">
@@ -248,7 +248,7 @@ const StepLaunch: React.FC<{
             text: 'Your streak counts when you complete at least one problem or review session per day, with one grace day per week.',
         },
         {
-            icon: <RefreshCw size={16} className="text-purple-400" />,
+            icon: <RefreshCw size={16} className="text-emerald-400" />,
             text: 'LeetCode sync may only reflect recent submissions — use the Problem Library to mark older solves if needed.',
         },
         {

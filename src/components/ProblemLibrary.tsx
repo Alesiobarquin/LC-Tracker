@@ -245,8 +245,9 @@ export const ProblemLibrary: React.FC = () => {
                             <td className="px-6 py-4">
                               <button 
                                  onClick={() => toggleSolved(prob.id, isSolved)}
-                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
+                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-full"
                                  title={isSolved ? "Mark as unsolved" : "Mark as solved"}
+                                 aria-label={isSolved ? `Mark ${prob.title} as unsolved` : `Mark ${prob.title} as solved`}
                               >
                                 {isRetired ? (
                                   <CircleCheck size={20} className="text-emerald-500" />
@@ -300,8 +301,9 @@ export const ProblemLibrary: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => setActiveSession(prob.id)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none"
                                   title="Start practice timer"
+                                  aria-label={`Start practice timer for ${prob.title}`}
                                 >
                                   <Play size={16} />
                                 </button>

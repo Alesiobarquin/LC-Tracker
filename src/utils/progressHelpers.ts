@@ -11,7 +11,7 @@ import { getNextReviewDate, getPhase, isDueToday } from './dateUtils';
 import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
-  allProblems,
+  allProblems, allProblemsById,
   problemMatchesTargetCurriculum,
   problems,
   problemsPoolForTargetCurriculum,
@@ -235,7 +235,7 @@ export function pickUnsolvedForRandomRecommendation(
   const solvedCounts: Record<'Easy' | 'Medium' | 'Hard', number> = { Easy: 0, Medium: 0, Hard: 0 };
   Object.entries(progress).forEach(([id, prog]) => {
     if (prog.history.length === 0) return;
-    const p = allProblems.find((x) => x.id === id);
+    const p = allProblemsById.get(id);
     if (!p || !problemMatchesTargetCurriculum(p, curriculum)) return;
     solvedCounts[p.difficulty] += 1;
   });
@@ -265,7 +265,7 @@ export function computeNewProblemProgress(
 ): ProblemProgress {
   const today = startOfDay(new Date());
   const todayStr = today.toISOString();
-  const prob = allProblems.find((p) => p.id === problemId);
+  const prob = allProblemsById.get(problemId);
   const isFirstRating = !existing || existing.history.length === 0;
   const consecutiveThrees = rating >= 4 ? (existing?.consecutiveThrees || 0) + 1 : 0;
   const prevSuccesses = existing?.consecutiveSuccesses || 0;
@@ -424,7 +424,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
   }> = [];
 
   Object.entries(progress).forEach(([problemId, prog]) => {
-    const problem = allProblems.find((item) => item.id === problemId);
+    const problem = allProblemsById.get(problemId);
     if (!problem) return;
 
     prog.history.forEach((entry, index) => {
@@ -616,7 +616,7 @@ export function applyLeetCodeSubmissions(
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const prob = allProblems.find((p) => p.id === problemId);
+      const prob = allProblemsById.get(problemId);
       const difficulty = prob?.difficulty ?? 'Medium';
       // Compute the first-success interval from the actual solve date so old
       // imports surface as overdue today rather than being pushed into the future.
@@ -665,7 +665,7 @@ export function computeReviewProblems(params: {
   } = params;
 
   const getSolveMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = allProblemsById.get(id);
     if (!prob) return 22;
     const data = categoryAvgSolveTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -675,7 +675,7 @@ export function computeReviewProblems(params: {
   };
 
   const getReviewMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = allProblemsById.get(id);
     if (!prob) return 12;
     const data = categoryAvgReviewTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -889,7 +889,7 @@ export function buildDailyPlan(params: {
     const categoryStats: Record<string, { total: number; count: number }> = {};
 
     Object.entries(progress).forEach(([id, prog]) => {
-      const prob = allProblems.find((item) => item.id === id);
+      const prob = allProblemsById.get(id);
       if (prob && prog.history.length > 0) {
         const lastRating = prog.history[prog.history.length - 1].rating;
         if (!categoryStats[prob.category]) categoryStats[prob.category] = { total: 0, count: 0 };

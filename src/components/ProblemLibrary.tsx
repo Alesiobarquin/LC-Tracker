@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, Category } from '../data/problems';
+import { problems, allProblems, allProblemsById, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Check, Filter, Lock, ExternalLink, Library } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
@@ -111,7 +111,7 @@ export const ProblemLibrary: React.FC = () => {
   }
 
   if (activeSession) {
-    const problem = allProblems.find(p => p.id === activeSession);
+    const problem = allProblemsById.get(activeSession);
     if (!problem) return null;
     return <Timer problem={problem} isNew={!progress[problem.id]} onComplete={() => setActiveSession(null)} />;
   }

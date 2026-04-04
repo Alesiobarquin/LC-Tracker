@@ -1,0 +1,3 @@
+## 2025-03-05 - Icon-only Buttons Lacking Context and Keyboard Access
+**Learning:** Across various modals and floating overlays (like FeedbackModal, Layout menu, and FloatingSessionIndicator), interactive elements containing only icons (like Lucide `X` and `Trash2`) often lack both accessible names (`aria-label`) and visible keyboard focus states (`focus-visible:ring-2 focus-visible:outline-none`).
+**Action:** When adding new icon-only buttons or reviewing existing ones, always ensure `aria-label` is provided and a distinct `focus-visible` state is implemented to support keyboard and screen reader navigation.

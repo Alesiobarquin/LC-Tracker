@@ -91,7 +91,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           <h2 className="text-lg font-semibold text-white">Share Feedback</h2>
           <button
             onClick={onClose}
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -148,7 +149,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                     setImagePreview(null);
                     URL.revokeObjectURL(imagePreview);
                   }}
-                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors"
+                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  aria-label="Remove screenshot"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

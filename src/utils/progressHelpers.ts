@@ -12,6 +12,7 @@ import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   allProblems,
+  allProblemsById,
   isProblemPremium,
   problemMatchesTargetCurriculum,
   problems,
@@ -244,7 +245,7 @@ export function pickUnsolvedForRandomRecommendation(
   const solvedCounts: Record<'Easy' | 'Medium' | 'Hard', number> = { Easy: 0, Medium: 0, Hard: 0 };
   Object.entries(progress).forEach(([id, prog]) => {
     if (prog.history.length === 0) return;
-    const p = allProblems.find((x) => x.id === id);
+    const p = allProblemsById[id];
     if (!p || !problemMatchesTargetCurriculum(p, curriculum)) return;
     solvedCounts[p.difficulty] += 1;
   });
@@ -274,7 +275,7 @@ export function computeNewProblemProgress(
 ): ProblemProgress {
   const today = startOfDay(new Date());
   const todayStr = today.toISOString();
-  const prob = allProblems.find((p) => p.id === problemId);
+  const prob = allProblemsById[problemId];
   const isFirstRating = !existing || existing.history.length === 0;
   const consecutiveThrees = rating >= 4 ? (existing?.consecutiveThrees || 0) + 1 : 0;
   const prevSuccesses = existing?.consecutiveSuccesses || 0;
@@ -433,7 +434,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
   }> = [];
 
   Object.entries(progress).forEach(([problemId, prog]) => {
-    const problem = allProblems.find((item) => item.id === problemId);
+    const problem = allProblemsById[problemId];
     if (!problem) return;
 
     prog.history.forEach((entry, index) => {
@@ -620,13 +621,12 @@ export function applyLeetCodeSubmissions(
 
   submissions.forEach((sub) => {
     const problemId = sub.titleSlug;
-    const existsInLibrary = allProblems.some((p) => p.id === problemId);
+    const prob = allProblemsById[problemId];
 
-    if (existsInLibrary && !nextProgress[problemId]) {
+    if (prob && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const prob = allProblems.find((p) => p.id === problemId);
-      const difficulty = prob?.difficulty ?? 'Medium';
+      const difficulty = prob.difficulty;
       // Compute the first-success interval from the actual solve date so old
       // imports surface as overdue today rather than being pushed into the future.
       const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
@@ -674,7 +674,7 @@ export function computeReviewProblems(params: {
   } = params;
 
   const getSolveMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = allProblemsById[id];
     if (!prob) return 22;
     const data = categoryAvgSolveTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -684,7 +684,7 @@ export function computeReviewProblems(params: {
   };
 
   const getReviewMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = allProblemsById[id];
     if (!prob) return 12;
     const data = categoryAvgReviewTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -711,7 +711,7 @@ export function computeReviewProblems(params: {
   );
   const result: string[] = [];
   for (const id of allDueReviewIds) {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = allProblemsById[id];
     if (!prob) continue;
     if (!includePremium && isProblemPremium(prob)) continue;
     const est = getReviewMins(id);
@@ -741,7 +741,6 @@ export function buildDailyPlan(params: {
   } = params;
   const phase = getPhase();
   const includePremium = settings.includePremiumInAssignments === true;
-  const problemById = new Map(allProblems.map((p) => [p.id, p] as const));
   const targetPool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75').filter(
     (p) => includePremium || !isProblemPremium(p)
   );
@@ -756,7 +755,7 @@ export function buildDailyPlan(params: {
   const allDueReviews = Object.entries(progress)
     .filter(([id, prog]) => {
       if (prog.retired || !isDueToday(prog.nextReviewAt)) return false;
-      const problem = problemById.get(id);
+      const problem = allProblemsById[id];
       if (!problem) return false;
       return includePremium || !isProblemPremium(problem);
     })
@@ -789,7 +788,7 @@ export function buildDailyPlan(params: {
     const potentialColdSolves = Object.entries(progress)
       .filter(([id, prog]) => {
         if (prog.history.length === 0) return false;
-        const problem = problemById.get(id);
+        const problem = allProblemsById[id];
         if (!problem) return false;
         if (!includePremium && isProblemPremium(problem)) return false;
         const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
@@ -923,7 +922,7 @@ export function buildDailyPlan(params: {
     const categoryStats: Record<string, { total: number; count: number }> = {};
 
     Object.entries(progress).forEach(([id, prog]) => {
-      const prob = allProblems.find((item) => item.id === id);
+      const prob = allProblemsById[id];
       if (prob && prog.history.length > 0) {
         const lastRating = prog.history[prog.history.length - 1].rating;
         if (!categoryStats[prob.category]) categoryStats[prob.category] = { total: 0, count: 0 };

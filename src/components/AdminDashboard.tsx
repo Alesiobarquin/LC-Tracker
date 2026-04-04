@@ -5,6 +5,17 @@ import { MessageSquare, AlertCircle, Lightbulb, RefreshCw } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { clsx } from 'clsx';
 
+// Security enhancement: Prevent XSS from user-supplied image URLs
+const isSafeUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 interface Ticket {
   id: string;
   user_id: string;
@@ -280,7 +291,7 @@ export function AdminDashboard() {
 
                       <p className="text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
 
-                      {ticket.image_url && (
+                      {ticket.image_url && isSafeUrl(ticket.image_url) && (
                         <a href={ticket.image_url} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
                           <img
                             src={ticket.image_url}

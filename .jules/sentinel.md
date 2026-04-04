@@ -1,0 +1,4 @@
+## 2024-04-04 - Stored XSS via javascript: URIs in React
+**Vulnerability:** React prevents XSS in text content, but rendering user-supplied strings directly into the `href` attribute of an `<a>` tag leaves the app vulnerable to `javascript:` URI attacks. This was found in the `AdminDashboard` where a ticket's `image_url` was passed directly to the `href` attribute.
+**Learning:** Developers often assume React automatically sanitizes all inputs against XSS. While true for text nodes (`{text}`), attribute injection (like `href`) requires manual validation to ensure the URL protocol is safe (e.g. `http:` or `https:`).
+**Prevention:** Always validate user-supplied URLs before rendering them into `href` or `src` attributes. A robust approach is parsing the URL with `new URL()` and checking that `parsed.protocol` is `http:` or `https:`.

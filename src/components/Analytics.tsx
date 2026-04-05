@@ -30,6 +30,8 @@ import type { SessionTiming } from '../types';
 import { useUser } from '@clerk/clerk-react';
 import { AnalyticsSkeleton } from './loadingSkeletons';
 
+const ALL_PROBLEMS_MAP = new Map(allProblems.map(p => [p.id, p]));
+
 const fmtSeconds = (s: number): string => {
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60);
@@ -119,7 +121,7 @@ export const Analytics: React.FC = () => {
     const stats: Record<string, { totalRating: number; count: number }> = {};
 
     Object.entries(progress).forEach(([problemId, prog]) => {
-      const prob = allProblems.find((p) => p.id === problemId);
+      const prob = ALL_PROBLEMS_MAP.get(problemId);
       if (!prob || prog.history.length === 0) return;
       const lastRating = prog.history[prog.history.length - 1].rating;
       if (!stats[prob.category]) stats[prob.category] = { totalRating: 0, count: 0 };
@@ -193,7 +195,7 @@ export const Analytics: React.FC = () => {
     }[] = [];
 
     Object.entries(progress).forEach(([problemId, prog]) => {
-      const prob = allProblems.find(p => p.id === problemId);
+      const prob = ALL_PROBLEMS_MAP.get(problemId);
       if (!prob) return;
       prog.history.forEach(entry => {
         allSessions.push({

@@ -33,7 +33,11 @@ import type {
   StreakState,
   SyntaxProgress,
   TargetCurriculum,
+  PatternId,
+  PatternProgress,
 } from '../types';
+import { patterns } from '../data/patterns';
+import { getPatternForProblem } from './patternMapping';
 import { DEFAULT_GRACE_DAY, DEFAULT_STREAK } from '../types';
 
 /**
@@ -841,7 +845,8 @@ export function buildDailyPlan(params: {
     if (solvedThisWeek >= 3) shouldAssignNewProblem = false;
   }
 
-  const useSprintLogic = phase === 1 && settings.learningMode === 'SPRINT';
+  const useSprintLogic = phase === 1 && settings.learningMode === 'CURRICULUM';
+  const usePatternLogic = settings.learningMode === 'PATTERNS';
   const effectiveSprint =
     useSprintLogic && !sprintState ? createInitialSprintState(progress, settings) : sprintState;
 
@@ -918,7 +923,38 @@ export function buildDailyPlan(params: {
     }
   }
 
-  if (shouldAssignNewProblem && !useSprintLogic && !newProblem) {
+  if (shouldAssignNewProblem && usePatternLogic && !newProblem) {
+    let targetPattern = null;
+    for (const pattern of patterns) {
+      const patternProblems = targetPool.filter((p) => getPatternForProblem(p) === pattern.id);
+      const masteredCount = patternProblems.filter((p) => progress[p.id]?.retired === true).length;
+      
+      if (masteredCount < patternProblems.length && patternProblems.length > 0) {
+        targetPattern = pattern;
+        break;
+      }
+    }
+
+    if (targetPattern) {
+      let patternProblems = targetPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
+      let picked = pickUnsolvedForRandomRecommendation(patternProblems, solvedIds, settings, progress);
+      
+      // If the target pool is exhausted but mastery isn't achieved, pull from the extended catalog
+      // to ensure continuous practice until the core foundational problems are retired.
+      if (!picked) {
+        const extendedPool = allProblems.filter((p) => p.isExtendedCatalog || p.isNeetCode250);
+        const overflowProblems = extendedPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
+        picked = pickUnsolvedForRandomRecommendation(overflowProblems, solvedIds, settings, progress);
+      }
+
+      if (picked) {
+        newProblem = picked.id;
+        recommendationReason = `Mastering ${targetPattern.name}`;
+      }
+    }
+  }
+
+  if (shouldAssignNewProblem && !useSprintLogic && !usePatternLogic && !newProblem) {
     const candidateCategories: string[] = [...PHASE_1_CATEGORIES, ...PHASE_2_CATEGORIES];
     const categoryStats: Record<string, { total: number; count: number }> = {};
 
@@ -989,3 +1025,21 @@ export function buildDailyPlan(params: {
     sprintDayInfo,
   };
 }
+
+
+export function computePatternMastery(
+  patternId: PatternId,
+  patternProblemIds: string[],
+  problemProgress: Record<string, ProblemProgress>
+): Pick<PatternProgress, 'problemsMasteredCount' | 'isMastered'> {
+  const masteredCount = patternProblemIds.filter(id => {
+    const prog = problemProgress[id];
+    return prog?.retired === true;
+  }).length;
+  
+  return {
+    problemsMasteredCount: masteredCount,
+    isMastered: masteredCount === patternProblemIds.length && patternProblemIds.length > 0
+  };
+}
+

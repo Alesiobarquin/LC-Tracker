@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { fetchLeetCodeProfile } from '../services/leetcode';
 import {
     BookOpen, CheckCircle, ChevronRight, ChevronLeft, RefreshCw,
-    AlertTriangle, Rocket, Shuffle, Swords,
+    AlertTriangle, Rocket, Shuffle, Swords, FileCode2
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useUserSettings } from '../hooks/useUserData';
@@ -192,42 +192,61 @@ const StepLearningMode: React.FC<{
             <p className="text-zinc-400 text-sm">Pick one — you can switch anytime in Settings under Learning Strategy.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
                 type="button"
-                onClick={() => onChange('SPRINT')}
+                onClick={() => onChange('EXPLORE')}
                 className={clsx(
                     'rounded-2xl border p-5 text-left transition-all duration-200',
-                    learningMode === 'SPRINT'
-                        ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
-                        : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
-                )}
-            >
-                <div className="flex items-center gap-2 mb-2">
-                    <Swords className="text-emerald-400" size={22} />
-                    <span className="text-lg font-semibold text-zinc-100">Sprint</span>
-                </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                    Focus on one pattern at a time before moving on — structured progression through Phase 1.
-                </p>
-            </button>
-
-            <button
-                type="button"
-                onClick={() => onChange('RANDOM')}
-                className={clsx(
-                    'rounded-2xl border p-5 text-left transition-all duration-200',
-                    learningMode === 'RANDOM'
+                    learningMode === 'EXPLORE'
                         ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
                         : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
                 )}
             >
                 <div className="flex items-center gap-2 mb-2">
                     <Shuffle className="text-emerald-400" size={22} />
-                    <span className="text-lg font-semibold text-zinc-100">Random</span>
+                    <span className="text-lg font-semibold text-zinc-100">Explore</span>
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                    Mix problems across categories for broader practice — less lock-in to a single sprint.
+                    Mix problems across categories for broader practice — less lock-in to a single pattern.
+                </p>
+            </button>
+
+            <button
+                type="button"
+                onClick={() => onChange('CURRICULUM')}
+                className={clsx(
+                    'rounded-2xl border p-5 text-left transition-all duration-200',
+                    learningMode === 'CURRICULUM'
+                        ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
+                        : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
+                )}
+            >
+                <div className="flex items-center gap-2 mb-2">
+                    <Swords className="text-emerald-400" size={22} />
+                    <span className="text-lg font-semibold text-zinc-100">Curriculum</span>
+                </div>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                    Focus on one pattern intensively before moving on — heavily curated structured progression.
+                </p>
+            </button>
+
+            <button
+                type="button"
+                onClick={() => onChange('PATTERNS')}
+                className={clsx(
+                    'rounded-2xl border p-5 text-left transition-all duration-200',
+                    learningMode === 'PATTERNS'
+                        ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
+                        : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
+                )}
+            >
+                <div className="flex items-center gap-2 mb-2">
+                    <FileCode2 className="text-emerald-400" size={22} />
+                    <span className="text-lg font-semibold text-zinc-100">Pattern Mastery</span>
+                </div>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                    A strictly guided progression algorithm explicitly tailored to pattern recognition instead of specific problems.
                 </p>
             </button>
         </div>
@@ -272,11 +291,11 @@ const StepLaunch: React.FC<{
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                     <span className="text-zinc-500 mt-0.5 shrink-0">
-                        {state.learningMode === 'SPRINT' ? <Swords size={14} /> : <Shuffle size={14} />}
+                        {state.learningMode === 'CURRICULUM' ? <Swords size={14} /> : state.learningMode === 'PATTERNS' ? <FileCode2 size={14} /> : <Shuffle size={14} />}
                     </span>
                     <span className="text-zinc-500 w-36 shrink-0">Learning mode</span>
                     <span className="text-zinc-100 font-medium">
-                        {state.learningMode === 'SPRINT' ? 'Sprint' : 'Random'}
+                        {state.learningMode === 'CURRICULUM' ? 'Curriculum' : state.learningMode === 'PATTERNS' ? 'Pattern Mastery' : 'Explore'}
                     </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -320,7 +339,7 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
 
     const [obState, setObState] = useState<OnboardingState>({
         leetcodeUsername: '',
-        learningMode: 'SPRINT',
+        learningMode: 'CURRICULUM',
     });
 
     useEffect(() => {

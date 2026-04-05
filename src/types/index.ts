@@ -116,6 +116,33 @@ export interface CatchUpPlanState {
   durationDays: number;
 }
 
+export type PatternId = 
+  | 'sliding-window'
+  | 'binary-search'
+  | 'topological-sort'
+  | 'bfs'
+  | 'top-k-elements'
+  | 'two-pointers'
+  | 'two-heaps'
+  | 'fast-slow-pointers';
+
+export interface PatternFoundation {
+  id: PatternId;
+  name: string;
+  description: string;
+  templateCodePython: string;
+  templateCodeJs: string;
+  relatedCategories: string[];
+  relatedTags: string[];
+}
+
+export interface PatternProgress {
+  id: PatternId;
+  problemsMasteredCount: number;
+  totalProblemsInPattern: number;
+  isMastered: boolean;
+}
+
 /** Which curated list drives recommendations and “target list” progress. */
 export type TargetCurriculum = 'NEET_75' | 'NEET_150' | 'NEET_250' | 'EXTENDED';
 
@@ -133,7 +160,7 @@ export interface AppSettings {
   language: 'Python' | 'Java' | 'JavaScript';
   /** When false, premium problems stay visible but are excluded from automatic assignment and reviews. */
   includePremiumInAssignments: boolean;
-  learningMode: 'SPRINT' | 'RANDOM';
+  learningMode: 'EXPLORE' | 'CURRICULUM' | 'PATTERNS';
   targetCurriculum: TargetCurriculum;
   sprintSettings: {
     lengthMultiplier: number;
@@ -169,7 +196,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   srAggressiveness: 'RELAXED',
   language: 'Python',
   includePremiumInAssignments: false,
-  learningMode: 'SPRINT',
+  learningMode: 'CURRICULUM',
   targetCurriculum: 'NEET_75',
   sprintSettings: {
     lengthMultiplier: 1.0,

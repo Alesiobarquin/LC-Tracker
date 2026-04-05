@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut, MessageSquarePlus, Shield, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, BookKey, LogOut, MessageSquarePlus, Shield, Sparkles } from 'lucide-react';
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
@@ -134,6 +134,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'library', label: 'Problem Library', icon: Library },
+    { id: 'patterns', label: 'Patterns', icon: BookKey },
     { id: 'analytics', label: 'Analytics', icon: LineChart },
     { id: 'mock', label: 'Mock Interview', icon: Code2 },
     { id: 'syntax', label: 'Syntax Reference', icon: BookOpen },
@@ -292,7 +293,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden w-full">
+      <main className="flex-1 p-4 md:py-8 md:pl-8 md:pr-[14.75rem] overflow-y-auto overflow-x-hidden w-full">
         <div className="max-w-7xl mx-auto auth-content-zoom">
           {children}
         </div>

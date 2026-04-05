@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
+import { PatternFoundations } from './components/PatternFoundations';
 import { Analytics } from './components/Analytics';
 import { MockInterview } from './components/MockInterview';
 import { SyntaxReference } from './components/SyntaxReference';
@@ -175,7 +176,8 @@ export default function App() {
     <>
       <RealtimeSyncHost userId={user.id} />
       <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
+        {activeTab === 'patterns' && <PatternFoundations />}
         {activeTab === 'library' && <ProblemLibrary />}
         {activeTab === 'analytics' && <Analytics />}
         {activeTab === 'mock' && <MockInterview />}

@@ -11,8 +11,10 @@ import {
   type Difficulty,
 } from '../data/problems';
 import { allSyntaxCards } from '../data/syntaxCards';
+import { patterns } from '../data/patterns';
+import { getPatternForProblem } from '../utils/patternMapping';
 import { getPhase } from '../utils/dateUtils';
-import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Lock, ChevronRight, Swords, LayoutDashboard } from 'lucide-react';
+import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Sparkles, Snowflake, BookOpen, Zap, X, Brain, Shield, ShieldAlert, Timer, RotateCcw, TrendingDown, SkipForward, Trophy, Lock, ChevronRight, Swords, LayoutDashboard, FileCode2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
@@ -77,7 +79,7 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
   );
 };
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ setActiveTab }) => {
   const { streak, graceDay } = useStreak();
   const {
     progress,
@@ -168,6 +170,33 @@ export const Dashboard: React.FC = () => {
     );
     return pickUnsolvedForRandomRecommendation(allCandidates, solvedIds, settings, progress)?.id ?? null;
   }, [newProblem, skippedNewProblemIds, progress, sprintCategory, sprintState, settings]);
+
+  const patternMasteryInfo = useMemo(() => {
+    if (settings.learningMode !== 'PATTERNS') return null;
+    
+    let targetPattern = null;
+    let masteryCount = 0;
+    let totalCount = 0;
+    
+    for (const pattern of patterns) {
+      const patternProblems = targetCurriculumPool.filter((p) => getPatternForProblem(p) === pattern.id);
+      const mCount = patternProblems.filter((p) => progress[p.id]?.retired === true).length;
+      
+      if (mCount < patternProblems.length && patternProblems.length > 0) {
+        targetPattern = pattern;
+        masteryCount = mCount;
+        totalCount = patternProblems.length;
+        break;
+      }
+    }
+    
+    return targetPattern ? {
+      pattern: targetPattern,
+      masteredCount: masteryCount,
+      totalCount: totalCount,
+      percent: Math.min(100, Math.round((masteryCount / Math.max(1, totalCount)) * 100))
+    } : null;
+  }, [settings.learningMode, targetCurriculumPool, progress]);
 
   // Recompute the review list whenever the effective new problem changes.
   // This means skipping a Hard→Medium immediately frees time for more reviews.
@@ -836,8 +865,44 @@ export const Dashboard: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6 slide-in-from-bottom-4 lg:sticky lg:top-8 self-start" style={{ animationDelay: '0.3s' }}>
-          {/* Sprint Card (Phase 1) or Phase Status (Phase 2+) */}
-          {phase === 1 && settings.learningMode === 'SPRINT' && sprintState && sprintState.sprintStatus !== 'complete' ? (
+          {/* Pattern Mastery Card */}
+          {settings.learningMode === 'PATTERNS' && patternMasteryInfo ? (
+            <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
+              <FileCode2 size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-emerald-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
+              <div className="absolute -top-2 -right-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(16,185,129,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase {phase}</div>
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                  <FileCode2 size={18} className="text-emerald-400" />
+                  <h3 className="font-semibold text-zinc-100">Mastering Pattern</h3>
+                </div>
+              </div>
+              
+              <div className="relative z-10 mb-4">
+                <p className="text-sm font-bold text-emerald-100 mb-1">{patternMasteryInfo.pattern.name}</p>
+                <p className="text-[11px] text-zinc-400 leading-relaxed font-medium line-clamp-2 mb-3">{patternMasteryInfo.pattern.description}</p>
+                <div className="text-[11px] font-medium text-emerald-400/90 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-lg">
+                  {patternMasteryInfo.masteredCount} of {patternMasteryInfo.totalCount} problems mastered. Score 5+ repeatedly to retire problems and advance.
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-xs text-zinc-400 mb-1 relative z-10">
+                <span>Foundation Progress</span>
+                <span className="font-medium text-emerald-400">{patternMasteryInfo.percent}%</span>
+              </div>
+              <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50 mb-4 relative z-10">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${patternMasteryInfo.percent}%` }} />
+              </div>
+              
+              {setActiveTab && (
+                <button 
+                  onClick={() => setActiveTab('patterns')}
+                  className="w-full py-2.5 rounded-lg bg-zinc-900 border border-zinc-700/50 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-sm font-bold text-zinc-300 hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative z-10 mt-4"
+                >
+                  View Roadmap <ChevronRight size={14} />
+                </button>
+              )}
+            </div>
+          ) : phase === 1 && settings.learningMode === 'CURRICULUM' && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
               <Swords size={140} aria-hidden="true" className="hidden sm:block absolute -bottom-8 -right-8 text-emerald-500/5 select-none pointer-events-none group-hover:rotate-12 transition-transform duration-700" />
               <div className="absolute -top-2 -right-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[4px] shadow-[0_4px_12px_rgba(16,185,129,0.2),inset_0_1px_1px_rgba(255,255,255,0.2)] rotate-6 z-20 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">Phase 1</div>

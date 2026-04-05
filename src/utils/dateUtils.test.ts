@@ -13,9 +13,11 @@ describe('getNextReviewDate', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
   });
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('rating 1 schedules two days out', () => {

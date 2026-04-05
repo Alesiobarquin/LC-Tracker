@@ -939,7 +939,7 @@ export function useSprintState() {
     if (!userId) return;
     if (query.isLoading) return;
     if (sprintData.sprintState) return;
-    if (settingsData.settings.learningMode !== 'SPRINT') return;
+    if (settingsData.settings.learningMode !== 'CURRICULUM') return;
 
     upsertSprintMutation.mutate({
       sprintState: createInitialSprintState(progress, settingsData.settings),

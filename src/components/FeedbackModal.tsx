@@ -91,7 +91,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           <h2 className="text-lg font-semibold text-white">Share Feedback</h2>
           <button
             onClick={onClose}
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            aria-label="Close"
+            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -113,8 +114,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Type of Feedback</label>
+            <label htmlFor="feedback-type" className="text-sm font-medium text-zinc-300">Type of Feedback</label>
             <select
+              id="feedback-type"
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
@@ -126,8 +128,11 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Message</label>
+            <label htmlFor="feedback-message" className="text-sm font-medium text-zinc-300">
+              Message <span className="text-red-500">*</span>
+            </label>
             <textarea
+              id="feedback-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Tell us what you think..."
@@ -143,12 +148,13 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 <img src={imagePreview} alt="Preview" className="max-h-32 object-cover" />
                 <button
                   type="button"
+                  aria-label="Remove screenshot"
                   onClick={() => {
                     setImageFile(null);
                     setImagePreview(null);
                     URL.revokeObjectURL(imagePreview);
                   }}
-                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors"
+                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

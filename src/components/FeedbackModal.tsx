@@ -77,8 +77,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         setImagePreview(null);
       }, 2000);
     } catch (err: any) {
-      console.error('Error submitting feedback:', err);
-      setStatus(err.message || 'Failed to send. Please try again.');
+      console.error('Operation failed: Error submitting feedback');
+      setStatus('Failed to send. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

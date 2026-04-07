@@ -152,14 +152,10 @@ export default function App() {
     );
   }
 
-  // Public application routes
-  const publicAppRoutes = ['/patterns', '/library', '/syntax'];
-  const isPublicAppRoute = publicAppRoutes.includes(path);
-
-  // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
+  // Not logged in — /login shows the sign-in widget, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
-    if (!isPublicAppRoute) return <Navigate to="/" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (path === '/admin') {
@@ -175,7 +171,7 @@ export default function App() {
     }
   }
 
-  if (user && !onboardingComplete) {
+  if (!onboardingComplete) {
     if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
     }
@@ -189,27 +185,19 @@ export default function App() {
 
   return (
     <>
-      <RealtimeSyncHost userId={user?.id || null} />
+      <RealtimeSyncHost userId={user.id} />
       <Layout>
         <Routes>
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
-          
-          {/* Protected routes */}
-          {user && (
-            <>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/mock" element={<MockInterview />} />
-              <Route path="/settings" element={<Settings />} />
-            </>
-          )}
-          
-          {/* Publicly indexable/previewable paths */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/patterns" element={<PatternFoundations />} />
           <Route path="/library" element={<ProblemLibrary />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/mock" element={<MockInterview />} />
           <Route path="/syntax" element={<SyntaxReference />} />
-          
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          <Route path="/settings" element={<Settings />} />
+          {/* Catch-all to redirect back to dashboard if logged in and onboarded */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>
     </>

@@ -11,7 +11,6 @@ import { PatternId } from '../types';
 import { clsx } from 'clsx';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
-import { useUser } from '@clerk/clerk-react';
 
 export const PatternFoundations: React.FC = () => {
   const { data: problemProgress } = useProblemProgress();
@@ -47,7 +46,6 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
   const { patternId } = useParams();
   const navigate = useNavigate();
   const startSession = useStore(state => state.startSession);
-  const { user } = useUser();
 
   const { data: problemProgress } = useProblemProgress();
   const pattern = patternData.find((p: any) => p.id === patternId);
@@ -55,13 +53,13 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
   if (!pattern) return <div>Pattern not found</div>;
     return (
       <div className="max-w-5xl mx-auto space-y-16 pb-24">
-        <Link 
-          to="/patterns"
-          className="text-zinc-400 hover:text-zinc-100 flex w-fit items-center gap-3 text-[11px] uppercase tracking-[0.2em] font-medium group transition-colors"
+        <button 
+          onClick={() => navigate("/patterns")}
+          className="text-zinc-400 hover:text-zinc-100 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] font-medium group transition-colors"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Roadmap
-        </Link>
+        </button>
 
         <header className="space-y-6">
           <h1 className="text-5xl sm:text-6xl font-black text-zinc-100 tracking-tight leading-tight">
@@ -146,10 +144,6 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!user) {
-                              navigate('/login');
-                              return;
-                            }
                             startSession(prob.id, false);
                           }}
                           className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-2"
@@ -267,11 +261,11 @@ const PatternList: React.FC<{ patternData: any[] }> = ({ patternData }) => {
           const isMastered = pattern.isMastered || (pattern.problemsCount === 0 && (pattern.educativeProblems?.length || 0) === 0);
 
           return (
-            <Link
+            <button
               key={pattern.id}
-              to={`/patterns/${pattern.id}`}
+              onClick={() => navigate(`/patterns/${pattern.id}`)}
               className={clsx(
-                'block w-full text-left premium-card p-5 sm:p-6 border transition-all duration-300 group',
+                'w-full text-left premium-card p-5 sm:p-6 border transition-all duration-300 group',
                 isMastered
                   ? 'border-emerald-500/30 bg-emerald-500/[0.06] hover:border-emerald-500/55'
                   : isUnlocked
@@ -354,7 +348,7 @@ const PatternList: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                   </div>
                 </div>
               </div>
-            </Link>
+            </button>
           );
         })}
       </div>

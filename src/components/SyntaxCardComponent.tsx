@@ -3,6 +3,8 @@ import { SyntaxCard } from '../data/syntaxCards';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SyntaxCardComponentProps {
     card: SyntaxCard;
@@ -12,6 +14,8 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
     const [isPracticeMode, setIsPracticeMode] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const { user } = useUser();
+    const navigate = useNavigate();
 
     const { syntaxProgress, logSyntaxPractice } = useSyntaxProgress();
 
@@ -25,6 +29,10 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
     }, [isPracticeMode]);
 
     const handlePracticeToggle = () => {
+        if (!user && !isPracticeMode) {
+            navigate('/login');
+            return;
+        }
         setIsPracticeMode(!isPracticeMode);
         if (isPracticeMode) {
             // Reset state if leaving practice mode

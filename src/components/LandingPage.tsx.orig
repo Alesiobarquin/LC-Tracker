@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView, animate, useMotionValue, useSpring } from 'framer-motion';
-import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu, ListFilter } from 'lucide-react';
+import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu } from 'lucide-react';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
 
@@ -462,17 +462,9 @@ export const LandingPage = () => {
                     </motion.div>
                     <span className="tracking-tight text-base">{BRAND.name}</span>
                 </div>
-                <div className="flex flex-wrap items-center gap-5 justify-end">
-                     <a href="/library" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Library
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
-                    </a>
-                     <a href="/patterns" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Patterns
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
-                    </a>
-                     <a href="/syntax" className="hidden md:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Syntax
+                <div className="flex items-center gap-5">
+                     <a href="/login" className="text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
+                        Log In
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
                     </a>
                      <a href="/login" className="brand-button-primary relative group overflow-hidden px-4 py-1.5 text-xs font-semibold rounded transition-colors">

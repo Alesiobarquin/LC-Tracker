@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { problems, allProblems, isProblemPremium, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
@@ -12,6 +14,8 @@ const PROBLEM_LIST_INITIAL_CHUNK = 100;
 const PROBLEM_LIST_LOAD_MORE_CHUNK = 200;
 
 export const ProblemLibrary: React.FC = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
   const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
@@ -88,6 +92,10 @@ export const ProblemLibrary: React.FC = () => {
   };
 
   const toggleSolved = (problemId: string, isSolved: boolean) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (isSolved) {
       void removeProblem(problemId);
     } else {
@@ -96,6 +104,10 @@ export const ProblemLibrary: React.FC = () => {
   };
 
   const handleStartSession = (problemId: string, isPremium: boolean) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (isPremium && !settings.includePremiumInAssignments) {
       setPendingPremiumStartId(problemId);
       return;

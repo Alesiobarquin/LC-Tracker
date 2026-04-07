@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-react';
+import { motion } from 'framer-motion';
+import { MagnetCanvas, NoiseOverlay } from './LandingPage';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
 
@@ -46,37 +48,29 @@ export function Login() {
   };
 
   return (
-    <div className="brand-shell relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-      {/* Atmospheric background layers */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 62% 52% at 50% 38%, rgba(16,185,129,0.09) 0%, transparent 72%), radial-gradient(circle at 16% 82%, rgba(20,184,166,0.08) 0%, transparent 42%), radial-gradient(circle at 84% 16%, rgba(34,197,94,0.07) 0%, transparent 38%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.14]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-            backgroundSize: '34px 34px',
-            maskImage: 'radial-gradient(circle at 50% 45%, black 0%, transparent 78%)',
-          }}
-        />
-        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/20 opacity-40" />
-        <div className="absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10 opacity-35" />
-      </div>
+    <div 
+        className="brand-shell min-h-screen text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-100 font-sans relative overflow-x-hidden flex flex-col items-center justify-center px-4"
+        style={{ fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}
+    >
+      <NoiseOverlay />
+      <MagnetCanvas />
 
-      <a
+      <motion.a
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
         href="/"
         className="absolute top-5 left-6 z-20 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
       >
         ← {BRAND.login.backLabel}
-      </a>
+      </motion.a>
 
-      <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10"
+      >
         {/* Logo + wordmark */}
         <div className="flex flex-col items-center gap-5">
           <div
@@ -139,10 +133,15 @@ export function Login() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Footer — satisfies Google's requirement for a visible privacy policy link */}
-      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4"
+      >
         <a
           href="/privacy"
           className="text-zinc-600 hover:text-zinc-400 text-[11px] transition-colors"
@@ -156,7 +155,7 @@ export function Login() {
         >
           Terms of Service
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -133,7 +133,7 @@ export const PatternFoundations: React.FC = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            startSession({ problemId: prob.id, type: 'PRACTICE' });
+                            startSession(prob.id, false, false);
                           }}
                           className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-2"
                           title="Start Session"

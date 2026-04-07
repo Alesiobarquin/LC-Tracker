@@ -37,16 +37,22 @@ export const ProblemLibrary: React.FC = () => {
     setVisibleLimit(PROBLEM_LIST_INITIAL_CHUNK);
   }, [activeTab, search, activeCategory, sortConfig]);
 
-  const categories = ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
+  const categories = useMemo(() => {
+    return ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
+  }, [tabProblems]);
 
   const filteredProblems = useMemo(() => {
+    const searchLower = search.toLowerCase();
+
     let result = tabProblems.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = p.title.toLowerCase().includes(searchLower);
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
 
     if (sortConfig) {
+      const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+
       result.sort((a, b) => {
         let aValue: any = a[sortConfig.key as keyof typeof a];
         let bValue: any = b[sortConfig.key as keyof typeof b];
@@ -57,7 +63,6 @@ export const ProblemLibrary: React.FC = () => {
           aValue = aProg ? (aProg.retired ? 2 : 1) : 0;
           bValue = bProg ? (bProg.retired ? 2 : 1) : 0;
         } else if (sortConfig.key === 'difficulty') {
-          const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
           aValue = difficultyOrder[a.difficulty as keyof typeof difficultyOrder];
           bValue = difficultyOrder[b.difficulty as keyof typeof difficultyOrder];
         }

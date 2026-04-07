@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
 import { patterns } from '../data/patterns';
 import { getPatternForProblem } from '../utils/patternMapping';
 import { problems } from '../data/problems';
@@ -31,30 +30,20 @@ export const PatternFoundations: React.FC = () => {
     });
   }, [problemProgress]);
 
+  const [selectedPattern, setSelectedPattern] = React.useState<PatternId | null>(null);
+  const masteredPatternsCount = patternData.filter((p) => p.isMastered).length;
+  const totalPatternProblems = patternData.reduce((sum, p) => sum + p.problemsCount, 0);
+  const masteredPatternProblems = patternData.reduce((sum, p) => sum + p.masteredCount, 0);
+  const overallProblemPercent = totalPatternProblems > 0
+    ? Math.round((masteredPatternProblems / totalPatternProblems) * 100)
+    : 0;
 
-  const navigate = useNavigate();
-
-  return (
-    <Routes>
-      <Route path="/" element={<PatternList patternData={patternData} />} />
-      <Route path="/:patternId" element={<PatternDetail patternData={patternData} />} />
-    </Routes>
-  );
-};
-
-const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
-  const { patternId } = useParams();
-  const navigate = useNavigate();
-  const startSession = useStore(state => state.startSession);
-
-  const { data: problemProgress } = useProblemProgress();
-  const pattern = patternData.find((p: any) => p.id === patternId);
-  
-  if (!pattern) return <div>Pattern not found</div>;
+  if (selectedPattern) {
+    const pattern = patternData.find(p => p.id === selectedPattern)!;
     return (
       <div className="max-w-5xl mx-auto space-y-16 pb-24">
         <button 
-          onClick={() => navigate("/patterns")}
+          onClick={() => setSelectedPattern(null)}
           className="text-zinc-400 hover:text-zinc-100 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] font-medium group transition-colors"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -161,77 +150,25 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
         </div>
       </div>
     );
-};
-
-const PatternList: React.FC<{ patternData: any[] }> = ({ patternData }) => {
-  const [viewMode, setViewMode] = React.useState<'core' | 'extensive'>(() => {
-    return (localStorage.getItem('patternViewMode') as 'core' | 'extensive') || 'core';
-  });
-
-  React.useEffect(() => {
-    localStorage.setItem('patternViewMode', viewMode);
-  }, [viewMode]);
-
-  const visiblePatternData = useMemo(() => {
-    if (viewMode === 'extensive') return patternData;
-    return patternData.filter(p => p.isCore !== false);
-  }, [patternData, viewMode]);
-
-  const navigate = useNavigate();
-  const masteredPatternsCount = visiblePatternData.filter((p: any) => p.isMastered).length;
-  const totalPatternProblems = visiblePatternData.reduce((sum: number, p: any) => sum + p.problemsCount, 0);
-  const masteredPatternProblems = visiblePatternData.reduce((sum: number, p: any) => sum + p.masteredCount, 0);
-  const overallProblemPercent = totalPatternProblems > 0
-    ? Math.round((masteredPatternProblems / totalPatternProblems) * 100)
-    : 0;
-
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-24 pt-6">
       <header className="space-y-4">
-        <div className="flex sm:items-end justify-between flex-col sm:flex-row gap-4">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-zinc-50">
-              Pattern Mastery
-            </h1>
-            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-3xl mt-4">
-              Internalize the essential algorithmic paradigms sequentially. Score <span className="font-black bg-emerald-500/10 px-2 py-0.5 rounded-md text-emerald-400">5s</span> repeatedly on core problems to retire them and advance your roadmap.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800/80 p-1 rounded-xl self-start sm:self-auto shrink-0 shadow-sm">
-            <button
-              onClick={() => setViewMode('core')}
-              className={clsx(
-                "px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
-                viewMode === 'core' 
-                  ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30" 
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
-              )}
-            >
-              Core (8)
-            </button>
-            <button
-              onClick={() => setViewMode('extensive')}
-              className={clsx(
-                "px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
-                viewMode === 'extensive' 
-                  ? "bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30" 
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
-              )}
-              >
-                Extensive (29)
-              </button>
-            </div>
-          </div>
-        </header>
+        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-zinc-50">
+          Pattern Mastery
+        </h1>
+        <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-3xl">
+          Internalize the 8 essential algorithmic paradigms sequentially. Score <span className="font-black bg-emerald-500/10 px-2 py-0.5 rounded-md text-emerald-400">5s</span> repeatedly on core problems to retire them and advance your roadmap.
+        </p>
+      </header>
 
       <div className="premium-card p-5 border-emerald-500/20 bg-emerald-500/[0.04]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-400/80 font-bold">Roadmap Progress</p>
             <p className="text-sm text-zinc-300 mt-1">
-              {masteredPatternsCount} / {visiblePatternData.length} patterns fully mastered
+              {masteredPatternsCount} / {patternData.length} patterns fully mastered
             </p>
           </div>
           <span className="text-sm font-semibold text-emerald-400">
@@ -247,23 +184,17 @@ const PatternList: React.FC<{ patternData: any[] }> = ({ patternData }) => {
       </div>
 
       <div className="space-y-4">
-        {visiblePatternData.map((pattern, index) => {
+        {patternData.map((pattern, index) => {
           const progressPercentage = pattern.problemsCount > 0
             ? (pattern.masteredCount / pattern.problemsCount) * 100
             : 0;
-            
-          // In core mode, they unlock sequentially. In extensive mode, non-core patterns aren't strictly locked by core progress, or everything is unlocked.
-          // Let's keep it simple: Extensive patterns don't lock. If it's a core pattern, it uses standard locking logic.
-          const isStandardUnlock = index === 0 || visiblePatternData.slice(0, index).every((p: any) => p.isMastered || p.isCore === false);
-          const isUnlocked = pattern.isCore === false ? true : isStandardUnlock;
-          
-          // An extensive pattern with 0 core problems but some educative ones
-          const isMastered = pattern.isMastered || (pattern.problemsCount === 0 && (pattern.educativeProblems?.length || 0) === 0);
+          const isUnlocked = index === 0 || patternData.slice(0, index).every((p) => p.isMastered);
+          const isMastered = pattern.isMastered;
 
           return (
             <button
               key={pattern.id}
-              onClick={() => navigate(`/patterns/${pattern.id}`)}
+              onClick={() => setSelectedPattern(pattern.id)}
               className={clsx(
                 'w-full text-left premium-card p-5 sm:p-6 border transition-all duration-300 group',
                 isMastered

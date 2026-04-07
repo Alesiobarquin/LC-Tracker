@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
@@ -45,14 +46,15 @@ function updateCanonical(href: string) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
   const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
-  const rawPath = window.location.pathname;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const rawPath = location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
 
   const handleOnboardingComplete = () => {
-    setActiveTab('dashboard');
+    navigate('/dashboard');
   };
 
   useEffect(() => {
@@ -124,6 +126,9 @@ export default function App() {
   // Landing page — show immediately without waiting for auth
   if (path === '/' && authLoaded && !user) return <LandingPage />;
 
+  // Prevent logged in users from seeing the landing page if they try to access '/'
+  if (path === '/' && user && onboardingComplete) return <Navigate to="/dashboard" replace />;
+
   // Auth loading state — bail out of loading if settings errored (prevents infinite hang)
   const showLoading = !authLoaded || (user && settingsLoading && !settingsError);
 
@@ -150,20 +155,26 @@ export default function App() {
   // Not logged in — /login shows the sign-in widget, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
-    window.location.href = '/';
-    return null;
+    return <Navigate to="/" replace />;
   }
 
   if (path === '/admin') {
     if (isAdminUser(user)) {
-      return <AdminDashboard />;
+      return (
+        <>
+          <RealtimeSyncHost userId={user.id} />
+          <AdminDashboard />
+        </>
+      );
     } else {
-      window.location.href = '/';
-      return null;
+      return <Navigate to="/" replace />;
     }
   }
 
   if (!onboardingComplete) {
+    if (path !== '/onboarding') {
+        return <Navigate to="/onboarding" replace />;
+    }
     return (
       <>
         <RealtimeSyncHost userId={user.id} />
@@ -175,14 +186,19 @@ export default function App() {
   return (
     <>
       <RealtimeSyncHost userId={user.id} />
-      <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
-        {activeTab === 'patterns' && <PatternFoundations />}
-        {activeTab === 'library' && <ProblemLibrary />}
-        {activeTab === 'analytics' && <Analytics />}
-        {activeTab === 'mock' && <MockInterview />}
-        {activeTab === 'syntax' && <SyntaxReference />}
-        {activeTab === 'settings' && <Settings />}
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/patterns" element={<PatternFoundations />} />
+          <Route path="/library" element={<ProblemLibrary />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/mock" element={<MockInterview />} />
+          <Route path="/syntax" element={<SyntaxReference />} />
+          <Route path="/settings" element={<Settings />} />
+          {/* Catch-all to redirect back to dashboard if logged in and onboarded */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
       </Layout>
     </>
   );

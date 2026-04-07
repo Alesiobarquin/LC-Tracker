@@ -134,6 +134,11 @@ export interface PatternFoundation {
   templateCodeJs: string;
   relatedCategories: string[];
   relatedTags: string[];
+  isCore?: boolean;
+  educativeProblems?: {
+    title: string;
+    badges: string[];
+  }[];
 }
 
 export interface PatternProgress {

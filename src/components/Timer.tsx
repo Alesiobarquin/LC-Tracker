@@ -200,18 +200,21 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         ? 'cold_solve'
         : 'new';
 
-    void recordSession({
-      id: crypto.randomUUID(),
-      problemId: problem.id,
-      category: problem.category,
-      date: new Date().toISOString(),
-      elapsedSeconds: frozenElapsed,
-      sessionType,
-      rating,
-    }).then(() => logProblem(problem.id, rating, isNew, notes, {
-      elapsedSeconds: frozenElapsed,
-      sessionType,
-    })).finally(() => {
+    void Promise.allSettled([
+      recordSession({
+        id: crypto.randomUUID(),
+        problemId: problem.id,
+        category: problem.category,
+        date: new Date().toISOString(),
+        elapsedSeconds: frozenElapsed,
+        sessionType,
+        rating,
+      }),
+      logProblem(problem.id, rating, isNew, notes, {
+        elapsedSeconds: frozenElapsed,
+        sessionType,
+      })
+    ]).finally(() => {
       endSession();
       onComplete();
     });

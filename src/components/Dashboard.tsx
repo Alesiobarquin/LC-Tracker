@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import {
   problems,
@@ -79,7 +80,8 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
   );
 };
 
-export const Dashboard: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ setActiveTab }) => {
+export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { streak, graceDay } = useStreak();
   const {
     progress,
@@ -893,14 +895,12 @@ export const Dashboard: React.FC<{ setActiveTab?: (tab: string) => void }> = ({ 
                 <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${patternMasteryInfo.percent}%` }} />
               </div>
               
-              {setActiveTab && (
-                <button 
-                  onClick={() => setActiveTab('patterns')}
-                  className="w-full py-2.5 rounded-lg bg-zinc-900 border border-zinc-700/50 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-sm font-bold text-zinc-300 hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative z-10 mt-4"
-                >
-                  View Roadmap <ChevronRight size={14} />
-                </button>
-              )}
+              <button 
+                onClick={() => navigate('/patterns')}
+                className="w-full py-2.5 rounded-lg bg-zinc-900 border border-zinc-700/50 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-sm font-bold text-zinc-300 hover:text-emerald-400 transition-all flex items-center justify-center gap-2 relative z-10 mt-4"
+              >
+                View Roadmap <ChevronRight size={14} />
+              </button>
             </div>
           ) : phase === 1 && settings.learningMode === 'CURRICULUM' && sprintState && sprintState.sprintStatus !== 'complete' ? (
             <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">

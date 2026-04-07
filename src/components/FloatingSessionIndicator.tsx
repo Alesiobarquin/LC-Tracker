@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { useNavigate } from 'react-router-dom';
 import { allProblems } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
-interface FloatingSessionIndicatorProps {
-    setActiveTab: (tab: string) => void;
-}
+interface FloatingSessionIndicatorProps {}
 
 const fmtTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
-export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> = ({ setActiveTab }) => {
+export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> = () => {
+    const navigate = useNavigate();
     const activeSession = useStore((state) => state.activeSession);
     const abandonSession = useStore((state) => state.abandonSession);
 
@@ -74,7 +74,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                 {!confirmAbandon ? (
                     <div className="flex gap-2 mt-1">
                         <button
-                            onClick={() => setActiveTab('dashboard')}
+                            onClick={() => navigate('/library')}
                             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 rounded-lg text-xs font-semibold transition-colors border border-emerald-500/20"
                         >
                             <ArrowRight size={12} />

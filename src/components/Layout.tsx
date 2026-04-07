@@ -3,6 +3,7 @@ import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { getPhase } from '../utils/dateUtils';
 import { motion } from 'motion/react';
 import { useUserSettings } from '../hooks/useUserData';
@@ -25,11 +26,21 @@ interface FeedbackReadRow {
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getActiveTabFromPath = (pathname: string) => {
+    const path = pathname.replace(/\/+$/, '');
+    const segments = path.split('/');
+    // Extract base tab from path (e.g. /patterns/two-pointer -> patterns)
+    return segments[1] || 'dashboard'; 
+  };
+  
+  const activeTab = getActiveTabFromPath(location.pathname);
+
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [unreadAdminTicketCount, setUnreadAdminTicketCount] = useState(0);
@@ -177,7 +188,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
+                  navigate(`/${item.id}`);
                   setIsMobileMenuOpen(false);
                 }}
                 className={clsx(
@@ -308,13 +319,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       )}
 
       {/* Floating active session indicator — visible on every page */}
-      <FloatingSessionIndicator setActiveTab={setActiveTab} />
+      <FloatingSessionIndicator />
       
       {/* Absolute Viewport Modal (fixes scrolling issues) */}
       <FeaturesModal
         isOpen={isFeaturesOpen}
         onClose={() => setIsFeaturesOpen(false)}
-        setActiveTab={setActiveTab}
       />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </div>

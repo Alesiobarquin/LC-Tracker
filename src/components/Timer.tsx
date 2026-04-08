@@ -62,6 +62,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const [showStartTimeEditor, setShowStartTimeEditor] = useState(false);
   const [manualStartTime, setManualStartTime] = useState('');
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Total seconds that the timer was paused — subtracted from elapsed so only work time counts.
   const pausedSecondsRef = useRef(0);
   const pausedAtRef = useRef<number | null>(null);
@@ -194,6 +195,9 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   };
 
   const handleRating = (rating: ProblemSessionRating) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const sessionType = activeSession?.isReview
       ? 'review'
       : activeSession?.isColdSolve
@@ -215,6 +219,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         sessionType,
       })
     ]).finally(() => {
+      setIsSubmitting(false);
       endSession();
       onComplete();
     });
@@ -315,10 +320,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               <button
                 key={r}
                 type="button"
+                disabled={isSubmitting}
                 onClick={() => handleRating(r)}
                 className={clsx(
-                  'w-full border p-3 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 text-left transition-colors group',
-                  tone
+                  'w-full border p-3 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 text-left transition-colors group cursor-pointer',
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : tone
                 )}
               >
                 <span className="font-semibold text-base group-hover:scale-[1.02] transition-transform">{title}</span>

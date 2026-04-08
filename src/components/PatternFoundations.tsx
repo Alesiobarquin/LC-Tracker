@@ -91,10 +91,10 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
           <div className="space-y-8">
             <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
               <h2 className="text-[11px] font-medium tracking-[0.2em] uppercase text-zinc-500">
-                Core Problems
+                {pattern.isCore === false ? 'Curated Problems' : 'Core Problems'}
               </h2>
               <span className="text-[10px] font-medium px-2 py-0.5 bg-zinc-800/40 text-emerald-400/80 uppercase tracking-widest border border-emerald-500/10">
-                {pattern.masteredCount} / {pattern.problemsCount} Mastered
+                {pattern.isCore === false ? `${pattern.educativeProblems?.length || 0} Listed` : `${pattern.masteredCount} / ${pattern.problemsCount} Mastered`}
               </span>
             </div>
             
@@ -157,6 +157,50 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                         >
                           <Play size={16} />
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {(!pattern.mappedProblems || pattern.mappedProblems.length === 0) && pattern.educativeProblems?.map((prob: any, idx: number) => {
+                const badgeString = (prob.badges || []).map((b: string) => b.toLowerCase()).join(' ');
+                const isHard = badgeString.includes('hard');
+                const isEasy = badgeString.includes('easy');
+                const isMedium = !isHard && !isEasy;
+                const isBlind75 = badgeString.includes('blind 75');
+                
+                return (
+                  <div 
+                    key={`edu-${idx}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-zinc-900/20 hover:bg-zinc-900/50 border border-transparent hover:border-zinc-800 transition-colors group"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <div className="w-2.5 h-2.5 rounded-full border border-zinc-600/50 group-hover:border-zinc-500 transition-colors" />
+                      </div>
+                      <h3 className="text-sm sm:text-base font-medium transition-colors cursor-default text-zinc-300 group-hover:text-zinc-200">
+                        {prob.title}
+                      </h3>
+                    </div>
+                    
+                    <div className="ml-[30px] sm:ml-0 mt-4 sm:mt-0 flex items-center justify-between sm:w-auto w-full gap-4">
+                      <div className="flex items-center gap-2">
+                        {isBlind75 && (
+                          <span className="text-[10px] uppercase tracking-widest font-bold text-amber-500/80 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
+                            Blind 75
+                          </span>
+                        )}
+                        <span className={clsx(
+                          "text-[10px] uppercase tracking-widest font-bold w-12 text-right",
+                          isEasy ? 'text-emerald-400/80' : 
+                          isMedium ? 'text-amber-400/80' : 'text-rose-400/80'
+                        )}>
+                          {isHard ? 'Hard' : isEasy ? 'Easy' : 'Medium'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity text-[9px] uppercase tracking-widest text-zinc-600 font-bold px-2 border border-zinc-800/50 rounded bg-zinc-900/50">
+                        Untracked
                       </div>
                     </div>
                   </div>
@@ -334,7 +378,7 @@ const PatternList: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                         'text-sm font-semibold',
                         isMastered ? 'text-emerald-300' : isUnlocked ? 'text-zinc-200' : 'text-zinc-500'
                       )}>
-                        {pattern.masteredCount} / {pattern.problemsCount} mastered
+                        {pattern.isCore === false ? `${pattern.educativeProblems?.length || 0} Listed` : `${pattern.masteredCount} / ${pattern.problemsCount} mastered`}
                       </span>
                     </div>
 

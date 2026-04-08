@@ -1,0 +1,17 @@
+--- src/components/PatternFoundations.tsx
++++ src/components/PatternFoundations.tsx
+@@ -91,3 +91,3 @@
+           <div className="space-y-8">
+             <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
+               <h2 className="text-[11px] font-medium tracking-[0.2em] uppercase text-zinc-500">
+-                Core Problems
++                {pattern.isCore === false ? 'Curated Problems' : 'Core Problems'}
+               </h2>
+               <span className="text-[10px] font-medium px-2 py-0.5 bg-zinc-800/40 text-emerald-400/80 uppercase tracking-widest border border-emerald-500/10">
+-                {pattern.masteredCount} / {pattern.problemsCount} Mastered
++                {pattern.isCore === false ? `${pattern.educativeProblems?.length || 0} Listed` : `${pattern.masteredCount} / ${pattern.problemsCount} Mastered`}
+               </span>
+             </div>
+             
+             <div className="flex flex-col gap-2">
+               {pattern.mappedProblems.map((prob) => {

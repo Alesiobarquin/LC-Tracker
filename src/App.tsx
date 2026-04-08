@@ -66,6 +66,24 @@ export default function App() {
         canonical: `${origin}/`,
         robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
       },
+      '/library': {
+        title: 'Problem Library | LC Tracker',
+        description: 'Browse the LC Tracker problem library by category, difficulty, and curated sets to plan your interview prep.',
+        canonical: `${origin}/library`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/patterns': {
+        title: 'Pattern Foundations | LC Tracker',
+        description: 'Explore algorithm patterns, templates, and mapped LeetCode problems in the LC Tracker pattern roadmap.',
+        canonical: `${origin}/patterns`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/syntax': {
+        title: 'Syntax Reference | LC Tracker',
+        description: 'Review Python interview syntax flashcards and weak areas in the LC Tracker syntax reference.',
+        canonical: `${origin}/syntax`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
       '/login': {
         title: 'Sign In | LC Tracker',
         description: 'Sign in to LC Tracker to continue tracking LeetCode sessions, review scheduling, and interview prep workflows.',
@@ -98,7 +116,12 @@ export default function App() {
       },
     } as const;
 
-    const config = pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/'];
+    const config = path.startsWith('/patterns/')
+      ? {
+          ...pageConfig['/patterns'],
+          canonical: `${origin}${path}`,
+        }
+      : (pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/']);
 
     document.title = config.title;
     updateMeta('name', 'description', config.description);
@@ -152,10 +175,14 @@ export default function App() {
     );
   }
 
-  // Not logged in — /login shows the sign-in widget, everything else goes to landing
+  // Public application routes
+  const publicAppRoutes = ['/patterns', '/library', '/syntax'];
+  const isPublicAppRoute = publicAppRoutes.some(r => path === r || path.startsWith(`${r}/`));
+
+  // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
-    return <Navigate to="/" replace />;
+    if (!isPublicAppRoute) return <Navigate to="/" replace />;
   }
 
   if (path === '/admin') {
@@ -171,7 +198,7 @@ export default function App() {
     }
   }
 
-  if (!onboardingComplete) {
+  if (user && !onboardingComplete) {
     if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
     }
@@ -185,19 +212,27 @@ export default function App() {
 
   return (
     <>
-      <RealtimeSyncHost userId={user.id} />
+      <RealtimeSyncHost userId={user?.id || null} />
       <Layout>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/patterns" element={<PatternFoundations />} />
+          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          
+          {/* Protected routes */}
+          {user && (
+            <>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/mock" element={<MockInterview />} />
+              <Route path="/settings" element={<Settings />} />
+            </>
+          )}
+          
+          {/* Publicly indexable/previewable paths */}
+          <Route path="/patterns/*" element={<PatternFoundations />} />
           <Route path="/library" element={<ProblemLibrary />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/mock" element={<MockInterview />} />
           <Route path="/syntax" element={<SyntaxReference />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* Catch-all to redirect back to dashboard if logged in and onboarded */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
         </Routes>
       </Layout>
     </>

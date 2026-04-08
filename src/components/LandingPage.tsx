@@ -5,149 +5,181 @@ import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
 
 // --- MAGNETIC CANVAS BACKGROUND ---
-export const MagnetCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+type MagnetCanvasMode = 'default' | 'login';
 
-    let animationFrameId: number;
-    let particles: Particle[] = [];
-    
-    // Grid settings
-    const spacing = 35;
-    const mouseRadius = 250;
-    const returnSpeed = 0.15;
-    const pullStrength = 0.12;
+export const MagnetCanvas = ({ mode = 'default' }: { mode?: MagnetCanvasMode }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const isLoginMode = mode === 'login';
 
-    let mouse = { x: -1000, y: -1000 };
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-    class Particle {
-      x: number;
-      y: number;
-      baseX: number;
-      baseY: number;
-      size: number;
-      baseSize: number;
-
-      constructor(x: number, y: number) {
-        this.baseX = x;
-        this.baseY = y;
-        this.x = x;
-        this.y = y;
-        this.baseSize = 1.5;
-        this.size = this.baseSize;
-      }
-
-      draw() {
+        const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        ctx.fillStyle = `rgba(16, 185, 129, ${(this.size / 6) + 0.1})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Optional reactive connecting effect if near mouse
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < mouseRadius * 0.5) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(16, 185, 129, ${(mouseRadius * 0.5 - distance) / (mouseRadius * 0.5) * 0.3})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
+
+        let animationFrameId: number;
+        let particles: Particle[] = [];
+
+        // Grid settings
+        const spacing = 35;
+        const mouseRadius = isLoginMode ? 280 : 250;
+        const returnSpeed = 0.15;
+        const pullStrength = isLoginMode ? 0.15 : 0.12;
+        const basePulseAmplitude = isLoginMode ? 0.45 : 0.2;
+        const activePulseAmplitude = isLoginMode ? 2.5 : 1;
+        const pulseFrequency = isLoginMode ? 0.0085 : 0.0055;
+        let pulseClock = 0;
+
+        const mouse = { x: -1000, y: -1000 };
+
+        class Particle {
+            x: number;
+            y: number;
+            baseX: number;
+            baseY: number;
+            size: number;
+            baseSize: number;
+            phaseOffset: number;
+
+            constructor(x: number, y: number) {
+                this.baseX = x;
+                this.baseY = y;
+                this.x = x;
+                this.y = y;
+                this.baseSize = isLoginMode ? 1.6 : 1.5;
+                this.size = this.baseSize;
+                this.phaseOffset = Math.random() * Math.PI * 2;
+            }
+
+            draw() {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const isNearMouse = distance < mouseRadius;
+                const alpha = Math.min(0.95, this.size / 6 + 0.1);
+
+                ctx.fillStyle = `rgba(16, 185, 129, ${alpha})`;
+                if (isLoginMode) {
+                    const glow = isNearMouse ? 12 + this.size * 2.2 : 4 + this.size;
+                    ctx.shadowBlur = glow;
+                    ctx.shadowColor = `rgba(16, 185, 129, ${Math.min(0.65, alpha + 0.15)})`;
+                }
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+
+                if (isLoginMode) {
+                    ctx.shadowBlur = 0;
+                }
+
+                const connectionRadius = mouseRadius * (isLoginMode ? 0.62 : 0.5);
+                if (distance < connectionRadius) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(16, 185, 129, ${((connectionRadius - distance) / connectionRadius) * (isLoginMode ? 0.45 : 0.3)})`;
+                    ctx.lineWidth = isLoginMode ? 1.2 : 1;
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            }
+
+            update() {
+                const dx = mouse.x - this.baseX;
+                const dy = mouse.y - this.baseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const isWithinMouseRadius = distance < mouseRadius;
+                const force = isWithinMouseRadius ? (mouseRadius - distance) / mouseRadius : 0;
+
+                const pulseWave = (Math.sin(pulseClock * pulseFrequency + this.phaseOffset) + 1) * 0.5;
+                const pulseBoost = pulseWave * (basePulseAmplitude + force * activePulseAmplitude);
+                let targetSize = this.baseSize + pulseBoost;
+
+                if (isWithinMouseRadius) {
+                    const targetX = this.baseX + dx * force * pullStrength;
+                    const targetY = this.baseY + dy * force * pullStrength;
+
+                    this.x += (targetX - this.x) * 0.4;
+                    this.y += (targetY - this.y) * 0.4;
+                    targetSize += force * 7 + pulseBoost * (isLoginMode ? 1.1 : 0.45);
+                } else {
+                    if (this.x !== this.baseX) {
+                        this.x -= (this.x - this.baseX) * returnSpeed;
+                    }
+                    if (this.y !== this.baseY) {
+                        this.y -= (this.y - this.baseY) * returnSpeed;
+                    }
+                }
+
+                this.size += (targetSize - this.size) * (isWithinMouseRadius ? 0.45 : 0.2);
+                this.draw();
+            }
         }
-      }
 
-      update() {
-        const dx = mouse.x - this.baseX;
-        const dy = mouse.y - this.baseY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        const init = () => {
+            particles = [];
+            const cols = Math.floor(window.innerWidth / spacing);
+            const rows = Math.floor(window.innerHeight / spacing);
 
-        if (distance < mouseRadius) {
-          const force = (mouseRadius - distance) / mouseRadius;
-          const targetX = this.baseX + dx * force * pullStrength;
-          const targetY = this.baseY + dy * force * pullStrength;
-          
-          this.x += (targetX - this.x) * 0.4;
-          this.y += (targetY - this.y) * 0.4;
-          this.size = this.baseSize + (force * 7); 
-        } else {
-          if (this.x !== this.baseX) {
-            this.x -= (this.x - this.baseX) * returnSpeed;
-          }
-          if (this.y !== this.baseY) {
-            this.y -= (this.y - this.baseY) * returnSpeed;
-          }
-           this.size = Math.max(this.baseSize, this.size - 0.2);
-        }
-        this.draw();
-      }
-    }
+            const offsetX = (window.innerWidth - cols * spacing) / 2;
+            const offsetY = (window.innerHeight - rows * spacing) / 2;
 
-    const init = () => {
-      particles = [];
-      const cols = Math.floor(window.innerWidth / spacing);
-      const rows = Math.floor(window.innerHeight / spacing);
-      
-      const offsetX = (window.innerWidth - cols * spacing) / 2;
-      const offsetY = (window.innerHeight - rows * spacing) / 2;
+            for (let i = 0; i <= cols; i++) {
+                for (let j = 0; j <= rows; j++) {
+                    particles.push(new Particle(offsetX + i * spacing, offsetY + j * spacing));
+                }
+            }
+        };
 
-      for (let i = 0; i <= cols; i++) {
-        for (let j = 0; j <= rows; j++) {
-          particles.push(new Particle(offsetX + i * spacing, offsetY + j * spacing));
-        }
-      }
-    };
+        const animateParams = () => {
+            pulseClock = performance.now();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((particle) => particle.update());
+            animationFrameId = requestAnimationFrame(animateParams);
+        };
 
-    const animateParams = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => p.update());
-      animationFrameId = requestAnimationFrame(animateParams);
-    };
+        const handleResize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        };
 
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init();
-    };
+        const handleMouseMove = (event: MouseEvent) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.x;
-      mouse.y = e.y;
-    };
-    
-    const handleMouseLeave = () => {
-        mouse.x = -1000;
-        mouse.y = -1000;
-    }
+        const handleMouseLeave = () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    
-    handleResize();
-    animateParams();
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
 
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
+        handleResize();
+        animateParams();
 
-  return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
-        <canvas ref={canvasRef} className="w-full h-full opacity-40 mix-blend-screen" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#09090b_80%)]" />
-    </div>
-  );
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, [isLoginMode]);
+
+    return (
+        <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+            <canvas
+                ref={canvasRef}
+                className={`w-full h-full mix-blend-screen ${isLoginMode ? 'opacity-55' : 'opacity-40'}`}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#09090b_80%)]" />
+        </div>
+    );
 };
 
 // --- SUBTLE FILM GRAIN NOISE ---
@@ -438,6 +470,15 @@ const FloatingBadge = ({ text, icon: Icon, top, left, delay }: { text: string, i
     </motion.div>
 );
 
+export const FloatingContextBadges = ({ className = '' }: { className?: string }) => (
+    <div className={`absolute inset-0 pointer-events-none overflow-visible ${className}`.trim()}>
+        <FloatingBadge icon={Network} text={BRAND.landing.badges[0]} top="25%" left="-5%" delay={0} />
+        <FloatingBadge icon={Cpu} text={BRAND.landing.badges[1]} top="70%" left="90%" delay={1.5} />
+        <FloatingBadge icon={Database} text={BRAND.landing.badges[2]} top="35%" left="85%" delay={0.8} />
+        <FloatingBadge icon={BrainCircuit} text={BRAND.landing.badges[3]} top="80%" left="10%" delay={2.2} />
+    </div>
+);
+
 // --- MAIN PAGE COMPONENT ---
 export const LandingPage = () => {
   return (
@@ -451,7 +492,7 @@ export const LandingPage = () => {
         {/* Navigation */}
         <nav className="fixed top-0 w-full z-50 border-b border-white/[0.08] backdrop-blur-xl bg-[#09090b]/60 transition-all duration-300">
             <div className="max-w-[52rem] mx-auto px-6 h-14 flex items-center justify-between">
-                <div className="flex items-center gap-2 font-semibold text-white group cursor-pointer">
+                <a href="/" className="flex items-center gap-2 font-semibold text-white group">
                     <motion.div
                         animate={{ y: [0, -1.5, 0] }}
                         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
@@ -461,7 +502,7 @@ export const LandingPage = () => {
                         <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-15 group-hover:opacity-45 transition-opacity duration-300"></div>
                     </motion.div>
                     <span className="tracking-tight text-base">{BRAND.name}</span>
-                </div>
+                </a>
                 <div className="flex flex-wrap items-center gap-5 justify-end">
                      <a href="/library" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
                         Library
@@ -489,12 +530,7 @@ export const LandingPage = () => {
         <section className="relative z-10 pt-36 pb-20 px-6 max-w-[52rem] mx-auto min-h-[95vh] flex flex-col justify-center gap-12">
             
             {/* Floating Context Badges */}
-            <div className="absolute inset-0 pointer-events-none overflow-visible">
-                <FloatingBadge icon={Network} text={BRAND.landing.badges[0]} top="25%" left="-5%" delay={0} />
-                <FloatingBadge icon={Cpu} text={BRAND.landing.badges[1]} top="70%" left="90%" delay={1.5} />
-                <FloatingBadge icon={Database} text={BRAND.landing.badges[2]} top="35%" left="85%" delay={0.8} />
-                <FloatingBadge icon={BrainCircuit} text={BRAND.landing.badges[3]} top="80%" left="10%" delay={2.2} />
-            </div>
+            <FloatingContextBadges />
 
             {/* Subtle background glow for hero */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[620px] h-[400px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />

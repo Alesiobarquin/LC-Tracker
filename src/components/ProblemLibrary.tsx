@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, isProblemPremium, Category } from '../data/problems';
+import { problems, allProblems, problemMap, isProblemPremium, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
@@ -80,7 +80,7 @@ export const ProblemLibrary: React.FC = () => {
   );
   const hiddenCount = Math.max(0, filteredProblems.length - displayedProblems.length);
   const pendingPremiumProblem = pendingPremiumStartId
-    ? allProblems.find((p) => p.id === pendingPremiumStartId) ?? null
+    ? problemMap.get(pendingPremiumStartId) ?? null
     : null;
 
   const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
@@ -135,7 +135,7 @@ export const ProblemLibrary: React.FC = () => {
   }
 
   if (activeSession) {
-    const problem = allProblems.find(p => p.id === activeSession);
+    const problem = problemMap.get(activeSession);
     if (!problem) return null;
     return <Timer problem={problem} isNew={!progress[problem.id]} onComplete={() => setActiveSession(null)} />;
   }

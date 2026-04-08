@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { allProblems } from '../data/problems';
+import { allProblems, problemMap } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
 interface FloatingSessionIndicatorProps {}
@@ -32,7 +32,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
 
     if (!activeSession) return null;
 
-    const prob = allProblems.find(p => p.id === activeSession.problemId);
+    const prob = problemMap.get(activeSession.problemId);
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
 

@@ -348,6 +348,8 @@ export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson a
 
 export const allProblems: Problem[] = [...problems, ...extendedCatalogProblems];
 
+export const problemMap = new Map<string, Problem>(allProblems.map((p) => [p.id, p]));
+
 /** Pool used for recommendations: main list for curated tiers; full list for extended. */
 export function problemsPoolForTargetCurriculum(curriculum: TargetCurriculum): Problem[] {
   const base = curriculum === 'EXTENDED' ? allProblems : problems;

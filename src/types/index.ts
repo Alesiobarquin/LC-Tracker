@@ -134,13 +134,18 @@ export interface PatternFoundation {
   templateCodeJs: string;
   relatedCategories: string[];
   relatedTags: string[];
+  isCore?: boolean;
+  educativeProblems?: {
+    title: string;
+    badges: string[];
+  }[];
 }
 
 export interface PatternProgress {
   id: PatternId;
-  problemsMasteredCount: number;
+  problemsCompletedCount: number;
   totalProblemsInPattern: number;
-  isMastered: boolean;
+  isCompleted: boolean;
 }
 
 /** Which curated list drives recommendations and “target list” progress. */

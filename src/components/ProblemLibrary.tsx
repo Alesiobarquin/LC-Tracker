@@ -1,10 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, isProblemPremium, Category } from '../data/problems';
+import { problems, allProblems, problemMap, isProblemPremium, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
+import { getDifficultyColor } from '../utils/uiHelpers';
 
 const VIRTUALIZE_THRESHOLD = 200;
 /** Initial rows to render per tab/filter (large lists load more on demand). */
@@ -12,6 +15,8 @@ const PROBLEM_LIST_INITIAL_CHUNK = 100;
 const PROBLEM_LIST_LOAD_MORE_CHUNK = 200;
 
 export const ProblemLibrary: React.FC = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
   const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
@@ -81,7 +86,7 @@ export const ProblemLibrary: React.FC = () => {
   );
   const hiddenCount = Math.max(0, filteredProblems.length - displayedProblems.length);
   const pendingPremiumProblem = pendingPremiumStartId
-    ? allProblems.find((p) => p.id === pendingPremiumStartId) ?? null
+    ? problemMap[pendingPremiumStartId] ?? null
     : null;
 
   const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
@@ -93,6 +98,10 @@ export const ProblemLibrary: React.FC = () => {
   };
 
   const toggleSolved = (problemId: string, isSolved: boolean) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (isSolved) {
       void removeProblem(problemId);
     } else {
@@ -101,6 +110,10 @@ export const ProblemLibrary: React.FC = () => {
   };
 
   const handleStartSession = (problemId: string, isPremium: boolean) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (isPremium && !settings.includePremiumInAssignments) {
       setPendingPremiumStartId(problemId);
       return;
@@ -128,7 +141,7 @@ export const ProblemLibrary: React.FC = () => {
   }
 
   if (activeSession) {
-    const problem = allProblems.find(p => p.id === activeSession);
+    const problem = problemMap[activeSession];
     if (!problem) return null;
     return <Timer problem={problem} isNew={!progress[problem.id]} onComplete={() => setActiveSession(null)} />;
   }
@@ -353,11 +366,7 @@ export const ProblemLibrary: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              <span className={clsx(
-                                prob.difficulty === 'Easy' ? "text-emerald-400" :
-                                prob.difficulty === 'Medium' ? "text-amber-400" :
-                                "text-red-400"
-                              )}>
+                              <span className={clsx(getDifficultyColor(prob.difficulty))}>
                                 {prob.difficulty}
                               </span>
                             </td>

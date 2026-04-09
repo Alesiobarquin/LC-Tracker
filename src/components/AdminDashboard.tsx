@@ -94,8 +94,8 @@ export function AdminDashboard() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching tickets:', error);
-      setErrorMessage(error.message || 'Failed to fetch tickets.');
+      console.error('Operation failed: Failed to fetch tickets');
+      setErrorMessage('Failed to fetch tickets.');
       setTickets([]);
       setViewedTicketIds(new Set());
     } else {
@@ -111,7 +111,7 @@ export function AdminDashboard() {
           if (readMarkerError.code === '42P01') {
             setAdminConfigWarning((existing) => existing ?? 'Unread tracking migration is missing. Run latest Supabase migrations to enable inbox counts.');
           } else {
-            console.error('Error loading admin read markers:', readMarkerError);
+            console.error('Operation failed: Failed to load admin read markers');
           }
           setViewedTicketIds(new Set());
         } else {
@@ -142,8 +142,8 @@ export function AdminDashboard() {
       );
 
     if (error) {
-      console.error('Error marking ticket as viewed:', error);
-      setErrorMessage(error.message || 'Could not mark ticket as viewed.');
+      console.error('Operation failed: Could not mark ticket as viewed');
+      setErrorMessage('Could not mark ticket as viewed.');
       return;
     }
 
@@ -161,7 +161,7 @@ export function AdminDashboard() {
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating status:', error);
+      console.error('Operation failed: Error updating status');
     } else {
       await markTicketViewed(id);
       void fetchTickets();
@@ -280,15 +280,24 @@ export function AdminDashboard() {
 
                       <p className="text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
 
-                      {ticket.image_url && (
-                        <a href={ticket.image_url} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
-                          <img
-                            src={ticket.image_url}
-                            alt="Attached screenshot"
-                            className="max-h-36 rounded-lg border border-zinc-700/60 hover:opacity-90 transition-opacity"
-                          />
-                        </a>
-                      )}
+                      {ticket.image_url && (() => {
+                        let safeUrl = '#';
+                        try {
+                          const url = new URL(ticket.image_url);
+                          if (url.protocol === 'http:' || url.protocol === 'https:') safeUrl = url.href;
+                        } catch {
+                          // Invalid URL, safely fallback to '#'
+                        }
+                        return (
+                          <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
+                            <img
+                              src={ticket.image_url}
+                              alt="Attached screenshot"
+                              className="max-h-36 rounded-lg border border-zinc-700/60 hover:opacity-90 transition-opacity"
+                            />
+                          </a>
+                        );
+                      })()}
 
                       <p className="text-xs text-zinc-500">From: {ticket.users?.email || ticket.user_id}</p>
                     </div>

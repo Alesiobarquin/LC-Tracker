@@ -1,0 +1,1381 @@
+WEEK 1
+1.
+Two Pointers
+
+Get started with two-pointers to solve linear data structure problems efficiently.
+
+My Proficiency: Beginner
+Introduction to Two Pointers
+Valid Palindrome
+easy
+Blind 75
+3Sum
+med
+Remove nth Node from End of List
+med
+Sort Colors
+med
+Reverse Words in a String
+med
+Valid Word Abbreviation
+easy
+Valid Palindrome II
+easy
+Lowest Common Ancestor of a Binary Tree III
+med
+Strobogrammatic Number
+easy
+Minimum Number of Moves to Make Palindrome
+hard
+Next Palindrome Using Same Digits
+hard
+Count Subarrays With Fixed Bounds
+hard
+Find the Lexicographically Largest String From Box II
+hard
+Get the Maximum Score
+hard
+Create Maximum Number
+hard
+Append Characters to String to Make Subsequence
+med
+Squares of a Sorted Array
+easy
+Reverse String
+easy
+Intersection of Two Linked Lists
+easy
+Partition Labels
+med
+Remove Element
+easy
+String Compression
+med
+Rotate Array
+med
+Next Permutation
+med
+Remove Duplicates from Sorted Array
+easy
+Reverse Vowels of a String
+med
+Is Subsequence
+med
+2.
+Fast and Slow Pointers
+
+Master the steps to use fast and slow pointers for cycle detection and mid-point identification.
+
+Introduction to Fast and Slow Pointers
+Linked List Cycle
+easy
+Blind 75
+Happy Number
+easy
+Middle of the Linked List
+easy
+Circular Array Loop
+med
+Find The Duplicate Number
+med
+Palindrome Linked List
+easy
+Linked List Cycle III
+med
+Linked List Cycle IV
+med
+Maximum Twin Sum of a Linked List
+med
+Split a Circular Linked List
+med
+3.
+Sliding Window
+
+Break down the sliding window technique to solve computational problems with optimized efficiency.
+
+Introduction to Sliding Window
+Longest Repeating Character Replacement
+med
+Blind 75
+Minimum Window Substring
+hard
+Blind 75
+Longest Substring without Repeating Characters
+med
+Blind 75
+Best Time to Buy and Sell Stock
+easy
+Blind 75
+Repeated DNA Sequences
+med
+Sliding Window Maximum
+hard
+Minimum Window Subsequence
+hard
+Minimum Size Subarray Sum
+med
+Fruit Into Baskets
+med
+Frequency of the Most Frequent Element
+med
+Maximum Average Subarray I
+easy
+Diet Plan Performance
+easy
+Subarrays with K Different Integers
+hard
+Count Subarrays With Score Less Than K
+hard
+Count Substrings With K-Frequency Characters II
+hard
+Substring with Concatenation of All Words
+hard
+Binary Subarrays With Sum
+med
+Permutation in String
+med
+Number of Substrings Containing All Three Characters
+med
+4.
+Intervals
+
+Solve problems in merging intervals, inserting and finding intersections of intervals, scheduler tasks, and determining employee free time.
+
+Introduction to Intervals
+Merge Intervals
+med
+Blind 75
+Insert Interval
+med
+Blind 75
+Meeting Rooms II
+med
+Blind 75
+Interval List Intersections
+med
+Employee Free Time
+hard
+Task Scheduler
+med
+Remove Covered Intervals
+med
+Count Days Without Meetings
+med
+Car Pooling
+med
+Data Stream as Disjoint Intervals
+hard
+Minimum Interval to Include Each Query
+hard
+5.
+In-Place Manipulation of a Linked List
+
+Tackle in-place linked list manipulations for efficient and memory-optimized operations.
+
+Introduction to In-Place Manipulation of a Linked List
+Reverse Linked List
+easy
+Blind 75
+Reorder List
+med
+Blind 75
+Reverse Nodes in k-Group
+hard
+Reverse Linked List II
+med
+Swapping Nodes in a Linked List
+med
+Reverse Nodes In Even Length Groups
+med
+Swap Nodes in Pairs
+med
+Split Linked List in Parts
+med
+Remove Linked List Elements
+easy
+Delete N Nodes After M Nodes of a Linked List
+easy
+Remove Duplicates from Sorted List
+easy
+Insert into a Sorted Circular Linked List
+med
+Odd Even Linked List
+med
+Rotate List
+med
+Mock Interview
+45m
+0 Attempts Remaining
+Two Pointer Strategies
+Advance your two-pointer strategies in coding problems using Two Pointers, Fast and Slow Pointers, In-place Manipulation, and Sliding Window techniques.
+
+6.
+Two Heaps
+
+Master the steps to optimize dynamic data processing and decision-making using heaps.
+
+Introduction to Heaps
+Find Median from a Data Stream
+hard
+Blind 75
+Maximize Capital
+hard
+Sliding Window Median
+hard
+Schedule Tasks on Minimum Machines
+med
+Meeting Rooms III
+hard
+Minimum Cost to Connect Sticks
+med
+Longest Happy String
+med
+Maximum Average Pass Ratio
+med
+The Number of the Smallest Unoccupied Chair
+med
+Largest Number After Digit Swaps by Parity
+easy
+Find Right Interval
+med
+Construct Target Array with Multiple Sums
+hard
+7.
+K-way Merge
+
+Learn how to use k-way merge for efficient data merging and finding k-th small elements.
+
+Introduction to K-way Merge
+Merge Sorted Array
+easy
+Blind 75
+Merge K Sorted Lists
+hard
+Blind 75
+Kth Smallest Number in M Sorted Lists
+med
+Find K Pairs with Smallest Sums
+med
+Kth Smallest Element in a Sorted Matrix
+med
+K-th Smallest Prime Fraction
+med
+Super Ugly Number
+med
+Mock Interview
+45m
+0 Attempts Remaining
+Merging Strategies
+Tackle Merge Intervals and K-way Merge problems, optimize solutions, and ace complexity questions.
+
+8.
+Top K Elements
+
+Walk through the top k elements pattern and learn efficient selection using heaps.
+
+Introduction to Top K Elements
+Top K Frequent Elements
+med
+Blind 75
+Kth Largest Element in a Stream
+easy
+Reorganize String
+med
+K Closest Points to Origin
+med
+Kth Largest Element in an Array
+med
+Maximal Score After Applying K Operations
+med
+Find the Kth Largest Integer in the Array
+med
+Third Maximum Number
+easy
+Find Subsequence of Length K with the Largest Sum
+easy
+Minimum Cost to Hire K Workers
+hard
+Smallest Range Covering Elements from K Lists
+hard
+Maximum Performance of a Team
+hard
+K Maximum Sum Combinations From Two Arrays
+hard
+K Empty Slots
+hard
+Find the K-Sum of an Array
+hard
+Maximum Product After K Increments
+med
+Least Number of Unique Integers after K Removals
+med
+Final Array State After K Multiplication Operations I
+easy
+•
+WEEK 2
+9.
+Modified Binary Search
+
+Break apart modified binary search adaptations and solutions for diverse search problems.
+
+Introduction to Modified Binary Search
+Search in Rotated Sorted Array
+med
+Blind 75
+Binary Search
+easy
+First Bad Version
+easy
+Find K Closest Elements
+med
+Single Element in a Sorted Array
+med
+Split Array Largest Sum
+hard
+The K Weakest Rows in a Matrix
+easy
+Maximum Value at a Given Index in a Bounded Array
+med
+Search in Rotated Sorted Array II
+med
+Count Pairs Whose Sum is Less than Target
+easy
+Find Minimum in Rotated Sorted Array II
+hard
+Maximum Running Time of N Computers
+hard
+Minimize Max Distance to Gas Station
+hard
+Divide Chocolate
+hard
+Split Array Into Two Arrays to Minimize Sum Difference
+hard
+Number of Flowers in Full Bloom
+hard
+Koko Eating Bananas
+med
+Search Insert Position
+easy
+Find Peak Element
+med
+Find First and Last Position of Element in Sorted Array
+med
+10.
+Subsets
+
+Grasp the fundamentals of generating subsets, permutations, and combinations.
+
+Introduction to Subsets
+Subsets
+med
+Permutations
+med
+Letter Combinations of a Phone Number
+med
+Generate Parentheses
+med
+Find K-Sum Subsets
+med
+Letter Case Permutation
+med
+Letter Tile Possibilities
+med
+Subsets II
+med
+11.
+Greedy Techniques
+
+Dig into optimization problems with greedy algorithms through practical scenarios and solutions.
+
+Introduction to Greedy Techniques
+Jump Game I
+med
+Blind 75
+Boats to Save People
+med
+Gas Stations
+med
+Two City Scheduling
+med
+Minimum Number of Refueling Stops
+hard
+Largest Palindromic Number
+med
+Jump Game II
+med
+Number of Steps to Reduce a Binary Number to One
+med
+Rearranging Fruits
+hard
+Maximum Swap
+med
+Can Place Flowers
+easy
+Largest Odd Number in String
+easy
+Assign Cookies
+easy
+Candy
+hard
+Minimum Replacements to Sort the Array
+hard
+Sort an Array
+med
+Text Justification
+hard
+Best Time to Buy and Sell Stock II
+med
+Wildcard Matching
+hard
+Remove K Digits
+med
+Largest Number
+med
+Strong Password Checker
+med
+12.
+Backtracking
+
+Explore backtracking algorithm for solving complex problems like N-Queens, word search, binary tree paths, and Sudoku.
+
+Introduction to Backtracking
+Word Search
+med
+Blind 75
+House Robber III
+med
+Blind 75
+N-Queens II
+hard
+Restore IP Addresses
+med
+Flood Fill
+easy
+Minimum Moves to Spread Stones Over Grid
+med
+Sudoku Solver
+hard
+Matchsticks to Square
+med
+Binary Watch
+easy
+Optimal Account Balancing
+hard
+Split a String Into the Max Number of Unique Substrings
+med
+Binary Tree Paths
+easy
+All Paths From Source to Target
+med
+Remove Invalid Parentheses
+hard
+Unique Paths III
+hard
+N-Queens
+hard
+Combinations
+med
+Word Ladder II
+hard
+Flip Game
+med
+Additive Number
+med
+13.
+Dynamic Programming
+
+Build on dynamic programming concepts to efficiently solve complex optimization problems.
+
+Introduction to Dynamic Programming
+Coin Change
+med
+Blind 75
+Counting Bits
+easy
+Blind 75
+Maximum Product Subarray
+med
+Blind 75
+Combination Sum
+med
+Blind 75
+Word Break
+med
+Blind 75
+Palindromic Substrings
+med
+Blind 75
+Longest Common Subsequence
+med
+Blind 75
+Decode Ways
+med
+Blind 75
+Climbing Stairs
+easy
+Blind 75
+0/1 Knapsack
+med
+N-th Tribonacci Number
+easy
+Partition Equal Subset Sum
+med
+01 Matrix
+med
+House Robber II
+med
+Word Break II
+hard
+Count the Number of Good Subsequences
+med
+Binary Tree Cameras
+hard
+Number of Ways to Form a Target String Given a Dictionary
+hard
+Pascal’s Triangle
+easy
+Triangle
+med
+Frog Jump
+hard
+Cherry Pickup
+hard
+Regular Expression Matching
+med
+Dungeon Game
+hard
+Burst Balloons
+med
+Shortest Common Supersequence
+med
+Interleaving String
+med
+Maximal Rectangle
+med
+Longest Increasing Path in a Matrix
+hard
+Min Cost Climbing Stairs
+easy
+Number of Longest Increasing Subsequence
+med
+Distinct Subsequences
+hard
+Cheapest Flights Within K Stops
+med
+Minimum Path Sum
+med
+Best Time to Buy and Sell Stock III
+med
+Maximal Square
+med
+The Number of Good Subsets
+hard
+Freedom Trail
+med
+Mock Interview
+45m
+0 Attempts Remaining
+Advanced Algorithmic Techniques
+Master advanced algorithmic techniques with a focus on Top K Elements, Greedy, Backtracking, Subsets, and Dynamic Programming, guided by structured questions and hints.
+
+14.
+Cyclic Sort
+
+Step through cyclic sort concepts to efficiently handle various missing and corrupt number scenarios.
+
+Introduction to Cyclic Sort
+Missing Number
+easy
+Blind 75
+First Missing Positive
+hard
+Find the Corrupt Pair
+med
+Find the First K Missing Positive Numbers
+easy
+Sort Array By Parity II
+easy
+Cyclic Sort
+easy
+15.
+Topological Sort
+
+Unpack the core of topological sort, focusing on ordering dependencies and resolving compilation sequences efficiently.
+
+Introduction to Topological Sort
+Alien Dictionary
+hard
+Blind 75
+Course Schedule
+med
+Blind 75
+Compilation Order
+med
+Verifying an Alien Dictionary
+easy
+Course Schedule II
+med
+Find All Possible Recipes from Given Supplies
+med
+Build a Matrix with Conditions
+hard
+Longest Path With Different Adjacent Characters
+hard
+Parallel Courses III
+hard
+Parallel Courses
+med
+Sort Items by Groups Respecting Dependencies
+hard
+•
+WEEK 3
+16.
+Sort and Search
+
+Solve problems by organizing data through sorting and applying binary search, two-pointer, and sliding window for efficient solutions.
+
+Introduction to Sort and Search
+Sum of Mutated Array Closest to Target
+med
+Contains Duplicate II
+easy
+Find K-th Smallest Pair Distance
+hard
+Maximum Number of Integers to Choose from a Range I
+med
+Find the Distance Value Between Two Arrays
+easy
+Find Target Indices After Sorting Array
+easy
+Russian Doll Envelopes
+hard
+Minimum Operations to Make All Array Elements Equal
+med
+Longest Subsequence With Limited Sum
+easy
+Range Sum of Sorted Subarray Sums
+med
+Magnetic Force Between Two Balls
+med
+Minimum Space Wasted from Packaging
+hard
+Two Sum Less Than K
+easy
+Valid Triangle Number
+med
+Count Pairs in Two Arrays
+med
+Put Marbles in Bags
+hard
+H-Index
+med
+Reverse Pairs
+hard
+Mock Interview
+45m
+0 Attempts Remaining
+Sorting and Searching Patterns
+Enhance your coding skills in sorting and searching algorithms with structured questions, hints, and complexity analysis.
+
+17.
+Matrices
+
+Go hands-on with matrix operations, transformations, and efficient traversal techniques in coding.
+
+Introduction to Matrices
+Set Matrix Zeros
+med
+Blind 75
+Rotate Image
+med
+Blind 75
+Spiral Matrix
+med
+Blind 75
+Where Will the Ball Fall
+med
+Island Perimeter
+easy
+Convert 1D Array Into 2D Array
+easy
+Spiral Matrix II
+med
+Flip Columns For Maximum Number of Equal Rows
+med
+Number of Spaces Cleaning Robot Cleaned
+med
+Transpose Matrix
+easy
+Count Negative Numbers in a Sorted Matrix
+easy
+Minimum Time Takes to Reach Destination Without Drowning
+hard
+Smallest Rectangle Enclosing Black Pixels
+hard
+Minimize Maximum Value in a Grid
+hard
+Kth Smallest Number in Multiplication Table
+hard
+Swim in Rising Water
+hard
+Best Meeting Point
+hard
+Game of Life
+med
+18.
+Stacks
+
+Apply your skills to use stacks for various tasks, including calculators, string manipulation, and queuing.
+
+Introduction to Stacks
+Valid Parentheses
+easy
+Blind 75
+Basic Calculator
+hard
+Remove All Adjacent Duplicates In String
+easy
+Minimum Remove to Make Valid Parentheses
+med
+Exclusive Time of Functions
+med
+Flatten Nested List Iterator
+med
+Implement Queue Using Stacks
+easy
+Decode String
+med
+Daily Temperatures
+med
+Minimum String Length After Removing Substrings
+easy
+Number of Valid Subarrays
+hard
+Number of Visible People in a Queue
+hard
+Parsing A Boolean Expression
+hard
+Remove Duplicate Letters
+med
+Longest Valid Parentheses
+hard
+Next Greater Element IV
+med
+Maximum Width Ramp
+med
+19.
+Graphs
+
+Deepen your knowledge of graph theory, algorithms, practical solutions, and real-world applications.
+
+Introduction to Graphs
+Clone Graph
+med
+Blind 75
+Graph Valid Tree
+med
+Blind 75
+Network Delay Time
+med
+Paths in Maze That Lead to Same Room
+med
+Bus Routes
+hard
+Reconstruct Itinerary
+hard
+Lucky Numbers in a Matrix
+easy
+Path with Maximum Probability
+med
+Reorder Routes to Make All Paths Lead to the City Zero
+med
+Tree Diameter
+med
+Find the Town Judge
+easy
+Find Center of Star Graph
+easy
+Longest Cycle in a Graph
+hard
+Minimum Cost to Make at Least One Valid Path in a Grid
+hard
+Shortest Cycle in a Graph
+hard
+Shortest Path Visiting All Nodes
+hard
+Max Area of Island
+med
+Mock Interview
+45m
+0 Attempts Remaining
+Graph Algorithms
+Tackle coding problems using graph algorithms with optimal patterns, evaluating complexities, and receiving tailored hints for improvement.
+
+20.
+Tree Depth-First Search
+
+Follow the process of exploring tree structures and implementing various binary tree problems.
+
+Introduction to Tree Depth-First Search
+Serialize and Deserialize Binary Tree
+hard
+Blind 75
+Invert Binary Tree
+easy
+Blind 75
+Binary Tree Maximum Path Sum
+hard
+Blind 75
+Build Binary Tree from Preorder and Inorder Traversal
+med
+Blind 75
+Lowest Common Ancestor of a Binary Tree
+med
+Blind 75
+Validate Binary Search Tree
+med
+Blind 75
+Maximum Depth of Binary Tree
+easy
+Blind 75
+Kth Smallest Element in a BST
+med
+Blind 75
+Flatten Binary Tree to Linked List
+med
+Diameter of Binary Tree
+easy
+Convert Sorted Array to Binary Search Tree
+easy
+Binary Tree Right Side View
+med
+Nested List Weight Sum II
+med
+Inorder Successor in BST
+med
+Height of Binary Tree After Subtree Removal Queries
+hard
+Delete Nodes And Return Forest
+med
+Sum of Distances in a Tree
+hard
+Recover a Tree From Preorder Traversal
+hard
+Binary Tree Preorder Traversal
+easy
+Univalued Binary Tree
+med
+Path Sum
+med
+21.
+Tree Breadth-First Search
+
+Piece together the parts of the Tree BFS traversal, focusing on various traversal methods.
+
+Introduction to Tree Breadth-First Search
+Level Order Traversal of Binary Tree
+med
+Blind 75
+Binary Tree Zigzag Level Order Traversal
+med
+Populating Next Right Pointers in Each Node
+med
+Vertical Order Traversal of a Binary Tree
+hard
+Symmetric Tree
+easy
+Word Ladder
+hard
+Connect All Siblings of a Binary Tree
+med
+Two Sum IV - Input is a BST
+easy
+Find Minimum Diameter After Merging Two Trees
+hard
+Closest Node to Path in Tree
+hard
+Frog Position After T Seconds
+hard
+Average of Levels in Binary Tree
+easy
+Open the Lock
+hard
+Mock Interview
+45m
+0 Attempts Remaining
+Tree Traversal Techniques
+Tackle tree traversal techniques with a focus on Depth-First and Breadth-First Search patterns through coding challenges and complexity analysis.
+
+22.
+Trie
+
+Step through efficient trie implementations to optimize search suggestions, word replacements, and common prefix finding.
+
+Introduction to Trie
+Implement Trie
+med
+Blind 75
+Design Add and Search Words Data Structure
+med
+Blind 75
+Word Search II
+hard
+Blind 75
+Search Suggestions System
+med
+Replace Words
+med
+Top K Frequent Words
+med
+Lexicographical Numbers
+med
+Longest Common Prefix
+easy
+Index Pairs of a String
+easy
+K-th Smallest in Lexicographical Order
+hard
+Palindrome Pairs
+hard
+Longest Common Suffix Queries
+hard
+Map Sum Pairs
+med
+Check If a Word is a Prefix of Any Word in a Sentence
+easy
+Longest Word With All Prefixes
+med
+•
+WEEK 4
+23.
+Hash Maps
+
+Discover the logic behind implementing efficient hash maps and their applications in problem-solving.
+
+Introduction to Hash Maps
+Design HashMap
+easy
+Fraction to Recurring Decimal
+med
+Logger Rate Limiter
+easy
+Next Greater Element I
+easy
+Isomorphic Strings
+easy
+Find Duplicate File in System
+med
+Longest Palindrome
+easy
+Continuous Subarray Sum
+med
+Unique Number of Occurrences
+easy
+High Five
+easy
+Bulls and Cows
+med
+Number of Wonderful Substrings
+med
+Number of Distinct Islands
+med
+Custom Sort String
+med
+Total Appeal of a String
+hard
+Dot Product of Two Sparse Vectors
+med
+Longest Happy Prefix
+hard
+Find Longest Self-Contained Substring
+hard
+Intersection of Two Arrays
+easy
+Word Pattern
+easy
+Valid Sudoku
+med
+Roman to Integer
+easy
+Contiguous Array
+med
+Jewels and Stones
+easy
+Vowel Spellchecker
+med
+N-Repeated Element in Size 2N Array
+med
+Powerful Integers
+med
+Before and After Puzzle
+med
+Intersection of Two Arrays II
+med
+24.
+Knowing What to Track
+
+Master the steps to efficiently track data, solve permutations, anagrams, and game design problems.
+
+Introduction to Knowing What to Track
+Valid Anagram
+easy
+Blind 75
+Group Anagrams
+med
+Blind 75
+Palindrome Permutation
+easy
+Design Tic-Tac-Toe
+med
+Maximum Frequency Stack
+hard
+First Unique Character in a String
+easy
+Find All Anagrams in a String
+med
+Longest Palindrome by Concatenating Two-Letter Words
+med
+Ransom Note
+easy
+Minimum Number of Pushes to Type Word II
+med
+Rank Teams by Votes
+med
+Pairs of Songs With Total Durations Divisible by 60
+med
+Count Anagrams
+hard
+Divide Array Into Increasing Sequences
+hard
+Max Consecutive Ones
+easy
+Count and Say
+med
+Find Words That Can Be Formed by Characters
+med
+Check if One String Swap Can Make Strings Equal
+med
+25.
+Union Find
+
+Enhance your skills in Union-Find to address diverse graph and connectivity problems.
+
+Introduction to Union Find
+Number of Islands
+med
+Blind 75
+Longest Consecutive Sequence
+med
+Blind 75
+Redundant Connection
+med
+Most Stones Removed with Same Row or Column
+med
+Last Day Where You Can Still Cross
+hard
+Regions Cut by Slashes
+med
+Accounts Merge
+med
+Minimize Malware Spread
+hard
+Evaluate Division
+med
+Find if Path Exists in Graph
+easy
+The Skyline Problem
+hard
+Similar String Groups
+hard
+Optimize Water Distribution in a Village
+hard
+Number of Islands II
+hard
+26.
+Custom Data Structures
+
+Dig into creating and implementing custom data structures for solving specialized problems efficiently.
+
+Introduction to Custom Data Structures
+Snapshot Array
+med
+Time-Based Key-Value Store
+med
+Implement LRU Cache
+med
+Insert Delete GetRandom O(1)
+med
+Min Stack
+med
+Range Module
+hard
+Shortest Word Distance II
+med
+LFU Cache
+hard
+Moving Average from Data Stream
+easy
+Two Sum III - Data structure design
+easy
+Range Sum Query - Immutable
+easy
+Design HashSet
+easy
+Max Stack
+hard
+Stream of Characters
+hard
+All O`one Data Structures
+hard
+Finding MK Average
+hard
+Mock Interview
+45m
+0 Attempts Remaining
+Fundamental Data Structures
+Master data structures like Stacks, Hash Maps, Heaps, and more through coding challenges, complexity analysis, and hints for optimization.
+
+27.
+Bitwise Manipulation
+
+Explore bitwise operations for problem-solving and algorithm optimization.
+
+Introduction to Bitwise Manipulation
+Encode and Decode Strings
+med
+Blind 75
+Reverse Bits
+easy
+Blind 75
+Find the Difference
+easy
+Complement of Base 10 Integer
+easy
+Flipping an Image
+easy
+Single Number
+easy
+Single Number II
+med
+Find the Longest Substring Having Vowels in Even Counts
+med
+Longest Subarray With Maximum Bitwise AND
+med
+Count Triplets That Can Form Two Arrays of Equal XOR
+med
+Sum of All Subset XOR Totals
+easy
+Find The K-th Lucky Number
+med
+Minimum Number of K Consecutive Bit Flips
+hard
+Minimum One Bit Operations to Make Integers Zero
+hard
+Triples with Bitwise AND Equal To Zero
+hard
+Power of Two
+easy
+Hamming Distance
+med
+28.
+Math and Geometry
+
+Explore math and geometry for problem-solving.
+
+Introduction to Math and Geometry
+Minimum Area Rectangle
+med
+Maximum Area Rectangle With Point Constraints I
+med
+Reverse Integer
+med
+Minimum Number of Lines to Cover Points
+med
+Minimize Manhattan Distances
+hard
+Convex Polygon
+med
+Check If It Is a Straight Line
+easy
+Minimum Cuts to Divide a Circle
+easy
+Valid Square
+med
+Rectangle Overlap
+easy
+Minimum Time Visiting All Points
+easy
+Rectangle Area
+med
+Queries on Number of Points Inside a Circle
+med
+Max Points on a Line
+hard
+Maximum Number of Visible Points
+hard
+Detonate the Maximum Bombs
+med
+Self Crossing
+hard
+Erect the Fence
+hard
+Nth Magical Number
+hard
+Add Strings
+easy
+Perfect Squares
+med
+Palindrome Number
+easy
+Fibonacci Number
+easy
+Integer to English Words
+hard
+Add Two Numbers
+med
+Plus One
+easy
+Confusing Number
+easy
+Nim Game
+med
+Bulb Switcher
+med
+Water and Jug Problem
+med
+Poor Pigs
+med
+Add to Array-Form of Integer
+med
+Greatest Common Divisor of Strings
+med
+Count Substrings with Only One Distinct Letter
+med
+Equal Rational Numbers
+med
+Adding Two Negabinary Numbers
+med
+Power of Three
+med
+Mock Interview
+45m
+0 Attempts Remaining
+Complex Patterns and Operations
+Sharpen your advanced coding skills by solving problems using patterns like Knowing What to Track, Math and Geometry, Bitwise Manipulation, Matrices, and Union Find with hints and complexity analysis.
+
+29.
+Challenge Yourself
+
+Test your understanding of various coding challenges focusing on algorithm efficiency.
+
+Challenge Yourself: Introduction
+Number of Connected Components in an Undirected Graph
+med
+Blind 75
+Pacific Atlantic Water Flow
+med
+Blind 75
+Contains Duplicate
+easy
+Blind 75
+Maximum Subarray
+med
+Blind 75
+Two Sum
+easy
+Blind 75
+Find Minimum in Rotated Sorted Array
+med
+Blind 75
+Non-overlapping Intervals
+med
+Blind 75
+Meeting Rooms
+easy
+Blind 75
+Subtree of Another Tree
+easy
+Blind 75
+Number of 1 Bits
+easy
+Blind 75
+Container with Most Water
+med
+Blind 75
+Product of Array Except Self
+med
+Blind 75
+Longest Increasing Subsequence
+med
+Blind 75
+Sum of Two Integers
+med
+Blind 75
+Unique Paths
+med
+Blind 75
+Longest Palindromic Substring
+med
+Blind 75
+House Robber
+med
+Blind 75
+Same Tree
+easy
+Blind 75
+Shortest Bridge
+med
+Median of Two Sorted Arrays
+hard
+Largest Rectangle in Histogram
+hard
+Sort List
+med
+Evaluate Reverse Polish Notation
+med
+4Sum
+med
+Loud and Rich
+med
+Majority Element
+easy
+Permutations II
+med
+Number of Provinces
+med
+Linked List Cycle II
+med
+Minimum Flips to Make the Binary String Alternate
+med
+Lemonade Change
+easy
+Find All Numbers Disappeared in an Array
+easy
+Find All Duplicates in an Array
+med
+Design In-Memory File System
+hard
+Design File System
+med
+Asteroid Collision
+med
+Rotting Oranges
+med
+Add Binary
+easy
+Multiply Strings
+med
+Lowest Common Ancestor of a Binary Search Tree
+med
+Merge Two Sorted Lists
+easy
+Balanced Binary Tree
+easy
+Maximum Profit in Job Scheduling
+hard
+Minimum Height Trees
+med
+String to Integer (atoi)
+med
+Trapping Rain Water
+hard

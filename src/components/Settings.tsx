@@ -554,7 +554,7 @@ export const Settings: React.FC = () => {
                                     {settings.studySchedule.blackoutDates.map((date, idx) => (
                                         <div key={idx} className="flex justify-between items-center bg-zinc-900 border border-zinc-800/50 p-2 rounded-lg text-sm text-zinc-300">
                                             <span>{new Date(date.start).toLocaleDateString()} - {new Date(date.end).toLocaleDateString()}</span>
-                                            <button onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors"><X size={14} /></button>
+                                            <button aria-label="Remove blackout date" onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors"><X size={14} /></button>
                                         </div>
                                     ))}
                                     {settings.studySchedule.blackoutDates.length === 0 && (
@@ -612,7 +612,7 @@ export const Settings: React.FC = () => {
                                                 {new Date(event.date + 'T00:00:00').toLocaleDateString()}
                                             </div>
                                         </div>
-                                        <button onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"><X size={16} /></button>
+                                        <button aria-label="Remove target event" onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"><X size={16} /></button>
                                     </div>
                                 ))}
                                 {targetEvents.length === 0 && (

@@ -1,5 +1,6 @@
 import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App.tsx';
@@ -47,14 +48,16 @@ const clerkAppearance = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ClerkProvider 
-        publishableKey={clerkPubKey || ''} 
-        afterSignOutUrl="/"
-        appearance={clerkAppearance}
-      >
-        <App />
-      </ClerkProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ClerkProvider 
+          publishableKey={clerkPubKey || ''} 
+          afterSignOutUrl="/"
+          appearance={clerkAppearance}
+        >
+          <App />
+        </ClerkProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

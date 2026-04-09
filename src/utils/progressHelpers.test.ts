@@ -4,6 +4,7 @@ import {
   getSprintPoolProblems,
   migrateLegacyRatingHistoryIfNeeded,
   pickUnsolvedForRandomRecommendation,
+  deriveMomentumState,
 } from './progressHelpers';
 import type { AppSettings, ProblemProgress } from '../types';
 import { DEFAULT_SETTINGS } from '../types';
@@ -152,5 +153,122 @@ describe('pickUnsolvedForRandomRecommendation', () => {
       {}
     );
     expect(picked?.id).toBe(premiumCandidate.id);
+  });
+});
+
+
+describe('deriveMomentumState', () => {
+  const createBaseProgress = (): ProblemProgress => ({
+    firstSolvedAt: '2023-01-01',
+    lastReviewedAt: '2023-01-01',
+    nextReviewAt: '2023-01-02',
+    reviewCount: 0,
+    retired: false,
+    consecutiveThrees: 0,
+    history: []
+  });
+
+  it('returns zeros/false and null for empty progress', () => {
+    const result = deriveMomentumState({});
+    expect(result.consecutiveLowConfByCategory).toEqual({});
+    expect(result.categoryStruggling).toEqual({});
+    expect(result.consecutiveLowConfTotal).toBe(0);
+    expect(result.proactiveNeetCodeProblemId).toBeNull();
+  });
+
+  it('returns zeros/false and null when there is no low confidence (rating 3+)', () => {
+    const progress: Record<string, ProblemProgress> = {
+      'valid-anagram': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-01T10:00:00Z', rating: 3, sessionType: 'new' }]
+      },
+      'valid-palindrome': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-02T10:00:00Z', rating: 4, sessionType: 'new' }]
+      }
+    };
+    const result = deriveMomentumState(progress);
+    expect(result.consecutiveLowConfTotal).toBe(0);
+    expect(result.proactiveNeetCodeProblemId).toBeNull();
+    expect(result.categoryStruggling['Arrays & Hashing']).toBeFalsy();
+    expect(result.categoryStruggling['Two Pointers']).toBeFalsy();
+  });
+
+  it('sets consecutiveLowConfTotal=2 and sets proactiveNeetCodeProblemId on two consecutive 1s', () => {
+    const progress: Record<string, ProblemProgress> = {
+      'valid-anagram': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-01T10:00:00Z', rating: 1, sessionType: 'new' }]
+      },
+      'valid-palindrome': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-02T10:00:00Z', rating: 1, sessionType: 'new' }]
+      }
+    };
+    const result = deriveMomentumState(progress);
+    expect(result.consecutiveLowConfTotal).toBe(2);
+    expect(result.proactiveNeetCodeProblemId).toBe('valid-palindrome');
+  });
+
+  it('sets categoryStruggling to true for two consecutive 1s on Mediums in same category', () => {
+    const progress: Record<string, ProblemProgress> = {
+      'group-anagrams': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-01T10:00:00Z', rating: 1, sessionType: 'new' }]
+      },
+      'top-k-frequent-elements': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-02T10:00:00Z', rating: 1, sessionType: 'new' }]
+      }
+    };
+    const result = deriveMomentumState(progress);
+    expect(result.consecutiveLowConfByCategory['Arrays & Hashing']).toBe(2);
+    expect(result.categoryStruggling['Arrays & Hashing']).toBe(true);
+  });
+
+  it('clears categoryStruggling on a 3+ rating for an Easy problem in the struggling category', () => {
+    const progress: Record<string, ProblemProgress> = {
+      'group-anagrams': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-01T10:00:00Z', rating: 1, sessionType: 'new' }]
+      },
+      'top-k-frequent-elements': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-02T10:00:00Z', rating: 1, sessionType: 'new' }]
+      },
+      'contains-duplicate': {
+        ...createBaseProgress(),
+        history: [{ date: '2023-01-03T10:00:00Z', rating: 3, sessionType: 'new' }]
+      }
+    };
+    const result = deriveMomentumState(progress);
+    expect(result.categoryStruggling['Arrays & Hashing']).toBe(false);
+    expect(result.consecutiveLowConfByCategory['Arrays & Hashing']).toBe(0);
+  });
+
+  it('ignores non-new events entirely', () => {
+    const progress: Record<string, ProblemProgress> = {
+      'group-anagrams': {
+        ...createBaseProgress(),
+        history: [
+          // Index 0 is treated as 'new' if sessionType is undefined, so we give it a 3
+          { date: '2023-01-01T10:00:00Z', rating: 3, sessionType: 'new' },
+          // Index 1 with sessionType='review' is a non-new event, should be ignored
+          { date: '2023-01-02T10:00:00Z', rating: 1, sessionType: 'review' }
+        ]
+      },
+      'top-k-frequent-elements': {
+        ...createBaseProgress(),
+        history: [
+          { date: '2023-01-03T10:00:00Z', rating: 3, sessionType: 'new' },
+          { date: '2023-01-04T10:00:00Z', rating: 1, sessionType: 'review' }
+        ]
+      }
+    };
+    const result = deriveMomentumState(progress);
+    // Even though there are two '1' ratings, they are non-new, so they shouldn't count.
+    expect(result.consecutiveLowConfTotal).toBe(0);
+    expect(result.categoryStruggling['Arrays & Hashing']).toBeFalsy();
+    expect(result.proactiveNeetCodeProblemId).toBeNull();
   });
 });

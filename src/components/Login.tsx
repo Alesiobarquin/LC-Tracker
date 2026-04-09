@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-react';
+import { motion } from 'framer-motion';
+import { FloatingContextBadges, MagnetCanvas, NoiseOverlay } from './LandingPage';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
 
@@ -46,37 +48,69 @@ export function Login() {
   };
 
   return (
-    <div className="brand-shell relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-      {/* Atmospheric background layers */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 62% 52% at 50% 38%, rgba(16,185,129,0.09) 0%, transparent 72%), radial-gradient(circle at 16% 82%, rgba(20,184,166,0.08) 0%, transparent 42%), radial-gradient(circle at 84% 16%, rgba(34,197,94,0.07) 0%, transparent 38%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.14]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-            backgroundSize: '34px 34px',
-            maskImage: 'radial-gradient(circle at 50% 45%, black 0%, transparent 78%)',
-          }}
-        />
-        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/20 opacity-40" />
-        <div className="absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10 opacity-35" />
-      </div>
+    <div 
+        className="brand-shell min-h-screen text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-100 font-sans relative overflow-x-hidden flex flex-col items-center justify-center px-4"
+        style={{ fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}
+    >
+      <NoiseOverlay />
+      <MagnetCanvas mode="login" />
 
-      <a
-        href="/"
-        className="absolute top-5 left-6 z-20 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0.34, 0.56, 0.34], scale: [0.98, 1.04, 0.98] }}
+        transition={{ duration: 6.2, repeat: Infinity, ease: 'easeInOut' }}
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] w-[90vw] max-w-[620px] h-[260px] md:h-[360px] bg-emerald-500/14 blur-[120px] rounded-full"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] w-[84vw] max-w-[460px] h-[200px] md:h-[280px] bg-teal-400/10 blur-[90px] rounded-full"
+      />
+
+      <FloatingContextBadges className="z-[2]" />
+
+      <nav className="fixed top-0 w-full z-50 border-b border-white/[0.08] backdrop-blur-xl bg-[#09090b]/60 transition-all duration-300">
+        <div className="max-w-[52rem] mx-auto px-6 h-14 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2 font-semibold text-white group">
+            <motion.div
+              animate={{ y: [0, -1.5, 0] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative"
+            >
+              <Logo className="text-emerald-400 group-hover:scale-110 transition-transform duration-300" size={18} />
+              <div className="absolute inset-0 bg-emerald-400 blur-[8px] opacity-15 group-hover:opacity-45 transition-opacity duration-300"></div>
+            </motion.div>
+            <span className="tracking-tight text-base">{BRAND.name}</span>
+          </a>
+
+          <div className="flex flex-wrap items-center gap-5 justify-end">
+            <a href="/library" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
+              Library
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
+            </a>
+            <a href="/patterns" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
+              Patterns
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
+            </a>
+            <a href="/syntax" className="hidden md:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
+              Syntax
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
+            </a>
+            <a href="/login" className="brand-button-primary relative group overflow-hidden px-4 py-1.5 text-xs font-semibold rounded transition-colors">
+              <span className="relative z-10">{BRAND.landing.ctaPrimary}</span>
+              <div className="absolute inset-0 -translate-x-[150%] skew-x-[-20deg] bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
+            </a>
+          </div>
+        </div>
+        <div className="brand-scanline"></div>
+      </nav>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10"
       >
-        ← {BRAND.login.backLabel}
-      </a>
-
-      <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-10">
         {/* Logo + wordmark */}
         <div className="flex flex-col items-center gap-5">
           <div
@@ -139,10 +173,15 @@ export function Login() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Footer — satisfies Google's requirement for a visible privacy policy link */}
-      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4"
+      >
         <a
           href="/privacy"
           className="text-zinc-600 hover:text-zinc-400 text-[11px] transition-colors"
@@ -156,7 +195,7 @@ export function Login() {
         >
           Terms of Service
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 }

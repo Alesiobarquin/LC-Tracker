@@ -143,9 +143,9 @@ export interface PatternFoundation {
 
 export interface PatternProgress {
   id: PatternId;
-  problemsMasteredCount: number;
+  problemsCompletedCount: number;
   totalProblemsInPattern: number;
-  isMastered: boolean;
+  isCompleted: boolean;
 }
 
 /** Which curated list drives recommendations and “target list” progress. */

@@ -927,9 +927,9 @@ export function buildDailyPlan(params: {
     let targetPattern = null;
     for (const pattern of patterns) {
       const patternProblems = targetPool.filter((p) => getPatternForProblem(p) === pattern.id);
-      const masteredCount = patternProblems.filter((p) => progress[p.id]?.retired === true).length;
+      const completedCount = patternProblems.filter((p) => !!progress[p.id]).length;
       
-      if (masteredCount < patternProblems.length && patternProblems.length > 0) {
+      if (completedCount < patternProblems.length && patternProblems.length > 0) {
         targetPattern = pattern;
         break;
       }
@@ -1027,19 +1027,19 @@ export function buildDailyPlan(params: {
 }
 
 
-export function computePatternMastery(
+export function computePatternCompletion(
   patternId: PatternId,
   patternProblemIds: string[],
   problemProgress: Record<string, ProblemProgress>
-): Pick<PatternProgress, 'problemsMasteredCount' | 'isMastered'> {
-  const masteredCount = patternProblemIds.filter(id => {
+): Pick<PatternProgress, 'problemsCompletedCount' | 'isCompleted'> {
+  const completedCount = patternProblemIds.filter(id => {
     const prog = problemProgress[id];
-    return prog?.retired === true;
+    return !!prog; // Treat any solved problem as completed for pattern progress
   }).length;
   
   return {
-    problemsMasteredCount: masteredCount,
-    isMastered: masteredCount === patternProblemIds.length && patternProblemIds.length > 0
+    problemsCompletedCount: completedCount,
+    isCompleted: completedCount === patternProblemIds.length && patternProblemIds.length > 0
   };
 }
 

@@ -6,6 +6,13 @@ export interface LeetCodeSubmission {
   lang: string;
 }
 
+export class LeetCodeApiError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'LeetCodeApiError';
+  }
+}
+
 export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSubmission[]> => {
   const query = `
     query recentAcSubmissions($username: String!, $limit: Int!) {
@@ -30,13 +37,13 @@ export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSu
     const response = await fetch(proxyUrl);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch from proxy`);
+      throw new LeetCodeApiError(`Failed to fetch from proxy: ${response.statusText}`);
     }
 
     const data = await response.json();
     
     if (data.errors) {
-      throw new Error(data.errors[0].message);
+      throw new LeetCodeApiError(data.errors[0].message);
     }
     
     return data.data?.recentAcSubmissionList || [];
@@ -49,13 +56,15 @@ export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSu
       const fbResponse = await fetch(fallbackEndpoint);
       if (!fbResponse.ok) {
          const errorText = await fbResponse.text();
-         throw new Error(`Fallback failed: ${errorText}`);
+         throw new LeetCodeApiError(`Fallback API failed: ${errorText}`);
       }
       const data = await fbResponse.json();
       return data.submission || [];
     } catch (fallbackError) {
-      console.error('All LeetCode API methods failed:', fallbackError);
-      throw fallbackError;
+      if (fallbackError instanceof LeetCodeApiError) {
+        throw fallbackError;
+      }
+      throw new LeetCodeApiError('All LeetCode API methods failed', { cause: fallbackError });
     }
   }
 };

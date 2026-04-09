@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   problems,
   allProblems,
+  problemMap,
   PHASE_1_CATEGORIES,
   problemsPoolForTargetCurriculum,
   countTargetCurriculumProblems,
@@ -119,7 +120,7 @@ export const Analytics: React.FC = () => {
     const stats: Record<string, { totalRating: number; count: number }> = {};
 
     Object.entries(progress).forEach(([problemId, prog]) => {
-      const prob = allProblems.find((p) => p.id === problemId);
+      const prob = problemMap[problemId];
       if (!prob || prog.history.length === 0) return;
       const lastRating = prog.history[prog.history.length - 1].rating;
       if (!stats[prob.category]) stats[prob.category] = { totalRating: 0, count: 0 };
@@ -193,7 +194,7 @@ export const Analytics: React.FC = () => {
     }[] = [];
 
     Object.entries(progress).forEach(([problemId, prog]) => {
-      const prob = allProblems.find(p => p.id === problemId);
+      const prob = problemMap[problemId];
       if (!prob) return;
       prog.history.forEach(entry => {
         allSessions.push({

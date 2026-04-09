@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
 import { patterns } from '../data/patterns';
 import { getPatternForProblem } from '../utils/patternMapping';
-import { problems, allProblems } from '../data/problems';
+import { problems, allProblems, problemMap } from '../data/problems';
 import { computePatternCompletion } from '../utils/progressHelpers';
 import { useProblemProgress } from '../hooks/useUserData';
 import { CheckCircle2, ChevronLeft, ExternalLink, Lock, Play } from 'lucide-react';
@@ -23,7 +23,11 @@ export const PatternFoundations: React.FC = () => {
       const coreIds = new Set(coreMapped.map(p => p.id));
       
       const extraMapped = (pattern.educativeProblems || [])
-        .map(ep => allProblems.find(ap => ap.title.toLowerCase() === ep.title.toLowerCase()))
+        .map(ep => {
+          const lowerTitle = ep.title.toLowerCase();
+          // Title lookup still needs search or a title-based map
+          return allProblems.find(ap => ap.title.toLowerCase() === lowerTitle);
+        })
         .filter((p): p is NonNullable<typeof p> => Boolean(p) && !coreIds.has(p.id));
         
       const allMapped = [...coreMapped, ...extraMapped];

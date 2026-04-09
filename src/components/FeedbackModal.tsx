@@ -32,7 +32,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       if (imageFile) {
         setStatus('Uploading image...');
         const fileExt = imageFile.name.split('.').pop() || 'png';
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage

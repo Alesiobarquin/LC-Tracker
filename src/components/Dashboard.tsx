@@ -570,7 +570,7 @@ export const Dashboard: React.FC = () => {
               <button onClick={() => setCatchUpPlan('CATCH_UP', missedDaysCount)} className="flex-1 sm:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2">
                 <Zap size={16} /> Catch Up Faster
               </button>
-              <button onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"><X size={18} /></button>
+              <button aria-label="Dismiss catch up banner" onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"><X size={18} /></button>
             </div>
           </div>
         </div>

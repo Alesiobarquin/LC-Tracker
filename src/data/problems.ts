@@ -381,3 +381,4 @@ export const PHASE_2_CATEGORIES: Category[] = [
   'Tries',
   'Backtracking',
 ];
+export const problemMap: Record<string, Problem> = Object.fromEntries(allProblems.map(p => [p.id, p]));

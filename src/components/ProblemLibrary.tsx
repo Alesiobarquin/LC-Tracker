@@ -7,6 +7,7 @@ import { clsx } from 'clsx';
 import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
+import { getDifficultyColor } from '../utils/uiHelpers';
 
 const VIRTUALIZE_THRESHOLD = 200;
 /** Initial rows to render per tab/filter (large lists load more on demand). */
@@ -360,11 +361,7 @@ export const ProblemLibrary: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              <span className={clsx(
-                                prob.difficulty === 'Easy' ? "text-emerald-400" :
-                                prob.difficulty === 'Medium' ? "text-amber-400" :
-                                "text-red-400"
-                              )}>
+                              <span className={clsx(getDifficultyColor(prob.difficulty))}>
                                 {prob.difficulty}
                               </span>
                             </td>

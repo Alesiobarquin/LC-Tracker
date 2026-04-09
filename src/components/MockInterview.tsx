@@ -228,7 +228,7 @@ export const MockInterview: React.FC = () => {
           {/* Header & Timer Panel */}
           <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shrink-0 shadow-lg">
             <div className="flex items-center gap-4 pl-2">
-              <a href={activeProblem.leetcodeUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center w-10 h-10 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors" title="Open in LeetCode">
+              <a href={activeProblem.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-10 h-10 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors" title="Open in LeetCode">
                 <ExternalLink size={18} />
               </a>
               <div>

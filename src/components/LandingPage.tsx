@@ -569,7 +569,7 @@ export const LandingPage = () => {
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.3),transparent)] -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                         </motion.button>
                     </a>
-                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noreferrer" className="brand-button-secondary group px-5 py-2.5 flex items-center justify-center gap-2.5 backdrop-blur-md rounded-lg font-medium transition-all">
+                    <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noopener noreferrer" className="brand-button-secondary group px-5 py-2.5 flex items-center justify-center gap-2.5 backdrop-blur-md rounded-lg font-medium transition-all">
                         <Github className="w-4 h-4 group-hover:text-white transition-colors" /> 
                         <span className="group-hover:text-white transition-colors">{BRAND.landing.ctaSecondary}</span>
                     </a>

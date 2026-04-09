@@ -68,7 +68,15 @@ export const getNextReviewDate = (
 
   // Cap intervals based on difficulty to ensure Hards don't drift too far
   const maxGap = difficulty === 'Easy' ? 180 : difficulty === 'Medium' ? 90 : 45;
-  const finalDays = Math.max(1, Math.min(Math.round(days), maxGap));
+  let finalDays = Math.max(1, Math.min(Math.round(days), maxGap));
+
+  // Apply a small random fuzz (±15% spread) to spread out bulk manual completions
+  // so items rated on the same day don't cluster on the exact same future date.
+  if (finalDays >= 3) {
+    const maxFuzz = Math.max(1, Math.round(finalDays * 0.15));
+    const fuzz = Math.floor(Math.random() * (2 * maxFuzz + 1)) - maxFuzz;
+    finalDays = Math.max(1, finalDays + fuzz);
+  }
 
   return addDays(today, finalDays);
 };

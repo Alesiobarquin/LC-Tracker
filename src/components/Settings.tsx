@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES, TARGET_CURRICULUM_LABELS } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
-import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info, Lock } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info, Lock, FileCode2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
 
@@ -215,10 +215,11 @@ export const Settings: React.FC = () => {
                             </div>
 
                             {/* Mode picker — radio cards */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 {([ 
-                                    { value: 'SPRINT', icon: Swords, label: 'Sprint Mode', desc: 'Focus intensively on one pattern before advancing.' },
-                                    { value: 'RANDOM', icon: Shuffle, label: 'Random Mode', desc: 'Mix problems from all categories for broad coverage.' },
+                                    { value: 'EXPLORE', icon: Shuffle, label: 'Explore', desc: 'Mix problems from all categories randomly.' },
+                                    { value: 'CURRICULUM', icon: Swords, label: 'Curriculum', desc: 'Focus intensely on one sequence pattern.' },
+                                    { value: 'PATTERNS', icon: FileCode2, label: 'Pattern Mastery', desc: 'Guided progression on core algorithms.' },
                                 ] as const).map(({ value, icon: Icon, label, desc }) => {
                                     const active = settings.learningMode === value;
                                     return (
@@ -316,7 +317,7 @@ export const Settings: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className={clsx('space-y-4 transition-opacity duration-200', settings.learningMode !== 'SPRINT' && 'opacity-40 pointer-events-none')}>
+                            <div className={clsx('space-y-4 transition-opacity duration-200', settings.learningMode !== 'CURRICULUM' && 'opacity-40 pointer-events-none')}>
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Sprint setup</label>
                                     <button
@@ -553,7 +554,7 @@ export const Settings: React.FC = () => {
                                     {settings.studySchedule.blackoutDates.map((date, idx) => (
                                         <div key={idx} className="flex justify-between items-center bg-zinc-900 border border-zinc-800/50 p-2 rounded-lg text-sm text-zinc-300">
                                             <span>{new Date(date.start).toLocaleDateString()} - {new Date(date.end).toLocaleDateString()}</span>
-                                            <button onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors"><X size={14} /></button>
+                                            <button aria-label="Remove blackout date" onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors"><X size={14} /></button>
                                         </div>
                                     ))}
                                     {settings.studySchedule.blackoutDates.length === 0 && (
@@ -611,7 +612,7 @@ export const Settings: React.FC = () => {
                                                 {new Date(event.date + 'T00:00:00').toLocaleDateString()}
                                             </div>
                                         </div>
-                                        <button onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"><X size={16} /></button>
+                                        <button aria-label="Remove target event" onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"><X size={16} /></button>
                                     </div>
                                 ))}
                                 {targetEvents.length === 0 && (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, LogOut, MessageSquarePlus, Shield, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar, BookOpen, BookKey, LogOut, LogIn, MessageSquarePlus, Shield, Sparkles, Lock } from 'lucide-react';
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { getPhase } from '../utils/dateUtils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useUserSettings } from '../hooks/useUserData';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { FeedbackModal } from './FeedbackModal';
@@ -25,11 +26,22 @@ interface FeedbackReadRow {
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [authModalTarget, setAuthModalTarget] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getActiveTabFromPath = (pathname: string) => {
+    const path = pathname.replace(/\/+$/, '');
+    const segments = path.split('/');
+    // Extract base tab from path (e.g. /patterns/two-pointer -> patterns)
+    return segments[1] || 'dashboard'; 
+  };
+  
+  const activeTab = getActiveTabFromPath(location.pathname);
+
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [unreadAdminTicketCount, setUnreadAdminTicketCount] = useState(0);
@@ -132,12 +144,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   }, [isAdmin, user?.id]);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, protected: true },
     { id: 'library', label: 'Problem Library', icon: Library },
-    { id: 'analytics', label: 'Analytics', icon: LineChart },
-    { id: 'mock', label: 'Mock Interview', icon: Code2 },
+    { id: 'patterns', label: 'Patterns', icon: BookKey },
+    { id: 'analytics', label: 'Analytics', icon: LineChart, protected: true },
+    { id: 'mock', label: 'Mock Interview', icon: Code2, protected: true },
     { id: 'syntax', label: 'Syntax Reference', icon: BookOpen },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'settings', label: 'Settings', icon: Settings, protected: true },
   ];
 
   return (
@@ -152,7 +165,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
           <div className="font-semibold text-lg tracking-[0.02em] text-emerald-300">{BRAND.name}</div>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
+        <button aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -176,7 +189,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
+                  if (!user && item.protected) {
+                    setAuthModalTarget(item.label);
+                  } else {
+                    navigate(`/${item.id}`);
+                  }
                   setIsMobileMenuOpen(false);
                 }}
                 className={clsx(
@@ -279,20 +296,31 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               {BRAND.shell.feedbackButton}
             </button>
             
-            <button
-              type="button"
-              onClick={() => void signOut()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
-            >
-              <LogOut size={16} />
-              {BRAND.shell.logoutButton}
-            </button>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 border border-zinc-800/80 transition-colors"
+              >
+                <LogOut size={16} />
+                {BRAND.shell.logoutButton}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-950 bg-emerald-400 hover:bg-emerald-300 transition-colors"
+              >
+                <LogIn size={16} />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden w-full">
+      <main className="flex-1 p-4 md:py-8 md:pl-8 md:pr-[14.75rem] overflow-y-auto overflow-x-hidden w-full">
         <div className="max-w-7xl mx-auto auth-content-zoom">
           {children}
         </div>
@@ -307,15 +335,69 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       )}
 
       {/* Floating active session indicator — visible on every page */}
-      <FloatingSessionIndicator setActiveTab={setActiveTab} />
+      <FloatingSessionIndicator />
       
       {/* Absolute Viewport Modal (fixes scrolling issues) */}
       <FeaturesModal
         isOpen={isFeaturesOpen}
         onClose={() => setIsFeaturesOpen(false)}
-        setActiveTab={setActiveTab}
       />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+
+      {/* Auth Prompt Modal */}
+      <AnimatePresence>
+        {authModalTarget && (
+           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setAuthModalTarget(null)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl z-10 flex flex-col items-center text-center overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
+                
+                <button 
+                  onClick={() => setAuthModalTarget(null)}
+                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
+                >
+                  <X size={20} />
+                </button>
+                
+                <div className="w-12 h-12 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center mb-4 relative z-10">
+                  <Lock className="w-5 h-5 text-emerald-400" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-zinc-100 mb-2 relative z-10">Create an Account</h3>
+                <p className="text-zinc-400 text-[15px] leading-relaxed mb-6 relative z-10">
+                  Sign in or create a free account to access <strong className="text-zinc-200">{authModalTarget}</strong> and start securely saving your progress.
+                </p>
+                
+                <div className="flex w-full gap-3 relative z-10">
+                  <button
+                    onClick={() => setAuthModalTarget(null)}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-300 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 transition-colors"
+                  >
+                    Maybe Later
+                  </button>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-950 bg-emerald-400 hover:bg-emerald-300 transition-colors"
+                  >
+                    Sign In
+                  </button>
+                </div>
+              </motion.div>
+           </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

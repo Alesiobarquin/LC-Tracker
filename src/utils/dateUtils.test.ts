@@ -1,5 +1,50 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getNextReviewDate, getSrIntervalMultiplier } from './dateUtils';
+import { getNextReviewDate, getSrIntervalMultiplier, getPhase } from './dateUtils';
+
+describe('getPhase', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('returns 1 for dates before phase 1 end (2026-05-01)', () => {
+    expect(getPhase(new Date('2026-04-15T00:00:00Z'))).toBe(1);
+    expect(getPhase(new Date('2025-12-31T23:59:59Z'))).toBe(1);
+  });
+
+  it('returns 2 for exactly phase 1 end', () => {
+    expect(getPhase(new Date('2026-05-01T00:00:00Z'))).toBe(2);
+  });
+
+  it('returns 2 for dates between phase 1 end and phase 2 end', () => {
+    expect(getPhase(new Date('2026-06-15T00:00:00Z'))).toBe(2);
+    expect(getPhase(new Date('2026-07-31T23:59:59Z'))).toBe(2);
+  });
+
+  it('returns 3 for exactly phase 2 end (2026-08-01)', () => {
+    expect(getPhase(new Date('2026-08-01T00:00:00Z'))).toBe(3);
+  });
+
+  it('returns 3 for dates after phase 2 end', () => {
+    expect(getPhase(new Date('2026-09-15T00:00:00Z'))).toBe(3);
+    expect(getPhase(new Date('2027-01-01T00:00:00Z'))).toBe(3);
+  });
+
+  it('uses current date when no arguments are provided', () => {
+    vi.setSystemTime(new Date('2026-04-15T00:00:00Z'));
+    expect(getPhase()).toBe(1);
+
+    vi.setSystemTime(new Date('2026-06-15T00:00:00Z'));
+    expect(getPhase()).toBe(2);
+
+    vi.setSystemTime(new Date('2026-09-15T00:00:00Z'));
+    expect(getPhase()).toBe(3);
+  });
+});
 
 describe('getSrIntervalMultiplier', () => {
   it('maps presets', () => {
@@ -13,9 +58,11 @@ describe('getNextReviewDate', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
   });
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('rating 1 schedules two days out', () => {

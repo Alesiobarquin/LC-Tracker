@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /mock
+Disallow: /settings
+Disallow: /admin
+Disallow: /onboarding
 
 Sitemap: https://lc-tracker.app/sitemap.xml

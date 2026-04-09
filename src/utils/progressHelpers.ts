@@ -12,6 +12,7 @@ import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   allProblems,
+  problemMap,
   isProblemPremium,
   problemMatchesTargetCurriculum,
   problems,
@@ -33,7 +34,11 @@ import type {
   StreakState,
   SyntaxProgress,
   TargetCurriculum,
+  PatternId,
+  PatternProgress,
 } from '../types';
+import { patterns } from '../data/patterns';
+import { getPatternForProblem } from './patternMapping';
 import { DEFAULT_GRACE_DAY, DEFAULT_STREAK } from '../types';
 
 /**
@@ -244,7 +249,7 @@ export function pickUnsolvedForRandomRecommendation(
   const solvedCounts: Record<'Easy' | 'Medium' | 'Hard', number> = { Easy: 0, Medium: 0, Hard: 0 };
   Object.entries(progress).forEach(([id, prog]) => {
     if (prog.history.length === 0) return;
-    const p = allProblems.find((x) => x.id === id);
+    const p = problemMap[id];
     if (!p || !problemMatchesTargetCurriculum(p, curriculum)) return;
     solvedCounts[p.difficulty] += 1;
   });
@@ -274,7 +279,7 @@ export function computeNewProblemProgress(
 ): ProblemProgress {
   const today = startOfDay(new Date());
   const todayStr = today.toISOString();
-  const prob = allProblems.find((p) => p.id === problemId);
+  const prob = problemMap[problemId];
   const isFirstRating = !existing || existing.history.length === 0;
   const consecutiveThrees = rating >= 4 ? (existing?.consecutiveThrees || 0) + 1 : 0;
   const prevSuccesses = existing?.consecutiveSuccesses || 0;
@@ -433,7 +438,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
   }> = [];
 
   Object.entries(progress).forEach(([problemId, prog]) => {
-    const problem = allProblems.find((item) => item.id === problemId);
+    const problem = problemMap[problemId];
     if (!problem) return;
 
     prog.history.forEach((entry, index) => {
@@ -625,7 +630,7 @@ export function applyLeetCodeSubmissions(
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const prob = allProblems.find((p) => p.id === problemId);
+      const prob = problemMap[problemId];
       const difficulty = prob?.difficulty ?? 'Medium';
       // Compute the first-success interval from the actual solve date so old
       // imports surface as overdue today rather than being pushed into the future.
@@ -674,7 +679,7 @@ export function computeReviewProblems(params: {
   } = params;
 
   const getSolveMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = problemMap[id];
     if (!prob) return 22;
     const data = categoryAvgSolveTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -684,7 +689,7 @@ export function computeReviewProblems(params: {
   };
 
   const getReviewMins = (id: string): number => {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = problemMap[id];
     if (!prob) return 12;
     const data = categoryAvgReviewTimes?.[prob.category];
     if (data && data.count >= MIN_TIMING_DATA_POINTS) {
@@ -711,7 +716,7 @@ export function computeReviewProblems(params: {
   );
   const result: string[] = [];
   for (const id of allDueReviewIds) {
-    const prob = allProblems.find((p) => p.id === id);
+    const prob = problemMap[id];
     if (!prob) continue;
     if (!includePremium && isProblemPremium(prob)) continue;
     const est = getReviewMins(id);
@@ -841,7 +846,8 @@ export function buildDailyPlan(params: {
     if (solvedThisWeek >= 3) shouldAssignNewProblem = false;
   }
 
-  const useSprintLogic = phase === 1 && settings.learningMode === 'SPRINT';
+  const useSprintLogic = phase === 1 && settings.learningMode === 'CURRICULUM';
+  const usePatternLogic = settings.learningMode === 'PATTERNS';
   const effectiveSprint =
     useSprintLogic && !sprintState ? createInitialSprintState(progress, settings) : sprintState;
 
@@ -918,12 +924,43 @@ export function buildDailyPlan(params: {
     }
   }
 
-  if (shouldAssignNewProblem && !useSprintLogic && !newProblem) {
+  if (shouldAssignNewProblem && usePatternLogic && !newProblem) {
+    let targetPattern = null;
+    for (const pattern of patterns) {
+      const patternProblems = targetPool.filter((p) => getPatternForProblem(p) === pattern.id);
+      const completedCount = patternProblems.filter((p) => !!progress[p.id]).length;
+      
+      if (completedCount < patternProblems.length && patternProblems.length > 0) {
+        targetPattern = pattern;
+        break;
+      }
+    }
+
+    if (targetPattern) {
+      let patternProblems = targetPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
+      let picked = pickUnsolvedForRandomRecommendation(patternProblems, solvedIds, settings, progress);
+      
+      // If the target pool is exhausted but mastery isn't achieved, pull from the extended catalog
+      // to ensure continuous practice until the core foundational problems are retired.
+      if (!picked) {
+        const extendedPool = allProblems.filter((p) => p.isExtendedCatalog || p.isNeetCode250);
+        const overflowProblems = extendedPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
+        picked = pickUnsolvedForRandomRecommendation(overflowProblems, solvedIds, settings, progress);
+      }
+
+      if (picked) {
+        newProblem = picked.id;
+        recommendationReason = `Mastering ${targetPattern.name}`;
+      }
+    }
+  }
+
+  if (shouldAssignNewProblem && !useSprintLogic && !usePatternLogic && !newProblem) {
     const candidateCategories: string[] = [...PHASE_1_CATEGORIES, ...PHASE_2_CATEGORIES];
     const categoryStats: Record<string, { total: number; count: number }> = {};
 
     Object.entries(progress).forEach(([id, prog]) => {
-      const prob = allProblems.find((item) => item.id === id);
+      const prob = problemMap[id];
       if (prob && prog.history.length > 0) {
         const lastRating = prog.history[prog.history.length - 1].rating;
         if (!categoryStats[prob.category]) categoryStats[prob.category] = { total: 0, count: 0 };
@@ -989,3 +1026,21 @@ export function buildDailyPlan(params: {
     sprintDayInfo,
   };
 }
+
+
+export function computePatternCompletion(
+  patternId: PatternId,
+  patternProblemIds: string[],
+  problemProgress: Record<string, ProblemProgress>
+): Pick<PatternProgress, 'problemsCompletedCount' | 'isCompleted'> {
+  const completedCount = patternProblemIds.filter(id => {
+    const prog = problemProgress[id];
+    return !!prog; // Treat any solved problem as completed for pattern progress
+  }).length;
+  
+  return {
+    problemsCompletedCount: completedCount,
+    isCompleted: completedCount === patternProblemIds.length && patternProblemIds.length > 0
+  };
+}
+

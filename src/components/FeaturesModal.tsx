@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { FEATURE_SLIDES } from '../data/featuresModalSlides';
 import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants/featuresModal';
 
 export interface FeaturesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  setActiveTab: (tab: string) => void;
   /** When opening programmatically (e.g. sidebar), start at this slide index */
   initialSlide?: number;
 }
@@ -19,7 +19,8 @@ function persistDismissed() {
   }
 }
 
-export function FeaturesModal({ isOpen, onClose, setActiveTab, initialSlide = 0 }: FeaturesModalProps) {
+export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesModalProps) {
+  const navigate = useNavigate();
   const titleId = useId();
   const [slideIndex, setSlideIndex] = useState(initialSlide);
 
@@ -57,7 +58,7 @@ export function FeaturesModal({ isOpen, onClose, setActiveTab, initialSlide = 0 
 
   const jumpToTab = () => {
     if (slide.tabId) {
-      setActiveTab(slide.tabId);
+      navigate(`/${slide.tabId}`);
       handleDismiss();
     }
   };

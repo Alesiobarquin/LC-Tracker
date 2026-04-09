@@ -36,7 +36,7 @@ import {
   SPRINT_DESCRIPTIONS,
 } from '../utils/progressHelpers';
 import { getNextReviewDate } from '../utils/dateUtils';
-import { allProblems } from '../data/problems';
+import { allProblems, problemMap } from '../data/problems';
 import { userDataQueryKeys } from '../lib/userDataQueryKeys';
 
 const queryKeys = userDataQueryKeys;
@@ -387,7 +387,7 @@ export function useUserSettings() {
       if (previous.settings.srAggressiveness !== next.settings.srAggressiveness) {
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const updatedRows = Object.entries(progress).flatMap(([problemId, prog]) => {
-          const problem = allProblems.find((item) => item.id === problemId);
+          const problem = problemMap[problemId];
           if (!problem || prog.retired || prog.history.length === 0) return [];
           const lastRating = prog.history[prog.history.length - 1].rating;
           const nextReviewAt = getNextReviewDate(
@@ -415,7 +415,7 @@ export function useUserSettings() {
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const optimisticProgress = { ...progress };
         Object.entries(optimisticProgress).forEach(([problemId, prog]) => {
-          const problem = allProblems.find((item) => item.id === problemId);
+          const problem = problemMap[problemId];
           if (!problem || prog.retired || prog.history.length === 0) return;
           const lastRating = prog.history[prog.history.length - 1].rating;
           optimisticProgress[problemId] = {
@@ -755,7 +755,7 @@ export function useProblemProgress() {
         rating = 4;
       }
 
-      const problem = allProblems.find((item) => item.id === variables.problemId);
+      const problem = problemMap[variables.problemId];
       if (variables.actualSecondsUsed !== undefined && problem) {
         const timing: SessionTiming = {
           id: crypto.randomUUID(),
@@ -939,7 +939,7 @@ export function useSprintState() {
     if (!userId) return;
     if (query.isLoading) return;
     if (sprintData.sprintState) return;
-    if (settingsData.settings.learningMode !== 'SPRINT') return;
+    if (settingsData.settings.learningMode !== 'CURRICULUM') return;
 
     upsertSprintMutation.mutate({
       sprintState: createInitialSprintState(progress, settingsData.settings),

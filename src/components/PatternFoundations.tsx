@@ -5,6 +5,7 @@ import { getPatternForProblem } from '../utils/patternMapping';
 import { problems, allProblems } from '../data/problems';
 import { computePatternCompletion } from '../utils/progressHelpers';
 import { useProblemProgress } from '../hooks/useUserData';
+import { getDifficultyColor } from '../utils/uiHelpers';
 import { CheckCircle2, ChevronLeft, ExternalLink, Lock, Play } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { PatternId } from '../types';
@@ -161,8 +162,7 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                     <div className="ml-[30px] sm:ml-0 mt-4 sm:mt-0 flex items-center justify-between sm:w-auto w-full gap-4">
                       <span className={clsx(
                         "text-[10px] uppercase tracking-widest font-bold",
-                        prob.difficulty === 'Easy' ? 'text-emerald-400' : 
-                        prob.difficulty === 'Medium' ? 'text-amber-400' : 'text-rose-400'
+                        getDifficultyColor(prob.difficulty)
                       )}>
                         {prob.difficulty}
                       </span>

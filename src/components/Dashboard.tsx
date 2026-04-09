@@ -22,6 +22,7 @@ import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
+import { getDifficultyColor } from '../utils/uiHelpers';
 import {
   computeReviewProblems,
   getEstimatedMinutesByDifficulty,
@@ -622,7 +623,7 @@ export const Dashboard: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-zinc-50 mb-3">{newProblemData.title}</h3>
                       <div className="flex flex-wrap gap-3 text-[10px]">
-                        <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', newProblemData.difficulty === 'Easy' ? 'text-emerald-400' : newProblemData.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{newProblemData.difficulty}</span>
+                            <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', getDifficultyColor(newProblemData.difficulty))}>{newProblemData.difficulty}</span>
                         <span className="px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full text-zinc-300 font-bold uppercase tracking-wide">{newProblemData.category}</span>
                         {isProblemPremium(newProblemData) && (
                           <span className="px-3 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-300 font-bold uppercase tracking-wide inline-flex items-center gap-1">
@@ -695,7 +696,7 @@ export const Dashboard: React.FC = () => {
                             )}
                           </div>
                           <div className="flex flex-wrap gap-3 mt-3 text-[10px]">
-                            <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', prob.difficulty === 'Easy' ? 'text-emerald-400' : prob.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{prob.difficulty}</span>
+                            <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', getDifficultyColor(prob.difficulty))}>{prob.difficulty}</span>
                             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-zinc-300 font-bold uppercase tracking-wide">{prob.category}</span>
                             <span className={clsx('px-3 py-1 rounded-full border flex items-center gap-1 font-bold uppercase tracking-wide', est.isDefault ? 'bg-white/5 text-zinc-400 border-white/10 backdrop-blur-sm' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 backdrop-blur-sm')}>
                               <Timer size={10} />

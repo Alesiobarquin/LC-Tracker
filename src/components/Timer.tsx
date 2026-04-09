@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore';
 import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
+import { getDifficultyColor } from '../utils/uiHelpers';
 
 interface TimerProps {
   problem: Problem;
@@ -348,12 +349,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <div className="flex gap-2 mt-2 text-sm">
             <span className="text-zinc-400">{problem.category}</span>
             <span className="text-zinc-600">•</span>
-            <span className={clsx(
-              'font-medium',
-              problem.difficulty === 'Easy' ? 'text-emerald-400' :
-                problem.difficulty === 'Medium' ? 'text-amber-400' :
-                  'text-red-400'
-            )}>
+            <span className={clsx('font-medium', getDifficultyColor(problem.difficulty))}>
               {problem.difficulty}
             </span>
             {isColdSolve && (
@@ -375,7 +371,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <a
             href={problem.leetcodeUrl}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors border border-zinc-700/50 hover:border-zinc-600"
           >
             <ExternalLink size={18} />

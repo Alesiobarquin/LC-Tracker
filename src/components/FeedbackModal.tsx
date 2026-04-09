@@ -32,7 +32,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       if (imageFile) {
         setStatus('Uploading image...');
         const fileExt = imageFile.name.split('.').pop() || 'png';
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -77,8 +77,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         setImagePreview(null);
       }, 2000);
     } catch (err: any) {
-      console.error('Error submitting feedback:', err);
-      setStatus(err.message || 'Failed to send. Please try again.');
+      console.error('Operation failed: Error submitting feedback');
+      setStatus('Failed to send. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -91,9 +91,10 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           <h2 className="text-lg font-semibold text-white">Share Feedback</h2>
           <button
             onClick={onClose}
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            aria-label="Close feedback modal"
+            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -143,14 +144,15 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 <img src={imagePreview} alt="Preview" className="max-h-32 object-cover" />
                 <button
                   type="button"
+                  aria-label="Remove attached image"
                   onClick={() => {
                     setImageFile(null);
                     setImagePreview(null);
                     URL.revokeObjectURL(imagePreview);
                   }}
-                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors"
+                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             ) : (
@@ -159,7 +161,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                   type="file"
                   id="screenshot-upload"
                   accept="image/png, image/jpeg, image/webp"
-                  className="hidden"
+                  className="sr-only peer"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -178,9 +180,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 />
                 <label
                   htmlFor="screenshot-upload"
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg cursor-pointer transition-colors text-sm w-max border border-zinc-700 mt-1"
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg cursor-pointer transition-colors text-sm w-max border border-zinc-700 mt-1 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 peer-focus-visible:outline-none"
                 >
-                  <ImagePlus className="w-4 h-4" />
+                  <ImagePlus className="w-4 h-4" aria-hidden="true" />
                   Select Image
                 </label>
                 <p className="text-xs text-zinc-500 mt-2">JPG, PNG, or WebP up to 5MB.</p>

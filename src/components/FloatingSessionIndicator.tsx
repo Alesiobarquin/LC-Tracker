@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { allProblems } from '../data/problems';
+import { problemMap } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
 interface FloatingSessionIndicatorProps {}
@@ -32,7 +32,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
 
     if (!activeSession) return null;
 
-    const prob = allProblems.find(p => p.id === activeSession.problemId);
+    const prob = problemMap[activeSession.problemId];
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
 
@@ -81,6 +81,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                             Return
                         </button>
                         <button
+                            aria-label="Abandon session"
                             onClick={() => setConfirmAbandon(true)}
                             className="flex items-center justify-center w-8 h-8 bg-zinc-800/70 hover:bg-red-500/15 text-zinc-500 hover:text-red-400 rounded-lg transition-colors border border-zinc-700/50"
                             title="Abandon session"

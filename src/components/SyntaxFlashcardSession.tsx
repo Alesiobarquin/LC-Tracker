@@ -309,6 +309,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                     )}
 
                     <button
+                        aria-label="Exit session"
                         onClick={() => {
                             if (phase === 'summary' || results.length === 0) onClose();
                             else setShowExitConfirm(true);
@@ -368,6 +369,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                 <p className="text-xs text-zinc-500 mt-0.5">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
                             </div>
                             <button
+                                aria-label="Close help"
                                 onClick={() => setShowHelp(false)}
                                 className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
                             >

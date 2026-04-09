@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { allProblems, TARGET_CURRICULUM_LABELS } from '../data/problems';
+import { problemMap, TARGET_CURRICULUM_LABELS } from '../data/problems';
 import { startOfWeek, endOfWeek, format, isWithinInterval } from 'date-fns';
 import { Trophy, Target, TrendingUp, AlertCircle } from 'lucide-react';
 import { useActivityLog, useProblemProgress, useStreak, useUserSettings } from '../hooks/useUserData';
@@ -33,7 +33,7 @@ export const WeeklySummary: React.FC = () => {
     const categoryStats: Record<string, { totalRating: number; count: number }> = {};
     
     Object.entries(progress).forEach(([id, prog]) => {
-      const prob = allProblems.find(p => p.id === id);
+      const prob = problemMap[id];
       if (!prob) return;
 
       // Check if worked on this week (rough estimate based on lastReviewedAt)

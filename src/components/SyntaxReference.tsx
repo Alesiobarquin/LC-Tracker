@@ -3,11 +3,15 @@ import { allSyntaxCards, SyntaxCard } from '../data/syntaxCards';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
 import { SyntaxFlashcardSession } from './SyntaxFlashcardSession';
 import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSyntaxProgress } from '../hooks/useUserData';
 
 export const SyntaxReference: React.FC = () => {
+    const { user } = useUser();
+    const navigate = useNavigate();
     const { syntaxProgress } = useSyntaxProgress();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript' | 'cpp'>('python');
@@ -74,6 +78,10 @@ export const SyntaxReference: React.FC = () => {
     }, [selectedLanguage, syntaxProgress]);
 
     const launchSession = (cards: SyntaxCard[], title: string) => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
         if (cards.length === 0) return;
         // Shuffle for interleaved practice
         const shuffled = [...cards].sort(() => Math.random() - 0.5);

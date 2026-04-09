@@ -1,0 +1,169 @@
+const fs = require('fs');
+let code = fs.readFileSync('src/components/LandingPage.tsx', 'utf8');
+
+code = code.replace(`    let mouse = { x: -1000, y: -1000 };
+
+    class Particle {
+      x: number;
+      y: number;
+      baseX: number;
+      baseY: number;
+      size: number;
+      baseSize: number;
+
+      constructor(x: number, y: number) {
+        this.baseX = x;
+        this.baseY = y;
+        this.x = x;
+        this.y = y;
+        this.baseSize = 1.5;
+        this.size = this.baseSize;
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.fillStyle = \`rgba(16, 185, 129, \${(this.size / 6) + 0.1})\`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Optional reactive connecting effect if near mouse
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < mouseRadius * 0.5) {
+            ctx.beginPath();
+            ctx.strokeStyle = \`rgba(16, 185, 129, \${(mouseRadius * 0.5 - distance) / (mouseRadius * 0.5) * 0.3})\`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+        }
+      }
+
+      update() {
+        const dx = mouse.x - this.baseX;
+        const dy = mouse.y - this.baseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < mouseRadius) {
+          const force = (mouseRadius - distance) / mouseRadius;
+          const targetX = this.baseX + dx * force * pullStrength;
+          const targetY = this.baseY + dy * force * pullStrength;
+          
+          this.x += (targetX - this.x) * 0.4;
+          this.y += (targetY - this.y) * 0.4;
+          this.size = this.baseSize + (force * 7); 
+        } else {
+          if (this.x !== this.baseX) {
+            this.x -= (this.x - this.baseX) * returnSpeed;
+          }
+          if (this.y !== this.baseY) {
+            this.y -= (this.y - this.baseY) * returnSpeed;
+          }
+           this.size = Math.max(this.baseSize, this.size - 0.2);
+        }
+        this.draw();
+      }
+    }`, `    let mouse = { x: -1000, y: -1000 };
+    let time = 0;
+
+    class Particle {
+      x: number;
+      y: number;
+      baseX: number;
+      baseY: number;
+      size: number;
+      baseSize: number;
+      colorPhase: number;
+
+      constructor(x: number, y: number) {
+        this.baseX = x;
+        this.baseY = y;
+        this.x = x;
+        this.y = y;
+        this.baseSize = 1.5;
+        this.size = this.baseSize;
+        this.colorPhase = Math.random() * 20;
+      }
+
+      draw() {
+        if (!ctx) return;
+        
+        // Dynamic hue shift (emerald to bright cyan/blue)
+        const hue = 150 + Math.sin(this.baseX * 0.003 + this.baseY * 0.003 + time * 1.5) * 45 + this.colorPhase;
+        const lightness = 40 + (this.size * 2.5);
+        const alpha = Math.min((this.size / 5) + 0.2, 1);
+        
+        ctx.fillStyle = \`hsla(\${hue}, 90%, \${Math.min(lightness, 75)}%, \${alpha})\`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Optional reactive connecting effect if near mouse
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < mouseRadius * 0.5) {
+            ctx.beginPath();
+            ctx.strokeStyle = \`hsla(\${hue}, 90%, 65%, \${(mouseRadius * 0.5 - distance) / (mouseRadius * 0.5) * 0.5})\`;
+            ctx.lineWidth = 1.2;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+        }
+      }
+
+      update() {
+        // Pulsing Wave Background Effect
+        const waveX = Math.sin(this.baseX * 0.01 + time);
+        const waveY = Math.cos(this.baseY * 0.01 + time * 0.8);
+        const wavePulsar = waveX * waveY;
+        
+        // Pulse base size gently to make it obvious
+        this.baseSize = 1.8 + wavePulsar * 1.2;
+        
+        const dx = mouse.x - this.baseX;
+        const dy = mouse.y - this.baseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < mouseRadius) {
+          const force = (mouseRadius - distance) / mouseRadius;
+          const targetX = this.baseX + dx * force * pullStrength;
+          const targetY = this.baseY + dy * force * pullStrength;
+          
+          this.x += (targetX - this.x) * 0.4;
+          this.y += (targetY - this.y) * 0.4;
+          this.size = this.baseSize + (force * 10); 
+        } else {
+          // Add a subtle wave drift to the base positions
+          const driftX = this.baseX + waveX * 6;
+          const driftY = this.baseY + waveY * 6;
+          
+          if (this.x !== driftX) {
+            this.x -= (this.x - driftX) * returnSpeed;
+          }
+          if (this.y !== driftY) {
+            this.y -= (this.y - driftY) * returnSpeed;
+          }
+           this.size = Math.max(this.baseSize, this.size - 0.2);
+        }
+        this.draw();
+      }
+    }`);
+
+code = code.replace(`    const animateParams = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => p.update());
+      animationFrameId = requestAnimationFrame(animateParams);
+    };`, `    const animateParams = () => {
+      time += 0.012;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => p.update());
+      animationFrameId = requestAnimationFrame(animateParams);
+    };`);
+
+fs.writeFileSync('src/components/LandingPage.tsx', code);
+console.log('Update done');

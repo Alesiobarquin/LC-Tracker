@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
@@ -45,14 +46,15 @@ function updateCanonical(href: string) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
   const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
-  const rawPath = window.location.pathname;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const rawPath = location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
 
   const handleOnboardingComplete = () => {
-    setActiveTab('dashboard');
+    navigate('/dashboard');
   };
 
   useEffect(() => {
@@ -62,6 +64,24 @@ export default function App() {
         title: 'LC Tracker | LeetCode Tracker for Spaced Repetition',
         description: 'LC Tracker is a LeetCode tracker for spaced repetition. Track sessions, expose weak patterns, and schedule reviews to improve interview retention.',
         canonical: `${origin}/`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/library': {
+        title: 'Problem Library | LC Tracker',
+        description: 'Browse the LC Tracker problem library by category, difficulty, and curated sets to plan your interview prep.',
+        canonical: `${origin}/library`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/patterns': {
+        title: 'Pattern Foundations | LC Tracker',
+        description: 'Explore algorithm patterns, templates, and mapped LeetCode problems in the LC Tracker pattern roadmap.',
+        canonical: `${origin}/patterns`,
+        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+      },
+      '/syntax': {
+        title: 'Syntax Reference | LC Tracker',
+        description: 'Review Python interview syntax flashcards and weak areas in the LC Tracker syntax reference.',
+        canonical: `${origin}/syntax`,
         robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
       },
       '/login': {
@@ -96,7 +116,12 @@ export default function App() {
       },
     } as const;
 
-    const config = pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/'];
+    const config = path.startsWith('/patterns/')
+      ? {
+          ...pageConfig['/patterns'],
+          canonical: `${origin}${path}`,
+        }
+      : (pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/']);
 
     document.title = config.title;
     updateMeta('name', 'description', config.description);
@@ -124,6 +149,9 @@ export default function App() {
   // Landing page — show immediately without waiting for auth
   if (path === '/' && authLoaded && !user) return <LandingPage />;
 
+  // Prevent logged in users from seeing the landing page if they try to access '/'
+  if (path === '/' && user && onboardingComplete) return <Navigate to="/dashboard" replace />;
+
   // Auth loading state — bail out of loading if settings errored (prevents infinite hang)
   const showLoading = !authLoaded || (user && settingsLoading && !settingsError);
 
@@ -147,23 +175,33 @@ export default function App() {
     );
   }
 
-  // Not logged in — /login shows the sign-in widget, everything else goes to landing
+  // Public application routes
+  const publicAppRoutes = ['/patterns', '/library', '/syntax'];
+  const isPublicAppRoute = publicAppRoutes.some(r => path === r || path.startsWith(`${r}/`));
+
+  // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
-    window.location.href = '/';
-    return null;
+    if (!isPublicAppRoute) return <Navigate to="/" replace />;
   }
 
   if (path === '/admin') {
     if (isAdminUser(user)) {
-      return <AdminDashboard />;
+      return (
+        <>
+          <RealtimeSyncHost userId={user.id} />
+          <AdminDashboard />
+        </>
+      );
     } else {
-      window.location.href = '/';
-      return null;
+      return <Navigate to="/" replace />;
     }
   }
 
-  if (!onboardingComplete) {
+  if (user && !onboardingComplete) {
+    if (path !== '/onboarding') {
+        return <Navigate to="/onboarding" replace />;
+    }
     return (
       <>
         <RealtimeSyncHost userId={user.id} />
@@ -174,15 +212,28 @@ export default function App() {
 
   return (
     <>
-      <RealtimeSyncHost userId={user.id} />
-      <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
-        {activeTab === 'patterns' && <PatternFoundations />}
-        {activeTab === 'library' && <ProblemLibrary />}
-        {activeTab === 'analytics' && <Analytics />}
-        {activeTab === 'mock' && <MockInterview />}
-        {activeTab === 'syntax' && <SyntaxReference />}
-        {activeTab === 'settings' && <Settings />}
+      <RealtimeSyncHost userId={user?.id || null} />
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          
+          {/* Protected routes */}
+          {user && (
+            <>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/mock" element={<MockInterview />} />
+              <Route path="/settings" element={<Settings />} />
+            </>
+          )}
+          
+          {/* Publicly indexable/previewable paths */}
+          <Route path="/patterns/*" element={<PatternFoundations />} />
+          <Route path="/library" element={<ProblemLibrary />} />
+          <Route path="/syntax" element={<SyntaxReference />} />
+
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+        </Routes>
       </Layout>
     </>
   );

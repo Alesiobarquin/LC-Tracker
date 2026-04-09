@@ -94,8 +94,8 @@ export function AdminDashboard() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching tickets:', error);
-      setErrorMessage(error.message || 'Failed to fetch tickets.');
+      console.error('Operation failed: Failed to fetch tickets');
+      setErrorMessage('Failed to fetch tickets.');
       setTickets([]);
       setViewedTicketIds(new Set());
     } else {
@@ -111,7 +111,7 @@ export function AdminDashboard() {
           if (readMarkerError.code === '42P01') {
             setAdminConfigWarning((existing) => existing ?? 'Unread tracking migration is missing. Run latest Supabase migrations to enable inbox counts.');
           } else {
-            console.error('Error loading admin read markers:', readMarkerError);
+            console.error('Operation failed: Failed to load admin read markers');
           }
           setViewedTicketIds(new Set());
         } else {
@@ -142,8 +142,8 @@ export function AdminDashboard() {
       );
 
     if (error) {
-      console.error('Error marking ticket as viewed:', error);
-      setErrorMessage(error.message || 'Could not mark ticket as viewed.');
+      console.error('Operation failed: Could not mark ticket as viewed');
+      setErrorMessage('Could not mark ticket as viewed.');
       return;
     }
 
@@ -161,7 +161,7 @@ export function AdminDashboard() {
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating status:', error);
+      console.error('Operation failed: Error updating status');
     } else {
       await markTicketViewed(id);
       void fetchTickets();

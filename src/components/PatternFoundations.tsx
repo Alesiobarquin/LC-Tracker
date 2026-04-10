@@ -6,6 +6,7 @@ import { problems, allProblems, problemMap } from '../data/problems';
 import { computePatternCompletion } from '../utils/progressHelpers';
 import { useProblemProgress } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { isSafeUrl } from '../utils/security';
 import { CheckCircle2, ChevronLeft, ExternalLink, Lock, Play } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { PatternId } from '../types';
@@ -172,7 +173,7 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                       </span>
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <a 
-                          href={prob.leetcodeUrl}
+                          href={isSafeUrl(prob.leetcodeUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"

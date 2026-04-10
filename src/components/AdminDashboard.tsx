@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, AlertCircle, Lightbulb, RefreshCw } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { clsx } from 'clsx';
+import { isSafeUrl } from '../utils/security';
 
 interface Ticket {
   id: string;
@@ -280,24 +281,15 @@ export function AdminDashboard() {
 
                       <p className="text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
 
-                      {ticket.image_url && (() => {
-                        let safeUrl = '#';
-                        try {
-                          const url = new URL(ticket.image_url);
-                          if (url.protocol === 'http:' || url.protocol === 'https:') safeUrl = url.href;
-                        } catch {
-                          // Invalid URL, safely fallback to '#'
-                        }
-                        return (
-                          <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
-                            <img
-                              src={ticket.image_url}
-                              alt="Attached screenshot"
-                              className="max-h-36 rounded-lg border border-zinc-700/60 hover:opacity-90 transition-opacity"
-                            />
-                          </a>
-                        );
-                      })()}
+                      {ticket.image_url && (
+                        <a href={isSafeUrl(ticket.image_url)} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
+                          <img
+                            src={isSafeUrl(ticket.image_url)}
+                            alt="Attached screenshot"
+                            className="max-h-36 rounded-lg border border-zinc-700/60 hover:opacity-90 transition-opacity"
+                          />
+                        </a>
+                      )}
 
                       <p className="text-xs text-zinc-500">From: {ticket.users?.email || ticket.user_id}</p>
                     </div>

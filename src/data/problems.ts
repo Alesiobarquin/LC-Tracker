@@ -356,6 +356,14 @@ export const problemMap: Record<string, Problem> = allProblems.reduce(
   {} as Record<string, Problem>
 );
 
+export const problemTitleMap: Record<string, Problem> = allProblems.reduce(
+  (acc, p) => {
+    acc[p.title.toLowerCase()] = p;
+    return acc;
+  },
+  {} as Record<string, Problem>
+);
+
 /** Pool used for recommendations: main list for curated tiers; full list for extended. */
 export function problemsPoolForTargetCurriculum(curriculum: TargetCurriculum): Problem[] {
   const base = curriculum === 'EXTENDED' ? allProblems : problems;

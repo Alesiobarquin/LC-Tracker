@@ -24,6 +24,7 @@ import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { isSafeUrl } from '../utils/security';
 import {
   computeReviewProblems,
   getEstimatedMinutesByDifficulty,
@@ -634,7 +635,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
-                        <a href={newProblemData.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
+                        <a href={isSafeUrl(newProblemData.leetcodeUrl)} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
                         <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
                           <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
@@ -715,7 +716,7 @@ export const Dashboard: React.FC = () => {
                               <SkipForward size={18} />
                             </button>
                           )}
-                          <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
+                          <a href={isSafeUrl(prob.leetcodeUrl)} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
                         </div>
                       </div>
                       <button

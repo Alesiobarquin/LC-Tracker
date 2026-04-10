@@ -8,6 +8,7 @@ import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { isSafeUrl } from '../utils/security';
 
 const VIRTUALIZE_THRESHOLD = 200;
 /** Initial rows to render per tab/filter (large lists load more on demand). */
@@ -373,7 +374,7 @@ export const ProblemLibrary: React.FC = () => {
                             <td className="px-6 py-4 text-right">
                               <div className="inline-flex items-center justify-end gap-2">
                                 <a
-                                  href={prob.leetcodeUrl}
+                                  href={isSafeUrl(prob.leetcodeUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 hover:border-zinc-600 text-xs font-medium"

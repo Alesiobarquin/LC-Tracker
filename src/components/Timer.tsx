@@ -6,6 +6,7 @@ import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause,
 import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { isSafeUrl } from '../utils/security';
 
 interface TimerProps {
   problem: Problem;
@@ -369,7 +370,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
         <div className="flex gap-3">
           <a
-            href={problem.leetcodeUrl}
+            href={isSafeUrl(problem.leetcodeUrl)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors border border-zinc-700/50 hover:border-zinc-600"

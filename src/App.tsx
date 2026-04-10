@@ -12,6 +12,7 @@ import { Onboarding } from './components/Onboarding';
 import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
+import { TimerPage } from './components/TimerPage';
 import { useUser, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { useUserSettings } from './hooks/useUserData';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
@@ -224,6 +225,8 @@ export default function App() {
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/mock" element={<MockInterview />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/timer" element={<TimerPage />} />
+              <Route path="/timer/:problemId" element={<TimerPage />} />
             </>
           )}
           

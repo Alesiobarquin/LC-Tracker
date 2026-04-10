@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { useNavigate } from 'react-router-dom';
-import { problemMap } from '../data/problems';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { allProblems } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
 interface FloatingSessionIndicatorProps {}
@@ -10,6 +10,7 @@ const fmtTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')
 
 export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const activeSession = useStore((state) => state.activeSession);
     const abandonSession = useStore((state) => state.abandonSession);
 
@@ -30,9 +31,10 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
         return () => clearInterval(id);
     }, [activeSession]);
 
-    if (!activeSession) return null;
+    // Hide if no active session OR if currently on the timer page
+    if (!activeSession || location.pathname.startsWith('/timer')) return null;
 
-    const prob = problemMap[activeSession.problemId];
+    const prob = allProblems.find(p => p.id === activeSession.problemId);
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
 
@@ -74,14 +76,13 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                 {!confirmAbandon ? (
                     <div className="flex gap-2 mt-1">
                         <button
-                            onClick={() => navigate('/library')}
+                            onClick={() => navigate('/timer')}
                             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 rounded-lg text-xs font-semibold transition-colors border border-emerald-500/20"
                         >
                             <ArrowRight size={12} />
                             Return
                         </button>
                         <button
-                            aria-label="Abandon session"
                             onClick={() => setConfirmAbandon(true)}
                             className="flex items-center justify-center w-8 h-8 bg-zinc-800/70 hover:bg-red-500/15 text-zinc-500 hover:text-red-400 rounded-lg transition-colors border border-zinc-700/50"
                             title="Abandon session"

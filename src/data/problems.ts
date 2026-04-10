@@ -348,14 +348,6 @@ export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson a
 
 export const allProblems: Problem[] = [...problems, ...extendedCatalogProblems];
 
-export const problemMap: Record<string, Problem> = allProblems.reduce(
-  (acc, p) => {
-    acc[p.id] = p;
-    return acc;
-  },
-  {} as Record<string, Problem>
-);
-
 /** Pool used for recommendations: main list for curated tiers; full list for extended. */
 export function problemsPoolForTargetCurriculum(curriculum: TargetCurriculum): Problem[] {
   const base = curriculum === 'EXTENDED' ? allProblems : problems;
@@ -389,3 +381,8 @@ export const PHASE_2_CATEGORIES: Category[] = [
   'Tries',
   'Backtracking',
 ];
+
+export const problemMap = allProblems.reduce((acc, problem) => {
+  acc[problem.id] = problem;
+  return acc;
+}, {} as Record<string, Problem>);

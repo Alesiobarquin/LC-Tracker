@@ -4,7 +4,6 @@ import { useStore } from '../store/useStore';
 import {
   problems,
   allProblems,
-  problemMap,
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   isProblemPremium,
@@ -23,7 +22,6 @@ import { Timer as TimerComp } from './Timer';
 import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
-import { getDifficultyColor } from '../utils/uiHelpers';
 import {
   computeReviewProblems,
   getEstimatedMinutesByDifficulty,
@@ -230,9 +228,9 @@ export const Dashboard: React.FC = () => {
     return <DashboardSkeleton />;
   }
 
-  const newProblemData = effectiveNewProblemId ? problemMap[effectiveNewProblemId] : null;
-  const reviewProblemsData = effectiveReviewProblems.map(id => problemMap[id]).filter(Boolean);
-  const coldSolveData = coldSolveProblem ? problemMap[coldSolveProblem] : null;
+  const newProblemData = effectiveNewProblemId ? allProblems.find(p => p.id === effectiveNewProblemId) : null;
+  const reviewProblemsData = effectiveReviewProblems.map(id => allProblems.find(p => p.id === id)).filter(Boolean);
+  const coldSolveData = coldSolveProblem ? allProblems.find(p => p.id === coldSolveProblem) : null;
   const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
 
   // ── Dynamic Time Estimates ───────────────────────────────────────────────
@@ -259,14 +257,14 @@ export const Dashboard: React.FC = () => {
     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
   additionalProblems.forEach(id => {
-    const prob = problemMap[id];
+    const prob = allProblems.find(p => p.id === id);
     if (prob) {
       const est = getNewProblemMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
   effectiveReviewProblems.forEach(id => {
-    const prob = problemMap[id];
+    const prob = allProblems.find(p => p.id === id);
     if (prob) {
       const est = getReviewMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
@@ -494,7 +492,7 @@ export const Dashboard: React.FC = () => {
 
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
-    const problem = problemMap[activeSession.problemId];
+    const problem = allProblems.find(p => p.id === activeSession.problemId);
     if (!problem) return null;
     return (
       <TimerComp
@@ -570,7 +568,7 @@ export const Dashboard: React.FC = () => {
               <button onClick={() => setCatchUpPlan('CATCH_UP', missedDaysCount)} className="flex-1 sm:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2">
                 <Zap size={16} /> Catch Up Faster
               </button>
-              <button aria-label="Dismiss catch up banner" onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"><X size={18} /></button>
+              <button onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"><X size={18} /></button>
             </div>
           </div>
         </div>
@@ -624,7 +622,7 @@ export const Dashboard: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-zinc-50 mb-3">{newProblemData.title}</h3>
                       <div className="flex flex-wrap gap-3 text-[10px]">
-                            <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', getDifficultyColor(newProblemData.difficulty))}>{newProblemData.difficulty}</span>
+                        <span className={clsx('px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full font-bold uppercase tracking-wide', newProblemData.difficulty === 'Easy' ? 'text-emerald-400' : newProblemData.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{newProblemData.difficulty}</span>
                         <span className="px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full text-zinc-300 font-bold uppercase tracking-wide">{newProblemData.category}</span>
                         {isProblemPremium(newProblemData) && (
                           <span className="px-3 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-300 font-bold uppercase tracking-wide inline-flex items-center gap-1">
@@ -634,7 +632,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
-                        <a href={newProblemData.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
+                        <a href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
                         <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
                           <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
@@ -666,7 +664,7 @@ export const Dashboard: React.FC = () => {
               );
             })() : newProblemData ? (
               <div className="space-y-4">
-                {[newProblemData, ...(additionalProblems || []).map(id => problemMap[id]).filter(Boolean)].map((prob, idx) => {
+                {[newProblemData, ...(additionalProblems || []).map(id => allProblems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
                   if (!prob) return null;
                   const isPrimary = idx === 0;
                   const est = getNewProblemMinutes(prob.category);
@@ -697,7 +695,7 @@ export const Dashboard: React.FC = () => {
                             )}
                           </div>
                           <div className="flex flex-wrap gap-3 mt-3 text-[10px]">
-                            <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', getDifficultyColor(prob.difficulty))}>{prob.difficulty}</span>
+                            <span className={clsx('px-3 py-1 rounded-full font-bold uppercase tracking-wide bg-white/5 border border-white/10 backdrop-blur-sm', prob.difficulty === 'Easy' ? 'text-emerald-400' : prob.difficulty === 'Medium' ? 'text-amber-400' : 'text-red-400')}>{prob.difficulty}</span>
                             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-zinc-300 font-bold uppercase tracking-wide">{prob.category}</span>
                             <span className={clsx('px-3 py-1 rounded-full border flex items-center gap-1 font-bold uppercase tracking-wide', est.isDefault ? 'bg-white/5 text-zinc-400 border-white/10 backdrop-blur-sm' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 backdrop-blur-sm')}>
                               <Timer size={10} />
@@ -715,7 +713,7 @@ export const Dashboard: React.FC = () => {
                               <SkipForward size={18} />
                             </button>
                           )}
-                          <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
+                          <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
                         </div>
                       </div>
                       <button

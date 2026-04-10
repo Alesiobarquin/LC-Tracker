@@ -4,7 +4,6 @@ import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from '
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { Timer } from './Timer';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
 import { getDifficultyColor } from '../utils/uiHelpers';
@@ -127,6 +126,15 @@ export const ProblemLibrary: React.FC = () => {
     setPendingPremiumStartId(null);
   };
   
+  // Conditionally navigate to timer if a session starts
+  useEffect(() => {
+    if (activeSession) {
+      navigate(`/timer/${activeSession}`);
+      // Clear the local state so navigating back works cleanly
+      setActiveSession(null);
+    }
+  }, [activeSession, navigate]);
+
   const solvedInTab = tabProblems.filter(p => progress[p.id]).length;
   const totalInTab = tabProblems.length;
   const progressPercent = totalInTab > 0 ? Math.round((solvedInTab / totalInTab) * 100) : 0;
@@ -138,12 +146,6 @@ export const ProblemLibrary: React.FC = () => {
 
   if (isLoading) {
     return <ProblemLibrarySkeleton />;
-  }
-
-  if (activeSession) {
-    const problem = problemMap[activeSession];
-    if (!problem) return null;
-    return <Timer problem={problem} isNew={!progress[problem.id]} onComplete={() => setActiveSession(null)} />;
   }
 
   return (

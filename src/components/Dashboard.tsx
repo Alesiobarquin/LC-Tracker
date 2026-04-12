@@ -583,6 +583,9 @@ export const Dashboard: React.FC = () => {
           <p className="text-zinc-400 mt-1">Today's queued work. Run it end-to-end.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2 border-zinc-800 bg-zinc-900/50">
+            <span className="font-medium text-sm sm:text-base text-zinc-100">Total Est: {totalTime}m</span>
+          </div>
           <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2">
             <Flame className="text-orange-500" size={18} />
             <span className="font-medium text-sm sm:text-base text-zinc-100">{streak.current} Day Streak</span>
@@ -593,8 +596,6 @@ export const Dashboard: React.FC = () => {
           <TodayTimer sessionTimings={sessionTimings} activeSession={activeSession} />
         </div>
       </header>
-
-      <WeeklySummary />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -742,10 +743,15 @@ export const Dashboard: React.FC = () => {
           {/* Cold Solve */}
           {coldSolveData && (
             <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.1s' }}>
-              <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-                <Snowflake size={20} className="text-emerald-400" />
-                Cold Solve Challenge
-              </h2>
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-1">
+                  <Snowflake size={20} className="text-emerald-400" />
+                  Cold Solve Challenge
+                </h2>
+                <p className="text-sm text-zinc-400">
+                  A problem you haven't seen in over 30 days. Let's see if you can still solve it!
+                </p>
+              </div>
               <div className="premium-card p-5 border-emerald-500/20 hover:border-emerald-500/40">
                 <div className="flex justify-between items-center">
                   <div>
@@ -832,34 +838,25 @@ export const Dashboard: React.FC = () => {
           {/* Syntax Drills */}
           {syntaxDrillsData && syntaxDrillsData.length > 0 && (
             <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.25s' }}>
-              <div className="flex justify-between items-end mb-4">
-                <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
-                  <BookOpen size={20} className="text-emerald-400" />
-                  Syntax Drills ({syntaxDrillsData.length})
-                </h2>
-                <div className="text-xs text-zinc-500">Takes ~{syntaxDrillsData.length * 2}m to complete</div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {syntaxDrillsData.map((card) => {
-                  if (!card) return null;
-                  return (
-                    <div key={card.id} className="premium-card p-4 flex flex-col justify-between group h-full">
-                      <div>
-                        <div className="text-xs font-medium text-emerald-400 mb-1 truncate">{card.category}</div>
-                        <h4 className="text-sm font-medium text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2">{card.description}</h4>
-                      </div>
-                      <button
-                        onClick={() => {
-                          const syntaxTabBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes('Syntax Reference'));
-                          if (syntaxTabBtn) syntaxTabBtn.click();
-                        }}
-                        className="mt-4 w-full py-1.5 px-3 bg-emerald-500/10 hover:bg-emerald-500 hover:text-zinc-950 text-emerald-400 text-xs font-medium rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500"
-                      >
-                        Drill Now
-                      </button>
-                    </div>
-                  );
-                })}
+              <div className="premium-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl font-semibold text-zinc-100 mb-1 flex items-center gap-2">
+                    <BookOpen size={20} className="text-emerald-400" />
+                    Syntax Drills ({syntaxDrillsData.length} Due)
+                  </h2>
+                  <p className="text-sm text-zinc-400">
+                    Review foundational syntax concepts. Takes ~{syntaxDrillsData.length * 2}m to complete.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const syntaxTabBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes('Syntax Reference'));
+                    if (syntaxTabBtn) syntaxTabBtn.click();
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl flex justify-center items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+                >
+                  <Play size={18} className="fill-current" /> Start Drills
+                </button>
               </div>
             </section>
           )}
@@ -1027,34 +1024,11 @@ export const Dashboard: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* Today's time breakdown detail */}
-          {timeItems.length > 0 && (
-            <div className="premium-card p-5">
-              <h3 className="font-semibold text-zinc-100 mb-3 flex items-center gap-2 text-sm">
-                <Clock size={16} className="text-emerald-400" />
-                Estimated Time Breakdown
-              </h3>
-              <div className="space-y-2">
-                {timeItems.map((item, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400 capitalize">{item.label}</span>
-                    <span className={clsx("font-mono font-medium", item.isDefault ? "text-zinc-500" : "text-emerald-400")}>
-                      {item.minutes}m{item.isDefault ? ' *' : ''}
-                    </span>
-                  </div>
-                ))}
-                <div className="border-t border-zinc-800 pt-2 flex justify-between text-xs font-semibold">
-                  <span className="text-zinc-300">Total</span>
-                  <span className="text-zinc-100">{totalTime}m</span>
-                </div>
-                {timeItems.some(t => t.isDefault) && (
-                  <p className="text-[10px] text-zinc-600">* default estimate (need 3+ sessions)</p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
+      </div>
+
+      <div className="mt-8">
+        <WeeklySummary />
       </div>
     </div>
   );

@@ -119,18 +119,18 @@ export const WeeklySummary: React.FC = () => {
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-zinc-100 mb-2 flex items-center gap-2">
             <Target size={16} className="text-red-400" />
-            Coach's Recommendation for Next Week
+            Performance Insight
           </h3>
           <p className="text-sm text-zinc-300 leading-relaxed">
             {summary.solvedThisWeek === 0 && summary.reviewedThisWeek === 0 ? (
-              "You took a break this week. Let's get back on track! Start with a quick review session to warm up."
+              "No activity recorded this week."
             ) : summary.topWeakness ? (
               <>
-                Great consistency! Your data shows that <strong className="text-red-400">{summary.topWeakness}</strong> is currently your weakest area (Avg Confidence: {summary.lowestAvg}). 
-                I recommend focusing your new problem sessions on this category next week to build a stronger foundation.
+                Weak point identified: <strong className="text-red-400">{summary.topWeakness}</strong> (Avg Confidence: {summary.lowestAvg}).
+                Prioritize new problems in this category.
               </>
             ) : (
-              "Solid work this week! You're making steady progress across the board. Keep following the daily plan."
+              "Consistently scoring across all categories this week. No immediate bottlenecks identified."
             )}
           </p>
         </div>

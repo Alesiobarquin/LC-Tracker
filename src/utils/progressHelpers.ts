@@ -928,7 +928,7 @@ export function buildDailyPlan(params: {
     let targetPattern = null;
     for (const pattern of patterns) {
       const patternProblems = targetPool.filter((p) => getPatternForProblem(p) === pattern.id);
-      const completedCount = patternProblems.filter((p) => !!progress[p.id]).length;
+      const completedCount = patternProblems.filter((p) => progress[p.id]?.retired === true).length;
       
       if (completedCount < patternProblems.length && patternProblems.length > 0) {
         targetPattern = pattern;

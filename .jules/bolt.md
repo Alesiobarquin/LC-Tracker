@@ -1,3 +1,3 @@
-## 2024-04-07 - Inefficient Filtering inside useMemo
-**Learning:** Found an inefficient pattern in `src/components/ProblemLibrary.tsx` where string lowercasing and array unique calculations were done inside `filter`/`sort` loops on every keystroke.
-**Action:** Always extract invariant computations outside loop boundaries within `useMemo` blocks to save CPU cycles on large dataset UI filtering.
+## 2024-05-15 - React Render O(N) Array Find Optimization
+**Learning:** Found O(N) `array.find()` operations within React loops and render paths targeting `allProblems`, introducing CPU overhead during rapid rendering/sorting iterations on a very large problem catalog.
+**Action:** Always pre-compute and rely exclusively on O(1) mappings (`problemMap` by ID and `problemTitleMap` by lowercase title) to avoid O(N*M) bottlenecks during frontend computation steps.

@@ -124,7 +124,28 @@ export type PatternId =
   | 'top-k-elements'
   | 'two-pointers'
   | 'two-heaps'
-  | 'fast-slow-pointers';
+  | 'fast-slow-pointers'
+  | 'intervals'
+  | 'in-place-manipulation-of-a-linked-list'
+  | 'k-way-merge'
+  | 'subsets'
+  | 'greedy-techniques'
+  | 'backtracking'
+  | 'dynamic-programming'
+  | 'cyclic-sort'
+  | 'sort-and-search'
+  | 'matrices'
+  | 'stacks'
+  | 'graphs'
+  | 'tree-depth-first-search'
+  | 'trie'
+  | 'hash-maps'
+  | 'knowing-what-to-track'
+  | 'union-find'
+  | 'custom-data-structures'
+  | 'bitwise-manipulation'
+  | 'math-and-geometry'
+  | 'challenge-yourself';
 
 export interface PatternFoundation {
   id: PatternId;

@@ -8,10 +8,10 @@ import {
   PHASE_2_CATEGORIES,
   isProblemPremium,
   problemsPoolForTargetCurriculum,
-  TARGET_CURRICULUM_LABELS,
+  TARGET_CURRICULUM_LABELS, problemMap,
   type Difficulty,
 } from '../data/problems';
-import { allSyntaxCards } from '../data/syntaxCards';
+import { allSyntaxCards, syntaxCardMap } from '../data/syntaxCards';
 import { patterns } from '../data/patterns';
 import { getPatternForProblem } from '../utils/patternMapping';
 import { getPhase } from '../utils/dateUtils';
@@ -228,10 +228,10 @@ export const Dashboard: React.FC = () => {
     return <DashboardSkeleton />;
   }
 
-  const newProblemData = effectiveNewProblemId ? allProblems.find(p => p.id === effectiveNewProblemId) : null;
-  const reviewProblemsData = effectiveReviewProblems.map(id => allProblems.find(p => p.id === id)).filter(Boolean);
-  const coldSolveData = coldSolveProblem ? allProblems.find(p => p.id === coldSolveProblem) : null;
-  const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
+  const newProblemData = effectiveNewProblemId ? problemMap[effectiveNewProblemId] : null;
+  const reviewProblemsData = effectiveReviewProblems.map(id => problemMap[id]).filter(Boolean);
+  const coldSolveData = coldSolveProblem ? problemMap[coldSolveProblem] : null;
+  const syntaxDrillsData = (dueSyntaxCards || []).map(id => syntaxCardMap[id]).filter(Boolean);
 
   // ── Dynamic Time Estimates ───────────────────────────────────────────────
   const getNewProblemMinutes = (category?: string, difficulty?: Difficulty): { minutes: number; isDefault: boolean } => {
@@ -257,14 +257,14 @@ export const Dashboard: React.FC = () => {
     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
   additionalProblems.forEach(id => {
-    const prob = allProblems.find(p => p.id === id);
+    const prob = problemMap[id];
     if (prob) {
       const est = getNewProblemMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
   effectiveReviewProblems.forEach(id => {
-    const prob = allProblems.find(p => p.id === id);
+    const prob = problemMap[id];
     if (prob) {
       const est = getReviewMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
@@ -492,7 +492,7 @@ export const Dashboard: React.FC = () => {
 
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
-    const problem = allProblems.find(p => p.id === activeSession.problemId);
+    const problem = problemMap[activeSession.problemId];
     if (!problem) return null;
     return (
       <TimerComp
@@ -665,7 +665,7 @@ export const Dashboard: React.FC = () => {
               );
             })() : newProblemData ? (
               <div className="space-y-4">
-                {[newProblemData, ...(additionalProblems || []).map(id => allProblems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
+                {[newProblemData, ...(additionalProblems || []).map(id => problemMap[id]).filter(Boolean)].map((prob, idx) => {
                   if (!prob) return null;
                   const isPrimary = idx === 0;
                   const est = getNewProblemMinutes(prob.category);

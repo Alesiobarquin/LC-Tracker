@@ -382,7 +382,14 @@ export const PHASE_2_CATEGORIES: Category[] = [
   'Backtracking',
 ];
 
+// O(1) lookup map for improved performance
 export const problemMap = allProblems.reduce((acc, problem) => {
   acc[problem.id] = problem;
+  return acc;
+}, {} as Record<string, Problem>);
+
+// O(1) lookup map for finding problems by lowercased title
+export const problemTitleMap = allProblems.reduce((acc, problem) => {
+  acc[problem.title.toLowerCase()] = problem;
   return acc;
 }, {} as Record<string, Problem>);

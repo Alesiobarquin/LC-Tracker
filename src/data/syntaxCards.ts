@@ -841,3 +841,9 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+// O(1) lookup map for improved performance
+export const syntaxCardMap = allSyntaxCards.reduce((acc, card) => {
+  acc[card.id] = card;
+  return acc;
+}, {} as Record<string, SyntaxCard>);

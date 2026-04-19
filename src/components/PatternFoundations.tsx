@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
 import { patterns } from '../data/patterns';
 import { getPatternForProblem } from '../utils/patternMapping';
-import { problems, allProblems, problemMap } from '../data/problems';
+import { problems, allProblems, problemMap, problemTitleMap } from '../data/problems';
 import { computePatternCompletion } from '../utils/progressHelpers';
 import { useProblemProgress } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
@@ -27,7 +27,7 @@ export const PatternFoundations: React.FC = () => {
         .map(ep => {
           const lowerTitle = ep.title.toLowerCase();
           // Title lookup still needs search or a title-based map
-          return allProblems.find(ap => ap.title.toLowerCase() === lowerTitle);
+          return problemTitleMap[lowerTitle];
         })
         .filter((p): p is NonNullable<typeof p> => Boolean(p) && !coreIds.has(p.id));
         
@@ -63,7 +63,7 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
   const { user } = useUser();
 
   const { data: problemProgress, logProblem, removeProblem } = useProblemProgress();
-  const pattern = patternData.find((p: any) => p.id === patternId);
+  const pattern = patternData.find((p: any) => p.id === patternId); // Leaving this as find because patternData is a local mapped array from useMemo
   
   const toggleSolved = (problemId: string, isSolved: boolean) => {
     if (!user) {

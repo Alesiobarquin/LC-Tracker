@@ -1,3 +1,4 @@
 ## 2024-04-07 - Inefficient Filtering inside useMemo
 **Learning:** Found an inefficient pattern in `src/components/ProblemLibrary.tsx` where string lowercasing and array unique calculations were done inside `filter`/`sort` loops on every keystroke.
 **Action:** Always extract invariant computations outside loop boundaries within `useMemo` blocks to save CPU cycles on large dataset UI filtering.
+## 2024-04-24 - Array .find() Performance Bottleneck\n**Learning:** Found an inefficient pattern where `allProblems.find()` and `allSyntaxCards.find()` were called inside `.map()` loops within component render cycles (e.g. `Dashboard.tsx`), resulting in O(N*M) time complexity.\n**Action:** Avoid `.find()` in render loops on large arrays. Always pre-compute and export O(1) lookup dictionaries (like `problemMap`) alongside array definitions in data files, and consume those directly.

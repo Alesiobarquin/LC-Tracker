@@ -841,3 +841,9 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+// Bolt Optimization: O(1) lookup map for syntax cards to replace slow array .find() calls
+export const syntaxCardMap = allSyntaxCards.reduce((acc, card) => {
+  acc[card.id] = card;
+  return acc;
+}, {} as Record<string, SyntaxCard>);

@@ -165,7 +165,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
           <div className="font-semibold text-lg tracking-[0.02em] text-emerald-300">{BRAND.name}</div>
         </div>
-        <button aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
+        <button aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100 rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -365,8 +365,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
                 
                 <button 
+                  aria-label="Close authentication modal"
                   onClick={() => setAuthModalTarget(null)}
-                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
+                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                 >
                   <X size={20} />
                 </button>

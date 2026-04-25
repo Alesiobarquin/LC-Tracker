@@ -26,18 +26,27 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "LC Tracker",
-        "description": "LC Tracker is a LeetCode tracker for spaced repetition, progress analytics, and technical interview prep.",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web",
-        "url": "https://lc-tracker.app/",
-        "image": "https://lc-tracker.app/og-image.svg",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "LC Tracker",
+            "url": "https://lc-tracker.app/"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "LC Tracker",
+            "description": "LC Tracker is a LeetCode tracker for spaced repetition, progress analytics, and technical interview prep.",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "url": "https://lc-tracker.app/",
+            "image": "https://lc-tracker.app/og-image.svg",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            }
+          }
+        ]
       }
     </script>
     <link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png" />

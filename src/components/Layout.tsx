@@ -161,10 +161,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur sticky top-0 z-50">
-        <div className="flex items-center gap-2">
+        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2">
           <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
           <div className="font-semibold text-lg tracking-[0.02em] text-emerald-300">{BRAND.name}</div>
-        </div>
+        </Link>
         <button aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -176,23 +176,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-4 hidden md:block">
-          <div className="flex items-center gap-3">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-3">
             <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={32} />
             <div className="font-semibold text-lg tracking-[0.03em] text-emerald-300">{BRAND.name}</div>
-          </div>
+          </Link>
         </div>
 
         <nav className="mt-1 px-3 space-y-1 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => {
+                to={`/${item.id}`}
+                onClick={(e) => {
                   if (!user && item.protected) {
+                    e.preventDefault();
                     setAuthModalTarget(item.label);
-                  } else {
-                    navigate(`/${item.id}`);
                   }
                   setIsMobileMenuOpen(false);
                 }}
@@ -213,7 +213,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
                 <Icon size={18} className={activeTab === item.id ? "text-emerald-400" : ""} />
                 <span>{item.label}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>

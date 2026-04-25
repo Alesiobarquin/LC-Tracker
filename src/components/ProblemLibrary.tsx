@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { problems, allProblems, problemMap, isProblemPremium, Category } from '../data/problems';
-import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library } from 'lucide-react';
+import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library, Copy } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
@@ -24,7 +24,7 @@ export const ProblemLibrary: React.FC = () => {
   const [pendingPremiumStartId, setPendingPremiumStartId] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<
-    'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog'
+    'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog' | 'Solved Problems'
   >('NeetCode 75');
   const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);
   const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
@@ -34,8 +34,9 @@ export const ProblemLibrary: React.FC = () => {
     if (activeTab === 'NeetCode 150') return problems.filter((p) => p.isNeetCode150);
     if (activeTab === 'NeetCode 250') return problems.filter((p) => p.isNeetCode250);
     if (activeTab === 'Full Catalog') return allProblems;
+    if (activeTab === 'Solved Problems') return allProblems.filter((p) => progress[p.id]);
     return [];
-  }, [activeTab]);
+  }, [activeTab, progress]);
 
   useEffect(() => {
     setVisibleLimit(PROBLEM_LIST_INITIAL_CHUNK);
@@ -120,10 +121,20 @@ export const ProblemLibrary: React.FC = () => {
     setActiveSession(problemId);
   };
 
+  const [isCopied, setIsCopied] = useState(false);
+
   const confirmPremiumStart = () => {
     if (!pendingPremiumStartId) return;
     setActiveSession(pendingPremiumStartId);
     setPendingPremiumStartId(null);
+  };
+
+  const copySolvedProblems = () => {
+    const solvedList = allProblems.filter((p) => progress[p.id]).map(p => p.title).join('\n');
+    navigator.clipboard.writeText(solvedList).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
   };
   
   // Conditionally navigate to timer if a session starts
@@ -159,36 +170,49 @@ export const ProblemLibrary: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
-          {(['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog'] as const).map((tab) => (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
+          <div className="flex flex-wrap gap-2">
+            {(['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog', 'Solved Problems'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={clsx(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  activeTab === tab 
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          {activeTab === 'Solved Problems' && (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={clsx(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                activeTab === tab 
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
-              )}
+              onClick={copySolvedProblems}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors border border-zinc-700"
             >
-              {tab}
+              {isCopied ? <CircleCheck size={14} className="text-emerald-500" /> : <Copy size={14} />}
+              {isCopied ? 'Copied!' : 'Copy List'}
             </button>
-          ))}
+          )}
         </div>
 
         {/* Progress Bar */}
-        <div className="premium-card p-4">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-zinc-400">{activeTab} Progress</span>
-            <span className="text-zinc-100 font-medium">{solvedInTab} / {totalInTab}</span>
+        {activeTab !== 'Solved Problems' && (
+          <div className="premium-card p-4">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-zinc-400">{activeTab} Progress</span>
+              <span className="text-zinc-100 font-medium">{solvedInTab} / {totalInTab}</span>
+            </div>
+            <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
+              <div 
+                className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
-            <div 
-              className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

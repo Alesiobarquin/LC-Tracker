@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, problemMap, isProblemPremium, Category } from '../data/problems';
+import { problems, allProblems, problemMap, problemTitleMap, isProblemPremium, Category } from '../data/problems';
 import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library, Copy } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +50,7 @@ export const ProblemLibrary: React.FC = () => {
     const searchLower = search.toLowerCase();
 
     let result = tabProblems.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(searchLower);
+      const matchesSearch = (problemTitleMap[p.id] || p.title.toLowerCase()).includes(searchLower);
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
       return matchesSearch && matchesCategory;
     });

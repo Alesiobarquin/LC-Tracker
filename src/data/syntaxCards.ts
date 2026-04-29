@@ -841,3 +841,13 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+export const syntaxCardLowerMap = allSyntaxCards.reduce((acc, card) => {
+  acc[card.id] = {
+    description: card.description.toLowerCase(),
+    syntax: card.syntax.toLowerCase(),
+    category: card.category.toLowerCase(),
+    useCase: card.useCase.toLowerCase(),
+  };
+  return acc;
+}, {} as Record<string, {description: string, syntax: string, category: string, useCase: string}>);

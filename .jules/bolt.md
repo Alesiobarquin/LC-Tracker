@@ -1,3 +1,4 @@
-## 2024-04-07 - Inefficient Filtering inside useMemo
-**Learning:** Found an inefficient pattern in `src/components/ProblemLibrary.tsx` where string lowercasing and array unique calculations were done inside `filter`/`sort` loops on every keystroke.
-**Action:** Always extract invariant computations outside loop boundaries within `useMemo` blocks to save CPU cycles on large dataset UI filtering.
+## 2024-05-14 - Optimize array lookups
+
+**Learning:** `allProblems.find` is an O(N) operation and is frequently used across the codebase for exact ID or title lookups. This is highly inefficient in React renders.
+**Action:** Replaced `allProblems.find(p => p.id === id)` with the existing `problemMap[id]` to convert O(N) searches into O(1) lookups. For title lookups, introduced `problemTitleToProblemMap` in `src/data/problems.ts` to also enable O(1) performance instead of searching an array with >1500 items on every render.

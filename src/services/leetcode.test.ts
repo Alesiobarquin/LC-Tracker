@@ -72,6 +72,9 @@ describe('fetchLeetCodeProfile', () => {
   });
 
   it('should throw LeetCodeApiError when primary API returns GraphQL errors and fallback fails', async () => {
+    // A single execution will exhaust the two mocked responses.
+    // So we'll catch the error explicitly instead of calling the function twice.
+
     // Primary returns GraphQL error
     (fetch as any).mockResolvedValueOnce({
       ok: true,
@@ -86,8 +89,9 @@ describe('fetchLeetCodeProfile', () => {
       text: () => Promise.resolve('Internal Server Error')
     });
 
-    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow(LeetCodeApiError);
-    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow('Fallback API failed: Internal Server Error');
+    const promise = fetchLeetCodeProfile('testuser');
+    await expect(promise).rejects.toThrow(LeetCodeApiError);
+    await expect(promise).rejects.toThrow('Fallback API failed: Internal Server Error');
   });
 
   it('should handle network errors by falling back', async () => {

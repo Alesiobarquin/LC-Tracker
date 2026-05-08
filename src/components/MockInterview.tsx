@@ -69,7 +69,8 @@ export const MockInterview: React.FC = () => {
     setCode('');
 
     if (useExternalLeetCode) {
-      window.open(randomProblem.leetcodeUrl, '_blank');
+      // Security: Prevent tabnabbing by adding noopener,noreferrer
+      window.open(randomProblem.leetcodeUrl, '_blank', 'noopener,noreferrer');
       setIsRunning(false);
       setIsFinished(true);
     } else {

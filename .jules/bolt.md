@@ -1,3 +1,3 @@
-## 2024-04-07 - Inefficient Filtering inside useMemo
-**Learning:** Found an inefficient pattern in `src/components/ProblemLibrary.tsx` where string lowercasing and array unique calculations were done inside `filter`/`sort` loops on every keystroke.
-**Action:** Always extract invariant computations outside loop boundaries within `useMemo` blocks to save CPU cycles on large dataset UI filtering.
+## 2024-04-19 - Fast Lookups in Render Cycle
+**Learning:** Found multiple instances where large arrays (like `allProblems` which contains ~250 items, or `allSyntaxCards`) were being iterated using `.find()` inside React component render functions (e.g., in `Dashboard.tsx`, `FloatingSessionIndicator.tsx`). This leads to O(n) lookups during rendering, which scales poorly.
+**Action:** When working with structured ID-based data sources that are accessed frequently within React render loops, ensure a pre-computed map structure (like `problemMap` for O(1) object lookup) is provided natively alongside the base array.

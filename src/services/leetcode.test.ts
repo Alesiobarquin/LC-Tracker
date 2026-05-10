@@ -87,7 +87,7 @@ describe('fetchLeetCodeProfile', () => {
     });
 
     await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow(LeetCodeApiError);
-    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow('Fallback API failed: Internal Server Error');
+    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow('All LeetCode API methods failed');
   });
 
   it('should handle network errors by falling back', async () => {

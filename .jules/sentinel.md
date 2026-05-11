@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-05-11 - XSS vulnerability via image src attributes
+**Vulnerability:** User-provided URLs (`ticket.image_url`) were being passed directly to the `src` attribute of `<img>` tags in the AdminDashboard.
+**Learning:** While the `href` attribute on anchor links was properly sanitized (checking for http/https), the `src` attribute inside the `<img>` tag was completely unprotected. An attacker could potentially use `javascript:` URIs or other malicious payloads directly in the `src` attribute. Even though `<img>` `javascript:` execution is blocked in most modern browsers, it is a significant defense-in-depth failure and can cause tracking or server-side-request-forgery if not filtered. Furthermore, centralized sanitization utilities are vastly superior to inline `try/catch` checks, as it prevents developers from forgetting to apply it uniformly to all attributes.
+**Prevention:** Always use a central URL sanitization utility (`src/utils/urlUtils.ts`) on untrusted URLs before passing them to ANY DOM attribute (`href`, `src`, `action`, etc.).

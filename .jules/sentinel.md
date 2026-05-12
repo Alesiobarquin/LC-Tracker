@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-04-10 - Consolidate XSS Protection and Fix Tabnabbing
+**Vulnerability:** Similar to previous URL injection issues, user-provided URLs used as `src` in images were not sanitized, allowing `javascript:` URIs. Additionally, programmatic navigation via `window.open` lacked `noopener,noreferrer`, exposing a tabnabbing vector.
+**Learning:** XSS via `javascript:` URIs applies to BOTH `href` attributes on anchors AND `src` attributes on images/iframes. `window.open` needs the same protections as `target="_blank"` anchors, passed as the third parameter. Inline `try/catch` logic scattered across the codebase is error-prone.
+**Prevention:** Centralize URL sanitization into a single utility (`sanitizeUrl`) and apply it consistently to all user-controlled `href` and `src` attributes. Always pass `'noopener,noreferrer'` as the features string when using `window.open` with `_blank`.

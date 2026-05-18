@@ -42,6 +42,10 @@ export const ProblemLibrary: React.FC = () => {
     setVisibleLimit(PROBLEM_LIST_INITIAL_CHUNK);
   }, [activeTab, search, activeCategory, sortConfig]);
 
+  const preparedTabProblems = useMemo(() => {
+    return tabProblems.map(p => ({ ...p, lowerTitle: p.title.toLowerCase() }));
+  }, [tabProblems]);
+
   const categories = useMemo(() => {
     return ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
   }, [tabProblems]);
@@ -49,8 +53,8 @@ export const ProblemLibrary: React.FC = () => {
   const filteredProblems = useMemo(() => {
     const searchLower = search.toLowerCase();
 
-    let result = tabProblems.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(searchLower);
+    let result = preparedTabProblems.filter(p => {
+      const matchesSearch = p.lowerTitle.includes(searchLower);
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
       return matchesSearch && matchesCategory;
     });

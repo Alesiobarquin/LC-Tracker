@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-04-10 - Centralized URL Sanitization and window.open Security
+**Vulnerability:** Inline, incomplete URL sanitization in `AdminDashboard.tsx` missed checking the `src` attribute of `<img>` tags (which can also lead to issues or broken states with malicious URIs), and `window.open` in `MockInterview.tsx` was called without `noopener,noreferrer` arguments.
+**Learning:** URL sanitization must be centralized (e.g., `sanitizeUrl` utility) to ensure consistency across the codebase. Applying sanitization inline often leads to missed attributes (like `src` alongside `href`). Additionally, `window.open` is susceptible to tabnabbing if `noopener,noreferrer` is not explicitly passed as the third parameter, similar to standard anchor tags.
+**Prevention:** Always use a centralized URL sanitizer for user-provided URLs and apply it to both `href` and `src` attributes. For programmatic navigation with `window.open`, always include `noopener,noreferrer` as the window features string.

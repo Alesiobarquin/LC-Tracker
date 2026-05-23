@@ -412,8 +412,9 @@ export const ProblemLibrary: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                                   title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
+                                  aria-label={`Start practice timer for ${prob.title}`}
                                 >
                                   <Play size={16} />
                                 </button>

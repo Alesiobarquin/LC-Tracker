@@ -10,6 +10,7 @@ export class LeetCodeApiError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = 'LeetCodeApiError';
+    Object.setPrototypeOf(this, LeetCodeApiError.prototype);
   }
 }
 
@@ -61,7 +62,7 @@ export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSu
       const data = await fbResponse.json();
       return data.submission || [];
     } catch (fallbackError) {
-      if (fallbackError instanceof LeetCodeApiError) {
+      if (fallbackError instanceof LeetCodeApiError || (fallbackError instanceof Error && fallbackError.name === 'LeetCodeApiError')) {
         throw fallbackError;
       }
       throw new LeetCodeApiError('All LeetCode API methods failed', { cause: fallbackError });

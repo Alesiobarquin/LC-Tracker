@@ -117,14 +117,35 @@ export interface CatchUpPlanState {
 }
 
 export type PatternId = 
-  | 'sliding-window'
-  | 'binary-search'
-  | 'topological-sort'
-  | 'bfs'
-  | 'top-k-elements'
   | 'two-pointers'
+  | 'fast-slow-pointers'
+  | 'sliding-window'
+  | 'intervals'
+  | 'in-place-manipulation-of-a-linked-list'
   | 'two-heaps'
-  | 'fast-slow-pointers';
+  | 'k-way-merge'
+  | 'top-k-elements'
+  | 'binary-search'
+  | 'subsets'
+  | 'greedy-techniques'
+  | 'backtracking'
+  | 'dynamic-programming'
+  | 'cyclic-sort'
+  | 'topological-sort'
+  | 'sort-and-search'
+  | 'matrices'
+  | 'stacks'
+  | 'graphs'
+  | 'tree-depth-first-search'
+  | 'bfs'
+  | 'trie'
+  | 'hash-maps'
+  | 'knowing-what-to-track'
+  | 'union-find'
+  | 'custom-data-structures'
+  | 'bitwise-manipulation'
+  | 'math-and-geometry'
+  | 'challenge-yourself';
 
 export interface PatternFoundation {
   id: PatternId;

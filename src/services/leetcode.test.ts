@@ -86,8 +86,9 @@ describe('fetchLeetCodeProfile', () => {
       text: () => Promise.resolve('Internal Server Error')
     });
 
-    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow(LeetCodeApiError);
-    await expect(fetchLeetCodeProfile('testuser')).rejects.toThrow('Fallback API failed: Internal Server Error');
+    const promise = fetchLeetCodeProfile('testuser');
+    await expect(promise).rejects.toThrow(LeetCodeApiError);
+    await expect(promise).rejects.toThrow('Fallback API failed: Internal Server Error');
   });
 
   it('should handle network errors by falling back', async () => {

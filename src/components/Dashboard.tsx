@@ -19,7 +19,6 @@ import { Play, CircleCheck, Clock, Flame, Target, ExternalLink, CircleAlert, Spa
 import { clsx } from 'clsx';
 import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import { Timer as TimerComp } from './Timer';
-import { WeeklySummary } from './WeeklySummary';
 import { type SessionTiming } from '../types';
 import { buildDailyPlan, useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useStreak, useSyntaxProgress, useUserSettings } from '../hooks/useUserData';
 import {
@@ -82,6 +81,7 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [showReadinessDetails, setShowReadinessDetails] = useState(false);
   const { streak, graceDay } = useStreak();
   const {
     progress,
@@ -987,48 +987,55 @@ export const Dashboard: React.FC = () => {
 
           {/* Readiness Score */}
           <div className="premium-card p-6">
-            <h3 className="font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-              <Brain size={18} className="text-emerald-400" />
-              Interview Readiness
-            </h3>
-            <div className="text-5xl font-black text-zinc-50 mb-4">{readinessScore}<span className="text-xl text-zinc-500">/100</span></div>
-
-            <div className="space-y-2 text-xs">
-              {[
-                { label: 'Phase Completion', value: phaseScore, max: 30 },
-                { label: 'Avg Confidence', value: confidenceScore, max: 25 },
-                { label: 'SR Health', value: srHealthScore, max: 20 },
-                { label: 'Mock Performance', value: mockScore, max: 15 },
-                { label: 'Syntax Mastery', value: syntaxScore, max: 10 },
-              ].map(c => (
-                <div key={c.label}>
-                  <div className="flex justify-between text-zinc-400 mb-1">
-                    <span>{c.label}</span>
-                    <span>{Math.round(c.value)}/{c.max}</span>
-                  </div>
-                  <div className="h-1 bg-zinc-800 rounded-full">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(c.value / c.max) * 100}%` }} />
-                  </div>
-                </div>
-              ))}
-              {speedBonusScore > 0 && (
-                <div>
-                  <div className="flex justify-between text-emerald-400 mb-1">
-                    <span className="flex items-center gap-1"><TrendingDown size={10} /> Speed Improvement Bonus</span>
-                    <span>+{speedBonusScore}/5</span>
-                  </div>
-                  <div className="h-1 bg-zinc-800 rounded-full">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(speedBonusScore / 5) * 100}%` }} />
-                  </div>
-                </div>
-              )}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-zinc-100 flex items-center gap-2">
+                <Brain size={18} className="text-emerald-400" />
+                Interview Readiness
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowReadinessDetails(!showReadinessDetails)}
+                className="text-xs text-zinc-400 hover:text-emerald-400 transition-colors border border-zinc-800 hover:border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 px-2 py-1 rounded"
+              >
+                {showReadinessDetails ? 'Hide details' : 'Show details'}
+              </button>
             </div>
+            <div className="text-5xl font-black text-zinc-50 mb-2">{readinessScore}<span className="text-xl text-zinc-500">/100</span></div>
+
+            {showReadinessDetails && (
+              <div className="space-y-2 text-xs mt-4 pt-4 border-t border-zinc-800 animate-in fade-in duration-300">
+                {[
+                  { label: 'Phase Completion', value: phaseScore, max: 30 },
+                  { label: 'Avg Confidence', value: confidenceScore, max: 25 },
+                  { label: 'SR Health', value: srHealthScore, max: 20 },
+                  { label: 'Mock Performance', value: mockScore, max: 15 },
+                  { label: 'Syntax Mastery', value: syntaxScore, max: 10 },
+                ].map(c => (
+                  <div key={c.label}>
+                    <div className="flex justify-between text-zinc-400 mb-1">
+                      <span>{c.label}</span>
+                      <span>{Math.round(c.value)}/{c.max}</span>
+                    </div>
+                    <div className="h-1 bg-zinc-800 rounded-full">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(c.value / c.max) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+                {speedBonusScore > 0 && (
+                  <div>
+                    <div className="flex justify-between text-emerald-400 mb-1">
+                      <span className="flex items-center gap-1"><TrendingDown size={10} /> Speed Improvement Bonus</span>
+                      <span>+{speedBonusScore}/5</span>
+                    </div>
+                    <div className="h-1 bg-zinc-800 rounded-full">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(speedBonusScore / 5) * 100}%` }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="mt-8">
-        <WeeklySummary />
       </div>
     </div>
   );

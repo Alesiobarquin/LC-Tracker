@@ -25,7 +25,18 @@ export const ProblemLibrary: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<
     'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog' | 'Solved Problems'
-  >('NeetCode 75');
+  >(() => {
+    const saved = localStorage.getItem('lc-tracker-active-library-tab');
+    const validTabs = ['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog', 'Solved Problems'];
+    return (saved && validTabs.includes(saved))
+      ? (saved as any)
+      : 'NeetCode 75';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lc-tracker-active-library-tab', activeTab);
+  }, [activeTab]);
+
   const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);
   const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
 

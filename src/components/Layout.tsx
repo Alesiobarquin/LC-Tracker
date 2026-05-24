@@ -366,7 +366,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 
                 <button 
                   onClick={() => setAuthModalTarget(null)}
-                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
+                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  aria-label="Close auth modal"
+                  title="Close auth modal"
                 >
                   <X size={20} />
                 </button>

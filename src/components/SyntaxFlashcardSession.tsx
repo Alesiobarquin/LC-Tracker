@@ -314,7 +314,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             if (phase === 'summary' || results.length === 0) onClose();
                             else setShowExitConfirm(true);
                         }}
-                        className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+                        className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors focus-visible:ring-2 outline-none focus-visible:ring-emerald-500"
                         title="Exit (Esc)"
                     >
                         <X size={17} />

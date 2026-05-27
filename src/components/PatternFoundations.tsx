@@ -177,6 +177,7 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                           rel="noopener noreferrer"
                           className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"
                           title="Open on LeetCode"
+                          aria-label={`Open ${prob.title} on LeetCode`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink size={16} />

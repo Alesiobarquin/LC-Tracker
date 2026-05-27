@@ -12,3 +12,7 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+## 2024-05-15 - Consistent URL Sanitization
+**Vulnerability:** XSS via unsanitized user-provided URLs in `src` attributes and potential unhandled `href` attributes. Additionally, tabnabbing via `window.open` lacking `noopener,noreferrer`.
+**Learning:** We need a centralized URL sanitization function. Also, `window.open` needs the same protections as standard `<a>` tags.
+**Prevention:** Use a centralized `sanitizeUrl` using `new URL()` validation for user-provided links, apply it to all user-sourced URL references. Add `noopener,noreferrer` to all `window.open` external navigations.

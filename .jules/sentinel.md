@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2024-05-24 - Centralize URL Sanitization
+**Vulnerability:** URLs constructed dynamically with user data or untrusted sources are vulnerable to XSS injection through `javascript:` URIs. Inline `try/catch` checks (like `new URL(...)`) are prone to missing edge cases and code duplication.
+**Learning:** We need a centralized `sanitizeUrl` function in a generic utility file (e.g. `src/utils/urlUtils.ts`) and apply it whenever setting an `href` or `src` attribute from user-supplied or external data.
+**Prevention:** Implement `src/utils/urlUtils.ts` containing the `sanitizeUrl` function and replace all inline verification with this centralized utility.

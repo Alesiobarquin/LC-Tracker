@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2024-05-18 - Centralized URL Sanitization for Both href and src
+**Vulnerability:** While `href` attributes in the Admin Dashboard were checking for `http:`/`https:`, the `src` attribute of the image tag was still directly using the raw user-provided `image_url`. This could potentially lead to XSS if a malicious payload was provided.
+**Learning:** Inline URL sanitization is repetitive and prone to missing edge cases or specific attributes (like `src` on `<img>` tags). All user-provided URLs must be sanitized consistently.
+**Prevention:** Use a centralized `sanitizeUrl` utility function and ensure it is applied to all relevant attributes (e.g., both `href` and `src` when rendering links containing images).

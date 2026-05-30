@@ -386,3 +386,8 @@ export const problemMap = allProblems.reduce((acc, problem) => {
   acc[problem.id] = problem;
   return acc;
 }, {} as Record<string, Problem>);
+
+export const problemTitleMap = new Map<string, Problem>();
+for (const p of allProblems) {
+  problemTitleMap.set(p.title.toLowerCase(), p);
+}

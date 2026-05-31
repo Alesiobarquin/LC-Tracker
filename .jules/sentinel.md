@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-04-10 - Reusable URL sanitization pattern
+**Vulnerability:** Inconsistent URL validation in `AdminDashboard.tsx` allowed potential XSS on image rendering if an attacker provided a non-HTTP/HTTPS protocol string (e.g., `javascript:alert(1)` for a payload inside an anchor `href` or `src` attribute). Even though we implemented inline checking previously, it was isolated and verbose.
+**Learning:** Security validations like URL sanitization must be centralized and reused across the application to avoid logic drift and missing edge cases across components. Using inline logic meant we were repeating similar checks with varying success.
+**Prevention:** Created a centralized utility function (`src/utils/urlUtils.ts` -> `sanitizeUrl`) which uses `new URL()` to enforce `http:` or `https:` protocols and securely fails over to `#`. This must be applied whenever user-provided URLs are dynamically set as attributes (`href`, `src`).

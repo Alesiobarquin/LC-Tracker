@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## $(date +%Y-%m-%d) - Fix XSS vulnerability in Admin Dashboard image src
+**Vulnerability:** The Admin Dashboard rendered user-provided `image_url` directly as an `src` inside an `<img>` tag without proper sanitization.
+**Learning:** Even though the `href` attribute was sanitized, an attacker could still use `javascript:alert(1)` in the `src` attribute. Both `src` and `href` should use the sanitized URL.
+**Prevention:** Use a centralized `sanitizeUrl` function to ensure consistency in validating all user-provided URLs before rendering them as `href` or `src` attributes.

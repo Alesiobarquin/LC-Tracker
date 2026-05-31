@@ -1,0 +1,155 @@
+diff --git a/.jules/bolt.md b/.jules/bolt.md
+index e40b987..0c81cb3 100644
+--- a/.jules/bolt.md
++++ b/.jules/bolt.md
+@@ -1,3 +1,8 @@
+ ## 2024-04-07 - Inefficient Filtering inside useMemo
+ **Learning:** Found an inefficient pattern in `src/components/ProblemLibrary.tsx` where string lowercasing and array unique calculations were done inside `filter`/`sort` loops on every keystroke.
+ **Action:** Always extract invariant computations outside loop boundaries within `useMemo` blocks to save CPU cycles on large dataset UI filtering.
++## 2024-05-18 - Array Lookups in React Render Loop
++
++**Learning:** Array `.find()` methods within loops and React render cycles (like in Dashboard.tsx or PatternFoundations.tsx) can become performance bottlenecks as the problem catalog grows, resulting in O(N) operations scaling with the catalog size per lookup.
++
++**Action:** Replace `allProblems.find(...)` and `allSyntaxCards.find(...)` with pre-computed O(1) hash maps (e.g. `problemMap` by id, `problemTitleMap` by lowercase title, `syntaxCardMap` by id) initialized once at the module level.
+diff --git a/src/components/Dashboard.tsx b/src/components/Dashboard.tsx
+index 4038cda..ccb434d 100644
+--- a/src/components/Dashboard.tsx
++++ b/src/components/Dashboard.tsx
+@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
+ import {
+   problems,
+   allProblems,
++  problemMap,
+   PHASE_1_CATEGORIES,
+   PHASE_2_CATEGORIES,
+   isProblemPremium,
+@@ -11,7 +12,7 @@ import {
+   TARGET_CURRICULUM_LABELS,
+   type Difficulty,
+ } from '../data/problems';
+-import { allSyntaxCards } from '../data/syntaxCards';
++import { allSyntaxCards, syntaxCardMap } from '../data/syntaxCards';
+ import { patterns } from '../data/patterns';
+ import { getPatternForProblem } from '../utils/patternMapping';
+ import { getPhase } from '../utils/dateUtils';
+@@ -228,10 +229,10 @@ export const Dashboard: React.FC = () => {
+     return <DashboardSkeleton />;
+   }
+
+-  const newProblemData = effectiveNewProblemId ? allProblems.find(p => p.id === effectiveNewProblemId) : null;
+-  const reviewProblemsData = effectiveReviewProblems.map(id => allProblems.find(p => p.id === id)).filter(Boolean);
+-  const coldSolveData = coldSolveProblem ? allProblems.find(p => p.id === coldSolveProblem) : null;
+-  const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
++  const newProblemData = effectiveNewProblemId ? problemMap[effectiveNewProblemId] : null;
++  const reviewProblemsData = effectiveReviewProblems.map(id => problemMap[id]).filter(Boolean);
++  const coldSolveData = coldSolveProblem ? problemMap[coldSolveProblem] : null;
++  const syntaxDrillsData = (dueSyntaxCards || []).map(id => syntaxCardMap[id]).filter(Boolean);
+
+   // ── Dynamic Time Estimates ───────────────────────────────────────────────
+   const getNewProblemMinutes = (category?: string, difficulty?: Difficulty): { minutes: number; isDefault: boolean } => {
+@@ -257,14 +258,14 @@ export const Dashboard: React.FC = () => {
+     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
+   }
+   additionalProblems.forEach(id => {
+-    const prob = allProblems.find(p => p.id === id);
++    const prob = problemMap[id];
+     if (prob) {
+       const est = getNewProblemMinutes(prob.category, prob.difficulty);
+       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
+     }
+   });
+   effectiveReviewProblems.forEach(id => {
+-    const prob = allProblems.find(p => p.id === id);
++    const prob = problemMap[id];
+     if (prob) {
+       const est = getReviewMinutes(prob.category, prob.difficulty);
+       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
+@@ -492,7 +493,7 @@ export const Dashboard: React.FC = () => {
+
+   // ── Active Session Handling ───────────────────────────────────────────────
+   if (activeSession) {
+-    const problem = allProblems.find(p => p.id === activeSession.problemId);
++    const problem = problemMap[activeSession.problemId];
+     if (!problem) return null;
+     return (
+       <TimerComp
+@@ -665,7 +666,7 @@ export const Dashboard: React.FC = () => {
+               );
+             })() : newProblemData ? (
+               <div className="space-y-4">
+-                {[newProblemData, ...(additionalProblems || []).map(id => allProblems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
++                {[newProblemData, ...(additionalProblems || []).map(id => problemMap[id]).filter(Boolean)].map((prob, idx) => {
+                   if (!prob) return null;
+                   const isPrimary = idx === 0;
+                   const est = getNewProblemMinutes(prob.category);
+diff --git a/src/components/FloatingSessionIndicator.tsx b/src/components/FloatingSessionIndicator.tsx
+index 292dc1a..953e720 100644
+--- a/src/components/FloatingSessionIndicator.tsx
++++ b/src/components/FloatingSessionIndicator.tsx
+@@ -1,7 +1,7 @@
+ import React, { useState, useEffect } from 'react';
+ import { useStore } from '../store/useStore';
+ import { useNavigate, useLocation } from 'react-router-dom';
+-import { allProblems } from '../data/problems';
++import { allProblems, problemMap } from '../data/problems';
+ import { ArrowRight, X, Timer } from 'lucide-react';
+
+ interface FloatingSessionIndicatorProps {}
+@@ -34,7 +34,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
+     // Hide if no active session OR if currently on the timer page
+     if (!activeSession || location.pathname.startsWith('/timer')) return null;
+
+-    const prob = allProblems.find(p => p.id === activeSession.problemId);
++    const prob = problemMap[activeSession.problemId];
+     const probName = prob?.title ?? 'Problem';
+     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
+
+diff --git a/src/components/PatternFoundations.tsx b/src/components/PatternFoundations.tsx
+index e41febc..333c2d5 100644
+--- a/src/components/PatternFoundations.tsx
++++ b/src/components/PatternFoundations.tsx
+@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
+ import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
+ import { patterns } from '../data/patterns';
+ import { getPatternForProblem } from '../utils/patternMapping';
+-import { problems, allProblems, problemMap } from '../data/problems';
++import { problems, allProblems, problemMap, problemTitleMap } from '../data/problems';
+ import { computePatternCompletion } from '../utils/progressHelpers';
+ import { useProblemProgress } from '../hooks/useUserData';
+ import { getDifficultyColor } from '../utils/uiHelpers';
+@@ -26,8 +26,7 @@ export const PatternFoundations: React.FC = () => {
+       const extraMapped = (pattern.educativeProblems || [])
+         .map(ep => {
+           const lowerTitle = ep.title.toLowerCase();
+-          // Title lookup still needs search or a title-based map
+-          return allProblems.find(ap => ap.title.toLowerCase() === lowerTitle);
++          return problemTitleMap[lowerTitle];
+         })
+         .filter((p): p is NonNullable<typeof p> => Boolean(p) && !coreIds.has(p.id));
+
+diff --git a/src/data/problems.ts b/src/data/problems.ts
+index 2424901..99e386d 100644
+--- a/src/data/problems.ts
++++ b/src/data/problems.ts
+@@ -386,3 +386,8 @@ export const problemMap = allProblems.reduce((acc, problem) => {
+   acc[problem.id] = problem;
+   return acc;
+ }, {} as Record<string, Problem>);
++
++export const problemTitleMap = allProblems.reduce((acc, problem) => {
++  acc[problem.title.toLowerCase()] = problem;
++  return acc;
++}, {} as Record<string, Problem>);
+diff --git a/src/data/syntaxCards.ts b/src/data/syntaxCards.ts
+index 6f1c9e6..ee26de9 100644
+--- a/src/data/syntaxCards.ts
++++ b/src/data/syntaxCards.ts
+@@ -841,3 +841,8 @@ export const pythonSyntaxCards: SyntaxCard[] = [
+ ];
+
+ export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
++
++export const syntaxCardMap = allSyntaxCards.reduce((acc, card) => {
++  acc[card.id] = card;
++  return acc;
++}, {} as Record<string, SyntaxCard>);

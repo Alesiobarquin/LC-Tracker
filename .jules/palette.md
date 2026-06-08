@@ -1,0 +1,3 @@
+## 2025-05-24 - Accessibility for Icon-only Buttons in Mapped Lists
+**Learning:** In highly repetitive UI maps (like a dashboard problem list or problem library), screen readers struggle when icon-only buttons use generic static aria-labels (e.g., "Skip" or "Play"). It creates ambiguity when multiple identical actions exist on the same page.
+**Action:** Always inject unique loop variables (like `prob.title`) into `aria-label`s and `title` attributes for mapped icon-only buttons, and pair this with `focus-visible:ring-2 outline-none` so keyboard navigators have a clear, unique visual focus state.

@@ -370,9 +370,9 @@ export const ProblemLibrary: React.FC = () => {
                             <td className="px-6 py-4">
                               <button 
                                  onClick={() => toggleSolved(prob.id, isSolved)}
-                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
-                                 title={statusTitle}
-                                 aria-label={statusTitle}
+                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-full"
+                                 title={`${statusTitle} for ${prob.title}`}
+                                 aria-label={`${statusTitle} for ${prob.title}`}
                               >
                                 {isRetired ? (
                                   <CircleCheck size={20} className="text-emerald-500" />
@@ -423,8 +423,9 @@ export const ProblemLibrary: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                  title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+                                  title={isPremium && !settings.includePremiumInAssignments ? `Confirm premium before starting ${prob.title}` : `Start practice timer for ${prob.title}`}
+                                  aria-label={`Start practice timer for ${prob.title}`}
                                 >
                                   <Play size={16} />
                                 </button>

@@ -708,8 +708,9 @@ export const Dashboard: React.FC = () => {
                           {isPrimary && (
                             <button
                               onClick={() => setSkippedNewProblemIds(prev => new Set([...prev, prob.id]))}
-                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50"
-                              title="Skip this problem"
+                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
+                              title={`Skip ${prob.title}`}
+                              aria-label={`Skip ${prob.title}`}
                             >
                               <SkipForward size={18} />
                             </button>
@@ -818,7 +819,9 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <button
                         onClick={() => startSession(prob.id, true, false)}
-                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500"
+                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
+                        title={`Start review for ${prob.title}`}
+                        aria-label={`Start review for ${prob.title}`}
                       >
                         <Play size={18} className="fill-current" />
                       </button>

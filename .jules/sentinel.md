@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2024-06-25 - Tabnabbing in `window.open`
+**Vulnerability:** Found `window.open` with `target="_blank"` missing the `noopener,noreferrer` feature parameters in `src/components/MockInterview.tsx`.
+**Learning:** Using `window.open(url, '_blank')` without specifying `noopener,noreferrer` creates a tabnabbing vulnerability where the newly opened window could potentially access the `window.opener` object and redirect the original page. While modern browsers have mitigated this for `<a>` tags with `target="_blank"`, `window.open` can still be vulnerable depending on browser implementation and context.
+**Prevention:** Always explicitly include `noopener,noreferrer` as the third argument (features) when using `window.open` with `_blank` or when creating new browsing contexts, just like adding `rel="noopener noreferrer"` to anchor tags.

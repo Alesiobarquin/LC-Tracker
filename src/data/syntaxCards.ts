@@ -841,3 +841,8 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+export const syntaxCardMap = allSyntaxCards.reduce((acc, card) => {
+  acc[card.id] = card;
+  return acc;
+}, {} as Record<string, SyntaxCard>);

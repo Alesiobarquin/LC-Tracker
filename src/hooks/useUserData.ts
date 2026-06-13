@@ -551,7 +551,7 @@ export function useUserSettings() {
         setLastSyncCount(next.pulledCount);
         queryClient.invalidateQueries({ queryKey: queryKeys.progress(userId) });
       } catch (error: any) {
-        setSyncError(error?.message || 'Failed to sync with LeetCode');
+        setSyncError('Failed to sync with LeetCode');
         throw error;
       }
     },

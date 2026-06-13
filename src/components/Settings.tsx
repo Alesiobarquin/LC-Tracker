@@ -156,7 +156,9 @@ export const Settings: React.FC = () => {
                                     <button
                                         onClick={handleManualSync}
                                         disabled={isSyncing || !tempUsername}
-                                        className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-xl text-zinc-300 transition-colors flex items-center justify-center shrink-0"
+                                        aria-label="Manual Sync"
+                                        title="Manual Sync"
+                                        className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-xl text-zinc-300 transition-colors flex items-center justify-center shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                                     >
                                         <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
                                     </button>
@@ -546,7 +548,7 @@ export const Settings: React.FC = () => {
                                 <div className="flex gap-2 mb-3">
                                     <input type="date" value={newBlackoutStart} onChange={(e) => setNewBlackoutStart(e.target.value)} className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none" />
                                     <input type="date" value={newBlackoutEnd} onChange={(e) => setNewBlackoutEnd(e.target.value)} className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none" />
-                                    <button onClick={handleAddBlackoutDate} disabled={!newBlackoutStart || !newBlackoutEnd} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0">
+                                    <button onClick={handleAddBlackoutDate} disabled={!newBlackoutStart || !newBlackoutEnd} aria-label="Add blackout date" title="Add blackout date" className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                                         <Plus size={20} />
                                     </button>
                                 </div>
@@ -597,7 +599,7 @@ export const Settings: React.FC = () => {
                                     onChange={(e) => setNewEventDate(e.target.value)}
                                     className="w-36 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                                 />
-                                <button type="button" onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center">
+                                <button type="button" onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} aria-label="Add target event" title="Add target event" className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                                     <Plus size={20} />
                                 </button>
                             </div>

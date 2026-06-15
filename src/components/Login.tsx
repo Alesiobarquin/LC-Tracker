@@ -42,7 +42,7 @@ export function Login() {
         redirectUrlComplete: `${window.location.origin}/`,
       });
     } catch (err) {
-      console.error(err);
+      console.error('Operation failed: Login error');
       setIsLoading(false);
     }
   };

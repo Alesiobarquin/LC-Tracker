@@ -914,7 +914,9 @@ export const Analytics: React.FC = () => {
               </div>
               <button
                 onClick={() => setViewingSession(null)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
+                aria-label="Close session details"
+                title="Close"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors focus-visible:ring-2 outline-none focus-visible:ring-emerald-500"
               >
                 <X size={24} />
               </button>

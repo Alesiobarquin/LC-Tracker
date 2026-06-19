@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2024-04-16 - Insecure window.open references
+**Vulnerability:** Calling `window.open` without window features allows the newly opened window to have a reference to the `window.opener` object, potentially leading to reverse tabnabbing attacks.
+**Learning:** `window.open` needs explicit `'noopener,noreferrer'` features passed to it to fully mitigate this risk, analogous to `rel="noopener noreferrer"` for anchor tags.
+**Prevention:** Always provide `'noopener,noreferrer'` as the window features string when opening untrusted or external URLs via `window.open`.

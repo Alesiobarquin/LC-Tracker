@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-06-18 - Fix XSS vulnerability in Admin Dashboard image src and programmatic tabnabbing
+**Vulnerability:** The Admin Dashboard rendered user-provided `image_url` directly as a `src` attribute inside an `<img>` tag without proper sanitization, despite having sanitized the `href` attribute on the wrapping `<a>` tag. Additionally, `window.open` calls lacked `noopener,noreferrer`.
+**Learning:** Sanitization must be applied to all attributes that consume user-provided URLs (`href`, `src`, etc.). Also, programmatic `window.open` calls are just as vulnerable to reverse tabnabbing as declarative `<a>` tags and require the same protections in the window features argument.
+**Prevention:** Always use the sanitized URL variable (e.g., `safeUrl`) for both `href` and `src` attributes. Add `'noopener,noreferrer'` as the third argument to `window.open` calls.

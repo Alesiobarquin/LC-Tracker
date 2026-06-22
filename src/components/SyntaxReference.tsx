@@ -31,19 +31,21 @@ export const SyntaxReference: React.FC = () => {
         });
     };
 
+    const searchPreparedCards = useMemo(() => {
+        return allSyntaxCards.map(card => ({
+            ...card,
+            searchableText: `${card.description} ${card.syntax} ${card.category} ${card.useCase}`.toLowerCase()
+        }));
+    }, []);
+
     // Filter cards
     const filteredCards = useMemo(() => {
-        return allSyntaxCards.filter(card => {
+        return searchPreparedCards.filter(card => {
             if (card.language !== selectedLanguage) return false;
 
             const query = searchQuery.toLowerCase();
-            if (query) {
-                if (!card.description.toLowerCase().includes(query) &&
-                    !card.syntax.toLowerCase().includes(query) &&
-                    !card.category.toLowerCase().includes(query) &&
-                    !card.useCase.toLowerCase().includes(query)) {
-                    return false;
-                }
+            if (query && !card.searchableText.includes(query)) {
+                return false;
             }
 
             if (showOnlyWeak) {
@@ -54,7 +56,7 @@ export const SyntaxReference: React.FC = () => {
 
             return true;
         });
-    }, [searchQuery, selectedLanguage, showOnlyWeak, syntaxProgress]);
+    }, [searchPreparedCards, searchQuery, selectedLanguage, showOnlyWeak, syntaxProgress]);
 
     // Group by category
     const categories = useMemo(() => {

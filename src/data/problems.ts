@@ -386,3 +386,14 @@ export const problemMap = allProblems.reduce((acc, problem) => {
   acc[problem.id] = problem;
   return acc;
 }, {} as Record<string, Problem>);
+
+export const problemTitleMap = allProblems.reduce((acc, problem) => {
+  acc[problem.id] = problem.title.toLowerCase();
+  return acc;
+}, {} as Record<string, string>);
+
+// Optimization (Bolt): Precompute a lowercase title-to-problem dictionary for O(1) lookups during render cycles to prevent O(N) .find() scans inside loops.
+export const problemTitleToProblemMap = allProblems.reduce((acc, problem) => {
+  acc[problem.title.toLowerCase()] = problem;
+  return acc;
+}, {} as Record<string, Problem>);

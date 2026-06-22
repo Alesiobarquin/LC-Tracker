@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { allProblems } from '../data/problems';
+import { problemMap } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
 interface FloatingSessionIndicatorProps {}
@@ -34,7 +34,8 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
     // Hide if no active session OR if currently on the timer page
     if (!activeSession || location.pathname.startsWith('/timer')) return null;
 
-    const prob = allProblems.find(p => p.id === activeSession.problemId);
+    // ⚡ Bolt: Use O(1) problemMap lookup instead of O(N) allProblems.find for faster rendering
+    const prob = problemMap[activeSession.problemId];
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
 

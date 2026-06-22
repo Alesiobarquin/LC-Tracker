@@ -84,8 +84,9 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                         </button>
                         <button
                             onClick={() => setConfirmAbandon(true)}
-                            className="flex items-center justify-center w-8 h-8 bg-zinc-800/70 hover:bg-red-500/15 text-zinc-500 hover:text-red-400 rounded-lg transition-colors border border-zinc-700/50"
+                            className="flex items-center justify-center w-8 h-8 bg-zinc-800/70 hover:bg-red-500/15 text-zinc-500 hover:text-red-400 rounded-lg transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
                             title="Abandon session"
+                            aria-label="Abandon session"
                         >
                             <X size={14} />
                         </button>

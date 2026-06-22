@@ -1,3 +1,3 @@
-## 2024-04-07 - Keyboard Accessibility for Styled File Inputs
-**Learning:** Using `className="hidden"` on `<input type="file">` removes it from the keyboard focus order, making custom styled file inputs inaccessible to keyboard users.
-**Action:** Always use `className="sr-only peer"` on the input and add `peer-focus-visible` styles to its associated `<label>` to maintain keyboard navigation and visual focus indication.
+## 2025-04-25 - Icon-only Button Accessibility
+**Learning:** Icon-only buttons (like the `X` close buttons in floating indicators, modals, and banners) often lack `aria-label`s and `focus-visible` classes in this React app. This makes them invisible to screen readers and difficult to navigate via keyboard.
+**Action:** When adding or reviewing icon-only buttons, always explicitly add an `aria-label` describing the action, and include Tailwind's `focus-visible:ring-2 outline-none` (with an appropriate ring color like `focus-visible:ring-emerald-500`) to ensure visible keyboard focus.

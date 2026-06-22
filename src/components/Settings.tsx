@@ -546,7 +546,7 @@ export const Settings: React.FC = () => {
                                 <div className="flex gap-2 mb-3">
                                     <input type="date" value={newBlackoutStart} onChange={(e) => setNewBlackoutStart(e.target.value)} className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none" />
                                     <input type="date" value={newBlackoutEnd} onChange={(e) => setNewBlackoutEnd(e.target.value)} className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none" />
-                                    <button onClick={handleAddBlackoutDate} disabled={!newBlackoutStart || !newBlackoutEnd} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0">
+                                    <button aria-label="Add blackout date" onClick={handleAddBlackoutDate} disabled={!newBlackoutStart || !newBlackoutEnd} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                                         <Plus size={20} />
                                     </button>
                                 </div>
@@ -554,7 +554,7 @@ export const Settings: React.FC = () => {
                                     {settings.studySchedule.blackoutDates.map((date, idx) => (
                                         <div key={idx} className="flex justify-between items-center bg-zinc-900 border border-zinc-800/50 p-2 rounded-lg text-sm text-zinc-300">
                                             <span>{new Date(date.start).toLocaleDateString()} - {new Date(date.end).toLocaleDateString()}</span>
-                                            <button aria-label="Remove blackout date" onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors"><X size={14} /></button>
+                                            <button aria-label="Remove blackout date" onClick={() => handleRemoveBlackoutDate(idx)} className="text-red-400 hover:bg-red-500/10 p-1 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500"><X size={14} /></button>
                                         </div>
                                     ))}
                                     {settings.studySchedule.blackoutDates.length === 0 && (
@@ -597,7 +597,7 @@ export const Settings: React.FC = () => {
                                     onChange={(e) => setNewEventDate(e.target.value)}
                                     className="w-36 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-100 text-sm focus:outline-none"
                                 />
-                                <button type="button" onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center">
+                                <button type="button" aria-label="Add event" onClick={handleAddEvent} disabled={!newEventTitle || !newEventDate} className="p-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-colors shrink-0 flex justify-center items-center outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -612,7 +612,7 @@ export const Settings: React.FC = () => {
                                                 {new Date(event.date + 'T00:00:00').toLocaleDateString()}
                                             </div>
                                         </div>
-                                        <button aria-label="Remove target event" onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"><X size={16} /></button>
+                                        <button aria-label="Remove target event" onClick={() => removeTargetEvent(event.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-500"><X size={16} /></button>
                                     </div>
                                 ))}
                                 {targetEvents.length === 0 && (

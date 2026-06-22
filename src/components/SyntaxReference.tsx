@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { allSyntaxCards, SyntaxCard } from '../data/syntaxCards';
+import { allSyntaxCards, SyntaxCard, syntaxCardLowerMap } from '../data/syntaxCards';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
 import { SyntaxFlashcardSession } from './SyntaxFlashcardSession';
 import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers } from 'lucide-react';
@@ -38,10 +38,12 @@ export const SyntaxReference: React.FC = () => {
 
             const query = searchQuery.toLowerCase();
             if (query) {
-                if (!card.description.toLowerCase().includes(query) &&
-                    !card.syntax.toLowerCase().includes(query) &&
-                    !card.category.toLowerCase().includes(query) &&
-                    !card.useCase.toLowerCase().includes(query)) {
+                const lower = syntaxCardLowerMap.get(card.id);
+                if (lower &&
+                    !lower.desc.includes(query) &&
+                    !lower.syntax.includes(query) &&
+                    !lower.cat.includes(query) &&
+                    !lower.useCase.includes(query)) {
                     return false;
                 }
             }

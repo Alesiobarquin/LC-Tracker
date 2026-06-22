@@ -841,3 +841,15 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+export const syntaxCardLowerMap = new Map(
+  allSyntaxCards.map(c => [
+    c.id,
+    {
+      desc: c.description.toLowerCase(),
+      syntax: c.syntax.toLowerCase(),
+      cat: c.category.toLowerCase(),
+      useCase: c.useCase.toLowerCase()
+    }
+  ])
+);

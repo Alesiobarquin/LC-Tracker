@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2024-06-22 - Fix tabnabbing vulnerability in window.open
+**Vulnerability:** Calling `window.open` with `target="_blank"` without providing the third features argument allows the newly opened tab to retain a reference to the `window.opener` object, which is a tabnabbing risk.
+**Learning:** To prevent tabnabbing attacks when using `window.open(url, target)`, always include `'noopener,noreferrer'` in the third features argument, especially for external links. This is the programmatic equivalent of `rel="noopener noreferrer"` for `<a>` tags.
+**Prevention:** Always include `'noopener,noreferrer'` in the features parameter when calling `window.open` with an untrusted external URL.

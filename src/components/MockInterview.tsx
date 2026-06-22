@@ -257,13 +257,15 @@ export const MockInterview: React.FC = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsRunning(!isRunning)}
-                  className="w-12 h-12 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-950 rounded-full transition-colors"
+                  className="w-12 h-12 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-950 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
+                  aria-label={isRunning ? "Pause timer" : "Resume timer"}
+                  title={isRunning ? "Pause timer" : "Resume timer"}
                 >
                   {isRunning ? <Pause size={20} className="fill-current" /> : <Play size={20} className="fill-current ml-1" />}
                 </button>
                 <button
                   onClick={() => { setIsRunning(false); setIsFinished(true); }}
-                  className="px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl font-medium transition-colors"
+                  className="px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl font-medium transition-colors focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
                 >
                   I'm done
                 </button>

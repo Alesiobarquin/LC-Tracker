@@ -841,3 +841,10 @@ export const pythonSyntaxCards: SyntaxCard[] = [
 ];
 
 export const allSyntaxCards: SyntaxCard[] = [...pythonSyntaxCards, ...cppSyntaxCards];
+
+// ⚡ Bolt Optimization: Pre-computed map for O(1) lookups.
+// Replaces O(N) array .find() calls during render loops, saving significant CPU overhead.
+export const syntaxCardMap = allSyntaxCards.reduce((acc, card) => {
+    acc[card.id] = card;
+    return acc;
+}, {} as Record<string, SyntaxCard>);

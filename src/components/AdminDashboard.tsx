@@ -291,7 +291,7 @@ export function AdminDashboard() {
                         return (
                           <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
                             <img
-                              src={ticket.image_url}
+                              src={safeUrl}
                               alt="Attached screenshot"
                               className="max-h-36 rounded-lg border border-zinc-700/60 hover:opacity-90 transition-opacity"
                             />

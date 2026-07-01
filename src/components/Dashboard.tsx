@@ -708,13 +708,14 @@ export const Dashboard: React.FC = () => {
                           {isPrimary && (
                             <button
                               onClick={() => setSkippedNewProblemIds(prev => new Set([...prev, prob.id]))}
-                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50"
-                              title="Skip this problem"
+                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
+                              aria-label={`Skip problem ${prob.title}`}
+                              title={`Skip problem ${prob.title}`}
                             >
                               <SkipForward size={18} />
                             </button>
                           )}
-                          <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
+                          <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none" aria-label={`Open ${prob.title} on LeetCode`} title={`Open ${prob.title} on LeetCode`}><ExternalLink size={18} /></a>
                         </div>
                       </div>
                       <button
@@ -818,7 +819,9 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <button
                         onClick={() => startSession(prob.id, true, false)}
-                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500"
+                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
+                        aria-label={`Start practice session for ${prob.title}`}
+                        title={`Start practice session for ${prob.title}`}
                       >
                         <Play size={18} className="fill-current" />
                       </button>

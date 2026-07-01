@@ -69,7 +69,7 @@ export const MockInterview: React.FC = () => {
     setCode('');
 
     if (useExternalLeetCode) {
-      window.open(randomProblem.leetcodeUrl, '_blank');
+      window.open(randomProblem.leetcodeUrl, '_blank', 'noopener,noreferrer');
       setIsRunning(false);
       setIsFinished(true);
     } else {

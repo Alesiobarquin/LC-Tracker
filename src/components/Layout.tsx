@@ -3,6 +3,7 @@ import { LayoutDashboard, Library, LineChart, Code2, Menu, X, Settings, Calendar
 import { FloatingSessionIndicator } from './FloatingSessionIndicator';
 import { clsx } from 'clsx';
 import { differenceInDays } from 'date-fns';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { getPhase } from '../utils/dateUtils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -338,66 +339,71 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <FloatingSessionIndicator />
       
       {/* Absolute Viewport Modal (fixes scrolling issues) */}
-      <FeaturesModal
-        isOpen={isFeaturesOpen}
-        onClose={() => setIsFeaturesOpen(false)}
-      />
-      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+      {createPortal(
+        <>
+          <FeaturesModal
+            isOpen={isFeaturesOpen}
+            onClose={() => setIsFeaturesOpen(false)}
+          />
+          <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
 
-      {/* Auth Prompt Modal */}
-      <AnimatePresence>
-        {authModalTarget && (
-           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={() => setAuthModalTarget(null)}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl z-10 flex flex-col items-center text-center overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
-                
-                <button 
-                  onClick={() => setAuthModalTarget(null)}
-                  className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
-                >
-                  <X size={20} />
-                </button>
-                
-                <div className="w-12 h-12 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center mb-4 relative z-10">
-                  <Lock className="w-5 h-5 text-emerald-400" />
-                </div>
-                
-                <h3 className="text-xl font-bold text-zinc-100 mb-2 relative z-10">Create an Account</h3>
-                <p className="text-zinc-400 text-[15px] leading-relaxed mb-6 relative z-10">
-                  Sign in or create a free account to access <strong className="text-zinc-200">{authModalTarget}</strong> and start securely saving your progress.
-                </p>
-                
-                <div className="flex w-full gap-3 relative z-10">
-                  <button
+          {/* Auth Prompt Modal */}
+          <AnimatePresence>
+            {authModalTarget && (
+               <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     onClick={() => setAuthModalTarget(null)}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-300 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 transition-colors"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl z-10 flex flex-col items-center text-center overflow-hidden"
                   >
-                    Maybe Later
-                  </button>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-950 bg-emerald-400 hover:bg-emerald-300 transition-colors"
-                  >
-                    Sign In
-                  </button>
-                </div>
-              </motion.div>
-           </div>
-        )}
-      </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
+
+                    <button
+                      onClick={() => setAuthModalTarget(null)}
+                      className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+
+                    <div className="w-12 h-12 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center mb-4 relative z-10">
+                      <Lock className="w-5 h-5 text-emerald-400" />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-zinc-100 mb-2 relative z-10">Create an Account</h3>
+                    <p className="text-zinc-400 text-[15px] leading-relaxed mb-6 relative z-10">
+                      Sign in or create a free account to access <strong className="text-zinc-200">{authModalTarget}</strong> and start securely saving your progress.
+                    </p>
+
+                    <div className="flex w-full gap-3 relative z-10">
+                      <button
+                        onClick={() => setAuthModalTarget(null)}
+                        className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-300 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 transition-colors"
+                      >
+                        Maybe Later
+                      </button>
+                      <button
+                        onClick={() => navigate('/login')}
+                        className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm text-zinc-950 bg-emerald-400 hover:bg-emerald-300 transition-colors"
+                      >
+                        Sign In
+                      </button>
+                    </div>
+                  </motion.div>
+               </div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </div>
   );
 };

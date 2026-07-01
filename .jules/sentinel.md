@@ -12,3 +12,8 @@
 **Vulnerability:** UI and console error handling leaked raw error objects which can contain database details or stack traces on fetch errors.
 **Learning:** Default error handlers used `error.message` directly in the UI state or passed `error` to `console.error` which is an information disclosure risk.
 **Prevention:** Always use generic fallback strings for client-facing errors and log messages, avoiding the direct assignment of raw error objects to frontend state.
+
+## 2026-06-25 - Fix XSS bypass in nested resource-loading tags
+**Vulnerability:** The Admin Dashboard sanitized the outer `<a>` tag's `href` attribute but still passed the raw, untrusted `ticket.image_url` to the nested `<img>` tag's `src` attribute.
+**Learning:** Sanitizing the container element is insufficient if nested elements (especially those that fetch resources like `<img>`, `<iframe>`, or `<script>`) still use the raw input. This allows XSS payloads or malicious resource loading to bypass the outer sanitization.
+**Prevention:** Ensure that when sanitizing a user-provided URL, all nested tags that consume that URL strictly use the sanitized version.

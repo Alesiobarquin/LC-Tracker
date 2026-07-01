@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
-import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, Type, Brain, CheckCircle2 } from 'lucide-react';
+import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
+import { motion } from 'motion/react';
 
 interface SyntaxFlashcardSessionProps {
     cards: SyntaxCard[];
@@ -10,13 +11,27 @@ interface SyntaxFlashcardSessionProps {
     onClose: () => void;
 }
 
-type Phase = 'prompt' | 'reveal' | 'summary';
-type PracticeMode = 'type' | 'self-grade';
+type Phase = 'active' | 'summary';
+type Rating = 1 | 2 | 3;
 
 interface SessionResult {
     cardId: string;
-    rating: 1 | 2 | 3;
+    rating: Rating;
 }
+
+const shuffleCards = (items: SyntaxCard[]) => [...items].sort(() => Math.random() - 0.5);
+
+const ratingLabel = (rating: Rating) => {
+    if (rating === 1) return "Don't know";
+    if (rating === 3) return 'Know it';
+    return 'Know it';
+};
+
+const isTypingTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName;
+    return tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT';
+};
 
 // Language-specific exclusion sets so Python variable names like `stack`, `count`
 // aren't accidentally filtered because they clash with C++ STL names.
@@ -103,21 +118,23 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     const totalUniqueCards = cards.length;
     const [queue, setQueue] = useState<SyntaxCard[]>([...cards]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [userInput, setUserInput] = useState('');
-    const [phase, setPhase] = useState<Phase>('prompt');
-    const [practiceMode, setPracticeMode] = useState<PracticeMode>('type');
+    const [isFlipped, setIsFlipped] = useState(false);
+    const [phase, setPhase] = useState<Phase>('active');
     const [results, setResults] = useState<SessionResult[]>([]);
-    const [startTime] = useState(Date.now());
+    const [sessionRatings, setSessionRatings] = useState<Record<string, Rating>>({});
+    const [maxVisitedIndex, setMaxVisitedIndex] = useState(0);
+    const [activeTitle, setActiveTitle] = useState(title);
+    const [startTime, setStartTime] = useState(Date.now());
     const [elapsed, setElapsed] = useState(0);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showHelp, setShowHelp] = useState(true);
-    const inputRef = useRef<HTMLTextAreaElement>(null);
 
     const currentCard = queue[currentIndex];
-    const isLastCard = currentIndex >= queue.length - 1;
+    const currentRating = currentCard ? sessionRatings[currentCard.id] : undefined;
+    const canGoPrevious = currentIndex > 0;
+    const canGoNext = currentIndex < queue.length - 1;
     const againCount = results.filter(r => r.rating === 1).length;
-    const hardCount = results.filter(r => r.rating === 2).length;
-    const goodCount = results.filter(r => r.rating === 3).length;
+    const knowCount = results.filter(r => r.rating === 3).length;
 
     // Timer
     useEffect(() => {
@@ -126,65 +143,92 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         return () => clearInterval(interval);
     }, [startTime, phase]);
 
-    // Focus input on prompt phase in type mode
-    useEffect(() => {
-        if (phase === 'prompt' && practiceMode === 'type' && inputRef.current) {
-            setTimeout(() => inputRef.current?.focus(), 50);
-        }
-    }, [phase, practiceMode, currentIndex]);
+    const handleFlip = useCallback(() => {
+        if (phase !== 'active' || !currentCard) return;
+        setIsFlipped(flipped => !flipped);
+    }, [phase, currentCard]);
 
-    const handleSubmit = useCallback(() => {
-        if (phase !== 'prompt') return;
-        if (practiceMode === 'type' && userInput.trim().length === 0) return;
-        setPhase('reveal');
-    }, [phase, practiceMode, userInput]);
+    const goPrevious = useCallback(() => {
+        if (currentIndex === 0) return;
+        setCurrentIndex(index => Math.max(index - 1, 0));
+        setIsFlipped(false);
+    }, [currentIndex]);
 
-    const handleRate = useCallback(async (rating: 1 | 2 | 3) => {
-        if (!currentCard) return;
+    const applyRatingAndAdvance = useCallback(async (rating: Rating) => {
+        if (!currentCard || phase !== 'active') return;
 
         await logSyntaxPractice(currentCard.id, rating);
-        const newResults = [...results, { cardId: currentCard.id, rating }];
-        setResults(newResults);
+        setSessionRatings(prev => ({ ...prev, [currentCard.id]: rating }));
+        setResults(prev => [...prev, { cardId: currentCard.id, rating }]);
 
-        if (rating === 1) {
-            setQueue(prev => [...prev, currentCard]);
-        }
+        const nextQueue = rating === 1 ? [...queue, currentCard] : queue;
+        if (rating === 1) setQueue(nextQueue);
 
-        if (isLastCard) {
+        if (currentIndex >= nextQueue.length - 1) {
             setPhase('summary');
+            setIsFlipped(false);
         } else {
-            setCurrentIndex(i => i + 1);
-            setUserInput('');
-            setPhase('prompt');
+            const nextIndex = currentIndex + 1;
+            setCurrentIndex(nextIndex);
+            setMaxVisitedIndex(prev => Math.max(prev, nextIndex));
+            setIsFlipped(false);
         }
-    }, [currentCard, logSyntaxPractice, results, isLastCard]);
+    }, [currentCard, currentIndex, logSyntaxPractice, phase, queue]);
+
+    const goNext = useCallback(async () => {
+        if (!currentCard || currentIndex >= queue.length - 1) return;
+
+        if (!sessionRatings[currentCard.id]) {
+            await applyRatingAndAdvance(1);
+            return;
+        }
+
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
+        setMaxVisitedIndex(prev => Math.max(prev, nextIndex));
+        setIsFlipped(false);
+    }, [currentCard, currentIndex, queue.length, sessionRatings, applyRatingAndAdvance]);
+
+    const handleBinaryChoice = useCallback(async (choice: 1 | 2) => {
+        if (!currentCard || phase !== 'active') return;
+        const srsRating = choice === 1 ? 1 : 3;
+        await applyRatingAndAdvance(srsRating);
+    }, [currentCard, phase, applyRatingAndAdvance]);
+
+    const restartSession = useCallback((nextCards: SyntaxCard[], nextTitle: string) => {
+        setQueue(shuffleCards(nextCards));
+        setCurrentIndex(0);
+        setIsFlipped(false);
+        setSessionRatings({});
+        setResults([]);
+        setMaxVisitedIndex(0);
+        setPhase('active');
+        setActiveTitle(nextTitle);
+        setElapsed(0);
+        setStartTime(Date.now());
+        setShowHelp(false);
+        setShowExitConfirm(false);
+    }, []);
+
+    const struggledCards = cards.filter(card => sessionRatings[card.id] === 1);
 
     // Keyboard shortcuts
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
-            const tag = (e.target as HTMLElement)?.tagName;
-            const isInTextarea = tag === 'TEXTAREA' || tag === 'INPUT';
-
             if (showExitConfirm) {
                 if (e.key === 'Escape') setShowExitConfirm(false);
                 return;
             }
 
-            if (phase === 'prompt') {
+            if (isTypingTarget(e.target)) return;
+
+            if (phase === 'active') {
                 if (e.key === 'Escape') { setShowExitConfirm(true); return; }
-                if (practiceMode === 'self-grade') {
-                    if (e.key === ' ' || e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSubmit();
-                    }
-                }
-            } else if (phase === 'reveal') {
-                if (e.key === 'Escape') { setShowExitConfirm(true); return; }
-                if (!isInTextarea) {
-                    if (e.key === '1') handleRate(1);
-                    if (e.key === '2') handleRate(2);
-                    if (e.key === '3') handleRate(3);
-                }
+                if (e.key === ' ') { e.preventDefault(); handleFlip(); return; }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); goPrevious(); return; }
+                if (e.key === 'ArrowRight') { e.preventDefault(); void goNext(); return; }
+                if (e.key === '1') { e.preventDefault(); void handleBinaryChoice(1); return; }
+                if (e.key === '2') { e.preventDefault(); void handleBinaryChoice(2); }
             } else if (phase === 'summary') {
                 if (e.key === 'Escape' || e.key === 'Enter') onClose();
             }
@@ -192,34 +236,13 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [phase, practiceMode, handleSubmit, handleRate, showExitConfirm, onClose]);
+    }, [phase, handleFlip, goPrevious, goNext, handleBinaryChoice, showExitConfirm, onClose]);
 
     // Prevent body scroll while session is open
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = ''; };
     }, []);
-
-    const renderDiff = () => {
-        const code = currentCard?.syntax || '';
-        return code.split('').map((char, i) => {
-            const userChar = userInput[i];
-            const isMissing = userChar === undefined;
-            const isCorrect = userChar === char;
-
-            const className = isMissing
-                ? 'text-zinc-600 font-mono'
-                : isCorrect
-                    ? 'text-emerald-400 font-mono'
-                    : 'text-red-400 bg-red-400/20 font-mono underline decoration-red-400 underline-offset-4';
-
-            return (
-                <span key={i} className={className}>
-                    {char === ' ' ? '\u00A0' : char}
-                </span>
-            );
-        });
-    };
 
     const formatTime = (s: number) => {
         const m = Math.floor(s / 60);
@@ -229,10 +252,11 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
     const sessionMessage = () => {
         const total = results.filter((r, i, a) => a.findIndex(x => x.cardId === r.cardId) === i).length;
-        if (goodCount === total) return "Flawless. Every card nailed cold.";
-        if (goodCount / total >= 0.8) return "Strong session. The weak spots will come back around.";
-        if (goodCount / total >= 0.5) return "Solid effort. Repetition is what makes it stick.";
-        return "Tough session — that's the point. They'll stick much better next time.";
+        if (total === 0) return "No cards rated yet. Jump back in when you're ready.";
+        if (knowCount === total) return "Flawless. Every card nailed cold.";
+        if (knowCount / total >= 0.8) return "Strong session. The weak spots will come back around.";
+        if (knowCount / total >= 0.5) return "Solid effort. Repetition is what makes it stick.";
+        return "Tough session - that's the point. They'll stick much better next time.";
     };
 
     const progressPct = queue.length > 0 ? Math.round((currentIndex / queue.length) * 100) : 100;
@@ -242,14 +266,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     return (
         <div className="fixed inset-0 z-50 bg-zinc-950 flex flex-col">
             {/* Top bar */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60 bg-zinc-900/40">
-                <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-sm font-semibold text-zinc-300 truncate">{title}</span>
+            <div className="flex-shrink-0 flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-zinc-800/60 bg-zinc-900/60">
+                <div className="flex items-center gap-4 min-w-0">
+                    <span className="text-lg sm:text-xl font-bold text-zinc-100 truncate">{activeTitle}</span>
                     {phase !== 'summary' && (
-                        <span className="text-xs text-zinc-600 font-mono tabular-nums whitespace-nowrap">
+                        <span className="text-sm sm:text-base text-zinc-500 font-mono tabular-nums whitespace-nowrap">
                             {currentIndex + 1} / {queue.length}
                             {queue.length > totalUniqueCards && (
-                                <span className="text-amber-500/60 ml-1.5">
+                                <span className="text-amber-500/70 ml-2">
                                     (+{queue.length - totalUniqueCards} again)
                                 </span>
                             )}
@@ -257,54 +281,21 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                     )}
                 </div>
 
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-4 flex-shrink-0">
                     {phase !== 'summary' && (
-                        <>
-                            {/* Mode toggle */}
-                            <div className="flex items-center bg-zinc-800 border border-zinc-700/50 rounded-lg p-0.5" title="Switch between typing from memory or mentally recalling then rating yourself">
-                                <button
-                                    onClick={() => setPracticeMode('type')}
-                                    className={clsx(
-                                        'px-3 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5',
-                                        practiceMode === 'type'
-                                            ? 'bg-emerald-500/20 text-emerald-400'
-                                            : 'text-zinc-500 hover:text-zinc-300'
-                                    )}
-                                    title="Type the syntax from memory — get a character-level diff"
-                                >
-                                    <Type size={11} />
-                                    Type it
-                                </button>
-                                <button
-                                    onClick={() => setPracticeMode('self-grade')}
-                                    className={clsx(
-                                        'px-3 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5',
-                                        practiceMode === 'self-grade'
-                                            ? 'bg-emerald-500/20 text-emerald-400'
-                                            : 'text-zinc-500 hover:text-zinc-300'
-                                    )}
-                                    title="Mentally recall the answer, reveal it, then rate yourself"
-                                >
-                                    <Brain size={11} />
-                                    Self-grade
-                                </button>
-                            </div>
-
-                            {/* Elapsed */}
-                            <div className="flex items-center gap-1.5 text-xs text-zinc-600 font-mono tabular-nums">
-                                <Clock size={11} />
-                                {formatTime(elapsed)}
-                            </div>
-                        </>
+                        <div className="flex items-center gap-2 text-sm sm:text-base text-zinc-500 font-mono tabular-nums">
+                            <Clock size={18} />
+                            {formatTime(elapsed)}
+                        </div>
                     )}
 
                     {phase !== 'summary' && (
                         <button
                             onClick={() => setShowHelp(true)}
-                            className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                            className="p-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
                             title="How it works"
                         >
-                            <HelpCircle size={16} />
+                            <HelpCircle size={22} />
                         </button>
                     )}
 
@@ -314,17 +305,17 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             if (phase === 'summary' || results.length === 0) onClose();
                             else setShowExitConfirm(true);
                         }}
-                        className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+                        className="p-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
                         title="Exit (Esc)"
                     >
-                        <X size={17} />
+                        <X size={22} />
                     </button>
                 </div>
             </div>
 
             {/* Progress bar */}
             {phase !== 'summary' && (
-                <div className="h-0.5 bg-zinc-800 flex-shrink-0">
+                <div className="h-1 bg-zinc-800 flex-shrink-0">
                     <div
                         className="h-full bg-emerald-500 transition-all duration-500 ease-out"
                         style={{ width: `${progressPct}%` }}
@@ -360,40 +351,40 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
             {/* Help / intro overlay */}
             {showHelp && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-4">
-                    <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-6 sm:p-10">
+                    <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl w-full max-w-3xl lg:max-w-4xl shadow-2xl overflow-hidden max-h-[min(92vh,900px)] overflow-y-auto">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-zinc-800">
+                        <div className="flex items-center justify-between px-8 sm:px-10 pt-8 sm:pt-10 pb-6 border-b border-zinc-800">
                             <div>
-                                <h3 className="text-base font-bold text-zinc-100">How Practice Sessions Work</h3>
-                                <p className="text-xs text-zinc-500 mt-0.5">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
+                                <h3 className="text-2xl sm:text-3xl font-bold text-zinc-100">How Practice Sessions Work</h3>
+                                <p className="text-sm sm:text-base text-zinc-500 mt-2">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
                             </div>
                             <button
                                 aria-label="Close help"
                                 onClick={() => setShowHelp(false)}
-                                className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                                className="p-2.5 rounded-xl text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
                             >
-                                <X size={16} />
+                                <X size={22} />
                             </button>
                         </div>
 
-                        <div className="px-6 py-5 space-y-5">
+                        <div className="px-8 sm:px-10 py-8 sm:py-10 space-y-8">
                             {/* The 3-step flow */}
                             <div>
-                                <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">The Flow</div>
-                                <div className="space-y-2.5">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-5">The Flow</div>
+                                <div className="space-y-4">
                                     {[
-                                        { step: '1', label: 'Read the prompt', desc: 'You see the description and use case — no code.' },
-                                        { step: '2', label: 'Recall & attempt', desc: 'Type the syntax from memory, or mentally recall it (self-grade mode).' },
-                                        { step: '3', label: 'Rate yourself honestly', desc: 'Your rating sets when this card appears next. Be honest — it only helps you.' },
+                                        { step: '1', label: 'Read the front', desc: 'Use the description, use case, and variable hints to recall the syntax.' },
+                                        { step: '2', label: 'Flip the card', desc: 'Press Space or tap the card to reveal the answer.' },
+                                        { step: '3', label: 'Mark know or not', desc: 'Press 1 if you did not know it, 2 if you did. You can also click the buttons below the card.' },
                                     ].map(({ step, label, desc }) => (
-                                        <div key={step} className="flex gap-3 items-start">
-                                            <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-zinc-400 flex-shrink-0 mt-0.5">
+                                        <div key={step} className="flex gap-4 items-start">
+                                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-sm font-bold text-zinc-400 flex-shrink-0 mt-0.5">
                                                 {step}
                                             </div>
                                             <div>
-                                                <div className="text-sm font-medium text-zinc-200">{label}</div>
-                                                <div className="text-xs text-zinc-500 leading-relaxed">{desc}</div>
+                                                <div className="text-lg sm:text-xl font-semibold text-zinc-200">{label}</div>
+                                                <div className="text-sm sm:text-base text-zinc-500 leading-relaxed mt-1">{desc}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -402,64 +393,47 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
                             {/* Ratings explained */}
                             <div>
-                                <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">What the ratings mean</div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-3">
-                                        <div className="text-sm font-bold text-red-400 mb-1">Again</div>
-                                        <div className="text-[11px] text-zinc-500 leading-snug">Blanked or got it wrong. Card re-queues at the end of this session.</div>
-                                    </div>
-                                    <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3">
-                                        <div className="text-sm font-bold text-amber-400 mb-1">Hard</div>
-                                        <div className="text-[11px] text-zinc-500 leading-snug">Recalled it but had to strain. Next review comes back sooner.</div>
-                                    </div>
-                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3">
-                                        <div className="text-sm font-bold text-emerald-400 mb-1">Good</div>
-                                        <div className="text-[11px] text-zinc-500 leading-snug">Got it clean. Normal spaced repetition interval applied.</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Modes explained */}
-                            <div>
-                                <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">Practice modes</div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex gap-3 items-start bg-zinc-800/40 rounded-xl p-3 border border-zinc-800">
-                                        <Type size={15} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                            <div className="text-sm font-medium text-zinc-200 mb-0.5">Type it</div>
-                                            <div className="text-[11px] text-zinc-500 leading-snug">Type the syntax from memory. You get a character-level diff showing exactly what you got right or wrong.</div>
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-5">The two options</div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 sm:p-6">
+                                        <div className="text-lg sm:text-xl font-bold text-red-400 mb-2 flex items-center gap-2">
+                                            <X size={20} />
+                                            <span>1 · Don't know</span>
                                         </div>
+                                        <div className="text-sm sm:text-base text-zinc-500 leading-relaxed">You blanked or got it wrong. Card re-queues at the end of this session.</div>
                                     </div>
-                                    <div className="flex gap-3 items-start bg-zinc-800/40 rounded-xl p-3 border border-zinc-800">
-                                        <Brain size={15} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                            <div className="text-sm font-medium text-zinc-200 mb-0.5">Self-grade</div>
-                                            <div className="text-[11px] text-zinc-500 leading-snug">Mentally recall the answer, then reveal it. Rate how well you knew it. Faster for longer patterns.</div>
+                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 sm:p-6">
+                                        <div className="text-lg sm:text-xl font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                                            <Check size={20} />
+                                            <span>2 · Know it</span>
                                         </div>
+                                        <div className="text-sm sm:text-base text-zinc-500 leading-relaxed">You knew the syntax. Normal spaced repetition interval applied.</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Keyboard shortcuts */}
-                            <div className="flex items-center gap-2 flex-wrap text-[11px] text-zinc-600 pt-1 border-t border-zinc-800">
-                                <Keyboard size={11} className="text-zinc-700" />
-                                <span><kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">Enter</kbd> submit</span>
+                            <div className="flex items-center gap-3 flex-wrap text-sm sm:text-base text-zinc-600 pt-2 border-t border-zinc-800">
+                                <Keyboard size={16} className="text-zinc-700" />
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">←</kbd> <kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">→</kbd> navigate</span>
                                 <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">1</kbd> <kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">2</kbd> <kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">3</kbd> rate</span>
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">Space</kbd> flip</span>
                                 <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">Space</kbd> reveal <span className="text-zinc-700">(self-grade)</span></span>
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">1</kbd> don't know</span>
                                 <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">Esc</kbd> exit</span>
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">2</kbd> know it</span>
+                                <span className="text-zinc-800">·</span>
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">Esc</kbd> exit</span>
                             </div>
                         </div>
 
-                        <div className="px-6 pb-6">
+                        <div className="px-8 sm:px-10 pb-8 sm:pb-10">
                             <button
                                 onClick={() => setShowHelp(false)}
-                                className="w-full py-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-semibold transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-4 sm:py-5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-lg font-semibold transition-colors flex items-center justify-center gap-3"
                             >
                                 Start Session
-                                <ArrowRight size={16} />
+                                <ArrowRight size={20} />
                             </button>
                         </div>
                     </div>
@@ -467,7 +441,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
             )}
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto flex items-start md:items-center justify-center p-5 md:p-8">
+            <div className={clsx(
+                "flex-1 min-h-0 overflow-y-auto flex justify-center p-4 sm:p-6",
+                phase === 'summary' ? 'items-center' : 'items-stretch'
+            )}>
                 {phase === 'summary' ? (
                     /* ── Summary screen ── */
                     <div className="max-w-md w-full text-center py-8">
@@ -479,18 +456,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             {sessionMessage()}
                         </p>
 
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-4">
-                                <div className="text-2xl font-bold text-red-400">{againCount}</div>
-                                <div className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-medium">Again</div>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-5">
+                                <div className="text-3xl font-bold text-red-400">{againCount}</div>
+                                <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-medium">Don't know</div>
                             </div>
-                            <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4">
-                                <div className="text-2xl font-bold text-amber-400">{hardCount}</div>
-                                <div className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-medium">Hard</div>
-                            </div>
-                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4">
-                                <div className="text-2xl font-bold text-emerald-400">{goodCount}</div>
-                                <div className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-medium">Good</div>
+                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-5">
+                                <div className="text-3xl font-bold text-emerald-400">{knowCount}</div>
+                                <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-medium">Know it</div>
                             </div>
                         </div>
 
@@ -512,204 +485,194 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             )}
                         </div>
 
-                        <button
-                            onClick={onClose}
-                            className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium transition-colors"
-                        >
-                            Back to Reference
-                        </button>
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => restartSession(cards, title)}
+                                className="w-full py-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-semibold transition-colors flex items-center justify-center gap-2"
+                            >
+                                <RotateCcw size={16} />
+                                Retry all
+                            </button>
+                            <button
+                                onClick={() => restartSession(struggledCards, `${title} · struggled`)}
+                                disabled={struggledCards.length === 0}
+                                className={clsx(
+                                    "w-full py-3 rounded-xl border font-medium transition-colors flex items-center justify-center gap-2",
+                                    struggledCards.length > 0
+                                        ? "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-400"
+                                        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 cursor-not-allowed"
+                                )}
+                            >
+                                <RotateCcw size={16} />
+                                Review struggled
+                                {struggledCards.length > 0 && (
+                                    <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold">
+                                        {struggledCards.length}
+                                    </span>
+                                )}
+                            </button>
+                            {struggledCards.length === 0 && (
+                                <p className="text-[11px] text-zinc-600">No cards marked as don't know in this session.</p>
+                            )}
+                            <button
+                                onClick={onClose}
+                                className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium transition-colors"
+                            >
+                                Back to Reference
+                            </button>
+                        </div>
                     </div>
                 ) : (
-                    /* ── Active card ── */
-                    <div className="max-w-2xl w-full flex flex-col gap-5">
-                        {/* Card */}
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
-                            {/* Prompt */}
-                            <div className="px-7 pt-7 pb-6 border-b border-zinc-800/60">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-400 text-[10px] font-medium uppercase tracking-widest">
-                                        {currentCard.category}
-                                    </span>
-                                    <span className="px-2 py-0.5 rounded-md bg-zinc-800/50 text-zinc-600 text-[10px] font-mono">
-                                        {currentCard.timeComplexity}
-                                    </span>
-                                </div>
-                                <h2 className="text-xl md:text-2xl font-bold text-zinc-50 leading-snug mb-3">
-                                    {currentCard.description}
-                                </h2>
-                                <p className="text-zinc-500 text-sm leading-relaxed mb-4">
-                                    {currentCard.useCase}
-                                </p>
-                                {/* Variable name hints */}
-                                {(() => {
-                                    const hints = extractVarHints(currentCard.syntax, currentCard.language);
-                                    if (hints.length === 0) return null;
-                                    return (
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-medium flex-shrink-0">
-                                                Variables:
-                                            </span>
-                                            {hints.map(v => (
-                                                <code
-                                                    key={v}
-                                                    className="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700/50 text-[11px] font-mono text-zinc-300"
-                                                >
-                                                    {v}
-                                                </code>
-                                            ))}
-                                        </div>
-                                    );
-                                })()}
+                    /* ── Active card + controls as one unit ── */
+                    <div className="w-full max-w-7xl flex flex-col flex-1 min-h-0 my-auto">
+                        <div className="flex flex-col flex-1 min-h-[min(100%,calc(100vh-11rem))] bg-zinc-900/60 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden">
+                            <div className="flex-1 min-h-[52vh] sm:min-h-[58vh] relative [perspective:1600px]">
+                                <motion.div
+                                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                                    transition={{ duration: 0.28, ease: 'easeInOut' }}
+                                    className="absolute inset-0 [transform-style:preserve-3d]"
+                                >
+                                    <div className="absolute inset-0 bg-zinc-900 overflow-hidden [backface-visibility:hidden]">
+                                        <button
+                                            type="button"
+                                            onClick={handleFlip}
+                                            aria-pressed={isFlipped}
+                                            className="flex h-full w-full flex-col justify-between p-5 sm:p-10 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40"
+                                        >
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="px-3 py-1 rounded-md bg-zinc-800 text-zinc-400 text-xs font-medium uppercase tracking-widest">
+                                                            {currentCard.category}
+                                                        </span>
+                                                        <span className="px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-600 text-xs font-mono">
+                                                            {currentCard.timeComplexity}
+                                                        </span>
+                                                    </div>
+                                                    {currentRating && (
+                                                        <span className={clsx(
+                                                            "px-3 py-1 rounded-full border text-[11px] font-semibold uppercase tracking-wider",
+                                                            currentRating === 1 && "bg-red-500/10 border-red-500/20 text-red-400",
+                                                            currentRating === 3 && "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+                                                        )}>
+                                                            {ratingLabel(currentRating)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-50 leading-tight mb-5 max-w-5xl">
+                                                    {currentCard.description}
+                                                </h2>
+                                                <p className="text-zinc-400 text-base sm:text-lg lg:text-xl leading-relaxed mb-8 max-w-4xl">
+                                                    {currentCard.useCase}
+                                                </p>
+                                                {(() => {
+                                                    const hints = extractVarHints(currentCard.syntax, currentCard.language);
+                                                    if (hints.length === 0) return null;
+                                                    return (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-xs text-zinc-600 uppercase tracking-widest font-medium flex-shrink-0">
+                                                                Variables:
+                                                            </span>
+                                                            {hints.map(v => (
+                                                                <code
+                                                                    key={v}
+                                                                    className="px-2.5 py-1 rounded-md bg-zinc-800/80 border border-zinc-700/50 text-sm font-mono text-zinc-300"
+                                                                >
+                                                                    {v}
+                                                                </code>
+                                                            ))}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 pt-6">
+                                                <span>{isFlipped ? 'Tap or press Space to hide' : 'See answer'}</span>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div className="absolute inset-0 bg-zinc-900 overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                                        <button
+                                            type="button"
+                                            onClick={handleFlip}
+                                            className="flex h-full w-full flex-col p-5 sm:p-8 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40"
+                                        >
+                                            <div className="flex items-center justify-between gap-3 mb-6">
+                                                <div className="text-xs text-emerald-500 font-semibold tracking-widest uppercase">
+                                                    Syntax
+                                                </div>
+                                                <span className="text-xs text-zinc-600">Tap or Space to hide</span>
+                                            </div>
+                                            <div className="flex-1 flex items-center justify-center min-h-0">
+                                                <div className="w-full h-full min-h-[16rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-8 font-mono text-xl sm:text-2xl lg:text-3xl text-zinc-100 whitespace-pre-wrap leading-relaxed overflow-auto flex items-center">
+                                                    {currentCard.syntax}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </motion.div>
                             </div>
 
-                            {/* Input / Reveal area */}
-                            <div className="px-7 py-6">
-                                {practiceMode === 'type' ? (
-                                    phase === 'prompt' ? (
-                                        /* Typing input */
-                                        <div>
-                                            <div className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase mb-2.5">
-                                                Type the syntax
-                                            </div>
-                                            <div className="rounded-xl border border-zinc-700 bg-zinc-950 overflow-hidden focus-within:border-emerald-500/40 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all">
-                                                <textarea
-                                                    ref={inputRef}
-                                                    value={userInput}
-                                                    onChange={(e) => {
-                                                        if (!e.target.value.includes('\n')) setUserInput(e.target.value);
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            if (userInput.trim().length > 0) handleSubmit();
-                                                        }
-                                                    }}
-                                                    className="w-full bg-transparent px-4 py-3.5 text-base text-zinc-100 font-mono placeholder:text-zinc-700 focus:outline-none resize-none border-0"
-                                                    placeholder="Type from memory…"
-                                                    spellCheck={false}
-                                                    autoComplete="off"
-                                                    autoCorrect="off"
-                                                    autoCapitalize="off"
-                                                    rows={2}
-                                                />
-                                            </div>
-                                            <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-zinc-700">
-                                                <Keyboard size={10} />
-                                                <span>Enter to submit</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        /* Typing reveal */
-                                        <div className="space-y-4">
-                                            <div>
-                                                <div className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase mb-2">
-                                                    Your attempt
-                                                </div>
-                                                <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 font-mono text-sm min-h-[42px] flex flex-wrap break-all items-start content-start gap-0">
-                                                    {userInput.length > 0
-                                                        ? renderDiff()
-                                                        : <span className="text-zinc-600 italic text-xs">No input</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                            {userInput.trim() !== currentCard.syntax.trim() && (
-                                                <div>
-                                                    <div className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase mb-2">
-                                                        Correct syntax
-                                                    </div>
-                                                    <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100 whitespace-pre-wrap leading-relaxed">
-                                                        {currentCard.syntax}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )
-                                ) : (
-                                    /* Self-grade mode */
-                                    phase === 'prompt' ? (
-                                        <div className="py-2">
-                                            <div className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase mb-3">Step 2 of 3 — Recall</div>
-                                            <div className="bg-zinc-950/60 border border-zinc-800 rounded-xl px-4 py-3.5 mb-4 space-y-1.5">
-                                                <div className="flex items-start gap-2 text-xs text-zinc-400">
-                                                    <CheckCircle2 size={13} className="text-emerald-500/60 flex-shrink-0 mt-0.5" />
-                                                    <span>Read the description and use case above.</span>
-                                                </div>
-                                                <div className="flex items-start gap-2 text-xs text-zinc-400">
-                                                    <CheckCircle2 size={13} className="text-emerald-500/60 flex-shrink-0 mt-0.5" />
-                                                    <span>Try to recall the exact syntax in your head.</span>
-                                                </div>
-                                                <div className="flex items-start gap-2 text-xs text-zinc-400">
-                                                    <CheckCircle2 size={13} className="text-zinc-700 flex-shrink-0 mt-0.5" />
-                                                    <span className="text-zinc-600">When ready, reveal the answer and rate yourself.</span>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={handleSubmit}
-                                                className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                Show Answer
-                                                <kbd className="text-[10px] text-zinc-500 font-mono bg-zinc-700 px-1.5 py-0.5 rounded">Space</kbd>
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <div className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase mb-2.5">
-                                                Syntax
-                                            </div>
-                                            <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3.5 font-mono text-sm text-zinc-100 whitespace-pre-wrap leading-relaxed">
-                                                {currentCard.syntax}
-                                            </div>
-                                        </div>
-                                    )
-                                )}
+                            <div className="flex-shrink-0 border-t border-zinc-800/80 bg-zinc-950/90 px-4 sm:px-6 py-5 sm:py-6">
+                                <p className="text-center text-sm text-zinc-500 mb-5">
+                                    Press <span className="text-zinc-400">Space</span> to flip · <span className="text-zinc-400">← / →</span> to navigate · <span className="text-zinc-400">1 / 2</span> to rate
+                                </p>
+                                <div className="flex items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
+                                    <button
+                                        type="button"
+                                        onClick={goPrevious}
+                                        disabled={!canGoPrevious}
+                                        aria-label="Previous card"
+                                        className={clsx(
+                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border transition-colors",
+                                            canGoPrevious
+                                                ? "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700"
+                                                : "border-zinc-800 bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
+                                        )}
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => { void handleBinaryChoice(1); }}
+                                        className="flex flex-1 items-center justify-center gap-2 sm:gap-3 rounded-full border border-zinc-700 bg-zinc-900/80 px-4 sm:px-6 py-3 sm:py-4 hover:bg-red-500/10 hover:border-red-500/30 transition-colors group"
+                                    >
+                                        <X size={18} className="text-red-400" />
+                                        <span className="text-lg sm:text-xl font-bold text-red-400 tabular-nums">{againCount}</span>
+                                        <span className="text-sm text-zinc-500 group-hover:text-red-300/80 hidden sm:inline">Don't know</span>
+                                        <kbd className="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">1</kbd>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => { void handleBinaryChoice(2); }}
+                                        className="flex flex-1 items-center justify-center gap-2 sm:gap-3 rounded-full border border-zinc-700 bg-zinc-900/80 px-4 sm:px-6 py-3 sm:py-4 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-colors group"
+                                    >
+                                        <span className="text-lg sm:text-xl font-bold text-emerald-400 tabular-nums">{knowCount}</span>
+                                        <Check size={18} className="text-emerald-400" />
+                                        <span className="text-sm text-zinc-500 group-hover:text-emerald-300/80 hidden sm:inline">Know it</span>
+                                        <kbd className="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">2</kbd>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => { void goNext(); }}
+                                        disabled={!canGoNext}
+                                        aria-label="Next card"
+                                        className={clsx(
+                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border transition-colors",
+                                            canGoNext
+                                                ? "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700"
+                                                : "border-zinc-800 bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
+                                        )}
+                                        title={currentRating ? 'Next card' : "Next — counts as don't know"}
+                                    >
+                                        <ArrowRight size={20} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Rating row */}
-                        {phase === 'reveal' && (
-                            <div>
-                                <div className="text-[10px] text-zinc-500 font-medium tracking-widest uppercase mb-3 text-center">
-                                    How well did you know it?
-                                </div>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {(
-                                        [
-                                            { rating: 1, label: 'Again', key: '1', color: 'red', sub: "Blanked — re-queues at end" },
-                                            { rating: 2, label: 'Hard', key: '2', color: 'amber', sub: "Struggled — review sooner" },
-                                            { rating: 3, label: 'Good', key: '3', color: 'emerald', sub: "Got it — normal interval" },
-                                        ] as const
-                                    ).map(({ rating, label, key, color, sub }) => (
-                                        <button
-                                            key={rating}
-                                            onClick={() => handleRate(rating)}
-                                            className={clsx(
-                                                'py-3 px-2 rounded-xl border font-medium transition-colors flex flex-col items-center gap-1',
-                                                color === 'red' && 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20',
-                                                color === 'amber' && 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-                                                color === 'emerald' && 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-sm font-semibold">{label}</span>
-                                                <span className={clsx(
-                                                    'font-mono text-[10px] opacity-50',
-                                                )}>{key}</span>
-                                            </div>
-                                            <span className={clsx(
-                                                'text-[10px] leading-tight text-center font-normal',
-                                                color === 'red' && 'text-red-400/60',
-                                                color === 'amber' && 'text-amber-400/60',
-                                                color === 'emerald' && 'text-emerald-400/60',
-                                            )}>{sub}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[10px] text-zinc-700">
-                                    <Keyboard size={10} />
-                                    <span>Press 1, 2, or 3 to rate</span>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>

@@ -6,6 +6,7 @@ import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause,
 import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { MAX_BACKDATE_HOURS, validateStartTimestamp } from '../utils/dateUtils';
 
 interface TimerProps {
   problem: Problem;
@@ -20,8 +21,6 @@ const fmtTime = (totalSeconds: number): string => {
   const s = totalSeconds % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
-
-const MAX_BACKDATE_HOURS = 12;
 
 const toTimeInputValue = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -101,18 +100,6 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         : 0;
 
     return Math.max(0, raw - pausedSecondsRef.current - currentPauseSeconds);
-  };
-
-  const validateStartTimestamp = (startTimestamp: number): string | null => {
-    const now = Date.now();
-    if (startTimestamp >= now) {
-      return 'Start time must be in the past.';
-    }
-    const maxBackdateMs = MAX_BACKDATE_HOURS * 60 * 60 * 1000;
-    if (now - startTimestamp > maxBackdateMs) {
-      return `Start time can be backdated up to ${MAX_BACKDATE_HOURS} hours.`;
-    }
-    return null;
   };
 
   const openStartTimeEditor = () => {

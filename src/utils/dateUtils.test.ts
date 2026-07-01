@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getNextReviewDate, getSrIntervalMultiplier, getPhase } from './dateUtils';
+import { getNextReviewDate, getSrIntervalMultiplier, getPhase, validateStartTimestamp, MAX_BACKDATE_HOURS } from './dateUtils';
 
 describe('getPhase', () => {
   beforeEach(() => {
@@ -88,5 +88,40 @@ describe('getNextReviewDate', () => {
     const prob = getNextReviewDate(3, 2, 'RELAXED', 'Medium', false);
     const syn = getNextReviewDate(3, 2, 'RELAXED', 'Medium', true);
     expect(syn.getTime()).toBeGreaterThanOrEqual(prob.getTime());
+  });
+});
+
+describe('validateStartTimestamp', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns null for a valid past timestamp within the limit', () => {
+    const validTime = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
+    expect(validateStartTimestamp(validTime)).toBeNull();
+  });
+
+  it('returns error if timestamp is in the future', () => {
+    const futureTime = Date.now() + (1 * 60 * 60 * 1000); // 1 hour in the future
+    expect(validateStartTimestamp(futureTime)).toBe('Start time must be in the past.');
+  });
+
+  it('returns error if timestamp is exactly now', () => {
+    expect(validateStartTimestamp(Date.now())).toBe('Start time must be in the past.');
+  });
+
+  it('returns error if timestamp exceeds max backdate limit', () => {
+    const tooOldTime = Date.now() - ((MAX_BACKDATE_HOURS + 1) * 60 * 60 * 1000);
+    expect(validateStartTimestamp(tooOldTime)).toBe(`Start time can be backdated up to ${MAX_BACKDATE_HOURS} hours.`);
+  });
+
+  it('returns null if timestamp is exactly at the max backdate limit', () => {
+    const exactLimitTime = Date.now() - (MAX_BACKDATE_HOURS * 60 * 60 * 1000);
+    expect(validateStartTimestamp(exactLimitTime)).toBeNull();
   });
 });

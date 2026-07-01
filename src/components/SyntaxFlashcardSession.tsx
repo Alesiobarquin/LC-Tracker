@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
-import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
 import { motion } from 'motion/react';
@@ -128,9 +128,12 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     const [elapsed, setElapsed] = useState(0);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showHelp, setShowHelp] = useState(true);
+    const [showExplanation, setShowExplanation] = useState(false);
 
     const currentCard = queue[currentIndex];
     const currentRating = currentCard ? sessionRatings[currentCard.id] : undefined;
+    const currentExplanation = currentCard?.explanation.trim() ?? '';
+    const hasExplanation = currentExplanation.length > 0;
     const canGoPrevious = currentIndex > 0;
     const canGoNext = currentIndex < queue.length - 1;
     const againCount = results.filter(r => r.rating === 1).length;
@@ -143,6 +146,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         return () => clearInterval(interval);
     }, [startTime, phase]);
 
+    useEffect(() => {
+        setShowExplanation(false);
+    }, [currentIndex, currentCard?.id]);
+
     const handleFlip = useCallback(() => {
         if (phase !== 'active' || !currentCard) return;
         setIsFlipped(flipped => !flipped);
@@ -152,6 +159,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         if (currentIndex === 0) return;
         setCurrentIndex(index => Math.max(index - 1, 0));
         setIsFlipped(false);
+        setShowExplanation(false);
     }, [currentIndex]);
 
     const applyRatingAndAdvance = useCallback(async (rating: Rating) => {
@@ -167,11 +175,13 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         if (currentIndex >= nextQueue.length - 1) {
             setPhase('summary');
             setIsFlipped(false);
+            setShowExplanation(false);
         } else {
             const nextIndex = currentIndex + 1;
             setCurrentIndex(nextIndex);
             setMaxVisitedIndex(prev => Math.max(prev, nextIndex));
             setIsFlipped(false);
+            setShowExplanation(false);
         }
     }, [currentCard, currentIndex, logSyntaxPractice, phase, queue]);
 
@@ -187,6 +197,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         setCurrentIndex(nextIndex);
         setMaxVisitedIndex(prev => Math.max(prev, nextIndex));
         setIsFlipped(false);
+        setShowExplanation(false);
     }, [currentCard, currentIndex, queue.length, sessionRatings, applyRatingAndAdvance]);
 
     const handleBinaryChoice = useCallback(async (choice: 1 | 2) => {
@@ -208,6 +219,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         setStartTime(Date.now());
         setShowHelp(false);
         setShowExitConfirm(false);
+        setShowExplanation(false);
     }, []);
 
     const struggledCards = cards.filter(card => sessionRatings[card.id] === 1);
@@ -223,7 +235,19 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
             if (isTypingTarget(e.target)) return;
 
             if (phase === 'active') {
-                if (e.key === 'Escape') { setShowExitConfirm(true); return; }
+                if (e.key === 'Escape') {
+                    if (showExplanation) {
+                        setShowExplanation(false);
+                        return;
+                    }
+                    setShowExitConfirm(true);
+                    return;
+                }
+                if (isFlipped && hasExplanation && (e.key.toLowerCase() === 'e' || e.key === '?')) {
+                    e.preventDefault();
+                    setShowExplanation(value => !value);
+                    return;
+                }
                 if (e.key === ' ') { e.preventDefault(); handleFlip(); return; }
                 if (e.key === 'ArrowLeft') { e.preventDefault(); goPrevious(); return; }
                 if (e.key === 'ArrowRight') { e.preventDefault(); void goNext(); return; }
@@ -236,7 +260,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [phase, handleFlip, goPrevious, goNext, handleBinaryChoice, showExitConfirm, onClose]);
+    }, [phase, handleFlip, goPrevious, goNext, handleBinaryChoice, showExitConfirm, showExplanation, isFlipped, hasExplanation, onClose]);
 
     // Prevent body scroll while session is open
     useEffect(() => {
@@ -423,6 +447,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                 <span className="text-zinc-800">·</span>
                                 <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">2</kbd> know it</span>
                                 <span className="text-zinc-800">·</span>
+                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">E</kbd> explain</span>
+                                <span className="text-zinc-800">·</span>
                                 <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">Esc</kbd> exit</span>
                             </div>
                         </div>
@@ -592,30 +618,76 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                     </div>
 
                                     <div className="absolute inset-0 bg-zinc-900 overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                                        <button
-                                            type="button"
-                                            onClick={handleFlip}
-                                            className="flex h-full w-full flex-col p-5 sm:p-8 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40"
-                                        >
+                                        <div className="flex h-full w-full flex-col p-5 sm:p-8 text-left">
                                             <div className="flex items-center justify-between gap-3 mb-6">
-                                                <div className="text-xs text-emerald-500 font-semibold tracking-widest uppercase">
-                                                    Syntax
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-xs text-emerald-500 font-semibold tracking-widest uppercase">
+                                                        Syntax
+                                                    </div>
+                                                    {hasExplanation && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setShowExplanation(value => !value);
+                                                            }}
+                                                            aria-expanded={showExplanation}
+                                                            className={clsx(
+                                                                "inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                                                                showExplanation
+                                                                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                                                    : "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:border-emerald-500/30 hover:text-emerald-300"
+                                                            )}
+                                                        >
+                                                            <BookOpen size={15} />
+                                                            Explain
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <span className="text-xs text-zinc-600">Tap or Space to hide</span>
                                             </div>
-                                            <div className="flex-1 flex items-center justify-center min-h-0">
-                                                <div className="w-full h-full min-h-[16rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-8 font-mono text-xl sm:text-2xl lg:text-3xl text-zinc-100 whitespace-pre-wrap leading-relaxed overflow-auto flex items-center">
+                                            <button
+                                                type="button"
+                                                onClick={handleFlip}
+                                                aria-label="Hide answer"
+                                                className="flex-1 flex items-center justify-center min-h-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-2xl"
+                                            >
+                                                <div className="w-full h-full min-h-[12rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-8 font-mono text-xl sm:text-2xl lg:text-3xl text-zinc-100 whitespace-pre-wrap leading-relaxed overflow-auto flex items-center">
                                                     {currentCard.syntax}
                                                 </div>
-                                            </div>
-                                        </button>
+                                            </button>
+                                            {showExplanation && hasExplanation && (
+                                                <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 sm:p-5 shadow-inner">
+                                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+                                                            <BookOpen size={14} />
+                                                            Explanation
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setShowExplanation(false);
+                                                            }}
+                                                            aria-label="Close explanation"
+                                                            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                    <p className="max-h-36 overflow-y-auto pr-1 text-sm sm:text-base leading-relaxed text-zinc-300">
+                                                        {currentExplanation}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             </div>
 
                             <div className="flex-shrink-0 border-t border-zinc-800/80 bg-zinc-950/90 px-4 sm:px-6 py-5 sm:py-6">
                                 <p className="text-center text-sm text-zinc-500 mb-5">
-                                    Press <span className="text-zinc-400">Space</span> to flip · <span className="text-zinc-400">← / →</span> to navigate · <span className="text-zinc-400">1 / 2</span> to rate
+                                    Press <span className="text-zinc-400">Space</span> to flip · <span className="text-zinc-400">E</span> to explain · <span className="text-zinc-400">← / →</span> to navigate · <span className="text-zinc-400">1 / 2</span> to rate
                                 </p>
                                 <div className="flex items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
                                     <button

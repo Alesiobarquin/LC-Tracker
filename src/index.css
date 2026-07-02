@@ -221,3 +221,54 @@ body {
   }
 }
 
+.syntax-highlighted-code .cm-editor {
+  background: transparent !important;
+}
+
+.syntax-highlighted-code .cm-editor.cm-focused {
+  outline: none !important;
+}
+
+.syntax-highlighted-code .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+
+.syntax-highlighted-code .cm-content {
+  padding: 0;
+}
+
+.syntax-highlighted-code--sm .cm-scroller {
+  font-size: 0.875rem;
+}
+
+.syntax-highlighted-code--md .cm-scroller {
+  font-size: 1rem;
+}
+
+.syntax-highlighted-code--lg .cm-scroller {
+  font-size: 1.125rem;
+}
+
+@media (min-width: 640px) {
+  .syntax-highlighted-code--lg .cm-scroller {
+    font-size: 1.25rem;
+  }
+}
+
+.syntax-highlighted-code--xl .cm-scroller {
+  font-size: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .syntax-highlighted-code--xl .cm-scroller {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .syntax-highlighted-code--xl .cm-scroller {
+    font-size: 1.875rem;
+  }
+}
+

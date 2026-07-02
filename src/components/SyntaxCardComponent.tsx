@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { SyntaxHighlightedCode } from './SyntaxHighlightedCode';
 
 interface SyntaxCardComponentProps {
     card: SyntaxCard;
@@ -69,11 +70,9 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
         setHasSubmitted(false);
     };
 
-    const highlightCode = (code: string) => {
-        // Return raw code string due to innerHTML issues with React state rendering 
-        // We'll rely on the uniform monospaced font for clean readability.
-        return <span className="font-mono text-zinc-100 whitespace-pre-wrap leading-relaxed">{code}</span>;
-    };
+    const highlightCode = (code: string) => (
+        <SyntaxHighlightedCode code={code} language={card.language} size="sm" />
+    );
 
     return (
         <div className={clsx(

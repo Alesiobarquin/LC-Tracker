@@ -1,13 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { allSyntaxCards, SyntaxCard } from '../data/syntaxCards';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
-import { SyntaxFlashcardSession } from './SyntaxFlashcardSession';
-import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers } from 'lucide-react';
+import { SyntaxFlashcardSession, SessionOrderMode } from './SyntaxFlashcardSession';
+import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers, Shuffle } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSyntaxProgress } from '../hooks/useUserData';
+
+const SESSION_ORDER_KEY = 'syntax-session-order';
+
+const readStoredOrderMode = (): SessionOrderMode => {
+    if (typeof window === 'undefined') return 'random';
+    return localStorage.getItem(SESSION_ORDER_KEY) === 'category' ? 'category' : 'random';
+};
 
 export const SyntaxReference: React.FC = () => {
     const { user } = useUser();
@@ -18,6 +25,11 @@ export const SyntaxReference: React.FC = () => {
     const [showOnlyWeak, setShowOnlyWeak] = useState(false);
     const [sessionCards, setSessionCards] = useState<SyntaxCard[] | null>(null);
     const [sessionTitle, setSessionTitle] = useState('');
+    const [sessionOrderMode, setSessionOrderMode] = useState<SessionOrderMode>(readStoredOrderMode);
+
+    useEffect(() => {
+        localStorage.setItem(SESSION_ORDER_KEY, sessionOrderMode);
+    }, [sessionOrderMode]);
 
     // Collapse state for categories
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -83,9 +95,7 @@ export const SyntaxReference: React.FC = () => {
             return;
         }
         if (cards.length === 0) return;
-        // Shuffle for interleaved practice
-        const shuffled = [...cards].sort(() => Math.random() - 0.5);
-        setSessionCards(shuffled);
+        setSessionCards(cards);
         setSessionTitle(title);
     };
 
@@ -100,6 +110,7 @@ export const SyntaxReference: React.FC = () => {
             <SyntaxFlashcardSession
                 cards={sessionCards}
                 title={sessionTitle}
+                orderMode={sessionOrderMode}
                 onClose={() => setSessionCards(null)}
             />
         )}
@@ -197,6 +208,35 @@ export const SyntaxReference: React.FC = () => {
                             <AlertCircle size={16} />
                             Weak Areas
                         </button>
+
+                        <div className="flex rounded-xl border border-zinc-800 bg-zinc-900 p-1">
+                            <button
+                                type="button"
+                                onClick={() => setSessionOrderMode('random')}
+                                className={clsx(
+                                    "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors whitespace-nowrap",
+                                    sessionOrderMode === 'random'
+                                        ? "bg-emerald-500/10 text-emerald-300"
+                                        : "text-zinc-400 hover:text-zinc-200"
+                                )}
+                            >
+                                <Shuffle size={14} />
+                                Random
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSessionOrderMode('category')}
+                                className={clsx(
+                                    "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors whitespace-nowrap",
+                                    sessionOrderMode === 'category'
+                                        ? "bg-emerald-500/10 text-emerald-300"
+                                        : "text-zinc-400 hover:text-zinc-200"
+                                )}
+                            >
+                                <Layers size={14} />
+                                By category
+                            </button>
+                        </div>
                     </div>
                 </div>
 

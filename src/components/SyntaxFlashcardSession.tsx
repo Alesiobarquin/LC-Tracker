@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
-import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check, BookOpen } from 'lucide-react';
+import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check, BookOpen, Shuffle, Layers } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
 import { motion } from 'motion/react';
+import { SyntaxHighlightedCode } from './SyntaxHighlightedCode';
+
+export type SessionOrderMode = 'random' | 'category';
 
 interface SyntaxFlashcardSessionProps {
     cards: SyntaxCard[];
     title: string;
+    orderMode?: SessionOrderMode;
     onClose: () => void;
 }
 
@@ -20,6 +24,23 @@ interface SessionResult {
 }
 
 const shuffleCards = (items: SyntaxCard[]) => [...items].sort(() => Math.random() - 0.5);
+
+export const orderSessionCards = (items: SyntaxCard[], mode: SessionOrderMode): SyntaxCard[] => {
+    if (mode === 'random') return shuffleCards(items);
+
+    const categoryOrder: string[] = [];
+    const byCategory = new Map<string, SyntaxCard[]>();
+
+    for (const card of items) {
+        if (!byCategory.has(card.category)) {
+            categoryOrder.push(card.category);
+            byCategory.set(card.category, []);
+        }
+        byCategory.get(card.category)!.push(card);
+    }
+
+    return categoryOrder.flatMap(category => byCategory.get(category)!);
+};
 
 const ratingLabel = (rating: Rating) => {
     if (rating === 1) return "Don't know";
@@ -111,12 +132,14 @@ function extractVarHints(syntax: string, language: string): string[] {
 export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     cards,
     title,
+    orderMode: initialOrderMode = 'random',
     onClose,
 }) => {
     const { logSyntaxPractice } = useSyntaxProgress();
 
     const totalUniqueCards = cards.length;
-    const [queue, setQueue] = useState<SyntaxCard[]>([...cards]);
+    const [orderMode, setOrderMode] = useState<SessionOrderMode>(initialOrderMode);
+    const [queue, setQueue] = useState<SyntaxCard[]>(() => orderSessionCards(cards, initialOrderMode));
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [phase, setPhase] = useState<Phase>('active');
@@ -129,6 +152,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showHelp, setShowHelp] = useState(true);
     const [showExplanation, setShowExplanation] = useState(false);
+    const [hasLeftHelp, setHasLeftHelp] = useState(false);
 
     const currentCard = queue[currentIndex];
     const currentRating = currentCard ? sessionRatings[currentCard.id] : undefined;
@@ -149,6 +173,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     useEffect(() => {
         setShowExplanation(false);
     }, [currentIndex, currentCard?.id]);
+
+    useEffect(() => {
+        setOrderMode(initialOrderMode);
+    }, [initialOrderMode]);
 
     const handleFlip = useCallback(() => {
         if (phase !== 'active' || !currentCard) return;
@@ -207,7 +235,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     }, [currentCard, phase, applyRatingAndAdvance]);
 
     const restartSession = useCallback((nextCards: SyntaxCard[], nextTitle: string) => {
-        setQueue(shuffleCards(nextCards));
+        setQueue(orderSessionCards(nextCards, orderMode));
         setCurrentIndex(0);
         setIsFlipped(false);
         setSessionRatings({});
@@ -220,7 +248,16 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         setShowHelp(false);
         setShowExitConfirm(false);
         setShowExplanation(false);
-    }, []);
+        setHasLeftHelp(true);
+    }, [orderMode]);
+
+    const handleCloseHelp = useCallback(() => {
+        if (!hasLeftHelp) {
+            setQueue(orderSessionCards(cards, orderMode));
+            setHasLeftHelp(true);
+        }
+        setShowHelp(false);
+    }, [cards, hasLeftHelp, orderMode]);
 
     const struggledCards = cards.filter(card => sessionRatings[card.id] === 1);
 
@@ -375,28 +412,28 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
             {/* Help / intro overlay */}
             {showHelp && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-6 sm:p-10">
-                    <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl w-full max-w-3xl lg:max-w-4xl shadow-2xl overflow-hidden max-h-[min(92vh,900px)] overflow-y-auto">
+                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-4 sm:p-6">
+                    <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl w-full max-w-3xl lg:max-w-4xl shadow-2xl flex flex-col max-h-[min(92vh,900px)] overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-8 sm:px-10 pt-8 sm:pt-10 pb-6 border-b border-zinc-800">
+                        <div className="flex-shrink-0 flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b border-zinc-800">
                             <div>
-                                <h3 className="text-2xl sm:text-3xl font-bold text-zinc-100">How Practice Sessions Work</h3>
-                                <p className="text-sm sm:text-base text-zinc-500 mt-2">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
+                                <h3 className="text-xl sm:text-2xl font-bold text-zinc-100">How Practice Sessions Work</h3>
+                                <p className="text-sm text-zinc-500 mt-1.5">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
                             </div>
                             <button
                                 aria-label="Close help"
-                                onClick={() => setShowHelp(false)}
+                                onClick={handleCloseHelp}
                                 className="p-2.5 rounded-xl text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
                             >
                                 <X size={22} />
                             </button>
                         </div>
 
-                        <div className="px-8 sm:px-10 py-8 sm:py-10 space-y-8">
+                        <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-8 py-5 sm:py-6 space-y-6">
                             {/* The 3-step flow */}
                             <div>
-                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-5">The Flow</div>
-                                <div className="space-y-4">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">The Flow</div>
+                                <div className="space-y-3">
                                     {[
                                         { step: '1', label: 'Read the front', desc: 'Use the description, use case, and variable hints to recall the syntax.' },
                                         { step: '2', label: 'Flip the card', desc: 'Press Space or tap the card to reveal the answer.' },
@@ -407,8 +444,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                 {step}
                                             </div>
                                             <div>
-                                                <div className="text-lg sm:text-xl font-semibold text-zinc-200">{label}</div>
-                                                <div className="text-sm sm:text-base text-zinc-500 leading-relaxed mt-1">{desc}</div>
+                                                <div className="text-base sm:text-lg font-semibold text-zinc-200">{label}</div>
+                                                <div className="text-sm text-zinc-500 leading-relaxed mt-0.5">{desc}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -417,27 +454,65 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
                             {/* Ratings explained */}
                             <div>
-                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-5">The two options</div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 sm:p-6">
-                                        <div className="text-lg sm:text-xl font-bold text-red-400 mb-2 flex items-center gap-2">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">The two options</div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 sm:p-5">
+                                        <div className="text-base sm:text-lg font-bold text-red-400 mb-1.5 flex items-center gap-2">
                                             <X size={20} />
                                             <span>1 · Don't know</span>
                                         </div>
-                                        <div className="text-sm sm:text-base text-zinc-500 leading-relaxed">You blanked or got it wrong. Card re-queues at the end of this session.</div>
+                                        <div className="text-sm text-zinc-500 leading-relaxed">You blanked or got it wrong. Card re-queues at the end of this session.</div>
                                     </div>
-                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 sm:p-6">
-                                        <div className="text-lg sm:text-xl font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 sm:p-5">
+                                        <div className="text-base sm:text-lg font-bold text-emerald-400 mb-1.5 flex items-center gap-2">
                                             <Check size={20} />
                                             <span>2 · Know it</span>
                                         </div>
-                                        <div className="text-sm sm:text-base text-zinc-500 leading-relaxed">You knew the syntax. Normal spaced repetition interval applied.</div>
+                                        <div className="text-sm text-zinc-500 leading-relaxed">You knew the syntax. Normal spaced repetition interval applied.</div>
                                     </div>
                                 </div>
                             </div>
 
+                            {/* Card order */}
+                            <div>
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">Card order</div>
+                                <div className="flex flex-col sm:flex-row gap-2.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setOrderMode('random')}
+                                        className={clsx(
+                                            "flex flex-1 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors",
+                                            orderMode === 'random'
+                                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                                : "border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                        )}
+                                    >
+                                        <Shuffle size={16} />
+                                        Random
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setOrderMode('category')}
+                                        className={clsx(
+                                            "flex flex-1 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors",
+                                            orderMode === 'category'
+                                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                                : "border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                        )}
+                                    >
+                                        <Layers size={16} />
+                                        By category
+                                    </button>
+                                </div>
+                                <p className="mt-3 text-sm text-zinc-500 leading-relaxed">
+                                    {orderMode === 'random'
+                                        ? 'Cards are shuffled for mixed practice across topics.'
+                                        : 'Cards stay grouped by category in reference order, with each category kept together.'}
+                                </p>
+                            </div>
+
                             {/* Keyboard shortcuts */}
-                            <div className="flex items-center gap-3 flex-wrap text-sm sm:text-base text-zinc-600 pt-2 border-t border-zinc-800">
+                            <div className="flex items-center gap-2.5 flex-wrap text-xs sm:text-sm text-zinc-600 pt-1 border-t border-zinc-800">
                                 <Keyboard size={16} className="text-zinc-700" />
                                 <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">←</kbd> <kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">→</kbd> navigate</span>
                                 <span className="text-zinc-800">·</span>
@@ -453,12 +528,12 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             </div>
                         </div>
 
-                        <div className="px-8 sm:px-10 pb-8 sm:pb-10">
+                        <div className="flex-shrink-0 border-t border-zinc-800 bg-zinc-900/95 px-6 sm:px-8 py-4 sm:py-5">
                             <button
-                                onClick={() => setShowHelp(false)}
-                                className="w-full py-4 sm:py-5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-lg font-semibold transition-colors flex items-center justify-center gap-3"
+                                onClick={handleCloseHelp}
+                                className="w-full py-3.5 sm:py-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-base sm:text-lg font-semibold transition-colors flex items-center justify-center gap-3"
                             >
-                                Start Session
+                                {hasLeftHelp ? 'Continue' : 'Start Session'}
                                 <ArrowRight size={20} />
                             </button>
                         </div>
@@ -646,16 +721,28 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                 </div>
                                                 <span className="text-xs text-zinc-600">Tap or Space to hide</span>
                                             </div>
-                                            <button
-                                                type="button"
+                                            <div
+                                                role="button"
+                                                tabIndex={0}
                                                 onClick={handleFlip}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        handleFlip();
+                                                    }
+                                                }}
                                                 aria-label="Hide answer"
-                                                className="flex-1 flex items-center justify-center min-h-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-2xl"
+                                                className="flex-1 flex items-stretch justify-center min-h-0 overflow-auto rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
                                             >
-                                                <div className="w-full h-full min-h-[12rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-8 font-mono text-xl sm:text-2xl lg:text-3xl text-zinc-100 whitespace-pre-wrap leading-relaxed overflow-auto flex items-center">
-                                                    {currentCard.syntax}
+                                                <div className="w-full min-h-[12rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-2 py-4 sm:px-4 sm:py-6">
+                                                    <SyntaxHighlightedCode
+                                                        code={currentCard.syntax}
+                                                        language={currentCard.language}
+                                                        size="xl"
+                                                        className="pointer-events-none"
+                                                    />
                                                 </div>
-                                            </button>
+                                            </div>
                                             {showExplanation && hasExplanation && (
                                                 <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 sm:p-5 shadow-inner">
                                                     <div className="mb-2 flex items-center justify-between gap-3">

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.4",
+    "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-python": "^6.2.1",
     "@google/genai": "^1.29.0",
     "@supabase/supabase-js": "^2.99.3",

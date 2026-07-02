@@ -86,3 +86,17 @@ export const isDueToday = (nextReviewAt: string) => {
   const reviewDate = startOfDay(new Date(nextReviewAt));
   return isBefore(reviewDate, today) || isSameDay(reviewDate, today);
 };
+
+export const MAX_BACKDATE_HOURS = 12;
+
+export const validateStartTimestamp = (startTimestamp: number): string | null => {
+  const now = Date.now();
+  if (startTimestamp >= now) {
+    return 'Start time must be in the past.';
+  }
+  const maxBackdateMs = MAX_BACKDATE_HOURS * 60 * 60 * 1000;
+  if (now - startTimestamp > maxBackdateMs) {
+    return `Start time can be backdated up to ${MAX_BACKDATE_HOURS} hours.`;
+  }
+  return null;
+};

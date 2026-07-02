@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import {
   problems,
   allProblems,
+  problemMap,
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
   isProblemPremium,
@@ -11,7 +12,7 @@ import {
   TARGET_CURRICULUM_LABELS,
   type Difficulty,
 } from '../data/problems';
-import { allSyntaxCards } from '../data/syntaxCards';
+import { allSyntaxCards, syntaxCardMap } from '../data/syntaxCards';
 import { patterns } from '../data/patterns';
 import { getPatternForProblem } from '../utils/patternMapping';
 import { getPhase } from '../utils/dateUtils';
@@ -228,10 +229,12 @@ export const Dashboard: React.FC = () => {
     return <DashboardSkeleton />;
   }
 
-  const newProblemData = effectiveNewProblemId ? allProblems.find(p => p.id === effectiveNewProblemId) : null;
-  const reviewProblemsData = effectiveReviewProblems.map(id => allProblems.find(p => p.id === id)).filter(Boolean);
-  const coldSolveData = coldSolveProblem ? allProblems.find(p => p.id === coldSolveProblem) : null;
-  const syntaxDrillsData = (dueSyntaxCards || []).map(id => allSyntaxCards.find(c => c.id === id)).filter(Boolean);
+  // ⚡ Bolt Optimization: Replaced O(N) allProblems.find() with O(1) problemMap/syntaxCardMap lookups.
+  // This prevents multiple full-array scans over ~3800 items per render iteration.
+  const newProblemData = effectiveNewProblemId ? problemMap[effectiveNewProblemId] : null;
+  const reviewProblemsData = effectiveReviewProblems.map(id => problemMap[id]).filter(Boolean);
+  const coldSolveData = coldSolveProblem ? problemMap[coldSolveProblem] : null;
+  const syntaxDrillsData = (dueSyntaxCards || []).map(id => syntaxCardMap[id]).filter(Boolean);
 
   // ── Dynamic Time Estimates ───────────────────────────────────────────────
   const getNewProblemMinutes = (category?: string, difficulty?: Difficulty): { minutes: number; isDefault: boolean } => {
@@ -257,14 +260,14 @@ export const Dashboard: React.FC = () => {
     timeItems.push({ label: `1 new (${newProblemData.category})`, minutes: est.minutes, isDefault: est.isDefault });
   }
   additionalProblems.forEach(id => {
-    const prob = allProblems.find(p => p.id === id);
+    const prob = problemMap[id];
     if (prob) {
       const est = getNewProblemMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `1 extra (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
     }
   });
   effectiveReviewProblems.forEach(id => {
-    const prob = allProblems.find(p => p.id === id);
+    const prob = problemMap[id];
     if (prob) {
       const est = getReviewMinutes(prob.category, prob.difficulty);
       timeItems.push({ label: `review (${prob.category})`, minutes: est.minutes, isDefault: est.isDefault });
@@ -492,7 +495,7 @@ export const Dashboard: React.FC = () => {
 
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
-    const problem = allProblems.find(p => p.id === activeSession.problemId);
+    const problem = problemMap[activeSession.problemId];
     if (!problem) return null;
     return (
       <TimerComp
@@ -568,7 +571,7 @@ export const Dashboard: React.FC = () => {
               <button onClick={() => setCatchUpPlan('CATCH_UP', missedDaysCount)} className="flex-1 sm:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2">
                 <Zap size={16} /> Catch Up Faster
               </button>
-              <button onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"><X size={18} /></button>
+              <button aria-label="Dismiss catch-up banner" onClick={dismissCatchUpBanner} className="px-2 py-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"><X size={18} /></button>
             </div>
           </div>
         </div>
@@ -633,7 +636,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
-                        <a href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50"><ExternalLink size={16} /></a>
+                        <a aria-label={`Open ${newProblemData.title} on LeetCode`} href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"><ExternalLink size={16} /></a>
                         <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
                           <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
@@ -665,7 +668,7 @@ export const Dashboard: React.FC = () => {
               );
             })() : newProblemData ? (
               <div className="space-y-4">
-                {[newProblemData, ...(additionalProblems || []).map(id => allProblems.find(p => p.id === id)).filter(Boolean)].map((prob, idx) => {
+                {[newProblemData, ...(additionalProblems || []).map(id => problemMap[id]).filter(Boolean)].map((prob, idx) => {
                   if (!prob) return null;
                   const isPrimary = idx === 0;
                   const est = getNewProblemMinutes(prob.category);
@@ -707,14 +710,15 @@ export const Dashboard: React.FC = () => {
                         <div className="flex gap-2">
                           {isPrimary && (
                             <button
+                              aria-label={`Skip ${prob.title}`}
                               onClick={() => setSkippedNewProblemIds(prev => new Set([...prev, prob.id]))}
-                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50"
+                              className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
                               title="Skip this problem"
                             >
                               <SkipForward size={18} />
                             </button>
                           )}
-                          <a href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600"><ExternalLink size={18} /></a>
+                          <a aria-label={`Open ${prob.title} on LeetCode`} href={prob.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 hover:border-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"><ExternalLink size={18} /></a>
                         </div>
                       </div>
                       <button
@@ -817,8 +821,9 @@ export const Dashboard: React.FC = () => {
                         </div>
                       </div>
                       <button
+                        aria-label={`Start session for ${prob.title}`}
                         onClick={() => startSession(prob.id, true, false)}
-                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500"
+                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
                       >
                         <Play size={18} className="fill-current" />
                       </button>
@@ -930,8 +935,8 @@ export const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">
                     <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
                     <div className="flex items-center gap-2">
-                       <button onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Decrease Sprint Length">-1d</button>
-                       <button onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800" title="Increase Sprint Length">+1d</button>
+                       <button aria-label="Decrease Sprint Length" onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Decrease Sprint Length">-1d</button>
+                       <button aria-label="Increase Sprint Length" onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Increase Sprint Length">+1d</button>
                        <span className="ml-1 w-6 text-right">{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
                     </div>
                   </div>

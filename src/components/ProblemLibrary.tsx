@@ -370,7 +370,7 @@ export const ProblemLibrary: React.FC = () => {
                             <td className="px-6 py-4">
                               <button 
                                  onClick={() => toggleSolved(prob.id, isSolved)}
-                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
+                                 className="focus:outline-none hover:scale-110 transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-full outline-none"
                                  title={statusTitle}
                                  aria-label={statusTitle}
                               >
@@ -413,7 +413,7 @@ export const ProblemLibrary: React.FC = () => {
                                   href={prob.leetcodeUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 hover:border-zinc-600 text-xs font-medium"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 hover:border-zinc-600 text-xs font-medium focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"
                                   title="Open on LeetCode to view your submission status"
                                   aria-label={`Open ${prob.title} on LeetCode`}
                                 >
@@ -423,8 +423,9 @@ export const ProblemLibrary: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                                   title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
+                                  aria-label={`Start practice timer for ${prob.title}`}
                                 >
                                   <Play size={16} />
                                 </button>

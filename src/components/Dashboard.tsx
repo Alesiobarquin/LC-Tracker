@@ -53,7 +53,11 @@ const TodayTimer: React.FC<{ sessionTimings: SessionTiming[]; activeSession: any
     }
 
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - activeSession.startTimestamp) / 1000);
+      const pausedSeconds = activeSession.pausedSeconds ?? 0;
+      const currentPause = activeSession.pausedAt
+        ? Math.floor((Date.now() - activeSession.pausedAt) / 1000)
+        : 0;
+      const elapsed = Math.floor((Date.now() - activeSession.startTimestamp) / 1000) - pausedSeconds - currentPause;
       setActiveElapsed(Math.max(0, elapsed));
     };
 
@@ -109,7 +113,6 @@ export const Dashboard: React.FC = () => {
     coldSolveProblem,
     dueSyntaxCards,
     recommendationReason,
-    totalDueReviews,
     dayModeType,
     isStabilizer,
     isRetro,
@@ -132,13 +135,13 @@ export const Dashboard: React.FC = () => {
     [progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog, sprintState, categoryStruggling, categoryAvgSolveTimes, categoryAvgReviewTimes]
   );
 
-  const [retroTimedOut, setRetroTimedOut] = useState(false);
   const [retroCompleted, setRetroCompleted] = useState(false);
   const [sprintCompletionDismissed, setSprintCompletionDismissed] = useState(false);
 
   const [isReview, setIsReview] = useState(false);
   const [isColdSolve, setIsColdSolve] = useState(false);
   const [skippedNewProblemIds, setSkippedNewProblemIds] = useState<Set<string>>(new Set());
+  const [skippedReviewIds, setSkippedReviewIds] = useState<Set<string>>(new Set());
 
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneDismissed, setMilestoneDismissed] = useState(false);
@@ -203,9 +206,15 @@ export const Dashboard: React.FC = () => {
 
   // Recompute the review list whenever the effective new problem changes.
   // This means skipping a Hard→Medium immediately frees time for more reviews.
+  // Skipped reviews are removed from the pool so the next deferred due items fill in.
+  const availableDueReviewIds = useMemo(
+    () => allDueReviewIds.filter((id) => !skippedReviewIds.has(id)),
+    [allDueReviewIds, skippedReviewIds]
+  );
+
   const effectiveReviewProblems = useMemo(() =>
     computeReviewProblems({
-      allDueReviewIds,
+      allDueReviewIds: availableDueReviewIds,
       newProblemId: effectiveNewProblemId,
       additionalProblemIds: additionalProblems,
       coldSolveProblemId: coldSolveProblem,
@@ -214,14 +223,13 @@ export const Dashboard: React.FC = () => {
       categoryAvgSolveTimes,
       categoryAvgReviewTimes,
     }),
-    [allDueReviewIds, effectiveNewProblemId, additionalProblems, coldSolveProblem, dueSyntaxCards.length, settings, categoryAvgSolveTimes, categoryAvgReviewTimes]
+    [availableDueReviewIds, effectiveNewProblemId, additionalProblems, coldSolveProblem, dueSyntaxCards.length, settings, categoryAvgSolveTimes, categoryAvgReviewTimes]
   );
 
   // Clean up sprint check state
   useEffect(() => {
     if (!isRetro) {
       setRetroCompleted(false);
-      setRetroTimedOut(false);
     }
   }, [isRetro]);
 
@@ -491,7 +499,7 @@ export const Dashboard: React.FC = () => {
     const diff = differenceInDays(todayStart, startOfDay(lastActive));
     if (diff >= 2) missedDaysCount = diff - 1;
   }
-  const showCatchUpBanner = missedDaysCount >= 2 && !catchUpPlan.active;
+  const showCatchUpBanner = missedDaysCount >= 2 && !catchUpPlan.active && !catchUpPlan.bannerDismissed;
 
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
@@ -615,7 +623,7 @@ export const Dashboard: React.FC = () => {
               const avgSec = avgCatSeconds && avgCatSeconds.count >= 2
                 ? Math.round(avgCatSeconds.totalSeconds / avgCatSeconds.count)
                 : 20 * 60;
-              const limitSeconds = Math.round(avgSec * 1.5);
+              const limitMinutes = Math.max(1, Math.round((avgSec * 1.5) / 60));
               return (
                 <div className="premium-card p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden group">
                   <Swords size={200} aria-hidden="true" className="hidden sm:block absolute -bottom-12 -right-12 text-amber-500-[0.03] opacity-5 select-none pointer-events-none group-hover:-rotate-12 transition-transform duration-1000" />
@@ -633,8 +641,11 @@ export const Dashboard: React.FC = () => {
                             <Lock size={10} /> LC Premium
                           </span>
                         )}
+                        <span className="px-3 py-1 rounded-full border bg-white/5 text-zinc-400 border-white/10 backdrop-blur-sm font-bold uppercase tracking-wide inline-flex items-center gap-1">
+                          <Timer size={10} /> ~{limitMinutes}m target
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Timer counts down. Rate yourself honestly — a 1 or timeout extends the sprint by 2 days.</p>
+                      <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Start the timer, solve under pressure, then rate yourself honestly — a struggle rating extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
                         <a aria-label={`Open ${newProblemData.title} on LeetCode`} href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"><ExternalLink size={16} /></a>
                         <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
@@ -643,25 +654,28 @@ export const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {/* Quick rating after timeout or completion */}
-                  {(retroTimedOut || retroCompleted) && (
+                  {/* Quick rating after completion */}
+                  {retroCompleted && (
                     <div className="mt-4 pt-4 border-t border-amber-500/20">
                       <p className="text-sm text-zinc-300 mb-3">How did the Sprint Check go?</p>
                       <div className="flex gap-2">
-                        <button onClick={() => { 
-                          if (newProblemData) void logProblem(newProblemData.id, 4, !progress[newProblemData.id], "Sprint Passed via Dashboard"); 
-                          setRetroCompleted(false); 
-                          setRetroTimedOut(false); 
+                        <button onClick={() => {
+                          if (newProblemData) void logProblem(newProblemData.id, 4, !progress[newProblemData.id], "Sprint Passed via Dashboard");
+                          void recordSprintRetro(true, 4);
+                          setRetroCompleted(false);
                         }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (4+)</button>
-                        <button onClick={() => { 
-                          if (newProblemData) void logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard"); 
-                          setRetroCompleted(false); 
-                          setRetroTimedOut(false); 
+                        <button onClick={() => {
+                          if (newProblemData) void logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard");
+                          void updateSprintState({
+                            extensionDays: (sprintState?.extensionDays ?? 0) + 2,
+                            retroAttempted: true,
+                          });
+                          setRetroCompleted(false);
                         }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
                       </div>
                     </div>
                   )}
-                  {!retroTimedOut && !retroCompleted && (
+                  {!retroCompleted && (
                     <button onClick={() => setRetroCompleted(true)} className="mt-4 text-xs text-zinc-500 hover:text-zinc-300 underline transition-colors">I finished — rate my attempt</button>
                   )}
                 </div>
@@ -769,7 +783,7 @@ export const Dashboard: React.FC = () => {
                     </h3>
                   </div>
                   <button
-                    onClick={() => startSession(coldSolveData.id, true, true)}
+                    onClick={() => startSession(coldSolveData.id, false, true)}
                     className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-2"
                   >
                     <Play size={16} className="fill-current" />
@@ -784,11 +798,11 @@ export const Dashboard: React.FC = () => {
           <section className="slide-in-from-bottom-4" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-xl font-semibold text-zinc-100 mb-4 flex items-center gap-2">
               <RotateCcw size={20} className="text-amber-400" />
-              Spaced Repetition Reviews ({reviewProblemsData.length}{totalDueReviews > reviewProblemsData.length ? ` of ${totalDueReviews}` : ''})
+              Spaced Repetition Reviews ({reviewProblemsData.length}{availableDueReviewIds.length > reviewProblemsData.length ? ` of ${availableDueReviewIds.length}` : ''})
             </h2>
-            {totalDueReviews > reviewProblemsData.length ? (
+            {availableDueReviewIds.length > reviewProblemsData.length ? (
               <p className="text-sm text-zinc-400 mb-4 bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg">
-                <span className="text-amber-400 font-semibold">{totalDueReviews - reviewProblemsData.length} review{(totalDueReviews - reviewProblemsData.length) !== 1 ? 's' : ''} deferred</span> to keep today's session within your <span className="text-amber-400 font-semibold">{todayTargetMinutes}min</span> target. Weakest and most overdue problems shown first.
+                <span className="text-amber-400 font-semibold">{availableDueReviewIds.length - reviewProblemsData.length} review{(availableDueReviewIds.length - reviewProblemsData.length) !== 1 ? 's' : ''} deferred</span> to keep today's session within your <span className="text-amber-400 font-semibold">{todayTargetMinutes}min</span> target. Weakest and most overdue problems shown first.
               </p>
             ) : null}
             {reviewProblemsData.length > 0 ? (
@@ -820,13 +834,23 @@ export const Dashboard: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      <button
-                        aria-label={`Start session for ${prob.title}`}
-                        onClick={() => startSession(prob.id, true, false)}
-                        className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
-                      >
-                        <Play size={18} className="fill-current" />
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          aria-label={`Skip review of ${prob.title}`}
+                          onClick={() => setSkippedReviewIds((prev) => new Set([...prev, prob.id]))}
+                          className="p-2.5 bg-zinc-800/80 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl text-zinc-400 hover:text-amber-400 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
+                          title="Skip this review"
+                        >
+                          <SkipForward size={18} />
+                        </button>
+                        <button
+                          aria-label={`Start session for ${prob.title}`}
+                          onClick={() => startSession(prob.id, true, false)}
+                          className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
+                        >
+                          <Play size={18} className="fill-current" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -835,7 +859,11 @@ export const Dashboard: React.FC = () => {
               <div className="premium-card p-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4 border border-amber-500/20"><CircleCheck size={32} className="text-amber-500" /></div>
                 <h3 className="text-lg font-medium text-zinc-100 mb-1">All Caught Up</h3>
-                <p className="text-zinc-400 text-sm">Your review queue is empty for today.</p>
+                <p className="text-zinc-400 text-sm">
+                  {skippedReviewIds.size > 0 && availableDueReviewIds.length === 0
+                    ? 'No more due reviews left to swap in.'
+                    : 'Your review queue is empty for today.'}
+                </p>
               </div>
             )}
           </section>
@@ -854,10 +882,7 @@ export const Dashboard: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => {
-                    const syntaxTabBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.includes('Syntax Reference'));
-                    if (syntaxTabBtn) syntaxTabBtn.click();
-                  }}
+                  onClick={() => navigate('/syntax')}
                   className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl flex justify-center items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]"
                 >
                   <Play size={18} className="fill-current" /> Start Drills

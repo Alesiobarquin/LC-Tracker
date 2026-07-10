@@ -21,7 +21,11 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !user) return;
+    if (!user) {
+      setStatus('Please sign in to send feedback.');
+      return;
+    }
+    if (!message.trim()) return;
 
     setIsSubmitting(true);
     setStatus('idle');
@@ -113,6 +117,13 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             </div>
           )}
 
+          {!user && status === 'idle' && (
+            <div className="flex items-center gap-2 p-3 text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <p className="font-medium text-sm">Sign in to send feedback.</p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-300">Type of Feedback</label>
             <select
@@ -192,7 +203,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
           <button
             type="submit"
-            disabled={isSubmitting || !message.trim()}
+            disabled={isSubmitting || !message.trim() || !user}
             className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white font-medium rounded-lg transition-colors"
           >
             {isSubmitting ? 'Sending...' : 'Send Feedback'}

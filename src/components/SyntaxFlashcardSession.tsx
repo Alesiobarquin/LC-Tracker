@@ -178,6 +178,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         setOrderMode(initialOrderMode);
     }, [initialOrderMode]);
 
+    useEffect(() => {
+        try {
+            localStorage.setItem('syntax-session-order', orderMode);
+        } catch {
+            /* ignore */
+        }
+    }, [orderMode]);
+
     const handleFlip = useCallback(() => {
         if (phase !== 'active' || !currentCard) return;
         setIsFlipped(flipped => !flipped);
@@ -193,12 +201,22 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     const applyRatingAndAdvance = useCallback(async (rating: Rating) => {
         if (!currentCard || phase !== 'active') return;
 
+        const previousRating = sessionRatings[currentCard.id];
         await logSyntaxPractice(currentCard.id, rating);
         setSessionRatings(prev => ({ ...prev, [currentCard.id]: rating }));
-        setResults(prev => [...prev, { cardId: currentCard.id, rating }]);
+        setResults(prev => {
+            const without = prev.filter(r => r.cardId !== currentCard.id);
+            return [...without, { cardId: currentCard.id, rating }];
+        });
 
-        const nextQueue = rating === 1 ? [...queue, currentCard] : queue;
-        if (rating === 1) setQueue(nextQueue);
+        let nextQueue = queue;
+        if (rating === 1) {
+            const alreadyQueuedAhead = queue.slice(currentIndex + 1).some(c => c.id === currentCard.id);
+            if (!alreadyQueuedAhead && previousRating !== 1) {
+                nextQueue = [...queue, currentCard];
+                setQueue(nextQueue);
+            }
+        }
 
         if (currentIndex >= nextQueue.length - 1) {
             setPhase('summary');
@@ -211,7 +229,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
             setIsFlipped(false);
             setShowExplanation(false);
         }
-    }, [currentCard, currentIndex, logSyntaxPractice, phase, queue]);
+    }, [currentCard, currentIndex, logSyntaxPractice, phase, queue, sessionRatings]);
 
     const goNext = useCallback(async () => {
         if (!currentCard || currentIndex >= queue.length - 1) return;
@@ -269,6 +287,11 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                 return;
             }
 
+            if (showHelp) {
+                if (e.key === 'Escape') setShowHelp(false);
+                return;
+            }
+
             if (isTypingTarget(e.target)) return;
 
             if (phase === 'active') {
@@ -297,7 +320,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [phase, handleFlip, goPrevious, goNext, handleBinaryChoice, showExitConfirm, showExplanation, isFlipped, hasExplanation, onClose]);
+    }, [phase, handleFlip, goPrevious, goNext, handleBinaryChoice, showExitConfirm, showHelp, showExplanation, isFlipped, hasExplanation, onClose]);
 
     // Prevent body scroll while session is open
     useEffect(() => {

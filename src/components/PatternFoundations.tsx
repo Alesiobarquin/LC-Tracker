@@ -188,7 +188,9 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                               navigate('/login');
                               return;
                             }
-                            startSession(prob.id, false);
+                            const isReview = Boolean(problemProgress?.[prob.id]);
+                            startSession(prob.id, isReview);
+                            navigate(`/timer/${prob.id}`);
                           }}
                           className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-2"
                           title="Start Session"

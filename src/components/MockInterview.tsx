@@ -138,7 +138,7 @@ export const MockInterview: React.FC = () => {
             <div className="flex items-center justify-center gap-4 mb-6 text-sm">
               <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-semibold">
                 <Timer size={14} />
-                Finished in {Math.round((Date.now() - (mockStartTimestampRef.current ?? Date.now())) / 60000)}m
+                Finished in {Math.max(1, Math.round((timeLimitSeconds - timeLeft) / 60))}m
               </span>
               <span className="text-zinc-600">·</span>
               <span className="text-zinc-500">Limit: {Math.round(timeLimitSeconds / 60)}m</span>
@@ -192,9 +192,7 @@ export const MockInterview: React.FC = () => {
 
             <button
               onClick={() => {
-                const actualSecondsUsed = mockStartTimestampRef.current
-                  ? Math.round((Date.now() - mockStartTimestampRef.current) / 1000)
-                  : undefined;
+                const actualSecondsUsed = Math.max(0, timeLimitSeconds - timeLeft);
                 void logMockInterview(
                   activeProblem.id,
                   evalSolved!,

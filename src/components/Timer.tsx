@@ -46,6 +46,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const activeSession = useStore((state) => state.activeSession);
   const startSession = useStore((state) => state.startSession);
   const setSessionStartTimestamp = useStore((state) => state.setSessionStartTimestamp);
+  const updateActiveSession = useStore((state) => state.updateActiveSession);
   const endSession = useStore((state) => state.endSession);
   const abandonSession = useStore((state) => state.abandonSession);
   const { progress, logProblem } = useProblemProgress();
@@ -63,13 +64,17 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const [manualStartTime, setManualStartTime] = useState('');
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   // Total seconds that the timer was paused — subtracted from elapsed so only work time counts.
   const pausedSecondsRef = useRef(0);
   const pausedAtRef = useRef<number | null>(null);
 
-  // If there's already an active session for this problem, pick it up
+  // If there's already an active session for this problem, pick it up (including pause state)
   useEffect(() => {
     if (activeSession && activeSession.problemId === problem.id) {
+      pausedSecondsRef.current = activeSession.pausedSeconds ?? 0;
+      pausedAtRef.current = activeSession.pausedAt ?? null;
+      setIsPaused(activeSession.pausedAt != null);
       setPhase('running');
     }
   }, []); // eslint-disable-line
@@ -148,15 +153,20 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const handlePauseResume = () => {
     if (isPaused) {
       // Resuming: accumulate how long we were paused
+      let nextPausedSeconds = pausedSecondsRef.current;
       if (pausedAtRef.current !== null) {
-        pausedSecondsRef.current += Math.floor((Date.now() - pausedAtRef.current) / 1000);
+        nextPausedSeconds += Math.floor((Date.now() - pausedAtRef.current) / 1000);
+        pausedSecondsRef.current = nextPausedSeconds;
         pausedAtRef.current = null;
       }
       setIsPaused(false);
+      updateActiveSession({ pausedSeconds: nextPausedSeconds, pausedAt: null });
     } else {
       // Pausing: record when we paused
-      pausedAtRef.current = Date.now();
+      const pausedAt = Date.now();
+      pausedAtRef.current = pausedAt;
       setIsPaused(true);
+      updateActiveSession({ pausedSeconds: pausedSecondsRef.current, pausedAt });
     }
   };
 
@@ -178,21 +188,26 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       setIsNewPB(true);
     }
 
+    pausedAtRef.current = null;
     setIsPaused(false);
+    updateActiveSession({ pausedSeconds: pausedSecondsRef.current, pausedAt: null });
     setPhase('rating');
   };
 
-  const handleRating = (rating: ProblemSessionRating) => {
+  const handleRating = async (rating: ProblemSessionRating) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    const sessionType = activeSession?.isReview
-      ? 'review'
-      : activeSession?.isColdSolve
-        ? 'cold_solve'
+    // Prefer cold_solve over review — cold solves may also carry isReview=false explicitly,
+    // but never classify a cold solve as a spaced-repetition review.
+    const sessionType = activeSession?.isColdSolve
+      ? 'cold_solve'
+      : activeSession?.isReview
+        ? 'review'
         : 'new';
 
-    void Promise.allSettled([
+    const results = await Promise.allSettled([
       recordSession({
         id: crypto.randomUUID(),
         problemId: problem.id,
@@ -205,12 +220,18 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       logProblem(problem.id, rating, isNew, notes, {
         elapsedSeconds: frozenElapsed,
         sessionType,
-      })
-    ]).finally(() => {
-      setIsSubmitting(false);
-      endSession();
-      onComplete();
-    });
+      }),
+    ]);
+
+    setIsSubmitting(false);
+
+    if (results.some((result) => result.status === 'rejected')) {
+      setSubmitError('Failed to save this session. Your timer is still here — try rating again.');
+      return;
+    }
+
+    endSession();
+    onComplete();
   };
 
   // ── Rating Screen ────────────────────────────────────────────────────────
@@ -269,6 +290,13 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-20 text-sm"
             />
           </div>
+
+          {submitError && (
+            <div className="mb-4 flex items-start gap-2 p-3 text-left text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl text-sm">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           <div className="space-y-2">
             {(

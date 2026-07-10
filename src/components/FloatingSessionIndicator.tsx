@@ -24,20 +24,35 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
             return;
         }
         const tick = () => {
-            setElapsed(Math.floor((Date.now() - activeSession.startTimestamp) / 1000));
+            const pausedSeconds = activeSession.pausedSeconds ?? 0;
+            const currentPause = activeSession.pausedAt
+                ? Math.floor((Date.now() - activeSession.pausedAt) / 1000)
+                : 0;
+            setElapsed(Math.max(
+                0,
+                Math.floor((Date.now() - activeSession.startTimestamp) / 1000) - pausedSeconds - currentPause
+            ));
         };
         tick();
+        // Keep ticking while paused so the display stays frozen (currentPause grows with wall clock
+        // but is subtracted — net elapsed stays constant). Interval still needed for resume updates.
         const id = window.setInterval(tick, 1000);
         return () => clearInterval(id);
     }, [activeSession]);
 
-    // Hide if no active session OR if currently on the timer page
-    if (!activeSession || location.pathname.startsWith('/timer')) return null;
+    // Hide if no active session, on the timer page, or on dashboard (Timer renders inline there)
+    if (
+        !activeSession ||
+        location.pathname.startsWith('/timer') ||
+        location.pathname === '/dashboard' ||
+        location.pathname === '/'
+    ) return null;
 
     // ⚡ Bolt Optimization: Using O(1) problemMap instead of O(N) allProblems.find()
     const prob = problemMap[activeSession.problemId];
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
+    const isPaused = activeSession.pausedAt != null;
 
     return (
         <div className="fixed bottom-5 right-5 z-50 select-none">
@@ -70,7 +85,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                         }`}>
                         {activeSession.isColdSolve ? 'Cold Solve' : activeSession.isReview ? 'Review' : 'New Problem'}
                     </span>
-                    <span className="text-zinc-600 text-[10px]">in progress</span>
+                    <span className="text-zinc-600 text-[10px]">{isPaused ? 'paused' : 'in progress'}</span>
                 </div>
 
                 {/* Buttons */}

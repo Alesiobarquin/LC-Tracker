@@ -148,7 +148,7 @@ export const Analytics: React.FC = () => {
     const strongest = confidenceData[confidenceData.length - 1];
     const result = [];
 
-    if (weakest && weakest.avg < 2.0) {
+    if (weakest && weakest.avg < 3.0) {
       result.push({
         title: `Needs Work: ${weakest.name}`,
         description: `Your confidence in ${weakest.name} is low (${weakest.avg}/5). Prioritize foundational problems here.`,
@@ -156,7 +156,7 @@ export const Analytics: React.FC = () => {
         color: 'border-red-500/20 bg-red-500/5',
       });
     }
-    const developing = confidenceData.find(c => c.avg >= 2.0 && c.avg < 2.5);
+    const developing = confidenceData.find(c => c.avg >= 3.0 && c.avg < 4.0);
     if (developing) {
       result.push({
         title: `Developing: ${developing.name}`,
@@ -165,7 +165,7 @@ export const Analytics: React.FC = () => {
         color: 'border-amber-500/20 bg-amber-500/5',
       });
     }
-    if (strongest && strongest.avg >= 2.5) {
+    if (strongest && strongest.avg >= 4.0) {
       result.push({
         title: `Strong: ${strongest.name}`,
         description: `${strongest.name} is your strongest area (${strongest.avg}/5). Keep maintaining it.`,

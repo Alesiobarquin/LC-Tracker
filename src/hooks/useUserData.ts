@@ -515,12 +515,18 @@ export function useUserSettings() {
     setCatchUpPlan: (type: UserSettingsData['catchUpPlan']['type'], durationDays: number) =>
       updateUserSettings((current) => ({
         ...current,
-        catchUpPlan: { active: true, type, startedAt: new Date().toISOString(), durationDays },
+        catchUpPlan: {
+          active: true,
+          type,
+          startedAt: new Date().toISOString(),
+          durationDays,
+          bannerDismissed: false,
+        },
       })),
     dismissCatchUpBanner: () =>
       updateUserSettings((current) => ({
         ...current,
-        catchUpPlan: { ...current.catchUpPlan, active: false },
+        catchUpPlan: { ...current.catchUpPlan, bannerDismissed: true },
       })),
     setLeetCodeUsername: (username: string) =>
       updateUserSettings((current) => ({ ...current, leetcodeUsername: username })),

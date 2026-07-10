@@ -154,7 +154,10 @@ export default function App() {
   if (path === '/' && user && onboardingComplete) return <Navigate to="/dashboard" replace />;
 
   // Auth loading state — bail out of loading if settings errored (prevents infinite hang)
-  const showLoading = !authLoaded || (user && settingsLoading && !settingsError);
+  // Also don't block public app routes on settings fetch for signed-in users.
+  const publicAppRoutes = ['/patterns', '/library', '/syntax'];
+  const isPublicAppRoute = publicAppRoutes.some(r => path === r || path.startsWith(`${r}/`));
+  const showLoading = !authLoaded || (user && settingsLoading && !settingsError && !isPublicAppRoute);
 
   if (showLoading) {
     return (
@@ -177,8 +180,7 @@ export default function App() {
   }
 
   // Public application routes
-  const publicAppRoutes = ['/patterns', '/library', '/syntax'];
-  const isPublicAppRoute = publicAppRoutes.some(r => path === r || path.startsWith(`${r}/`));
+  // (isPublicAppRoute already computed above)
 
   // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
@@ -199,7 +201,9 @@ export default function App() {
     }
   }
 
-  if (user && !onboardingComplete) {
+  // Settings fetch failed — don't force onboarding with default incomplete settings.
+  // Fall through to the app shell so the user isn't trapped in a re-onboarding loop.
+  if (user && !onboardingComplete && !settingsError) {
     if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
     }

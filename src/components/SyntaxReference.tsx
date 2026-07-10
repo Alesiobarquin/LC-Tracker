@@ -99,10 +99,16 @@ export const SyntaxReference: React.FC = () => {
         setSessionTitle(title);
     };
 
-    // Overall stats
+    // Overall stats for the selected language only
     const totalCardsForLang = allSyntaxCards.filter(c => c.language === selectedLanguage).length;
-    const practicedCards = Object.values(syntaxProgress).length;
-    const confidentCards = Object.values(syntaxProgress).filter(p => p.confidenceRating === 3).length;
+    const langCardIds = useMemo(
+        () => new Set(allSyntaxCards.filter(c => c.language === selectedLanguage).map(c => c.id)),
+        [selectedLanguage]
+    );
+    const practicedCards = Object.keys(syntaxProgress).filter(id => langCardIds.has(id)).length;
+    const confidentCards = Object.entries(syntaxProgress).filter(
+        ([id, p]) => langCardIds.has(id) && p.confidenceRating === 3
+    ).length;
 
     return (
         <>

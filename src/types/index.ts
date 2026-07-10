@@ -84,6 +84,10 @@ export interface ActiveSession {
   startTimestamp: number;
   isReview: boolean;
   isColdSolve: boolean;
+  /** Accumulated paused seconds so far (excludes an in-progress pause). */
+  pausedSeconds?: number;
+  /** Epoch ms when the current pause began; null/undefined when running. */
+  pausedAt?: number | null;
 }
 
 export interface StreakState {
@@ -114,6 +118,8 @@ export interface CatchUpPlanState {
   type: 'EXTEND' | 'CATCH_UP' | null;
   startedAt: string | null;
   durationDays: number;
+  /** User closed the missed-days banner without choosing a plan. */
+  bannerDismissed?: boolean;
 }
 
 export type PatternId = 
@@ -241,6 +247,7 @@ export const DEFAULT_CATCH_UP_PLAN: CatchUpPlanState = {
   type: null,
   startedAt: null,
   durationDays: 0,
+  bannerDismissed: false,
 };
 
 export const DEFAULT_USER_SETTINGS: UserSettingsData = {

@@ -175,8 +175,9 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                           href={prob.leetcodeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"
+                          className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                           title="Open on LeetCode"
+                          aria-label={`Open ${prob.title} on LeetCode`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink size={16} />
@@ -190,8 +191,9 @@ const PatternDetail: React.FC<{ patternData: any[] }> = ({ patternData }) => {
                             }
                             startSession(prob.id, false);
                           }}
-                          className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-2"
+                          className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                           title="Start Session"
+                          aria-label={`Start session for ${prob.title}`}
                         >
                           <Play size={16} />
                         </button>

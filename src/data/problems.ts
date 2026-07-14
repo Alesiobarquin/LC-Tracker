@@ -386,3 +386,9 @@ export const problemMap = allProblems.reduce((acc, problem) => {
   acc[problem.id] = problem;
   return acc;
 }, {} as Record<string, Problem>);
+
+// ⚡ Bolt Optimization: Pre-computed map for O(1) title lookups.
+export const problemTitleMap = allProblems.reduce((acc, problem) => {
+  acc[problem.title.toLowerCase()] = problem;
+  return acc;
+}, {} as Record<string, Problem>);

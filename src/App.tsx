@@ -5,7 +5,6 @@ import { Dashboard } from './components/Dashboard';
 import { ProblemLibrary } from './components/ProblemLibrary';
 import { PatternFoundations } from './components/PatternFoundations';
 import { Analytics } from './components/Analytics';
-import { MockInterview } from './components/MockInterview';
 import { SyntaxReference } from './components/SyntaxReference';
 import { Settings } from './components/Settings';
 import { Onboarding } from './components/Onboarding';
@@ -227,7 +226,6 @@ export default function App() {
             <>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/analytics" element={<Analytics />} />
-              <Route path="/mock" element={<MockInterview />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/timer" element={<TimerPage />} />
               <Route path="/timer/:problemId" element={<TimerPage />} />

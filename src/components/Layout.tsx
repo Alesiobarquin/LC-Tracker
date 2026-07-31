@@ -149,7 +149,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { id: 'library', label: 'Problem Library', icon: Library },
     { id: 'patterns', label: 'Patterns', icon: BookKey },
     { id: 'analytics', label: 'Analytics', icon: LineChart, protected: true },
-    { id: 'mock', label: 'Mock Interview', icon: Code2, protected: true },
     { id: 'syntax', label: 'Syntax Reference', icon: BookOpen },
     { id: 'settings', label: 'Settings', icon: Settings, protected: true },
   ];

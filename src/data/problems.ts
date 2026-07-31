@@ -21,7 +21,6 @@ export type Category =
   | 'Bit Manipulation';
 
 import type { TargetCurriculum } from '../types';
-import { MockInterviewContent, mockProblemContent } from './mockProblems';
 import leetcodeExtendedCatalogJson from './leetcodeExtendedCatalog.json';
 import leetcodePremiumStatusJson from './leetcodePremiumStatus.json';
 
@@ -41,7 +40,6 @@ export interface Problem {
   isPremium?: boolean;
   /** Extra LeetCode problems beyond NeetCode 250 (full catalog browse / sprint tier 4). */
   isExtendedCatalog?: boolean;
-  mockInterviewContent?: MockInterviewContent;
 }
 
 type PremiumStatusPayload = {
@@ -335,14 +333,12 @@ export const problems: Problem[] = ([
 ] as Problem[]).map(problem => ({
   ...problem,
   isPremium: isProblemPremium(problem),
-  mockInterviewContent: mockProblemContent[problem.id]
 }) as Problem);
 
 export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson as Problem[]).map(
   (p) => ({
     ...p,
     isPremium: isProblemPremium(p),
-    mockInterviewContent: mockProblemContent[p.id],
   }) as Problem
 );
 

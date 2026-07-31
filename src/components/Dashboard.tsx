@@ -423,14 +423,13 @@ export const Dashboard: React.FC = () => {
   let phaseScore = 0;
   let confidenceScore = 0;
   let srHealthScore = 0;
-  let mockScore = 0;
   let syntaxScore = 0;
   let speedBonusScore = 0;
 
   const readinessTargetProblems = targetCurriculumPool;
   const readinessTargetSolved = readinessTargetProblems.filter((p) => progress[p.id]).length;
   const readinessTargetTotal = Math.max(1, readinessTargetProblems.length);
-  phaseScore = Math.min(30, (readinessTargetSolved / readinessTargetTotal) * 30);
+  phaseScore = Math.min(35, (readinessTargetSolved / readinessTargetTotal) * 35);
 
   let readinessTotalRating = 0;
   let readinessRatingCount = 0;
@@ -443,25 +442,12 @@ export const Dashboard: React.FC = () => {
     }
   });
   const readinessAvgConfidence = readinessRatingCount > 0 ? readinessTotalRating / readinessRatingCount : 0;
-  confidenceScore = Math.min(25, (readinessAvgConfidence / 5.0) * 25);
+  confidenceScore = Math.min(30, (readinessAvgConfidence / 5.0) * 30);
 
   const totalActive = Object.values(progress).filter(p => !p.retired).length;
   const overdueCount = Object.values(progress).filter(p => !p.retired && new Date(p.nextReviewAt) < new Date(today.setHours(0, 0, 0, 0))).length;
   const srHealthRatio = totalActive > 0 ? Math.max(0, 1 - (overdueCount / totalActive)) : 1;
-  srHealthScore = srHealthRatio * 20;
-
-  let mockRatingTotal = 0;
-  let mockCount = 0;
-  Object.values(progress).forEach(prog => {
-    prog.history.forEach(h => {
-      if (h.rawCode) {
-        mockRatingTotal += h.rating;
-        mockCount++;
-      }
-    });
-  });
-  const avgMockRating = mockCount > 0 ? mockRatingTotal / mockCount : 0;
-  mockScore = Math.min(15, (avgMockRating / 5.0) * 15);
+  srHealthScore = srHealthRatio * 25;
 
   let syntaxRatingTotal = 0;
   let syntaxCount = 0;
@@ -489,7 +475,7 @@ export const Dashboard: React.FC = () => {
     }
   }
 
-  const readinessScore = Math.min(100, Math.round(phaseScore + confidenceScore + srHealthScore + mockScore + syntaxScore + speedBonusScore));
+  const readinessScore = Math.min(100, Math.round(phaseScore + confidenceScore + srHealthScore + syntaxScore + speedBonusScore));
 
   // ── Catch-Up Logic ─────────────────────────────────────────────────────────
   let missedDaysCount = 0;
@@ -1035,10 +1021,9 @@ export const Dashboard: React.FC = () => {
             {showReadinessDetails && (
               <div className="space-y-2 text-xs mt-4 pt-4 border-t border-zinc-800 animate-in fade-in duration-300">
                 {[
-                  { label: 'Phase Completion', value: phaseScore, max: 30 },
-                  { label: 'Avg Confidence', value: confidenceScore, max: 25 },
-                  { label: 'SR Health', value: srHealthScore, max: 20 },
-                  { label: 'Mock Performance', value: mockScore, max: 15 },
+                  { label: 'Phase Completion', value: phaseScore, max: 35 },
+                  { label: 'Avg Confidence', value: confidenceScore, max: 30 },
+                  { label: 'SR Queue Health', value: srHealthScore, max: 25 },
                   { label: 'Syntax Mastery', value: syntaxScore, max: 10 },
                 ].map(c => (
                   <div key={c.label}>

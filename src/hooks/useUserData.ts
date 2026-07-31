@@ -743,67 +743,6 @@ export function useProblemProgress() {
     },
   });
 
-  const logMockInterviewMutation = useMutation({
-    mutationFn: async (variables: {
-      problemId: string;
-      evalSolved: boolean;
-      evalSyntax: boolean;
-      evalComplexity: boolean;
-      approachSimilarity: number;
-      rawCode: string;
-      optimalSolution: string;
-      usedInAppEditor: boolean;
-      actualSecondsUsed?: number;
-      timeLimitSeconds?: number;
-    }) => {
-      if (!userId) throw new Error('No authenticated user');
-      let rating: ProblemSessionRating = 3;
-      if (!variables.evalSolved || !variables.evalSyntax || variables.approachSimilarity === 1) {
-        rating = 1;
-      } else if (
-        variables.evalSolved &&
-        variables.evalSyntax &&
-        variables.evalComplexity &&
-        variables.approachSimilarity === 3
-      ) {
-        rating = 4;
-      }
-
-      const problem = problemMap[variables.problemId];
-      if (variables.actualSecondsUsed !== undefined && problem) {
-        const timing: SessionTiming = {
-          id: safeUUID(),
-          problemId: variables.problemId,
-          category: problem.category,
-          date: new Date().toISOString(),
-          elapsedSeconds: variables.actualSecondsUsed,
-          sessionType: 'mock',
-          rating,
-        };
-
-        const { error: timingError } = await supabase.from('session_timings').insert(timingToRow(userId, timing));
-        if (timingError) throw timingError;
-      }
-
-      await logProblemMutation.mutateAsync({
-        problemId: variables.problemId,
-        rating,
-        isNew: false,
-        notes: 'Mock Interview',
-        additionalData: {
-          rawCode: variables.rawCode,
-          optimalSolution: variables.optimalSolution,
-          approachSimilarity: variables.approachSimilarity,
-          usedInAppEditor: variables.usedInAppEditor,
-          sessionType: 'mock',
-          elapsedSeconds: variables.actualSecondsUsed,
-          mockTimeLimitSeconds: variables.timeLimitSeconds ?? 25 * 60,
-          mockActualSecondsUsed: variables.actualSecondsUsed,
-        },
-      });
-    },
-  });
-
   const progress = query.data ?? {};
   const momentum = useMemo(() => deriveMomentumState(progress), [progress]);
 
@@ -821,30 +760,6 @@ export function useProblemProgress() {
       additionalData?: Record<string, unknown>
     ) => logProblemMutation.mutateAsync({ problemId, rating, isNew, notes, additionalData }),
     removeProblem: (problemId: string) => removeProblemMutation.mutateAsync(problemId),
-    logMockInterview: (
-      problemId: string,
-      evalSolved: boolean,
-      evalSyntax: boolean,
-      evalComplexity: boolean,
-      approachSimilarity: number,
-      rawCode: string,
-      optimalSolution: string,
-      usedInAppEditor: boolean,
-      actualSecondsUsed?: number,
-      timeLimitSeconds?: number
-    ) =>
-      logMockInterviewMutation.mutateAsync({
-        problemId,
-        evalSolved,
-        evalSyntax,
-        evalComplexity,
-        approachSimilarity,
-        rawCode,
-        optimalSolution,
-        usedInAppEditor,
-        actualSecondsUsed,
-        timeLimitSeconds,
-      }),
   };
 }
 

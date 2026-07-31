@@ -50,18 +50,6 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     tabId: 'analytics',
   },
   {
-    id: 'mock',
-    title: 'Mock Interview',
-    subtitle: 'Timed practice with optional AI feedback.',
-    icon: Code2,
-    highlights: [
-      'Code in-app with Python or JavaScript',
-      'AI-powered feedback and solution analysis (Gemini) when your API key is set in Settings',
-      'Run full rounds in one place without tab thrash',
-    ],
-    tabId: 'mock',
-  },
-  {
     id: 'syntax',
     title: 'Syntax Reference',
     subtitle: 'Fast refreshers to preserve momentum between problems.',
@@ -80,7 +68,7 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     icon: Settings,
     highlights: [
       'Targets, LeetCode identity, and learning mode',
-      'API keys and preferences (including Gemini for Mock Interview)',
+      'Spaced repetition aggressiveness preferences',
       'Update as your timeline, role target, or focus changes',
     ],
     tabId: 'settings',

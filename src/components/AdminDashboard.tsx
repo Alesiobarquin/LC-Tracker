@@ -1,3 +1,4 @@
+import { sanitizeUrl } from "../utils/urlUtils";
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -281,13 +282,7 @@ export function AdminDashboard() {
                       <p className="text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
 
                       {ticket.image_url && (() => {
-                        let safeUrl = '#';
-                        try {
-                          const url = new URL(ticket.image_url);
-                          if (url.protocol === 'http:' || url.protocol === 'https:') safeUrl = url.href;
-                        } catch {
-                          // Invalid URL, safely fallback to '#'
-                        }
+                        const safeUrl = sanitizeUrl(ticket.image_url);
                         return (
                           <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block w-max rounded-xl border border-zinc-700/70 bg-zinc-950/40 p-1 hover:border-zinc-500 transition-colors">
                             <img

@@ -38,6 +38,7 @@ import {
 import { getNextReviewDate } from '../utils/dateUtils';
 import { allProblems, problemMap } from '../data/problems';
 import { userDataQueryKeys } from '../lib/userDataQueryKeys';
+import { safeUUID } from '../utils/uuid';
 
 const queryKeys = userDataQueryKeys;
 
@@ -480,7 +481,7 @@ export function useUserSettings() {
       updateUserSettings((current) => ({ ...current, targetInterviewDate: date })),
     addTargetEvent: (event: Omit<TargetEvent, 'id'>) =>
       updateUserSettings((current) => {
-        const newEvent = { ...event, id: crypto.randomUUID() };
+        const newEvent = { ...event, id: safeUUID() };
         const targetEvents = [...current.targetEvents, newEvent].sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
@@ -607,15 +608,20 @@ export function useProblemProgress() {
 
       const { error: progressError } = await supabase
         .from('problem_progress')
-        .upsert(progressToRow(userId, variables.problemId, nextProgressEntry));
+        .upsert(progressToRow(userId, variables.problemId, nextProgressEntry), {
+          onConflict: 'user_id,problem_id',
+        });
       if (progressError) throw progressError;
 
-      const { error: activityError } = await supabase.from('activity_log').upsert({
-        user_id: userId,
-        log_date: dateKey,
-        solved: nextActivityEntry.solved,
-        reviewed: nextActivityEntry.reviewed,
-      });
+      const { error: activityError } = await supabase.from('activity_log').upsert(
+        {
+          user_id: userId,
+          log_date: dateKey,
+          solved: nextActivityEntry.solved,
+          reviewed: nextActivityEntry.reviewed,
+        },
+        { onConflict: 'user_id,log_date' }
+      );
       if (activityError) throw activityError;
 
       if (
@@ -633,7 +639,9 @@ export function useProblemProgress() {
 
         const { error: sprintError } = await supabase
           .from('sprint_state')
-          .upsert(sprintToRow(userId, nextSprint.sprintState, nextSprint.sprintHistory));
+          .upsert(sprintToRow(userId, nextSprint.sprintState, nextSprint.sprintHistory), {
+            onConflict: 'user_id',
+          });
         if (sprintError) throw sprintError;
       }
     },
@@ -764,7 +772,7 @@ export function useProblemProgress() {
       const problem = problemMap[variables.problemId];
       if (variables.actualSecondsUsed !== undefined && problem) {
         const timing: SessionTiming = {
-          id: crypto.randomUUID(),
+          id: safeUUID(),
           problemId: variables.problemId,
           category: problem.category,
           date: new Date().toISOString(),

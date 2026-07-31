@@ -7,6 +7,7 @@ import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
 import { MAX_BACKDATE_HOURS, validateStartTimestamp } from '../utils/dateUtils';
+import { safeUUID } from '../utils/uuid';
 
 interface TimerProps {
   problem: Problem;
@@ -209,7 +210,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
     const results = await Promise.allSettled([
       recordSession({
-        id: crypto.randomUUID(),
+        id: safeUUID(),
         problemId: problem.id,
         category: problem.category,
         date: new Date().toISOString(),
@@ -225,8 +226,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
     setIsSubmitting(false);
 
-    if (results.some((result) => result.status === 'rejected')) {
-      setSubmitError('Failed to save this session. Your timer is still here — try rating again.');
+    const rejected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+    if (rejected.length > 0) {
+      const errorMsg = rejected.map((r) => r.reason?.message || String(r.reason)).join('; ');
+      console.error('Failed to save session:', errorMsg, rejected);
+      setSubmitError(`Failed to save session: ${errorMsg}. Your timer is still here — try rating again.`);
       return;
     }
 

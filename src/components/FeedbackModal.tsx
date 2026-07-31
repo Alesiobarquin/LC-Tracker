@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Send, AlertCircle, CheckCircle2, ImagePlus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useUser } from '@clerk/clerk-react';
+import { safeUUID } from '../utils/uuid';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       if (imageFile) {
         setStatus('Uploading image...');
         const fileExt = imageFile.name.split('.').pop() || 'png';
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const fileName = `${safeUUID()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage

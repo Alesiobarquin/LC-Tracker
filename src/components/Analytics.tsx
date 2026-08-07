@@ -90,7 +90,7 @@ export const Analytics: React.FC = () => {
         if (batch.length < 500) setHasMoreOlder(false);
       }
     } catch (e) {
-      console.error(e);
+      console.error('Failed to load older activity logs.');
     } finally {
       setLoadingOlder(false);
     }

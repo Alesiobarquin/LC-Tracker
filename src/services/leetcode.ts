@@ -49,7 +49,7 @@ export const fetchLeetCodeProfile = async (username: string): Promise<LeetCodeSu
     
     return data.data?.recentAcSubmissionList || [];
   } catch (error) {
-    console.warn('Primary fetch failed, falling back to Alfa LeetCode API...', error);
+    console.warn('Primary fetch failed, falling back to Alfa LeetCode API...');
     
     // Fallback to alfa-leetcode-api
     const fallbackEndpoint = `https://alfa-leetcode-api.onrender.com/${username}/acSubmission`;

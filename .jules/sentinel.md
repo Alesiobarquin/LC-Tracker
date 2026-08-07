@@ -3,6 +3,11 @@
 **Learning:** Even though modern browsers treat `target="_blank"` as `rel="noopener"` by default, explicitly defining it is crucial for defense-in-depth, support for older browsers, and passing security audits.
 **Prevention:** Always include `rel="noopener noreferrer"` when using `target="_blank"`. Use linting rules (like `react/jsx-no-target-blank`) to catch these issues automatically.
 
+## 2026-05-25 - Fix XSS vulnerability in Admin Dashboard image src attributes
+**Vulnerability:** The Admin Dashboard rendered user-provided `image_url` directly as an `src` inside an `<img>` tag without proper sanitization, though `href` was previously sanitized.
+**Learning:** XSS can be achieved via `javascript:` URIs on `src` attributes just like `href`. Untrusted URLs must be sanitized for all execution contexts. A centralized utility ensures consistency.
+**Prevention:** Always use a centralized URL sanitizer to check if a user-provided URL starts with `http://` or `https://` before rendering it in *any* attribute that loads resources or executes code (e.g. `href`, `src`).
+
 ## 2026-04-05 - Fix XSS vulnerability in Admin Dashboard image links
 **Vulnerability:** The Admin Dashboard rendered user-provided `image_url` directly as an `href` inside an `<a>` tag without proper sanitization.
 **Learning:** Even though feedback images are uploaded to Supabase and return valid URLs, an attacker could manually insert a payload like `javascript:alert(1)` into the database or API. Untrusted URLs must always be validated on the client side before rendering in anchor tags.

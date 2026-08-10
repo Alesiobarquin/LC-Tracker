@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.session_timings (
   problem_id      TEXT NOT NULL,
   category        TEXT NOT NULL,
   session_type    TEXT NOT NULL, -- 'new' | 'review' | 'cold_solve' | 'mock'
-  rating          SMALLINT NOT NULL CHECK (rating IN (1, 2, 3)),
+  rating          SMALLINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
   elapsed_seconds INT NOT NULL,
   recorded_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

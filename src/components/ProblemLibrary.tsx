@@ -1,57 +1,200 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { problems, allProblems, problemMap, isProblemPremium, Category } from '../data/problems';
-import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library, Copy } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { problems, allProblems, problemMap, isProblemPremium, Category, Difficulty, ensureExtendedCatalogLoaded } from '../data/problems';
+import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library, Copy, X } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
 import { ProblemLibrarySkeleton } from './loadingSkeletons';
 import { getDifficultyColor } from '../utils/uiHelpers';
+import { isDueToday } from '../utils/dateUtils';
+import type { ProblemProgress } from '../types';
+import { PageHeader } from './ui';
 
 const VIRTUALIZE_THRESHOLD = 200;
 /** Initial rows to render per tab/filter (large lists load more on demand). */
 const PROBLEM_LIST_INITIAL_CHUNK = 100;
 const PROBLEM_LIST_LOAD_MORE_CHUNK = 200;
+const RECENT_SOLVE_MS = 14 * 24 * 60 * 60 * 1000;
+
+type LibraryTab =
+  | 'Pareto Set'
+  | 'NeetCode 75'
+  | 'NeetCode 150'
+  | 'NeetCode 250'
+  | 'Full Catalog'
+  | 'Solved Problems';
+
+type SavedView = 'all' | 'due' | 'weak' | 'essentials' | 'recent';
+type ProgressStatusFilter = 'all' | 'unsolved' | 'rotation' | 'retired';
+type PremiumFilter = 'all' | 'free' | 'premium';
+type DifficultyFilter = 'All' | Difficulty;
+type SortKey = 'title' | 'category' | 'difficulty' | 'status';
+
+const LIBRARY_TABS: LibraryTab[] = [
+  'Pareto Set',
+  'NeetCode 75',
+  'NeetCode 150',
+  'NeetCode 250',
+  'Full Catalog',
+  'Solved Problems',
+];
+
+const TAB_TO_PARAM: Record<LibraryTab, string> = {
+  'Pareto Set': 'pareto',
+  'NeetCode 75': 'neetcode-75',
+  'NeetCode 150': 'neetcode-150',
+  'NeetCode 250': 'neetcode-250',
+  'Full Catalog': 'catalog',
+  'Solved Problems': 'solved',
+};
+
+const PARAM_TO_TAB: Record<string, LibraryTab> = Object.fromEntries(
+  Object.entries(TAB_TO_PARAM).map(([tab, param]) => [param, tab as LibraryTab])
+) as Record<string, LibraryTab>;
+
+const SAVED_VIEWS: { id: SavedView; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'due', label: 'Due' },
+  { id: 'weak', label: 'Weak' },
+  { id: 'essentials', label: 'Unsolved essentials' },
+  { id: 'recent', label: 'Recent' },
+];
+
+const parseLibraryTab = (raw: string | null): LibraryTab => {
+  if (raw && PARAM_TO_TAB[raw]) return PARAM_TO_TAB[raw];
+  if (raw && (LIBRARY_TABS as string[]).includes(raw)) return raw as LibraryTab;
+  const saved = localStorage.getItem('lc-tracker-active-library-tab');
+  if (saved && (LIBRARY_TABS as string[]).includes(saved)) return saved as LibraryTab;
+  return 'NeetCode 75';
+};
+
+const parseSavedView = (raw: string | null): SavedView =>
+  raw === 'due' || raw === 'weak' || raw === 'essentials' || raw === 'recent' ? raw : 'all';
+
+const parseDifficulty = (raw: string | null): DifficultyFilter =>
+  raw === 'Easy' || raw === 'Medium' || raw === 'Hard' ? raw : 'All';
+
+const parseStatus = (raw: string | null): ProgressStatusFilter =>
+  raw === 'unsolved' || raw === 'rotation' || raw === 'retired' ? raw : 'all';
+
+const parsePremium = (raw: string | null): PremiumFilter =>
+  raw === 'free' || raw === 'premium' ? raw : 'all';
+
+const isRecentSolve = (prog: ProblemProgress): boolean => {
+  const cutoff = Date.now() - RECENT_SOLVE_MS;
+  return [prog.firstSolvedAt, prog.lastReviewedAt].some((d) => {
+    const t = new Date(d).getTime();
+    return Number.isFinite(t) && t >= cutoff;
+  });
+};
+
+const ariaSortValue = (
+  sortConfig: { key: SortKey; direction: 'asc' | 'desc' } | null,
+  key: SortKey
+): 'none' | 'ascending' | 'descending' => {
+  if (!sortConfig || sortConfig.key !== key) return 'none';
+  return sortConfig.direction === 'asc' ? 'ascending' : 'descending';
+};
 
 export const ProblemLibrary: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { progress, logProblem, removeProblem, isLoading } = useProblemProgress();
   const { settings } = useUserSettings();
-  const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
-  const [activeSession, setActiveSession] = useState<string | null>(null);
-  const [pendingPremiumStartId, setPendingPremiumStartId] = useState<string | null>(null);
+  const [catalogReady, setCatalogReady] = useState(allProblems.length > problems.length);
 
-  const [activeTab, setActiveTab] = useState<
-    'NeetCode 75' | 'NeetCode 150' | 'NeetCode 250' | 'Full Catalog' | 'Solved Problems'
-  >(() => {
-    const saved = localStorage.getItem('lc-tracker-active-library-tab');
-    const validTabs = ['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog', 'Solved Problems'];
-    return (saved && validTabs.includes(saved))
-      ? (saved as any)
-      : 'NeetCode 75';
-  });
+  const search = searchParams.get('q') ?? '';
+  const activeTab = parseLibraryTab(searchParams.get('tab'));
+  const activeCategory = (searchParams.get('cat') as Category | 'All' | null) || 'All';
+  const savedView = parseSavedView(searchParams.get('view'));
+  const difficultyFilter = parseDifficulty(searchParams.get('diff'));
+  const statusFilter = parseStatus(searchParams.get('status'));
+  const premiumFilter = parsePremium(searchParams.get('premium'));
+
+  useEffect(() => {
+    let cancelled = false;
+    void ensureExtendedCatalogLoaded().then(() => {
+      if (!cancelled) setCatalogReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('lc-tracker-active-library-tab', activeTab);
+  }, [activeTab]);
+
+  const updateFilterParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          for (const [key, value] of Object.entries(updates)) {
+            if (value === null || value === '') next.delete(key);
+            else next.set(key, value);
+          }
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
+
+  const setSearch = (value: string) => updateFilterParams({ q: value || null });
+  const setActiveTab = (tab: LibraryTab) => {
+    updateFilterParams({
+      tab: TAB_TO_PARAM[tab],
+      cat: null,
+    });
+  };
+  const setActiveCategory = (cat: Category | 'All') =>
+    updateFilterParams({ cat: cat === 'All' ? null : cat });
+  const setSavedView = (view: SavedView) =>
+    updateFilterParams({ view: view === 'all' ? null : view });
+  const setDifficultyFilter = (diff: DifficultyFilter) =>
+    updateFilterParams({ diff: diff === 'All' ? null : diff });
+  const setStatusFilter = (status: ProgressStatusFilter) =>
+    updateFilterParams({ status: status === 'all' ? null : status });
+  const setPremiumFilter = (premium: PremiumFilter) =>
+    updateFilterParams({ premium: premium === 'all' ? null : premium });
+
+  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [pendingImportId, setPendingImportId] = useState<string | null>(null);
+  const [pendingPremiumStartId, setPendingPremiumStartId] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('lc-tracker-active-library-tab', activeTab);
   }, [activeTab]);
 
   const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);
-  const [sortConfig, setSortConfig] = useState<{ key: 'title' | 'category' | 'difficulty' | 'status'; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
 
   const tabProblems = useMemo(() => {
+    if (activeTab === 'Pareto Set') return problems.filter((p) => p.isPareto);
     if (activeTab === 'NeetCode 75') return problems.filter((p) => p.isNeetCode75);
     if (activeTab === 'NeetCode 150') return problems.filter((p) => p.isNeetCode150);
     if (activeTab === 'NeetCode 250') return problems.filter((p) => p.isNeetCode250);
     if (activeTab === 'Full Catalog') return allProblems;
     if (activeTab === 'Solved Problems') return allProblems.filter((p) => progress[p.id]);
     return [];
-  }, [activeTab, progress]);
+  }, [activeTab, progress, catalogReady]);
 
   useEffect(() => {
     setVisibleLimit(PROBLEM_LIST_INITIAL_CHUNK);
-  }, [activeTab, search, activeCategory, sortConfig]);
+  }, [
+    activeTab,
+    search,
+    activeCategory,
+    savedView,
+    difficultyFilter,
+    statusFilter,
+    premiumFilter,
+    sortConfig,
+  ]);
 
   const categories = useMemo(() => {
     return ['All', ...Array.from(new Set(tabProblems.map(p => p.category)))];
@@ -60,18 +203,52 @@ export const ProblemLibrary: React.FC = () => {
   const filteredProblems = useMemo(() => {
     const searchLower = search.toLowerCase();
 
-    let result = tabProblems.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(searchLower);
+    let result = tabProblems.filter((p) => {
+      const prog = progress[p.id];
+      const matchesSearch = !searchLower || p.title.toLowerCase().includes(searchLower);
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
-      return matchesSearch && matchesCategory;
+      const matchesDifficulty = difficultyFilter === 'All' || p.difficulty === difficultyFilter;
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'unsolved' && !prog) ||
+        (statusFilter === 'rotation' && !!prog && !prog.retired) ||
+        (statusFilter === 'retired' && !!prog?.retired);
+
+      const isPremium = isProblemPremium(p);
+      const matchesPremium =
+        premiumFilter === 'all' ||
+        (premiumFilter === 'free' && !isPremium) ||
+        (premiumFilter === 'premium' && isPremium);
+
+      let matchesView = true;
+      if (savedView === 'due') {
+        matchesView = !!prog && !prog.retired && isDueToday(prog.nextReviewAt);
+      } else if (savedView === 'weak') {
+        const lastRating = prog?.history[prog.history.length - 1]?.rating;
+        matchesView = !!prog && (lastRating === 1 || lastRating === 2);
+      } else if (savedView === 'essentials') {
+        matchesView = !!p.isNeetCode75 && !prog;
+      } else if (savedView === 'recent') {
+        matchesView = !!prog && isRecentSolve(prog);
+      }
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesDifficulty &&
+        matchesStatus &&
+        matchesPremium &&
+        matchesView
+      );
     });
 
     if (sortConfig) {
-      const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+      const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
 
-      result.sort((a, b) => {
-        let aValue: any = a[sortConfig.key as keyof typeof a];
-        let bValue: any = b[sortConfig.key as keyof typeof b];
+      result = [...result].sort((a, b) => {
+        let aValue: string | number = a[sortConfig.key as 'title' | 'category' | 'difficulty'] as string;
+        let bValue: string | number = b[sortConfig.key as 'title' | 'category' | 'difficulty'] as string;
 
         if (sortConfig.key === 'status') {
           const aProg = progress[a.id];
@@ -79,8 +256,8 @@ export const ProblemLibrary: React.FC = () => {
           aValue = aProg ? (aProg.retired ? 2 : 1) : 0;
           bValue = bProg ? (bProg.retired ? 2 : 1) : 0;
         } else if (sortConfig.key === 'difficulty') {
-          aValue = difficultyOrder[a.difficulty as keyof typeof difficultyOrder];
-          bValue = difficultyOrder[b.difficulty as keyof typeof difficultyOrder];
+          aValue = difficultyOrder[a.difficulty];
+          bValue = difficultyOrder[b.difficulty];
         }
 
         if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -89,7 +266,63 @@ export const ProblemLibrary: React.FC = () => {
       });
     }
     return result;
-  }, [tabProblems, search, activeCategory, sortConfig, progress]);
+  }, [
+    tabProblems,
+    search,
+    activeCategory,
+    savedView,
+    difficultyFilter,
+    statusFilter,
+    premiumFilter,
+    sortConfig,
+    progress,
+  ]);
+
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: string; label: string; clear: () => void }[] = [];
+    if (search) {
+      chips.push({ key: 'q', label: `Search: ${search}`, clear: () => setSearch('') });
+    }
+    if (activeCategory !== 'All') {
+      chips.push({
+        key: 'cat',
+        label: `Category: ${activeCategory}`,
+        clear: () => setActiveCategory('All'),
+      });
+    }
+    if (savedView !== 'all') {
+      const viewLabel = SAVED_VIEWS.find((v) => v.id === savedView)?.label ?? savedView;
+      chips.push({ key: 'view', label: `View: ${viewLabel}`, clear: () => setSavedView('all') });
+    }
+    if (difficultyFilter !== 'All') {
+      chips.push({
+        key: 'diff',
+        label: `Difficulty: ${difficultyFilter}`,
+        clear: () => setDifficultyFilter('All'),
+      });
+    }
+    if (statusFilter !== 'all') {
+      const statusLabel =
+        statusFilter === 'unsolved'
+          ? 'Unsolved'
+          : statusFilter === 'rotation'
+            ? 'In rotation'
+            : 'Retired';
+      chips.push({
+        key: 'status',
+        label: `Status: ${statusLabel}`,
+        clear: () => setStatusFilter('all'),
+      });
+    }
+    if (premiumFilter !== 'all') {
+      chips.push({
+        key: 'premium',
+        label: `Premium: ${premiumFilter === 'free' ? 'Free' : 'Premium'}`,
+        clear: () => setPremiumFilter('all'),
+      });
+    }
+    return chips;
+  }, [search, activeCategory, savedView, difficultyFilter, statusFilter, premiumFilter]);
 
   const displayedProblems = useMemo(
     () => filteredProblems.slice(0, visibleLimit),
@@ -100,7 +333,7 @@ export const ProblemLibrary: React.FC = () => {
     ? problemMap[pendingPremiumStartId] ?? null
     : null;
 
-  const handleSort = (key: 'title' | 'category' | 'difficulty' | 'status') => {
+  const handleSort = (key: SortKey) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
@@ -115,9 +348,20 @@ export const ProblemLibrary: React.FC = () => {
     }
     if (isSolved) {
       void removeProblem(problemId);
-    } else {
-      void logProblem(problemId, 4, true, "Quick solve");
+      return;
     }
+    setPendingImportId(problemId);
+  };
+
+  const confirmImportSolve = (rating: 3 | 4) => {
+    if (!pendingImportId) return;
+    void logProblem(
+      pendingImportId,
+      rating,
+      true,
+      rating === 4 ? 'Imported strong solve' : 'Imported solve'
+    );
+    setPendingImportId(null);
   };
 
   const handleStartSession = (problemId: string, isPremium: boolean) => {
@@ -151,8 +395,7 @@ export const ProblemLibrary: React.FC = () => {
   // Conditionally navigate to timer if a session starts
   useEffect(() => {
     if (activeSession) {
-      navigate(`/timer/${activeSession}`);
-      // Clear the local state so navigating back works cleanly
+      navigate(`/timer/${activeSession}`, { state: { returnTo: '/library' } });
       setActiveSession(null);
     }
   }, [activeSession, navigate]);
@@ -172,20 +415,19 @@ export const ProblemLibrary: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
-          <Library className="text-emerald-400" size={32} />
-          Problem Library
-        </h1>
-      </header>
+      <PageHeader
+        icon={<Library size={32} />}
+        title="Problem Library"
+      />
 
       <div className="flex flex-col gap-4">
         {/* Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
           <div className="flex flex-wrap gap-2">
-            {(['NeetCode 75', 'NeetCode 150', 'NeetCode 250', 'Full Catalog', 'Solved Problems'] as const).map((tab) => (
+            {LIBRARY_TABS.map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setActiveTab(tab)}
                 className={clsx(
                   "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -200,6 +442,7 @@ export const ProblemLibrary: React.FC = () => {
           </div>
           {activeTab === 'Solved Problems' && (
             <button
+              type="button"
               onClick={copySolvedProblems}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors border border-zinc-700"
             >
@@ -226,27 +469,101 @@ export const ProblemLibrary: React.FC = () => {
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search problems..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
-          />
+      <div className="sticky top-0 z-20 -mx-1 px-1 py-3 space-y-3 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800/60">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Saved views">
+          {SAVED_VIEWS.map((view) => (
+            <button
+              key={view.id}
+              type="button"
+              onClick={() => setSavedView(view.id)}
+              className={clsx(
+                'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                savedView === view.id
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                  : 'bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700'
+              )}
+            >
+              {view.label}
+            </button>
+          ))}
         </div>
-        <div className="relative">
-          <select 
-            value={activeCategory}
-            onChange={(e) => setActiveCategory(e.target.value as Category | 'All')}
-            className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
-          >
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+
+        <div className="flex flex-col lg:flex-row gap-3">
+          <div className="relative flex-1 min-w-[12rem]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+            <input
+              type="text"
+              placeholder="Search problems..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <div className="relative">
+              <select
+                value={activeCategory}
+                onChange={(e) => setActiveCategory(e.target.value as Category | 'All')}
+                aria-label="Filter by category"
+                className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              >
+                {categories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+            </div>
+            <select
+              value={difficultyFilter}
+              onChange={(e) => setDifficultyFilter(e.target.value as DifficultyFilter)}
+              aria-label="Filter by difficulty"
+              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            >
+              <option value="All">All difficulties</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as ProgressStatusFilter)}
+              aria-label="Filter by progress status"
+              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            >
+              <option value="all">All statuses</option>
+              <option value="unsolved">Unsolved</option>
+              <option value="rotation">In rotation</option>
+              <option value="retired">Retired</option>
+            </select>
+            <select
+              value={premiumFilter}
+              onChange={(e) => setPremiumFilter(e.target.value as PremiumFilter)}
+              aria-label="Filter by premium"
+              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            >
+              <option value="all">All access</option>
+              <option value="free">Free</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
         </div>
+
+        {activeFilterChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
+            {activeFilterChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={chip.clear}
+                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+              >
+                {chip.label}
+                <X size={12} aria-hidden />
+                <span className="sr-only">Clear filter</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-zinc-800/70 bg-zinc-900/40 px-3 py-2 text-[11px] text-zinc-400">
@@ -268,6 +585,40 @@ export const ProblemLibrary: React.FC = () => {
           Unsolved
         </span>
       </div>
+
+      {pendingImportId && (
+        <div className="premium-card p-4 border-emerald-500/30 bg-emerald-500/5 flex flex-col gap-3">
+          <div>
+            <p className="text-sm text-emerald-300 font-medium">Mark as previously solved?</p>
+            <p className="text-xs text-zinc-300 mt-1">
+              This imports a solve without a timed session. Choose an honest confidence rating so spaced repetition stays accurate.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingImportId(null)}
+              className="px-3 py-2 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => confirmImportSolve(3)}
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-white text-zinc-950"
+            >
+              Acceptable (3)
+            </button>
+            <button
+              type="button"
+              onClick={() => confirmImportSolve(4)}
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950"
+            >
+              Strong (4)
+            </button>
+          </div>
+        </div>
+      )}
 
       {pendingPremiumProblem && (
         <div className="premium-card p-4 border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -320,29 +671,56 @@ export const ProblemLibrary: React.FC = () => {
                   <table className="w-full text-left text-sm">
                     <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
                       <tr>
-                        <th 
-                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                          onClick={() => handleSort('status')}
+                        <th
+                          className="px-6 py-4 font-medium"
+                          aria-sort={ariaSortValue(sortConfig, 'status')}
                         >
-                          <div className="flex items-center gap-1">
-                            Status {sortConfig?.key === 'status' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSort('status')}
+                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                          >
+                            Status
+                            {sortConfig?.key === 'status' && (
+                              <span className="text-emerald-500" aria-hidden>
+                                {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                              </span>
+                            )}
+                          </button>
                         </th>
-                        <th 
-                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                          onClick={() => handleSort('title')}
+                        <th
+                          className="px-6 py-4 font-medium"
+                          aria-sort={ariaSortValue(sortConfig, 'title')}
                         >
-                          <div className="flex items-center gap-1">
-                            Problem {sortConfig?.key === 'title' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSort('title')}
+                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                          >
+                            Problem
+                            {sortConfig?.key === 'title' && (
+                              <span className="text-emerald-500" aria-hidden>
+                                {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                              </span>
+                            )}
+                          </button>
                         </th>
-                        <th 
-                          className="px-6 py-4 font-medium cursor-pointer hover:text-zinc-200 select-none transition-colors"
-                          onClick={() => handleSort('difficulty')}
+                        <th
+                          className="px-6 py-4 font-medium"
+                          aria-sort={ariaSortValue(sortConfig, 'difficulty')}
                         >
-                          <div className="flex items-center gap-1">
-                            Difficulty {sortConfig?.key === 'difficulty' && <span className="text-emerald-500">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSort('difficulty')}
+                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                          >
+                            Difficulty
+                            {sortConfig?.key === 'difficulty' && (
+                              <span className="text-emerald-500" aria-hidden>
+                                {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                              </span>
+                            )}
+                          </button>
                         </th>
                         <th className="px-6 py-4 font-medium text-right">Actions</th>
                       </tr>
@@ -423,8 +801,9 @@ export const ProblemLibrary: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
                                   title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
+                                  aria-label={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : `Start practice timer for ${prob.title}`}
                                 >
                                   <Play size={16} />
                                 </button>

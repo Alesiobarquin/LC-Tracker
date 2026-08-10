@@ -206,6 +206,32 @@ function timingToRow(userId: string, timing: SessionTiming) {
   };
 }
 
+/** True when Postgres still enforces the pre–1–5 `session_timings_rating_check`. */
+export function isLegacySessionRatingConstraintError(error: { message?: string; code?: string } | null | undefined): boolean {
+  const message = error?.message ?? '';
+  return message.includes('session_timings_rating_check') || (error?.code === '23514' && message.includes('rating'));
+}
+
+/**
+ * Insert a session timing. If the DB still only allows ratings 1–3, retry with a
+ * compatible rating so elapsed/PB data still saves. The real 1–5 rating lives in
+ * `problem_progress.history` via `logProblem`.
+ */
+async function insertSessionTiming(userId: string, timing: SessionTiming) {
+  const { error } = await supabase.from('session_timings').insert(timingToRow(userId, timing));
+  if (!error) return;
+
+  if (isLegacySessionRatingConstraintError(error) && timing.rating >= 4) {
+    const { error: retryError } = await supabase
+      .from('session_timings')
+      .insert(timingToRow(userId, { ...timing, rating: 3 }));
+    if (retryError) throw retryError;
+    return;
+  }
+
+  throw error;
+}
+
 function normalizeSprintRow(row: SprintStateRow | null): { sprintState: SprintState | null; sprintHistory: SprintHistoryEntry[] } {
   if (!row?.current_category || !row.sprint_start_date || !row.sprint_length || !row.sprint_status) {
     return { sprintState: null, sprintHistory: row?.sprint_history ?? [] };
@@ -562,6 +588,72 @@ export function useUserSettings() {
         throw error;
       }
     },
+    restoreBackup: async (backup: {
+      userSettings?: UserSettingsData;
+      progress?: Record<string, ProblemProgress>;
+      activityLog?: ActivityLog;
+      sprintState?: SprintState | null;
+      sprintHistory?: SprintHistoryEntry[];
+    }) => {
+      if (!userId) throw new Error('No authenticated user');
+
+      if (backup.userSettings) {
+        const nextSettings: UserSettingsData = {
+          ...DEFAULT_USER_SETTINGS,
+          ...backup.userSettings,
+          settings: mergeSettings(DEFAULT_SETTINGS, backup.userSettings.settings ?? {}),
+        };
+        const { error } = await supabase.from('user_settings').upsert(userSettingsToRow(userId, nextSettings));
+        if (error) throw error;
+        queryClient.setQueryData(queryKeys.settings(userId), nextSettings);
+      }
+
+      if (backup.progress && Object.keys(backup.progress).length > 0) {
+        const rows = Object.entries(backup.progress).map(([problemId, prog]) =>
+          progressToRow(userId, problemId, prog)
+        );
+        const { error } = await supabase.from('problem_progress').upsert(rows);
+        if (error) throw error;
+        queryClient.setQueryData(queryKeys.progress(userId), backup.progress);
+      }
+
+      if (backup.activityLog && Object.keys(backup.activityLog).length > 0) {
+        const rows = Object.entries(backup.activityLog).map(([logDate, entry]) => ({
+          user_id: userId,
+          log_date: logDate,
+          solved: entry.solved ?? 0,
+          reviewed: entry.reviewed ?? 0,
+          updated_at: new Date().toISOString(),
+        }));
+        const { error } = await supabase.from('activity_log').upsert(rows);
+        if (error) throw error;
+        queryClient.setQueryData(queryKeys.activity(userId), backup.activityLog);
+      }
+
+      if (backup.sprintState !== undefined || backup.sprintHistory !== undefined) {
+        const current =
+          queryClient.getQueryData<{ sprintState: SprintState | null; sprintHistory: SprintHistoryEntry[] }>(
+            queryKeys.sprint(userId)
+          ) ?? { sprintState: null, sprintHistory: [] };
+        const next = {
+          sprintState: backup.sprintState !== undefined ? backup.sprintState : current.sprintState,
+          sprintHistory: backup.sprintHistory ?? current.sprintHistory,
+        };
+        const { error } = await supabase
+          .from('sprint_state')
+          .upsert(sprintToRow(userId, next.sprintState, next.sprintHistory));
+        if (error) throw error;
+        queryClient.setQueryData(queryKeys.sprint(userId), next);
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.settings(userId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.progress(userId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.activity(userId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.sprint(userId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.timings(userId) }),
+      ]);
+    },
   };
 }
 
@@ -751,6 +843,7 @@ export function useProblemProgress() {
     progress,
     isLoading: query.isLoading,
     error: query.error,
+    refetch: query.refetch,
     ...momentum,
     logProblem: (
       problemId: string,
@@ -789,8 +882,7 @@ export function useSessionTimings() {
   const recordSessionMutation = useMutation({
     mutationFn: async (timing: SessionTiming) => {
       if (!userId) throw new Error('No authenticated user');
-      const { error } = await supabase.from('session_timings').insert(timingToRow(userId, timing));
-      if (error) throw error;
+      await insertSessionTiming(userId, timing);
     },
     onMutate: async (timing) => {
       if (!userId) return {};

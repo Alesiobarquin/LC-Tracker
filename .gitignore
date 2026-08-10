@@ -6,4 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
-supabase
+supabase/.temp/
+supabase/.branches/
+.vercel
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

@@ -20,6 +20,7 @@ export const SyntaxReference: React.FC = () => {
     const { user } = useUser();
     const navigate = useNavigate();
     const { syntaxProgress } = useSyntaxProgress();
+    const [viewMode, setViewMode] = useState<'due' | 'browse'>('due');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'java' | 'javascript' | 'cpp'>('python');
     const [showOnlyWeak, setShowOnlyWeak] = useState(false);
@@ -130,13 +131,39 @@ export const SyntaxReference: React.FC = () => {
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap justify-end">
-                        {/* Practice session launchers */}
+                    <div className="flex items-center gap-3 flex-wrap justify-start md:justify-end w-full md:w-auto sticky top-0 z-10 py-2 bg-zinc-950/90 backdrop-blur-sm md:static md:bg-transparent md:backdrop-blur-none md:py-0">
+                        <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 p-1 rounded-xl mr-auto md:mr-0" role="tablist" aria-label="Syntax study mode">
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={viewMode === 'due'}
+                                onClick={() => setViewMode('due')}
+                                className={clsx(
+                                    'px-3 py-2 rounded-lg text-xs font-semibold min-h-11 transition-colors',
+                                    viewMode === 'due' ? 'bg-emerald-500/15 text-emerald-300' : 'text-zinc-500 hover:text-zinc-300'
+                                )}
+                            >
+                                Due now ({dueCards.length})
+                            </button>
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={viewMode === 'browse'}
+                                onClick={() => setViewMode('browse')}
+                                className={clsx(
+                                    'px-3 py-2 rounded-lg text-xs font-semibold min-h-11 transition-colors',
+                                    viewMode === 'browse' ? 'bg-emerald-500/15 text-emerald-300' : 'text-zinc-500 hover:text-zinc-300'
+                                )}
+                            >
+                                Browse all
+                            </button>
+                        </div>
+                        {/* Practice session launchers — due first */}
                         <button
                             onClick={() => launchSession(dueCards, `Due Now · ${selectedLanguage}`)}
                             disabled={dueCards.length === 0}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors",
+                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors min-h-11",
                                 dueCards.length > 0
                                     ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20"
                                     : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 cursor-not-allowed"
@@ -247,6 +274,7 @@ export const SyntaxReference: React.FC = () => {
                 </div>
 
                 {/* Category Jump Anchor Links */}
+                {viewMode === 'browse' && (
                 <div className="flex overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 gap-2 scrollbar-hide">
                     {categories.map(([category]) => (
                         <a
@@ -258,10 +286,46 @@ export const SyntaxReference: React.FC = () => {
                         </a>
                     ))}
                 </div>
+                )}
             </header>
 
             <div className="space-y-6 relative">
-                {categories.length === 0 ? (
+                {viewMode === 'due' ? (
+                    dueCards.length === 0 ? (
+                        <div className="py-16 text-center premium-card border border-zinc-800">
+                            <Zap size={40} className="mx-auto text-emerald-400 mb-4" />
+                            <h3 className="text-xl font-medium text-zinc-100">Nothing due right now</h3>
+                            <p className="text-zinc-500 text-sm mt-2 max-w-md mx-auto">
+                                Catch up later or switch to Browse all to study reference cards.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('browse')}
+                                className="mt-4 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium"
+                            >
+                                Browse all
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <h2 className="text-lg font-semibold text-zinc-100">Due now · {selectedLanguage}</h2>
+                                <button
+                                    type="button"
+                                    onClick={() => launchSession(dueCards, `Due Now · ${selectedLanguage}`)}
+                                    className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm font-semibold"
+                                >
+                                    Start due session
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                {dueCards.map((card) => (
+                                    <SyntaxCardComponent key={card.id} card={card} />
+                                ))}
+                            </div>
+                        </div>
+                    )
+                ) : categories.length === 0 ? (
                     <div className="py-20 text-center">
                         <BookOpen size={48} className="mx-auto text-zinc-700 mb-4" />
                         <h3 className="text-xl font-medium text-zinc-400">No syntax cards found</h3>

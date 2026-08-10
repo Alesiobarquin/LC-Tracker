@@ -1,24 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect, lazy } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { ProblemLibrary } from './components/ProblemLibrary';
-import { PatternFoundations } from './components/PatternFoundations';
-import { Analytics } from './components/Analytics';
-import { SyntaxReference } from './components/SyntaxReference';
-import { Settings } from './components/Settings';
-import { Onboarding } from './components/Onboarding';
 import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
-import { TimerPage } from './components/TimerPage';
 import { useUser, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { useUserSettings } from './hooks/useUserData';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
-import { AdminDashboard } from './components/AdminDashboard';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { isAdminUser } from './utils/adminAuth';
+
+const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
+const ProblemLibrary = lazy(() => import('./components/ProblemLibrary').then((m) => ({ default: m.ProblemLibrary })));
+const PatternFoundations = lazy(() => import('./components/PatternFoundations').then((m) => ({ default: m.PatternFoundations })));
+const Analytics = lazy(() => import('./components/Analytics').then((m) => ({ default: m.Analytics })));
+const SyntaxReference = lazy(() => import('./components/SyntaxReference').then((m) => ({ default: m.SyntaxReference })));
+const Settings = lazy(() => import('./components/Settings').then((m) => ({ default: m.Settings })));
+const Onboarding = lazy(() => import('./components/Onboarding').then((m) => ({ default: m.Onboarding })));
+const TimerPage = lazy(() => import('./components/TimerPage').then((m) => ({ default: m.TimerPage })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+
+function RouteFallback() {
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center text-sm text-zinc-500" role="status">
+      Loading…
+    </div>
+  );
+}
 
 function RealtimeSyncHost({ userId }: { userId: string | null }) {
   useRealtimeSync(userId);
@@ -178,9 +187,6 @@ export default function App() {
     );
   }
 
-  // Public application routes
-  // (isPublicAppRoute already computed above)
-
   // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
@@ -192,7 +198,9 @@ export default function App() {
       return (
         <>
           <RealtimeSyncHost userId={user.id} />
-          <AdminDashboard />
+          <Suspense fallback={<RouteFallback />}>
+            <AdminDashboard />
+          </Suspense>
         </>
       );
     } else {
@@ -209,7 +217,9 @@ export default function App() {
     return (
       <>
         <RealtimeSyncHost userId={user.id} />
-        <Onboarding onComplete={handleOnboardingComplete} />
+        <Suspense fallback={<RouteFallback />}>
+          <Onboarding onComplete={handleOnboardingComplete} />
+        </Suspense>
       </>
     );
   }
@@ -218,27 +228,29 @@ export default function App() {
     <>
       <RealtimeSyncHost userId={user?.id || null} />
       <Layout>
-        <Routes>
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
-          
-          {/* Protected routes */}
-          {user && (
-            <>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/timer" element={<TimerPage />} />
-              <Route path="/timer/:problemId" element={<TimerPage />} />
-            </>
-          )}
-          
-          {/* Publicly indexable/previewable paths */}
-          <Route path="/patterns/*" element={<PatternFoundations />} />
-          <Route path="/library" element={<ProblemLibrary />} />
-          <Route path="/syntax" element={<SyntaxReference />} />
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
 
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
-        </Routes>
+            {/* Protected routes */}
+            {user && (
+              <>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/timer" element={<TimerPage />} />
+                <Route path="/timer/:problemId" element={<TimerPage />} />
+              </>
+            )}
+
+            {/* Publicly indexable/previewable paths */}
+            <Route path="/patterns/*" element={<PatternFoundations />} />
+            <Route path="/library" element={<ProblemLibrary />} />
+            <Route path="/syntax" element={<SyntaxReference />} />
+
+            <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          </Routes>
+        </Suspense>
       </Layout>
     </>
   );

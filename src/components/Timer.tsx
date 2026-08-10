@@ -130,7 +130,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     }
 
     if (phase === 'idle') {
-      startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false, parsedTimestamp);
+      startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false, parsedTimestamp, useStore.getState().sessionReturnTo);
       setPhase('running');
       setIsPaused(false);
       pausedSecondsRef.current = 0;
@@ -145,7 +145,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   };
 
   const handleStart = () => {
-    startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false);
+    startSession(problem.id, !isNew && !isColdSolve, isColdSolve ?? false, Date.now(), useStore.getState().sessionReturnTo);
     setPhase('running');
     setShowStartTimeEditor(false);
     setStartTimeError(null);
@@ -238,6 +238,49 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     onComplete();
   };
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (phase === 'running' && !showCancelConfirm) {
+          e.preventDefault();
+          setShowCancelConfirm(true);
+        } else if (showCancelConfirm) {
+          e.preventDefault();
+          setShowCancelConfirm(false);
+        }
+        return;
+      }
+      if (e.code === 'Space' || e.key === ' ') {
+        if (phase === 'idle') {
+          e.preventDefault();
+          handleStart();
+        } else if (phase === 'running' && !showCancelConfirm) {
+          e.preventDefault();
+          handlePauseResume();
+        }
+        return;
+      }
+      if (phase === 'running' && !showCancelConfirm && !isPaused && (e.key === 'Enter' || e.key === 'd' || e.key === 'D')) {
+        e.preventDefault();
+        handleDone();
+        return;
+      }
+      if (phase === 'rating' && !isSubmitting) {
+        const rating = Number(e.key) as ProblemSessionRating;
+        if (rating >= 1 && rating <= 5) {
+          e.preventDefault();
+          void handleRating(rating);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [phase, showCancelConfirm, isPaused, isSubmitting]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Rating Screen ────────────────────────────────────────────────────────
   if (phase === 'rating') {
     const minutes = Math.floor(frozenElapsed / 60);
@@ -273,9 +316,10 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <CircleCheck size={28} className="text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
-          <p className="text-zinc-400 mb-6 text-sm">
+          <p className="text-zinc-400 mb-2 text-sm">
             Rate how you’d perform on <strong className="text-zinc-200">{problem.title}</strong> if you saw it again soon — not whether the code compiled once.
           </p>
+          <p className="text-zinc-500 text-xs mb-6">Keyboard: press 1–5</p>
 
           <div className="mb-6 text-left">
             <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
@@ -305,36 +349,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <div className="space-y-2">
             {(
               [
-                {
-                  r: 5 as const,
-                  title: '5 — Cold / automatic',
-                  hint: 'Could solve again without prep; pattern feels automatic. Use when you’d trust yourself in an interview cold.',
-                  tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20',
-                },
-                {
-                  r: 4 as const,
-                  title: '4 — Strong',
-                  hint: 'Solid solve you could explain out loud; small slips ok. Stronger than “acceptable” but not fully muscle-memory yet.',
-                  tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20',
-                },
-                {
-                  r: 3 as const,
-                  title: '3 — Acceptable',
-                  hint: 'You finished or mostly got it, but it was slow, messy, or you needed small nudges. Honest middle tier.',
-                  tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20',
-                },
-                {
-                  r: 2 as const,
-                  title: '2 — Shaky',
-                  hint: 'Heavy hints, bugs, wrong approach first, or only a partial solution.',
-                  tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20',
-                },
-                {
-                  r: 1 as const,
-                  title: '1 — Could not',
-                  hint: 'Did not finish, or needed a full walkthrough. Schedules a quick revisit.',
-                  tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20',
-                },
+                { r: 5 as const, title: '5 — Automatic', hint: 'Could solve cold in an interview.', tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
+                { r: 4 as const, title: '4 — Strong', hint: 'Solid solve; small slips only.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
+                { r: 3 as const, title: '3 — Acceptable', hint: 'Finished, but slow or messy.', tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20' },
+                { r: 2 as const, title: '2 — Shaky', hint: 'Heavy hints or partial solution.', tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20' },
+                { r: 1 as const, title: '1 — Could not', hint: 'Did not finish — revisit soon.', tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20' },
               ] as const
             ).map(({ r, title, hint, tone }) => (
               <button
@@ -361,7 +380,35 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const displayElapsed = phase === 'running' ? elapsed : 0;
 
   return (
-    <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pb-24 md:pb-8">
+      {/* Sticky mobile focus chrome */}
+      <div className="md:hidden sticky top-0 z-30 -mx-4 px-4 py-3 mb-4 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-xl flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-zinc-100 truncate">{problem.title}</p>
+          <p className="text-[11px] text-zinc-500">
+            {phase === 'running' ? fmtTime(elapsed) : 'Ready'}
+            {isPaused ? ' · paused' : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {phase === 'idle' && (
+            <button type="button" onClick={handleStart} className="px-3 py-2 rounded-lg bg-emerald-500 text-zinc-950 text-xs font-bold">
+              Start
+            </button>
+          )}
+          {phase === 'running' && (
+            <>
+              <button type="button" onClick={handlePauseResume} className="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-xs font-semibold border border-zinc-700">
+                {isPaused ? 'Resume' : 'Pause'}
+              </button>
+              <button type="button" onClick={handleDone} disabled={isPaused} className="px-3 py-2 rounded-lg bg-emerald-500 disabled:opacity-40 text-zinc-950 text-xs font-bold">
+                Done
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-zinc-50">{problem.title}</h1>
@@ -561,16 +608,16 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
         <div className="mt-10 text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
           {phase === 'idle' && (
-            <span>Open the problem in LeetCode, then click Start Session. Forgot earlier? Use the start-time link to backdate.</span>
+            <span>Open the problem in LeetCode, then start. Shortcuts: Space to start · Enter/D when done · Esc to cancel.</span>
           )}
           {phase === 'running' && isPaused && (
-            <span className="text-amber-400/80">Timer paused. Click resume when you're ready to continue.</span>
+            <span className="text-amber-400/80">Timer paused. Space resumes · Esc cancels.</span>
           )}
           {phase === 'running' && !isPaused && isColdSolve && (
-            <span>Cold Solve: No hints, no videos. Test your true retention.</span>
+            <span>Cold Solve: No hints, no videos. Test your true retention. Space pauses · Enter finishes.</span>
           )}
           {phase === 'running' && !isPaused && !isColdSolve && (
-            <span>Work through the problem at your own pace. Click I'm Done whenever you're finished.</span>
+            <span>Work at your own pace. Space pauses · Enter finishes · Esc cancels.</span>
           )}
         </div>
       </div>

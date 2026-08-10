@@ -30,6 +30,7 @@ import {
   pickUnsolvedForRandomRecommendation,
 } from '../utils/progressHelpers';
 import { DashboardSkeleton } from './loadingSkeletons';
+import { QueryErrorBanner, PageHeader } from './ui';
 
 const MIN_DATA_POINTS = 3;
 
@@ -88,14 +89,16 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showReadinessDetails, setShowReadinessDetails] = useState(false);
   const { streak, graceDay } = useStreak();
+  const { settings, catchUpPlan, dayMode, setCatchUpPlan, dismissCatchUpBanner, setDayMode, targetInterviewDate, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const {
     progress,
     categoryStruggling,
     logProblem,
     isLoading: progressLoading,
+    error: progressError,
+    refetch: refetchProgress,
   } = useProblemProgress();
   const phase = getPhase();
-  const { settings, catchUpPlan, dayMode, setCatchUpPlan, dismissCatchUpBanner, setDayMode, isLoading: settingsLoading } = useUserSettings();
   const curriculum = settings.targetCurriculum ?? 'NEET_75';
   const targetCurriculumPool = useMemo(() => problemsPoolForTargetCurriculum(curriculum), [curriculum]);
   const { data: activityLog } = useActivityLog();
@@ -313,15 +316,17 @@ export const Dashboard: React.FC = () => {
   });
   const avgConfidence = ratingCount > 0 ? totalRating / ratingCount : 0;
 
-  if (phase === 1 && !showMilestone && !milestoneDismissed) {
+  useEffect(() => {
+    if (phase !== 1 || showMilestone || milestoneDismissed) return;
     if (curriculumSolvedCount === targetCurriculumPool.length && targetCurriculumPool.length > 0 && avgConfidence >= 3) {
-      setTimeout(() => setShowMilestone(true), 500);
+      const timer = window.setTimeout(() => setShowMilestone(true), 500);
+      return () => window.clearTimeout(timer);
     }
-  }
+  }, [avgConfidence, curriculumSolvedCount, milestoneDismissed, phase, showMilestone, targetCurriculumPool.length]);
 
   // ── Pacing ───────────────────────────────────────────────────────────────
   const today = new Date();
-  const phase1TargetDate = new Date('2026-05-01T00:00:00Z');
+  const pacingTargetDate = new Date(`${targetInterviewDate}T00:00:00`);
 
   let effectiveProblemsRemaining = 0;
   targetCurriculumPool.forEach((p) => {
@@ -339,7 +344,7 @@ export const Dashboard: React.FC = () => {
 
   let availableDaysUntilTarget = 0;
   let currentDate = new Date(today);
-  while (currentDate <= phase1TargetDate) {
+  while (currentDate <= pacingTargetDate) {
     const isRestDay = currentDate.getDay() === settings.studySchedule.restDay;
     const dateStr = currentDate.toISOString().split('T')[0];
     const isBlackout = settings.studySchedule.blackoutDates.some(b => dateStr >= b.start && dateStr <= b.end);
@@ -396,7 +401,7 @@ export const Dashboard: React.FC = () => {
   if (effectiveProblemsRemaining === 0) {
     pacingStatus = 'green';
     pacingMessage = 'Target curriculum complete!';
-  } else if (projectedFinishDate <= phase1TargetDate) {
+  } else if (projectedFinishDate <= pacingTargetDate) {
     pacingStatus = 'green';
     pacingMessage = `On track to finish Phase 1 by ${projectedFinishDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.`;
   } else {
@@ -547,6 +552,42 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in">
+      {(progressError || settingsError) && (
+        <QueryErrorBanner
+          title="Some dashboard data failed to load"
+          message="Your local plan may be incomplete until sync recovers."
+          onRetry={() => void refetchProgress()}
+        />
+      )}
+
+      <PageHeader
+        icon={<LayoutDashboard size={28} />}
+        title="Today's plan"
+        description="Queued work for today. Easy trims new problems; Hard expands the plan for catch-up days."
+        actions={
+          <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800/80 p-1 rounded-xl" role="group" aria-label="Day mode">
+            {([
+              ['EASY', 'Easy'],
+              ['NORMAL', 'Normal'],
+              ['HARD', 'Hard'],
+            ] as const).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setDayMode(mode)}
+                className={clsx(
+                  'px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                  dayMode.type === mode
+                    ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      />
       {showCatchUpBanner && (
         <div className="premium-card p-4 sm:p-6 border-amber-500/30 bg-amber-500/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
@@ -571,15 +612,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
-            <LayoutDashboard className="text-emerald-400" size={32} />
-            Daily Plan
-          </h1>
-          <p className="text-zinc-400 mt-1">Today's queued work. Run it end-to-end.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2 premium-card px-3 sm:px-4 py-2 border-zinc-800 bg-zinc-900/50">
             <span className="font-medium text-sm sm:text-base text-zinc-100">Total Est: {totalTime}m</span>
           </div>
@@ -591,8 +624,7 @@ export const Dashboard: React.FC = () => {
 
           {/* Actual time spent today */}
           <TodayTimer sessionTimings={sessionTimings} activeSession={activeSession} />
-        </div>
-      </header>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -634,7 +666,7 @@ export const Dashboard: React.FC = () => {
                       <p className="text-xs text-zinc-400 mt-3">Mock-interview style. Start the timer, solve under pressure, then rate yourself honestly — a struggle rating extends the sprint by 2 days.</p>
                       <div className="flex gap-2 mt-4">
                         <a aria-label={`Open ${newProblemData.title} on LeetCode`} href={newProblemData.leetcodeUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl text-zinc-300 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-zinc-400 outline-none"><ExternalLink size={16} /></a>
-                        <button onClick={() => startSession(newProblemData.id, false, false)} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
+                        <button onClick={() => startSession(newProblemData.id, false, false, Date.now(), '/dashboard')} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] group">
                           <Play size={16} className="fill-current transition-transform group-hover:scale-110" /> Start Sprint Check
                         </button>
                       </div>
@@ -722,7 +754,7 @@ export const Dashboard: React.FC = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => startSession(prob.id, false, false)}
+                        onClick={() => startSession(prob.id, false, false, Date.now(), '/dashboard')}
                         className={clsx(
                           'w-full group mt-6 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-95 active:translate-y-0',
                           !isPrimary && 'bg-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]'
@@ -769,7 +801,7 @@ export const Dashboard: React.FC = () => {
                     </h3>
                   </div>
                   <button
-                    onClick={() => startSession(coldSolveData.id, false, true)}
+                    onClick={() => startSession(coldSolveData.id, false, true, Date.now(), '/dashboard')}
                     className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-2"
                   >
                     <Play size={16} className="fill-current" />
@@ -831,7 +863,7 @@ export const Dashboard: React.FC = () => {
                         </button>
                         <button
                           aria-label={`Start session for ${prob.title}`}
-                          onClick={() => startSession(prob.id, true, false)}
+                          onClick={() => startSession(prob.id, true, false, Date.now(), '/dashboard')}
                           className="p-2.5 bg-zinc-800/80 hover:bg-amber-500 hover:text-zinc-950 text-zinc-300 rounded-xl transition-all duration-200 border border-zinc-700/50 hover:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none"
                         >
                           <Play size={18} className="fill-current" />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { FloatingContextBadges, MagnetCanvas, NoiseOverlay } from './LandingPage';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
@@ -31,10 +31,12 @@ function GoogleIcon() {
 export function Login() {
   const { signIn, isLoaded } = useSignIn();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     if (!isLoaded || !signIn) return;
     setIsLoading(true);
+    setErrorMessage(null);
     try {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
@@ -43,6 +45,7 @@ export function Login() {
       });
     } catch (err) {
       console.error(err);
+      setErrorMessage('Google sign-in failed. Check your connection and try again.');
       setIsLoading(false);
     }
   };
@@ -171,6 +174,11 @@ export function Login() {
               )}
               {isLoading ? 'Redirecting…' : 'Continue with Google'}
             </button>
+            {errorMessage ? (
+              <p role="alert" className="mt-3 text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+                {errorMessage}
+              </p>
+            ) : null}
           </div>
         </div>
       </motion.div>

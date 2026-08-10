@@ -44,7 +44,7 @@ export const orderSessionCards = (items: SyntaxCard[], mode: SessionOrderMode): 
 
 const ratingLabel = (rating: Rating) => {
     if (rating === 1) return "Don't know";
-    if (rating === 3) return 'Know it';
+    if (rating === 2) return 'Shaky';
     return 'Know it';
 };
 

@@ -113,7 +113,7 @@ async function migrateOne(row: LegacyRow) {
           recorded_at: recordedAt,
           elapsed_seconds: Number(t.elapsedSeconds ?? t.elapsed_seconds ?? 0),
           session_type: String(t.sessionType ?? t.session_type ?? 'new'),
-          rating: Number(t.rating ?? 3) as 1 | 2 | 3,
+          rating: Number(t.rating ?? 3) as 1 | 2 | 3 | 4 | 5,
         };
       })
       .filter(Boolean) as Record<string, unknown>[];

@@ -1,9 +1,9 @@
+import { defineConfig, loadEnv } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss()],
@@ -13,6 +13,24 @@ export default defineConfig(({mode}) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('leetcodeExtendedCatalog.json')) return 'extended-catalog';
+            if (id.includes('leetcodePremiumStatus.json')) return 'premium-status';
+            if (id.includes('node_modules/@clerk')) return 'clerk';
+            if (id.includes('node_modules/@codemirror') || id.includes('node_modules/@uiw/react-codemirror')) {
+              return 'codemirror';
+            }
+            if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) {
+              return 'motion';
+            }
+            if (id.includes('node_modules/recharts')) return 'recharts';
+          },
+        },
       },
     },
     server: {

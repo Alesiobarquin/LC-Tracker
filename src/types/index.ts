@@ -162,6 +162,20 @@ export interface PatternFoundation {
   relatedCategories: string[];
   relatedTags: string[];
   isCore?: boolean;
+  stage?: string;
+  recognitionSignals?: string[];
+  antiPatterns?: string[];
+  prerequisites?: PatternId[];
+  invariants?: string[];
+  commonMistakes?: string[];
+  complexity?: string;
+  estimatedMinutes?: number;
+  workedExample?: {
+    title: string;
+    input: string;
+    walkthrough: string[];
+    result: string;
+  };
   educativeProblems?: {
     title: string;
     badges: string[];

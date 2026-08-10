@@ -165,14 +165,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={24} />
           <div className="font-semibold text-lg tracking-[0.02em] text-emerald-300">{BRAND.name}</div>
         </Link>
-        <button aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-zinc-100">
+        <button
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="app-sidebar"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-lg"
+        >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Sidebar */}
-      <div className={clsx(
-        "fixed inset-y-0 left-0 z-40 w-[14rem] md:w-[12.75rem] bg-zinc-900/92 border-r border-zinc-800/90 backdrop-blur transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
+      <div
+        id="app-sidebar"
+        className={clsx(
+        "fixed inset-y-0 left-0 z-40 w-[15rem] bg-zinc-900/95 border-r border-zinc-800/90 backdrop-blur transform transition-transform duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-4 hidden md:block">
@@ -219,20 +227,32 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </nav>
 
         <div className="p-3 border-t border-zinc-800/50 space-y-4">
-          <div className="p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
-            <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
-              <Calendar size={12} />
-              <span>Next Target</span>
+          {user ? (
+            <div className="p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
+              <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
+                <Calendar size={12} />
+                <span>Next Target</span>
+              </div>
+              <div className="text-lg font-semibold text-zinc-100">
+                {daysUntilInterview > 0 ? `${daysUntilInterview} days` : 'It\'s time!'}
+              </div>
+              <div className="text-xs text-emerald-400/80 mt-1">
+                {phaseProgress}
+              </div>
             </div>
-            <div className="text-lg font-semibold text-zinc-100">
-              {daysUntilInterview > 0 ? `${daysUntilInterview} days` : 'It\'s time!'}
+          ) : (
+            <div className="p-3 rounded-xl bg-zinc-950/50 border border-zinc-800/50">
+              <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
+                <Calendar size={12} />
+                <span>Interview target</span>
+              </div>
+              <p className="text-sm text-zinc-300 leading-relaxed">
+                Sign in to set your interview date and personal study plan.
+              </p>
             </div>
-            <div className="text-xs text-emerald-400/80 mt-1">
-              {phaseProgress}
-            </div>
-          </div>
+          )}
 
-          {targetEvents.length > 0 && (
+          {user && targetEvents.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider pl-1">Target Timeline</div>
               <div className="relative pl-3 space-y-3 before:absolute before:inset-y-2 before:left-[5px] before:w-[2px] before:bg-zinc-800">
@@ -320,11 +340,56 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:py-8 md:pl-8 md:pr-[14.75rem] overflow-y-auto overflow-x-hidden w-full">
-        <div className="max-w-7xl mx-auto auth-content-zoom">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden w-full">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[120] focus:px-4 focus:py-2 focus:rounded-xl focus:bg-emerald-500 focus:text-zinc-950"
+        >
+          Skip to content
+        </a>
+        <div id="main-content" className="page-container pb-20 md:pb-0">
           {children}
         </div>
       </main>
+
+      {/* Mobile bottom nav — primary destinations */}
+      <nav
+        aria-label="Primary"
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-zinc-800/90 bg-zinc-950/95 backdrop-blur-xl"
+      >
+        <div className="grid grid-cols-4 gap-1 px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          {(
+            [
+              { id: 'dashboard', label: 'Today', icon: LayoutDashboard, protected: true },
+              { id: 'library', label: 'Library', icon: Library, protected: false },
+              { id: 'patterns', label: 'Patterns', icon: BookKey, protected: false },
+              { id: 'syntax', label: 'Syntax', icon: BookOpen, protected: false },
+            ] as const
+          ).map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <Link
+                key={item.id}
+                to={`/${item.id}`}
+                onClick={(e) => {
+                  if (!user && item.protected) {
+                    e.preventDefault();
+                    setAuthModalTarget(item.label);
+                  }
+                }}
+                className={clsx(
+                  'flex flex-col items-center justify-center gap-0.5 min-h-12 rounded-xl text-[10px] font-semibold transition-colors',
+                  active ? 'text-emerald-300' : 'text-zinc-500 hover:text-zinc-300'
+                )}
+              >
+                <Icon size={18} className={active ? 'text-emerald-400' : ''} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
@@ -362,13 +427,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
                     transition={{ duration: 0.2 }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="auth-prompt-title"
                     className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl z-10 flex flex-col items-center text-center overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
 
                     <button
                       onClick={() => setAuthModalTarget(null)}
-                      className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20"
+                      aria-label="Close sign-in prompt"
+                      className="absolute top-4 right-4 p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     >
                       <X size={20} />
                     </button>
@@ -377,7 +446,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <Lock className="w-5 h-5 text-emerald-400" />
                     </div>
 
-                    <h3 className="text-xl font-bold text-zinc-100 mb-2 relative z-10">Create an Account</h3>
+                    <h3 id="auth-prompt-title" className="text-xl font-bold text-zinc-100 mb-2 relative z-10">Create an Account</h3>
                     <p className="text-zinc-400 text-[15px] leading-relaxed mb-6 relative z-10">
                       Sign in or create a free account to access <strong className="text-zinc-200">{authModalTarget}</strong> and start securely saving your progress.
                     </p>

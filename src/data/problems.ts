@@ -21,7 +21,6 @@ export type Category =
   | 'Bit Manipulation';
 
 import type { TargetCurriculum } from '../types';
-import leetcodeExtendedCatalogJson from './leetcodeExtendedCatalog.json';
 import leetcodePremiumStatusJson from './leetcodePremiumStatus.json';
 
 export interface Problem {
@@ -36,11 +35,69 @@ export interface Problem {
   isNeetCode150: boolean;
   /** True for all 250 NeetCode 250 curriculum problems (includes full NeetCode 150). */
   isNeetCode250: boolean;
+  /**
+   * Aman Manazir’s Pareto Problem Set (49 high-yield interview problems).
+   * @see https://leetcode.com/problem-list/2yvx2ha6/
+   */
+  isPareto?: boolean;
   /** LeetCode paidOnly status fetched from GraphQL metadata refresh. */
   isPremium?: boolean;
   /** Extra LeetCode problems beyond NeetCode 250 (full catalog browse / sprint tier 4). */
   isExtendedCatalog?: boolean;
 }
+
+/** Title slugs from The Pareto Problem Set (LeetCode list `2yvx2ha6`). */
+export const PARETO_PROBLEM_IDS = new Set<string>([
+  'contains-duplicate',
+  'valid-anagram',
+  'two-sum',
+  'group-anagrams',
+  'top-k-frequent-elements',
+  'valid-sudoku',
+  'product-of-array-except-self',
+  'longest-consecutive-sequence',
+  'valid-palindrome',
+  'two-sum-ii-input-array-is-sorted',
+  '3sum',
+  'container-with-most-water',
+  'best-time-to-buy-and-sell-stock',
+  'longest-substring-without-repeating-characters',
+  'longest-repeating-character-replacement',
+  'valid-parentheses',
+  'min-stack',
+  'daily-temperatures',
+  'binary-search',
+  'find-minimum-in-rotated-sorted-array',
+  'search-in-rotated-sorted-array',
+  'reverse-linked-list',
+  'merge-two-sorted-lists',
+  'reorder-list',
+  'remove-nth-node-from-end-of-list',
+  'linked-list-cycle',
+  'lru-cache',
+  'invert-binary-tree',
+  'maximum-depth-of-binary-tree',
+  'diameter-of-binary-tree',
+  'balanced-binary-tree',
+  'same-tree',
+  'subtree-of-another-tree',
+  'lowest-common-ancestor-of-a-binary-search-tree',
+  'binary-tree-level-order-traversal',
+  'binary-tree-right-side-view',
+  'count-good-nodes-in-binary-tree',
+  'validate-binary-search-tree',
+  'kth-smallest-element-in-a-bst',
+  'kth-largest-element-in-a-stream',
+  'last-stone-weight',
+  'kth-largest-element-in-an-array',
+  'number-of-islands',
+  'max-area-of-island',
+  'clone-graph',
+  'pacific-atlantic-water-flow',
+  'surrounded-regions',
+  'course-schedule',
+  'course-schedule-ii',
+]);
 
 type PremiumStatusPayload = {
   statusById?: Record<string, boolean>;
@@ -332,17 +389,51 @@ export const problems: Problem[] = ([
   { id: 'shuffle-the-array', title: 'Shuffle the Array', difficulty: 'Easy', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/shuffle-the-array/', videoUrl: '', isNeetCode75: false, isBlind75: false, isNeetCode150: false, isNeetCode250: true },
 ] as Problem[]).map(problem => ({
   ...problem,
+  isPareto: PARETO_PROBLEM_IDS.has(problem.id),
   isPremium: isProblemPremium(problem),
 }) as Problem);
 
-export const extendedCatalogProblems: Problem[] = (leetcodeExtendedCatalogJson as Problem[]).map(
-  (p) => ({
-    ...p,
-    isPremium: isProblemPremium(p),
-  }) as Problem
-);
+let extendedCatalogCache: Problem[] = [];
+let extendedCatalogPromise: Promise<Problem[]> | null = null;
 
-export const allProblems: Problem[] = [...problems, ...extendedCatalogProblems];
+function decorateCatalogProblem(p: Problem): Problem {
+  return {
+    ...p,
+    isPareto: PARETO_PROBLEM_IDS.has(p.id),
+    isPremium: isProblemPremium(p),
+  } as Problem;
+}
+
+/** Core NeetCode list plus extended catalog once loaded. */
+export let allProblems: Problem[] = [...problems];
+
+export let extendedCatalogProblems: Problem[] = [];
+
+function rebuildProblemMap() {
+  for (const key of Object.keys(problemMap)) delete problemMap[key];
+  for (const problem of allProblems) problemMap[problem.id] = problem;
+}
+
+/** Lazily load the extended LeetCode catalog (large JSON) into `allProblems` / `problemMap`. */
+export async function ensureExtendedCatalogLoaded(): Promise<Problem[]> {
+  if (extendedCatalogCache.length > 0) return extendedCatalogCache;
+  if (!extendedCatalogPromise) {
+    extendedCatalogPromise = import('./leetcodeExtendedCatalog.json').then((mod) => {
+      const rows = (mod.default as Problem[]).map(decorateCatalogProblem);
+      extendedCatalogCache = rows;
+      extendedCatalogProblems = rows;
+      allProblems = [...problems, ...rows];
+      rebuildProblemMap();
+      return rows;
+    });
+  }
+  return extendedCatalogPromise;
+}
+
+/** Sync accessor used before async load finishes — core list only until hydrated. */
+export function getAllProblemsSnapshot(): Problem[] {
+  return allProblems;
+}
 
 /** Pool used for recommendations: main list for curated tiers; full list for extended. */
 export function problemsPoolForTargetCurriculum(curriculum: TargetCurriculum): Problem[] {
@@ -378,7 +469,12 @@ export const PHASE_2_CATEGORIES: Category[] = [
   'Backtracking',
 ];
 
-export const problemMap = allProblems.reduce((acc, problem) => {
+export const problemMap: Record<string, Problem> = problems.reduce((acc, problem) => {
   acc[problem.id] = problem;
   return acc;
 }, {} as Record<string, Problem>);
+
+// Kick off catalog hydration in the background so Full Catalog / EXTENDED curriculum warm up quickly.
+void ensureExtendedCatalogLoaded().catch(() => {
+  /* ignore — callers can retry via ensureExtendedCatalogLoaded */
+});

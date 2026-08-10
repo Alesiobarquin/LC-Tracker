@@ -5,6 +5,7 @@ import {
   migrateLegacyRatingHistoryIfNeeded,
   pickUnsolvedForRandomRecommendation,
   deriveMomentumState,
+  computePatternCompletion,
 } from './progressHelpers';
 import type { AppSettings, ProblemProgress } from '../types';
 import { DEFAULT_SETTINGS } from '../types';
@@ -270,5 +271,53 @@ describe('deriveMomentumState', () => {
     expect(result.consecutiveLowConfTotal).toBe(0);
     expect(result.categoryStruggling['Arrays & Hashing']).toBeFalsy();
     expect(result.proactiveNeetCodeProblemId).toBeNull();
+  });
+});
+
+describe('computePatternCompletion', () => {
+  const base = (): ProblemProgress => ({
+    firstSolvedAt: '2026-01-01',
+    lastReviewedAt: '2026-01-01',
+    nextReviewAt: '2099-01-01',
+    reviewCount: 1,
+    retired: false,
+    consecutiveThrees: 0,
+    consecutiveSuccesses: 1,
+    history: [{ date: '2026-01-01', rating: 4, sessionType: 'new' }],
+  });
+
+  it('counts mastery from retired problems, not any solve', () => {
+    const result = computePatternCompletion(
+      'two_pointers' as never,
+      ['a', 'b', 'c'],
+      {
+        a: { ...base(), retired: true },
+        b: base(),
+        c: {
+          ...base(),
+          nextReviewAt: '2000-01-01',
+          history: [{ date: '2026-01-01', rating: 1, sessionType: 'new' }],
+        },
+      }
+    );
+
+    expect(result.masteredCount).toBe(1);
+    expect(result.problemsCompletedCount).toBe(1);
+    expect(result.dueCount).toBe(1);
+    expect(result.needsWorkCount).toBe(1);
+    expect(result.isCompleted).toBe(false);
+  });
+
+  it('marks pattern complete only when every problem is retired', () => {
+    const result = computePatternCompletion(
+      'sliding_window' as never,
+      ['a', 'b'],
+      {
+        a: { ...base(), retired: true },
+        b: { ...base(), retired: true },
+      }
+    );
+    expect(result.isCompleted).toBe(true);
+    expect(result.masteredCount).toBe(2);
   });
 });

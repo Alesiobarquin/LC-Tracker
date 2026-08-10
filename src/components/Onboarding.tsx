@@ -15,17 +15,17 @@ import type { AppSettings } from '../types';
 interface OnboardingState {
     leetcodeUsername: string;
     learningMode: AppSettings['learningMode'];
+    targetInterviewDate: string;
+    targetCurriculum: AppSettings['targetCurriculum'];
+    weekdayMinutes: number;
 }
 
 interface Props {
     onComplete: () => void;
 }
 
-// ─────────────────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────────────────
-
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
+const ONBOARDING_DRAFT_KEY = 'lc-tracker-onboarding-draft';
 
 // ─────────────────────────────────────────────────────────
 // Step Indicator
@@ -257,10 +257,76 @@ const StepLearningMode: React.FC<{
 // Step 3: Launch
 // ─────────────────────────────────────────────────────────
 
+const StepPlan: React.FC<{
+    state: OnboardingState;
+    onChangeDate: (v: string) => void;
+    onChangeCurriculum: (v: AppSettings['targetCurriculum']) => void;
+    onChangeMinutes: (v: number) => void;
+}> = ({ state, onChangeDate, onChangeCurriculum, onChangeMinutes }) => (
+    <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-zinc-50">Set your plan targets</h2>
+            <p className="text-sm text-zinc-400">These drive pacing, recommendations, and the sidebar countdown.</p>
+        </div>
+        <div className="space-y-4">
+            <label className="block space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Interview date</span>
+                <input
+                    type="date"
+                    value={state.targetInterviewDate}
+                    onChange={(e) => onChangeDate(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                />
+            </label>
+            <div className="space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Target curriculum</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {([
+                        ['NEET_75', 'NeetCode 75'],
+                        ['NEET_150', 'NeetCode 150'],
+                        ['NEET_250', 'NeetCode 250'],
+                        ['EXTENDED', 'Extended catalog'],
+                    ] as const).map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => onChangeCurriculum(value)}
+                            className={clsx(
+                                'text-left rounded-xl border px-4 py-3 text-sm font-semibold transition-colors',
+                                state.targetCurriculum === value
+                                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                                    : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                            )}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <label className="block space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Weekday study minutes ({state.weekdayMinutes})
+                </span>
+                <input
+                    type="range"
+                    min={15}
+                    max={120}
+                    step={5}
+                    value={state.weekdayMinutes}
+                    onChange={(e) => onChangeMinutes(Number(e.target.value))}
+                    className="w-full"
+                />
+            </label>
+        </div>
+    </div>
+);
+
 const StepLaunch: React.FC<{
     state: OnboardingState;
     onLaunch: () => void;
-}> = ({ state, onLaunch }) => {
+    isLaunching: boolean;
+    launchError: string | null;
+}> = ({ state, onLaunch, isLaunching, launchError }) => {
     const tips = [
         {
             icon: <CheckCircle size={16} className="text-emerald-400" />,
@@ -284,7 +350,7 @@ const StepLaunch: React.FC<{
                 </div>
                 <h2 className="text-2xl font-bold text-zinc-50">You&apos;re ready</h2>
                 <p className="text-zinc-400 text-sm mt-1">
-                    Schedule, skill ratings, company tier, and more use sensible defaults — tune them in Plan Customization when you like.
+                    First-week focus: {state.targetCurriculum.replaceAll('_', ' ')} with about {state.weekdayMinutes} weekday minutes, aiming for {state.targetInterviewDate}.
                 </p>
             </div>
 
@@ -317,12 +383,19 @@ const StepLaunch: React.FC<{
                 ))}
             </div>
 
+            {launchError ? (
+                <p role="alert" className="text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                    {launchError}
+                </p>
+            ) : null}
+
             <button
                 onClick={onLaunch}
-                className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
+                disabled={isLaunching}
+                className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black font-bold text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
             >
                 <Rocket size={18} />
-                Launch
+                {isLaunching ? 'Launching…' : 'Launch'}
             </button>
         </div>
     );
@@ -333,13 +406,34 @@ const StepLaunch: React.FC<{
 // ─────────────────────────────────────────────────────────
 
 export const Onboarding: React.FC<Props> = ({ onComplete }) => {
-    const { setLeetCodeUsername, updateSettings, setOnboardingComplete } = useUserSettings();
+    const { setLeetCodeUsername, updateSettings, setOnboardingComplete, setTargetInterviewDate } = useUserSettings();
 
     const [step, setStep] = useState(1);
+    const [isLaunching, setIsLaunching] = useState(false);
+    const [launchError, setLaunchError] = useState<string | null>(null);
 
-    const [obState, setObState] = useState<OnboardingState>({
-        leetcodeUsername: '',
-        learningMode: 'CURRICULUM',
+    const defaultDate = (() => {
+        const d = new Date();
+        d.setMonth(d.getMonth() + 3);
+        return d.toISOString().slice(0, 10);
+    })();
+
+    const [obState, setObState] = useState<OnboardingState>(() => {
+        const defaults: OnboardingState = {
+            leetcodeUsername: '',
+            learningMode: 'CURRICULUM',
+            targetInterviewDate: defaultDate,
+            targetCurriculum: 'NEET_75',
+            weekdayMinutes: 60,
+        };
+        try {
+            const raw = localStorage.getItem(ONBOARDING_DRAFT_KEY);
+            if (!raw) return defaults;
+            const parsed = JSON.parse(raw) as Partial<OnboardingState>;
+            return { ...defaults, ...parsed };
+        } catch {
+            return defaults;
+        }
     });
 
     useEffect(() => {
@@ -350,21 +444,40 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
         return () => window.removeEventListener('keydown', handleKey, true);
     }, []);
 
+    useEffect(() => {
+        try {
+            localStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(obState));
+        } catch { /* ignore */ }
+    }, [obState]);
+
     const update = useCallback(<K extends keyof OnboardingState>(key: K, val: OnboardingState[K]) => {
         setObState((prev) => ({ ...prev, [key]: val }));
     }, []);
 
     const commitSettingsAndLaunch = async () => {
-        if (obState.leetcodeUsername) {
-            await setLeetCodeUsername(obState.leetcodeUsername);
+        setIsLaunching(true);
+        setLaunchError(null);
+        try {
+            if (obState.leetcodeUsername) {
+                await setLeetCodeUsername(obState.leetcodeUsername);
+            }
+
+            await updateSettings({
+                learningMode: obState.learningMode,
+                targetCurriculum: obState.targetCurriculum,
+                studySchedule: {
+                    weekdayMinutes: obState.weekdayMinutes,
+                } as AppSettings['studySchedule'],
+            });
+            await setTargetInterviewDate(obState.targetInterviewDate);
+
+            await setOnboardingComplete();
+            localStorage.removeItem(ONBOARDING_DRAFT_KEY);
+            onComplete();
+        } catch {
+            setLaunchError('Could not save your setup. Check your connection and try again.');
+            setIsLaunching(false);
         }
-
-        await updateSettings({
-            learningMode: obState.learningMode,
-        });
-
-        await setOnboardingComplete();
-        onComplete();
     };
 
     const handleSkipStep1 = () => setStep(2);
@@ -397,14 +510,24 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
                         />
                     )}
                     {step === 3 && (
+                        <StepPlan
+                            state={obState}
+                            onChangeDate={(v) => update('targetInterviewDate', v)}
+                            onChangeCurriculum={(v) => update('targetCurriculum', v)}
+                            onChangeMinutes={(v) => update('weekdayMinutes', v)}
+                        />
+                    )}
+                    {step === 4 && (
                         <StepLaunch
                             state={obState}
                             onLaunch={commitSettingsAndLaunch}
+                            isLaunching={isLaunching}
+                            launchError={launchError}
                         />
                     )}
                 </div>
 
-                {step !== 3 && (
+                {step !== 4 && (
                     <div className="px-8 py-6 border-t border-zinc-800/50 flex justify-between items-center shrink-0">
                         <button
                             onClick={() => setStep((s) => Math.max(1, s - 1))}

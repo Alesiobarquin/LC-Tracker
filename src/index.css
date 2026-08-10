@@ -2,19 +2,22 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
 
   --color-background: #09090b;
-  --color-surface: #121212;
-  --color-surface-hover: #1a1a1a;
+  --color-surface: #18181b;
+  --color-surface-hover: #27272a;
   --color-border: #27272a;
   --color-border-hover: #3f3f46;
-  --color-brand: #4ade80;
-  --color-brand-strong: #34d399;
-  --color-brand-soft: #86efac;
-  --color-text-main: #ededed;
+  --color-brand: #34d399;
+  --color-brand-strong: #10b981;
+  --color-brand-soft: #6ee7b7;
+  --color-text-main: #fafafa;
   --color-text-dim: #a1a1aa;
+  --radius-control: 0.75rem;
+  --radius-card: 1rem;
+  --radius-modal: 1.25rem;
   
   --animate-fade-in: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-slide-up: slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -93,10 +96,10 @@ body {
 }
 
 .brand-button-primary {
-  background: linear-gradient(135deg, #66f4d2, #28c79b);
+  background: #34d399;
   color: #04100d;
-  border: 1px solid rgba(138, 255, 224, 0.48);
-  box-shadow: 0 0 34px rgba(32, 201, 154, 0.35);
+  border: 1px solid rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.28);
 }
 
 .brand-button-secondary {
@@ -197,19 +200,14 @@ body {
   border-color: transparent; /* Let the pseudo-element glow completely take over */
 }
 
-@media (min-width: 768px) {
-  .auth-content-zoom {
-    zoom: 0.75;
-  }
+.page-container {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+}
 
-  @supports not (zoom: 1) {
-    .auth-content-zoom {
-      transform: scale(0.75);
-      transform-origin: top center;
-      width: calc(100% / 0.75);
-      min-height: calc(100% / 0.75);
-    }
-  }
+.auth-content-zoom {
+  /* Remnant removed — layout is full scale. */
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PHASE_1_CATEGORIES, PHASE_2_CATEGORIES, TARGET_CURRICULUM_LABELS } from '../data/problems';
 import { getPhase } from '../utils/dateUtils';
-import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Swords, Shuffle, Info, Lock, FileCode2 } from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Target, Briefcase, Zap, Code2, Calendar, Plus, X, RefreshCw, CheckCircle, Download, Upload, Swords, Shuffle, Info, Lock, FileCode2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
+import type { ActivityLog, ProblemProgress, SprintHistoryEntry, SprintState, UserSettingsData } from '../types';
+import { PageHeader } from './ui';
 
 function formatMinutes(minutes: number): string {
     if (minutes < 60) return `${minutes} min`;
@@ -32,6 +34,7 @@ export const Settings: React.FC = () => {
         lastSync,
         lastSyncCount,
         syncError,
+        restoreBackup,
     } = useUserSettings();
     const { sprintState, sprintHistory, setSprintCategory } = useSprintState();
     const { progress } = useProblemProgress();
@@ -47,7 +50,19 @@ export const Settings: React.FC = () => {
     const [newEventType, setNewEventType] = useState('Phone Screen');
     const [newEventDate, setNewEventDate] = useState('');
     const [sprintHowOpen, setSprintHowOpen] = useState(false);
+    const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [importMessage, setImportMessage] = useState('');
+    const importInputRef = useRef<HTMLInputElement>(null);
     const calendarPhase = getPhase();
+
+    const SETTINGS_SECTIONS = [
+        { id: 'section-leetcode', label: 'LeetCode' },
+        { id: 'section-strategy', label: 'Strategy' },
+        { id: 'section-schedule', label: 'Schedule' },
+        { id: 'section-targets', label: 'Targets' },
+        { id: 'section-language', label: 'Language' },
+        { id: 'section-backup', label: 'Backup' },
+    ] as const;
 
     useEffect(() => {
         setTempUsername(leetcodeUsername || '');
@@ -102,6 +117,32 @@ export const Settings: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    const handleImportData = async (file: File) => {
+        setImportStatus('loading');
+        setImportMessage('');
+        try {
+            const text = await file.text();
+            const parsed = JSON.parse(text) as {
+                userSettings?: UserSettingsData;
+                progress?: Record<string, ProblemProgress>;
+                activityLog?: ActivityLog;
+                sprintState?: SprintState | null;
+                sprintHistory?: SprintHistoryEntry[];
+            };
+            if (!parsed.userSettings && !parsed.progress && !parsed.activityLog && parsed.sprintState === undefined) {
+                throw new Error('This file does not look like an LC Tracker backup.');
+            }
+            await restoreBackup(parsed);
+            setImportStatus('success');
+            setImportMessage('Backup restored. Your plan, progress, and activity were merged from the file.');
+        } catch (error: unknown) {
+            setImportStatus('error');
+            setImportMessage(error instanceof Error ? error.message : 'Could not restore this backup.');
+        } finally {
+            if (importInputRef.current) importInputRef.current.value = '';
+        }
+    };
+
     const renderTierBar = () => {
         let ratios = [20, 60, 20]; // Default Mixed roughly
         if (settings.targetCompanyTier === 'FAANG') ratios = [20, 60, 20];
@@ -127,17 +168,30 @@ export const Settings: React.FC = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-12 max-w-4xl xl:max-w-5xl mx-auto">
-            <header className="space-y-1">
-                <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
-                    <SettingsIcon className="text-emerald-400" size={32} />
-                    Plan Customization
-                </h1>
-            </header>
+            <PageHeader
+                title="Plan Customization"
+                description="Interview date, curriculum, schedule, and backups — one place to tune how LC Tracker paces you."
+                icon={<SettingsIcon className="text-emerald-400" size={28} />}
+            />
+
+            <nav aria-label="Settings sections" className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800/60">
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {SETTINGS_SECTIONS.map((section) => (
+                        <a
+                            key={section.id}
+                            href={`#${section.id}`}
+                            className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+                        >
+                            {section.label}
+                        </a>
+                    ))}
+                </div>
+            </nav>
 
             <div className="space-y-8">
 
                     {/* LeetCode — first for visibility */}
-                    <section className="premium-card p-6 border-emerald-500/20">
+                    <section id="section-leetcode" className="premium-card p-6 border-emerald-500/20 scroll-mt-16">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
                             <RefreshCw className="text-emerald-400" size={20} />
                             LeetCode Integration
@@ -173,7 +227,7 @@ export const Settings: React.FC = () => {
                     </section>
 
                     {/* Learning Strategy */}
-                    <section className="premium-card p-6 border-emerald-500/20">
+                    <section id="section-strategy" className="premium-card p-6 border-emerald-500/20 scroll-mt-16">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
                             <Swords className="text-emerald-400" size={20} />
                             Learning Strategy
@@ -467,7 +521,7 @@ export const Settings: React.FC = () => {
                     </section>
 
                     {/* Study Schedule */}
-                    <section className="premium-card p-6">
+                    <section id="section-schedule" className="premium-card p-6 scroll-mt-16">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
                             <Clock className="text-emerald-400" size={20} />
                             Study Schedule
@@ -566,7 +620,7 @@ export const Settings: React.FC = () => {
                     </section>
 
                     {/* Target Events */}
-                    <section className="premium-card p-6 border-emerald-500/20">
+                    <section id="section-targets" className="premium-card p-6 border-emerald-500/20 scroll-mt-16">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
                             <Calendar className="text-emerald-400" size={20} />
                             Interview Timeline
@@ -657,7 +711,7 @@ export const Settings: React.FC = () => {
                     </section>
 
                     {/* Programming Language */}
-                    <section className="premium-card p-6">
+                    <section id="section-language" className="premium-card p-6 scroll-mt-16">
                         <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
                             <Code2 className="text-emerald-400" size={20} />
                             Programming Language
@@ -673,20 +727,54 @@ export const Settings: React.FC = () => {
                         </select>
                     </section>
 
-                    {/* Export Backup */}
-                    <section className="premium-card p-6 border-emerald-500/20">
-                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-4">
+                    {/* Backup */}
+                    <section id="section-backup" className="premium-card p-6 border-emerald-500/20 scroll-mt-16">
+                        <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2 mb-2">
                             <Download className="text-emerald-400" size={20} />
-                            Export Backup
+                            Backup &amp; Restore
                         </h2>
-                        <button
-                            type="button"
-                            onClick={handleExportData}
-                            className="flex items-center gap-2 px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl transition-all duration-200 text-sm font-medium"
-                        >
-                            <Download size={16} />
-                            Export Data
-                        </button>
+                        <p className="text-sm text-zinc-400 mb-4">
+                            Export a JSON snapshot for portability, or restore settings, progress, activity, and sprint state from a previous backup.
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                type="button"
+                                onClick={handleExportData}
+                                className="flex items-center gap-2 px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl transition-all duration-200 text-sm font-medium"
+                            >
+                                <Download size={16} />
+                                Export Data
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => importInputRef.current?.click()}
+                                disabled={importStatus === 'loading'}
+                                className="flex items-center gap-2 px-5 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl transition-all duration-200 text-sm font-medium disabled:opacity-50"
+                            >
+                                <Upload size={16} />
+                                {importStatus === 'loading' ? 'Restoring…' : 'Restore Backup'}
+                            </button>
+                            <input
+                                ref={importInputRef}
+                                type="file"
+                                accept="application/json,.json"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) void handleImportData(file);
+                                }}
+                            />
+                        </div>
+                        {importStatus === 'success' && (
+                            <p role="status" className="mt-3 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+                                {importMessage}
+                            </p>
+                        )}
+                        {importStatus === 'error' && (
+                            <p role="alert" className="mt-3 text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                                {importMessage}
+                            </p>
+                        )}
                     </section>
 
                     {sprintHowOpen && (

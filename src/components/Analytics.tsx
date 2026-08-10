@@ -47,14 +47,16 @@ export const Analytics: React.FC = () => {
   const { data: activityLog } = useActivityLog();
   const { sessionTimings, isLoading: timingsLoading } = useSessionTimings();
   const { sprintState, sprintHistory } = useSprintState();
-  const { settings } = useUserSettings();
+  const { settings, targetInterviewDate } = useUserSettings();
 
   const [olderTimings, setOlderTimings] = useState<SessionTiming[]>([]);
   const [olderCursor, setOlderCursor] = useState<string | null>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [viewingSession, setViewingSession] = useState<any>(null);
   const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [analyticsTab, setAnalyticsTab] = useState<'overview' | 'sessions' | 'plan'>('overview');
 
   useEffect(() => {
     setOlderTimings([]);
@@ -79,6 +81,7 @@ export const Analytics: React.FC = () => {
   const handleLoadMoreTimings = useCallback(async () => {
     if (!user?.id || loadingOlder || !hasMoreOlder) return;
     setLoadingOlder(true);
+    setLoadMoreError(null);
     try {
       const cursor = olderCursor ?? getSessionTimingsWindowStartIso();
       const batch = await fetchSessionTimingsBefore(user.id, cursor, 500);
@@ -91,6 +94,7 @@ export const Analytics: React.FC = () => {
       }
     } catch (e) {
       console.error(e);
+      setLoadMoreError('Could not load older sessions. Check your connection and try again.');
     } finally {
       setLoadingOlder(false);
     }
@@ -263,7 +267,7 @@ export const Analytics: React.FC = () => {
 
   // ── Heatmap ────────────────────────────────────────────────────────────────
   const today = new Date();
-  const targetDate = new Date('2026-09-15T00:00:00Z');
+  const targetDate = new Date(`${targetInterviewDate || '2026-09-15'}T00:00:00`);
   const endDate = new Date(targetDate);
   endDate.setDate(endDate.getDate() + 14);
   const startDate = subDays(endDate, 364);
@@ -430,8 +434,37 @@ export const Analytics: React.FC = () => {
           <LineChart className="text-emerald-400" size={32} />
           Analytics
         </h1>
+        <p className="text-sm text-zinc-400 mt-2">
+          Weakest patterns first, then activity and session history you can act on.
+        </p>
       </header>
 
+      <div role="tablist" aria-label="Analytics sections" className="flex flex-wrap gap-2">
+        {([
+          ['overview', 'Overview'],
+          ['sessions', 'Sessions'],
+          ['plan', 'Plan'],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={analyticsTab === id}
+            onClick={() => setAnalyticsTab(id)}
+            className={clsx(
+              'px-4 py-2 rounded-xl text-sm font-semibold border transition-colors',
+              analyticsTab === id
+                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {analyticsTab === 'overview' && (
+      <>
       {/* ── Active Sprint Banner ──────────────────────────────────────────────── */}
       {isSprintActive && sprintState && (() => {
         const estLen = sprintState.sprintLength + sprintState.extensionDays;
@@ -617,6 +650,8 @@ export const Analytics: React.FC = () => {
                 return (
                   <div
                     key={i}
+                    role="img"
+                    aria-label={`${dateKey}: ${totalActivity} problem${totalActivity !== 1 ? 's' : ''}`}
                     className={`w-3.5 h-3.5 rounded-[4px] ${colorClass} transition-all duration-300 hover:scale-125 hover:z-20 hover:shadow-[0_0_12px_rgba(52,211,153,0.6)] hover:border-emerald-400 cursor-pointer`}
                     title={`${dateKey}: ${totalActivity} problem${totalActivity !== 1 ? 's' : ''}`}
                   />
@@ -639,7 +674,7 @@ export const Analytics: React.FC = () => {
                 style={{ left: `${targetColumn * 16 - 2}px` }}
               >
                 <div className="absolute -top-6 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Target: Sep 15
+                  Target: {format(targetDate, 'MMM d')}
                 </div>
               </div>
             )}
@@ -717,6 +752,12 @@ export const Analytics: React.FC = () => {
           </div>
         )}
 
+        {loadMoreError && (
+          <p role="alert" className="mt-4 text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+            {loadMoreError}
+          </p>
+        )}
+
         {/* Load older sessions prompt — only shown when there are no timings at all */}
         {combinedTimings.length === 0 && hasMoreOlder && user?.id && (
           <div className="mt-6 text-center">
@@ -732,7 +773,11 @@ export const Analytics: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
 
+      {analyticsTab === 'sessions' && (
+      <>
       {/* ── Session History ─────────────────────────────────────────────────── */}
       <div className="premium-card p-6">
         <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2 mb-6">
@@ -875,9 +920,16 @@ export const Analytics: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
 
+      {analyticsTab === 'plan' && (
+      <>
       {/* ── Sprint Schedule (resting position when no sprint active) ─────────── */}
       {!isSprintActive && SprintScheduleSection}
+      {isSprintActive && SprintScheduleSection}
+      </>
+      )}
 
       {/* ── Code Review Modal ────────────────────────────────────────────────── */}
       {viewingSession && (

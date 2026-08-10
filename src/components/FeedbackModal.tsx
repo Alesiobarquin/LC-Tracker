@@ -90,10 +90,19 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedback-modal-title"
+        className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950/50">
-          <h2 className="text-lg font-semibold text-white">Share Feedback</h2>
+          <h2 id="feedback-modal-title" className="text-lg font-semibold text-white">Share Feedback</h2>
           <button
             onClick={onClose}
             aria-label="Close feedback modal"

@@ -83,13 +83,14 @@ export function computeSprintLength(
 export function getReservedProblemIds(): Set<string> {
   return new Set(
     problems
-      .filter(
-        (p) =>
-          p.mockInterviewContent &&
-          p.mockInterviewContent.statement &&
-          p.mockInterviewContent.optimalSolution &&
-          p.mockInterviewContent.explanation
-      )
+      .filter((p) => {
+        const mock = (p as { mockInterviewContent?: {
+          statement?: string;
+          optimalSolution?: string;
+          explanation?: string;
+        } }).mockInterviewContent;
+        return Boolean(mock?.statement && mock?.optimalSolution && mock?.explanation);
+      })
       .map((p) => p.id)
   );
 }
@@ -1032,15 +1033,35 @@ export function computePatternCompletion(
   patternId: PatternId,
   patternProblemIds: string[],
   problemProgress: Record<string, ProblemProgress>
-): Pick<PatternProgress, 'problemsCompletedCount' | 'isCompleted'> {
-  const completedCount = patternProblemIds.filter(id => {
+): Pick<PatternProgress, 'problemsCompletedCount' | 'isCompleted'> & {
+  masteredCount: number;
+  dueCount: number;
+  needsWorkCount: number;
+} {
+  void patternId;
+  const now = Date.now();
+  let masteredCount = 0;
+  let dueCount = 0;
+  let needsWorkCount = 0;
+
+  for (const id of patternProblemIds) {
     const prog = problemProgress[id];
-    return !!prog; // Treat any solved problem as completed for pattern progress
-  }).length;
-  
+    if (!prog) continue;
+    if (prog.retired) {
+      masteredCount += 1;
+      continue;
+    }
+    const lastRating = prog.history[prog.history.length - 1]?.rating;
+    if (lastRating === 1) needsWorkCount += 1;
+    if (new Date(prog.nextReviewAt).getTime() <= now) dueCount += 1;
+  }
+
   return {
-    problemsCompletedCount: completedCount,
-    isCompleted: completedCount === patternProblemIds.length && patternProblemIds.length > 0
+    problemsCompletedCount: masteredCount,
+    masteredCount,
+    dueCount,
+    needsWorkCount,
+    isCompleted: masteredCount === patternProblemIds.length && patternProblemIds.length > 0,
   };
 }
 

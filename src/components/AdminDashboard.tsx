@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, AlertCircle, Lightbulb, RefreshCw } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { clsx } from 'clsx';
+import { isMissingRelationError } from '../utils/supabaseErrors';
 
 interface Ticket {
   id: string;
@@ -108,7 +109,7 @@ export function AdminDashboard() {
           .eq('admin_user_id', user.id);
 
         if (readMarkerError) {
-          if (readMarkerError.code === '42P01') {
+          if (isMissingRelationError(readMarkerError)) {
             setAdminConfigWarning((existing) => existing ?? 'Unread tracking migration is missing. Run latest Supabase migrations to enable inbox counts.');
           } else {
             console.error('Operation failed: Failed to load admin read markers');

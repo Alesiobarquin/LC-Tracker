@@ -752,7 +752,7 @@ export function buildDailyPlan(params: {
     (p) => includePremium || !isProblemPremium(p)
   );
   const sprintPoolOpts: SprintPoolOptions = {
-    alignPoolToTargetCurriculum: settings.sprintSettings.alignPoolToTargetCurriculum,
+    alignPoolToTargetCurriculum: settings.sprintSettings?.alignPoolToTargetCurriculum,
     targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
     includePremiumInAssignments: includePremium,
   };
@@ -832,7 +832,7 @@ export function buildDailyPlan(params: {
     }
   }
 
-  if (settings.studySchedule.restDay === dayOfWeek) {
+  if (settings.studySchedule?.restDay === dayOfWeek) {
     shouldAssignNewProblem = false;
   }
 

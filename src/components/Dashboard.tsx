@@ -331,7 +331,7 @@ export const Dashboard: React.FC = () => {
   let effectiveProblemsRemaining = 0;
   targetCurriculumPool.forEach((p) => {
     if (!progress[p.id]) {
-      const skill = settings.skillLevels[p.category];
+      const skill = settings.skillLevels?.[p.category];
       if (skill === 'comfortable') {
         effectiveProblemsRemaining += 0;
       } else if (skill === 'some_exposure') {
@@ -344,12 +344,19 @@ export const Dashboard: React.FC = () => {
 
   let availableDaysUntilTarget = 0;
   let currentDate = new Date(today);
-  while (currentDate <= pacingTargetDate) {
+  const blackoutDates = Array.isArray(settings.studySchedule?.blackoutDates)
+    ? settings.studySchedule.blackoutDates
+    : [];
+  // Cap pacing scan so a far-future / corrupt interview date can't hang the UI thread.
+  const maxPacingDays = 3660;
+  let pacingDaysScanned = 0;
+  while (currentDate <= pacingTargetDate && pacingDaysScanned < maxPacingDays) {
     const isRestDay = currentDate.getDay() === settings.studySchedule.restDay;
     const dateStr = currentDate.toISOString().split('T')[0];
-    const isBlackout = settings.studySchedule.blackoutDates.some(b => dateStr >= b.start && dateStr <= b.end);
+    const isBlackout = blackoutDates.some(b => dateStr >= b.start && dateStr <= b.end);
     if (!isRestDay && !isBlackout) availableDaysUntilTarget++;
     currentDate.setDate(currentDate.getDate() + 1);
+    pacingDaysScanned += 1;
   }
   availableDaysUntilTarget = Math.max(1, availableDaysUntilTarget);
 
@@ -392,7 +399,7 @@ export const Dashboard: React.FC = () => {
     daysSimulated++;
     const isRestDay = projectedFinishDate.getDay() === settings.studySchedule.restDay;
     const dateStr = projectedFinishDate.toISOString().split('T')[0];
-    const isBlackout = settings.studySchedule.blackoutDates.some(b => dateStr >= b.start && dateStr <= b.end);
+    const isBlackout = blackoutDates.some(b => dateStr >= b.start && dateStr <= b.end);
     if (!isRestDay && !isBlackout) activeDaysCounted++;
   }
 

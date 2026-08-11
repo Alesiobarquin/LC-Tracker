@@ -88,20 +88,34 @@ type SprintStateRow = {
   sprint_history: SprintHistoryEntry[];
 };
 
-function mergeSettings(defaults: AppSettings, partial?: Partial<AppSettings>): AppSettings {
+function mergeSettings(defaults: AppSettings, partial?: Partial<AppSettings> | null): AppSettings {
+  const patch = partial && typeof partial === 'object' ? partial : {};
+  const studyPatch: Partial<AppSettings['studySchedule']> =
+    patch.studySchedule && typeof patch.studySchedule === 'object' ? patch.studySchedule : {};
+  const sprintPatch: Partial<AppSettings['sprintSettings']> =
+    patch.sprintSettings && typeof patch.sprintSettings === 'object' ? patch.sprintSettings : {};
+  const skillLevels =
+    patch.skillLevels && typeof patch.skillLevels === 'object' && !Array.isArray(patch.skillLevels)
+      ? patch.skillLevels
+      : {};
+
   return {
     ...defaults,
-    ...partial,
+    ...patch,
+    // Nested objects must never be null — a null overwrite from settings_json crashes Dashboard.
+    skillLevels: { ...defaults.skillLevels, ...skillLevels },
     studySchedule: {
       ...defaults.studySchedule,
-      ...(partial?.studySchedule ?? {}),
+      ...studyPatch,
+      blackoutDates: Array.isArray(studyPatch.blackoutDates)
+        ? studyPatch.blackoutDates
+        : defaults.studySchedule.blackoutDates,
     },
     sprintSettings: {
-      lengthMultiplier: partial?.sprintSettings?.lengthMultiplier ?? defaults.sprintSettings.lengthMultiplier,
-      targetDays: partial?.sprintSettings?.targetDays ?? defaults.sprintSettings.targetDays,
+      lengthMultiplier: sprintPatch.lengthMultiplier ?? defaults.sprintSettings.lengthMultiplier,
+      targetDays: sprintPatch.targetDays ?? defaults.sprintSettings.targetDays,
       alignPoolToTargetCurriculum:
-        partial?.sprintSettings?.alignPoolToTargetCurriculum ??
-        defaults.sprintSettings.alignPoolToTargetCurriculum,
+        sprintPatch.alignPoolToTargetCurriculum ?? defaults.sprintSettings.alignPoolToTargetCurriculum,
     },
   };
 }
@@ -121,10 +135,21 @@ function normalizeUserSettingsRow(row: {
     settings: mergeSettings(DEFAULT_SETTINGS, settingsJson.settings),
     ratingHistoryMigrationVersion:
       settingsJson.ratingHistoryMigrationVersion ?? DEFAULT_USER_SETTINGS.ratingHistoryMigrationVersion,
-    targetEvents: settingsJson.targetEvents ?? DEFAULT_USER_SETTINGS.targetEvents,
-    dayMode: settingsJson.dayMode ?? DEFAULT_USER_SETTINGS.dayMode,
-    catchUpPlan: settingsJson.catchUpPlan ?? DEFAULT_USER_SETTINGS.catchUpPlan,
-    syntaxProgress: settingsJson.syntaxProgress ?? DEFAULT_USER_SETTINGS.syntaxProgress,
+    targetEvents: Array.isArray(settingsJson.targetEvents)
+      ? settingsJson.targetEvents
+      : DEFAULT_USER_SETTINGS.targetEvents,
+    dayMode:
+      settingsJson.dayMode && typeof settingsJson.dayMode === 'object'
+        ? settingsJson.dayMode
+        : DEFAULT_USER_SETTINGS.dayMode,
+    catchUpPlan:
+      settingsJson.catchUpPlan && typeof settingsJson.catchUpPlan === 'object'
+        ? settingsJson.catchUpPlan
+        : DEFAULT_USER_SETTINGS.catchUpPlan,
+    syntaxProgress:
+      settingsJson.syntaxProgress && typeof settingsJson.syntaxProgress === 'object'
+        ? settingsJson.syntaxProgress
+        : DEFAULT_USER_SETTINGS.syntaxProgress,
   };
 }
 

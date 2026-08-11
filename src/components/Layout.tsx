@@ -16,6 +16,7 @@ import { FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION } from '../constants
 import { BRAND } from '../constants/brand';
 import { isAdminUser } from '../utils/adminAuth';
 import { supabase } from '../lib/supabase';
+import { isMissingRelationError } from '../utils/supabaseErrors';
 
 interface FeedbackRow {
   id: string;
@@ -106,7 +107,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         .eq('admin_user_id', user.id);
 
       if (readError) {
-        if (readError.code === '42P01') {
+        // Table missing in prod (PGRST205) — treat every ticket as unread, don't crash boot.
+        if (isMissingRelationError(readError)) {
           if (!cancelled) {
             setUnreadAdminTicketCount(ticketRows.length);
           }

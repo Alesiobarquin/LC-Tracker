@@ -10,6 +10,7 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { isAdminUser } from './utils/adminAuth';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ProblemLibrary = lazy(() => import('./components/ProblemLibrary').then((m) => ({ default: m.ProblemLibrary })));
@@ -219,8 +220,8 @@ export default function App() {
   }
 
   // Settings fetch failed — don't force onboarding with default incomplete settings.
-  // Fall through to the app shell so the user isn't trapped in a re-onboarding loop.
-  if (user && !onboardingComplete && !settingsError) {
+  // Also wait until settings finished loading so a hung/timeout boot doesn't trap users in onboarding.
+  if (user && !onboardingComplete && !settingsError && !settingsLoading) {
     if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
     }
@@ -235,7 +236,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <RealtimeSyncHost userId={user?.id || null} />
       <Layout>
         <Suspense fallback={<RouteFallback />}>
@@ -262,6 +263,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </Layout>
-    </>
+    </ErrorBoundary>
   );
 }

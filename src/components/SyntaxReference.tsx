@@ -16,6 +16,23 @@ const readStoredOrderMode = (): SessionOrderMode => {
     return localStorage.getItem(SESSION_ORDER_KEY) === 'category' ? 'category' : 'random';
 };
 
+function matchesSyntaxSearch(card: SyntaxCard, query: string): boolean {
+    if (!query) return true;
+    const haystack = [
+        card.description,
+        card.syntax,
+        card.category,
+        card.useCase,
+        card.explanation,
+    ]
+        .join('\n')
+        .toLowerCase();
+    return query
+        .split(/\s+/)
+        .filter(Boolean)
+        .every((term) => haystack.includes(term));
+}
+
 export const SyntaxReference: React.FC = () => {
     const { user } = useUser();
     const navigate = useNavigate();
@@ -32,6 +49,13 @@ export const SyntaxReference: React.FC = () => {
         localStorage.setItem(SESSION_ORDER_KEY, sessionOrderMode);
     }, [sessionOrderMode]);
 
+    // Search is for the full reference — jump out of Due-now when the user types.
+    useEffect(() => {
+        if (searchQuery.trim()) {
+            setViewMode('browse');
+        }
+    }, [searchQuery]);
+
     // Collapse state for categories
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
@@ -46,18 +70,10 @@ export const SyntaxReference: React.FC = () => {
 
     // Filter cards
     const filteredCards = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
         return allSyntaxCards.filter(card => {
             if (card.language !== selectedLanguage) return false;
-
-            const query = searchQuery.toLowerCase();
-            if (query) {
-                if (!card.description.toLowerCase().includes(query) &&
-                    !card.syntax.toLowerCase().includes(query) &&
-                    !card.category.toLowerCase().includes(query) &&
-                    !card.useCase.toLowerCase().includes(query)) {
-                    return false;
-                }
-            }
+            if (!matchesSyntaxSearch(card, query)) return false;
 
             if (showOnlyWeak) {
                 const prog = syntaxProgress[card.id];
@@ -82,13 +98,19 @@ export const SyntaxReference: React.FC = () => {
     // Due cards: never practiced OR nextReviewAt <= now, for current language
     const dueCards = useMemo(() => {
         const now = new Date();
+        const query = searchQuery.trim().toLowerCase();
         return allSyntaxCards.filter(card => {
             if (card.language !== selectedLanguage) return false;
+            if (!matchesSyntaxSearch(card, query)) return false;
+            if (showOnlyWeak) {
+                const prog = syntaxProgress[card.id];
+                if (!prog || prog.confidenceRating >= 3) return false;
+            }
             const prog = syntaxProgress[card.id];
             if (!prog) return true;
             return new Date(prog.nextReviewAt) <= now;
         });
-    }, [selectedLanguage, syntaxProgress]);
+    }, [searchQuery, selectedLanguage, showOnlyWeak, syntaxProgress]);
 
     const launchSession = (cards: SyntaxCard[], title: string) => {
         if (!user) {

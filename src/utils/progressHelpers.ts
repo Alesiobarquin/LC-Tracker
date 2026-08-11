@@ -626,7 +626,7 @@ export function applyLeetCodeSubmissions(
 
   submissions.forEach((sub) => {
     const problemId = sub.titleSlug;
-    const existsInLibrary = allProblems.some((p) => p.id === problemId);
+    const existsInLibrary = Boolean(problemMap[problemId] || allProblems.some((p) => p.id === problemId));
 
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);

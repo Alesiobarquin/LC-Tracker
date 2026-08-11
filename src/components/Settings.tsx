@@ -69,12 +69,20 @@ export const Settings: React.FC = () => {
     }, [leetcodeUsername]);
 
     const handleManualSync = async () => {
-        if (tempUsername !== leetcodeUsername) {
-            setLeetCodeUsername(tempUsername);
-        }
+        const username = tempUsername.trim().replace(/^@/, '');
+        if (!username) return;
+
         setIsSyncing(true);
-        await syncLeetCode();
-        setIsSyncing(false);
+        try {
+            if (username !== (leetcodeUsername || '')) {
+                await setLeetCodeUsername(username);
+            }
+            await syncLeetCode(username);
+        } catch {
+            // syncError is set inside syncLeetCode / settings mutations
+        } finally {
+            setIsSyncing(false);
+        }
     };
 
     const handleAddBlackoutDate = () => {
@@ -204,17 +212,28 @@ export const Settings: React.FC = () => {
                                         type="text"
                                         value={tempUsername}
                                         onChange={(e) => setTempUsername(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && tempUsername.trim() && !isSyncing) {
+                                                void handleManualSync();
+                                            }
+                                        }}
                                         placeholder="e.g., neetcode"
                                         className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-amber-500/50 transition-colors"
                                     />
                                     <button
-                                        onClick={handleManualSync}
-                                        disabled={isSyncing || !tempUsername}
-                                        className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-xl text-zinc-300 transition-colors flex items-center justify-center shrink-0"
+                                        type="button"
+                                        onClick={() => void handleManualSync()}
+                                        disabled={isSyncing || !tempUsername.trim()}
+                                        aria-label="Sync LeetCode submissions"
+                                        className="px-4 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 rounded-xl text-zinc-950 font-semibold transition-colors flex items-center justify-center gap-2 shrink-0"
                                     >
                                         <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
+                                        <span className="hidden sm:inline">{isSyncing ? 'Syncing…' : 'Sync'}</span>
                                     </button>
                                 </div>
+                                <p className="text-xs text-zinc-500 mt-2">
+                                    Imports recent accepted solves into your tracker when they match problems in the library.
+                                </p>
                                 {syncError && <p className="text-red-400 text-xs mt-2">{syncError}</p>}
                                 {lastSync && !syncError && (
                                     <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">

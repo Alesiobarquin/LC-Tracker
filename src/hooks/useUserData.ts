@@ -36,7 +36,7 @@ import {
   SPRINT_DESCRIPTIONS,
 } from '../utils/progressHelpers';
 import { getNextReviewDate } from '../utils/dateUtils';
-import { allProblems, problemMap } from '../data/problems';
+import { allProblems, ensureExtendedCatalogLoaded, problemMap } from '../data/problems';
 import { userDataQueryKeys } from '../lib/userDataQueryKeys';
 import { safeUUID } from '../utils/uuid';
 
@@ -581,14 +581,21 @@ export function useUserSettings() {
         catchUpPlan: { ...current.catchUpPlan, bannerDismissed: true },
       })),
     setLeetCodeUsername: (username: string) =>
-      updateUserSettings((current) => ({ ...current, leetcodeUsername: username })),
-    syncLeetCode: async () => {
+      updateUserSettings((current) => ({ ...current, leetcodeUsername: username.trim().replace(/^@/, '') })),
+    syncLeetCode: async (usernameOverride?: string) => {
       if (!userId) throw new Error('No authenticated user');
-      const username = (queryClient.getQueryData<UserSettingsData>(queryKeys.settings(userId)) ?? data).leetcodeUsername;
-      if (!username) return;
+      const cached =
+        queryClient.getQueryData<UserSettingsData>(queryKeys.settings(userId)) ?? data;
+      const username = (usernameOverride ?? cached.leetcodeUsername ?? '').trim().replace(/^@/, '');
+      if (!username) {
+        setSyncError('Enter a LeetCode username first');
+        throw new Error('Enter a LeetCode username first');
+      }
 
       setSyncError(null);
       try {
+        // Prefer matching against the full catalog so EXTENDED problems can import.
+        await ensureExtendedCatalogLoaded().catch(() => undefined);
         const submissions = await fetchLeetCodeProfile(username);
         const progress = queryClient.getQueryData<Record<string, ProblemProgress>>(queryKeys.progress(userId)) ?? {};
         const next = applyLeetCodeSubmissions(progress, submissions);

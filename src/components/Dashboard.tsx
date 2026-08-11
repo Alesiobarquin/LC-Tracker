@@ -236,6 +236,40 @@ export const Dashboard: React.FC = () => {
     }
   }, [isRetro]);
 
+  // Must stay above any early returns — conditional hooks cause React #310.
+  useEffect(() => {
+    if (progressLoading || settingsLoading) return;
+    if (phase !== 1 || showMilestone || milestoneDismissed) return;
+
+    const curriculumSolvedCount = targetCurriculumPool.filter((p) => progress[p.id]).length;
+    let totalRating = 0;
+    let ratingCount = 0;
+    Object.values(progress).forEach((prog) => {
+      if (prog.history.length > 0) {
+        totalRating += prog.history[prog.history.length - 1].rating;
+        ratingCount++;
+      }
+    });
+    const avgConfidence = ratingCount > 0 ? totalRating / ratingCount : 0;
+
+    if (
+      curriculumSolvedCount === targetCurriculumPool.length &&
+      targetCurriculumPool.length > 0 &&
+      avgConfidence >= 3
+    ) {
+      const timer = window.setTimeout(() => setShowMilestone(true), 500);
+      return () => window.clearTimeout(timer);
+    }
+  }, [
+    milestoneDismissed,
+    phase,
+    progress,
+    progressLoading,
+    settingsLoading,
+    showMilestone,
+    targetCurriculumPool,
+  ]);
+
   if (progressLoading || settingsLoading) {
     return <DashboardSkeleton />;
   }
@@ -315,14 +349,6 @@ export const Dashboard: React.FC = () => {
     }
   });
   const avgConfidence = ratingCount > 0 ? totalRating / ratingCount : 0;
-
-  useEffect(() => {
-    if (phase !== 1 || showMilestone || milestoneDismissed) return;
-    if (curriculumSolvedCount === targetCurriculumPool.length && targetCurriculumPool.length > 0 && avgConfidence >= 3) {
-      const timer = window.setTimeout(() => setShowMilestone(true), 500);
-      return () => window.clearTimeout(timer);
-    }
-  }, [avgConfidence, curriculumSolvedCount, milestoneDismissed, phase, showMilestone, targetCurriculumPool.length]);
 
   // ── Pacing ───────────────────────────────────────────────────────────────
   const today = new Date();

@@ -61,10 +61,16 @@ export default function App() {
   const navigate = useNavigate();
   const rawPath = location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
+  const [bootTimedOut, setBootTimedOut] = React.useState(false);
 
   const handleOnboardingComplete = () => {
     navigate('/dashboard');
   };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBootTimedOut(true), 6000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const origin = window.location.origin;
@@ -155,8 +161,9 @@ export default function App() {
   if (path === '/terms') return <TermsOfService />;
   if (path === '/sso-callback') return <AuthenticateWithRedirectCallback />;
 
-  // Landing page — show immediately without waiting for auth
-  if (path === '/' && authLoaded && !user) return <LandingPage />;
+  // Landing: render immediately so guests never sit on an empty dark splash
+  // while Clerk boots. Logged-in users redirect once auth resolves.
+  if (path === '/' && (!authLoaded || !user)) return <LandingPage />;
 
   // Prevent logged in users from seeing the landing page if they try to access '/'
   if (path === '/' && user && onboardingComplete) return <Navigate to="/dashboard" replace />;
@@ -165,7 +172,9 @@ export default function App() {
   // Also don't block public app routes on settings fetch for signed-in users.
   const publicAppRoutes = ['/patterns', '/library', '/syntax'];
   const isPublicAppRoute = publicAppRoutes.some(r => path === r || path.startsWith(`${r}/`));
-  const showLoading = !authLoaded || (user && settingsLoading && !settingsError && !isPublicAppRoute);
+  const showLoading =
+    !bootTimedOut &&
+    (!authLoaded || (user && settingsLoading && !settingsError && !isPublicAppRoute));
 
   if (showLoading) {
     return (
@@ -174,8 +183,9 @@ export default function App() {
           <div className="p-4 bg-zinc-900 rounded-full border border-zinc-800 shadow-lg shadow-emerald-500/10">
             <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={40} />
           </div>
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <h1 className="text-xl font-bold font-mono tracking-tight text-zinc-50">LC Tracker</h1>
+            <p className="text-sm text-zinc-500">Loading your workspace…</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

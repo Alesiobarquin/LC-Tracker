@@ -36,6 +36,10 @@ export const TimerPage: React.FC = () => {
 
   const problem = problemMap[targetProblemId];
   if (!problem) {
+    // Clear orphaned persisted sessions so refresh doesn't loop on a blank timer.
+    if (activeSession?.problemId === targetProblemId) {
+      useStore.getState().abandonSession();
+    }
     return <Navigate to="/library" replace />;
   }
 

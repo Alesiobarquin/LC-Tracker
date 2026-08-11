@@ -409,9 +409,10 @@ export let allProblems: Problem[] = [...problems];
 
 export let extendedCatalogProblems: Problem[] = [];
 
-function rebuildProblemMap() {
-  for (const key of Object.keys(problemMap)) delete problemMap[key];
-  for (const problem of allProblems) problemMap[problem.id] = problem;
+function rebuildProblemMap(extra: Problem[] = []) {
+  for (const problem of [...problems, ...extra]) {
+    problemMap[problem.id] = problem;
+  }
 }
 
 /** Lazily load the extended LeetCode catalog (large JSON) into `allProblems` / `problemMap`. */
@@ -423,7 +424,8 @@ export async function ensureExtendedCatalogLoaded(): Promise<Problem[]> {
       extendedCatalogCache = rows;
       extendedCatalogProblems = rows;
       allProblems = [...problems, ...rows];
-      rebuildProblemMap();
+      // Merge only — never wipe the map (a wipe can blank the UI mid-session).
+      rebuildProblemMap(rows);
       return rows;
     });
   }
@@ -473,8 +475,3 @@ export const problemMap: Record<string, Problem> = problems.reduce((acc, problem
   acc[problem.id] = problem;
   return acc;
 }, {} as Record<string, Problem>);
-
-// Kick off catalog hydration in the background so Full Catalog / EXTENDED curriculum warm up quickly.
-void ensureExtendedCatalogLoaded().catch(() => {
-  /* ignore — callers can retry via ensureExtendedCatalogLoaded */
-});

@@ -495,7 +495,24 @@ export const Dashboard: React.FC = () => {
   // ── Active Session Handling ───────────────────────────────────────────────
   if (activeSession) {
     const problem = problemMap[activeSession.problemId];
-    if (!problem) return null;
+    if (!problem) {
+      // Orphaned / pre-catalog session — clear it instead of rendering a blank page.
+      return (
+        <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 text-center px-6">
+          <p className="text-zinc-200 font-semibold">Couldn’t restore your last timer session.</p>
+          <p className="text-sm text-zinc-500 max-w-md">
+            The problem is missing from the local catalog. Discard the session to return to today’s plan.
+          </p>
+          <button
+            type="button"
+            onClick={() => useStore.getState().abandonSession()}
+            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm"
+          >
+            Discard session
+          </button>
+        </div>
+      );
+    }
     return (
       <TimerComp
         problem={problem}

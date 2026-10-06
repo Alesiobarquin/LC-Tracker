@@ -12,7 +12,11 @@ import { ReferenceCode } from "./ReferenceCode";
 export function ExplanationText({ children }: { children: string }) {
   return (
     <div className="explanation-prose">
-      <ReactMarkdown>{children}</ReactMarkdown>
+      <ReactMarkdown
+        components={{ ul: ({ children }) => <ul role="list">{children}</ul> }}
+      >
+        {children}
+      </ReactMarkdown>
     </div>
   );
 }
@@ -122,13 +126,23 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
   const [reasoning, pitfalls] = reference.explanation.split(
     "\n\n### Things to watch for\n\n",
   );
+  const sections = reasoning.split(/(?=^### )/m).filter((text) => text.trim());
   return (
     <div className="problem-explanation space-y-5">
       <div>
         <p className="register-label">Built-in explanation</p>
-        <h3 className="text-lg text-foreground mt-2">{reference.approach}</h3>
+        <h3 className="explanation-approach">{reference.approach}</h3>
       </div>
-      <ExplanationText>{reasoning}</ExplanationText>
+      <div className="explanation-sections">
+        {sections.map((text, index) => (
+          <section
+            key={index}
+            className={`explanation-section${text.startsWith("### Complexity\n") ? " explanation-complexity" : ""}`}
+          >
+            <ExplanationText>{text}</ExplanationText>
+          </section>
+        ))}
+      </div>
       <div className="flex flex-wrap justify-between items-center gap-3">
         <h3 className="text-sm font-semibold text-foreground">Code example</h3>
         <label className="text-sm text-muted flex items-center gap-2">

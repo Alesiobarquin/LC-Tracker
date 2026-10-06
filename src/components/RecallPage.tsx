@@ -15,7 +15,11 @@ import {
   hasProblemReference,
   type ReferenceLanguage,
 } from "../data/problemReferences";
-import { ProblemExplanation, ExplanationLinks } from "./ProblemExplanation";
+import {
+  ProblemExplanation,
+  ExplanationLinks,
+  ProblemExplanationFootnote,
+} from "./ProblemExplanation";
 import { ReferenceCode } from "./ReferenceCode";
 import {
   parsePersonalExplanation,
@@ -570,11 +574,6 @@ export function RecallPage() {
             </details>
           )}
           <ExplanationLinks problem={problem} />
-          <p className="text-sm text-muted">
-            Check the approach, correctness argument, complexity, and edge
-            cases. This is a self-check; the app does not automatically grade
-            your answer.
-          </p>
           {!compared && (
             <div className="comparison-next space-y-3">
               <p className="text-sm text-body">
@@ -652,6 +651,9 @@ export function RecallPage() {
             Recall success never counts as an independent coding pass.
           </p>
         </section>
+      )}
+      {draft.revealed && draft.checkedAgainst === "solution" && (
+        <ProblemExplanationFootnote problem={problem} />
       )}
     </div>
   );

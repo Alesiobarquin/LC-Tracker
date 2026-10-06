@@ -86,7 +86,9 @@ transaction commits. Imported ownership and version metadata are ignored.
 ## Monitoring
 
 `/api/health` makes bounded, read-only checks of Supabase REST and Clerk's public
-JWKS endpoint. It returns provider status flags, never credentials or user rows.
+JWKS endpoint. The database probe selects zero rows from `problem_progress`;
+Supabase can deny API schema discovery to public keys even when table reads work.
+It returns provider status flags, never credentials or user rows.
 A healthy response does not prove authenticated RLS, applied migration versions,
 Realtime publication, or database backups. Vercel functions have a 15-second budget;
 individual external requests have shorter deadlines.
@@ -108,10 +110,41 @@ PostgreSQL, browser, build, and audit checks. Dependabot opens weekly dependency
 updates. Review major upgrades with sign-in, save/retry, and backup verification;
 do not force updates past failed build or browser checks.
 
-## Production access at the time of this change
+## CLI access and staging
 
-The local Vercel credential was invalid. Only browser Supabase keys were available;
-no database administrator credential was configured. No production migrations,
-deployments, provider alert settings, or branch-protection changes were performed.
-This commit is prepared for release; the service-dependent steps above still need
-working account access. Do not describe local or mocked tests as production checks.
+The production project is Vercel `lc-tracker`, project ID
+`prj_1wLEIfzof3VCsOGMZEAsgVLMBpOB`, serving `lc-tracker.app`. Confirm the linked
+project with `vercel project inspect lc-tracker` before deploying. Check access
+with `vercel whoami` and `gh auth status`. Pull production configuration to a
+private temporary file, not to a tracked file:
+
+```sh
+vercel env pull /private/tmp/lc-tracker-production.env --environment=production --yes
+```
+
+For Supabase administration, run `npx --yes supabase@2.119.0 login --agent no`.
+Complete its browser login and enter the verification code in that terminal.
+The explicit agent flag allows the interactive login rather than machine output.
+Do not paste access tokens into chat or commit them. A scoped personal access
+token saved with `supabase login --token` is another option; grant only the
+project permissions needed for database inspection, backup, and migration.
+The production Supabase project reference is `blqlgtwmigajizcfldiv`; compare it
+with the URL pulled from Vercel before any database mutation.
+
+To build a production-configured deployment without switching the live domains:
+
+```sh
+vercel deploy --prod --skip-domain --yes
+vercel curl /api/health --deployment <deployment-url>
+```
+
+`vercel curl` handles protected deployment access. Staging a deployment does not
+apply migrations or authorize promotion past missing schema. Apply the migration
+and verify it first, then use `vercel promote <deployment-url>` to switch domains.
+Public browser checks should run against the custom domain after promotion.
+
+On October 6, 2026, the custom domain was live on the August 11 deployment of
+`c08b6cc`, and all six public browser smoke checks passed. The required revision
+columns were absent and `/api/health` returned 404. Vercel and GitHub CLI access
+worked; Supabase administrator login was still required. These public checks do
+not establish authenticated saves or database recovery.

@@ -2,7 +2,7 @@
 
 ## Local setup and checks
 
-Use Node.js 22.12+ (24 is also supported), `npm ci`, and a local `.env` copied from
+Use Node.js 24, `npm ci`, and a local `.env` copied from
 `.env.example`. Clerk and Supabase browser values are public configuration, but
 service-role keys and database passwords must never have a `VITE_` prefix.
 Start the app with `npm run dev`.
@@ -148,3 +148,11 @@ On October 6, 2026, the custom domain was live on the August 11 deployment of
 columns were absent and `/api/health` returned 404. Vercel and GitHub CLI access
 worked; Supabase administrator login was still required. These public checks do
 not establish authenticated saves or database recovery.
+
+The reliability release is staged on Vercel with a healthy readiness response.
+GitHub's complete reliability workflow passed on release commit `f7a19f8`.
+Branch protection requires the GitHub Actions `verify` check, including for
+administrators, and prevents force pushes and branch deletion. Keep the release
+PR unmerged until the database prerequisites are satisfied: merging `main`
+triggers Vercel production deployment. The runtime is pinned to Node.js 24 so
+Vercel will not silently select a future major release.

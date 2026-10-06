@@ -35,6 +35,7 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
 ## Verification
 
 Run `npm run lint`, `npm test`, and `npm run build` for application changes.
+Use Node.js 24, matching CI and the pinned Vercel runtime.
 For persistence changes also run `npm run test:db` (PostgreSQL binaries on PATH)
 and `npm run test:e2e`. Database tests create and remove an isolated local cluster;
 they never load production credentials. The repository skill at
@@ -47,6 +48,12 @@ Use `PLAYWRIGHT_BASE_URL` only for public smoke checks against a deployment.
 Keep `.env*`, tokens, screenshots containing personal data, and database exports
 out of commits. Optional Sentry reporting strips messages, requests, and user
 information; preserve that behavior when extending telemetry.
+
+For a release, confirm the linked Vercel project is `lc-tracker`. Stage with
+`vercel deploy --prod --skip-domain --yes` and check the protected deployment
+with `vercel curl`. Keep the release PR unmerged until required migrations are
+verified; merging `main` triggers production deployment. The GitHub Actions
+`verify` check is required by branch protection.
 
 ## Personal project presentation
 

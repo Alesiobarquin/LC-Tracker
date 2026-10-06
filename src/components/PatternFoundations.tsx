@@ -1,3 +1,4 @@
+import { getLearningStatus, LEARNING_STATUS_LABELS } from '../utils/study';
 import { preferenceStorage } from '../lib/safeStorage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
@@ -180,7 +181,7 @@ const PatternList: React.FC<{
         title="Pattern Mastery"
         description={
           <>
-            Learn recognition cues, walk a worked example, then practice until problems are truly retired.
+            Learn recognition cues, walk a worked example, then test recall, implementation, and transfer across spaced attempts.
             Mastery means repeated strong recall — not a one-time checkbox.
           </>
         }
@@ -210,7 +211,7 @@ const PatternList: React.FC<{
           <div className="space-y-1">
             <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-400/80 font-bold">Roadmap progress</p>
             <p className="text-sm text-zinc-200">
-              {masteredCount} / {visiblePatternData.length} patterns mastered · {masteredProblems} / {totalProblems} problems retired
+              {masteredCount} / {visiblePatternData.length} patterns established · {masteredProblems} / {totalProblems} dependable problems
             </p>
             <p className="text-xs text-zinc-500">{dueCount} review{dueCount === 1 ? '' : 's'} currently due across this track</p>
           </div>
@@ -366,7 +367,7 @@ const PatternList: React.FC<{
                                 Mastery
                               </span>
                               <span className="font-semibold text-zinc-200">
-                                {pattern.masteredCount} / {pattern.problemsCount} retired
+                                {pattern.masteredCount} / {pattern.problemsCount} dependable
                               </span>
                             </div>
                             <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/55">
@@ -471,7 +472,7 @@ const PatternDetail: React.FC<{
             const isSolved = !!prog;
             const tone = getProblemStatusTone({
               isSolved,
-              isRetired: prog?.retired,
+              isRetired: getLearningStatus(prog) === 'maintenance',
               lastRating: prog?.history?.[prog.history.length - 1]?.rating,
             });
             return (
@@ -491,7 +492,7 @@ const PatternDetail: React.FC<{
                   </button>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-zinc-100 truncate">{prob.title}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{getProblemStatusLabel(tone)}</p>
+                    <p className="text-xs text-zinc-500 mt-1">{LEARNING_STATUS_LABELS[getLearningStatus(prog)]}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:justify-end">
@@ -544,7 +545,7 @@ const PatternDetail: React.FC<{
       <header className="space-y-4">
         <div className="flex flex-wrap gap-2">
           <Badge>{lesson.stage}</Badge>
-          <Badge tone="success">{pattern.masteredCount}/{pattern.problemsCount} mastered</Badge>
+          <Badge tone="success">{pattern.masteredCount}/{pattern.problemsCount} dependable</Badge>
           <Badge tone={pattern.dueCount ? 'warning' : 'neutral'}>{pattern.dueCount} due</Badge>
         </div>
         <h1 className="text-4xl sm:text-5xl font-black text-zinc-100 tracking-tight leading-tight">

@@ -270,7 +270,7 @@ const StepPlan: React.FC<{
         </div>
         <div className="space-y-4">
             <label className="block space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Interview date</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Interview date (optional)</span>
                 <input
                     type="date"
                     value={state.targetInterviewDate}
@@ -278,6 +278,7 @@ const StepPlan: React.FC<{
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
                 />
             </label>
+            <p className="text-xs text-zinc-500">Leave the date blank if no interview is scheduled. You can add it later.</p>
             <div className="space-y-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Target curriculum</span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -350,7 +351,7 @@ const StepLaunch: React.FC<{
                 </div>
                 <h2 className="text-2xl font-bold text-zinc-50">You&apos;re ready</h2>
                 <p className="text-zinc-400 text-sm mt-1">
-                    First-week focus: {state.targetCurriculum.replaceAll('_', ' ')} with about {state.weekdayMinutes} weekday minutes, aiming for {state.targetInterviewDate}.
+                    First-week focus: {state.targetCurriculum.replaceAll('_', ' ')} with about {state.weekdayMinutes} weekday minutes, {state.targetInterviewDate ? `with an interview target of ${state.targetInterviewDate}` : 'with no interview scheduled'}.
                 </p>
             </div>
 
@@ -412,17 +413,12 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
     const [isLaunching, setIsLaunching] = useState(false);
     const [launchError, setLaunchError] = useState<string | null>(null);
 
-    const defaultDate = (() => {
-        const d = new Date();
-        d.setMonth(d.getMonth() + 3);
-        return d.toISOString().slice(0, 10);
-    })();
 
     const [obState, setObState] = useState<OnboardingState>(() => {
         const defaults: OnboardingState = {
             leetcodeUsername: '',
             learningMode: 'CURRICULUM',
-            targetInterviewDate: defaultDate,
+            targetInterviewDate: '',
             targetCurriculum: 'NEET_75',
             weekdayMinutes: 60,
         };

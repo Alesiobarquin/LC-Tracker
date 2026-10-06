@@ -43,7 +43,8 @@ These public checks do not perform a real sign-in or authenticated database writ
    Clerk-ID/RLS, and session-rating migrations, then apply
    `supabase/migrations/20261006000000_reliable_user_writes.sql` and
    `supabase/migrations/20261006000001_clerk_feedback_storage.sql`, followed by
-   `supabase/migrations/20261006000002_postgrest_conflict_status.sql`, with the
+   `supabase/migrations/20261006000002_postgrest_conflict_status.sql`, then
+   `supabase/migrations/20261006000003_study_evidence.sql`, with the
    authenticated database administration tool for the correct project. Do not run
    the historical migrations blindly on an unknown production schema.
 3. Confirm `version` exists on settings, progress, and sprint state; the
@@ -52,6 +53,9 @@ These public checks do not perform a real sign-in or authenticated database writ
    reliability migration sets these up. Its functions are SECURITY INVOKER and
    retain RLS. Feedback image upload/delete policies must use the Clerk subject
    for the first path folder and apply only to the authenticated role.
+   The study migration adds nullable `problem_progress.study_state` and recall
+   operations. Confirm that an older payload omitting this column preserves it.
+   Run the study SQL suite in a rolled-back transaction before the client release.
 4. Configure Vercel production and preview environment variables from `.env.example`.
    Clerk's publishable key, allowed origins, OAuth callbacks, and Supabase third-party
    integration must refer to the same Clerk instance. JWTs need the authenticated
@@ -93,8 +97,10 @@ transaction commits. Imported ownership and version metadata are ignored.
 For a PostgreSQL custom-format archive, `npm run verify:backup -- <archive-path>`
 creates an isolated local cluster using PostgreSQL binaries on PATH (17+ for the
 current hosted database). It restores `auth`, `storage`, and `public`, compares
-application row counts and checksums before/after the reliability migrations,
-and runs the persistence suite inside a rolled-back transaction. It never connects
+application row counts and checksums before/after the reliability and study migrations,
+and runs both persistence suites inside a rolled-back transaction. The recovery
+cluster creates the Realtime publication before restoring table attachments.
+It never connects
 to production. Platform ownership/grants are skipped and the Supabase outbound
 webhook function is disabled. This checks application recovery; it does not restore
 the Supabase platform, test notification delivery, or include stored image bytes.

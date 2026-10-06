@@ -41,6 +41,30 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   migrations to repair an already deployed database. Apply required migrations
   before releasing dependent browser code.
 
+## Learning behavior
+
+- `src/utils/study.ts` owns the shared daily budget, mixed recall queue, coding
+  blocks, interval updates, and evidence labels. Read `docs/study-strategy.md`
+  before changing learning semantics. The repo skill at
+  `.agents/skills/lc-tracker-study/SKILL.md` covers this repeatable workflow.
+- Recall and implementation are distinct. Recall success never counts as a
+  coding pass or postpones the coding check. Same-day/daily rehearsal cannot
+  establish delayed retention; outcomes include correctness, assistance, and
+  explanation rather than confidence alone.
+- New imports have unknown current confidence. Preserve legacy ratings and
+  retirement flags as historical data; do not rewrite their meanings during
+  reads. Maintenance remains eligible for practice.
+- Deduplicate all task kinds and subtract today's recorded and active time and used recall
+  allocation. Respect rest days and inclusive blackout ranges. Long coding
+  attempts may span time-bounded blocks; support unfinished continuation.
+- Preserve a pending session when another problem is opened. Session starts must
+  not replace coding or recall drafts; redirect to the active session instead.
+- Keep numeric study defaults distinct from scientific evidence. Never describe
+  a self-reported rating as a calibrated probability or interview prediction.
+- The study-state migration must precede the dependent client release. Extend
+  `supabase/tests/study.sql`, service/backup checks, and `e2e/study.spec.ts` when
+  changing recall persistence or the completion flow.
+
 ## Verification
 
 Run `npm run lint`, `npm test`, and `npm run build` for application changes.

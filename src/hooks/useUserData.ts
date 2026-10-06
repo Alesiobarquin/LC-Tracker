@@ -17,7 +17,7 @@ import { advanceSprintState, buildDailyPlan, calculateSessionAggregates, calcula
   setSprintCategoryState, SPRINT_DESCRIPTIONS } from '../utils/progressHelpers';
 import { fetchUserSettings, fetchProblemProgress, fetchActivityLog, fetchSessionTimings, fetchSprintState,
   saveUserSettings, saveProblemSession, saveSprint, importSubmissions, removeProblemProgress,
-  restoreUserBackup, exportBackup, type SaveProblemInput, type SprintData } from '../services/userData';
+  restoreUserBackup, exportBackup, saveRecallSession, type SaveRecallInput, type SaveProblemInput, type SprintData } from '../services/userData';
 
 export { userDataQueryKeys } from '../lib/userDataQueryKeys';
 export { fetchSessionTimingsBefore, getSessionTimingsWindowStartIso } from '../services/userData';
@@ -65,28 +65,12 @@ export function useUserSettings() {
         const targetEvents = [...current.targetEvents, newEvent].sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
-        const today = new Date().toISOString().split('T')[0];
-        const nextEvent = targetEvents.find((item) => item.date >= today);
-        return {
-          ...current,
-          targetEvents,
-          targetInterviewDate: nextEvent ? nextEvent.date : current.targetInterviewDate,
-        };
+        return { ...current, targetEvents };
       }),
     removeTargetEvent: (id: string) =>
       updateUserSettings((current) => {
         const targetEvents = current.targetEvents.filter((item) => item.id !== id);
-        const today = new Date().toISOString().split('T')[0];
-        const nextEvent = targetEvents.find((item) => item.date >= today);
-        return {
-          ...current,
-          targetEvents,
-          targetInterviewDate: nextEvent
-            ? nextEvent.date
-            : targetEvents.length > 0
-              ? targetEvents[targetEvents.length - 1].date
-              : current.targetInterviewDate,
-        };
+        return { ...current, targetEvents };
       }),
     setDayMode: (mode: UserSettingsData['dayMode']['type']) =>
       updateUserSettings((current) => ({
@@ -150,6 +134,13 @@ export function useProblemProgress() {
     },
     onSettled: () => userId ? refreshUserData(userId) : undefined,
   });
+  const recallMutation = useMutation({
+    mutationFn: (input: SaveRecallInput) => {
+      if (!userId) throw new Error('No authenticated user');
+      return saveRecallSession(userId, input);
+    },
+    onSettled: () => userId ? refreshUserData(userId) : undefined,
+  });
   const removeMutation = useMutation({
     mutationFn: (problemId: string) => {
       if (!userId) throw new Error('No authenticated user');
@@ -162,6 +153,7 @@ export function useProblemProgress() {
   return {
     data: progress, progress, isLoading: query.isLoading, isSuccess: query.isSuccess,
     error: query.error, refetch: query.refetch, ...momentum,
+    saveRecall: (input: SaveRecallInput) => observeMutation(recallMutation.mutateAsync(input)),
     saveSession: (input: SaveProblemInput) => observeMutation(mutation.mutateAsync(input)),
     logProblem: (problemId: string, rating: ProblemSessionRating, _isNew: boolean, notes?: string,
       additionalData?: Record<string, unknown>) => observeMutation(mutation.mutateAsync({

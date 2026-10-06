@@ -108,7 +108,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1.5 mt-1">
-                        <p className="text-[11px] text-red-400 text-center font-medium">Abandon? No data will be saved.</p>
+                        <p className="text-[11px] text-red-400 text-center font-medium">Clear the local session? A save already sent may have completed.</p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => { abandonSession(); setConfirmAbandon(false); }}

@@ -53,8 +53,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isAdmin = isAdminUser(user);
   const { targetInterviewDate, targetEvents } = useUserSettings();
   const daysUntilInterview = differenceInDays(new Date(targetInterviewDate), new Date());
-  const phase = getPhase();
-  const phaseProgress = phase === 1 ? 'Phase 1 (Foundations)' : phase === 2 ? 'Phase 2 (Internship)' : 'Phase 3 (Grind)';
+  const phase = getPhase(new Date(), targetInterviewDate);
+  const phaseProgress = phase === 1 ? 'Build pattern coverage' : phase === 2 ? 'Practice integration' : 'Independent interview practice';
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -236,7 +236,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span>Next Target</span>
               </div>
               <div className="text-lg font-semibold text-zinc-100">
-                {daysUntilInterview > 0 ? `${daysUntilInterview} days` : 'It\'s time!'}
+                {Number.isFinite(daysUntilInterview) && daysUntilInterview >= 0 ? `${daysUntilInterview} days` : 'No upcoming interview'}
               </div>
               <div className="text-xs text-emerald-400/80 mt-1">
                 {phaseProgress}
@@ -260,7 +260,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="relative pl-3 space-y-3 before:absolute before:inset-y-2 before:left-[5px] before:w-[2px] before:bg-zinc-800">
                 {targetEvents.map((event) => {
                   const isNext = event.date === targetInterviewDate;
-                  const isPast = new Date(event.date) < new Date(targetInterviewDate);
+                  const isPast = event.date < new Date().toISOString().slice(0, 10);
                   return (
                     <div key={event.id} className="relative">
                       <div className={clsx(

@@ -1,3 +1,4 @@
+import { getLearningStatus, getStudyState, LEARNING_STATUS_LABELS } from '../utils/study';
 import { preferenceStorage } from '../lib/safeStorage';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { problems, allProblems, problemMap, isProblemPremium, Category, Difficulty, ensureExtendedCatalogLoaded } from '../data/problems';
@@ -213,8 +214,8 @@ export const ProblemLibrary: React.FC = () => {
       const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'unsolved' && !prog) ||
-        (statusFilter === 'rotation' && !!prog && !prog.retired) ||
-        (statusFilter === 'retired' && !!prog?.retired);
+        (statusFilter === 'rotation' && !!prog && getLearningStatus(prog) !== 'maintenance') ||
+        (statusFilter === 'retired' && getLearningStatus(prog) === 'maintenance');
 
       const isPremium = isProblemPremium(p);
       const matchesPremium =
@@ -224,10 +225,10 @@ export const ProblemLibrary: React.FC = () => {
 
       let matchesView = true;
       if (savedView === 'due') {
-        matchesView = !!prog && !prog.retired && isDueToday(prog.nextReviewAt);
+        matchesView = !!prog && (isDueToday(getStudyState(prog).nextRecallAt) || isDueToday(getStudyState(prog).nextCodingAt));
       } else if (savedView === 'weak') {
         const lastRating = prog?.history[prog.history.length - 1]?.rating;
-        matchesView = !!prog && (lastRating === 1 || lastRating === 2);
+        matchesView = !!prog && (getLearningStatus(prog) === 'relearning' || lastRating === 1 || lastRating === 2);
       } else if (savedView === 'essentials') {
         matchesView = !!p.isNeetCode75 && !prog;
       } else if (savedView === 'recent') {
@@ -254,8 +255,8 @@ export const ProblemLibrary: React.FC = () => {
         if (sortConfig.key === 'status') {
           const aProg = progress[a.id];
           const bProg = progress[b.id];
-          aValue = aProg ? (aProg.retired ? 2 : 1) : 0;
-          bValue = bProg ? (bProg.retired ? 2 : 1) : 0;
+          aValue = aProg ? (getLearningStatus(aProg) === 'maintenance' ? 2 : 1) : 0;
+          bValue = bProg ? (getLearningStatus(bProg) === 'maintenance' ? 2 : 1) : 0;
         } else if (sortConfig.key === 'difficulty') {
           aValue = difficultyOrder[a.difficulty];
           bValue = difficultyOrder[b.difficulty];
@@ -534,7 +535,7 @@ export const ProblemLibrary: React.FC = () => {
               <option value="all">All statuses</option>
               <option value="unsolved">Unsolved</option>
               <option value="rotation">In rotation</option>
-              <option value="retired">Retired</option>
+              <option value="retired">Maintenance</option>
             </select>
             <select
               value={premiumFilter}
@@ -571,7 +572,7 @@ export const ProblemLibrary: React.FC = () => {
         <span className="uppercase tracking-wider text-zinc-500">Status key</span>
         <span className="inline-flex items-center gap-1.5">
           <CircleCheck size={13} className="text-emerald-500" />
-          Mastered (retired)
+          Maintenance
         </span>
         <span className="inline-flex items-center gap-1.5">
           <CircleCheck size={13} className="text-amber-500" />
@@ -592,7 +593,7 @@ export const ProblemLibrary: React.FC = () => {
           <div>
             <p className="text-sm text-emerald-300 font-medium">Mark as previously solved?</p>
             <p className="text-xs text-zinc-300 mt-1">
-              This imports a solve without a timed session. Choose an honest confidence rating so spaced repetition stays accurate.
+              Record your prior solve and an honest self-rating. A recall check and independent coding attempts will assess current ability.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -730,18 +731,18 @@ export const ProblemLibrary: React.FC = () => {
                       {problems.map(prob => {
                         const prog = progress[prob.id];
                         const isSolved = !!prog;
-                        const isRetired = prog?.retired;
+                        const isRetired = getLearningStatus(prog) === 'maintenance';
                         const lastRating = prog && prog.history.length > 0
                           ? prog.history[prog.history.length - 1].rating
                           : undefined;
-                        const needsWork = isSolved && !isRetired && lastRating === 1;
+                        const needsWork = getLearningStatus(prog) === 'relearning';
                         const isPremium = isProblemPremium(prob);
                         const statusTitle = isRetired
-                          ? 'Mastered (retired) — mark as unsolved'
+                          ? 'Maintenance — mark as unsolved'
                           : needsWork
                             ? 'Solved but struggling (last rating 1) — mark as unsolved'
                             : isSolved
-                            ? 'Solved (active queue) — mark as unsolved'
+                            ? `${LEARNING_STATUS_LABELS[getLearningStatus(prog)]} — mark as unsolved`
                             : 'Mark as solved';
                         
                         return (
@@ -799,6 +800,7 @@ export const ProblemLibrary: React.FC = () => {
                                   <ExternalLink size={14} className="shrink-0" />
                                   <span className="hidden sm:inline">LeetCode</span>
                                 </a>
+                                {isSolved && user && <button type="button" onClick={() => navigate(`/recall/${prob.id}`)} className="px-2.5 py-1.5 rounded-lg border border-zinc-700 text-xs text-emerald-400" aria-label={`Recall ${prob.title}`}>Recall</button>}
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}

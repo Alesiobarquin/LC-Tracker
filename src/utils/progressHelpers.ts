@@ -7,7 +7,8 @@ import {
   startOfDay,
   subDays,
 } from 'date-fns';
-import { getNextReviewDate, getPhase, isDueToday } from './dateUtils';
+import { getNextReviewDate } from './dateUtils';
+import { buildStudyPlan, getLearningStatus, getPatternEvidence, scheduleCoding } from './study';
 import {
   PHASE_1_CATEGORIES,
   PHASE_2_CATEGORIES,
@@ -278,30 +279,24 @@ export function computeNewProblemProgress(
   additionalHistoryData: Record<string, unknown> | undefined,
   srAggressiveness: AppSettings['srAggressiveness']
 ): ProblemProgress {
-  const today = startOfDay(new Date());
-  const todayStr = today.toISOString();
-  const prob = problemMap[problemId];
-  const isFirstRating = !existing || existing.history.length === 0;
-  const consecutiveThrees = rating >= 4 ? (existing?.consecutiveThrees || 0) + 1 : 0;
-  const prevSuccesses = existing?.consecutiveSuccesses || 0;
-  const consecutiveSuccesses = rating >= 3 ? prevSuccesses + 1 : 0;
-  const difficulty = prob?.difficulty || 'Medium';
-  const retireThreshold = difficulty === 'Easy' ? 2 : difficulty === 'Hard' ? 6 : 4;
-  const retired = consecutiveSuccesses >= retireThreshold && consecutiveThrees >= 2;
-  const reviewCount = isFirstRating ? 0 : existing ? existing.reviewCount + 1 : 0;
-  const nextReviewAt = getNextReviewDate(rating, consecutiveSuccesses, srAggressiveness, difficulty, false).toISOString();
-
-  return {
-    firstSolvedAt: existing ? existing.firstSolvedAt : todayStr,
-    lastReviewedAt: todayStr,
-    nextReviewAt,
-    reviewCount,
-    history: [...(existing?.history || []), { date: todayStr, rating, ...additionalHistoryData }],
-    retired,
-    consecutiveThrees,
-    consecutiveSuccesses,
+  const now = new Date(typeof additionalHistoryData?.date === 'string' ? additionalHistoryData.date : Date.now());
+  const date = now.toISOString();
+  const history = [...(existing?.history ?? []), { ...additionalHistoryData, date, rating }];
+  const next: ProblemProgress = {
+    ...existing,
+    firstSolvedAt: existing?.firstSolvedAt ?? date,
+    lastReviewedAt: date,
+    nextReviewAt: date,
+    reviewCount: existing ? existing.reviewCount + 1 : 0,
+    history, retired: false,
+    consecutiveThrees: rating >= 4 ? (existing?.consecutiveThrees ?? 0) + 1 : 0,
+    consecutiveSuccesses: rating >= 3 ? (existing?.consecutiveSuccesses ?? 0) + 1 : 0,
     notes: notes !== undefined ? notes : existing?.notes,
   };
+  void isNew;
+  next.studyState = scheduleCoding(next, problemId, history.at(-1)?.codingOutcome, rating, srAggressiveness, now);
+  next.nextReviewAt = new Date(Math.min(Date.parse(next.studyState.nextRecallAt), Date.parse(next.studyState.nextCodingAt))).toISOString();
+  return next;
 }
 
 export function computeUpdatedActivityEntry(
@@ -631,24 +626,17 @@ export function applyLeetCodeSubmissions(
     if (existsInLibrary && !nextProgress[problemId]) {
       const solveDate = new Date(parseInt(sub.timestamp, 10) * 1000);
       const solveDateStr = solveDate.toISOString();
-      const prob = problemMap[problemId];
-      const difficulty = prob?.difficulty ?? 'Medium';
-      // Compute the first-success interval from the actual solve date so old
-      // imports surface as overdue today rather than being pushed into the future.
-      const diffMultiplier = difficulty === 'Easy' ? 2.5 : difficulty === 'Medium' ? 1.0 : 0.7;
-      const intervalDays = Math.round(4 * diffMultiplier); // consecutiveSuccesses=1, assumed strong first pass (rating 4)
-      const nextReview = startOfDay(new Date(solveDate));
-      nextReview.setDate(nextReview.getDate() + intervalDays);
-
+      const assessmentDate = startOfDay(new Date()).toISOString();
       nextProgress[problemId] = {
-        firstSolvedAt: solveDateStr,
-        lastReviewedAt: solveDateStr,
-        nextReviewAt: nextReview.toISOString(),
-        reviewCount: 0,
-        history: [{ date: solveDateStr, rating: 4 }],
-        retired: false,
-        consecutiveThrees: 1,
-        consecutiveSuccesses: 1,
+        firstSolvedAt: solveDateStr, lastReviewedAt: solveDateStr,
+        nextReviewAt: assessmentDate, reviewCount: 0, history: [],
+        retired: false, consecutiveThrees: 0, consecutiveSuccesses: 0,
+        studyState: {
+          version: 1, source: 'leetcode_import', recallIntervalDays: 3, codingIntervalDays: 7,
+          nextRecallAt: assessmentDate,
+          nextCodingAt: addDays(startOfDay(new Date()), 7).toISOString(),
+          lapses: 0, recallHistory: [],
+        },
       };
       pulledCount += 1;
     }
@@ -657,377 +645,17 @@ export function applyLeetCodeSubmissions(
   return { progress: nextProgress, pulledCount };
 }
 
-const MIN_TIMING_DATA_POINTS = 3;
-
-/**
- * Compute how many reviews fit in the remaining time budget after reserving
- * time for the new problem, additional problems, cold solve and syntax cards.
- * Exported so the Dashboard can re-run it reactively when the user skips.
- */
-export function computeReviewProblems(params: {
-  allDueReviewIds: string[];
-  newProblemId: string | null;
-  additionalProblemIds: string[];
-  coldSolveProblemId: string | null;
-  dueSyntaxCardCount: number;
-  settings: AppSettings;
-  categoryAvgSolveTimes?: Record<string, { totalSeconds: number; count: number }>;
-  categoryAvgReviewTimes?: Record<string, { totalSeconds: number; count: number }>;
-}): string[] {
-  const {
-    allDueReviewIds, newProblemId, additionalProblemIds, coldSolveProblemId,
-    dueSyntaxCardCount, settings, categoryAvgSolveTimes, categoryAvgReviewTimes,
-  } = params;
-
-  const getSolveMins = (id: string): number => {
-    const prob = problemMap[id];
-    if (!prob) return 22;
-    const data = categoryAvgSolveTimes?.[prob.category];
-    if (data && data.count >= MIN_TIMING_DATA_POINTS) {
-      return Math.max(1, Math.round(data.totalSeconds / data.count / 60));
-    }
-    return getEstimatedMinutesByDifficulty(prob.difficulty, true);
-  };
-
-  const getReviewMins = (id: string): number => {
-    const prob = problemMap[id];
-    if (!prob) return 12;
-    const data = categoryAvgReviewTimes?.[prob.category];
-    if (data && data.count >= MIN_TIMING_DATA_POINTS) {
-      return Math.max(1, Math.round(data.totalSeconds / data.count / 60));
-    }
-    return getEstimatedMinutesByDifficulty(prob.difficulty, false);
-  };
-
-  const dayOfWeek = getDay(new Date());
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-  const availableMinutes = isWeekend
-    ? settings.studySchedule.weekendMinutes
-    : settings.studySchedule.weekdayMinutes;
-  const includePremium = settings.includePremiumInAssignments === true;
-
-  const reservedNew = newProblemId ? getSolveMins(newProblemId) : 0;
-  const reservedAdditional = additionalProblemIds.reduce((sum, id) => sum + getSolveMins(id), 0);
-  const reservedColdSolve = coldSolveProblemId ? getSolveMins(coldSolveProblemId) : 0;
-  const reservedSyntax = dueSyntaxCardCount * 3;
-
-  let budget = Math.max(
-    0,
-    availableMinutes - reservedNew - reservedAdditional - reservedColdSolve - reservedSyntax
-  );
-  const result: string[] = [];
-  for (const id of allDueReviewIds) {
-    const prob = problemMap[id];
-    if (!prob) continue;
-    if (!includePremium && isProblemPremium(prob)) continue;
-    const est = getReviewMins(id);
-    if (budget <= 0 && result.length >= 1) break;
-    result.push(id);
-    budget -= est;
-  }
-  return result;
-}
-
+/** Compatibility entry point; every task is now planned by one capacity allocator. */
 export function buildDailyPlan(params: {
-  progress: Record<string, ProblemProgress>;
-  syntaxProgress: Record<string, SyntaxProgress>;
-  settings: AppSettings;
-  catchUpPlan: CatchUpPlanState;
-  dayMode: DayModeState;
-  activityLog: ActivityLog;
-  sprintState: SprintState | null;
-  categoryStruggling: Record<string, boolean>;
+  progress: Record<string, ProblemProgress>; syntaxProgress: Record<string, SyntaxProgress>;
+  settings: AppSettings; catchUpPlan: CatchUpPlanState; dayMode: DayModeState;
+  activityLog: ActivityLog; sprintState: SprintState | null; categoryStruggling: Record<string, boolean>;
   categoryAvgSolveTimes?: Record<string, { totalSeconds: number; count: number }>;
   categoryAvgReviewTimes?: Record<string, { totalSeconds: number; count: number }>;
+  timings?: SessionTiming[]; targetInterviewDate?: string;
 }) {
-  const {
-    progress, syntaxProgress, settings, catchUpPlan, dayMode, activityLog,
-    sprintState, categoryStruggling,
-    categoryAvgSolveTimes, categoryAvgReviewTimes,
-  } = params;
-  const phase = getPhase();
-  const includePremium = settings.includePremiumInAssignments === true;
-  const problemById = new Map(allProblems.map((p) => [p.id, p] as const));
-  const targetPool = problemsPoolForTargetCurriculum(settings.targetCurriculum ?? 'NEET_75').filter(
-    (p) => includePremium || !isProblemPremium(p)
-  );
-  const sprintPoolOpts: SprintPoolOptions = {
-    alignPoolToTargetCurriculum: settings.sprintSettings?.alignPoolToTargetCurriculum,
-    targetCurriculum: settings.targetCurriculum ?? 'NEET_75',
-    includePremiumInAssignments: includePremium,
-  };
-  const today = new Date();
-  const dayOfWeek = getDay(today);
-
-  const allDueReviews = Object.entries(progress)
-    .filter(([id, prog]) => {
-      if (prog.retired || !isDueToday(prog.nextReviewAt)) return false;
-      const problem = problemById.get(id);
-      if (!problem) return false;
-      return includePremium || !isProblemPremium(problem);
-    })
-    .map(([id, prog]) => ({ id, prog }))
-    .sort((a, b) => {
-      // Primary: fewest consecutive successes first (weakest items reviewed first).
-      const successA = a.prog.consecutiveSuccesses || 0;
-      const successB = b.prog.consecutiveSuccesses || 0;
-      if (successA !== successB) return successA - successB;
-
-      // Secondary: most overdue first — items that have been waiting longest
-      // relative to their scheduled date get priority within the same tier.
-      return new Date(a.prog.nextReviewAt).getTime() - new Date(b.prog.nextReviewAt).getTime();
-    });
-
-  const totalDueReviews = allDueReviews.length;
-  // reviewProblems is computed after newProblem is known (see end of function).
-
-  const allDueSyntax = Object.entries(syntaxProgress || {})
-    .filter(([, prog]) => isDueToday(prog.nextReviewAt))
-    .sort((a, b) => a[1].confidenceRating - b[1].confidenceRating)
-    .map(([id]) => id);
-
-  const dueSyntaxCards = allDueSyntax.slice(0, 5);
-  const isEasyDay = dayMode.type === 'EASY' && dayMode.dateSet && isSameDay(today, new Date(dayMode.dateSet));
-  const isHardDay = dayMode.type === 'HARD' && dayMode.dateSet && isSameDay(today, new Date(dayMode.dateSet));
-
-  let coldSolveProblem: string | null = null;
-  if (!isEasyDay) {
-    const potentialColdSolves = Object.entries(progress)
-      .filter(([id, prog]) => {
-        if (prog.history.length === 0) return false;
-        const problem = problemById.get(id);
-        if (!problem) return false;
-        if (!includePremium && isProblemPremium(problem)) return false;
-        const daysSinceLastReview = differenceInDays(today, new Date(prog.lastReviewedAt));
-        return daysSinceLastReview > 30;
-      })
-      .sort((a, b) => new Date(a[1].lastReviewedAt).getTime() - new Date(b[1].lastReviewedAt).getTime())
-      .map(([id]) => id);
-
-    if (potentialColdSolves.length > 0) {
-      coldSolveProblem = potentialColdSolves[0];
-    }
-  }
-
-  let newProblem: string | null = null;
-  let additionalProblems: string[] = [];
-  let recommendationReason: string | undefined;
-  let isStabilizer = false;
-  let isRetro = false;
-  let sprintCategory: string | undefined;
-  let sprintDayInfo: { day: number; total: number } | undefined;
-
-  const solvedIds = new Set(Object.keys(progress));
-  const reservedIds = getReservedProblemIds();
-  let shouldAssignNewProblem = true;
-  let targetNewProblemCount = 1;
-
-  if (catchUpPlan?.active && catchUpPlan?.type === 'CATCH_UP') {
-    targetNewProblemCount = 2;
-    if (catchUpPlan.startedAt) {
-      const daysSinceStart = differenceInDays(today, new Date(catchUpPlan.startedAt));
-      if (daysSinceStart >= (catchUpPlan.durationDays || 0)) {
-        targetNewProblemCount = 1;
-      }
-    }
-  }
-
-  if (settings.studySchedule?.restDay === dayOfWeek) {
-    shouldAssignNewProblem = false;
-  }
-
-  if (phase === 2 && shouldAssignNewProblem) {
-    let solvedThisWeek = 0;
-    for (let i = 0; i <= dayOfWeek; i += 1) {
-      const dateKey = format(subDays(today, i), 'yyyy-MM-dd');
-      if (activityLog[dateKey]?.solved > 0) {
-        solvedThisWeek += 1;
-      }
-    }
-    if (solvedThisWeek >= 3) shouldAssignNewProblem = false;
-  }
-
-  const useSprintLogic = phase === 1 && settings.learningMode === 'CURRICULUM';
-  const usePatternLogic = settings.learningMode === 'PATTERNS';
-  const effectiveSprint =
-    useSprintLogic && !sprintState ? createInitialSprintState(progress, settings) : sprintState;
-
-  if (shouldAssignNewProblem && useSprintLogic && effectiveSprint && effectiveSprint.sprintStatus !== 'complete') {
-    sprintCategory = effectiveSprint.currentCategory;
-
-    const sprintStart = startOfDay(new Date(effectiveSprint.sprintStartDate));
-    const todayStart = startOfDay(today);
-    const daysSinceStart = differenceInDays(todayStart, sprintStart);
-    const totalDays = effectiveSprint.sprintLength + effectiveSprint.extensionDays;
-    const currentDay = Math.min(daysSinceStart + 1, totalDays);
-    sprintDayInfo = { day: currentDay, total: totalDays };
-
-    const findRetroCandidate = () => {
-      const cat = effectiveSprint.currentCategory;
-      const pool = getSprintPoolProblems(cat, solvedIds, reservedIds, sprintPoolOpts);
-      return (
-        pool.find((p) => p.difficulty === 'Medium') ??
-        pool[0] ??
-        allProblems.find(
-          (p) =>
-            p.category === cat &&
-            !solvedIds.has(p.id) &&
-            !reservedIds.has(p.id) &&
-            (includePremium || !isProblemPremium(p))
-        ) ??
-        allProblems.find(
-          (p) => p.category === cat && !reservedIds.has(p.id) && (includePremium || !isProblemPremium(p))
-        )
-      );
-    };
-
-    if (effectiveSprint.sprintStatus === 'retrospective' || daysSinceStart >= totalDays) {
-      isRetro = true;
-      newProblem = effectiveSprint.retroProblemId ?? findRetroCandidate()?.id ?? null;
-      recommendationReason = `Sprint Check — complete this problem to pass your ${effectiveSprint.currentCategory} sprint.`;
-    } else {
-      const sprintCat = effectiveSprint.currentCategory;
-      const isStruggling = categoryStruggling[sprintCat] ?? false;
-      const categoryProblems = getSprintPoolProblems(sprintCat, solvedIds, reservedIds, sprintPoolOpts);
-
-      let candidate = null;
-
-      if (isEasyDay) {
-        candidate = categoryProblems.find((p) => p.difficulty === 'Easy') ?? categoryProblems[0];
-      } else if (isHardDay) {
-        candidate = categoryProblems.find((p) => p.difficulty === 'Hard') ?? categoryProblems[0];
-      } else if (isStruggling) {
-        const easyCandidates = categoryProblems.filter((p) => p.difficulty === 'Easy');
-        candidate = easyCandidates[0] ?? categoryProblems[0];
-        if (candidate && candidate.difficulty === 'Easy') {
-          isStabilizer = true;
-        }
-      } else {
-        candidate = categoryProblems[0];
-      }
-
-      if (candidate) {
-        newProblem = candidate.id;
-        recommendationReason = isStabilizer
-          ? `Stabilizer: Easy problem selected as you've been struggling with ${sprintCat} mediums.`
-          : `Sprint Day ${currentDay}/${totalDays}: Drilling ${sprintCat} patterns.`;
-      } else {
-        isRetro = true;
-        recommendationReason = `${sprintCat} problems exhausted — Sprint Check coming.`;
-      }
-
-      if (newProblem && targetNewProblemCount > 1) {
-        const secondCandidate = categoryProblems.find(
-          (p) => !solvedIds.has(p.id) && p.id !== newProblem && !reservedIds.has(p.id)
-        );
-        if (secondCandidate) additionalProblems.push(secondCandidate.id);
-      }
-    }
-  }
-
-  if (shouldAssignNewProblem && usePatternLogic && !newProblem) {
-    let targetPattern = null;
-    for (const pattern of patterns) {
-      const patternProblems = targetPool.filter((p) => getPatternForProblem(p) === pattern.id);
-      const completedCount = patternProblems.filter((p) => progress[p.id]?.retired === true).length;
-      
-      if (completedCount < patternProblems.length && patternProblems.length > 0) {
-        targetPattern = pattern;
-        break;
-      }
-    }
-
-    if (targetPattern) {
-      let patternProblems = targetPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
-      let picked = pickUnsolvedForRandomRecommendation(patternProblems, solvedIds, settings, progress);
-      
-      // If the target pool is exhausted but mastery isn't achieved, pull from the extended catalog
-      // to ensure continuous practice until the core foundational problems are retired.
-      if (!picked) {
-        const extendedPool = allProblems.filter((p) => p.isExtendedCatalog || p.isNeetCode250);
-        const overflowProblems = extendedPool.filter((p) => getPatternForProblem(p) === targetPattern.id && !reservedIds.has(p.id));
-        picked = pickUnsolvedForRandomRecommendation(overflowProblems, solvedIds, settings, progress);
-      }
-
-      if (picked) {
-        newProblem = picked.id;
-        recommendationReason = `Mastering ${targetPattern.name}`;
-      }
-    }
-  }
-
-  if (shouldAssignNewProblem && !useSprintLogic && !usePatternLogic && !newProblem) {
-    const candidateCategories: string[] = [...PHASE_1_CATEGORIES, ...PHASE_2_CATEGORIES];
-    const categoryStats: Record<string, { total: number; count: number }> = {};
-
-    Object.entries(progress).forEach(([id, prog]) => {
-      const prob = problemMap[id];
-      if (prob && prog.history.length > 0) {
-        const lastRating = prog.history[prog.history.length - 1].rating;
-        if (!categoryStats[prob.category]) categoryStats[prob.category] = { total: 0, count: 0 };
-        categoryStats[prob.category].total += lastRating;
-        categoryStats[prob.category].count += 1;
-      }
-    });
-
-    const categoryAverages = Object.entries(categoryStats)
-      .map(([category, stats]) => ({ category, avg: stats.total / stats.count }))
-      .sort((a, b) => a.avg - b.avg);
-
-    for (const { category, avg } of categoryAverages) {
-      if (!candidateCategories.includes(category)) continue;
-      if (avg >= 3) continue;
-
-      const categoryProblems = targetPool.filter(
-        (p) => p.category === category && !reservedIds.has(p.id)
-      );
-      const picked = pickUnsolvedForRandomRecommendation(categoryProblems, solvedIds, settings, progress);
-
-      if (picked) {
-        newProblem = picked.id;
-        recommendationReason = `Recommending this because your ${category} confidence average is ${avg.toFixed(1)}.`;
-        break;
-      }
-    }
-
-    if (!newProblem) {
-      const allCandidates = targetPool.filter((p) => !reservedIds.has(p.id));
-      const picked = pickUnsolvedForRandomRecommendation(allCandidates, solvedIds, settings, progress);
-      newProblem = picked?.id ?? null;
-      if (newProblem) recommendationReason = 'Best next unsolved problem from your target list.';
-    }
-  }
-
-  const allDueReviewIds = allDueReviews.map((item) => item.id);
-
-  const reviewProblems = computeReviewProblems({
-    allDueReviewIds,
-    newProblemId: newProblem,
-    additionalProblemIds: additionalProblems,
-    coldSolveProblemId: coldSolveProblem,
-    dueSyntaxCardCount: dueSyntaxCards.length,
-    settings,
-    categoryAvgSolveTimes,
-    categoryAvgReviewTimes,
-  });
-
-  return {
-    newProblem,
-    additionalProblems,
-    allDueReviewIds,
-    reviewProblems,
-    coldSolveProblem,
-    dueSyntaxCards,
-    recommendationReason,
-    totalDueReviews,
-    dayModeType: dayMode.type,
-    isStabilizer,
-    isRetro,
-    sprintCategory,
-    sprintDayInfo,
-  };
+  return buildStudyPlan(params);
 }
-
 
 export function computePatternCompletion(
   patternId: PatternId,
@@ -1039,29 +667,10 @@ export function computePatternCompletion(
   needsWorkCount: number;
 } {
   void patternId;
-  const now = Date.now();
-  let masteredCount = 0;
-  let dueCount = 0;
-  let needsWorkCount = 0;
-
-  for (const id of patternProblemIds) {
-    const prog = problemProgress[id];
-    if (!prog) continue;
-    if (prog.retired) {
-      masteredCount += 1;
-      continue;
-    }
-    const lastRating = prog.history[prog.history.length - 1]?.rating;
-    if (lastRating === 1) needsWorkCount += 1;
-    if (new Date(prog.nextReviewAt).getTime() <= now) dueCount += 1;
-  }
-
-  return {
-    problemsCompletedCount: masteredCount,
-    masteredCount,
-    dueCount,
-    needsWorkCount,
-    isCompleted: masteredCount === patternProblemIds.length && patternProblemIds.length > 0,
-  };
+  const evidence = getPatternEvidence(patternProblemIds, problemProgress, patternId);
+  const dueCount = patternProblemIds.filter(id => problemProgress[id] && Date.parse(problemProgress[id].nextReviewAt) <= Date.now()).length;
+  const needsWorkCount = patternProblemIds.filter(id => getLearningStatus(problemProgress[id]) === 'relearning').length;
+  return { problemsCompletedCount: evidence.dependable, masteredCount: evidence.dependable,
+    dueCount, needsWorkCount, isCompleted: evidence.established };
 }
 

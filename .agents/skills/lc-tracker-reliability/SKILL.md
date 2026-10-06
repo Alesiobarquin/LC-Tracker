@@ -13,7 +13,8 @@ Vercel, Clerk, Supabase, and the browser.
 The client computes scheduling from confirmed reads; `commit_user_change` checks
 revisions and atomically commits related rows with a retry receipt. A timer's
 operation UUID and exact completion are stored in sessionStorage before sending.
-Keep that ID through timeouts, reloads, and explicit retries. Only confirmed
+Recall drafts also persist a frozen answer/outcome and operation ID before saving.
+Keep those IDs through timeouts, reloads, and explicit retries. Only confirmed
 `PT409` conflicts may be retried automatically, with fresh source data. Never use
 `40001` for application version checks: PostgREST 14 retries the same stale RPC
 internally and can exhaust the API pool.

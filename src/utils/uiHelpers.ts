@@ -33,7 +33,7 @@ export function getProblemStatusTone(options: {
 export function getProblemStatusLabel(tone: ProblemStatusTone): string {
   switch (tone) {
     case 'retired':
-      return 'Mastered';
+      return 'Maintenance';
     case 'solved':
       return 'Solved';
     case 'needsWork':

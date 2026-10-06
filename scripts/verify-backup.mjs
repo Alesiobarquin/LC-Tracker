@@ -47,7 +47,7 @@ function digest() {
     const name = '"' + table.replaceAll('"', '""') + '"';
     result[table] = JSON.parse(
       query(
-        `SELECT json_build_object('rows',count(*),'checksum',md5(coalesce(string_agg(md5((to_jsonb(t)-'version')::text),'' ORDER BY md5((to_jsonb(t)-'version')::text)),''))) FROM public.${name} t`,
+        `SELECT json_build_object('rows',count(*),'checksum',md5(coalesce(string_agg(md5(((to_jsonb(t)-'version') - CASE WHEN to_jsonb(t)->'study_state' = 'null'::jsonb THEN 'study_state' ELSE '__no_column__' END)::text),'' ORDER BY md5(((to_jsonb(t)-'version') - CASE WHEN to_jsonb(t)->'study_state' = 'null'::jsonb THEN 'study_state' ELSE '__no_column__' END)::text)),''))) FROM public.${name} t`,
       ),
     );
   }
@@ -69,7 +69,8 @@ try {
     "psql",
     args,
     `CREATE ROLE authenticated; CREATE ROLE anon; CREATE ROLE service_role; CREATE ROLE supabase_auth_admin; CREATE ROLE supabase_storage_admin; CREATE ROLE supabase_admin;
- CREATE SCHEMA auth; CREATE SCHEMA storage; CREATE SCHEMA supabase_functions; CREATE FUNCTION supabase_functions.http_request() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Outbound webhook disabled in recovery test'; END $$; CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions; CREATE EXTENSION "uuid-ossp" WITH SCHEMA extensions; CREATE EXTENSION citext WITH SCHEMA extensions;`,
+ CREATE SCHEMA auth; CREATE SCHEMA storage; CREATE SCHEMA supabase_functions; CREATE FUNCTION supabase_functions.http_request() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Outbound webhook disabled in recovery test'; END $$; CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions; CREATE EXTENSION "uuid-ossp" WITH SCHEMA extensions; CREATE EXTENSION citext WITH SCHEMA extensions;
+ CREATE PUBLICATION supabase_realtime;`,
   );
   run("pg_restore", [
     "--exit-on-error",
@@ -92,13 +93,14 @@ try {
   run(
     "psql",
     args,
-    `GRANT USAGE ON SCHEMA public,auth TO authenticated,anon; CREATE PUBLICATION supabase_realtime;`,
+    `GRANT USAGE ON SCHEMA public,auth TO authenticated,anon;`,
   );
   for (const file of [
     "20260407000000_fix_session_rating_constraint.sql",
     "20261006000000_reliable_user_writes.sql",
     "20261006000001_clerk_feedback_storage.sql",
     "20261006000002_postgrest_conflict_status.sql",
+    "20261006000003_study_evidence.sql",
   ])
     run("psql", args, readFileSync("supabase/migrations/" + file, "utf8"));
   const after = digest();
@@ -111,6 +113,7 @@ try {
     args,
     "BEGIN;\n" +
       readFileSync("supabase/tests/reliability.sql", "utf8") +
+      readFileSync("supabase/tests/study.sql", "utf8") +
       "\nROLLBACK;",
   );
   console.log(
@@ -120,6 +123,7 @@ try {
       rows: Object.values(before).reduce((sum, t) => sum + t.rows, 0),
       migrationPreservesExistingRows: true,
       reliabilityTests: checks.includes("RLS isolation passed"),
+      studyTests: checks.includes("Recall persistence"),
     }),
   );
 } catch (error) {

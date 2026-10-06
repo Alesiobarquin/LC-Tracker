@@ -24,6 +24,10 @@ For persistence changes:
 - Put cross-record atomicity, duplicate handling, and account isolation checks in
   `supabase/tests/reliability.sql`. `npm run test:db` uses the actual migrations in
   a disposable local PostgreSQL cluster and tests concurrent connections.
+- For feedback Storage policies, use the Clerk JWT subject for folder ownership
+  and test owned, cross-account, bucket, and anonymous behavior in
+  `supabase/tests/storage.sql`. Avoid live feedback inserts: production sends an
+  external notification. Local recovery must keep that webhook disabled.
 - Put browser retry/reload behavior in `e2e/reliability.spec.ts`. `npm run test:e2e`
   uses the `e2e` Vite mode and mock auth fixture. Do not treat that as live OAuth
   verification. Production builds reject the fixture mode.

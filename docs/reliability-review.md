@@ -106,7 +106,11 @@ integration trusts the production Clerk issuer.
 The old deployed LeetCode function also failed native ESM startup; its import is
 fixed and a compiled-function regression test now catches this failure.
 
-Real OAuth completion and authenticated browser saves remain outside these checks.
+The site owner confirmed real Google sign-in and one session saved exactly once
+after refresh on the released site. The final feedback Storage audit found old
+UUID ownership policies; the applied forward migration now uses Clerk folder
+ownership, with owned, cross-account, and anonymous SQL checks. Live feedback notification
+delivery and image upload bytes were not exercised.
 The restore check skips platform ownership/grants and disables webhook delivery;
 database archives do not contain Storage image bytes. Supabase currently lists no
 physical backups or PITR. Optional Sentry alert destinations and scheduled

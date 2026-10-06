@@ -21,6 +21,12 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   a write failed; do not replay a non-idempotent operation with a new ID.
 - Derive ownership from the Clerk JWT subject in SQL. Browser admin flags only
   affect navigation; database RLS and `admin_users` enforce permissions.
+- Feedback Storage uses the Clerk subject as the first path folder. Upload/delete
+  policies must target `authenticated`; `auth.uid()` assumes UUIDs and cannot own
+  these images. Cover ownership and anonymous denial in `supabase/tests/storage.sql`.
+- Production feedback inserts invoke an external notification webhook. Validate
+  with isolated fixtures and disable provider webhooks during local recovery;
+  do not send synthetic live feedback without explicit permission to send messages.
 - Reads must not rewrite settings or infer new meanings for historical ratings.
   Keep review scheduling changes separate from reliability repairs.
 - Paginate with deterministic ordering and handle a server row cap smaller than

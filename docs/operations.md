@@ -40,13 +40,16 @@ These public checks do not perform a real sign-in or authenticated database writ
    authentication, feedback storage, database policies, or other users.
 2. Confirm the deployed migration history. Apply any missing prerequisite schema,
    Clerk-ID/RLS, and session-rating migrations, then apply
-   `supabase/migrations/20261006000000_reliable_user_writes.sql` with the authenticated
-   database administration tool for the correct project. Do not run the historical
-   migrations blindly on an unknown production schema.
+   `supabase/migrations/20261006000000_reliable_user_writes.sql` and
+   `supabase/migrations/20261006000001_clerk_feedback_storage.sql` with the
+   authenticated database administration tool for the correct project. Do not run
+   the historical migrations blindly on an unknown production schema.
 3. Confirm `version` exists on settings, progress, and sprint state; the
    `commit_user_change` and `export_user_data` RPCs exist; authenticated table grants
    are present; and the five user tables are in the Realtime publication. The new
-   migration sets these up. Its functions are SECURITY INVOKER and retain RLS.
+   reliability migration sets these up. Its functions are SECURITY INVOKER and
+   retain RLS. Feedback image upload/delete policies must use the Clerk subject
+   for the first path folder and apply only to the authenticated role.
 4. Configure Vercel production and preview environment variables from `.env.example`.
    Clerk's publishable key, allowed origins, OAuth callbacks, and Supabase third-party
    integration must refer to the same Clerk instance. JWTs need the authenticated
@@ -60,9 +63,10 @@ These public checks do not perform a real sign-in or authenticated database writ
 The new client deliberately fails safely if the RPC or version columns are
 missing. It must not fall back to the old sequence of independent writes.
 
-The local test harness bootstraps only the Supabase auth/role surfaces needed to
-exercise the persistence migrations. It does not reproduce hosted Clerk token
-verification, the storage service, or all Supabase platform settings.
+The local test harness bootstraps the Supabase auth/role and Storage metadata
+surfaces needed to exercise persistence and ownership policies. It does not
+reproduce hosted Clerk token verification, image storage, or all Supabase platform
+settings.
 
 ## Recovery and rollback
 
@@ -204,3 +208,13 @@ administrators, and prevents force pushes and branch deletion. Keep the release
 PR unmerged until the database prerequisites are satisfied: merging `main`
 triggers Vercel production deployment. The runtime is pinned to Node.js 24 so
 Vercel will not silently select a future major release.
+
+The final Storage audit found the old UUID policies still deployed for feedback
+images. Forward migration `20261006000001_clerk_feedback_storage.sql` was applied
+transactionally and recorded in production migration history. It switches
+upload/delete ownership to the Clerk subject and rejects anonymous writes. Its
+PostgreSQL checks cover owned uploads/deletes, cross-account denial, and unrelated
+buckets. The historical migration was not replayed. The site owner confirmed a
+real Google sign-in, one completed/rated study session, and its persistence after
+refresh on the released site. Actual feedback delivery and image bytes were not
+tested through the live Storage API.

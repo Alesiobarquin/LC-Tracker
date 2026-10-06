@@ -24,11 +24,13 @@ try {
   started = true;
   const args = ['-X', '-v', 'ON_ERROR_STOP=1', '-h', socket, '-p', '55439', '-d', 'postgres'];
   run('psql', args, readFileSync('supabase/tests/bootstrap.sql', 'utf8'));
-  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql']) {
+  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql', '20261006000001_clerk_feedback_storage.sql']) {
     run('psql', args, readFileSync(`supabase/migrations/${name}`, 'utf8'));
   }
   const output = run('psql', args, readFileSync('supabase/tests/reliability.sql', 'utf8'));
   console.log(output.split('\n').find((line) => line.includes('Atomic saves'))?.trim());
+  const storage = run('psql', args, readFileSync('supabase/tests/storage.sql', 'utf8'));
+  console.log(storage.split('\n').find((line) => line.includes('Clerk storage'))?.trim());
   const raceSql = (operationId, version, reviewCount) => {
     const payload = JSON.stringify({ problemId: 'two-sum', progress: [{ problem_id: 'two-sum',
       first_solved_at: '2026-10-01T00:00:00Z', last_reviewed_at: '2026-10-06T00:00:00Z', next_review_at: '2026-10-09T00:00:00Z',

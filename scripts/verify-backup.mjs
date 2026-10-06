@@ -97,6 +97,7 @@ try {
   for (const file of [
     "20260407000000_fix_session_rating_constraint.sql",
     "20261006000000_reliable_user_writes.sql",
+    "20261006000001_clerk_feedback_storage.sql",
   ])
     run("psql", args, readFileSync("supabase/migrations/" + file, "utf8"));
   const after = digest();

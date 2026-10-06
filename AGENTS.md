@@ -44,6 +44,9 @@ For persistence changes also run `npm run test:db` (PostgreSQL binaries on PATH)
 and `npm run test:e2e`. Database tests create and remove an isolated local cluster;
 they never load production credentials. The repository skill at
 `.agents/skills/lc-tracker-reliability/SKILL.md` documents this repeatable workflow.
+For a private PostgreSQL archive, run `npm run verify:backup -- <archive-path>`
+with PostgreSQL 17+ binaries. Its local restore disables provider webhooks and
+skips platform ownership/grants; it does not recover stored image bytes.
 
 Playwright's local server uses Vite's `e2e` mode with simulated Clerk/Supabase
 responses. Production builds reject that mode. Passing those tests does not

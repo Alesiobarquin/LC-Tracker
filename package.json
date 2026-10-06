@@ -17,7 +17,8 @@
     "build:premium-status": "node scripts/build-problem-premium-status.mjs",
     "refresh:catalog": "npm run build:extended-catalog && npm run build:premium-status",
     "migrate:legacy": "tsx scripts/migrate-legacy-data.ts",
-    "test:db": "node scripts/test-database.mjs"
+    "test:db": "node scripts/test-database.mjs",
+    "verify:backup": "node scripts/verify-backup.mjs"
   },
   "dependencies": {
     "@clerk/react": "^6.17.6",

@@ -12,6 +12,7 @@ flowchart LR
   Browser --> Supabase[Supabase REST and PostgreSQL RLS]
   Browser <--> Realtime[Supabase Realtime]
   Browser --> Storage[Supabase feedback image storage]
+  Supabase --> Webhook[Formspree feedback notification webhook]
   Browser --> Proxy[Vercel /api/leetcode-ac]
   Proxy --> LeetCode[LeetCode GraphQL]
   Browser --> Fallback[Alfa LeetCode API on Render]
@@ -37,6 +38,9 @@ inspected application. Recommendations are computed when the app is used. The
 Alfa API is external; the repository does not establish ownership of its Render
 service. Clerk IDs are text; a historical migration replaces Supabase auth UUIDs
 and updates RLS. Browser admin flags control the UI, not database authorization.
+Production also has a feedback insert trigger calling Formspree through
+`supabase_functions.http_request`; this provider-managed trigger was discovered
+in the database export. It is disabled in the isolated restore check.
 
 ## Reliability repairs
 
@@ -87,15 +91,26 @@ an incompatible transform and was corrected before verification.
 
 Checks include unit tests, real PostgreSQL transaction/RLS tests, concurrent database
 connections, local browser failure/reload/retry tests, TypeScript, a production build,
-and dependency auditing. The final run passed 98 unit tests and 11 local Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build, and a zero-vulnerability dependency audit.
+and dependency auditing. GitHub CI passed 100 unit tests and 11 local Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build, and a zero-vulnerability dependency audit.
 The local browser suite simulates Clerk/Supabase; it does not prove real OAuth or
 hosted JWT enforcement. Database tests exercise the actual persistence migrations
 with a minimal auth/role bootstrap.
 
-Production migration application, real sign-in verification, provider backups and
-test restores, alert destinations, and branch protection require working account
-access. They were not performed with the unavailable administrator credentials.
-The required migration must precede deployment of this client.
+The production rating and reliability migrations were applied after a private
+database export and an isolated restore of all nine application tables (290 rows),
+auth, and storage metadata. Migration checksums preserved existing application
+records. Hosted SQL transaction/RLS checks passed inside a rolled-back transaction.
+Branch protection requires CI. Public browser checks pass on the old production
+site and public pages render on the staged release; Clerk's sign-in button renders.
+The old deployed LeetCode function also failed native ESM startup; its import is
+fixed and a compiled-function regression test now catches this failure.
+
+Real OAuth completion and authenticated browser saves remain outside these checks.
+The restore check skips platform ownership/grants and disables webhook delivery;
+database archives do not contain Storage image bytes. Supabase currently lists no
+physical backups or PITR. Optional Sentry alert destinations and scheduled
+off-device backups remain unconfigured. Readiness is provider reachability, not
+proof of end-to-end sign-in or full Supabase platform recovery.
 
 The build still reports large CodeMirror/catalog chunks and upstream Zod annotation
 warnings. Public routes and retry flows pass, but loading performance can be improved

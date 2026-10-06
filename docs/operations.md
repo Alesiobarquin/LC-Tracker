@@ -12,6 +12,7 @@ Start the app with `npm run dev`.
 | `npm run lint` | TypeScript across the client, server, scripts, and tests |
 | `npm test` | Scheduling helpers, validated reads/writes, token handling, configuration, and API behavior |
 | `npm run test:db` | Actual migrations, transaction rollback, duplicate retries, revision conflicts, concurrent connections, and RLS |
+| `npm run verify:backup -- <archive-path>` | Private PostgreSQL archive restore and migration preservation in an isolated local cluster |
 | `npm run test:e2e` | Public routes and simulated authenticated failure/reload/retry flows |
 | `npm run build` | The production bundle, without mock authentication |
 | `npm audit` | The installed dependency advisories; the lockfile fixes versions |
@@ -83,6 +84,27 @@ and replaces matching progress/settings; it does not remove unrelated records or
 replace existing timing IDs. Validation and all restore writes happen before one
 transaction commits. Imported ownership and version metadata are ignored.
 
+For a PostgreSQL custom-format archive, `npm run verify:backup -- <archive-path>`
+creates an isolated local cluster using PostgreSQL binaries on PATH (17+ for the
+current hosted database). It restores `auth`, `storage`, and `public`, compares
+application row counts and checksums before/after the reliability migrations,
+and runs the persistence suite inside a rolled-back transaction. It never connects
+to production. Platform ownership/grants are skipped and the Supabase outbound
+webhook function is disabled. This checks application recovery; it does not restore
+the Supabase platform, test notification delivery, or include stored image bytes.
+
+On macOS with the installed PostgreSQL 17 tools:
+
+```sh
+PATH=/opt/homebrew/opt/postgresql@17/bin:$PATH npm run verify:backup -- /private/path/database.dump
+```
+
+If Docker is unavailable, the CLI's `db dump --dry-run` emits a native `pg_dump`
+script. Capture it privately: it contains temporary database credentials. Use a
+dump client at least as new as the hosted PostgreSQL major version. A full custom
+archive can be taken with `pg_dump --format=custom --role=postgres`; protect the
+result and never print connection settings or commit the archive.
+
 ## Monitoring
 
 `/api/health` makes bounded, read-only checks of Supabase REST and Clerk's public
@@ -153,8 +175,25 @@ columns were absent and `/api/health` returned 404. Vercel and GitHub CLI access
 worked; Supabase administrator login was still required. These public checks do
 not establish authenticated saves or database recovery.
 
-The reliability release is staged on Vercel with a healthy readiness response.
-GitHub's complete reliability workflow passed on release commit `f7a19f8`.
+The release audit obtained a private full PostgreSQL archive and restored auth,
+storage metadata, and all nine application tables into isolated PostgreSQL 17.
+All 290 existing application rows were preserved by the missing rating migration
+and the reliability migration. Both migrations were then applied transactionally
+to production and recorded in `supabase_migrations.schema_migrations`. Earlier
+manual migrations were not blindly replayed or marked applied. The deployed schema
+now has ratings 1–5, revision columns, SECURITY INVOKER RPCs, receipt RLS, and all
+five study tables in the Realtime publication. Hosted transaction/RLS checks passed
+with synthetic accounts inside a rolled-back transaction.
+
+Supabase reported no available physical backups and PITR disabled at this audit.
+The private pre-release archive is outside the repository under the local
+`Library/Application Support/LC-Tracker/backups` directory. A logical database
+archive does not include Storage object bytes. Scheduled off-device backups and
+PITR are separate operational work; this release does not claim either is enabled.
+
+The reliability release is staged on Vercel with a healthy readiness response;
+the LeetCode proxy returns JSON successfully after repairing its ESM import.
+GitHub's complete reliability workflow passed on release commit `4c6e0bf`.
 Branch protection requires the GitHub Actions `verify` check, including for
 administrators, and prevents force pushes and branch deletion. Keep the release
 PR unmerged until the database prerequisites are satisfied: merging `main`

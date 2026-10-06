@@ -31,9 +31,16 @@ For persistence changes:
   for changes spanning the save path. Add a test for the demonstrated failure,
   rather than assertions that only mirror the implementation.
 - For a release, check that required migrations precede the client deployment,
-  read `/api/health`, and report which provider configurations or recovery steps
+  read `/api/health`, invoke `/api/leetcode-ac`, and report which provider configurations or recovery steps
   could not be verified. Provider readiness does not establish authenticated RLS
   behavior or a tested database backup restore.
+- For a private PostgreSQL archive, use `npm run verify:backup -- <archive-path>`
+  with PostgreSQL 17+ binaries on PATH. It restores auth, storage metadata, and
+  public tables into an isolated local cluster, verifies migration data preservation,
+  and runs the persistence checks in a rolled-back transaction. It disables the
+  Supabase outbound webhook function and skips platform ownership/grants. This
+  validates application recovery, not hosted service restoration or stored image
+  bytes. Keep the archive outside the repository.
 
 Export uses `export_user_data` under the same lock as writes; restore validates
 all records and commits them together. Preserve all session timings, including

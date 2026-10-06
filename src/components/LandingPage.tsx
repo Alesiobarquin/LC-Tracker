@@ -288,7 +288,7 @@ const PatternMasteryMock = () => (
     <MockPanelChrome title="Example pattern evidence">
         <div className="space-y-3">
             <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-emerald-500" /> Graphs</span>
+                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-emerald-500" /> Core patterns</span>
                 <span>5 / 8 dependable</span>
             </div>
             <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">

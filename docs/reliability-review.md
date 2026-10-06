@@ -91,7 +91,9 @@ an incompatible transform and was corrected before verification.
 
 Checks include unit tests, real PostgreSQL transaction/RLS tests, concurrent database
 connections, local browser failure/reload/retry tests, TypeScript, a production build,
-and dependency auditing. GitHub CI passed 100 unit tests and 11 local Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build, and a zero-vulnerability dependency audit.
+and dependency auditing. The final suite contains 101 unit tests and 13 local
+Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build,
+and dependency auditing.
 The local browser suite simulates Clerk/Supabase; it does not prove real OAuth or
 hosted JWT enforcement. Database tests exercise the actual persistence migrations
 with a minimal auth/role bootstrap.
@@ -111,6 +113,13 @@ after refresh on the released site. The final feedback Storage audit found old
 UUID ownership policies; the applied forward migration now uses Clerk folder
 ownership, with owned, cross-account, and anonymous SQL checks. Live feedback notification
 delivery and image upload bytes were not exercised.
+The owner also reported study-time sliders that could not be changed. A delayed
+save reproduced their snap-back: each movement sent a mutation while the input
+still used confirmed server data. Both targets now use a local draft and one
+explicit save, retain selections after failure, and preserve the edit-start base
+across conflicting refetches. Regression checks cover keyboard changes, latency,
+failed-save retry, persistence after refresh, and conflict recovery. Backup
+validation also accepts the valid “no weekly rest day” schedule.
 The restore check skips platform ownership/grants and disables webhook delivery;
 database archives do not contain Storage image bytes. Supabase currently lists no
 physical backups or PITR. Optional Sentry alert destinations and scheduled

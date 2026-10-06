@@ -19,6 +19,9 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
 - Use confirmed source reads and revision checks before editing records. Retry
   only SQLSTATE `40001` with refreshed inputs. A network timeout does not prove
   a write failed; do not replay a non-idempotent operation with a new ID.
+- Settings sliders need local drafts and an explicit save action. Keep the
+  edit-start settings as the conflict base across refetches, and retain selections
+  after failed saves. Do not bind every slider movement to a database mutation.
 - Derive ownership from the Clerk JWT subject in SQL. Browser admin flags only
   affect navigation; database RLS and `admin_users` enforce permissions.
 - Feedback Storage uses the Clerk subject as the first path folder. Upload/delete

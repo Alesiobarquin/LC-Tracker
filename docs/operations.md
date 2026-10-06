@@ -218,3 +218,10 @@ buckets. The historical migration was not replayed. The site owner confirmed a
 real Google sign-in, one completed/rated study session, and its persistence after
 refresh on the released site. Actual feedback delivery and image bytes were not
 tested through the live Storage API.
+
+The owner's study-time slider report was reproduced with a delayed save. The
+weekday and weekend targets now edit locally and save together with the
+`Save study time targets` button. Failed saves retain the draft; a same-field
+conflict requires `Use saved targets` before editing again. Browser checks cover
+both cases and persistence after refresh. Backups also accept the `None` weekly
+rest-day value (`-1`).

@@ -31,6 +31,9 @@ For persistence changes:
 - Put browser retry/reload behavior in `e2e/reliability.spec.ts`. `npm run test:e2e`
   uses the `e2e` Vite mode and mock auth fixture. Do not treat that as live OAuth
   verification. Production builds reject the fixture mode.
+- Settings range controls use local drafts and explicit saves. Preserve the
+  edit-start conflict base through refetches. Check repeated keyboard changes,
+  delayed/failed saves, and a same-field conflict before confirming the fix.
 - Run types, unit tests, database tests, browser tests, and the production build
   for changes spanning the save path. Add a test for the demonstrated failure,
   rather than assertions that only mirror the implementation.

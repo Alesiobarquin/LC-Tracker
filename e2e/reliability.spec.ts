@@ -65,6 +65,97 @@ test('failed settings reads cannot send an initialized sprint write', async ({ p
   await expect(page).not.toHaveURL(/onboarding/);
 });
 
+test('study time targets remain editable during latency and survive a failed save', async ({ page }) => {
+  await signIn(page);
+  const stored = { version: 1, onboarding_complete: true, leetcode_username: null,
+    target_interview_date: '2027-01-01', settings_json: { settings: { learningMode: 'EXPLORE',
+      studySchedule: { weekdayMinutes: 60, weekendMinutes: 120, restDay: 0, blackoutDates: [] } } } };
+  await page.route('https://test.supabase.co/rest/v1/user_settings*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stored) }));
+  const saves: any[] = [];
+  let releaseFirstSave!: () => void;
+  const firstSave = new Promise<void>((resolve) => { releaseFirstSave = resolve; });
+  await page.route('https://test.supabase.co/rest/v1/rpc/commit_user_change', async (route) => {
+    const payload = route.request().postDataJSON();
+    saves.push(payload);
+    if (saves.length === 1) {
+      await firstSave;
+      await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ code: 'XX000' }) });
+      return;
+    }
+    stored.settings_json = payload.p_payload.settings.settings_json;
+    stored.version++;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ duplicate: false }) });
+  });
+  await page.goto('/settings');
+  const weekday = page.locator('#section-schedule input[type="range"]').nth(0);
+  const weekend = page.locator('#section-schedule input[type="range"]').nth(1);
+  await expect(weekday).toHaveValue('60');
+  await weekday.focus();
+  await weekday.press('ArrowRight');
+  await weekday.press('ArrowRight');
+  await expect(weekday).toHaveValue('90', { timeout: 1000 });
+  await weekend.focus();
+  await weekend.press('ArrowLeft');
+  await weekend.press('ArrowLeft');
+  await weekend.press('ArrowLeft');
+  await expect(weekend).toHaveValue('75');
+  expect(saves).toHaveLength(0);
+  await page.getByRole('button', { name: 'Save study time targets' }).click();
+  await expect(page.getByRole('button', { name: 'Saving study time targets…' })).toBeDisabled();
+  await expect(weekday).toBeDisabled();
+  releaseFirstSave();
+  await expect(page.getByRole('alert').filter({ hasText: 'Could not save your study time targets' })).toBeVisible();
+  await expect(weekday).toHaveValue('90');
+  await expect(weekend).toHaveValue('75');
+  await page.getByRole('button', { name: 'Save study time targets' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Study time targets saved' })).toBeVisible();
+  expect(saves).toHaveLength(2);
+  expect(saves[1].p_payload.settings.settings_json.settings.studySchedule).toMatchObject({ weekdayMinutes: 90, weekendMinutes: 75 });
+  await page.reload();
+  await expect(weekday).toHaveValue('90');
+  await expect(weekend).toHaveValue('75');
+});
+
+test('study time target conflicts keep the draft until saved values are explicitly reloaded', async ({ page }) => {
+  await signIn(page);
+  const stored = { version: 1, onboarding_complete: true, target_interview_date: '2027-01-01',
+    settings_json: { settings: { learningMode: 'EXPLORE', studySchedule: {
+      weekdayMinutes: 60, weekendMinutes: 120, restDay: 0, blackoutDates: [] } } } };
+  await page.route('https://test.supabase.co/rest/v1/user_settings*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stored) }));
+  const saves: any[] = [];
+  await page.route('https://test.supabase.co/rest/v1/rpc/commit_user_change', async (route) => {
+    const payload = route.request().postDataJSON();
+    saves.push(payload);
+    stored.settings_json = payload.p_payload.settings.settings_json;
+    stored.version++;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+  });
+  await page.goto('/settings');
+  const weekday = page.getByLabel('Weekday Daily Target');
+  await expect(weekday).toHaveValue('60');
+  await weekday.press('ArrowRight');
+  await weekday.press('ArrowRight');
+  stored.settings_json.settings.studySchedule.weekdayMinutes = 105;
+  stored.settings_json.settings.studySchedule.restDay = 2;
+  stored.version++;
+  const save = page.getByRole('button', { name: 'Save study time targets' });
+  await save.click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Select Use saved targets' })).toBeVisible();
+  await expect(weekday).toHaveValue('90');
+  await save.click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Select Use saved targets' })).toBeVisible();
+  expect(saves).toHaveLength(0);
+  await page.getByRole('button', { name: 'Use saved targets' }).click();
+  await expect(weekday).toHaveValue('105');
+  await weekday.press('ArrowRight');
+  await save.click();
+  await expect(page.getByRole('status').filter({ hasText: 'Study time targets saved' })).toBeVisible();
+  expect(saves).toHaveLength(1);
+  expect(stored.settings_json.settings.studySchedule).toMatchObject({ weekdayMinutes: 120, restDay: 2 });
+});
+
 test('Google sign-in failures show a recovery message', async ({ page }) => {
   await page.goto('/login');
   await page.getByRole('button', { name: 'Continue with Google' }).click();

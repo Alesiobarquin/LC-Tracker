@@ -74,17 +74,17 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg sm:max-w-xl max-h-[min(90vh,720px)] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden"
+        className="bg-surface border border-line rounded-2xl w-full max-w-lg sm:max-w-xl max-h-[min(90vh,720px)] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-zinc-800 bg-zinc-950/50 shrink-0">
-          <h2 id={titleId} className="text-lg sm:text-xl font-semibold text-white leading-snug pr-2">
+        <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-line bg-canvas/50 shrink-0">
+          <h2 id={titleId} className="text-lg sm:text-xl font-semibold text-foreground leading-snug pr-2">
             How LC Tracker Works
           </h2>
           <button
             type="button"
             onClick={handleDismiss}
-            className="p-2 -m-1 shrink-0 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 -m-1 shrink-0 text-muted hover:text-foreground hover:bg-muted-surface rounded-lg transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -94,39 +94,41 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
         <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 sm:py-8">
           <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
             <div
-              className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 mb-5 shadow-[0_0_32px_-8px_rgba(16,185,129,0.35)]"
+              className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted-surface text-accent mb-4"
               aria-hidden
             >
-              <SlideIcon className="w-8 h-8 sm:w-10 sm:h-10" strokeWidth={1.75} />
+              <SlideIcon className="w-6 h-6" strokeWidth={1.75} />
             </div>
-            <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-50 tracking-tight mb-2">{slide.title}</h3>
-            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-md">{slide.subtitle}</p>
+            <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-2">{slide.title}</h3>
+            <p className="text-base sm:text-lg text-muted leading-relaxed max-w-md">{slide.subtitle}</p>
           </div>
 
           <ul className="space-y-3.5 sm:space-y-4 max-w-md mx-auto text-left">
             {slide.highlights.map((line) => (
               <li key={line} className="flex gap-3 sm:gap-4">
                 <span
-                  className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent "
                   aria-hidden
                 />
-                <span className="text-base sm:text-[17px] leading-relaxed text-zinc-200">{line}</span>
+                <span className="text-base sm:text-[17px] leading-relaxed text-body">{line}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="px-5 sm:px-6 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-zinc-800/80 pt-4 shrink-0 bg-zinc-950/40">
+        <div className="px-5 sm:px-6 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-line/80 pt-4 shrink-0 bg-canvas/40">
           <div className="flex items-center justify-center gap-1.5 order-2 sm:order-1">
             {FEATURE_SLIDES.map((s, i) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => setSlideIndex(i)}
-                className={`h-2 rounded-full transition-all ${i === slideIndex ? 'w-7 bg-emerald-500' : 'w-2 bg-zinc-600 hover:bg-zinc-500'}`}
+                className="h-10 w-8 flex items-center justify-center rounded-md hover:bg-muted-surface transition-colors"
                 aria-label={`Go to slide ${i + 1} of ${total}`}
                 aria-current={i === slideIndex ? 'true' : undefined}
-              />
+              >
+                <span className={`h-1.5 rounded-sm transition-all ${i === slideIndex ? 'w-6 bg-accent' : 'w-1.5 bg-subtle'}`} aria-hidden="true" />
+              </button>
             ))}
           </div>
 
@@ -135,7 +137,7 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
               <button
                 type="button"
                 onClick={jumpToTab}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base font-medium text-accent bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-xl transition-colors"
               >
                 Open in app
                 <ExternalLink className="w-4 h-4 shrink-0" />
@@ -146,7 +148,7 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
                 type="button"
                 onClick={goPrev}
                 disabled={slideIndex === 0}
-                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-2.5 rounded-xl border border-line-strong text-body hover:bg-muted-surface disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 aria-label="Previous slide"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -155,7 +157,7 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
                 type="button"
                 onClick={goNext}
                 disabled={slideIndex >= total - 1}
-                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-2.5 rounded-xl border border-line-strong text-body hover:bg-muted-surface disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 aria-label="Next slide"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -168,7 +170,7 @@ export function FeaturesModal({ isOpen, onClose, initialSlide = 0 }: FeaturesMod
           <button
             type="button"
             onClick={handleDismiss}
-            className="w-full py-3.5 sm:py-4 text-base sm:text-lg font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
+            className="w-full py-3.5 sm:py-4 text-base sm:text-lg font-semibold bg-accent hover:bg-accent-strong text-on-accent rounded-xl transition-colors"
           >
             Continue
           </button>

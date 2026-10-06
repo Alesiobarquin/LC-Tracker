@@ -12,8 +12,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       ref={ref}
       className={cn(
         'rounded-2xl border transition-colors',
-        elevated ? 'premium-card' : 'bg-zinc-900/70 border-zinc-800',
-        accent && 'border-emerald-500/25 bg-emerald-500/[0.04]',
+        elevated ? 'premium-card' : 'bg-surface/70 border-line',
+        accent && 'border-accent/25 bg-accent/[0.04]',
         className
       )}
       {...props}
@@ -30,9 +30,9 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
   className,
   ...props
-}) => <h2 className={cn('text-xl font-semibold text-zinc-100', className)} {...props} />;
+}) => <h2 className={cn('text-xl font-semibold text-foreground', className)} {...props} />;
 
 export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({
   className,
   ...props
-}) => <p className={cn('text-sm text-zinc-400 leading-relaxed', className)} {...props} />;
+}) => <p className={cn('text-sm text-muted leading-relaxed', className)} {...props} />;

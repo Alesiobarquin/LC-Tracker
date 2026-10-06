@@ -166,7 +166,7 @@ export function Analytics() {
         icon={<BarChart3 />}
         description="Track delayed implementation, recall, transfer to new problems, and sustainable study time."
       />
-      <p className="text-sm text-zinc-400">
+      <p className="text-sm text-muted">
         Outcomes are self-reported. A confidence rating, imported acceptance, or
         repeated same-day solve is not an interview readiness score.
       </p>
@@ -207,20 +207,20 @@ export function Analytics() {
           ],
         ].map(([label, value, detail]) => (
           <div key={label} className="premium-card p-5">
-            <h2 className="text-sm text-zinc-400">{label}</h2>
-            <p className="text-2xl font-semibold text-zinc-100 my-2">{value}</p>
-            <p className="text-xs text-zinc-500">{detail}</p>
+            <h2 className="text-sm text-muted">{label}</h2>
+            <p className="text-2xl font-semibold text-foreground my-2">{value}</p>
+            <p className="text-xs text-subtle">{detail}</p>
           </div>
         ))}
       </section>
       <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-zinc-100 flex gap-2 items-center">
+        <h2 className="text-lg font-semibold text-foreground flex gap-2 items-center">
           <Clock size={20} /> Daily study time
         </h2>
         <div
           className="flex gap-2 items-end h-36"
           role="img"
-          aria-label="Recorded study minutes in the last fourteen days"
+          aria-label={`Recorded study minutes in the last fourteen days: ${minuteData.map(({ day, minutes }) => `${format(day, 'MMM d')}, ${minutes} minutes`).join('; ')}`}
         >
           {minuteData.map(({ day, minutes }) => (
             <div
@@ -229,52 +229,52 @@ export function Analytics() {
               title={`${format(day, "MMM d")}: ${minutes} min`}
             >
               <div
-                className="bg-emerald-500/70 rounded-t w-full min-h-1"
+                className="bg-accent rounded-t-sm w-full min-h-1"
                 style={{ height: `${(minutes / maxMinutes) * 100}px` }}
               />
-              <span className="text-[10px] text-zinc-500">
+              <span className="text-[10px] text-subtle">
                 {format(day, "d")}
               </span>
             </div>
           ))}
         </div>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-subtle">
           {Object.values(progress).filter(hasDelayedIndependentPass).length}{" "}
           problems have independent passes at least 7 days apart. They remain
           eligible for maintenance.
         </p>
       </section>
       <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-zinc-100">
+        <h2 className="text-lg font-semibold text-foreground">
           Pattern coverage and depth
         </h2>
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted">
           Encountered means present in your history. Dependable means
           independent passes on separate days at least a week apart. Established
           requires two dependable representatives (or all available if fewer)
           plus an independent pass on an unseen variation.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-zinc-500">
+          <table className="w-full min-w-[520px] text-sm text-left">
+            <thead className="text-subtle">
               <tr>
-                <th className="py-3">Pattern</th>
-                <th>Encountered</th>
-                <th>Dependable</th>
-                <th>Variant pass</th>
-                <th>Status</th>
+                <th scope="col" className="py-3 pr-4">Pattern</th>
+                <th scope="col" className="pr-4">Encountered</th>
+                <th scope="col" className="pr-4">Dependable</th>
+                <th scope="col" className="pr-4">Variant pass</th>
+                <th scope="col">Status</th>
               </tr>
             </thead>
             <tbody>
               {evidence.map((row) => (
                 <tr
                   key={row.pattern.id}
-                  className="border-t border-zinc-800 text-zinc-300"
+                  className="border-t border-line text-body"
                 >
                   <td className="py-3 pr-4">
                     <Link
                       to={`/patterns/${row.pattern.id}`}
-                      className="text-emerald-400"
+                      className="text-accent"
                     >
                       {row.pattern.name}
                     </Link>
@@ -298,22 +298,22 @@ export function Analytics() {
         </div>
       </section>
       <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-zinc-100">Session history</h2>
+        <h2 className="text-lg font-semibold text-foreground">Session history</h2>
         {history.length ? (
           <div className="space-y-2">
             {history.map((t) => (
               <button
                 key={t.id}
-                className="w-full rounded-xl border border-zinc-800 px-4 py-3 text-left hover:border-emerald-500/40 flex flex-wrap justify-between gap-3"
+                className="w-full rounded-xl border border-line px-4 py-3 text-left hover:border-accent/40 flex flex-wrap justify-between gap-3"
                 onClick={() => setViewing(t)}
               >
-                <span className="text-sm text-zinc-100">
+                <span className="text-sm text-foreground">
                   {problemMap[t.problemId]?.title ?? t.problemId}
-                  <span className="block text-xs text-zinc-500 mt-1">
+                  <span className="block text-xs text-subtle mt-1">
                     {format(new Date(t.date), "MMM d, yyyy · HH:mm")}
                   </span>
                 </span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted">
                   {t.sessionType === "recall"
                     ? "Recall check"
                     : t.sessionType.replace("_", " ")}{" "}
@@ -323,18 +323,18 @@ export function Analytics() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             Your first recorded recall or coding session will appear here.
           </p>
         )}
         {historyError && (
-          <p role="alert" className="text-red-300">
+          <p role="alert" className="text-danger">
             {historyError}
           </p>
         )}
         {hasMore && (
           <button
-            className="text-sm text-emerald-400"
+            className="text-sm text-accent"
             disabled={loadingOlder}
             onClick={() => void loadOlder()}
           >
@@ -355,7 +355,7 @@ export function Analytics() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between gap-4">
-              <h2 className="text-xl text-zinc-100">
+              <h2 className="text-xl font-semibold text-foreground">
                 {problemMap[viewing.problemId]?.title ?? viewing.problemId}
               </h2>
               <button
@@ -367,27 +367,27 @@ export function Analytics() {
             </div>
             {viewedRecall ? (
               <>
-                <p className="text-sm text-emerald-400">
+                <p className="text-sm text-accent">
                   Recall: {viewedRecall.outcome} · checked against{" "}
                   {viewedRecall.checkedAgainst}
                 </p>
-                <pre className="whitespace-pre-wrap text-sm text-zinc-300">
+                <pre className="whitespace-pre-wrap text-sm text-body">
                   {viewedRecall.answer || "No approach recalled."}
                 </pre>
               </>
             ) : (
               <>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-muted">
                   Confidence: {viewing.rating}/5 (self-rating)
                 </p>
                 {viewedCoding?.codingOutcome ? (
-                  <p className="text-sm text-zinc-300">
+                  <p className="text-sm text-body">
                     Tests: {viewedCoding.codingOutcome.correctness} ·
                     Assistance: {viewedCoding.codingOutcome.assistance} ·
                     Explanation: {viewedCoding.codingOutcome.explanation}
                   </p>
                 ) : (
-                  <p className="text-sm text-zinc-400">
+                  <p className="text-sm text-muted">
                     This older session has no recorded correctness or assistance
                     assessment.
                   </p>
@@ -396,8 +396,8 @@ export function Analytics() {
             )}
             {viewedProgress?.notes && (
               <div>
-                <h3 className="text-sm text-zinc-500">Latest problem notes</h3>
-                <p className="whitespace-pre-wrap text-sm text-zinc-300 mt-2">
+                <h3 className="text-sm text-subtle">Latest problem notes</h3>
+                <p className="whitespace-pre-wrap text-sm text-body mt-2">
                   {viewedProgress.notes}
                 </p>
               </div>

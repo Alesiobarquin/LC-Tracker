@@ -1,230 +1,45 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import React from 'react';
+import { motion } from 'motion/react';
 import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu, ListFilter, Download, CalendarDays, Layers } from 'lucide-react';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
-
-// --- MAGNETIC CANVAS BACKGROUND ---
-type MagnetCanvasMode = 'default' | 'login';
-
-export const MagnetCanvas = ({ mode = 'default' }: { mode?: MagnetCanvasMode }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const isLoginMode = mode === 'login';
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        let animationFrameId: number;
-        let particles: Particle[] = [];
-
-        // Grid settings
-        const spacing = 35;
-        const mouseRadius = isLoginMode ? 280 : 250;
-        const returnSpeed = 0.15;
-        const pullStrength = isLoginMode ? 0.15 : 0.12;
-        const basePulseAmplitude = isLoginMode ? 0.45 : 0.2;
-        const activePulseAmplitude = isLoginMode ? 2.5 : 1;
-        const pulseFrequency = isLoginMode ? 0.0085 : 0.0055;
-        let pulseClock = 0;
-
-        const mouse = { x: -1000, y: -1000 };
-
-        class Particle {
-            x: number;
-            y: number;
-            baseX: number;
-            baseY: number;
-            size: number;
-            baseSize: number;
-            phaseOffset: number;
-
-            constructor(x: number, y: number) {
-                this.baseX = x;
-                this.baseY = y;
-                this.x = x;
-                this.y = y;
-                this.baseSize = isLoginMode ? 1.6 : 1.5;
-                this.size = this.baseSize;
-                this.phaseOffset = Math.random() * Math.PI * 2;
-            }
-
-            draw() {
-                const dx = mouse.x - this.x;
-                const dy = mouse.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const isNearMouse = distance < mouseRadius;
-                const alpha = Math.min(0.95, this.size / 6 + 0.1);
-
-                ctx.fillStyle = `rgba(16, 185, 129, ${alpha})`;
-                if (isLoginMode) {
-                    const glow = isNearMouse ? 12 + this.size * 2.2 : 4 + this.size;
-                    ctx.shadowBlur = glow;
-                    ctx.shadowColor = `rgba(16, 185, 129, ${Math.min(0.65, alpha + 0.15)})`;
-                }
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-
-                if (isLoginMode) {
-                    ctx.shadowBlur = 0;
-                }
-
-                const connectionRadius = mouseRadius * (isLoginMode ? 0.62 : 0.5);
-                if (distance < connectionRadius) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(16, 185, 129, ${((connectionRadius - distance) / connectionRadius) * (isLoginMode ? 0.45 : 0.3)})`;
-                    ctx.lineWidth = isLoginMode ? 1.2 : 1;
-                    ctx.moveTo(this.x, this.y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.stroke();
-                }
-            }
-
-            update() {
-                const dx = mouse.x - this.baseX;
-                const dy = mouse.y - this.baseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const isWithinMouseRadius = distance < mouseRadius;
-                const force = isWithinMouseRadius ? (mouseRadius - distance) / mouseRadius : 0;
-
-                const pulseWave = (Math.sin(pulseClock * pulseFrequency + this.phaseOffset) + 1) * 0.5;
-                const pulseBoost = pulseWave * (basePulseAmplitude + force * activePulseAmplitude);
-                let targetSize = this.baseSize + pulseBoost;
-
-                if (isWithinMouseRadius) {
-                    const targetX = this.baseX + dx * force * pullStrength;
-                    const targetY = this.baseY + dy * force * pullStrength;
-
-                    this.x += (targetX - this.x) * 0.4;
-                    this.y += (targetY - this.y) * 0.4;
-                    targetSize += force * 7 + pulseBoost * (isLoginMode ? 1.1 : 0.45);
-                } else {
-                    if (this.x !== this.baseX) {
-                        this.x -= (this.x - this.baseX) * returnSpeed;
-                    }
-                    if (this.y !== this.baseY) {
-                        this.y -= (this.y - this.baseY) * returnSpeed;
-                    }
-                }
-
-                this.size += (targetSize - this.size) * (isWithinMouseRadius ? 0.45 : 0.2);
-                this.draw();
-            }
-        }
-
-        const init = () => {
-            particles = [];
-            const cols = Math.floor(window.innerWidth / spacing);
-            const rows = Math.floor(window.innerHeight / spacing);
-
-            const offsetX = (window.innerWidth - cols * spacing) / 2;
-            const offsetY = (window.innerHeight - rows * spacing) / 2;
-
-            for (let i = 0; i <= cols; i++) {
-                for (let j = 0; j <= rows; j++) {
-                    particles.push(new Particle(offsetX + i * spacing, offsetY + j * spacing));
-                }
-            }
-        };
-
-        const animateParams = () => {
-            pulseClock = performance.now();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((particle) => particle.update());
-            animationFrameId = requestAnimationFrame(animateParams);
-        };
-
-        const handleResize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            init();
-        };
-
-        const handleMouseMove = (event: MouseEvent) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        };
-
-        const handleMouseLeave = () => {
-            mouse.x = -1000;
-            mouse.y = -1000;
-        };
-
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseleave', handleMouseLeave);
-
-        handleResize();
-        animateParams();
-
-        return () => {
-            cancelAnimationFrame(animationFrameId);
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseleave', handleMouseLeave);
-        };
-    }, [isLoginMode]);
-
-    return (
-        <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
-            <canvas
-                ref={canvasRef}
-                className={`w-full h-full mix-blend-screen ${isLoginMode ? 'opacity-55' : 'opacity-40'}`}
-            />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#09090b_80%)]" />
-        </div>
-    );
-};
-
-// --- SUBTLE FILM GRAIN NOISE ---
-export const NoiseOverlay = () => (
-    <div 
-        className="pointer-events-none fixed inset-0 z-[1] h-full w-full opacity-[0.035]" 
-        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
-    </div>
-);
+import { PublicHeader } from './PublicHeader';
 
 // Illustrative examples explain recorded fields, not observed user outcomes.
 const TerminalLog = () => (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5 space-y-3 text-xs">
-        <p className="text-zinc-500">Example coding record</p>
-        <p className="text-zinc-200">LRU Cache · 22 min</p>
-        <p className="text-emerald-400">Tests passed · no hints · explanation clear</p>
-        <p className="text-zinc-400">One independent attempt. Delayed retention still needs another check.</p>
+    <div className="rounded-xl border border-line bg-canvas p-5 space-y-3 text-xs">
+        <p className="text-subtle">Example coding record</p>
+        <p className="text-body">LRU Cache · 22 min</p>
+        <p className="text-accent">Tests passed · no hints · explanation clear</p>
+        <p className="text-muted">One independent attempt. Delayed retention still needs another check.</p>
     </div>
 );
 const SpacedRepetitionVisual = () => (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5 space-y-4 text-sm">
-        <p className="text-zinc-500 text-xs">Two distinct checks</p>
-        <div><p className="text-emerald-400 font-semibold">Recall the approach</p><p className="text-zinc-400 mt-1">Explain from memory, then compare with a reference.</p></div>
-        <div><p className="text-emerald-400 font-semibold">Implement independently</p><p className="text-zinc-400 mt-1">Code, test, and explain it after a delay. Record any hints.</p></div>
-        <p className="text-xs text-zinc-500">Intervals respond to your recorded results; the app does not estimate when you will forget.</p>
+    <div className="rounded-xl border border-line bg-canvas p-5 space-y-4 text-sm">
+        <p className="text-subtle text-xs">Two distinct checks</p>
+        <div><p className="text-accent font-semibold">Recall the approach</p><p className="text-muted mt-1">Explain from memory, then compare with a reference.</p></div>
+        <div><p className="text-accent font-semibold">Implement independently</p><p className="text-muted mt-1">Code, test, and explain it after a delay. Record any hints.</p></div>
+        <p className="text-xs text-subtle">Intervals respond to your recorded results; the app does not estimate when you will forget.</p>
     </div>
 );
 const HeatmapVisual = () => (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 h-full space-y-3">
-        <p className="text-xs text-zinc-500">Example study minutes · one week</p>
+    <div className="rounded-xl border border-line bg-canvas p-4 h-full space-y-3">
+        <p className="text-xs text-subtle">Example study minutes · one week</p>
         <div className="flex gap-2 items-end h-16" role="img" aria-label="Illustrative daily study time, not user measurements">
-            {[30, 45, 0, 30, 40, 60, 30].map((minutes, i) => <div key={i} className="flex-1 bg-emerald-500/60 rounded-t" style={{ height: `${minutes}px` }} title={`${minutes} minutes`} />)}
+            {[30, 45, 0, 30, 40, 60, 30].map((minutes, i) => <div key={i} className="flex-1 bg-accent/60 rounded-t" style={{ height: `${minutes}px` }} title={`${minutes} minutes`} />)}
         </div>
-        <p className="text-xs text-zinc-400">Review minutes alongside learning outcomes.</p>
+        <p className="text-xs text-muted">Review minutes alongside learning outcomes.</p>
     </div>
 );
 
 // --- PRODUCT PREVIEW MOCK PANELS ---
 const MockPanelChrome = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="rounded-xl border border-zinc-800/80 bg-[#0a0a0c] overflow-hidden h-full flex flex-col">
-        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-800/80 bg-[#121214]">
-            <span className="text-[11px] font-medium text-zinc-300 tracking-tight">{title}</span>
+    <div className="rounded-xl border border-line/80 bg-canvas overflow-hidden h-full flex flex-col">
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-line/80 bg-surface">
+            <span className="text-[11px] font-medium text-body tracking-tight">{title}</span>
             <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                <div className="w-1.5 h-1.5 rounded-full bg-hover-surface" />
+                <div className="w-1.5 h-1.5 rounded-full bg-hover-surface" />
             </div>
         </div>
         <div className="p-3.5 flex-1">{children}</div>
@@ -234,22 +49,22 @@ const MockPanelChrome = ({ title, children }: { title: string; children: React.R
 const TodayPlanMock = () => (
     <MockPanelChrome title="Example daily plan">
         <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3 text-emerald-500" /> 30 min budget</span>
+            <div className="flex items-center justify-between text-[10px] font-mono text-subtle">
+                <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3 text-accent" /> 30 min budget</span>
                 <span>30 min planned</span>
             </div>
-            <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                <div className="h-full w-full rounded-full bg-emerald-500/80" />
+            <div className="h-1.5 rounded-full bg-muted-surface overflow-hidden">
+                <div className="h-full w-full rounded-full bg-accent/80" />
             </div>
             <ul className="space-y-2 pt-1">
                 {[
-                    { name: 'Clone Graph', tag: 'Code · 21 min', tone: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-                    { name: 'Course Schedule', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-                    { name: 'Valid Palindrome', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-                    { name: 'Binary Search', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                    { name: 'Clone Graph', tag: 'Code · 21 min', tone: 'text-accent bg-accent/10 border-accent/20' },
+                    { name: 'Course Schedule', tag: 'Recall · 3 min', tone: 'text-warning bg-warning/10 border-warning/20' },
+                    { name: 'Valid Palindrome', tag: 'Recall · 3 min', tone: 'text-warning bg-warning/10 border-warning/20' },
+                    { name: 'Binary Search', tag: 'Recall · 3 min', tone: 'text-warning bg-warning/10 border-warning/20' },
                 ].map((row) => (
-                    <li key={row.name} className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800/70 bg-zinc-900/50 px-2.5 py-2">
-                        <span className="text-xs text-zinc-200 truncate">{row.name}</span>
+                    <li key={row.name} className="flex items-center justify-between gap-2 rounded-lg border border-line/70 bg-surface/50 px-2.5 py-2">
+                        <span className="text-xs text-body truncate">{row.name}</span>
                         <span className={`shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded border ${row.tone}`}>{row.tag}</span>
                     </li>
                 ))}
@@ -261,8 +76,8 @@ const TodayPlanMock = () => (
 const ReviewQueueMock = () => (
     <MockPanelChrome title="Example recall queue">
         <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><ListFilter className="w-3 h-3 text-emerald-500" /> Fits today</span>
+            <div className="flex items-center justify-between text-[10px] font-mono text-subtle">
+                <span className="flex items-center gap-1.5"><ListFilter className="w-3 h-3 text-accent" /> Fits today</span>
                 <span>3 checks</span>
             </div>
             <ul className="space-y-2">
@@ -271,12 +86,12 @@ const ReviewQueueMock = () => (
                     { name: 'Valid Palindrome', due: '3 min', interval: 'Explain the correctness argument' },
                     { name: 'Binary Search', due: '3 min', interval: 'Identify complexity and edge cases' },
                 ].map((row) => (
-                    <li key={row.name} className="rounded-lg border border-zinc-800/70 bg-zinc-900/50 px-2.5 py-2">
+                    <li key={row.name} className="rounded-lg border border-line/70 bg-surface/50 px-2.5 py-2">
                         <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs text-zinc-200 truncate">{row.name}</span>
-                            <span className="text-[10px] font-mono text-emerald-400/90 shrink-0">{row.due}</span>
+                            <span className="text-xs text-body truncate">{row.name}</span>
+                            <span className="text-[10px] font-mono text-accent/90 shrink-0">{row.due}</span>
                         </div>
-                        <div className="mt-1 text-[10px] font-mono text-zinc-500">{row.interval}</div>
+                        <div className="mt-1 text-[10px] font-mono text-subtle">{row.interval}</div>
                     </li>
                 ))}
             </ul>
@@ -287,12 +102,12 @@ const ReviewQueueMock = () => (
 const PatternMasteryMock = () => (
     <MockPanelChrome title="Example pattern evidence">
         <div className="space-y-3">
-            <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-emerald-500" /> Core patterns</span>
+            <div className="flex items-center justify-between text-[10px] font-mono text-subtle">
+                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-accent" /> Core patterns</span>
                 <span>5 / 8 dependable</span>
             </div>
-            <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                <div className="h-full w-[62%] rounded-full bg-emerald-500/80" />
+            <div className="h-1.5 rounded-full bg-muted-surface overflow-hidden">
+                <div className="h-full w-[62%] rounded-full bg-accent/80" />
             </div>
             <ul className="space-y-2">
                 {[
@@ -302,11 +117,11 @@ const PatternMasteryMock = () => (
                 ].map((row) => (
                     <li key={row.name} className="space-y-1.5">
                         <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-zinc-300">{row.name}</span>
-                            <span className="font-mono text-zinc-500">{row.passed}/{row.total}</span>
+                            <span className="text-body">{row.name}</span>
+                            <span className="font-mono text-subtle">{row.passed}/{row.total}</span>
                         </div>
-                        <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
-                            <div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${row.passed}/{row.total}` }} />
+                        <div className="h-1 rounded-full bg-muted-surface overflow-hidden">
+                            <div className="h-full rounded-full bg-accent-strong/80" style={{ width: `${(row.passed / row.total) * 100}%` }} />
                         </div>
                     </li>
                 ))}
@@ -315,92 +130,8 @@ const PatternMasteryMock = () => (
     </MockPanelChrome>
 );
 
-// --- GLOWING SPOTLIGHT CARD WITH 3D TILT ---
-const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
-    const divRef = useRef<HTMLDivElement>(null);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [opacity, setOpacity] = useState(0);
-
-    const rotateX = useMotionValue(0);
-    const rotateY = useMotionValue(0);
-    const springX = useSpring(rotateX, { stiffness: 300, damping: 30, mass: 0.8 });
-    const springY = useSpring(rotateY, { stiffness: 300, damping: 30, mass: 0.8 });
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!divRef.current) return;
-        const rect = divRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        setPosition({ x, y });
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        rotateX.set((y - centerY) / -30);
-        rotateY.set((x - centerX) / 30);
-    };
-
-    const handleMouseLeave = () => {
-        setOpacity(0);
-        rotateX.set(0);
-        rotateY.set(0);
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 30 }}
-            whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            style={{
-                rotateX: springX,
-                rotateY: springY,
-                transformStyle: "preserve-3d",
-                perspective: 1000
-            }}
-            ref={divRef}
-            onMouseMove={handleMouseMove}
-            onMouseEnter={() => setOpacity(1)}
-            onMouseLeave={handleMouseLeave}
-            className={`relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-[#0a0a0c]/80 shadow-2xl transition-colors duration-500 hover:border-zinc-700/80 ${className}`}
-        >
-            <div
-                className="pointer-events-none absolute inset-0 transition-opacity duration-500 z-0"
-                style={{
-                    opacity,
-                    background: `radial-gradient(800px circle at ${position.x}px ${position.y}px, rgba(16,185,129,0.06), transparent 40%)`,
-                }}
-            />
-            <div className="relative z-10 h-full" style={{ transform: "translateZ(30px)" }}>
-                {children}
-            </div>
-        </motion.div>
-    );
-}
-
-// --- FLOATING HERO BADGES (kept for Login; not used on Landing hero) ---
-const FloatingBadge = ({ text, icon: Icon, top, left, delay }: { text: string, icon: any, top: string, left: string, delay: number }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: [0.2, 0.5, 0.2], y: [0, -15, 0] }}
-        transition={{ 
-            opacity: { duration: 4, repeat: Infinity, delay }, 
-            y: { duration: 6, repeat: Infinity, delay, ease: "easeInOut" } 
-        }}
-        className="absolute hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-black/40 backdrop-blur-md text-zinc-500 font-mono text-[10px] shadow-xl pointer-events-none"
-        style={{ top, left }}
-    >
-        <Icon className="w-2.5 h-2.5 text-emerald-500/50" />
-        {text}
-    </motion.div>
-);
-
-export const FloatingContextBadges = ({ className = '' }: { className?: string }) => (
-    <div className={`absolute inset-0 pointer-events-none overflow-visible ${className}`.trim()}>
-        <FloatingBadge icon={Network} text={BRAND.landing.badges[0]} top="25%" left="-5%" delay={0} />
-        <FloatingBadge icon={Cpu} text={BRAND.landing.badges[1]} top="70%" left="90%" delay={1.5} />
-        <FloatingBadge icon={Database} text={BRAND.landing.badges[2]} top="35%" left="85%" delay={0.8} />
-        <FloatingBadge icon={BrainCircuit} text={BRAND.landing.badges[3]} top="80%" left="10%" delay={2.2} />
-    </div>
+const FeaturePanel = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+    <div className={`rounded-xl border border-line bg-surface ${className}`}>{children}</div>
 );
 
 const LOOP_ICONS = [ListFilter, Code2, BrainCircuit] as const;
@@ -409,64 +140,33 @@ const LOOP_ICONS = [ListFilter, Code2, BrainCircuit] as const;
 export const LandingPage = () => {
   return (
                 <div
-                        className="brand-shell min-h-screen text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-100 font-sans relative overflow-x-hidden"
-                        style={{ fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}
+                        className="brand-shell min-h-screen text-body selection:bg-accent/30 selection:text-accent font-sans relative overflow-x-hidden"
                 >
-        <NoiseOverlay />
-        <MagnetCanvas />
-        
-        {/* Navigation */}
-        <nav className="fixed top-0 w-full z-50 border-b border-white/[0.08] backdrop-blur-xl bg-[#09090b]/60 transition-all duration-300">
-            <div className="max-w-[52rem] mx-auto px-6 h-14 flex items-center justify-between">
-                <a href="/" className="flex items-center gap-2 font-semibold text-white group">
-                    <div className="relative">
-                        <Logo className="text-emerald-400 group-hover:scale-105 transition-transform duration-300" size={18} />
-                    </div>
-                    <span className="tracking-tight text-base">{BRAND.name}</span>
-                </a>
-                <div className="flex flex-wrap items-center gap-5 justify-end">
-                     <a href="/library" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Library
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
-                    </a>
-                     <a href="/patterns" className="hidden sm:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Patterns
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
-                    </a>
-                     <a href="/syntax" className="hidden md:inline-block text-xs font-medium text-zinc-400 hover:text-white transition-colors relative group">
-                        Syntax
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-400 transition-all group-hover:w-full"></span>
-                    </a>
-                     <a href="/login" className="brand-button-primary px-4 py-1.5 text-xs font-semibold rounded transition-colors">
-                        {BRAND.landing.ctaPrimary}
-                    </a>
-                </div>
-            </div>
-        </nav>
+        <PublicHeader fixed />
 
         {/* Hero Section */}
         <section className="relative z-10 pt-36 pb-20 px-6 max-w-[52rem] mx-auto min-h-[95vh] flex flex-col justify-center gap-12">
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="space-y-5 relative z-20 max-w-[34rem] mx-auto lg:mr-auto lg:ml-8 w-full"
             >
-                <h1 className="text-[2.2rem] md:text-[3.35rem] font-black tracking-tight text-white leading-[1.07]">
+                <h1 className="text-[2.2rem] md:text-[3.35rem] font-semibold tracking-tight text-foreground leading-[1.07]">
                     {BRAND.landing.headlineTop}
                     <br />
-                    <span className="bg-gradient-to-br from-emerald-200 via-emerald-400 to-teal-500 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-br from-accent via-accent to-accent bg-clip-text text-transparent">
                         {BRAND.landing.headlineBottom}
                     </span>
                 </h1>
 
-                <p className="max-w-md text-[15px] text-zinc-400 font-medium leading-relaxed">
+                <p className="max-w-md text-[15px] text-muted font-medium leading-relaxed">
                     {BRAND.landing.body}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-5">
                      <a href="/login" className="block w-full sm:w-auto">
-                        <motion.button 
+                        <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="brand-button-primary group relative px-5 py-2.5 font-semibold rounded-lg flex items-center gap-2 w-full sm:w-auto justify-center transition-shadow"
@@ -477,23 +177,23 @@ export const LandingPage = () => {
                         </motion.button>
                     </a>
                     <a href="https://github.com/Alesiobarquin/LC-Tracker" target="_blank" rel="noopener noreferrer" className="brand-button-secondary group px-5 py-2.5 flex items-center justify-center gap-2.5 backdrop-blur-md rounded-lg font-medium transition-all">
-                        <Github className="w-4 h-4 group-hover:text-white transition-colors" /> 
-                        <span className="group-hover:text-white transition-colors">{BRAND.landing.ctaSecondary}</span>
+                        <Github className="w-4 h-4 group-hover:text-foreground transition-colors" />
+                        <span className="group-hover:text-foreground transition-colors">{BRAND.landing.ctaSecondary}</span>
                     </a>
                 </div>
             </motion.div>
-            
+
             {/* Scroll Indicator */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-600 font-mono text-xs z-10"
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-subtle font-mono text-xs z-10"
             >
                 <span>Explore</span>
-                <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-600 to-transparent overflow-hidden">
-                    <motion.div 
-                        className="w-full h-1/2 bg-emerald-500" 
+                <div className="w-[1px] h-12 bg-gradient-to-b from-subtle to-transparent overflow-hidden">
+                    <motion.div
+                        className="w-full h-1/2 bg-accent"
                         animate={{ y: [-24, 24] }}
                         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                     />
@@ -502,11 +202,11 @@ export const LandingPage = () => {
         </section>
 
         {/* Plan → Practice → Retain */}
-        <section className="relative z-10 py-20 px-6 border-t border-zinc-800/50">
+        <section className="relative z-10 py-20 px-6 border-t border-line/50">
             <div className="max-w-[52rem] mx-auto space-y-10">
                 <div className="max-w-lg space-y-2">
-                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{BRAND.landing.loopTitle}</h2>
-                    <p className="text-sm text-zinc-400 leading-relaxed">{BRAND.landing.loopBody}</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">{BRAND.landing.loopTitle}</h2>
+                    <p className="text-sm text-muted leading-relaxed">{BRAND.landing.loopBody}</p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                     {BRAND.landing.loopSteps.map((step, index) => {
@@ -518,18 +218,18 @@ export const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: '-40px' }}
                                 transition={{ duration: 0.45, delay: index * 0.08 }}
-                                className="rounded-xl border border-zinc-800/70 bg-[#0a0a0c]/70 p-5 space-y-3"
+                                className="rounded-xl border border-line/70 bg-canvas/70 p-5 space-y-3"
                             >
                                 <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-lg border border-zinc-700/60 bg-zinc-900 flex items-center justify-center">
-                                        <Icon className="w-4 h-4 text-emerald-400" />
+                                    <div className="w-8 h-8 rounded-lg border border-line-strong/60 bg-surface flex items-center justify-center">
+                                        <Icon className="w-4 h-4 text-accent" />
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-[10px] font-mono text-zinc-600">0{index + 1}</span>
-                                        <h3 className="text-base font-semibold text-white tracking-tight">{step.title}</h3>
+                                        <span className="text-[10px] font-mono text-subtle">0{index + 1}</span>
+                                        <h3 className="text-base font-semibold text-foreground tracking-tight">{step.title}</h3>
                                     </div>
                                 </div>
-                                <p className="text-xs text-zinc-400 leading-relaxed">{step.body}</p>
+                                <p className="text-xs text-muted leading-relaxed">{step.body}</p>
                             </motion.div>
                         );
                     })}
@@ -538,11 +238,11 @@ export const LandingPage = () => {
         </section>
 
         {/* Product preview */}
-        <section className="relative z-10 py-20 px-6 border-t border-zinc-800/50 bg-[#09090b]/60">
+        <section className="relative z-10 py-20 px-6 border-t border-line/50 bg-canvas/60">
             <div className="max-w-[52rem] mx-auto space-y-8">
                 <div className="max-w-lg space-y-2">
-                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{BRAND.landing.previewTitle}</h2>
-                    <p className="text-sm text-zinc-400 leading-relaxed">{BRAND.landing.previewBody}</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">{BRAND.landing.previewTitle}</h2>
+                    <p className="text-sm text-muted leading-relaxed">{BRAND.landing.previewBody}</p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                     <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
@@ -559,30 +259,30 @@ export const LandingPage = () => {
         </section>
 
         {/* Features Grids */}
-        <section className="relative z-10 py-28 px-6 border-y border-zinc-800/50 bg-[#09090b]/80 backdrop-blur-3xl">
+        <section className="relative z-10 py-28 px-6 border-y border-line/50 bg-canvas/80 backdrop-blur-3xl">
             <div className="max-w-[52rem] mx-auto space-y-6 perspective-[2000px]">
-                
+
                 {/* Feature 1 */}
-                <SpotlightCard className="p-5 md:p-7">
+                <FeaturePanel className="p-5 md:p-7">
                     <div className="grid md:grid-cols-2 gap-7 md:gap-12 items-center">
                         <div>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-5">
-                                <BrainCircuit className="w-5 h-5 text-emerald-400" />
+                            <div className="w-10 h-10 rounded-xl bg-muted-surface border border-line-strong/50  flex items-center justify-center mb-5">
+                                <BrainCircuit className="w-5 h-5 text-accent" />
                             </div>
-                            <h2 className="text-xl md:text-[1.65rem] font-bold text-white mb-4 tracking-tight">{BRAND.landing.featuresHeadlineA}</h2>
-                            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+                            <h2 className="text-xl md:text-[1.65rem] font-bold text-foreground mb-4 tracking-tight">{BRAND.landing.featuresHeadlineA}</h2>
+                            <p className="text-muted text-sm leading-relaxed mb-5">
                                 Recall checks and coding attempts have separate schedules. Success after a delay extends an interval; gaps in recall or implementation bring practice closer. The daily plan selects only what fits your time budget.
                             </p>
-                            <a href="https://github.com/Alesiobarquin/LC-Tracker/blob/main/docs/study-strategy.md" target="_blank" rel="noopener noreferrer" className="inline-block text-xs text-emerald-400 mb-5">Study strategy and evidence limits</a>
-                            <ul className="space-y-2.5 text-xs font-mono text-zinc-500">
+                            <a href="https://github.com/Alesiobarquin/LC-Tracker/blob/main/docs/study-strategy.md" target="_blank" rel="noopener noreferrer" className="inline-block text-xs text-accent mb-5">Study strategy and evidence limits</a>
+                            <ul className="space-y-2.5 text-xs font-mono text-subtle">
                                 <li className="flex gap-3 items-center">
-                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <div className="p-1 rounded bg-accent/10 text-accent border border-accent/20">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
                                     Separate recall and coding dates per problem
                                 </li>
                                 <li className="flex gap-3 items-center">
-                                    <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <div className="p-1 rounded bg-accent/10 text-accent border border-accent/20">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
                                     Retained implementation and unseen variations
@@ -593,64 +293,64 @@ export const LandingPage = () => {
                             <SpacedRepetitionVisual />
                         </div>
                     </div>
-                </SpotlightCard>
+                </FeaturePanel>
 
                 {/* Feature 2 & 3 in a grid */}
                 <div className="grid md:grid-cols-2 gap-4">
                     {/* Feature 2 */}
-                    <SpotlightCard className="p-5 md:p-6 flex flex-col justify-between">
+                    <FeaturePanel className="p-5 md:p-6 flex flex-col justify-between">
                         <div className="mb-7">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-4">
-                                <Activity className="w-4.5 h-4.5 text-emerald-400" />
+                            <div className="w-9 h-9 rounded-xl bg-muted-surface border border-line-strong/50  flex items-center justify-center mb-4">
+                                <Activity className="w-4.5 h-4.5 text-accent" />
                             </div>
-                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineB}</h2>
-                            <p className="text-zinc-400 text-xs leading-relaxed">
+                            <h2 className="text-lg font-bold text-foreground mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineB}</h2>
+                            <p className="text-muted text-xs leading-relaxed">
                                 See recall outcomes, delayed independent coding, unseen variations, and recorded study minutes over the last fourteen days.
                             </p>
                         </div>
                         <div className="h-36 mt-auto">
                             <HeatmapVisual />
                         </div>
-                    </SpotlightCard>
+                    </FeaturePanel>
 
                     {/* Feature 3 */}
-                    <SpotlightCard className="p-5 md:p-6 flex flex-col justify-between">
+                    <FeaturePanel className="p-5 md:p-6 flex flex-col justify-between">
                         <div className="mb-7">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-inner flex items-center justify-center mb-4">
-                                <TerminalSquare className="w-4.5 h-4.5 text-emerald-400" />
+                            <div className="w-9 h-9 rounded-xl bg-muted-surface border border-line-strong/50  flex items-center justify-center mb-4">
+                                <TerminalSquare className="w-4.5 h-4.5 text-accent" />
                             </div>
-                            <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineC}</h2>
-                            <p className="text-zinc-400 text-xs leading-relaxed">
+                            <h2 className="text-lg font-bold text-foreground mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineC}</h2>
+                            <p className="text-muted text-xs leading-relaxed">
                                 Record correctness, assistance, explanations, and notes. Confidence remains a self-rating, separate from coding evidence.
                             </p>
                         </div>
                         <div className="h-36 mt-auto">
                             <TerminalLog />
                         </div>
-                    </SpotlightCard>
+                    </FeaturePanel>
                 </div>
 
             </div>
         </section>
 
         {/* Final CTA Section */}
-        <section className="relative z-10 py-28 px-6 overflow-hidden bg-black">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-emerald-900/10 via-[#09090b] to-[#09090b] pointer-events-none"></div>
+        <section className="relative z-10 py-28 px-6 overflow-hidden bg-surface">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-accent/10 via-canvas to-canvas pointer-events-none"></div>
 
             <div className="max-w-xl mx-auto text-center space-y-7 relative z-10">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-2xl md:text-[2.8rem] font-black text-white tracking-tight mb-4">{BRAND.landing.finalCtaTitle}</h2>
-                    <p className="text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
+                    <h2 className="text-2xl md:text-[2.8rem] font-semibold text-foreground tracking-tight mb-4">{BRAND.landing.finalCtaTitle}</h2>
+                    <p className="text-sm text-muted max-w-lg mx-auto leading-relaxed">
                         {BRAND.landing.finalCtaBody}
                     </p>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -668,21 +368,21 @@ export const LandingPage = () => {
         </section>
 
         {/* Trust footer */}
-        <section className="relative z-10 py-24 px-6 bg-zinc-950/90 border-t border-zinc-900">
+        <section className="relative z-10 py-24 px-6 bg-canvas/90 border-t border-line">
             <div className="max-w-[52rem] mx-auto">
-                <h2 className="text-sm font-medium text-zinc-400 mb-8 tracking-tight">{BRAND.landing.trustTitle}</h2>
+                <h2 className="text-sm font-medium text-muted mb-8 tracking-tight">{BRAND.landing.trustTitle}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {BRAND.landing.trustItems.map((item, index) => {
                         const isGithub = item.title === 'Open source';
                         const content = (
                             <>
-                                <div className="flex items-center gap-2 text-zinc-300 text-sm font-medium">
-                                    {index === 0 && <Download className="w-4 h-4 text-emerald-500" />}
-                                    {index === 1 && <Github className="w-4 h-4 text-emerald-500" />}
-                                    {index === 2 && <Database className="w-4 h-4 text-emerald-500" />}
+                                <div className="flex items-center gap-2 text-body text-sm font-medium">
+                                    {index === 0 && <Download className="w-4 h-4 text-accent" />}
+                                    {index === 1 && <Github className="w-4 h-4 text-accent" />}
+                                    {index === 2 && <Database className="w-4 h-4 text-accent" />}
                                     {item.title}
                                 </div>
-                                <p className="text-xs text-zinc-500 leading-relaxed">{item.body}</p>
+                                <p className="text-xs text-subtle leading-relaxed">{item.body}</p>
                             </>
                         );
 
@@ -693,7 +393,7 @@ export const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.05 * (index + 1) }}
-                                className="space-y-2 border-l border-zinc-800 pl-4 py-1"
+                                className="space-y-2 border-l border-line pl-4 py-1"
                             >
                                 {isGithub ? (
                                     <a
@@ -711,17 +411,17 @@ export const LandingPage = () => {
                         );
                     })}
                 </div>
-                
-                <div className="mt-16 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-zinc-600 uppercase tracking-wide">
+
+                <div className="mt-16 pt-8 border-t border-line flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-subtle uppercase tracking-wide">
                     <div className="flex items-center gap-3 opacity-80">
                         <TerminalSquare className="w-3.5 h-3.5" />
                         © 2026 {BRAND.name}
                     </div>
                     <div className="flex gap-6">
-                        <a href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy</a>
-                        <a href="/terms" className="hover:text-emerald-400 transition-colors">Terms</a>
-                        <span className="flex items-center gap-2 text-emerald-500/80">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <a href="/privacy" className="hover:text-accent transition-colors">Privacy</a>
+                        <a href="/terms" className="hover:text-accent transition-colors">Terms</a>
+                        <span className="flex items-center gap-2 text-accent/80">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
                             {BRAND.landing.footerStatus}
                         </span>
                     </div>

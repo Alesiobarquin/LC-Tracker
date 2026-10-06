@@ -68,6 +68,22 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   `supabase/tests/study.sql`, service/backup checks, and `e2e/study.spec.ts` when
   changing recall persistence or the completion flow.
 
+## Interface and themes
+
+- Use the semantic palette in `src/index.css` for backgrounds, borders, text,
+  status colors, charts, and syntax highlighting. Both light and dark themes
+  must stay readable; do not introduce fixed dark panels or pale text colors.
+- `ThemeProvider` owns the browser preference (`light`, `dark`, or `system`).
+  Keep `public/theme-init.js` aligned with it so the correct theme appears before
+  React loads. Theme changes are local preferences and never write user data.
+- Keep one prominent next action on the daily plan. Use flatter panels, small
+  corner radii, and quiet secondary controls. Preserve session drafts, time
+  accounting, queue selection, and rest-day behavior during visual changes.
+- Check desktop and narrow mobile layouts in both themes, including code,
+  dialogs, keyboard focus, and navigation. Run the theme and study browser
+  checks after shared shell changes. Pure styling changes need no database
+  migration or production backup.
+
 ## Verification
 
 Run `npm run lint`, `npm test`, and `npm run build` for application changes.

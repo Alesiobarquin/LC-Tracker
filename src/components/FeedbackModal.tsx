@@ -98,15 +98,15 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-modal-title"
-        className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200"
+        className="bg-surface border border-line rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950/50">
-          <h2 id="feedback-modal-title" className="text-lg font-semibold text-white">Share Feedback</h2>
+        <div className="flex items-center justify-between p-4 border-b border-line bg-canvas/50">
+          <h2 id="feedback-modal-title" className="text-lg font-semibold text-foreground">Share Feedback</h2>
           <button
             onClick={onClose}
             aria-label="Close feedback modal"
-            className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="p-1 text-muted hover:text-foreground hover:bg-muted-surface rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -114,32 +114,32 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {status === 'success' && (
-            <div className="flex items-center gap-2 p-3 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+            <div className="flex items-center gap-2 p-3 text-accent bg-accent/10 border border-accent/20 rounded-lg">
               <CheckCircle2 className="w-5 h-5" />
               <p className="font-medium text-sm">Feedback sent successfully!</p>
             </div>
           )}
 
           {status !== 'idle' && status !== 'success' && (
-            <div className="flex items-center gap-2 p-3 text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <div className="flex items-center gap-2 p-3 text-danger bg-danger/10 border border-danger/20 rounded-lg">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="font-medium text-sm break-words">{status}</p>
             </div>
           )}
 
           {!user && status === 'idle' && (
-            <div className="flex items-center gap-2 p-3 text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <div className="flex items-center gap-2 p-3 text-warning bg-warning/10 border border-warning/20 rounded-lg">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="font-medium text-sm">Sign in to send feedback.</p>
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Type of Feedback</label>
+            <label className="text-sm font-medium text-body">Type of Feedback</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full bg-canvas border border-line rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
             >
               <option value="feature_request">💡 Feature Request</option>
               <option value="bug">🐛 Bug Report</option>
@@ -148,20 +148,20 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Message</label>
+            <label className="text-sm font-medium text-body">Message</label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Tell us what you think..."
-              className="w-full h-32 bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none"
+              className="w-full h-32 bg-canvas border border-line rounded-lg px-4 py-3 text-foreground placeholder-subtle focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <span className="text-sm font-medium text-zinc-300">Attach Screenshot (Optional)</span>
+            <span className="text-sm font-medium text-body">Attach Screenshot (Optional)</span>
             {imagePreview ? (
-              <div className="relative inline-block mt-2 rounded-lg overflow-hidden border border-zinc-700">
+              <div className="relative inline-block mt-2 rounded-lg overflow-hidden border border-line-strong">
                 <img src={imagePreview} alt="Preview" className="max-h-32 object-cover" />
                 <button
                   type="button"
@@ -171,7 +171,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                     setImagePreview(null);
                     URL.revokeObjectURL(imagePreview);
                   }}
-                  className="absolute top-1 right-1 p-1.5 bg-black/60 hover:bg-red-500/80 text-white rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  className="absolute top-1 right-1 p-1.5 bg-black/70 hover:bg-black/90 text-white rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                 >
                   <Trash2 className="w-4 h-4" aria-hidden="true" />
                 </button>
@@ -201,12 +201,12 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 />
                 <label
                   htmlFor="screenshot-upload"
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg cursor-pointer transition-colors text-sm w-max border border-zinc-700 mt-1 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 peer-focus-visible:outline-none"
+                  className="flex items-center gap-2 px-4 py-2 bg-muted-surface hover:bg-hover-surface text-body rounded-lg cursor-pointer transition-colors text-sm w-max border border-line-strong mt-1 peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-focus-visible:outline-none"
                 >
                   <ImagePlus className="w-4 h-4" aria-hidden="true" />
                   Select Image
                 </label>
-                <p className="text-xs text-zinc-500 mt-2">JPG, PNG, or WebP up to 5MB.</p>
+                <p className="text-xs text-subtle mt-2">JPG, PNG, or WebP up to 5MB.</p>
               </div>
             )}
           </div>
@@ -214,7 +214,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           <button
             type="submit"
             disabled={isSubmitting || !message.trim() || !user}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white font-medium rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-accent hover:bg-accent-strong disabled:opacity-50 disabled:hover:bg-accent text-on-accent font-medium rounded-lg transition-colors"
           >
             {isSubmitting ? 'Sending...' : 'Send Feedback'}
             <Send className="w-4 h-4" />

@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
 import { motion } from 'motion/react';
 import { SyntaxHighlightedCode } from './SyntaxHighlightedCode';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 export type SessionOrderMode = 'random' | 'category';
 
@@ -349,16 +350,16 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     if (!currentCard && phase !== 'summary') return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-zinc-950 flex flex-col">
+        <div className="fixed inset-0 z-[60] bg-canvas flex flex-col">
             {/* Top bar */}
-            <div className="flex-shrink-0 flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-zinc-800/60 bg-zinc-900/60">
-                <div className="flex items-center gap-4 min-w-0">
-                    <span className="text-lg sm:text-xl font-bold text-zinc-100 truncate">{activeTitle}</span>
+            <div className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-8 py-3 sm:py-4 border-b border-line bg-surface">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                    <span className="text-sm sm:text-lg font-semibold text-foreground truncate">{activeTitle}</span>
                     {phase !== 'summary' && (
-                        <span className="text-sm sm:text-base text-zinc-500 font-mono tabular-nums whitespace-nowrap">
+                        <span className="text-xs sm:text-sm text-subtle font-mono tabular-nums whitespace-nowrap">
                             {currentIndex + 1} / {queue.length}
                             {queue.length > totalUniqueCards && (
-                                <span className="text-amber-500/70 ml-2">
+                                <span className="text-warning/70 ml-2">
                                     (+{queue.length - totalUniqueCards} again)
                                 </span>
                             )}
@@ -366,9 +367,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                     )}
                 </div>
 
-                <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+                    <ThemeSwitcher compact />
                     {phase !== 'summary' && (
-                        <div className="flex items-center gap-2 text-sm sm:text-base text-zinc-500 font-mono tabular-nums">
+                        <div className="hidden sm:flex items-center gap-2 text-sm text-subtle font-mono tabular-nums">
                             <Clock size={18} />
                             {formatTime(elapsed)}
                         </div>
@@ -377,7 +379,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                     {phase !== 'summary' && (
                         <button
                             onClick={() => setShowHelp(true)}
-                            className="p-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+                            aria-label="How the syntax session works"
+                            className="p-2.5 rounded-xl text-subtle hover:text-body hover:bg-muted-surface transition-colors"
                             title="How it works"
                         >
                             <HelpCircle size={22} />
@@ -390,7 +393,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             if (phase === 'summary' || results.length === 0) onClose();
                             else setShowExitConfirm(true);
                         }}
-                        className="p-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+                        className="p-2.5 rounded-xl text-subtle hover:text-body hover:bg-muted-surface transition-colors"
                         title="Exit (Esc)"
                     >
                         <X size={22} />
@@ -400,9 +403,9 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
             {/* Progress bar */}
             {phase !== 'summary' && (
-                <div className="h-1 bg-zinc-800 flex-shrink-0">
+                <div className="h-1 bg-muted-surface flex-shrink-0">
                     <div
-                        className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                        className="h-full bg-accent transition-all duration-500 ease-out"
                         style={{ width: `${progressPct}%` }}
                     />
                 </div>
@@ -410,22 +413,22 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
             {/* Exit confirmation */}
             {showExitConfirm && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/90 backdrop-blur-sm">
-                    <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-7 max-w-sm w-full mx-4 text-center shadow-2xl">
-                        <h3 className="text-lg font-bold text-zinc-100 mb-1.5">Exit session?</h3>
-                        <p className="text-sm text-zinc-400 mb-6">
+                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-canvas/90 backdrop-blur-sm">
+                    <div className="bg-surface border border-line-strong rounded-2xl p-7 max-w-sm w-full mx-4 text-center shadow-2xl">
+                        <h3 className="text-lg font-bold text-foreground mb-1.5">Exit session?</h3>
+                        <p className="text-sm text-muted mb-6">
                             Progress so far is saved, but the session will end.
                         </p>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowExitConfirm(false)}
-                                className="flex-1 py-2.5 rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition-colors text-sm font-medium"
+                                className="flex-1 py-2.5 rounded-xl border border-line-strong text-body hover:bg-muted-surface transition-colors text-sm font-medium"
                             >
                                 Keep going
                             </button>
                             <button
                                 onClick={onClose}
-                                className="flex-1 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-medium"
+                                className="flex-1 py-2.5 rounded-xl bg-danger/10 border border-danger/20 text-danger hover:bg-danger/20 transition-colors text-sm font-medium"
                             >
                                 Exit
                             </button>
@@ -436,18 +439,18 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
             {/* Help / intro overlay */}
             {showHelp && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-4 sm:p-6">
-                    <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl w-full max-w-3xl lg:max-w-4xl shadow-2xl flex flex-col max-h-[min(92vh,900px)] overflow-hidden">
+                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-canvas/95 backdrop-blur-sm p-4 sm:p-6">
+                    <div className="bg-surface border border-line-strong/80 rounded-3xl w-full max-w-3xl lg:max-w-4xl shadow-2xl flex flex-col max-h-[min(92vh,900px)] overflow-hidden">
                         {/* Header */}
-                        <div className="flex-shrink-0 flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b border-zinc-800">
+                        <div className="flex-shrink-0 flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b border-line">
                             <div>
-                                <h3 className="text-xl sm:text-2xl font-bold text-zinc-100">How Practice Sessions Work</h3>
-                                <p className="text-sm text-zinc-500 mt-1.5">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
+                                <h3 className="text-xl sm:text-2xl font-bold text-foreground">How Practice Sessions Work</h3>
+                                <p className="text-sm text-subtle mt-1.5">You can re-open this anytime with the <span className="font-mono">?</span> button</p>
                             </div>
                             <button
                                 aria-label="Close help"
                                 onClick={handleCloseHelp}
-                                className="p-2.5 rounded-xl text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                                className="p-2.5 rounded-xl text-subtle hover:text-body hover:bg-muted-surface transition-colors"
                             >
                                 <X size={22} />
                             </button>
@@ -456,7 +459,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                         <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-8 py-5 sm:py-6 space-y-6">
                             {/* The 3-step flow */}
                             <div>
-                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">The Flow</div>
+                                <div className="text-xs sm:text-sm font-semibold text-subtle uppercase tracking-widest mb-4">The Flow</div>
                                 <div className="space-y-3">
                                     {[
                                         { step: '1', label: 'Read the front', desc: 'Use the description, use case, and variable hints to recall the syntax.' },
@@ -464,12 +467,12 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                         { step: '3', label: 'Mark know or not', desc: 'Press 1 if you did not know it, 2 if you did. You can also click the buttons below the card.' },
                                     ].map(({ step, label, desc }) => (
                                         <div key={step} className="flex gap-4 items-start">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-sm font-bold text-zinc-400 flex-shrink-0 mt-0.5">
+                                            <div className="w-8 h-8 rounded-full bg-muted-surface border border-line-strong flex items-center justify-center text-sm font-bold text-muted flex-shrink-0 mt-0.5">
                                                 {step}
                                             </div>
                                             <div>
-                                                <div className="text-base sm:text-lg font-semibold text-zinc-200">{label}</div>
-                                                <div className="text-sm text-zinc-500 leading-relaxed mt-0.5">{desc}</div>
+                                                <div className="text-base sm:text-lg font-semibold text-body">{label}</div>
+                                                <div className="text-sm text-subtle leading-relaxed mt-0.5">{desc}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -478,28 +481,28 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
                             {/* Ratings explained */}
                             <div>
-                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">The two options</div>
+                                <div className="text-xs sm:text-sm font-semibold text-subtle uppercase tracking-widest mb-4">The two options</div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 sm:p-5">
-                                        <div className="text-base sm:text-lg font-bold text-red-400 mb-1.5 flex items-center gap-2">
+                                    <div className="bg-danger/5 border border-danger/10 rounded-2xl p-4 sm:p-5">
+                                        <div className="text-base sm:text-lg font-bold text-danger mb-1.5 flex items-center gap-2">
                                             <X size={20} />
                                             <span>1 · Don't know</span>
                                         </div>
-                                        <div className="text-sm text-zinc-500 leading-relaxed">You blanked or got it wrong. Card re-queues at the end of this session.</div>
+                                        <div className="text-sm text-subtle leading-relaxed">You blanked or got it wrong. Card re-queues at the end of this session.</div>
                                     </div>
-                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 sm:p-5">
-                                        <div className="text-base sm:text-lg font-bold text-emerald-400 mb-1.5 flex items-center gap-2">
+                                    <div className="bg-accent/5 border border-accent/10 rounded-2xl p-4 sm:p-5">
+                                        <div className="text-base sm:text-lg font-bold text-accent mb-1.5 flex items-center gap-2">
                                             <Check size={20} />
                                             <span>2 · Know it</span>
                                         </div>
-                                        <div className="text-sm text-zinc-500 leading-relaxed">You knew the syntax. Normal spaced repetition interval applied.</div>
+                                        <div className="text-sm text-subtle leading-relaxed">You knew the syntax. Normal spaced repetition interval applied.</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Card order */}
                             <div>
-                                <div className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-4">Card order</div>
+                                <div className="text-xs sm:text-sm font-semibold text-subtle uppercase tracking-widest mb-4">Card order</div>
                                 <div className="flex flex-col sm:flex-row gap-2.5">
                                     <button
                                         type="button"
@@ -507,8 +510,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                         className={clsx(
                                             "flex flex-1 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors",
                                             orderMode === 'random'
-                                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                                                : "border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                                ? "border-accent/30 bg-accent/10 text-accent"
+                                                : "border-line bg-canvas/60 text-muted hover:border-line-strong hover:text-body"
                                         )}
                                     >
                                         <Shuffle size={16} />
@@ -520,15 +523,15 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                         className={clsx(
                                             "flex flex-1 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors",
                                             orderMode === 'category'
-                                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                                                : "border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                                ? "border-accent/30 bg-accent/10 text-accent"
+                                                : "border-line bg-canvas/60 text-muted hover:border-line-strong hover:text-body"
                                         )}
                                     >
                                         <Layers size={16} />
                                         By category
                                     </button>
                                 </div>
-                                <p className="mt-3 text-sm text-zinc-500 leading-relaxed">
+                                <p className="mt-3 text-sm text-subtle leading-relaxed">
                                     {orderMode === 'random'
                                         ? 'Cards are shuffled for mixed practice across topics.'
                                         : 'Cards stay grouped by category in reference order, with each category kept together.'}
@@ -536,26 +539,26 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                             </div>
 
                             {/* Keyboard shortcuts */}
-                            <div className="flex items-center gap-2.5 flex-wrap text-xs sm:text-sm text-zinc-600 pt-1 border-t border-zinc-800">
-                                <Keyboard size={16} className="text-zinc-700" />
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">←</kbd> <kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">→</kbd> navigate</span>
-                                <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">Space</kbd> flip</span>
-                                <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">1</kbd> don't know</span>
-                                <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">2</kbd> know it</span>
-                                <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">E</kbd> explain</span>
-                                <span className="text-zinc-800">·</span>
-                                <span><kbd className="font-mono bg-zinc-800 px-2 py-1 rounded text-zinc-400">Esc</kbd> exit</span>
+                            <div className="flex items-center gap-2.5 flex-wrap text-xs sm:text-sm text-subtle pt-1 border-t border-line">
+                                <Keyboard size={16} className="text-body" />
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">←</kbd> <kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">→</kbd> navigate</span>
+                                <span className="text-foreground">·</span>
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">Space</kbd> flip</span>
+                                <span className="text-foreground">·</span>
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">1</kbd> don't know</span>
+                                <span className="text-foreground">·</span>
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">2</kbd> know it</span>
+                                <span className="text-foreground">·</span>
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">E</kbd> explain</span>
+                                <span className="text-foreground">·</span>
+                                <span><kbd className="font-mono bg-muted-surface px-2 py-1 rounded text-muted">Esc</kbd> exit</span>
                             </div>
                         </div>
 
-                        <div className="flex-shrink-0 border-t border-zinc-800 bg-zinc-900/95 px-6 sm:px-8 py-4 sm:py-5">
+                        <div className="flex-shrink-0 border-t border-line bg-surface/95 px-6 sm:px-8 py-4 sm:py-5">
                             <button
                                 onClick={handleCloseHelp}
-                                className="w-full py-3.5 sm:py-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-base sm:text-lg font-semibold transition-colors flex items-center justify-center gap-3"
+                                className="w-full py-3.5 sm:py-4 rounded-2xl bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent text-base sm:text-lg font-semibold transition-colors flex items-center justify-center gap-3"
                             >
                                 {hasLeftHelp ? 'Continue' : 'Start Session'}
                                 <ArrowRight size={20} />
@@ -573,36 +576,36 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                 {phase === 'summary' ? (
                     /* ── Summary screen ── */
                     <div className="max-w-md w-full text-center py-8">
-                        <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5">
-                            <Trophy size={34} className="text-emerald-400" />
+                        <div className="w-20 h-20 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-5">
+                            <Trophy size={34} className="text-accent" />
                         </div>
-                        <h2 className="text-3xl font-bold text-zinc-50 mb-2">Session Complete</h2>
-                        <p className="text-zinc-400 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
+                        <h2 className="text-3xl font-bold text-foreground mb-2">Session Complete</h2>
+                        <p className="text-muted text-sm mb-8 max-w-xs mx-auto leading-relaxed">
                             {sessionMessage()}
                         </p>
 
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-5">
-                                <div className="text-3xl font-bold text-red-400">{againCount}</div>
-                                <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-medium">Don't know</div>
+                            <div className="bg-danger/5 border border-danger/10 rounded-xl p-5">
+                                <div className="text-3xl font-bold text-danger">{againCount}</div>
+                                <div className="text-xs text-subtle mt-1 uppercase tracking-wider font-medium">Don't know</div>
                             </div>
-                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-5">
-                                <div className="text-3xl font-bold text-emerald-400">{knowCount}</div>
-                                <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-medium">Know it</div>
+                            <div className="bg-accent/5 border border-accent/10 rounded-xl p-5">
+                                <div className="text-3xl font-bold text-accent">{knowCount}</div>
+                                <div className="text-xs text-subtle mt-1 uppercase tracking-wider font-medium">Know it</div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-center gap-3 text-xs text-zinc-600 mb-8">
+                        <div className="flex items-center justify-center gap-3 text-xs text-subtle mb-8">
                             <span className="flex items-center gap-1.5">
                                 <Clock size={11} />
                                 {formatTime(elapsed)}
                             </span>
-                            <span className="text-zinc-800">·</span>
+                            <span className="text-foreground">·</span>
                             <span>{totalUniqueCards} unique cards</span>
                             {results.length > totalUniqueCards && (
                                 <>
-                                    <span className="text-zinc-800">·</span>
-                                    <span className="flex items-center gap-1 text-amber-500/60">
+                                    <span className="text-foreground">·</span>
+                                    <span className="flex items-center gap-1 text-warning/60">
                                         <RotateCcw size={10} />
                                         {results.length - totalUniqueCards} re-queued
                                     </span>
@@ -613,7 +616,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                         <div className="space-y-3">
                             <button
                                 onClick={() => restartSession(cards, title)}
-                                className="w-full py-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-semibold transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 rounded-xl bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent font-semibold transition-colors flex items-center justify-center gap-2"
                             >
                                 <RotateCcw size={16} />
                                 Retry all
@@ -624,24 +627,24 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                 className={clsx(
                                     "w-full py-3 rounded-xl border font-medium transition-colors flex items-center justify-center gap-2",
                                     struggledCards.length > 0
-                                        ? "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-400"
-                                        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 cursor-not-allowed"
+                                        ? "bg-warning/10 hover:bg-warning/20 border-warning/20 text-warning"
+                                        : "bg-muted-surface/50 border-line-strong/50 text-subtle cursor-not-allowed"
                                 )}
                             >
                                 <RotateCcw size={16} />
                                 Review struggled
                                 {struggledCards.length > 0 && (
-                                    <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold">
+                                    <span className="rounded-md bg-warning/15 px-1.5 py-0.5 text-[10px] font-bold">
                                         {struggledCards.length}
                                     </span>
                                 )}
                             </button>
                             {struggledCards.length === 0 && (
-                                <p className="text-[11px] text-zinc-600">No cards marked as don't know in this session.</p>
+                                <p className="text-[11px] text-subtle">No cards marked as don't know in this session.</p>
                             )}
                             <button
                                 onClick={onClose}
-                                className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium transition-colors"
+                                className="w-full py-3 rounded-xl bg-muted-surface hover:bg-hover-surface border border-line-strong text-body font-medium transition-colors"
                             >
                                 Back to Reference
                             </button>
@@ -650,44 +653,44 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                 ) : (
                     /* ── Active card + controls as one unit ── */
                     <div className="w-full max-w-7xl flex flex-col flex-1 min-h-0 my-auto">
-                        <div className="flex flex-col flex-1 min-h-[min(100%,calc(100vh-11rem))] bg-zinc-900/60 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden">
+                        <div className="flex flex-col flex-1 min-h-[min(100%,calc(100vh-11rem))] bg-surface border border-line rounded-lg overflow-hidden">
                             <div className="flex-1 min-h-[52vh] sm:min-h-[58vh] relative [perspective:1600px]">
                                 <motion.div
                                     animate={{ rotateY: isFlipped ? 180 : 0 }}
                                     transition={{ duration: 0.28, ease: 'easeInOut' }}
                                     className="absolute inset-0 [transform-style:preserve-3d]"
                                 >
-                                    <div className="absolute inset-0 bg-zinc-900 overflow-hidden [backface-visibility:hidden]">
+                                    <div className="absolute inset-0 bg-surface overflow-hidden [backface-visibility:hidden]">
                                         <button
                                             type="button"
                                             onClick={handleFlip}
                                             aria-pressed={isFlipped}
-                                            className="flex h-full w-full flex-col justify-between p-5 sm:p-10 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40"
+                                            className="flex h-full w-full flex-col justify-between p-5 sm:p-10 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
                                         >
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="px-3 py-1 rounded-md bg-zinc-800 text-zinc-400 text-xs font-medium uppercase tracking-widest">
+                                                        <span className="px-3 py-1 rounded-md bg-muted-surface text-muted text-xs font-medium uppercase tracking-widest">
                                                             {currentCard.category}
                                                         </span>
-                                                        <span className="px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-600 text-xs font-mono">
+                                                        <span className="px-2.5 py-1 rounded-md bg-muted-surface/50 text-subtle text-xs font-mono">
                                                             {currentCard.timeComplexity}
                                                         </span>
                                                     </div>
                                                     {currentRating && (
                                                         <span className={clsx(
-                                                            "px-3 py-1 rounded-full border text-[11px] font-semibold uppercase tracking-wider",
-                                                            currentRating === 1 && "bg-red-500/10 border-red-500/20 text-red-400",
-                                                            currentRating === 3 && "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+                                                            "px-3 py-1 rounded-md border text-xs font-medium",
+                                                            currentRating === 1 && "bg-danger/10 border-danger/20 text-danger",
+                                                            currentRating === 3 && "bg-accent/10 border-accent/20 text-accent",
                                                         )}>
                                                             {ratingLabel(currentRating)}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-50 leading-tight mb-5 max-w-5xl">
+                                                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight mb-5 max-w-5xl">
                                                     {currentCard.description}
                                                 </h2>
-                                                <p className="text-zinc-400 text-base sm:text-lg lg:text-xl leading-relaxed mb-8 max-w-4xl">
+                                                <p className="text-muted text-base sm:text-lg lg:text-xl leading-relaxed mb-8 max-w-4xl">
                                                     {currentCard.useCase}
                                                 </p>
                                                 {(() => {
@@ -695,13 +698,13 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                     if (hints.length === 0) return null;
                                                     return (
                                                         <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-xs text-zinc-600 uppercase tracking-widest font-medium flex-shrink-0">
+                                                            <span className="text-xs text-subtle uppercase tracking-widest font-medium flex-shrink-0">
                                                                 Variables:
                                                             </span>
                                                             {hints.map(v => (
                                                                 <code
                                                                     key={v}
-                                                                    className="px-2.5 py-1 rounded-md bg-zinc-800/80 border border-zinc-700/50 text-sm font-mono text-zinc-300"
+                                                                    className="px-2.5 py-1 rounded-md bg-muted-surface/80 border border-line-strong/50 text-sm font-mono text-body"
                                                                 >
                                                                     {v}
                                                                 </code>
@@ -710,17 +713,17 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                     );
                                                 })()}
                                             </div>
-                                            <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 pt-6">
+                                            <div className="flex items-center justify-center gap-2 text-sm font-medium text-accent pt-6">
                                                 <span>{isFlipped ? 'Tap or press Space to hide' : 'See answer'}</span>
                                             </div>
                                         </button>
                                     </div>
 
-                                    <div className="absolute inset-0 bg-zinc-900 overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                                    <div className="absolute inset-0 bg-surface overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
                                         <div className="flex h-full w-full flex-col p-5 sm:p-8 text-left">
                                             <div className="flex items-center justify-between gap-3 mb-6">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="text-xs text-emerald-500 font-semibold tracking-widest uppercase">
+                                                    <div className="text-xs text-accent font-semibold tracking-widest uppercase">
                                                         Syntax
                                                     </div>
                                                     {hasExplanation && (
@@ -732,10 +735,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                             }}
                                                             aria-expanded={showExplanation}
                                                             className={clsx(
-                                                                "inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                                                                "inline-flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors",
                                                                 showExplanation
-                                                                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                                                                    : "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:border-emerald-500/30 hover:text-emerald-300"
+                                                                    ? "border-accent/30 bg-accent/10 text-accent"
+                                                                    : "border-line-strong bg-muted-surface/80 text-body hover:border-accent/30 hover:text-accent"
                                                             )}
                                                         >
                                                             <BookOpen size={15} />
@@ -743,7 +746,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                         </button>
                                                     )}
                                                 </div>
-                                                <span className="text-xs text-zinc-600">Tap or Space to hide</span>
+                                                <span className="text-xs text-subtle">Tap or Space to hide</span>
                                             </div>
                                             <div
                                                 role="button"
@@ -756,9 +759,9 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                     }
                                                 }}
                                                 aria-label="Hide answer"
-                                                className="flex-1 flex items-stretch justify-center min-h-0 overflow-auto rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
+                                                className="flex-1 flex items-stretch justify-center min-h-0 overflow-auto rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                                             >
-                                                <div className="w-full min-h-[12rem] rounded-2xl border border-zinc-800 bg-zinc-950 px-2 py-4 sm:px-4 sm:py-6">
+                                                <div className="w-full min-h-[12rem] rounded-2xl border border-line bg-canvas px-2 py-4 sm:px-4 sm:py-6">
                                                     <SyntaxHighlightedCode
                                                         code={currentCard.syntax}
                                                         language={currentCard.language}
@@ -768,9 +771,9 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                 </div>
                                             </div>
                                             {showExplanation && hasExplanation && (
-                                                <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 sm:p-5 shadow-inner">
+                                                <div className="mt-4 rounded-lg border border-line bg-muted-surface p-4 sm:p-5">
                                                     <div className="mb-2 flex items-center justify-between gap-3">
-                                                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+                                                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-accent">
                                                             <BookOpen size={14} />
                                                             Explanation
                                                         </div>
@@ -781,12 +784,12 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                                                 setShowExplanation(false);
                                                             }}
                                                             aria-label="Close explanation"
-                                                            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                                                            className="rounded-lg p-1.5 text-subtle transition-colors hover:bg-muted-surface hover:text-body"
                                                         >
                                                             <X size={16} />
                                                         </button>
                                                     </div>
-                                                    <p className="max-h-36 overflow-y-auto pr-1 text-sm sm:text-base leading-relaxed text-zinc-300">
+                                                    <p className="max-h-36 overflow-y-auto pr-1 text-sm sm:text-base leading-relaxed text-body">
                                                         {currentExplanation}
                                                     </p>
                                                 </div>
@@ -796,10 +799,11 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                 </motion.div>
                             </div>
 
-                            <div className="flex-shrink-0 border-t border-zinc-800/80 bg-zinc-950/90 px-4 sm:px-6 py-5 sm:py-6">
-                                <p className="text-center text-sm text-zinc-500 mb-5">
-                                    Press <span className="text-zinc-400">Space</span> to flip · <span className="text-zinc-400">E</span> to explain · <span className="text-zinc-400">← / →</span> to navigate · <span className="text-zinc-400">1 / 2</span> to rate
+                            <div className="flex-shrink-0 border-t border-line/80 bg-canvas/90 px-4 sm:px-6 py-5 sm:py-6">
+                                <p className="hidden sm:block text-center text-sm text-subtle mb-5">
+                                    Press <span className="text-muted">Space</span> to flip · <span className="text-muted">E</span> to explain · <span className="text-muted">← / →</span> to navigate · <span className="text-muted">1 / 2</span> to rate
                                 </p>
+                                <p className="sm:hidden text-center text-xs text-muted mb-4">See the answer, then rate your recall.</p>
                                 <div className="flex items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
                                     <button
                                         type="button"
@@ -807,10 +811,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                         disabled={!canGoPrevious}
                                         aria-label="Previous card"
                                         className={clsx(
-                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border transition-colors",
+                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-lg border transition-colors",
                                             canGoPrevious
-                                                ? "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700"
-                                                : "border-zinc-800 bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
+                                                ? "border-line-strong bg-muted-surface/80 text-body hover:bg-hover-surface"
+                                                : "border-line bg-surface/50 text-body cursor-not-allowed"
                                         )}
                                     >
                                         <ArrowLeft size={20} />
@@ -819,23 +823,25 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => { void handleBinaryChoice(1); }}
-                                        className="flex flex-1 items-center justify-center gap-2 sm:gap-3 rounded-full border border-zinc-700 bg-zinc-900/80 px-4 sm:px-6 py-3 sm:py-4 hover:bg-red-500/10 hover:border-red-500/30 transition-colors group"
+                                        aria-label="Don't know · practice again"
+                                        className="flex flex-1 min-h-12 items-center justify-center gap-2 sm:gap-3 rounded-lg border border-line-strong bg-surface px-3 sm:px-6 py-3 sm:py-4 hover:bg-danger/10 hover:border-danger/30 transition-colors group"
                                     >
-                                        <X size={18} className="text-red-400" />
-                                        <span className="text-lg sm:text-xl font-bold text-red-400 tabular-nums">{againCount}</span>
-                                        <span className="text-sm text-zinc-500 group-hover:text-red-300/80 hidden sm:inline">Don't know</span>
-                                        <kbd className="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">1</kbd>
+                                        <X size={18} className="hidden sm:block text-danger" />
+                                        <span className="hidden sm:inline text-xl font-semibold text-danger tabular-nums">{againCount}</span>
+                                        <span className="text-xs sm:text-sm text-danger whitespace-nowrap">Don't know</span>
+                                        <kbd className="hidden sm:inline font-mono text-[10px] text-subtle bg-muted-surface px-1.5 py-0.5 rounded">1</kbd>
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={() => { void handleBinaryChoice(2); }}
-                                        className="flex flex-1 items-center justify-center gap-2 sm:gap-3 rounded-full border border-zinc-700 bg-zinc-900/80 px-4 sm:px-6 py-3 sm:py-4 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-colors group"
+                                        aria-label="Know it · continue"
+                                        className="flex flex-1 min-h-12 items-center justify-center gap-2 sm:gap-3 rounded-lg border border-line-strong bg-surface px-3 sm:px-6 py-3 sm:py-4 hover:bg-accent/10 hover:border-accent/30 transition-colors group"
                                     >
-                                        <span className="text-lg sm:text-xl font-bold text-emerald-400 tabular-nums">{knowCount}</span>
-                                        <Check size={18} className="text-emerald-400" />
-                                        <span className="text-sm text-zinc-500 group-hover:text-emerald-300/80 hidden sm:inline">Know it</span>
-                                        <kbd className="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">2</kbd>
+                                        <span className="hidden sm:inline text-xl font-semibold text-accent tabular-nums">{knowCount}</span>
+                                        <Check size={18} className="hidden sm:block text-accent" />
+                                        <span className="text-xs sm:text-sm text-accent whitespace-nowrap">Know it</span>
+                                        <kbd className="hidden sm:inline font-mono text-[10px] text-subtle bg-muted-surface px-1.5 py-0.5 rounded">2</kbd>
                                     </button>
 
                                     <button
@@ -844,10 +850,10 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                                         disabled={!canGoNext}
                                         aria-label="Next card"
                                         className={clsx(
-                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border transition-colors",
+                                            "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-lg border transition-colors",
                                             canGoNext
-                                                ? "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700"
-                                                : "border-zinc-800 bg-zinc-900/50 text-zinc-700 cursor-not-allowed"
+                                                ? "border-line-strong bg-muted-surface/80 text-body hover:bg-hover-surface"
+                                                : "border-line bg-surface/50 text-body cursor-not-allowed"
                                         )}
                                         title={currentRating ? 'Next card' : "Next — counts as don't know"}
                                     >

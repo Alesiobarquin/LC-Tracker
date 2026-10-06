@@ -50,9 +50,9 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
             const isCorrect = userChar === char;
             const isMissing = userChar === undefined;
 
-            let className = "text-zinc-600 font-mono"; // Default / Missing
+            let className = "text-subtle font-mono"; // Default / Missing
             if (!isMissing) {
-                className = isCorrect ? "text-emerald-400 font-mono" : "text-red-400 bg-red-400/20 font-mono underline decoration-red-400 underline-offset-4";
+                className = isCorrect ? "text-accent font-mono" : "text-danger bg-danger/20 font-mono underline decoration-danger underline-offset-4";
             }
 
             return (
@@ -76,52 +76,49 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
 
     return (
         <div className={clsx(
-            "premium-card flex flex-col bg-zinc-900 border border-zinc-800/80 overflow-hidden group transition-all duration-300",
-            isPracticeMode ? "ring-1 ring-emerald-500/30" : "hover:border-zinc-700 hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+            "premium-card flex flex-col bg-surface border border-line/80 overflow-hidden group transition-all duration-300",
+            isPracticeMode ? "ring-1 ring-accent/30" : "hover:border-line-strong "
         )}>
             {/* Header */}
-            <div className="flex justify-between items-start p-4 border-b border-zinc-800/50 bg-zinc-950/30">
+            <div className="flex justify-between items-start p-4 border-b border-line/50 bg-canvas/30">
                 <div className="pr-4">
-                    <p className="text-sm font-medium text-emerald-400 mb-1 leading-snug">{card.description}</p>
-                    <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{card.useCase}</p>
+                    <h3 className="text-sm font-semibold text-foreground mb-1 leading-snug">{card.description}</h3>
+                    <p className="text-xs text-subtle line-clamp-2 leading-relaxed">{card.useCase}</p>
                 </div>
 
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/50 border border-zinc-700/50 text-xs text-zinc-400">
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted-surface/50 border border-line-strong/50 text-xs text-muted">
                         <Clock size={12} />
                         <span>{card.timeComplexity}</span>
                     </div>
                     {progress && (
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-medium tracking-wide">
-                            {progress.confidenceRating === 3 && <CheckCircle2 size={12} className="text-emerald-500" />}
-                            {progress.confidenceRating === 2 && <span className="w-3 h-3 rounded-full bg-amber-500" />}
-                            {progress.confidenceRating === 1 && <span className="w-3 h-3 rounded-full bg-red-500" />}
+                        <div className="flex items-center gap-1 text-[10px] text-subtle font-medium tracking-wide">
+                            {progress.confidenceRating === 3 && <CheckCircle2 size={12} className="text-accent" />}
+                            {progress.confidenceRating === 2 && <span className="w-3 h-3 rounded-full bg-warning" />}
+                            {progress.confidenceRating === 1 && <span className="w-3 h-3 rounded-full bg-danger" />}
                             PRACTICED {progress.reviewCount}X
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex flex-col flex-1 relative">
-                {/* Toggle Button Container - Absolute positioned */}
-                <div className="absolute right-3 -top-3.5 z-10 transition-transform duration-200">
                     <button
                         onClick={handlePracticeToggle}
+                        aria-pressed={isPracticeMode}
                         className={clsx(
-                            "px-3 py-1 text-xs font-semibold rounded-full shadow-lg border transition-colors flex items-center gap-1",
+                            "px-3 py-2 min-h-10 text-xs font-medium rounded-md border transition-colors",
                             isPracticeMode
-                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
-                                : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
+                                ? "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
+                                : "bg-surface text-body border-line-strong hover:bg-muted-surface"
                         )}
                     >
                         {isPracticeMode ? "Close Practice" : "Practice"}
                     </button>
                 </div>
+            </div>
 
+            {/* Main Content Area */}
+            <div className="flex flex-col flex-1 relative">
                 {/* Read Mode */}
                 <div className={clsx(
-                    "p-4 bg-zinc-950/80 transition-all duration-300 h-full",
+                    "p-4 bg-canvas/80 transition-all duration-300 h-full",
                     isPracticeMode ? "hidden" : "block"
                 )}>
                     {highlightCode(card.syntax)}
@@ -129,13 +126,13 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
 
                 {/* Practice Mode */}
                 <div className={clsx(
-                    "p-4 flex flex-col gap-4 bg-emerald-950/10 transition-all duration-300 h-full",
+                    "p-4 flex flex-col gap-4 bg-surface transition-all duration-300 h-full",
                     isPracticeMode ? "block" : "hidden"
                 )}>
                     <div>
-                        <div className="text-xs font-medium text-emerald-500 mb-2 tracking-wider">TYPE THE SYNTAX:</div>
+                        <div className="text-sm font-medium text-body mb-2">Type the syntax from memory</div>
 
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950 shadow-inner overflow-hidden focus-within:border-emerald-500/40 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-colors">
+                        <div className="rounded-lg border border-line-strong bg-surface overflow-hidden focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-colors">
                             <textarea
                                 ref={inputRef}
                                 value={userInput}
@@ -152,14 +149,14 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
                                         if (userInput.length > 0) setHasSubmitted(true);
                                     }
                                 }}
-                                className="w-full min-h-[5.5rem] bg-transparent px-3 py-3 text-sm text-zinc-100 font-mono placeholder:text-zinc-600 focus:outline-none resize-none border-0"
+                                className="w-full min-h-[5.5rem] bg-transparent px-3 py-3 text-sm text-foreground font-mono placeholder:text-subtle focus:outline-none resize-none border-0"
                                 placeholder="Type the syntax from memory…"
                                 spellCheck={false}
                                 autoComplete="off"
                                 rows={3}
                             />
                             {userInput.length > 0 && (
-                                <div className="border-t border-zinc-800/80 px-3 py-2.5 text-sm flex flex-wrap break-all items-center bg-zinc-950/50">
+                                <div className="border-t border-line/80 px-3 py-2.5 text-sm flex flex-wrap break-all items-center bg-canvas/50">
                                     {renderDiff()}
                                 </div>
                             )}
@@ -167,24 +164,24 @@ export const SyntaxCardComponent: React.FC<SyntaxCardComponentProps> = ({ card }
                     </div>
 
                     <div className={clsx(
-                        "pt-3 border-t border-emerald-500/20 transition-all",
+                        "pt-3 border-t border-accent/20 transition-all",
                         hasSubmitted && userInput.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none"
                     )}>
-                        <div className="text-xs text-zinc-400 mb-2">How well did you know this?</div>
+                        <div className="text-xs text-muted mb-2">How well did you know this?</div>
                         <div className="grid grid-cols-3 gap-2">
-                            <button onClick={() => handleRating(1)} className="py-1.5 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-md text-xs font-medium transition-colors">
+                            <button onClick={() => handleRating(1)} className="py-1.5 px-2 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20 rounded-md text-xs font-medium transition-colors">
                                 Again
                             </button>
-                            <button onClick={() => handleRating(2)} className="py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-md text-xs font-medium transition-colors">
+                            <button onClick={() => handleRating(2)} className="py-1.5 px-2 bg-warning/10 hover:bg-warning/20 text-warning border border-warning/20 rounded-md text-xs font-medium transition-colors">
                                 Hard
                             </button>
-                            <button onClick={() => handleRating(3)} className="py-1.5 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-md text-xs font-medium transition-colors">
+                            <button onClick={() => handleRating(3)} className="py-1.5 px-2 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 rounded-md text-xs font-medium transition-colors">
                                 Good
                             </button>
                         </div>
                         {userInput !== card.syntax && (
-                            <div className="mt-3 p-2 bg-zinc-950 rounded-md border border-zinc-800">
-                                <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Actual Syntax</div>
+                            <div className="mt-3 p-2 bg-canvas rounded-md border border-line">
+                                <div className="text-[10px] text-subtle mb-1 uppercase tracking-wider">Actual Syntax</div>
                                 {highlightCode(card.syntax)}
                             </div>
                         )}

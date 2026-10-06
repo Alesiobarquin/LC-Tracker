@@ -1,24 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Plus Jakarta Sans", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
 
-  --color-background: #09090b;
-  --color-surface: #18181b;
-  --color-surface-hover: #27272a;
-  --color-border: #27272a;
-  --color-border-hover: #3f3f46;
-  --color-brand: #34d399;
-  --color-brand-strong: #10b981;
-  --color-brand-soft: #6ee7b7;
-  --color-text-main: #fafafa;
-  --color-text-dim: #a1a1aa;
-  --radius-control: 0.75rem;
-  --radius-card: 1rem;
-  --radius-modal: 1.25rem;
-  
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.625rem;
+  --radius-control: 0.375rem;
+  --radius-card: 0.5rem;
+  --radius-modal: 0.625rem;
+
   --animate-fade-in: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-slide-up: slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-slide-in-right: slide-in-right 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -51,15 +47,92 @@
   }
 }
 
+/* Semantic colors keep text, panels, controls, and code readable in both themes. */
+:root {
+  color-scheme: light;
+  --palette-canvas: #f6f8fa;
+  --palette-surface: #ffffff;
+  --palette-muted-surface: #edf1f4;
+  --palette-hover-surface: #e2e8ed;
+  --palette-line: #d8dfe4;
+  --palette-line-strong: #b8c4cd;
+  --palette-foreground: #17212b;
+  --palette-body: #344553;
+  --palette-muted: #526370;
+  --palette-subtle: #61707c;
+  --palette-accent: #076b57;
+  --palette-accent-strong: #065f4d;
+  --palette-on-accent: #ffffff;
+  --palette-danger: #ab243b;
+  --palette-warning: #856119;
+  --palette-info: #205f9c;
+  --palette-violet: #7045b9;
+  --palette-cyan: #096e84;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --palette-canvas: #0e1419;
+  --palette-surface: #17212a;
+  --palette-muted-surface: #1e2b35;
+  --palette-hover-surface: #293b48;
+  --palette-line: #30414e;
+  --palette-line-strong: #4b606f;
+  --palette-foreground: #e8eef2;
+  --palette-body: #c2cfd8;
+  --palette-muted: #a3b4c0;
+  --palette-subtle: #90a1ae;
+  --palette-accent: #57d8b5;
+  --palette-accent-strong: #79ecc9;
+  --palette-on-accent: #06271e;
+  --palette-danger: #ff9ba6;
+  --palette-warning: #e6c16f;
+  --palette-info: #84b6e8;
+  --palette-violet: #c4a4f0;
+  --palette-cyan: #83d2e5;
+}
+
+@theme inline {
+  --color-canvas: var(--palette-canvas);
+  --color-surface: var(--palette-surface);
+  --color-muted-surface: var(--palette-muted-surface);
+  --color-hover-surface: var(--palette-hover-surface);
+  --color-line: var(--palette-line);
+  --color-line-strong: var(--palette-line-strong);
+  --color-foreground: var(--palette-foreground);
+  --color-body: var(--palette-body);
+  --color-muted: var(--palette-muted);
+  --color-subtle: var(--palette-subtle);
+  --color-accent: var(--palette-accent);
+  --color-accent-strong: var(--palette-accent-strong);
+  --color-on-accent: var(--palette-on-accent);
+  --color-danger: var(--palette-danger);
+  --color-warning: var(--palette-warning);
+  --color-info: var(--palette-info);
+  --color-violet: var(--palette-violet);
+  --color-cyan: var(--palette-cyan);
+  /* Existing chart and shared component aliases. */
+  --color-background: var(--palette-canvas);
+  --color-surface-hover: var(--palette-hover-surface);
+  --color-border: var(--palette-line);
+  --color-border-hover: var(--palette-line-strong);
+  --color-brand: var(--palette-accent);
+  --color-brand-strong: var(--palette-accent-strong);
+  --color-brand-soft: var(--palette-accent);
+  --color-text-main: var(--palette-foreground);
+  --color-text-dim: var(--palette-muted);
+}
+
 body {
-  background:
-    radial-gradient(circle at 10% -22%, rgba(52, 211, 153, 0.08), transparent 38%),
-    radial-gradient(circle at 92% 114%, rgba(52, 211, 153, 0.04), transparent 44%),
-    var(--color-background);
-  color: var(--color-text-main);
+  background: var(--palette-canvas);
+  color: var(--palette-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+::selection { background: color-mix(in srgb, var(--palette-accent) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--palette-accent); outline-offset: 3px; }
+input, select, textarea { accent-color: var(--palette-accent); }
 
 .animate-in {
   animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -71,74 +144,35 @@ body {
   will-change: opacity, transform;
 }
 
-@utility text-extruded-emerald {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-200 via-emerald-300 to-teal-400 drop-shadow-sm;
-}
+@utility text-extruded-emerald { color: var(--palette-accent); }
+@utility text-extruded-indigo { color: var(--palette-accent); }
 
-@utility text-extruded-indigo {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-400 drop-shadow-sm;
-}
-
-.brand-shell {
+.brand-shell { position: relative; min-height: 100vh; background: var(--palette-canvas); }
+.brand-panel, .premium-card {
   position: relative;
-  min-height: 100vh;
-  background: linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(9, 9, 11, 1));
+  background: var(--palette-surface);
+  border: 1px solid var(--palette-line);
+  border-radius: var(--radius-card);
 }
-
-.brand-panel {
-  position: relative;
-  background: linear-gradient(180deg, rgba(24, 24, 27, 0.55), rgba(24, 24, 27, 0.92));
-  border: 1px solid rgba(63, 63, 70, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 16px 44px -20px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(24, 24, 27, 0.45);
-}
-
 .brand-button-primary {
-  background: #34d399;
-  color: #04100d;
-  border: 1px solid rgba(52, 211, 153, 0.55);
-  box-shadow: 0 0 28px rgba(16, 185, 129, 0.28);
+  background: var(--palette-accent);
+  color: var(--palette-on-accent);
+  border: 1px solid transparent;
 }
-
-.brand-button-secondary {
-  background: rgba(24, 24, 27, 0.74);
-  border: 1px solid rgba(63, 63, 70, 0.78);
-  color: #d4d4d8;
+.brand-button-primary:hover { background: var(--palette-accent-strong); }
+.brand-button-secondary, .brand-chip {
+  background: var(--palette-surface);
+  border: 1px solid var(--palette-line-strong);
+  color: var(--palette-body);
 }
-
-.brand-input,
-.brand-select {
-  background: rgba(24, 24, 27, 0.78);
-  border: 1px solid rgba(63, 63, 70, 0.78);
-  color: var(--color-text-main);
+.brand-button-secondary:hover { background: var(--palette-muted-surface); }
+.brand-input, .brand-select {
+  background: var(--palette-surface);
+  border: 1px solid var(--palette-line-strong);
+  color: var(--palette-foreground);
 }
-
-.brand-input::placeholder {
-  color: #71717a;
-}
-
-.brand-input:focus,
-.brand-select:focus {
-  outline: none;
-  border-color: rgba(52, 211, 153, 0.45);
-  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.15);
-}
-
-.brand-chip {
-  background: rgba(24, 24, 27, 0.78);
-  border: 1px solid rgba(63, 63, 70, 0.78);
-  color: #d4d4d8;
-}
-
-.brand-scanline {
-  height: 1px;
-  width: 100%;
-  background: linear-gradient(to right, transparent, rgba(92, 242, 205, 0.62), transparent);
-  transform: scaleX(0);
-  animation: scanline 3s ease-in-out infinite alternate;
-}
+.brand-input::placeholder { color: var(--palette-subtle); }
+.brand-input:focus, .brand-select:focus { border-color: var(--palette-accent); }
 
 /* Hide Clerk development mode banner */
 .cl-internal-b3fm6y,
@@ -156,48 +190,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: var(--palette-line);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
-}
-
-/* Premium Card Styles */
-.premium-card {
-  position: relative;
-  background: linear-gradient(180deg, rgba(24, 24, 27, 0.5) 0%, rgba(24, 24, 27, 0.9) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  transition: all 0.3s ease;
-  z-index: 1;
-}
-
-.premium-card::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 16px;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.28), rgba(52, 211, 153, 0) 40%, rgba(52, 211, 153, 0) 60%, rgba(52, 211, 153, 0.08));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.premium-card:hover::before {
-  opacity: 1;
-}
-
-.premium-card:hover {
-  border-color: transparent; /* Let the pseudo-element glow completely take over */
+  background: var(--palette-line-strong);
 }
 
 .page-container {

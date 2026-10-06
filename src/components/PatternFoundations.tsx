@@ -32,6 +32,7 @@ import {
 } from '../utils/uiHelpers';
 import { cn } from '../utils/cn';
 import { Badge, Button, Card, Input, PageHeader, QueryErrorBanner } from './ui';
+import { syntaxHighlightExtensions } from '../utils/syntaxHighlightTheme';
 
 type ViewMode = 'essential' | 'complete';
 type TemplateLanguage = 'python' | 'javascript';
@@ -165,10 +166,10 @@ const PatternList: React.FC<{
   if (isLoading && patternData.length === 0) {
     return (
       <div className="space-y-6 animate-in">
-        <div className="h-24 rounded-2xl bg-zinc-900/70 border border-zinc-800 animate-pulse" />
-        <div className="h-28 rounded-2xl bg-zinc-900/70 border border-zinc-800 animate-pulse" />
+        <div className="h-24 rounded-2xl bg-surface/70 border border-line animate-pulse" />
+        <div className="h-28 rounded-2xl bg-surface/70 border border-line animate-pulse" />
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-32 rounded-2xl bg-zinc-900/70 border border-zinc-800 animate-pulse" />
+          <div key={i} className="h-32 rounded-2xl bg-surface/70 border border-line animate-pulse" />
         ))}
       </div>
     );
@@ -206,23 +207,23 @@ const PatternList: React.FC<{
         />
       ) : null}
 
-      <Card accent className="p-5">
+      <Card className="p-5">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-400/80 font-bold">Roadmap progress</p>
-            <p className="text-sm text-zinc-200">
+            <p className="text-sm text-muted font-medium">Roadmap progress</p>
+            <p className="text-sm text-body">
               {masteredCount} / {visiblePatternData.length} patterns established · {masteredProblems} / {totalProblems} dependable problems
             </p>
-            <p className="text-xs text-zinc-500">{dueCount} review{dueCount === 1 ? '' : 's'} currently due across this track</p>
+            <p className="text-xs text-subtle">{dueCount} review{dueCount === 1 ? '' : 's'} currently due across this track</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge tone="success">{viewMode === 'essential' ? 'Essential 8' : 'Complete catalog'}</Badge>
             {recommended ? <Badge>Next: {recommended.name}</Badge> : <Badge tone="success">Track complete</Badge>}
           </div>
         </div>
-        <div className="mt-4 h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
+        <div className="mt-4 h-2 bg-muted-surface/80 rounded-full overflow-hidden border border-line-strong/50">
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+            className="h-full bg-accent rounded-full transition-all duration-700"
             style={{ width: `${totalProblems ? Math.round((masteredProblems / totalProblems) * 100) : 0}%` }}
           />
         </div>
@@ -230,7 +231,7 @@ const PatternList: React.FC<{
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={18} />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -240,7 +241,7 @@ const PatternList: React.FC<{
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800/80 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-canvas border border-line/80 p-1 rounded-xl">
             {([
               ['essential', 'Essential 8'],
               ['complete', 'Complete (29)'],
@@ -250,17 +251,17 @@ const PatternList: React.FC<{
                 type="button"
                 onClick={() => setViewMode(mode)}
                 className={cn(
-                  'px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                  'px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                   viewMode === mode
-                    ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+                    ? 'bg-accent/15 text-accent ring-1 ring-accent/30'
+                    : 'text-subtle hover:text-body hover:bg-muted-surface/50'
                 )}
               >
                 {label}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800/80 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-canvas border border-line/80 p-1 rounded-xl">
             {([
               ['all', 'All'],
               ['next', 'In progress'],
@@ -272,10 +273,10 @@ const PatternList: React.FC<{
                 type="button"
                 onClick={() => setStatusFilter(mode)}
                 className={cn(
-                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                  'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                   statusFilter === mode
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-muted-surface text-foreground'
+                    : 'text-subtle hover:text-body'
                 )}
               >
                 {label}
@@ -286,15 +287,15 @@ const PatternList: React.FC<{
       </div>
 
       {grouped.length === 0 ? (
-        <Card className="p-10 text-center text-zinc-500">No patterns match your filters.</Card>
+        <Card className="p-10 text-center text-subtle">No patterns match your filters.</Card>
       ) : (
         <div className="space-y-10">
           {grouped.map(([stage, items]) => (
             <section key={stage} className="space-y-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-zinc-100">{stage}</h2>
-                <div className="h-px flex-1 bg-zinc-800" />
-                <span className="text-xs text-zinc-500">{items.length} pattern{items.length === 1 ? '' : 's'}</span>
+                <h2 className="text-lg font-semibold text-foreground">{stage}</h2>
+                <div className="h-px flex-1 bg-muted-surface" />
+                <span className="text-xs text-subtle">{items.length} pattern{items.length === 1 ? '' : 's'}</span>
               </div>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {items.map((pattern, index) => {
@@ -307,12 +308,12 @@ const PatternList: React.FC<{
                       key={pattern.id}
                       to={`/patterns/${pattern.id}`}
                       className={cn(
-                        'block premium-card p-5 border transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                        'block premium-card p-5 border transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                         pattern.isCompleted
-                          ? 'border-emerald-500/30 bg-emerald-500/[0.06] hover:border-emerald-500/55'
+                          ? 'border-accent/30 bg-accent/[0.06] hover:border-accent/55'
                           : isNext
-                            ? 'border-emerald-500/40 bg-zinc-900/90 hover:border-emerald-500/60'
-                            : 'border-zinc-700/70 bg-zinc-900/65 hover:border-emerald-500/35'
+                            ? 'border-accent/40 bg-surface/90 hover:border-accent/60'
+                            : 'border-line-strong/70 bg-surface/65 hover:border-accent/35'
                       )}
                     >
                       <div className="flex items-start gap-4">
@@ -320,8 +321,8 @@ const PatternList: React.FC<{
                           className={cn(
                             'w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 text-xs font-black tracking-wider',
                             pattern.isCompleted
-                              ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                              : 'border-zinc-600 bg-zinc-800/70 text-zinc-200'
+                              ? 'border-accent/40 bg-accent/15 text-accent'
+                              : 'border-line-strong bg-muted-surface/70 text-body'
                           )}
                         >
                           {String(index + 1).padStart(2, '0')}
@@ -329,8 +330,8 @@ const PatternList: React.FC<{
                         <div className="min-w-0 flex-1 space-y-3">
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <h3 className="text-xl font-bold tracking-tight text-zinc-100">{pattern.name}</h3>
-                              <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{pattern.description}</p>
+                              <h3 className="text-xl font-bold tracking-tight text-foreground">{pattern.name}</h3>
+                              <p className="mt-2 text-sm text-muted leading-relaxed">{pattern.description}</p>
                             </div>
                             <Badge tone={pattern.isCompleted ? 'success' : isNext ? 'info' : 'neutral'}>
                               {pattern.isCompleted ? (
@@ -345,12 +346,12 @@ const PatternList: React.FC<{
                             </Badge>
                           </div>
 
-                          <p className="text-xs text-zinc-500 leading-relaxed">
-                            <span className="text-zinc-300 font-medium">Recognize it when: </span>
+                          <p className="text-xs text-subtle leading-relaxed">
+                            <span className="text-body font-medium">Recognize it when: </span>
                             {pattern.recognitionSignals[0]}
                           </p>
 
-                          <div className="flex flex-wrap gap-2 text-[11px] text-zinc-400">
+                          <div className="flex flex-wrap gap-2 text-[11px] text-muted">
                             <Badge>~{pattern.estimatedMinutes} min</Badge>
                             <Badge tone={pattern.dueCount ? 'warning' : 'neutral'}>{pattern.dueCount} due</Badge>
                             <Badge tone={pattern.needsWorkCount ? 'danger' : 'neutral'}>
@@ -363,16 +364,16 @@ const PatternList: React.FC<{
 
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-3 text-sm">
-                              <span className="text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-semibold">
+                              <span className="text-[11px] uppercase tracking-[0.16em] text-subtle font-semibold">
                                 Implementation evidence
                               </span>
-                              <span className="font-semibold text-zinc-200">
+                              <span className="font-semibold text-body">
                                 {pattern.masteredCount} / {pattern.problemsCount} dependable
                               </span>
                             </div>
-                            <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/55">
+                            <div className="h-2 bg-muted-surface/80 rounded-full overflow-hidden border border-line-strong/55">
                               <div
-                                className="h-full rounded-full bg-emerald-500/80 transition-all duration-700"
+                                className="h-full rounded-full bg-accent/80 transition-all duration-700"
                                 style={{ width: `${progressPct}%` }}
                               />
                             </div>
@@ -418,8 +419,8 @@ const PatternDetail: React.FC<{
   if (!isLoading && !pattern) {
     return (
       <div className="max-w-2xl mx-auto space-y-6 py-16 text-center">
-        <h1 className="text-3xl font-bold text-zinc-50">Pattern not found</h1>
-        <p className="text-zinc-400">That roadmap link is invalid or outdated.</p>
+        <h1 className="text-3xl font-bold text-foreground">Pattern not found</h1>
+        <p className="text-muted">That roadmap link is invalid or outdated.</p>
         <Button variant="primary" onClick={() => navigate('/patterns')}>
           Back to roadmap
         </Button>
@@ -428,7 +429,7 @@ const PatternDetail: React.FC<{
   }
 
   if (!pattern || !lesson) {
-    return <div className="h-64 rounded-2xl bg-zinc-900/70 border border-zinc-800 animate-pulse" />;
+    return <div className="h-64 rounded-2xl bg-surface/70 border border-line animate-pulse" />;
   }
 
   const template = language === 'python' ? pattern.templateCodePython : pattern.templateCodeJs;
@@ -463,8 +464,8 @@ const PatternDetail: React.FC<{
     return (
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-500">{title}</h3>
-          <span className="text-xs text-zinc-500">{items.length}</span>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-subtle">{title}</h3>
+          <span className="text-xs text-subtle">{items.length}</span>
         </div>
         <div className="space-y-2">
           {items.map((prob) => {
@@ -478,21 +479,21 @@ const PatternDetail: React.FC<{
             return (
               <div
                 key={prob.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-zinc-800/80 bg-zinc-950/40"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-line/80 bg-canvas/40"
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <button
                     type="button"
-                    className="mt-1 p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    className="mt-1 p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     title={getProblemStatusLabel(tone)}
                     aria-label={`${getProblemStatusLabel(tone)} — toggle ${prob.title}`}
                     onClick={() => toggleSolved(prob.id, isSolved)}
                   >
-                    <span className={cn('block w-2.5 h-2.5 rounded-full', getProblemStatusClass(tone), tone === 'unsolved' ? 'border border-zinc-600 bg-transparent' : 'bg-current')} />
+                    <span className={cn('block w-2.5 h-2.5 rounded-full', getProblemStatusClass(tone), tone === 'unsolved' ? 'border border-line-strong bg-transparent' : 'bg-current')} />
                   </button>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-100 truncate">{prob.title}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{LEARNING_STATUS_LABELS[getLearningStatus(prog)]}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{prob.title}</p>
+                    <p className="text-xs text-subtle mt-1">{LEARNING_STATUS_LABELS[getLearningStatus(prog)]}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:justify-end">
@@ -503,7 +504,7 @@ const PatternDetail: React.FC<{
                     href={prob.leetcodeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:text-emerald-300 hover:border-emerald-500/40 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-line-strong text-body hover:text-accent hover:border-accent/40 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     <ExternalLink size={14} />
                     LeetCode
@@ -518,7 +519,7 @@ const PatternDetail: React.FC<{
                       startSession(prob.id, Boolean(problemProgress[prob.id]), false, Date.now(), `/patterns/${pattern.id}`);
                       navigate(`/timer/${prob.id}`, { state: { returnTo: `/patterns/${pattern.id}` } });
                     }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-accent/30 bg-accent/10 text-accent text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     <Play size={14} />
                     Start
@@ -536,7 +537,7 @@ const PatternDetail: React.FC<{
     <div className="max-w-6xl mx-auto space-y-10 pb-24 animate-in">
       <Link
         to="/patterns"
-        className="text-zinc-400 hover:text-zinc-100 inline-flex w-fit items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-lg"
+        className="text-muted hover:text-foreground inline-flex w-fit items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
       >
         <ChevronLeft className="w-4 h-4" />
         Roadmap
@@ -548,35 +549,35 @@ const PatternDetail: React.FC<{
           <Badge tone="success">{pattern.masteredCount}/{pattern.problemsCount} dependable</Badge>
           <Badge tone={pattern.dueCount ? 'warning' : 'neutral'}>{pattern.dueCount} due</Badge>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-black text-zinc-100 tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight leading-tight">
           {pattern.name}
         </h1>
-        <p className="text-lg text-zinc-400 max-w-3xl leading-relaxed">{pattern.description}</p>
+        <p className="text-base text-muted max-w-3xl leading-relaxed">{pattern.description}</p>
       </header>
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)] gap-8 items-start">
         <div className="space-y-8">
           <Card className="p-6 space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">Recognition</h2>
-            <ul className="space-y-2 text-sm text-zinc-300 leading-relaxed">
+            <h2 className="text-lg font-semibold text-foreground">Recognition</h2>
+            <ul className="space-y-2 text-sm text-body leading-relaxed">
               {lesson.recognitionSignals.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-emerald-400 mt-1">•</span>
+                  <span className="text-accent mt-1">•</span>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-            <div className="pt-2 border-t border-zinc-800 space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">When not to use it</h3>
+            <div className="pt-2 border-t border-line space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-subtle">When not to use it</h3>
               {lesson.antiPatterns.map((item) => (
-                <p key={item} className="text-sm text-zinc-400 leading-relaxed">{item}</p>
+                <p key={item} className="text-sm text-muted leading-relaxed">{item}</p>
               ))}
             </div>
           </Card>
 
           <Card className="p-6 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">Logic template</h2>
+              <h2 className="text-lg font-semibold text-foreground">Logic template</h2>
               <div className="flex flex-wrap gap-2">
                 {([
                   ['python', 'Python'],
@@ -586,11 +587,12 @@ const PatternDetail: React.FC<{
                     key={value}
                     type="button"
                     onClick={() => setLanguage(value)}
+                    aria-pressed={language === value}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-semibold border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                       language === value
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'bg-zinc-950 text-zinc-400 border-zinc-800'
+                        ? 'bg-accent/15 text-accent border-accent/30'
+                        : 'bg-canvas text-muted border-line'
                     )}
                   >
                     {label}
@@ -602,20 +604,21 @@ const PatternDetail: React.FC<{
                 </Button>
               </div>
             </div>
-            <div className="bg-[#0f0f11] border border-zinc-800/50 p-3 sm:p-4 rounded-xl overflow-x-auto">
+            <div className="bg-canvas border border-line/50 p-3 sm:p-4 rounded-xl overflow-x-auto">
               <CodeMirror
                 value={template}
-                extensions={[language === 'python' ? python() : javascript({ typescript: false })]}
-                theme="dark"
+                extensions={[language === 'python' ? python() : javascript({ typescript: false }), ...syntaxHighlightExtensions]}
+                theme="none"
                 editable={false}
-                basicSetup={{ lineNumbers: true, foldGutter: false }}
-                className="text-sm sm:text-base font-mono opacity-95"
+                readOnly
+                basicSetup={false}
+                className="syntax-highlighted-code syntax-highlighted-code--md"
               />
             </div>
-            <p className="text-xs text-zinc-500 leading-relaxed">{lesson.complexity}</p>
+            <p className="text-xs text-subtle leading-relaxed">{lesson.complexity}</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {lesson.invariants.map((item) => (
-                <div key={item} className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-3 text-sm text-zinc-300">
+                <div key={item} className="rounded-xl border border-line bg-canvas/50 p-3 text-sm text-body">
                   {item}
                 </div>
               ))}
@@ -623,25 +626,25 @@ const PatternDetail: React.FC<{
           </Card>
 
           <Card className="p-6 space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">Worked example</h2>
+            <h2 className="text-lg font-semibold text-foreground">Worked example</h2>
             <div>
-              <p className="text-base font-semibold text-zinc-100">{lesson.workedExample.title}</p>
-              <p className="text-sm text-zinc-400 mt-1 font-mono">{lesson.workedExample.input}</p>
+              <p className="text-base font-semibold text-foreground">{lesson.workedExample.title}</p>
+              <p className="text-sm text-muted mt-1 font-mono">{lesson.workedExample.input}</p>
             </div>
-            <ol className="space-y-2 list-decimal list-inside text-sm text-zinc-300 leading-relaxed">
+            <ol className="space-y-2 list-decimal list-inside text-sm text-body leading-relaxed">
               {lesson.workedExample.walkthrough.map((step) => (
                 <li key={step}>{step}</li>
               ))}
             </ol>
-            <p className="text-sm text-emerald-300 font-medium">Result: {lesson.workedExample.result}</p>
+            <p className="text-sm text-accent font-medium">Result: {lesson.workedExample.result}</p>
           </Card>
 
           <Card className="p-6 space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">Common pitfalls</h2>
-            <ul className="space-y-2 text-sm text-zinc-300 leading-relaxed">
+            <h2 className="text-lg font-semibold text-foreground">Common pitfalls</h2>
+            <ul className="space-y-2 text-sm text-body leading-relaxed">
               {lesson.commonMistakes.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-amber-400 mt-1">•</span>
+                  <span className="text-warning mt-1">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -651,8 +654,8 @@ const PatternDetail: React.FC<{
 
         <aside className="space-y-6 xl:sticky xl:top-8">
           <Card accent className="p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-zinc-100">Practice ladder</h2>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <h2 className="text-sm font-semibold text-foreground">Practice ladder</h2>
+            <p className="text-xs text-muted leading-relaxed">
               Learn representative problems, check implementation after a delay, and try unseen variations. Successful recall checks stay separate from coding evidence. Dependable problems remain eligible for maintenance.
             </p>
             <div className="flex flex-wrap gap-2 text-xs">

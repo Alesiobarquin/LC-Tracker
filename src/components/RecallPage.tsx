@@ -12,7 +12,7 @@ import type { RecallAttempt } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
 
 const button =
-  "rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-40";
+  "rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
 export function RecallPage() {
   const { problemId } = useParams();
   const navigate = useNavigate();
@@ -160,7 +160,7 @@ export function RecallPage() {
     );
   if (isLoading || !catalogReady)
     return (
-      <p role="status" className="text-zinc-400">
+      <p role="status" className="text-muted">
         Loading recall check…
       </p>
     );
@@ -171,7 +171,7 @@ export function RecallPage() {
         <p>
           This problem needs to be in your study history before a recall check.
         </p>
-        <Link to="/library" className="text-emerald-400">
+        <Link to="/library" className="text-accent">
           Open library
         </Link>
       </div>
@@ -183,7 +183,7 @@ export function RecallPage() {
           Finish or pause your coding session before starting a recall check.
         </p>
         <Link
-          className="text-emerald-400"
+          className="text-accent"
           to={`/timer/${activeSession.problemId}`}
         >
           Resume coding session
@@ -194,7 +194,7 @@ export function RecallPage() {
     return (
       <div className="premium-card p-6">
         <p className="mb-4">You have another recall check in progress.</p>
-        <Link className="text-emerald-400" to={`/recall/${draft.problemId}`}>
+        <Link className="text-accent" to={`/recall/${draft.problemId}`}>
           Resume your recall check
         </Link>
       </div>
@@ -209,7 +209,7 @@ export function RecallPage() {
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
       <Link
         to="/dashboard"
-        className="inline-flex items-center gap-2 text-sm text-zinc-400"
+        className="inline-flex items-center gap-2 text-sm text-muted"
       >
         <ArrowLeft size={16} /> Back to today’s plan · draft saved
       </Link>
@@ -219,28 +219,28 @@ export function RecallPage() {
         description="Try from memory first. This checks your approach; full coding practice checks implementation."
       />
       {!storageAvailable && (
-        <p role="alert" className="text-amber-300">
+        <p role="alert" className="text-warning">
           This browser cannot preserve your answer after reload. Keep this tab
           open until saving finishes.
         </p>
       )}
       <section className="premium-card p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-xl font-semibold text-foreground">
             {problem.title}
           </h2>
-          <span className="text-zinc-400 text-sm inline-flex gap-2 items-center">
+          <span className="text-muted text-sm inline-flex gap-2 items-center">
             <Clock size={16} /> {Math.floor(elapsed / 60)}:
             {String(elapsed % 60).padStart(2, "0")} · aim for 3 min
           </span>
         </div>
         {!frozen && (
           <div className="flex gap-4 items-center text-sm">
-            <button className="text-emerald-400" onClick={togglePause}>
+            <button className="text-accent" onClick={togglePause}>
               {draft.pausedAt ? "Resume check" : "Pause check"}
             </button>
             {draft.pausedAt && (
-              <span className="text-zinc-500">Timer paused</span>
+              <span className="text-subtle">Timer paused</span>
             )}
           </div>
         )}
@@ -248,11 +248,11 @@ export function RecallPage() {
           href={problem.leetcodeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-emerald-400 inline-flex gap-2 items-center"
+          className="text-sm text-accent inline-flex gap-2 items-center"
         >
           Read the problem statement <ExternalLink size={14} />
         </a>
-        <ol className="list-decimal pl-5 text-sm text-zinc-300 space-y-2">
+        <ol className="list-decimal pl-5 text-sm text-body space-y-2">
           <li>
             Which approach would you choose, and what clues lead you to it?
           </li>
@@ -260,7 +260,7 @@ export function RecallPage() {
           <li>What are the time and space costs?</li>
           <li>Which edge cases or implementation details could break it?</li>
         </ol>
-        <label htmlFor="recall-answer" className="block text-sm text-zinc-300">
+        <label htmlFor="recall-answer" className="block text-sm text-body">
           Your attempt · explanation or pseudocode
         </label>
         <textarea
@@ -271,7 +271,7 @@ export function RecallPage() {
           disabled={draft.revealed || frozen}
           onChange={(e) => updateRecall({ answer: e.target.value })}
           placeholder="Write what you remember without opening your notes or the solution."
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-950 p-4 text-zinc-100"
+          className="w-full rounded-lg border border-line-strong bg-surface p-4 text-foreground font-mono text-sm placeholder:text-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
         {!draft.revealed && (
           <div className="flex flex-wrap gap-3">
@@ -282,7 +282,7 @@ export function RecallPage() {
               Compare with a reference
             </button>
             <button
-              className="text-sm text-zinc-400 underline"
+              className="text-sm text-muted underline"
               onClick={() => updateRecall({ revealed: true })}
             >
               I can’t recall it
@@ -292,7 +292,7 @@ export function RecallPage() {
       </section>
       {!frozen && (
         <button
-          className="text-xs text-zinc-500 underline"
+          className="text-xs text-subtle underline"
           onClick={() => {
             endRecall();
             navigate("/dashboard");
@@ -303,37 +303,37 @@ export function RecallPage() {
       )}
       {draft.revealed && (
         <section className="premium-card p-6 space-y-5">
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-xl font-semibold text-foreground">
             Compare and identify gaps
           </h2>
           {progress[problem.id].notes && (
-            <div className="rounded-xl bg-zinc-950 p-4">
-              <h3 className="text-sm font-semibold text-emerald-400 mb-2">
+            <div className="rounded-xl bg-canvas p-4">
+              <h3 className="text-sm font-semibold text-accent mb-2">
                 Your saved notes
               </h3>
-              <p className="whitespace-pre-wrap text-sm text-zinc-300">
+              <p className="whitespace-pre-wrap text-sm text-body">
                 {progress[problem.id].notes}
               </p>
             </div>
           )}
           {lesson && (
-            <details className="rounded-xl border border-zinc-800 p-4">
-              <summary className="cursor-pointer text-sm text-emerald-400">
+            <details className="rounded-xl border border-line p-4">
+              <summary className="cursor-pointer text-sm text-accent">
                 Pattern reference: {pattern?.name}
               </summary>
-              <p className="text-xs text-zinc-500 my-3">
+              <p className="text-xs text-subtle my-3">
                 General pattern guidance. Check the problem’s explanation for
                 its exact solution and complexity.
               </p>
-              <ul className="text-sm text-zinc-300 list-disc pl-5 space-y-2">
+              <ul className="text-sm text-body list-disc pl-5 space-y-2">
                 {lesson.invariants.map((text) => (
                   <li key={text}>{text}</li>
                 ))}
               </ul>
-              <p className="text-sm text-zinc-400 mt-3">{lesson.complexity}</p>
+              <p className="text-sm text-muted mt-3">{lesson.complexity}</p>
               <Link
                 to={`/patterns/${pattern?.id}`}
-                className="text-emerald-400 text-sm mt-3 inline-block"
+                className="text-accent text-sm mt-3 inline-block"
               >
                 Open the pattern lesson
               </Link>
@@ -343,16 +343,16 @@ export function RecallPage() {
             href={problem.leetcodeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-emerald-400 text-sm"
+            className="inline-flex items-center gap-2 text-accent text-sm"
           >
             Check the explanation on LeetCode <ExternalLink size={14} />
           </a>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             Check the approach, correctness argument, complexity, and edge
             cases. This is a self-check; the app does not automatically grade
             your answer.
           </p>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Reference used
             <select
               aria-label="Reference used"
@@ -364,7 +364,7 @@ export function RecallPage() {
                     .value as RecallAttempt["checkedAgainst"],
                 })
               }
-              className="block mt-2 w-full rounded-xl bg-zinc-950 border border-zinc-700 p-3"
+              className="block mt-2 w-full rounded-lg bg-surface border border-line-strong p-3 text-foreground"
             >
               <option value="external">
                 Problem explanation / external reference
@@ -373,7 +373,7 @@ export function RecallPage() {
               <option value="reference">Pattern reference</option>
             </select>
           </label>
-          <label className="flex gap-3 text-sm text-zinc-300">
+          <label className="flex gap-3 text-sm text-body">
             <input
               type="checkbox"
               checked={checked || frozen}
@@ -382,7 +382,7 @@ export function RecallPage() {
             />{" "}
             I compared my answer with a reference and identified any gaps.
           </label>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Save a corrected explanation or key insight (optional)
             <textarea
               aria-label="Corrected explanation"
@@ -391,11 +391,11 @@ export function RecallPage() {
               disabled={frozen}
               value={draft.notes ?? ""}
               onChange={(e) => updateRecall({ notes: e.target.value })}
-              className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 p-3"
+              className="mt-2 w-full rounded-lg border border-line-strong bg-surface p-3 text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
           {saveError && (
-            <p role="alert" className="text-red-300">
+            <p role="alert" className="text-danger">
               {saveError}
             </p>
           )}
@@ -423,18 +423,18 @@ export function RecallPage() {
                   (frozen && draft.completion?.attempt.outcome !== outcome)
                 }
                 onClick={() => void finish(outcome)}
-                className="text-left rounded-xl border border-zinc-700 p-4 hover:border-emerald-500 disabled:opacity-40"
+                className="text-left rounded-xl border border-line-strong p-4 hover:border-accent disabled:opacity-40"
               >
-                <span className="block font-semibold text-zinc-100">
+                <span className="block font-semibold text-foreground">
                   {saving ? "Saving…" : frozen ? `Retry: ${label}` : label}
                 </span>
-                <span className="block text-xs text-zinc-400 mt-1">
+                <span className="block text-xs text-muted mt-1">
                   {description}
                 </span>
               </button>
             ))}
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-subtle">
             Recall success never counts as an independent coding pass.
           </p>
         </section>

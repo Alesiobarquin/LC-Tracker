@@ -28,7 +28,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m)
 
 function RouteFallback() {
   return (
-    <div className="min-h-[40vh] flex items-center justify-center text-sm text-zinc-500" role="status">
+    <div className="min-h-[40vh] flex items-center justify-center text-sm text-subtle" role="status">
       Loading…
     </div>
   );
@@ -198,20 +198,20 @@ export default function App() {
 
   if (showLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-6">
+      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center gap-6">
         <div className="flex flex-col items-center gap-4 animate-in">
-          <div className="p-4 bg-zinc-900 rounded-full border border-zinc-800 shadow-lg shadow-emerald-500/10">
-            <Logo className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" size={40} />
+          <div className="p-4 bg-surface rounded-full border border-line shadow-lg shadow-accent/10">
+            <Logo className="text-accent " size={40} />
           </div>
           <div className="text-center space-y-2">
-            <h1 className="text-xl font-bold font-mono tracking-tight text-zinc-50">LC Tracker</h1>
-            <p className="text-sm text-zinc-500">Loading your workspace…</p>
+            <h1 className="text-xl font-bold font-mono tracking-tight text-foreground">LC Tracker</h1>
+            <p className="text-sm text-subtle">Loading your workspace…</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" />
         </div>
       </div>
     );

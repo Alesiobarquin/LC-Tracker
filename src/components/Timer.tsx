@@ -315,50 +315,50 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       <div className="max-w-xl mx-auto mt-12 animate-in slide-in-from-bottom-4 fade-in duration-500">
         <div className="premium-card p-8 text-center">
           {/* Time taken banner */}
-          <div className="mb-6 p-4 rounded-xl bg-zinc-800/60 border border-zinc-700/50">
+          <div className="mb-6 p-4 rounded-xl bg-muted-surface/60 border border-line-strong/50">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <TimerIcon size={16} className="text-emerald-400" />
-              <span className="text-zinc-400 text-sm">Time spent</span>
+              <TimerIcon size={16} className="text-accent" />
+              <span className="text-muted text-sm">Time spent</span>
             </div>
-            <div className="font-mono text-4xl font-bold text-zinc-50 tracking-tighter">
+            <div className="font-mono text-4xl font-bold text-foreground tracking-tighter">
               {fmtTime(frozenElapsed)}
             </div>
-            <div className="text-zinc-500 text-xs mt-1">{timeLabel} elapsed</div>
+            <div className="text-subtle text-xs mt-1">{timeLabel} elapsed</div>
 
           </div>
 
-          <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
-            <CircleCheck size={28} className="text-emerald-500" />
+          <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border border-accent/20">
+            <CircleCheck size={28} className="text-accent" />
           </div>
-          <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
-          {!storageAvailable && <p role="alert" className="text-amber-300 text-sm mb-3">Your browser cannot preserve this timer after reload. Keep this tab open until saving finishes.</p>}
-          <p className="text-zinc-400 mb-2 text-sm">
-            Record what happened on <strong className="text-zinc-200">{problem.title}</strong>, then rate your confidence.
+          <h2 className="text-2xl font-bold text-foreground mb-1">Session Complete</h2>
+          {!storageAvailable && <p role="alert" className="text-warning text-sm mb-3">Your browser cannot preserve this timer after reload. Keep this tab open until saving finishes.</p>}
+          <p className="text-muted mb-2 text-sm">
+            Record what happened on <strong className="text-body">{problem.title}</strong>, then rate your confidence.
           </p>
-          <p className="text-zinc-500 text-xs mb-6">Independent passes need passing tests, no hints, and a clear explanation. These outcomes are self-reported.</p>
+          <p className="text-subtle text-xs mb-6">Independent passes need passing tests, no hints, and a clear explanation. These outcomes are self-reported.</p>
           <div className="space-y-3 text-left mb-6">
             {([
               { key: 'correctness', label: 'Correctness', options: [['passed', 'Passed the problem tests'], ['failed', 'Failed tests / incorrect'], ['unfinished', 'Unfinished — continue another day'], ['unchecked', 'Not checked against tests']] },
               { key: 'assistance', label: 'Assistance used', options: [['none', 'No hints or solution'], ['hint', 'Used hints'], ['solution', 'Read / followed the solution']] },
               { key: 'explanation', label: 'Can you explain why it works?', options: [['clear', 'Yes, including complexity and edge cases'], ['partial', 'Partly'], ['not_yet', 'Not yet']] },
-            ] as const).map(({ key, label, options }) => <label key={key} className="block text-sm text-zinc-300">{label}
+            ] as const).map(({ key, label, options }) => <label key={key} className="block text-sm text-body">{label}
               <select aria-label={label} value={codingOutcome[key] ?? ''} disabled={isSubmitting || !!activeSession?.completion} onChange={e => {
                 const next = { ...codingOutcome, [key]: e.target.value };
                 setCodingOutcome(next); updateActiveSession({ codingOutcome: next as CodingOutcome }); setSubmitError(null);
-              }} className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 p-3">
+              }} className="mt-2 w-full rounded-xl border border-line-strong bg-canvas p-3">
                 <option value="">Select an outcome</option>{options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
               </select>
             </label>)}
           </div>
 
           <div className="mb-6 text-left">
-            <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
-              <BookOpen size={16} className="text-emerald-400" />
+            <label className="block text-sm font-medium text-body mb-2 flex items-center gap-2">
+              <BookOpen size={16} className="text-accent" />
               Corrected Explanation / Key Insight (Optional)
             </label>
             {existingNotes && (
-              <div className="mb-2 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-lg text-xs text-zinc-400">
-                <span className="text-emerald-400 font-medium">Previous: </span>{existingNotes}
+              <div className="mb-2 p-3 bg-accent/5 border border-accent/15 rounded-lg text-xs text-muted">
+                <span className="text-accent font-medium">Previous: </span>{existingNotes}
               </div>
             )}
             <textarea
@@ -366,12 +366,12 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               onChange={(e) => { notesEdited.current = true; setNotes(e.target.value); updateActiveSession({ draftNotes: e.target.value }); }}
               disabled={isSubmitting || !!activeSession?.completion}
               placeholder="Jot down the key trick or pattern for this problem..."
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-20 text-sm"
+              className="w-full bg-canvas border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors resize-none h-20 text-sm"
             />
           </div>
 
           {submitError && (
-            <div className="mb-4 flex items-start gap-2 p-3 text-left text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl text-sm">
+            <div className="mb-4 flex items-start gap-2 p-3 text-left text-danger bg-danger/10 border border-danger/20 rounded-xl text-sm">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               <span>{submitError}</span>
             </div>
@@ -380,11 +380,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <div className="space-y-2">
             {(
               [
-                { r: 5 as const, title: '5 — Automatic', hint: 'Very confident after this attempt.', tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
-                { r: 4 as const, title: '4 — Strong', hint: 'Confident, with small slips.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
-                { r: 3 as const, title: '3 — Acceptable', hint: 'Some confidence, still rough.', tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20' },
-                { r: 2 as const, title: '2 — Shaky', hint: 'Low confidence; needs practice.', tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20' },
-                { r: 1 as const, title: '1 — Could not', hint: 'Not confident yet.', tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20' },
+                { r: 5 as const, title: '5 — Automatic', hint: 'Very confident after this attempt.', tone: 'text-accent border-accent/30 bg-accent/10 hover:bg-accent/20' },
+                { r: 4 as const, title: '4 — Strong', hint: 'Confident, with small slips.', tone: 'text-accent border-accent/30 bg-accent/10 hover:bg-accent/20' },
+                { r: 3 as const, title: '3 — Acceptable', hint: 'Some confidence, still rough.', tone: 'text-accent border-accent/30 bg-accent/10 hover:bg-accent/20' },
+                { r: 2 as const, title: '2 — Shaky', hint: 'Low confidence; needs practice.', tone: 'text-warning border-warning/30 bg-warning/10 hover:bg-warning/20' },
+                { r: 1 as const, title: '1 — Could not', hint: 'Not confident yet.', tone: 'text-danger border-danger/30 bg-danger/10 hover:bg-danger/20' },
               ] as const
             ).map(({ r, title, hint, tone }) => (
               <button
@@ -412,30 +412,30 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
   return (
     <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pb-24 md:pb-8">
-      {activeSession?.plannedMinutes && <div role="status" className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-zinc-300 mb-5">
+      {activeSession?.plannedMinutes && <div role="status" className="rounded-xl border border-accent/20 bg-accent/5 p-4 text-sm text-body mb-5">
         {elapsed >= activeSession.plannedMinutes * 60 ? 'Your planned block is complete. You can finish and record an unfinished attempt to continue another day.' : `Today’s practice block: ${activeSession.plannedMinutes} minutes. Try independently before using a hint.`}
       </div>}
       {/* Sticky mobile focus chrome */}
-      <div className="md:hidden sticky top-0 z-30 -mx-4 px-4 py-3 mb-4 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-xl flex items-center justify-between gap-3">
+      <div className="md:hidden sticky top-0 z-30 -mx-4 px-4 py-3 mb-4 border-b border-line/80 bg-canvas/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-zinc-100 truncate">{problem.title}</p>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-sm font-semibold text-foreground truncate">{problem.title}</p>
+          <p className="text-[11px] text-subtle">
             {phase === 'running' ? fmtTime(elapsed) : 'Ready'}
             {isPaused ? ' · paused' : ''}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {phase === 'idle' && (
-            <button type="button" onClick={handleStart} className="px-3 py-2 rounded-lg bg-emerald-500 text-zinc-950 text-xs font-bold">
+            <button type="button" onClick={handleStart} className="px-3 py-2 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 text-xs font-semibold">
               Start
             </button>
           )}
           {phase === 'running' && (
             <>
-              <button type="button" onClick={handlePauseResume} className="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-xs font-semibold border border-zinc-700">
+              <button type="button" onClick={handlePauseResume} className="px-3 py-2 rounded-lg bg-muted-surface text-body text-xs font-semibold border border-line-strong">
                 {isPaused ? 'Resume' : 'Pause'}
               </button>
-              <button type="button" onClick={handleDone} disabled={isPaused} className="px-3 py-2 rounded-lg bg-emerald-500 disabled:opacity-40 text-zinc-950 text-xs font-bold">
+              <button type="button" onClick={handleDone} disabled={isPaused} className="px-3 py-2 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 disabled:opacity-40 text-xs font-semibold">
                 Done
               </button>
             </>
@@ -445,23 +445,23 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50">{problem.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{problem.title}</h1>
           <div className="flex gap-2 mt-2 text-sm">
-            <span className="text-zinc-400">{isColdSolve || activeSession?.isReview ? 'Independent attempt' : problem.category}</span>
-            <span className="text-zinc-600">•</span>
+            <span className="text-muted">{isColdSolve || activeSession?.isReview ? 'Independent attempt' : problem.category}</span>
+            <span className="text-subtle">•</span>
             <span className={clsx('font-medium', getDifficultyColor(problem.difficulty))}>
               {problem.difficulty}
             </span>
             {isColdSolve && (
               <>
-                <span className="text-zinc-600">•</span>
-                <span className="text-emerald-400 font-medium">Cold Solve</span>
+                <span className="text-subtle">•</span>
+                <span className="text-accent font-medium">Cold Solve</span>
               </>
             )}
             {!isNew && !isColdSolve && (
               <>
-                <span className="text-zinc-600">•</span>
-                <span className="text-amber-400 font-medium">Review</span>
+                <span className="text-subtle">•</span>
+                <span className="text-warning font-medium">Review</span>
               </>
             )}
           </div>
@@ -472,7 +472,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             href={problem.leetcodeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-100 transition-colors border border-zinc-700/50 hover:border-zinc-600"
+            className="flex items-center gap-2 px-4 py-2 bg-muted-surface hover:bg-hover-surface rounded-xl text-foreground transition-colors border border-line-strong/50 hover:border-line-strong"
           >
             <ExternalLink size={18} />
             <span className="hidden sm:inline">LeetCode</span>
@@ -481,47 +481,47 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       </div>
 
       <div className="premium-card p-8 md:p-12 text-center relative overflow-hidden">
-        {/* Thin progress "vibe" bar that pulses when running */}
-        <div className="absolute top-0 left-0 h-1 bg-zinc-800 w-full">
+        {/* The running state is also labeled below the status line. */}
+        <div className="absolute top-0 left-0 h-1 bg-muted-surface w-full">
           {phase === 'running' && (
-            <div className="h-full bg-emerald-500 animate-[pulse_2s_ease-in-out_infinite]" style={{ width: '100%' }} />
+            <div className="h-full bg-accent" style={{ width: '100%' }} />
           )}
         </div>
 
         {/* Label */}
         <div className={clsx(
-          "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-8 border transition-colors",
+          "inline-flex items-center gap-2 text-sm font-medium mb-7 transition-colors",
           phase === 'running'
-            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-            : "bg-zinc-800/80 text-zinc-400 border-zinc-700/50"
+            ? "text-accent"
+            : "text-muted"
         )}>
-          <TimerIcon size={14} className={phase === 'running' ? 'animate-[spin_3s_linear_infinite]' : ''} />
+          <TimerIcon size={14} />
           {phase === 'idle' ? 'Ready to start' : 'Session in progress'}
         </div>
 
         {/* Stopwatch Display */}
-        <div className="font-mono text-7xl md:text-9xl font-bold tracking-tighter text-zinc-50 mb-12">
+        <div className="font-mono text-6xl sm:text-7xl md:text-8xl font-medium tabular-nums tracking-tight text-foreground mb-10">
           {fmtTime(displayElapsed)}
         </div>
 
         <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {phase === 'idle' ? (
               <button
                 onClick={handleStart}
-                className="px-10 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-lg rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-3"
+                className="px-8 py-3 bg-accent hover:bg-accent-strong text-on-accent font-semibold text-base rounded-lg transition-colors flex items-center gap-3"
               >
                 Start Session
               </button>
             ) : showCancelConfirm ? (
               <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-200">
-                <p className="text-sm font-medium text-red-400 flex items-center gap-2">
+                <p className="text-sm font-medium text-danger flex items-center gap-2">
                   <AlertTriangle size={16} /> Discard this session? No progress will be saved.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowCancelConfirm(false)}
-                    className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl font-medium transition-colors"
+                    className="px-6 py-3 bg-muted-surface hover:bg-hover-surface text-body rounded-xl font-medium transition-colors"
                   >
                     Go Back
                   </button>
@@ -530,7 +530,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                       abandonSession();
                       onComplete();
                     }}
-                    className="px-6 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-500/20"
+                    className="px-6 py-3 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 font-semibold rounded-lg transition-colors"
                   >
                     Yes, Cancel
                   </button>
@@ -541,12 +541,13 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                 <button
                   onClick={handlePauseResume}
                   className={clsx(
-                    "w-12 h-12 flex items-center justify-center rounded-full transition-all border",
+                    "w-12 h-12 flex items-center justify-center rounded-lg transition-colors border",
                     isPaused
-                      ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
-                      : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300"
+                      ? "bg-accent/10 hover:bg-accent/20 border-accent/30 text-accent"
+                      : "bg-muted-surface hover:bg-hover-surface border-line-strong text-body"
                   )}
                   title={isPaused ? 'Resume' : 'Pause'}
+                  aria-label={isPaused ? 'Resume session' : 'Pause session'}
                 >
                   {isPaused ? <Play size={18} className="fill-current ml-0.5" /> : <Pause size={18} className="fill-current" />}
                 </button>
@@ -554,9 +555,9 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                 <button
                   onClick={handleDone}
                   disabled={isPaused}
-                  className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-2"
+                  className="px-8 py-3 bg-accent hover:bg-accent-strong disabled:opacity-40 disabled:cursor-not-allowed text-on-accent font-semibold rounded-lg min-h-12 transition-colors flex items-center gap-2"
                 >
-                  <CircleCheck size={20} className="fill-current" />
+                  <CircleCheck size={20} />
                   I'm Done
                 </button>
 
@@ -566,7 +567,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                     setStartTimeError(null);
                     setShowCancelConfirm(true);
                   }}
-                  className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl font-medium transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-danger/10 text-muted hover:text-danger rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
                   <X size={18} />
                   Cancel
@@ -579,7 +580,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <button
               type="button"
               onClick={openStartTimeEditor}
-              className="text-xs sm:text-sm text-emerald-400/90 hover:text-emerald-300 underline underline-offset-2 transition-colors"
+              className="text-xs sm:text-sm text-accent/90 hover:text-accent underline underline-offset-2 transition-colors"
             >
               Started earlier? Enter start time
             </button>
@@ -589,15 +590,15 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <button
               type="button"
               onClick={openStartTimeEditor}
-              className="text-xs sm:text-sm text-zinc-400 hover:text-zinc-200 underline underline-offset-2 transition-colors"
+              className="text-xs sm:text-sm text-muted hover:text-body underline underline-offset-2 transition-colors"
             >
               Adjust start time
             </button>
           )}
 
           {showStartTimeEditor && !showCancelConfirm && (
-            <div className="w-full max-w-md rounded-xl border border-zinc-700/60 bg-zinc-950/70 p-4 text-left">
-              <label htmlFor="manual-start-time" className="text-sm font-medium text-zinc-300">
+            <div className="w-full max-w-md rounded-xl border border-line-strong/60 bg-canvas/70 p-4 text-left">
+              <label htmlFor="manual-start-time" className="text-sm font-medium text-body">
                 Session start time (today)
               </label>
               <div className="mt-2 flex flex-col sm:flex-row gap-2">
@@ -610,12 +611,12 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                     setManualStartTime(e.target.value);
                     setStartTimeError(null);
                   }}
-                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="flex-1 bg-surface border border-line-strong rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-accent/50"
                 />
                 <button
                   type="button"
                   onClick={applyManualStartTime}
-                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 bg-accent hover:bg-accent-strong text-on-accent font-semibold rounded-lg transition-colors"
                 >
                   Apply
                 </button>
@@ -625,27 +626,27 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
                     setShowStartTimeEditor(false);
                     setStartTimeError(null);
                   }}
-                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-muted-surface hover:bg-hover-surface text-body font-medium rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
               </div>
               {startTimeError && (
-                <p className="mt-2 text-xs text-red-400">{startTimeError}</p>
+                <p className="mt-2 text-xs text-danger">{startTimeError}</p>
               )}
-              <p className="mt-2 text-[11px] text-zinc-500">
+              <p className="mt-2 text-[11px] text-subtle">
                 Start time must be in the past. Backdating is limited to {MAX_BACKDATE_HOURS} hours.
               </p>
             </div>
           )}
         </div>
 
-        <div className="mt-10 text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
+        <div className="mt-10 text-subtle text-sm max-w-md mx-auto leading-relaxed">
           {phase === 'idle' && (
             <span>Open the problem in LeetCode, then start. Shortcuts: Space to start · Enter/D when done · Esc to cancel.</span>
           )}
           {phase === 'running' && isPaused && (
-            <span className="text-amber-400/80">Timer paused. Space resumes · Esc cancels.</span>
+            <span className="text-warning/80">Timer paused. Space resumes · Esc cancels.</span>
           )}
           {phase === 'running' && !isPaused && isColdSolve && (
             <span>Cold Solve: No hints, no videos. Test your true retention. Space pauses · Enter finishes.</span>

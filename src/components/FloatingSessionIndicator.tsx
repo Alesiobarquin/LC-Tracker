@@ -55,22 +55,20 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
     const isPaused = activeSession.pausedAt != null;
 
     return (
-        <div className="fixed bottom-5 right-5 z-50 select-none">
+        <div className="fixed bottom-24 md:bottom-5 right-4 md:right-5 z-50 select-none">
             <div className="relative">
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-emerald-500/25 blur-lg opacity-60 animate-[pulse_2.5s_ease-in-out_infinite]" />
-
                 <div
-                    className="relative bg-zinc-900 border border-emerald-500/40 rounded-2xl px-4 py-3 flex flex-col gap-2 min-w-[220px] max-w-[280px] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+                    className="relative bg-surface border border-line-strong rounded-lg px-4 py-3 flex flex-col gap-2 min-w-[220px] max-w-[280px]"
                 >
                 {/* Header */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                        <Timer size={14} className="text-emerald-400 shrink-0" />
-                        <span className="text-zinc-100 text-sm font-semibold truncate" title={probName}>
+                        <Timer size={14} className="text-accent shrink-0" />
+                        <span className="text-foreground text-sm font-semibold truncate" title={probName}>
                             {truncated}
                         </span>
                     </div>
-                    <span className="font-mono text-emerald-400 font-bold text-sm shrink-0">
+                    <span className="font-mono text-accent font-bold text-sm shrink-0">
                         {fmtTime(elapsed)}
                     </span>
                 </div>
@@ -78,14 +76,14 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                 {/* Session type badge */}
                 <div className="flex items-center gap-1.5">
                     <span className={`text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${activeSession.isColdSolve
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            ? 'bg-accent/10 text-accent border-accent/20'
                             : activeSession.isReview
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                ? 'bg-warning/10 text-warning border-warning/20'
+                                : 'bg-accent/10 text-accent border-accent/20'
                         }`}>
                         {activeSession.isColdSolve ? 'Cold Solve' : activeSession.isReview ? 'Review' : 'New Problem'}
                     </span>
-                    <span className="text-zinc-600 text-[10px]">{isPaused ? 'paused' : 'in progress'}</span>
+                    <span className="text-subtle text-[10px]">{isPaused ? 'paused' : 'in progress'}</span>
                 </div>
 
                 {/* Buttons */}
@@ -93,14 +91,15 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                     <div className="flex gap-2 mt-1">
                         <button
                             onClick={() => navigate('/timer')}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 rounded-lg text-xs font-semibold transition-colors border border-emerald-500/20"
+                            className="flex-1 flex items-center justify-center gap-1.5 min-h-10 py-1.5 px-3 bg-accent hover:bg-accent-strong text-on-accent rounded-lg text-xs font-semibold transition-colors"
                         >
                             <ArrowRight size={12} />
                             Return
                         </button>
                         <button
                             onClick={() => setConfirmAbandon(true)}
-                            className="flex items-center justify-center w-8 h-8 bg-zinc-800/70 hover:bg-red-500/15 text-zinc-500 hover:text-red-400 rounded-lg transition-colors border border-zinc-700/50"
+                            className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-danger/10 text-muted hover:text-danger rounded-lg transition-colors border border-line"
+                            aria-label="Abandon session"
                             title="Abandon session"
                         >
                             <X size={14} />
@@ -108,17 +107,17 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1.5 mt-1">
-                        <p className="text-[11px] text-red-400 text-center font-medium">Clear the local session? A save already sent may have completed.</p>
+                        <p className="text-[11px] text-danger text-center font-medium">Clear the local session? A save already sent may have completed.</p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => { abandonSession(); setConfirmAbandon(false); }}
-                                className="flex-1 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-semibold transition-colors border border-red-500/30"
+                                className="flex-1 py-1.5 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-xs font-semibold transition-colors border border-danger/30"
                             >
                                 Yes, abandon
                             </button>
                             <button
                                 onClick={() => setConfirmAbandon(false)}
-                                className="flex-1 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-medium transition-colors border border-zinc-700"
+                                className="flex-1 py-1.5 bg-muted-surface hover:bg-hover-surface text-body rounded-lg text-xs font-medium transition-colors border border-line-strong"
                             >
                                 Cancel
                             </button>

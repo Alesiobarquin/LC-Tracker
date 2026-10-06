@@ -74,8 +74,8 @@
   --palette-body: #494b46;
   --palette-muted: #6a6c65;
   --palette-subtle: #6e7068;
-  --palette-accent: #b4492b;
-  --palette-accent-strong: #993b21;
+  --palette-accent: #c1431b;
+  --palette-accent-strong: #a33614;
   --palette-on-accent: #ffffff;
   --palette-success: #3d7560;
   --palette-danger: #ab3940;
@@ -83,6 +83,13 @@
   --palette-info: #476b7d;
   --palette-violet: #746581;
   --palette-cyan: #42766c;
+  --palette-code-keyword: #7c3aed;
+  --palette-code-function: #005cc5;
+  --palette-code-string: #187b2c;
+  --palette-code-type: #8c5e00;
+  --palette-code-number: #c2410c;
+  --palette-code-operator: #007782;
+  --palette-code-property: #a11b64;
 }
 
 :root[data-theme="dark"] {
@@ -97,8 +104,8 @@
   --palette-body: #cccfc4;
   --palette-muted: #a3a79b;
   --palette-subtle: #919689;
-  --palette-accent: #e99575;
-  --palette-accent-strong: #f1ad90;
+  --palette-accent: #ff9862;
+  --palette-accent-strong: #ffb07f;
   --palette-on-accent: #28180f;
   --palette-success: #9ab99b;
   --palette-danger: #efa2a4;
@@ -106,6 +113,13 @@
   --palette-info: #9fbac5;
   --palette-violet: #bfb1cb;
   --palette-cyan: #98c2b6;
+  --palette-code-keyword: #c792ff;
+  --palette-code-function: #47b8ff;
+  --palette-code-string: #80d44e;
+  --palette-code-type: #ffd166;
+  --palette-code-number: #ff9862;
+  --palette-code-operator: #36d6cf;
+  --palette-code-property: #ff82c3;
 }
 
 @theme inline {
@@ -2693,6 +2707,10 @@ button:active:not(:disabled),
 .reference-code-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 14px; background: var(--palette-muted-surface); border-bottom: 1px solid var(--palette-line); color: var(--palette-muted); font: 11px var(--font-mono); }
 .reference-code .cm-editor { min-width: 0; }
 .reference-code .cm-foldGutter { color: var(--palette-muted); }
+.explanation-footnote { color: var(--palette-muted); font-size: 11px; line-height: 1.7; }
+.explanation-footnote summary { width: fit-content; cursor: pointer; }
+.explanation-footnote p { margin-top: 8px; }
+.explanation-footnote a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .reference-switch { display: flex; flex-wrap: wrap; gap: 24px; }
 .reference-switch [aria-pressed="true"] { color: var(--palette-accent); text-decoration: underline; text-underline-offset: 6px; }
 .comparison-next { border-top: 1px solid var(--palette-line); padding-top: 20px; }

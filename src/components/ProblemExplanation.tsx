@@ -37,6 +37,41 @@ export function ExplanationLinks({ problem }: { problem: Problem }) {
   );
 }
 
+export function ProblemExplanationFootnote({ problem }: { problem: Problem }) {
+  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setSourceUrl(null);
+    void loadProblemReference(problem.id)
+      .then((reference) => {
+        if (!cancelled) setSourceUrl(reference?.sourceUrl ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setSourceUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [problem.id]);
+  if (!sourceUrl) return null;
+  return (
+    <details className="explanation-footnote">
+      <summary>Source and license</summary>
+      <p>
+        Adapted from{" "}
+        <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+          NeetCode’s explanation and code
+        </a>{" "}
+        ·{" "}
+        <a href="/neetcode-license.txt" target="_blank" rel="noopener noreferrer">
+          MIT license
+        </a>
+        . Node types are supplied by LeetCode where needed.
+      </p>
+    </details>
+  );
+}
+
 export function ProblemExplanation({ problem }: { problem: Problem }) {
   const [reference, setReference] = useState<ProblemReference | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,27 +155,6 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
           </div>
         </details>
       )}
-      <p className="text-xs text-muted">
-        Adapted from{" "}
-        <a
-          className="text-accent underline"
-          href={reference.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          NeetCode’s explanation and code
-        </a>{" "}
-        ·{" "}
-        <a
-          className="text-accent underline"
-          href="/neetcode-license.txt"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          MIT license
-        </a>
-        . Node types are supplied by LeetCode where needed.
-      </p>
     </div>
   );
 }

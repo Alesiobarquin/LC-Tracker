@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 type VercelRequest = IncomingMessage & { query: Record<string, string | string[] | undefined> };
 type VercelResponse = ServerResponse & { status: (code: number) => VercelResponse; json: (body: unknown) => void };
-import { fetchRecentAcSubmissionsFromLeetCode } from '../server/leetcodeAc';
+import { fetchRecentAcSubmissionsFromLeetCode } from '../server/leetcodeAc.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');

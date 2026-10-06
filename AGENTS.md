@@ -36,6 +36,10 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
 
 Run `npm run lint`, `npm test`, and `npm run build` for application changes.
 Use Node.js 24, matching CI and the pinned Vercel runtime.
+Use explicit `.js` extensions for local imports in Vercel function entry points;
+Vercel emits JavaScript modules and native Node ESM rejects extensionless imports.
+The native function runtime regression test runs with the unit suite. Check both
+`/api/health` and `/api/leetcode-ac` on a staged deployment before promotion.
 For persistence changes also run `npm run test:db` (PostgreSQL binaries on PATH)
 and `npm run test:e2e`. Database tests create and remove an isolated local cluster;
 they never load production credentials. The repository skill at

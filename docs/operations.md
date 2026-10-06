@@ -136,12 +136,16 @@ To build a production-configured deployment without switching the live domains:
 ```sh
 vercel deploy --prod --skip-domain --yes
 vercel curl /api/health --deployment <deployment-url>
+vercel curl '/api/leetcode-ac?username=<test-username>&limit=1' --deployment <deployment-url>
 ```
 
 `vercel curl` handles protected deployment access. Staging a deployment does not
 apply migrations or authorize promotion past missing schema. Apply the migration
 and verify it first, then use `vercel promote <deployment-url>` to switch domains.
 Public browser checks should run against the custom domain after promotion.
+The LeetCode function must load under native Node ESM, not only Vite's resolver.
+Use `.js` extensions in its relative imports; the unit suite compiles the function
+and loads it in a separate Node process to catch missing-module startup failures.
 
 On October 6, 2026, the custom domain was live on the August 11 deployment of
 `c08b6cc`, and all six public browser smoke checks passed. The required revision

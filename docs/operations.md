@@ -191,9 +191,14 @@ The private pre-release archive is outside the repository under the local
 archive does not include Storage object bytes. Scheduled off-device backups and
 PITR are separate operational work; this release does not claim either is enabled.
 
-The reliability release is staged on Vercel with a healthy readiness response;
-the LeetCode proxy returns JSON successfully after repairing its ESM import.
-GitHub's complete reliability workflow passed on release commit `4c6e0bf`.
+The reliability release was promoted to `lc-tracker.app` after the database checks.
+The live readiness endpoint reports both providers healthy, the LeetCode proxy
+returns HTTP 200 JSON, and all six live public browser checks pass. GitHub's full
+reliability workflow passed on `d851959` and the release was merged through PR #262.
+The Supabase Management API confirms a custom OIDC integration trusting
+`https://clerk.lc-tracker.app`. The CLI config template's disabled Clerk section
+does not represent that hosted custom integration; verify the integrations API
+before changing authentication configuration.
 Branch protection requires the GitHub Actions `verify` check, including for
 administrators, and prevents force pushes and branch deletion. Keep the release
 PR unmerged until the database prerequisites are satisfied: merging `main`

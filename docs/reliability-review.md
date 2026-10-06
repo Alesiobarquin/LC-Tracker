@@ -100,8 +100,9 @@ The production rating and reliability migrations were applied after a private
 database export and an isolated restore of all nine application tables (290 rows),
 auth, and storage metadata. Migration checksums preserved existing application
 records. Hosted SQL transaction/RLS checks passed inside a rolled-back transaction.
-Branch protection requires CI. Public browser checks pass on the old production
-site and public pages render on the staged release; Clerk's sign-in button renders.
+Branch protection requires CI. All six public browser checks pass on the released
+production site; Clerk's sign-in button renders and Supabase's custom OIDC
+integration trusts the production Clerk issuer.
 The old deployed LeetCode function also failed native ESM startup; its import is
 fixed and a compiled-function regression test now catches this failure.
 

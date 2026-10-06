@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { fetchLeetCodeProfile } from '../services/leetcode';
 import {
     BookOpen, CheckCircle, ChevronRight, ChevronLeft, RefreshCw,
-    AlertTriangle, Rocket, Shuffle, Swords, FileCode2
+    AlertTriangle, Rocket, Shuffle
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useUserSettings } from '../hooks/useUserData';
@@ -192,7 +192,7 @@ const StepLearningMode: React.FC<{
             <p className="text-zinc-400 text-sm">Pick one — you can switch anytime in Settings under Learning Strategy.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
                 type="button"
                 onClick={() => onChange('EXPLORE')}
@@ -205,7 +205,7 @@ const StepLearningMode: React.FC<{
             >
                 <div className="flex items-center gap-2 mb-2">
                     <Shuffle className="text-emerald-400" size={22} />
-                    <span className="text-lg font-semibold text-zinc-100">Explore</span>
+                    <span className="text-lg font-semibold text-zinc-100">Mixed</span>
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">
                     Mix problems across categories for broader practice — less lock-in to a single pattern.
@@ -217,36 +217,17 @@ const StepLearningMode: React.FC<{
                 onClick={() => onChange('CURRICULUM')}
                 className={clsx(
                     'rounded-2xl border p-5 text-left transition-all duration-200',
-                    learningMode === 'CURRICULUM'
+                    learningMode !== 'EXPLORE'
                         ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
                         : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
                 )}
             >
                 <div className="flex items-center gap-2 mb-2">
-                    <Swords className="text-emerald-400" size={22} />
-                    <span className="text-lg font-semibold text-zinc-100">Curriculum</span>
+                    <BookOpen className="text-emerald-400" size={22} />
+                    <span className="text-lg font-semibold text-zinc-100">Guided</span>
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                    Focus on one pattern intensively before moving on — heavily curated structured progression.
-                </p>
-            </button>
-
-            <button
-                type="button"
-                onClick={() => onChange('PATTERNS')}
-                className={clsx(
-                    'rounded-2xl border p-5 text-left transition-all duration-200',
-                    learningMode === 'PATTERNS'
-                        ? 'border-emerald-400 bg-emerald-500/10 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-zinc-950'
-                        : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-600',
-                )}
-            >
-                <div className="flex items-center gap-2 mb-2">
-                    <FileCode2 className="text-emerald-400" size={22} />
-                    <span className="text-lg font-semibold text-zinc-100">Pattern Mastery</span>
-                </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                    A strictly guided progression algorithm explicitly tailored to pattern recognition instead of specific problems.
+                    Start with foundations and build representative coverage across patterns. Brief recall and coding checks share your daily budget.
                 </p>
             </button>
         </div>
@@ -358,11 +339,11 @@ const StepLaunch: React.FC<{
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                     <span className="text-zinc-500 mt-0.5 shrink-0">
-                        {state.learningMode === 'CURRICULUM' ? <Swords size={14} /> : state.learningMode === 'PATTERNS' ? <FileCode2 size={14} /> : <Shuffle size={14} />}
+                        {state.learningMode === 'EXPLORE' ? <Shuffle size={14} /> : <BookOpen size={14} />}
                     </span>
                     <span className="text-zinc-500 w-36 shrink-0">Learning mode</span>
                     <span className="text-zinc-100 font-medium">
-                        {state.learningMode === 'CURRICULUM' ? 'Curriculum' : state.learningMode === 'PATTERNS' ? 'Pattern Mastery' : 'Explore'}
+                        {state.learningMode === 'EXPLORE' ? 'Mixed' : 'Guided'}
                     </span>
                 </div>
                 <div className="flex items-start gap-2">

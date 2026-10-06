@@ -19,8 +19,8 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     subtitle: 'Your daily execution view for retention-focused prep.',
     icon: LayoutDashboard,
     highlights: [
-      'Daily plan with spaced repetition reviews',
-      'Sprint pacing, timers, streaks, and session tracking',
+      'Daily plan within your remaining study time',
+      'Brief recall checks, coding blocks, and new learning',
       'Immediate next actions so sessions start without context switching',
     ],
     tabId: 'dashboard',
@@ -43,8 +43,8 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     subtitle: 'Measure how your practice behavior is changing.',
     icon: LineChart,
     highlights: [
-      'Charts, category mastery, and trend views',
-      'Sprint history and long-term progress',
+      'Delayed coding outcomes and pattern coverage',
+      'Recall results, unseen variations, and study time',
       'Spot strengths and weak areas so next sessions are targeted',
     ],
     tabId: 'analytics',
@@ -68,7 +68,7 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     icon: Settings,
     highlights: [
       'Targets, LeetCode identity, and learning mode',
-      'Spaced repetition aggressiveness preferences',
+      'Optional interview date and future spacing preferences',
       'Update as your timeline, role target, or focus changes',
     ],
     tabId: 'settings',

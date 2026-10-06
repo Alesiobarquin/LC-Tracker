@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { codingOutcomeSchema, practiceKindSchema, studyStateSchema } from './studySchemas';
 import type { ActivityLog, ProblemProgress, SessionTiming, SprintHistoryEntry, SprintState, UserSettingsData } from '../types';
 
 export interface UserBackup {
@@ -15,14 +16,17 @@ export interface UserBackup {
 const date = z.string().refine((s) => Number.isFinite(Date.parse(s)), 'Invalid date');
 const count = z.number().int().nonnegative();
 const rating = z.number().int().min(1).max(5);
-const sessionType = z.enum(['new', 'review', 'cold_solve', 'mock']);
+const sessionType = z.enum(['new', 'review', 'cold_solve', 'mock', 'recall']);
 const historyEntry = z.object({
+  sessionId: z.uuid().optional(),
+  codingOutcome: codingOutcomeSchema.optional(), practiceKind: practiceKindSchema.optional(),
   date, rating, elapsedSeconds: count.optional(), sessionType: sessionType.optional(),
   rawCode: z.string().optional(), optimalSolution: z.string().optional(),
   approachSimilarity: z.number().finite().optional(), usedInAppEditor: z.boolean().optional(),
   mockTimeLimitSeconds: count.optional(), mockActualSecondsUsed: count.optional(),
 });
 const progress = z.object({
+  studyState: studyStateSchema.optional(),
   firstSolvedAt: date, lastReviewedAt: date, nextReviewAt: date,
   reviewCount: count, history: z.array(historyEntry), retired: z.boolean(),
   consecutiveThrees: count, consecutiveSuccesses: count.optional(), notes: z.string().optional(),
@@ -41,7 +45,7 @@ const sprintHistory = z.array(z.object({
   avgSolveSeconds: count, sprintLength: z.number().int().positive(),
 }));
 const settings = z.object({
-  onboardingComplete: z.boolean(), leetcodeUsername: z.string().nullable(), targetInterviewDate: date,
+  onboardingComplete: z.boolean(), leetcodeUsername: z.string().nullable(), targetInterviewDate: z.union([z.literal(''), date]),
   ratingHistoryMigrationVersion: count.default(1),
   settings: z.object({
     studySchedule: z.object({
@@ -61,7 +65,7 @@ const settings = z.object({
   syntaxProgress: z.record(z.string(), z.object({ lastPracticedAt: date, nextReviewAt: date, confidenceRating: z.number().int().min(1).max(3), reviewCount: count, consecutiveSuccesses: count.optional() })),
 });
 const backup = z.object({
-  formatVersion: z.literal(1).optional(), exportedAt: date.optional(), userSettings: settings.optional(),
+  formatVersion: z.union([z.literal(1), z.literal(2)]).optional(), exportedAt: date.optional(), userSettings: settings.optional(),
   progress: z.record(z.string().min(1), progress).optional(),
   activityLog: z.record(z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.object({ solved: count, reviewed: count })).optional(),
   sessionTimings: z.array(timing).optional(), sprintState: sprintState.nullable().optional(), sprintHistory: sprintHistory.optional(),

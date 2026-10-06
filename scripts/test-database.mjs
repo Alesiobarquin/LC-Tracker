@@ -24,11 +24,13 @@ try {
   started = true;
   const args = ['-X', '-v', 'ON_ERROR_STOP=1', '-h', socket, '-p', '55439', '-d', 'postgres'];
   run('psql', args, readFileSync('supabase/tests/bootstrap.sql', 'utf8'));
-  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql', '20261006000001_clerk_feedback_storage.sql', '20261006000002_postgrest_conflict_status.sql']) {
+  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql', '20261006000001_clerk_feedback_storage.sql', '20261006000002_postgrest_conflict_status.sql', '20261006000003_study_evidence.sql']) {
     run('psql', args, readFileSync(`supabase/migrations/${name}`, 'utf8'));
   }
   const output = run('psql', args, readFileSync('supabase/tests/reliability.sql', 'utf8'));
   console.log(output.split('\n').find((line) => line.includes('Atomic saves'))?.trim());
+  const study = run('psql', args, readFileSync('supabase/tests/study.sql', 'utf8'));
+  console.log(study.split('\n').find(line => line.includes('Recall persistence'))?.trim());
   const storage = run('psql', args, readFileSync('supabase/tests/storage.sql', 'utf8'));
   console.log(storage.split('\n').find((line) => line.includes('Clerk storage'))?.trim());
   const raceSql = (operationId, version, reviewCount) => {

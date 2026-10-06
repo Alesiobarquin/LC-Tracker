@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Problem } from '../data/problems';
-import type { ProblemSessionRating } from '../types';
+import type { ProblemSessionRating, CodingOutcome } from '../types';
 import { useStore } from '../store/useStore';
-import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Trophy, Pause, Play, X, AlertTriangle } from 'lucide-react';
+import { ExternalLink, CircleCheck, BookOpen, Timer as TimerIcon, Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
+import { useProblemProgress } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
 import { MAX_BACKDATE_HOURS, validateStartTimestamp } from '../utils/dateUtils';
 import { canPersistTimer } from '../lib/safeStorage';
@@ -51,14 +51,13 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const endSession = useStore((state) => state.endSession);
   const abandonSession = useStore((state) => state.abandonSession);
   const { progress, saveSession } = useProblemProgress();
-  const { personalBestTimes } = useSessionTimings();
 
   const [notes, setNotes] = useState(activeSession?.draftNotes ?? progress[problem.id]?.notes ?? '');
+  const [codingOutcome, setCodingOutcome] = useState<Partial<CodingOutcome>>(activeSession?.completion?.codingOutcome ?? activeSession?.codingOutcome ?? {});
   const [phase, setPhase] = useState<'idle' | 'running' | 'rating'>('idle');
   const [elapsed, setElapsed] = useState(0);
   const [frozenElapsed, setFrozenElapsed] = useState(0);
   const intervalRef = useRef<number | null>(null);
-  const [isNewPB, setIsNewPB] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showStartTimeEditor, setShowStartTimeEditor] = useState(false);
@@ -200,12 +199,6 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
     const finalElapsed = Math.max(0, raw - pausedSecondsRef.current);
     setFrozenElapsed(finalElapsed);
 
-    // Check if this is a personal best
-    const currentBest = personalBestTimes[problem.id];
-    if (currentBest === undefined || finalElapsed < currentBest) {
-      setIsNewPB(true);
-    }
-
     pausedAtRef.current = null;
     setIsPaused(false);
     updateActiveSession({ pausedSeconds: pausedSecondsRef.current, pausedAt: null, finishedElapsed: finalElapsed });
@@ -215,6 +208,10 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const handleRating = async (rating: ProblemSessionRating) => {
     if (submittingRef.current || !activeSession) return;
     if (activeSession.completion && activeSession.completion.rating !== rating) return;
+    if (!activeSession.completion && (!codingOutcome.correctness || !codingOutcome.assistance || !codingOutcome.explanation)) {
+      setSubmitError('Record correctness, assistance, and explanation before saving your confidence.');
+      return;
+    }
     submittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
@@ -237,6 +234,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         sessionType,
         rating,
       }, rating, notes: notesEdited.current ? notes : undefined,
+      codingOutcome: codingOutcome as CodingOutcome, practiceKind: activeSession.practiceKind,
     };
     // Persist the exact attempted completion before sending. Retries after an
     // ambiguous timeout or a page reload retain both the operation ID and payload.
@@ -245,6 +243,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
       await saveSession({
         operationId: completion.timing.id, problemId: problem.id,
         rating: completion.rating, notes: completion.notes, timing: completion.timing,
+        codingOutcome: completion.codingOutcome, practiceKind: completion.practiceKind,
         additionalData: { elapsedSeconds: completion.timing.elapsedSeconds, sessionType: completion.timing.sessionType },
       });
       if (useStore.getState().activeSession?.id === completion.timing.id) {
@@ -262,7 +261,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
         return;
       }
       if (e.key === 'Escape') {
@@ -325,12 +324,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               {fmtTime(frozenElapsed)}
             </div>
             <div className="text-zinc-500 text-xs mt-1">{timeLabel} elapsed</div>
-            {isNewPB && (
-              <div className="mt-2 flex items-center justify-center gap-1.5 text-amber-400 text-xs font-semibold">
-                <Trophy size={14} className="fill-current" />
-                New Personal Best!
-              </div>
-            )}
+
           </div>
 
           <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
@@ -339,14 +333,28 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
           {!storageAvailable && <p role="alert" className="text-amber-300 text-sm mb-3">Your browser cannot preserve this timer after reload. Keep this tab open until saving finishes.</p>}
           <p className="text-zinc-400 mb-2 text-sm">
-            Rate how you’d perform on <strong className="text-zinc-200">{problem.title}</strong> if you saw it again soon — not whether the code compiled once.
+            Record what happened on <strong className="text-zinc-200">{problem.title}</strong>, then rate your confidence.
           </p>
-          <p className="text-zinc-500 text-xs mb-6">Keyboard: press 1–5</p>
+          <p className="text-zinc-500 text-xs mb-6">Independent passes need passing tests, no hints, and a clear explanation. These outcomes are self-reported.</p>
+          <div className="space-y-3 text-left mb-6">
+            {([
+              { key: 'correctness', label: 'Correctness', options: [['passed', 'Passed the problem tests'], ['failed', 'Failed tests / incorrect'], ['unfinished', 'Unfinished — continue another day'], ['unchecked', 'Not checked against tests']] },
+              { key: 'assistance', label: 'Assistance used', options: [['none', 'No hints or solution'], ['hint', 'Used hints'], ['solution', 'Read / followed the solution']] },
+              { key: 'explanation', label: 'Can you explain why it works?', options: [['clear', 'Yes, including complexity and edge cases'], ['partial', 'Partly'], ['not_yet', 'Not yet']] },
+            ] as const).map(({ key, label, options }) => <label key={key} className="block text-sm text-zinc-300">{label}
+              <select aria-label={label} value={codingOutcome[key] ?? ''} disabled={isSubmitting || !!activeSession?.completion} onChange={e => {
+                const next = { ...codingOutcome, [key]: e.target.value };
+                setCodingOutcome(next); updateActiveSession({ codingOutcome: next as CodingOutcome }); setSubmitError(null);
+              }} className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 p-3">
+                <option value="">Select an outcome</option>{options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+              </select>
+            </label>)}
+          </div>
 
           <div className="mb-6 text-left">
             <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
               <BookOpen size={16} className="text-emerald-400" />
-              Key Insight / Notes (Optional)
+              Corrected Explanation / Key Insight (Optional)
             </label>
             {existingNotes && (
               <div className="mb-2 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-lg text-xs text-zinc-400">
@@ -372,11 +380,11 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
           <div className="space-y-2">
             {(
               [
-                { r: 5 as const, title: '5 — Automatic', hint: 'Could solve cold in an interview.', tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
-                { r: 4 as const, title: '4 — Strong', hint: 'Solid solve; small slips only.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
-                { r: 3 as const, title: '3 — Acceptable', hint: 'Finished, but slow or messy.', tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20' },
-                { r: 2 as const, title: '2 — Shaky', hint: 'Heavy hints or partial solution.', tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20' },
-                { r: 1 as const, title: '1 — Could not', hint: 'Did not finish — revisit soon.', tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20' },
+                { r: 5 as const, title: '5 — Automatic', hint: 'Very confident after this attempt.', tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
+                { r: 4 as const, title: '4 — Strong', hint: 'Confident, with small slips.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20' },
+                { r: 3 as const, title: '3 — Acceptable', hint: 'Some confidence, still rough.', tone: 'text-teal-400 border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20' },
+                { r: 2 as const, title: '2 — Shaky', hint: 'Low confidence; needs practice.', tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20' },
+                { r: 1 as const, title: '1 — Could not', hint: 'Not confident yet.', tone: 'text-red-400 border-red-500/30 bg-red-500/10 hover:bg-red-500/20' },
               ] as const
             ).map(({ r, title, hint, tone }) => (
               <button
@@ -404,6 +412,9 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
   return (
     <div className="max-w-3xl mx-auto animate-in fade-in duration-500 pb-24 md:pb-8">
+      {activeSession?.plannedMinutes && <div role="status" className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-zinc-300 mb-5">
+        {elapsed >= activeSession.plannedMinutes * 60 ? 'Your planned block is complete. You can finish and record an unfinished attempt to continue another day.' : `Today’s practice block: ${activeSession.plannedMinutes} minutes. Try independently before using a hint.`}
+      </div>}
       {/* Sticky mobile focus chrome */}
       <div className="md:hidden sticky top-0 z-30 -mx-4 px-4 py-3 mb-4 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -436,7 +447,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         <div>
           <h1 className="text-2xl font-bold text-zinc-50">{problem.title}</h1>
           <div className="flex gap-2 mt-2 text-sm">
-            <span className="text-zinc-400">{problem.category}</span>
+            <span className="text-zinc-400">{isColdSolve || activeSession?.isReview ? 'Independent attempt' : problem.category}</span>
             <span className="text-zinc-600">•</span>
             <span className={clsx('font-medium', getDifficultyColor(problem.difficulty))}>
               {problem.difficulty}

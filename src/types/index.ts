@@ -7,11 +7,42 @@ export type ProblemSessionRating = 1 | 2 | 3 | 4 | 5;
 /** How aggressively the app schedules the next review (shorter gaps = more frequent). */
 export type SrAggressiveness = 'RELAXED' | 'BALANCED' | 'AGGRESSIVE';
 
+export interface CodingOutcome {
+  correctness: 'passed' | 'failed' | 'unfinished' | 'unchecked';
+  assistance: 'none' | 'hint' | 'solution';
+  explanation: 'clear' | 'partial' | 'not_yet';
+}
+
+export type PracticeKind = 'learning' | 'coding_review' | 'variant';
+export interface RecallAttempt {
+  id: string;
+  date: string;
+  elapsedSeconds: number;
+  outcome: 'recalled' | 'partial' | 'forgot';
+  answer: string;
+  checkedAgainst: 'notes' | 'reference' | 'external';
+}
+
+/** Separate schedules: recalling an approach never verifies implementation. */
+export interface StudyState {
+  version: 1;
+  source: 'practice' | 'leetcode_import' | 'legacy';
+  recallIntervalDays: number;
+  codingIntervalDays: number;
+  nextRecallAt: string;
+  nextCodingAt: string;
+  lapses: number;
+  recallHistory: RecallAttempt[];
+}
+
 export interface ProblemHistoryEntry {
+  sessionId?: string;
   date: string;
   rating: ProblemSessionRating;
   elapsedSeconds?: number;
   sessionType?: 'new' | 'review' | 'cold_solve' | 'mock';
+  codingOutcome?: CodingOutcome;
+  practiceKind?: PracticeKind;
   rawCode?: string;
   optimalSolution?: string;
   approachSimilarity?: number;
@@ -32,6 +63,7 @@ export interface ProblemProgress {
   consecutiveThrees: number;
   consecutiveSuccesses?: number;
   notes?: string;
+  studyState?: StudyState;
 }
 
 export interface SyntaxProgress {
@@ -57,7 +89,7 @@ export interface SessionTiming {
   category: string;
   date: string;
   elapsedSeconds: number;
-  sessionType: 'new' | 'review' | 'cold_solve' | 'mock';
+  sessionType: 'new' | 'review' | 'cold_solve' | 'mock' | 'recall';
   rating: ProblemSessionRating;
 }
 
@@ -94,8 +126,25 @@ export interface ActiveSession {
   pausedAt?: number | null;
   finishedElapsed?: number;
   draftNotes?: string;
+  codingOutcome?: CodingOutcome;
+  practiceKind?: PracticeKind;
+  plannedMinutes?: number;
   /** Persisted before the request so a reload/retry uses the same operation ID. */
-  completion?: { timing: SessionTiming; rating: ProblemSessionRating; notes?: string };
+  completion?: { timing: SessionTiming; rating: ProblemSessionRating; notes?: string; codingOutcome?: CodingOutcome; practiceKind?: PracticeKind };
+}
+
+export interface RecallDraft {
+  id: string;
+  userId?: string;
+  problemId: string;
+  startedAt: number;
+  pausedSeconds?: number;
+  pausedAt?: number | null;
+  answer: string;
+  revealed: boolean;
+  checkedAgainst: RecallAttempt['checkedAgainst'];
+  notes?: string;
+  completion?: { attempt: RecallAttempt; notes?: string };
 }
 
 export interface StreakState {
@@ -241,7 +290,7 @@ export interface UserSettingsData {
 export const DEFAULT_SETTINGS: AppSettings = {
   studySchedule: {
     weekdayMinutes: 60,
-    weekendMinutes: 120,
+    weekendMinutes: 60,
     restDay: 0,
     blackoutDates: [],
   },
@@ -276,7 +325,7 @@ export const DEFAULT_CATCH_UP_PLAN: CatchUpPlanState = {
 export const DEFAULT_USER_SETTINGS: UserSettingsData = {
   onboardingComplete: false,
   leetcodeUsername: null,
-  targetInterviewDate: '2026-09-15',
+  targetInterviewDate: '',
   settings: DEFAULT_SETTINGS,
   ratingHistoryMigrationVersion: 0,
   targetEvents: [],

@@ -4,11 +4,12 @@ import {
   DEFAULT_SETTINGS, DEFAULT_USER_SETTINGS,
   type ActivityLog, type AppSettings, type ProblemProgress, type ProblemSessionRating,
   type SessionTiming, type SprintHistoryEntry, type SprintState, type SyntaxProgress,
-  type TargetEvent, type UserSettingsData,
+  type TargetEvent, type UserSettingsData, type CodingOutcome, type PracticeKind, type RecallAttempt,
 } from '../types';
 import { advanceSprintState, applyLeetCodeSubmissions, calculateSessionAggregates,
   computeNewProblemProgress } from '../utils/progressHelpers';
-import { getNextReviewDate } from '../utils/dateUtils';
+import { applyRecall } from '../utils/study';
+import { recallAttemptSchema, codingOutcomeSchema, studyStateSchema } from '../utils/studySchemas';
 import { problemMap } from '../data/problems';
 import { safeUUID } from '../utils/uuid';
 import { fetchAllPages } from '../lib/pagination';
@@ -35,6 +36,7 @@ type ProblemProgressRow = {
   retired: boolean;
   notes: string | null;
   history: ProblemProgress['history'];
+  study_state?: ProblemProgress['studyState'] | null;
 };
 
 type SessionTimingRow = {
@@ -159,6 +161,7 @@ export function rowToProgressMap(rows: ProblemProgressRow[] | null): Record<stri
       consecutiveThrees: row.consecutive_threes ?? 0,
       consecutiveSuccesses: row.consecutive_successes ?? 0,
       notes: row.notes ?? undefined,
+      studyState: row.study_state ? studyStateSchema.parse(row.study_state) : undefined,
     };
   });
   return map;
@@ -177,6 +180,7 @@ function progressToRow(userId: string, problemId: string, progress: ProblemProgr
     retired: progress.retired,
     notes: progress.notes ?? null,
     history: progress.history,
+    study_state: progress.studyState ?? null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -257,7 +261,7 @@ export async function fetchUserSettings(userId: string) {
 export async function fetchProblemProgress(userId: string) {
   const data = await fetchAllPages<ProblemProgressRow>((from, to) => supabase
     .from('problem_progress')
-    .select('version, problem_id, first_solved_at, last_reviewed_at, next_review_at, review_count, consecutive_threes, consecutive_successes, retired, notes, history')
+    .select('version, problem_id, first_solved_at, last_reviewed_at, next_review_at, review_count, consecutive_threes, consecutive_successes, retired, notes, history, study_state')
     .eq('user_id', userId).order('problem_id').range(from, to));
   return rowToProgressMap(data);
 }
@@ -355,9 +359,12 @@ export interface SaveProblemInput {
   notes?: string;
   additionalData?: Record<string, unknown>;
   timing?: SessionTiming;
+  codingOutcome?: CodingOutcome;
+  practiceKind?: PracticeKind;
 }
 
 export async function saveProblemSession(userId: string, input: SaveProblemInput) {
+  if (input.codingOutcome) codingOutcomeSchema.parse(input.codingOutcome);
   return retryConflict(async () => {
     const [settings, progress, sprint, timings] = await Promise.all([
       fetchUserSettings(userId), fetchProblemProgress(userId), fetchSprintState(userId), fetchSessionTimings(userId),
@@ -366,7 +373,7 @@ export async function saveProblemSession(userId: string, input: SaveProblemInput
     // Classify against confirmed data, not the UI's potentially stale isNew flag.
     const isNew = !existing;
     const next = computeNewProblemProgress(existing, input.problemId, input.rating, isNew,
-      input.notes, input.additionalData, settings.settings.srAggressiveness);
+      input.notes, { ...input.additionalData, sessionId: input.timing?.id, codingOutcome: input.codingOutcome, practiceKind: input.practiceKind, date: input.timing?.date ?? new Date().toISOString() }, settings.settings.srAggressiveness);
     const payload: Record<string, unknown> = {
       problemId: input.problemId, progress: [progressToRow(userId, input.problemId, next)],
       logDate: format(new Date(input.timing?.date ?? Date.now()), 'yyyy-MM-dd'), isNew,
@@ -386,26 +393,40 @@ export async function saveProblemSession(userId: string, input: SaveProblemInput
   });
 }
 
+export interface SaveRecallInput {
+  problemId: string;
+  attempt: RecallAttempt;
+  notes?: string;
+}
+export async function saveRecallSession(userId: string, input: SaveRecallInput) {
+  recallAttemptSchema.parse(input.attempt);
+  return retryConflict(async () => {
+    const progress = await fetchProblemProgress(userId);
+    const existing = progress[input.problemId];
+    if (!existing) throw new Error('This problem was removed. Return to your library before reviewing it.');
+    const next = applyRecall(existing, input.problemId, input.attempt, input.notes);
+    const timing: SessionTiming = {
+      id: input.attempt.id, problemId: input.problemId, category: problemMap[input.problemId]?.category ?? 'Other',
+      date: input.attempt.date, elapsedSeconds: input.attempt.elapsedSeconds, sessionType: 'recall',
+      rating: input.attempt.outcome === 'recalled' ? 4 : input.attempt.outcome === 'partial' ? 2 : 1,
+    };
+    return commit(input.attempt.id, 'recall', { progress: { [input.problemId]: existing.version ?? 0 } }, {
+      problemId: input.problemId, progress: [progressToRow(userId, input.problemId, next)],
+      logDate: format(new Date(input.attempt.date), 'yyyy-MM-dd'), isNew: false,
+      timings: [timingToRow(userId, timing)],
+    }, userId);
+  });
+}
+
 export async function saveUserSettings(userId: string, updater: (current: UserSettingsData) => UserSettingsData) {
   const operationId = safeUUID();
   return retryConflict(async () => {
     const current = await fetchUserSettings(userId);
     const next = updater(current);
-    const expected: ExpectedVersions = { settings: current.version };
-    const reviewDates: Array<{ problemId: string; nextReviewAt: string }> = [];
-    if (current.settings.srAggressiveness !== next.settings.srAggressiveness) {
-      const progress = await fetchProblemProgress(userId);
-      expected.progress = {};
-      for (const [problemId, prog] of Object.entries(progress)) {
-        const problem = problemMap[problemId];
-        if (!problem || prog.retired || !prog.history.length) continue;
-        expected.progress[problemId] = prog.version ?? 0;
-        reviewDates.push({ problemId, nextReviewAt: getNextReviewDate(
-          prog.history.at(-1)!.rating, prog.consecutiveSuccesses ?? 0,
-          next.settings.srAggressiveness, problem.difficulty).toISOString() });
-      }
-    }
-    return commit(operationId, 'settings', expected, { settings: userSettingsToRow(userId, next), reviewDates }, userId);
+    // Intensity affects future practice intervals. Changing a setting must not
+    // manufacture a bulk review event or rewrite existing memory evidence.
+    return commit(operationId, 'settings', { settings: current.version },
+      { settings: userSettingsToRow(userId, next) }, userId);
   });
 }
 
@@ -446,7 +467,7 @@ export async function exportBackup(): Promise<UserBackup> {
   };
   const sprint = normalizeSprintRow(snapshot.sprint);
   return validateBackup({
-    formatVersion: 1, exportedAt: new Date().toISOString(),
+    formatVersion: 2, exportedAt: new Date().toISOString(),
     userSettings: normalizeUserSettingsRow(snapshot.settings), progress: rowToProgressMap(snapshot.progress),
     activityLog: Object.fromEntries(snapshot.activity.map((row) => [row.log_date, { solved: row.solved, reviewed: row.reviewed }])),
     sessionTimings: snapshot.timings.map(rowToTiming), sprintState: sprint.sprintState, sprintHistory: sprint.sprintHistory,

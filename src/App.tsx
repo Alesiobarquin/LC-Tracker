@@ -22,6 +22,7 @@ const Analytics = lazy(() => import('./components/Analytics').then((m) => ({ def
 const SyntaxReference = lazy(() => import('./components/SyntaxReference').then((m) => ({ default: m.SyntaxReference })));
 const Settings = lazy(() => import('./components/Settings').then((m) => ({ default: m.Settings })));
 const Onboarding = lazy(() => import('./components/Onboarding').then((m) => ({ default: m.Onboarding })));
+const RecallPage = lazy(() => import('./components/RecallPage').then(m => ({ default: m.RecallPage })));
 const TimerPage = lazy(() => import('./components/TimerPage').then((m) => ({ default: m.TimerPage })));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 
@@ -267,6 +268,7 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/recall/:problemId" element={<RecallPage />} />
                 <Route path="/timer" element={<TimerPage />} />
                 <Route path="/timer/:problemId" element={<TimerPage />} />
               </>

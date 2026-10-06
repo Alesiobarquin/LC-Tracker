@@ -55,6 +55,35 @@ export async function testPostgrest(socket) {
     assert.equal(settings[0].settings_json.settings.studySchedule.weekdayMinutes, 90);
     const other = await request('/user_settings?select=version', { headers: { Authorization: `Bearer ${token('another_api_user')}` } });
     assert.deepEqual(await other.json(), []);
+    const progressRow = { problem_id: 'two-sum', first_solved_at: '2020-01-01T00:00:00Z',
+      last_reviewed_at: '2020-01-01T00:00:00Z', next_review_at: '2026-10-06T00:00:00Z',
+      review_count: 0, consecutive_threes: 0, consecutive_successes: 0, retired: false, history: [] };
+    assert.equal((await request('/rpc/commit_user_change', { method: 'POST', headers, body: JSON.stringify({
+      p_operation_id: randomUUID(), p_kind: 'import', p_expected: {}, p_payload: { progress: [progressRow] },
+    }) })).status, 200);
+    const recallId = randomUUID();
+    const studyState = { version: 1, source: 'leetcode_import', recallIntervalDays: 5, codingIntervalDays: 7,
+      nextRecallAt: '2026-10-11T00:00:00Z', nextCodingAt: '2026-10-13T00:00:00Z', lapses: 0,
+      recallHistory: [{ id: recallId, date: '2026-10-06T12:00:00Z', elapsedSeconds: 180,
+        outcome: 'recalled', answer: 'A fixture recall answer', checkedAgainst: 'external' }] };
+    const recallSave = () => request('/rpc/commit_user_change', { method: 'POST', headers, body: JSON.stringify({
+      p_operation_id: recallId, p_kind: 'recall', p_expected: { progress: { 'two-sum': 1 } },
+      p_payload: { problemId: 'two-sum', progress: [{ ...progressRow, study_state: studyState }],
+        logDate: '2026-10-06', isNew: false, timings: [{ id: recallId, problem_id: 'two-sum',
+          category: 'Arrays & Hashing', recorded_at: '2026-10-06T12:00:00Z', elapsed_seconds: 180, session_type: 'recall', rating: 4 }] },
+    }) });
+    assert.equal((await recallSave()).status, 200);
+    assert.equal((await (await recallSave()).json()).duplicate, true);
+    const recalledRows = await (await request('/problem_progress?select=study_state,history,review_count', { headers })).json();
+    assert.deepEqual(recalledRows[0].study_state, studyState);
+    assert.deepEqual(recalledRows[0].history, []);
+    assert.equal(recalledRows[0].review_count, 0);
+    const recallTimings = await (await request('/session_timings?select=id,session_type', { headers })).json();
+    assert.equal(recallTimings.length, 1);
+    assert.equal(recallTimings[0].session_type, 'recall');
+    const isolated = await request('/problem_progress?select=study_state', { headers: { Authorization: `Bearer ${token('another_api_user')}` } });
+    assert.deepEqual(await isolated.json(), []);
+    console.log('PostgREST recall state, modality, exact-once retry, and answer privacy passed.');
     console.log('PostgREST HTTP conflicts return 409 without pool starvation; retry receipts and JWT RLS passed.');
   } finally {
     if (server.exitCode === null && !startupError) {

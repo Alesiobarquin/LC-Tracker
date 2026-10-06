@@ -275,49 +275,20 @@ describe('deriveMomentumState', () => {
 });
 
 describe('computePatternCompletion', () => {
-  const base = (): ProblemProgress => ({
-    firstSolvedAt: '2026-01-01',
-    lastReviewedAt: '2026-01-01',
-    nextReviewAt: '2099-01-01',
-    reviewCount: 1,
-    retired: false,
-    consecutiveThrees: 0,
-    consecutiveSuccesses: 1,
-    history: [{ date: '2026-01-01', rating: 4, sessionType: 'new' }],
-  });
-
-  it('counts mastery from retired problems, not any solve', () => {
-    const result = computePatternCompletion(
-      'two_pointers' as never,
-      ['a', 'b', 'c'],
-      {
-        a: { ...base(), retired: true },
-        b: base(),
-        c: {
-          ...base(),
-          nextReviewAt: '2000-01-01',
-          history: [{ date: '2026-01-01', rating: 1, sessionType: 'new' }],
-        },
-      }
-    );
-
-    expect(result.masteredCount).toBe(1);
-    expect(result.problemsCompletedCount).toBe(1);
-    expect(result.dueCount).toBe(1);
-    expect(result.needsWorkCount).toBe(1);
+  const outcome = { correctness: 'passed' as const, assistance: 'none' as const, explanation: 'clear' as const };
+  const base = (): ProblemProgress => ({ firstSolvedAt: '2026-01-01', lastReviewedAt: '2026-01-09', nextReviewAt: '2099-01-01', reviewCount: 1,
+    retired: true, consecutiveThrees: 4, history: [{ date: '2026-01-01', rating: 5 }, { date: '2026-01-09', rating: 5 }] });
+  it('does not infer dependable performance from legacy ratings or retirement', () => {
+    const result = computePatternCompletion('two-pointers', ['a', 'b'], { a: base(), b: base() });
+    expect(result.masteredCount).toBe(0);
     expect(result.isCompleted).toBe(false);
   });
-
-  it('marks pattern complete only when every problem is retired', () => {
-    const result = computePatternCompletion(
-      'sliding_window' as never,
-      ['a', 'b'],
-      {
-        a: { ...base(), retired: true },
-        b: { ...base(), retired: true },
-      }
-    );
-    expect(result.isCompleted).toBe(true);
+  it('uses spaced independent outcomes and a passed unseen variation', () => {
+    const practiced = { ...base(), history: [{ date: '2026-01-01', rating: 4 as const, codingOutcome: outcome }, { date: '2026-01-09', rating: 4 as const, codingOutcome: outcome }] };
+    expect(computePatternCompletion('two-pointers', ['a', 'b'], { a: practiced, b: practiced }).isCompleted).toBe(false);
+    const variant = { ...practiced, history: [{ ...practiced.history[0], practiceKind: 'variant' as const }, practiced.history[1]] };
+    const result = computePatternCompletion('two-pointers', ['a', 'b'], { a: practiced, b: variant });
     expect(result.masteredCount).toBe(2);
+    expect(result.isCompleted).toBe(true);
   });
 });

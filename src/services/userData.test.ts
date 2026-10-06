@@ -8,13 +8,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../lib/supabase', () => ({ supabase: {
   rpc: mocks.rpc,
   from: (table: string) => {
+    let offset = 0; let limit = 500;
     const query: any = {
       select: () => query, eq: () => query, gte: () => query, lt: () => query, limit: () => query,
       order: (...args: unknown[]) => { mocks.order(...args); return query; },
       or: (...args: unknown[]) => { mocks.or(...args); return query; },
-      range: () => query, maybeSingle: () => query,
+      range: (from: number, to: number) => { offset = from; limit = to - from + 1; return query; }, maybeSingle: () => query,
       then: (resolve: (result: unknown) => unknown) => Promise.resolve(resolve({
-        data: mocks.rows.get(table) ?? (['user_settings', 'sprint_state'].includes(table) ? null : []),
+        data: Array.isArray(mocks.rows.get(table)) ? (mocks.rows.get(table) as unknown[]).slice(offset, offset + limit) : mocks.rows.get(table) ?? (['user_settings', 'sprint_state'].includes(table) ? null : []),
         error: mocks.readError,
       })),
     };
@@ -23,7 +24,7 @@ vi.mock('../lib/supabase', () => ({ supabase: {
 } }));
 
 import { fetchProblemProgress, fetchSessionTimingsBefore, saveProblemSession,
-  saveUserSettings, importSubmissions, restoreUserBackup, exportBackup } from './userData';
+  saveUserSettings, importSubmissions, restoreUserBackup, exportBackup, saveRecallSession } from './userData';
 
 const operationId = '00000000-0000-4000-8000-000000000001';
 const timing = { id: operationId, problemId: 'two-sum', category: 'Arrays & Hashing',
@@ -117,7 +118,7 @@ describe('transactional user-data service', () => {
         elapsed_seconds: 120, session_type: 'new', rating: 3 }] } });
     const backup = await exportBackup();
     expect(backup.sessionTimings?.[0].date).toBe('2020-01-01T00:00:00Z');
-    expect(backup.formatVersion).toBe(1);
+    expect(backup.formatVersion).toBe(2);
   });
 
   it('uses a secondary ID cursor for equal timing timestamps', async () => {
@@ -125,4 +126,34 @@ describe('transactional user-data service', () => {
     expect(mocks.or).toHaveBeenCalledWith(expect.stringContaining(`id.lt.${operationId}`));
     expect(mocks.order).toHaveBeenCalledWith('id', { ascending: false });
   });
+  it('saves recall atomically without appending a coding rating', async () => {
+    const history = [{ date: '2020-01-01T00:00:00Z', rating: 4 }];
+    mocks.rows.set('problem_progress', [{ problem_id: 'two-sum', version: 2, first_solved_at: timing.date,
+      last_reviewed_at: timing.date, next_review_at: timing.date, review_count: 0, history,
+      retired: false, consecutive_threes: 1, consecutive_successes: 1, notes: null }]);
+    await saveRecallSession('user_test', { problemId: 'two-sum', attempt: { id: operationId, date: timing.date,
+      elapsedSeconds: 180, outcome: 'partial', answer: 'An attempt from memory', checkedAgainst: 'external' } });
+    const request = mocks.rpc.mock.calls[0][1];
+    expect(request.p_kind).toBe('recall');
+    expect(request.p_operation_id).toBe(operationId);
+    expect(request.p_expected.progress).toEqual({ 'two-sum': 2 });
+    expect(request.p_payload.progress[0].history).toEqual(history);
+    expect(request.p_payload.progress[0].study_state.recallHistory).toHaveLength(1);
+    expect(request.p_payload.timings[0].session_type).toBe('recall');
+    expect(request.p_payload.isNew).toBe(false);
+  });
+  it('does not recreate a removed problem or write after a failed recall source read', async () => {
+    const input = { problemId: 'two-sum', attempt: { id: operationId, date: timing.date, elapsedSeconds: 180,
+      outcome: 'forgot' as const, answer: '', checkedAgainst: 'external' as const } };
+    await expect(saveRecallSession('user_test', input)).rejects.toThrow('removed');
+    mocks.readError = new Error('Read unavailable');
+    await expect(saveRecallSession('user_test', input)).rejects.toThrow('Read unavailable');
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it('changes intensity without rewriting historical due dates or ratings', async () => {
+    await saveUserSettings('user_test', current => ({ ...current, settings: { ...current.settings, srAggressiveness: 'AGGRESSIVE' } }));
+    expect(mocks.rpc.mock.calls[0][1].p_payload).not.toHaveProperty('reviewDates');
+    expect(mocks.rpc.mock.calls[0][1].p_expected).not.toHaveProperty('progress');
+  });
+
 });

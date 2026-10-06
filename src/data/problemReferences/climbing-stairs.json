@@ -1,0 +1,11 @@
+{
+  "problemId": "climbing-stairs",
+  "approach": "Math",
+  "explanation": "### How it works\n\nThe number of ways to climb stairs follows the **Fibonacci sequence**.  \nThere is a **closed-form mathematical formula** (called **Binet’s Formula**) that directly computes the nth Fibonacci number using powers and square roots, without loops or recursion.\n\nThis works because Fibonacci numbers can be expressed using two constants derived from the golden ratio.\n\n### Steps\n\n1. Compute the golden ratio `φ = (1 + √5) / 2` and its conjugate `ψ = (1 − √5) / 2`.\n2. Use Binet’s Formula to compute the Fibonacci value directly.\n3. Since climbing stairs corresponds to `Fib(n+1)`, adjust `n` accordingly.\n4. Round the result to handle floating-point precision.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Off-by-One Error in Base Cases\nInitializing DP incorrectly or misunderstanding what `dp[0]` represents. For this problem, `dp[1] = 1` (one way to climb 1 step) and `dp[2] = 2` (two ways to climb 2 steps). Starting the loop from index 1 instead of 3 overwrites these base cases.\n\n### Not Handling n = 1 or n = 2 Edge Cases\nAttempting to access `dp[n-1]` or `dp[n-2]` when `n` is 1 or 2 without proper base case handling, causing index out of bounds errors. Always check `if n <= 2: return n` before running the general loop.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n    def climbStairs(self, n: int) -> int:\n        sqrt5 = math.sqrt(5)\n        phi = (1 + sqrt5) / 2\n        psi = (1 - sqrt5) / 2\n        n += 1\n        return round((phi**n - psi**n) / sqrt5)\n",
+    "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        double sqrt5 = sqrt(5);\n        double phi = (1 + sqrt5) / 2;\n        double psi = (1 - sqrt5) / 2;\n        n++;\n        return round((pow(phi, n) - pow(psi, n)) / sqrt5);\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=Y0lT9Fck7qI",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/climbing-stairs.md"
+}

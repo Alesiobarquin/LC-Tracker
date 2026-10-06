@@ -73,8 +73,16 @@ function isValidRecallDraft(value: unknown): value is RecallDraft {
       draft.pausedAt === null ||
       Number.isFinite(draft.pausedAt)) &&
     typeof draft.answer === "string" &&
+    (draft.retrievedAnswer === undefined ||
+      typeof draft.retrievedAnswer === "string") &&
+    (draft.compared === undefined || typeof draft.compared === "boolean") &&
+    (draft.notes === undefined || typeof draft.notes === "string") &&
+    (draft.notesLanguage === undefined ||
+      ["python", "cpp"].includes(draft.notesLanguage)) &&
     typeof draft.revealed === "boolean" &&
-    ["notes", "reference", "external"].includes(draft.checkedAgainst ?? "") &&
+    ["notes", "reference", "external", "solution"].includes(
+      draft.checkedAgainst ?? "",
+    ) &&
     (!draft.completion ||
       (recallAttemptSchema.safeParse(draft.completion.attempt).success &&
         draft.completion.attempt.id === draft.id))
@@ -204,7 +212,15 @@ export const useStore = create<UIState>()(
               }
             : null,
           activeRecall: isValidRecallDraft(incoming.activeRecall)
-            ? incoming.activeRecall
+            ? {
+                ...incoming.activeRecall,
+                // Old revealed drafts were locked, so their answer is still unaided.
+                retrievedAnswer:
+                  incoming.activeRecall.retrievedAnswer ??
+                  (incoming.activeRecall.revealed
+                    ? incoming.activeRecall.answer
+                    : undefined),
+              }
             : null,
           sessionReturnTo:
             typeof incoming.sessionReturnTo === "string" ||

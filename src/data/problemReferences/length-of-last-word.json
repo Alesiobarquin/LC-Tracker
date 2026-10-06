@@ -1,0 +1,11 @@
+{
+  "problemId": "length-of-last-word",
+  "approach": "Built-In Function",
+  "explanation": "### How it works\n\nMost languages provide string manipulation functions that handle splitting and trimming. By splitting the string on spaces and taking the last non-empty segment, we get the last word directly. This trades some efficiency for code simplicity and readability.\n\n### Steps\n\n1. Trim trailing spaces from the string (or use split which handles this).\n2. Split the string by spaces.\n3. Return the length of the last element in the resulting array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Not Handling Trailing Spaces\n\nStrings like `\"Hello World   \"` have trailing spaces after the last word. If you simply scan from the end without first skipping spaces, you will count zero characters. Always skip trailing spaces before counting the last word's length.\n\n### Assuming Single Spaces Between Words\n\nThe input can have multiple consecutive spaces between words or at the beginning and end. Code that assumes exactly one space between words may produce incorrect results or fail on edge cases like `\"   fly me   to   the moon  \"`.",
+  "code": {
+    "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        return len(s.split().pop())\n",
+    "cpp": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        s.erase(s.find_last_not_of(' ') + 1);\n        return s.substr(s.find_last_of(' ') + 1).length();\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=KT9rltZTybQ",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-last-word.md"
+}

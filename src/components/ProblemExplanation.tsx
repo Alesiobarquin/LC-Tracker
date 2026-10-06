@@ -1,0 +1,146 @@
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { ExternalLink, Play } from "lucide-react";
+import {
+  loadProblemReference,
+  type ProblemReference,
+  type ReferenceLanguage,
+} from "../data/problemReferences";
+import type { Problem } from "../data/problems";
+import { ReferenceCode } from "./ReferenceCode";
+
+export function ExplanationText({ children }: { children: string }) {
+  return (
+    <div className="explanation-prose">
+      <ReactMarkdown>{children}</ReactMarkdown>
+    </div>
+  );
+}
+
+export function ExplanationLinks({ problem }: { problem: Problem }) {
+  return (
+    <div className="explanation-links">
+      <a
+        href={`${problem.leetcodeUrl.replace(/\/$/, "")}/editorial/`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Check the explanation on LeetCode <ExternalLink size={14} aria-hidden />
+      </a>
+      {problem.videoUrl && (
+        <a href={problem.videoUrl} target="_blank" rel="noopener noreferrer">
+          <Play size={14} aria-hidden /> Watch NeetCode on YouTube{" "}
+          <ExternalLink size={14} aria-hidden />
+        </a>
+      )}
+    </div>
+  );
+}
+
+export function ProblemExplanation({ problem }: { problem: Problem }) {
+  const [reference, setReference] = useState<ProblemReference | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [language, setLanguage] = useState<ReferenceLanguage>("python");
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(false);
+    setReference(null);
+    void loadProblemReference(problem.id)
+      .then((data) => {
+        if (!cancelled) setReference(data);
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [problem.id, retry]);
+  if (loading)
+    return (
+      <p role="status" className="text-muted">
+        Loading explanation…
+      </p>
+    );
+  if (error)
+    return (
+      <div role="alert" className="text-danger">
+        Could not load this explanation.{" "}
+        <button className="quiet-action" onClick={() => setRetry(retry + 1)}>
+          Retry explanation
+        </button>
+      </div>
+    );
+  if (!reference)
+    return (
+      <p className="text-muted text-sm">
+        A built-in explanation isn’t available for this full-catalog problem
+        yet. Use the LeetCode explanation or your own notes.
+      </p>
+    );
+  const [reasoning, pitfalls] = reference.explanation.split(
+    "\n\n### Things to watch for\n\n",
+  );
+  return (
+    <div className="problem-explanation space-y-5">
+      <div>
+        <p className="register-label">Built-in explanation</p>
+        <h3 className="text-lg text-foreground mt-2">{reference.approach}</h3>
+      </div>
+      <ExplanationText>{reasoning}</ExplanationText>
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <h3 className="text-sm font-semibold text-foreground">Code example</h3>
+        <label className="text-sm text-muted flex items-center gap-2">
+          Example language
+          <select
+            aria-label="Example language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as ReferenceLanguage)}
+            className="rounded-md border border-line-strong bg-surface text-foreground p-2"
+          >
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+          </select>
+        </label>
+      </div>
+      <ReferenceCode code={reference.code[language]} language={language} />
+      {pitfalls && (
+        <details className="recall-pattern-reference">
+          <summary className="cursor-pointer text-sm text-accent">
+            Edge cases and common mistakes
+          </summary>
+          <div className="mt-4">
+            <ExplanationText>{pitfalls}</ExplanationText>
+          </div>
+        </details>
+      )}
+      <p className="text-xs text-muted">
+        Adapted from{" "}
+        <a
+          className="text-accent underline"
+          href={reference.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          NeetCode’s explanation and code
+        </a>{" "}
+        ·{" "}
+        <a
+          className="text-accent underline"
+          href="/neetcode-license.txt"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          MIT license
+        </a>
+        . Node types are supplied by LeetCode where needed.
+      </p>
+    </div>
+  );
+}

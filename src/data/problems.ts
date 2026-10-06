@@ -22,6 +22,7 @@ export type Category =
 
 import type { TargetCurriculum } from '../types';
 import leetcodePremiumStatusJson from './leetcodePremiumStatus.json';
+import problemVideos from './problemVideos.json';
 
 export interface Problem {
   id: string;
@@ -389,6 +390,7 @@ export const problems: Problem[] = ([
   { id: 'shuffle-the-array', title: 'Shuffle the Array', difficulty: 'Easy', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/shuffle-the-array/', videoUrl: '', isNeetCode75: false, isBlind75: false, isNeetCode150: false, isNeetCode250: true },
 ] as Problem[]).map(problem => ({
   ...problem,
+  videoUrl: (problemVideos as Record<string, string>)[problem.id] ?? problem.videoUrl,
   isPareto: PARETO_PROBLEM_IDS.has(problem.id),
   isPremium: isProblemPremium(problem),
 }) as Problem);

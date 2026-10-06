@@ -403,11 +403,32 @@ export function Analytics() {
               <>
                 <p className="text-sm text-accent">
                   Recall: {viewedRecall.outcome} · checked against{" "}
-                  {viewedRecall.checkedAgainst}
+                  {
+                    {
+                      notes: "personal explanation",
+                      reference: "general pattern guidance",
+                      external: "external reference",
+                      solution: "built-in problem explanation",
+                    }[viewedRecall.checkedAgainst]
+                  }
                 </p>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Original answer from memory
+                </h3>
                 <pre className="whitespace-pre-wrap text-sm text-body">
                   {viewedRecall.answer || "No approach recalled."}
                 </pre>
+                {viewedRecall.revisedAnswer !== undefined && (
+                  <>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Correction after comparison
+                    </h3>
+                    <pre className="whitespace-pre-wrap text-sm text-body">
+                      {viewedRecall.revisedAnswer ||
+                        "The revised answer was cleared."}
+                    </pre>
+                  </>
+                )}
               </>
             ) : (
               <>

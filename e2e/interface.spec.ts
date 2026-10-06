@@ -257,8 +257,8 @@ for (const theme of ["light", "dark"] as const) {
             .getByRole("button", { name: "Compare with a reference" })
             .click();
           await page
-            .getByRole("checkbox", { name: /I compared my answer/ })
-            .check();
+            .getByRole("button", { name: "I’ve compared my answer — continue" })
+            .click();
           await page.evaluate(() => window.scrollTo(0, 0));
           await page.screenshot({
             path: testInfo.outputPath("comparison.png"),

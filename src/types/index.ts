@@ -20,7 +20,9 @@ export interface RecallAttempt {
   elapsedSeconds: number;
   outcome: 'recalled' | 'partial' | 'forgot';
   answer: string;
-  checkedAgainst: 'notes' | 'reference' | 'external';
+  /** Optional correction made after revealing a reference; answer remains unaided. */
+  revisedAnswer?: string;
+  checkedAgainst: 'notes' | 'reference' | 'external' | 'solution';
 }
 
 /** Separate schedules: recalling an approach never verifies implementation. */
@@ -141,9 +143,13 @@ export interface RecallDraft {
   pausedSeconds?: number;
   pausedAt?: number | null;
   answer: string;
+  retrievedAnswer?: string;
   revealed: boolean;
+  compared?: boolean;
   checkedAgainst: RecallAttempt['checkedAgainst'];
   notes?: string;
+  /** Preserve the editor choice even before the optional code is entered. */
+  notesLanguage?: 'python' | 'cpp';
   completion?: { attempt: RecallAttempt; notes?: string };
 }
 

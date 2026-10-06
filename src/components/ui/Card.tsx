@@ -11,7 +11,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        'rounded-2xl border transition-colors',
+        'rounded-md border transition-colors',
         elevated ? 'premium-card' : 'bg-surface/70 border-line',
         accent && 'border-accent/25 bg-accent/[0.04]',
         className

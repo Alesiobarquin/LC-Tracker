@@ -91,14 +91,14 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-modal-title"
-        className="bg-surface border border-line rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in duration-200"
+        className="bg-surface border border-line rounded-md w-full max-w-md overflow-hidden ui-dialog animate-in fade-in duration-200"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-line bg-canvas/50">

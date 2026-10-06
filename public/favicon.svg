@@ -1,27 +1,9 @@
-<svg width="512" height="512" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="faviconStroke" x1="12" y1="16" x2="88" y2="88" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#A8FFE4" />
-      <stop offset="0.52" stop-color="#4CF0C6" />
-      <stop offset="1" stop-color="#14B88C" />
-    </linearGradient>
-    <radialGradient id="faviconAura" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(50 62) rotate(90) scale(30 28)">
-      <stop offset="0" stop-color="#74FAD3" stop-opacity="0.95" />
-      <stop offset="0.72" stop-color="#2ECFA8" stop-opacity="0.34" />
-      <stop offset="1" stop-color="#0A2A21" stop-opacity="0" />
-    </radialGradient>
-    <filter id="faviconGlow" x="-60%" y="-60%" width="220%" height="220%">
-      <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#6AFFDC" flood-opacity="0.95" />
-      <feDropShadow dx="0" dy="0" stdDeviation="4.8" flood-color="#20C99A" flood-opacity="0.8" />
-      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#14906E" flood-opacity="0.45" />
-    </filter>
-  </defs>
-
-  <path d="M10 84L29 50L37 58L50 18L61 42L69 34L90 84Z" fill="url(#faviconAura)" opacity="0.74" />
-
-  <g fill="none" stroke="url(#faviconStroke)" stroke-linecap="round" stroke-linejoin="round" filter="url(#faviconGlow)">
-    <path d="M10 84L29 50L37 58L50 18L61 42L69 34L90 84Z" stroke-width="3.9" opacity="0.96" />
-    <path d="M20 84L33 61L39 67L50 40L58 54L65 48L80 84Z" stroke-width="3" opacity="0.72" />
+<svg width="512" height="512" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="6" fill="#20221f"/>
+  <g transform="translate(4 4)" stroke="#e99575">
+    <path d="M9 5H5v22h4M23 5h4v22h-4" stroke-width="2"/>
+    <path d="M10 21h5V11h7" stroke-width="2"/>
+    <path d="M10 26h10V16h2" stroke-width="1.5" opacity=".45"/>
+    <rect x="19" y="8" width="5" height="5" fill="#e99575" stroke="none"/>
   </g>
-
 </svg>

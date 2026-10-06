@@ -77,7 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
       <button
         type="button"
         aria-label="Close dialog backdrop"
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
       <div
@@ -87,12 +87,12 @@ export const Modal: React.FC<ModalProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         className={cn(
-          'relative w-full bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden animate-in fade-in duration-200',
+          'ui-dialog relative w-full max-h-[calc(100dvh-2rem)] flex flex-col bg-surface border border-line rounded-lg overflow-hidden animate-in fade-in duration-200',
           sizeClasses[size],
           className
         )}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-line bg-canvas/50 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line bg-canvas/50 px-5 py-4">
           <div className="min-w-0 space-y-1">
             <h2 id={titleId} className="text-lg font-semibold text-foreground">
               {title}
@@ -112,7 +112,7 @@ export const Modal: React.FC<ModalProps> = ({
             <X size={18} aria-hidden="true" />
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        <div className="p-5 min-h-0 overflow-y-auto">{children}</div>
       </div>
     </div>,
     document.body

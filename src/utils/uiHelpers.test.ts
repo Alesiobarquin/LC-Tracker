@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { getDifficultyColor } from './uiHelpers';
 
 describe('getDifficultyColor', () => {
-  it('returns text-accent for Easy', () => {
-    expect(getDifficultyColor('Easy')).toBe('text-accent');
+  it('returns text-success for Easy', () => {
+    expect(getDifficultyColor('Easy')).toBe('text-success');
   });
 
   it('returns text-warning for Medium', () => {

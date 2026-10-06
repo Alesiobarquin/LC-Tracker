@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useSignIn } from '@clerk/react/legacy';
-import { PublicHeader } from './PublicHeader';
-import { Logo } from './Logo';
-import { BRAND } from '../constants/brand';
+import React, { useState } from "react";
+import { useSignIn } from "@clerk/react/legacy";
+import { PublicHeader } from "./PublicHeader";
+import { Logo } from "./Logo";
+import { BRAND } from "../constants/brand";
+import { TraceIndex } from "./ui/StudyTrace";
 
 function GoogleIcon() {
   return (
@@ -38,41 +39,89 @@ export function Login() {
     setErrorMessage(null);
     try {
       await signIn.authenticateWithRedirect({
-        strategy: 'oauth_google',
+        strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
         redirectUrlComplete: `${window.location.origin}/`,
       });
     } catch (err) {
       console.error(err);
-      setErrorMessage('Google sign-in failed. Check your connection and try again.');
+      setErrorMessage(
+        "Google sign-in failed. Check your connection and try again.",
+      );
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="brand-shell flex min-h-screen flex-col items-center justify-center px-4 pt-24 pb-12">
+    <div className="brand-shell login-page">
       <PublicHeader fixed showSignIn={false} />
-      <main className="w-full max-w-sm">
-        <Logo className="mb-6 text-accent" size={36} />
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sign in to LC Tracker</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted">{BRAND.login.subtitle}</p>
-        <div className="mt-8 rounded-xl border border-line bg-surface p-6">
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={!isLoaded || isLoading}
-            className="brand-button-primary flex min-h-11 w-full items-center justify-center gap-3 rounded-lg px-4 py-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <GoogleIcon />}
-            {isLoading ? 'Redirecting…' : 'Continue with Google'}
-          </button>
-          {errorMessage && <p role="alert" className="mt-4 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-sm text-danger">{errorMessage}</p>}
-        </div>
-        <p className="mt-6 text-xs leading-relaxed text-subtle">Your sessions and study plan are saved to your account.</p>
+      <main className="login-composition">
+        <section className="login-form">
+          <Logo className="mb-6 text-accent" size={36} />
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Sign in to LC Tracker
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            {BRAND.login.subtitle}
+          </p>
+          <div className="mt-8 border-t border-line pt-6">
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={!isLoaded || isLoading}
+              className="brand-button-primary flex min-h-11 w-full items-center justify-center gap-3 rounded-lg px-4 py-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              ) : (
+                <GoogleIcon />
+              )}
+              {isLoading ? "Redirecting…" : "Continue with Google"}
+            </button>
+            {errorMessage && (
+              <p
+                role="alert"
+                className="mt-4 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-sm text-danger"
+              >
+                {errorMessage}
+              </p>
+            )}
+          </div>
+          <p className="mt-6 text-xs leading-relaxed text-subtle">
+            Your sessions and study plan are saved to your account.
+          </p>
+        </section>
+        <aside className="login-notebook" aria-label="The study sequence">
+          <p className="register-label mb-7">Plan → attempt → record</p>
+          <ol>
+            <li>
+              <TraceIndex active>01</TraceIndex>
+              <h2>Make time.</h2>
+              <p>A daily plan bounded by your study budget.</p>
+            </li>
+            <li>
+              <TraceIndex>02</TraceIndex>
+              <h2>Try from memory.</h2>
+              <p>Recall an approach, then implement independently.</p>
+            </li>
+            <li>
+              <TraceIndex>03</TraceIndex>
+              <h2>Keep the evidence.</h2>
+              <p>Correctness, assistance, explanation, and time.</p>
+            </li>
+          </ol>
+          <a href="/library" className="quiet-action mt-6">
+            Browse the material first ↗
+          </a>
+        </aside>
       </main>
-      <footer className="mt-12 flex items-center justify-center gap-4 text-xs text-muted">
-        <a href="/privacy" className="hover:text-foreground">Privacy Policy</a>
+      <footer className="login-footer flex items-center gap-4 text-xs text-muted">
+        <a href="/privacy" className="hover:text-foreground">
+          Privacy Policy
+        </a>
         <span aria-hidden="true">·</span>
-        <a href="/terms" className="hover:text-foreground">Terms of Service</a>
+        <a href="/terms" className="hover:text-foreground">
+          Terms of Service
+        </a>
       </footer>
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const fieldBase =
-  'w-full bg-canvas border border-line rounded-xl px-4 py-3 text-foreground placeholder:text-subtle transition-colors focus:outline-none focus:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50';
+  'w-full bg-surface border border-line rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-subtle transition-colors focus:outline-none focus:border-accent/50 focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}

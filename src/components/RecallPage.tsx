@@ -1,6 +1,7 @@
+import { SectionHeading } from "./ui/StudyTrace";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Brain, ExternalLink, ArrowLeft, Clock } from "lucide-react";
+import { ExternalLink, ArrowLeft, Clock } from "lucide-react";
 import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
 import { patterns } from "../data/patterns";
 import { getPatternForProblem } from "../utils/patternMapping";
@@ -12,7 +13,7 @@ import type { RecallAttempt } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
 
 const button =
-  "rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
+  "rounded-md bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
 export function RecallPage() {
   const { problemId } = useParams();
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export function RecallPage() {
   const { startRecall, updateRecall, endRecall } = useStore.getState();
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
+  const [promptsExpanded, setPromptsExpanded] = useState(false);
   const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -182,10 +184,7 @@ export function RecallPage() {
         <p className="mb-4">
           Finish or pause your coding session before starting a recall check.
         </p>
-        <Link
-          className="text-accent"
-          to={`/timer/${activeSession.problemId}`}
-        >
+        <Link className="text-accent" to={`/timer/${activeSession.problemId}`}>
           Resume coding session
         </Link>
       </div>
@@ -206,89 +205,126 @@ export function RecallPage() {
     : null;
   const frozen = !!draft.completion;
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      <Link
-        to="/dashboard"
-        className="inline-flex items-center gap-2 text-sm text-muted"
-      >
-        <ArrowLeft size={16} /> Back to today’s plan · draft saved
-      </Link>
-      <PageHeader
-        title="Recall check"
-        icon={<Brain />}
-        description="Try from memory first. This checks your approach; full coding practice checks implementation."
-      />
+    <div className="recall-workspace mx-auto space-y-6 pb-12">
+      <div className="attempt-context-header">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 text-sm text-muted"
+        >
+          <ArrowLeft size={14} /> Today’s plan · draft saved
+        </Link>
+        <PageHeader title="Recall check" className="attempt-page-heading" />
+      </div>
       {!storageAvailable && (
         <p role="alert" className="text-warning">
           This browser cannot preserve your answer after reload. Keep this tab
           open until saving finishes.
         </p>
       )}
-      <section className="premium-card p-6 space-y-4">
+      <section className="recall-stage space-y-4">
+        <ol className="attempt-stages" aria-label="Recall stages">
+          <li className={!draft.revealed ? "is-current" : "is-complete"}>
+            <span>01</span>Retrieve
+          </li>
+          <li className={draft.revealed ? "is-current" : ""}>
+            <span>02</span>Compare
+          </li>
+          <li>
+            <span>03</span>Record
+          </li>
+        </ol>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="attempt-problem-title text-foreground">
             {problem.title}
           </h2>
-          <span className="text-muted text-sm inline-flex gap-2 items-center">
+          <span className="text-subtle text-xs font-mono inline-flex gap-2 items-center">
             <Clock size={16} /> {Math.floor(elapsed / 60)}:
             {String(elapsed % 60).padStart(2, "0")} · aim for 3 min
           </span>
         </div>
-        {!frozen && (
-          <div className="flex gap-4 items-center text-sm">
-            <button className="text-accent" onClick={togglePause}>
-              {draft.pausedAt ? "Resume check" : "Pause check"}
+        <div className="attempt-tools">
+          {!frozen && (
+            <div className="flex gap-4 items-center text-sm">
+              <button className="text-accent" onClick={togglePause}>
+                {draft.pausedAt ? "Resume check" : "Pause check"}
+              </button>
+              {draft.pausedAt && (
+                <span className="text-subtle">Timer paused</span>
+              )}
+            </div>
+          )}
+          <a
+            href={problem.leetcodeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-accent inline-flex gap-2 items-center"
+          >
+            Read the problem statement <ExternalLink size={14} />
+          </a>
+        </div>
+        <div className="recall-writing-layout">
+          <aside className="recall-guide">
+            <p className="register-label recall-guide-label">
+              Check your reasoning
+            </p>
+            <button
+              type="button"
+              className="recall-guide-toggle quiet-action"
+              onClick={() => setPromptsExpanded(!promptsExpanded)}
+              aria-expanded={promptsExpanded}
+              aria-controls="recall-prompts"
+            >
+              Reasoning prompts{" "}
+              <span className="font-mono text-[10px] text-subtle">
+                04 / {promptsExpanded ? "−" : "+"}
+              </span>
             </button>
-            {draft.pausedAt && (
-              <span className="text-subtle">Timer paused</span>
+            <ol
+              id="recall-prompts"
+              className={`recall-prompts text-body ${promptsExpanded ? "prompts-expanded" : ""}`}
+            >
+              <li>
+                Which approach would you choose, and what clues lead you to it?
+              </li>
+              <li>What invariant or recurrence makes it correct?</li>
+              <li>What are the time and space costs?</li>
+              <li>
+                Which edge cases or implementation details could break it?
+              </li>
+            </ol>
+          </aside>
+          <div className="recall-writing-sheet">
+            <label htmlFor="recall-answer" className="block text-sm text-body">
+              Your attempt · explanation or pseudocode
+            </label>
+            <textarea
+              id="recall-answer"
+              rows={7}
+              maxLength={20000}
+              value={draft.answer}
+              disabled={draft.revealed || frozen}
+              onChange={(e) => updateRecall({ answer: e.target.value })}
+              placeholder="Write what you remember without opening your notes or the solution."
+              className="notebook-answer w-full text-foreground font-mono text-sm placeholder:text-subtle"
+            />
+            {!draft.revealed && (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  className={button}
+                  onClick={() => updateRecall({ revealed: true })}
+                >
+                  Compare with a reference
+                </button>
+                <button
+                  className="text-sm text-muted underline"
+                  onClick={() => updateRecall({ revealed: true })}
+                >
+                  I can’t recall it
+                </button>
+              </div>
             )}
           </div>
-        )}
-        <a
-          href={problem.leetcodeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-accent inline-flex gap-2 items-center"
-        >
-          Read the problem statement <ExternalLink size={14} />
-        </a>
-        <ol className="list-decimal pl-5 text-sm text-body space-y-2">
-          <li>
-            Which approach would you choose, and what clues lead you to it?
-          </li>
-          <li>What invariant or recurrence makes it correct?</li>
-          <li>What are the time and space costs?</li>
-          <li>Which edge cases or implementation details could break it?</li>
-        </ol>
-        <label htmlFor="recall-answer" className="block text-sm text-body">
-          Your attempt · explanation or pseudocode
-        </label>
-        <textarea
-          id="recall-answer"
-          rows={7}
-          maxLength={20000}
-          value={draft.answer}
-          disabled={draft.revealed || frozen}
-          onChange={(e) => updateRecall({ answer: e.target.value })}
-          placeholder="Write what you remember without opening your notes or the solution."
-          className="w-full rounded-lg border border-line-strong bg-surface p-4 text-foreground font-mono text-sm placeholder:text-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-        />
-        {!draft.revealed && (
-          <div className="flex flex-wrap gap-3">
-            <button
-              className={button}
-              onClick={() => updateRecall({ revealed: true })}
-            >
-              Compare with a reference
-            </button>
-            <button
-              className="text-sm text-muted underline"
-              onClick={() => updateRecall({ revealed: true })}
-            >
-              I can’t recall it
-            </button>
-          </div>
-        )}
+        </div>
       </section>
       {!frozen && (
         <button
@@ -302,12 +338,10 @@ export function RecallPage() {
         </button>
       )}
       {draft.revealed && (
-        <section className="premium-card p-6 space-y-5">
-          <h2 className="text-xl font-semibold text-foreground">
-            Compare and identify gaps
-          </h2>
+        <section className="recall-stage recall-comparison space-y-5">
+          <SectionHeading index="02" title="Compare and identify gaps" />
           {progress[problem.id].notes && (
-            <div className="rounded-xl bg-canvas p-4">
+            <div className="saved-recall-reference">
               <h3 className="text-sm font-semibold text-accent mb-2">
                 Your saved notes
               </h3>
@@ -317,7 +351,7 @@ export function RecallPage() {
             </div>
           )}
           {lesson && (
-            <details className="rounded-xl border border-line p-4">
+            <details className="recall-pattern-reference">
               <summary className="cursor-pointer text-sm text-accent">
                 Pattern reference: {pattern?.name}
               </summary>
@@ -364,7 +398,7 @@ export function RecallPage() {
                     .value as RecallAttempt["checkedAgainst"],
                 })
               }
-              className="block mt-2 w-full rounded-lg bg-surface border border-line-strong p-3 text-foreground"
+              className="block mt-2 w-full rounded-md bg-surface border border-line-strong p-3 text-foreground"
             >
               <option value="external">
                 Problem explanation / external reference
@@ -391,7 +425,7 @@ export function RecallPage() {
               disabled={frozen}
               value={draft.notes ?? ""}
               onChange={(e) => updateRecall({ notes: e.target.value })}
-              className="mt-2 w-full rounded-lg border border-line-strong bg-surface p-3 text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-2 w-full rounded-md border border-line-strong bg-surface p-3 text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
           {saveError && (
@@ -399,7 +433,7 @@ export function RecallPage() {
               {saveError}
             </p>
           )}
-          <div className="grid sm:grid-cols-3 gap-3">
+          <div className="recall-outcomes">
             {(
               [
                 [
@@ -423,14 +457,12 @@ export function RecallPage() {
                   (frozen && draft.completion?.attempt.outcome !== outcome)
                 }
                 onClick={() => void finish(outcome)}
-                className="text-left rounded-xl border border-line-strong p-4 hover:border-accent disabled:opacity-40"
+                className="rating-row recall-outcome-row text-left disabled:opacity-40"
               >
-                <span className="block font-semibold text-foreground">
+                <span className="font-medium text-foreground">
                   {saving ? "Saving…" : frozen ? `Retry: ${label}` : label}
                 </span>
-                <span className="block text-xs text-muted mt-1">
-                  {description}
-                </span>
+                <span className="text-xs text-muted">{description}</span>
               </button>
             ))}
           </div>

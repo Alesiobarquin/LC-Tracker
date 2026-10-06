@@ -338,12 +338,12 @@ async function commit(operationId: string, kind: string, expected: ExpectedVersi
   return data as { duplicate: boolean; imported: number };
 }
 
-/** Retry only a confirmed transaction conflict, never an ambiguous network error. */
+/** Retry application revision conflicts with fresh inputs, never an ambiguous network error. */
 export async function retryConflict<T>(action: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try { return await action(); }
     catch (error) {
-      if ((error as { code?: string })?.code !== '40001' || attempt >= 2) throw error;
+      if ((error as { code?: string })?.code !== 'PT409' || attempt >= 2) throw error;
     }
   }
 }

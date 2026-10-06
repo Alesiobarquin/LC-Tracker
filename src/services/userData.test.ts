@@ -61,15 +61,15 @@ describe('transactional user-data service', () => {
   });
 
   it('retries confirmed version conflicts with the original operation ID', async () => {
-    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: '40001' } });
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: 'PT409' } });
     await saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3 });
     expect(mocks.rpc).toHaveBeenCalledTimes(2);
     expect(mocks.rpc.mock.calls.map(([, args]) => args.p_operation_id)).toEqual([operationId, operationId]);
   });
 
   it('bounds conflict retries', async () => {
-    mocks.rpc.mockResolvedValue({ data: null, error: { code: '40001' } });
-    await expect(saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3 })).rejects.toEqual({ code: '40001' });
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: 'PT409' } });
+    await expect(saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3 })).rejects.toEqual({ code: 'PT409' });
     expect(mocks.rpc).toHaveBeenCalledTimes(3);
   });
 

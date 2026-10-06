@@ -91,7 +91,9 @@ an incompatible transform and was corrected before verification.
 
 Checks include unit tests, real PostgreSQL transaction/RLS tests, concurrent database
 connections, local browser failure/reload/retry tests, TypeScript, a production build,
-and dependency auditing. GitHub CI passed 100 unit tests and 11 local Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build, and a zero-vulnerability dependency audit.
+and dependency auditing. The final suite contains 101 unit tests and 13 local
+Chromium browser tests, plus TypeScript, the PostgreSQL suite, the production build,
+and dependency auditing.
 The local browser suite simulates Clerk/Supabase; it does not prove real OAuth or
 hosted JWT enforcement. Database tests exercise the actual persistence migrations
 with a minimal auth/role bootstrap.
@@ -100,12 +102,29 @@ The production rating and reliability migrations were applied after a private
 database export and an isolated restore of all nine application tables (290 rows),
 auth, and storage metadata. Migration checksums preserved existing application
 records. Hosted SQL transaction/RLS checks passed inside a rolled-back transaction.
-Branch protection requires CI. Public browser checks pass on the old production
-site and public pages render on the staged release; Clerk's sign-in button renders.
+Branch protection requires CI. All six public browser checks pass on the released
+production site; Clerk's sign-in button renders and Supabase's custom OIDC
+integration trusts the production Clerk issuer.
 The old deployed LeetCode function also failed native ESM startup; its import is
 fixed and a compiled-function regression test now catches this failure.
 
-Real OAuth completion and authenticated browser saves remain outside these checks.
+The site owner confirmed real Google sign-in and one session saved exactly once
+after refresh on the released site. The final feedback Storage audit found old
+UUID ownership policies; the applied forward migration now uses Clerk folder
+ownership, with owned, cross-account, and anonymous SQL checks. Live feedback notification
+delivery and image upload bytes were not exercised.
+The owner also reported study-time sliders that could not be changed. A delayed
+save reproduced their snap-back: each movement sent a mutation while the input
+still used confirmed server data. Both targets now use a local draft and one
+explicit save, retain selections after failure, and preserve the edit-start base
+across conflicting refetches. Regression checks cover keyboard changes, latency,
+failed-save retry, persistence after refresh, and conflict recovery. Backup
+validation also accepts the valid “no weekly rest day” schedule.
+The readiness gate also caught a flaw in the new revision checks: their `40001`
+code caused PostgREST 14.5 to retry stale inputs internally until the pool was
+exhausted. A forward migration now emits `PT409`, the client bounds its fresh-read
+retries, and production readiness recovered. A real PostgREST/JWT HTTP suite is
+now required by CI; direct PostgreSQL tests do not exercise this middleware.
 The restore check skips platform ownership/grants and disables webhook delivery;
 database archives do not contain Storage image bytes. Supabase currently lists no
 physical backups or PITR. Optional Sentry alert destinations and scheduled

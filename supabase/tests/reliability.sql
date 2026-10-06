@@ -42,7 +42,7 @@ DO $$ BEGIN
  BEGIN
   PERFORM public.commit_user_change('00000000-0000-4000-8000-000000000003','session', '{"progress":{"two-sum":0}}', '{"problemId":"two-sum"}');
   RAISE EXCEPTION 'Expected stale revision failure';
- EXCEPTION WHEN serialization_failure THEN NULL; END;
+ EXCEPTION WHEN SQLSTATE 'PT409' THEN NULL; END;
 END $$;
 SELECT pg_temp.assert_true((SELECT solved=1 AND reviewed=0 FROM public.activity_log), 'conflict has no side effects');
 

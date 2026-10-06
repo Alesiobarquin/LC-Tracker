@@ -8,7 +8,7 @@ export function reportOperationError(error: unknown, operation = 'operation') {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(OPERATION_ERROR_EVENT, {
       detail: { message: operation === 'load' ? 'Could not load your data. Check your connection and retry.'
-        : code === '40001' ? 'Your data changed on another device. Refresh and try again.'
+        : code === 'PT409' ? 'Your data changed on another device. Refresh and try again.'
         : 'Could not confirm your change. Check your connection and try again.' },
     }));
   }

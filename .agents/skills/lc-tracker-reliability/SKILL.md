@@ -14,7 +14,9 @@ The client computes scheduling from confirmed reads; `commit_user_change` checks
 revisions and atomically commits related rows with a retry receipt. A timer's
 operation UUID and exact completion are stored in sessionStorage before sending.
 Keep that ID through timeouts, reloads, and explicit retries. Only confirmed
-`40001` conflicts may be retried automatically, with fresh source data.
+`PT409` conflicts may be retried automatically, with fresh source data. Never use
+`40001` for application version checks: PostgREST 14 retries the same stale RPC
+internally and can exhaust the API pool.
 
 For persistence changes:
 
@@ -24,9 +26,19 @@ For persistence changes:
 - Put cross-record atomicity, duplicate handling, and account isolation checks in
   `supabase/tests/reliability.sql`. `npm run test:db` uses the actual migrations in
   a disposable local PostgreSQL cluster and tests concurrent connections.
+- Run `npm run test:api` with PostgREST 14.5 and PostgreSQL binaries on PATH. It
+  tests real HTTP/JWT RLS and more stale saves than pool slots, then confirms a
+  fresh save and retry receipt. SQL-only tests cannot detect middleware retries.
+- For feedback Storage policies, use the Clerk JWT subject for folder ownership
+  and test owned, cross-account, bucket, and anonymous behavior in
+  `supabase/tests/storage.sql`. Avoid live feedback inserts: production sends an
+  external notification. Local recovery must keep that webhook disabled.
 - Put browser retry/reload behavior in `e2e/reliability.spec.ts`. `npm run test:e2e`
   uses the `e2e` Vite mode and mock auth fixture. Do not treat that as live OAuth
   verification. Production builds reject the fixture mode.
+- Settings range controls use local drafts and explicit saves. Preserve the
+  edit-start conflict base through refetches. Check repeated keyboard changes,
+  delayed/failed saves, and a same-field conflict before confirming the fix.
 - Run types, unit tests, database tests, browser tests, and the production build
   for changes spanning the save path. Add a test for the demonstrated failure,
   rather than assertions that only mirror the implementation.

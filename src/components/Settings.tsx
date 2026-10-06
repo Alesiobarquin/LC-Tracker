@@ -6,24 +6,13 @@ import { clsx } from 'clsx';
 import { useActivityLog, useProblemProgress, useSessionTimings, useSprintState, useUserSettings } from '../hooks/useUserData';
 import type { ActivityLog, ProblemProgress, SprintHistoryEntry, SprintState, UserSettingsData } from '../types';
 import { PageHeader } from './ui';
-
-function formatMinutes(minutes: number): string {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (mins === 0) return `${hours} hr`;
-    return `${hours} hr ${mins} min`;
-}
-
-/** Study sliders use min 15 / max 120; 60 min is not the numeric midpoint, so tick labels must match linear track position. */
-const STUDY_MINUTES_RANGE = { min: 15, max: 120 } as const;
-const ONE_HOUR_TICK_LEFT_PCT =
-    ((60 - STUDY_MINUTES_RANGE.min) / (STUDY_MINUTES_RANGE.max - STUDY_MINUTES_RANGE.min)) * 100;
+import { StudyTimeTargets } from './StudyTimeTargets';
 
 export const Settings: React.FC = () => {
     const {
         data: userSettings,
         settings,
+        isSuccess: settingsReady,
         updateSettings,
         targetEvents,
         addTargetEvent,
@@ -541,57 +530,7 @@ export const Settings: React.FC = () => {
                         </h2>
 
                         <div className="space-y-6">
-                            <div>
-                                <div className="flex justify-between mb-2">
-                                    <label className="text-sm font-medium text-zinc-300">Weekday Daily Target</label>
-                                    <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekdayMinutes)}</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min={STUDY_MINUTES_RANGE.min}
-                                    max={STUDY_MINUTES_RANGE.max}
-                                    step="15"
-                                    value={settings.studySchedule.weekdayMinutes}
-                                    onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekdayMinutes: parseInt(e.target.value) } })}
-                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                />
-                                <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
-                                    <span className="absolute left-0 top-0">15 min</span>
-                                    <span
-                                        className="absolute top-0 -translate-x-1/2"
-                                        style={{ left: `${ONE_HOUR_TICK_LEFT_PCT}%` }}
-                                    >
-                                        1 hr
-                                    </span>
-                                    <span className="absolute right-0 top-0">2 hr</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex justify-between mb-2">
-                                    <label className="text-sm font-medium text-zinc-300">Weekend Daily Target</label>
-                                    <span className="text-emerald-400 font-medium">{formatMinutes(settings.studySchedule.weekendMinutes)}</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min={STUDY_MINUTES_RANGE.min}
-                                    max={STUDY_MINUTES_RANGE.max}
-                                    step="15"
-                                    value={settings.studySchedule.weekendMinutes}
-                                    onChange={(e) => updateSettings({ studySchedule: { ...settings.studySchedule, weekendMinutes: parseInt(e.target.value) } })}
-                                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                />
-                                <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
-                                    <span className="absolute left-0 top-0">15 min</span>
-                                    <span
-                                        className="absolute top-0 -translate-x-1/2"
-                                        style={{ left: `${ONE_HOUR_TICK_LEFT_PCT}%` }}
-                                    >
-                                        1 hr
-                                    </span>
-                                    <span className="absolute right-0 top-0">2 hr</span>
-                                </div>
-                            </div>
+                            <StudyTimeTargets settings={settings} ready={settingsReady} onSave={updateSettings} />
 
                             <div>
                                 <label className="block text-sm font-medium text-zinc-300 mb-2">Weekly Rest Day</label>

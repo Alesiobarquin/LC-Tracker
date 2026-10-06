@@ -17,10 +17,19 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   reloads. Never split timing, progress, activity, and sprint updates into
   independent writes.
 - Use confirmed source reads and revision checks before editing records. Retry
-  only SQLSTATE `40001` with refreshed inputs. A network timeout does not prove
+  only application conflict `PT409` with refreshed inputs. A network timeout does not prove
   a write failed; do not replay a non-idempotent operation with a new ID.
+- Settings sliders need local drafts and an explicit save action. Keep the
+  edit-start settings as the conflict base across refetches, and retain selections
+  after failed saves. Do not bind every slider movement to a database mutation.
 - Derive ownership from the Clerk JWT subject in SQL. Browser admin flags only
   affect navigation; database RLS and `admin_users` enforce permissions.
+- Feedback Storage uses the Clerk subject as the first path folder. Upload/delete
+  policies must target `authenticated`; `auth.uid()` assumes UUIDs and cannot own
+  these images. Cover ownership and anonymous denial in `supabase/tests/storage.sql`.
+- Production feedback inserts invoke an external notification webhook. Validate
+  with isolated fixtures and disable provider webhooks during local recovery;
+  do not send synthetic live feedback without explicit permission to send messages.
 - Reads must not rewrite settings or infer new meanings for historical ratings.
   Keep review scheduling changes separate from reliability repairs.
 - Paginate with deterministic ordering and handle a server row cap smaller than
@@ -41,7 +50,11 @@ Vercel emits JavaScript modules and native Node ESM rejects extensionless import
 The native function runtime regression test runs with the unit suite. Check both
 `/api/health` and `/api/leetcode-ac` on a staged deployment before promotion.
 For persistence changes also run `npm run test:db` (PostgreSQL binaries on PATH)
-and `npm run test:e2e`. Database tests create and remove an isolated local cluster;
+and `npm run test:api` (PostgREST 14.5 also on PATH), plus `npm run test:e2e`.
+Never raise `40001` for application revision conflicts: the production PostgREST
+version retries it internally without refreshing inputs and can exhaust the pool.
+Use `PT409` and keep the forward conflict-status migration in the release.
+Database tests create and remove an isolated local cluster;
 they never load production credentials. The repository skill at
 `.agents/skills/lc-tracker-reliability/SKILL.md` documents this repeatable workflow.
 For a private PostgreSQL archive, run `npm run verify:backup -- <archive-path>`

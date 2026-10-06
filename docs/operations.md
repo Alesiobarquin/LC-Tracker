@@ -12,6 +12,7 @@ Start the app with `npm run dev`.
 | `npm run lint` | TypeScript across the client, server, scripts, and tests |
 | `npm test` | Scheduling helpers, validated reads/writes, token handling, configuration, and API behavior |
 | `npm run test:db` | Actual migrations, transaction rollback, duplicate retries, revision conflicts, concurrent connections, and RLS |
+| `npm run test:api` | PostgreSQL plus PostgREST 14.5 HTTP conflicts, pool recovery, JWT RLS, and retry receipts |
 | `npm run verify:backup -- <archive-path>` | Private PostgreSQL archive restore and migration preservation in an isolated local cluster |
 | `npm run test:e2e` | Public routes and simulated authenticated failure/reload/retry flows |
 | `npm run build` | The production bundle, without mock authentication |
@@ -40,13 +41,17 @@ These public checks do not perform a real sign-in or authenticated database writ
    authentication, feedback storage, database policies, or other users.
 2. Confirm the deployed migration history. Apply any missing prerequisite schema,
    Clerk-ID/RLS, and session-rating migrations, then apply
-   `supabase/migrations/20261006000000_reliable_user_writes.sql` with the authenticated
-   database administration tool for the correct project. Do not run the historical
-   migrations blindly on an unknown production schema.
+   `supabase/migrations/20261006000000_reliable_user_writes.sql` and
+   `supabase/migrations/20261006000001_clerk_feedback_storage.sql`, followed by
+   `supabase/migrations/20261006000002_postgrest_conflict_status.sql`, with the
+   authenticated database administration tool for the correct project. Do not run
+   the historical migrations blindly on an unknown production schema.
 3. Confirm `version` exists on settings, progress, and sprint state; the
    `commit_user_change` and `export_user_data` RPCs exist; authenticated table grants
    are present; and the five user tables are in the Realtime publication. The new
-   migration sets these up. Its functions are SECURITY INVOKER and retain RLS.
+   reliability migration sets these up. Its functions are SECURITY INVOKER and
+   retain RLS. Feedback image upload/delete policies must use the Clerk subject
+   for the first path folder and apply only to the authenticated role.
 4. Configure Vercel production and preview environment variables from `.env.example`.
    Clerk's publishable key, allowed origins, OAuth callbacks, and Supabase third-party
    integration must refer to the same Clerk instance. JWTs need the authenticated
@@ -60,9 +65,10 @@ These public checks do not perform a real sign-in or authenticated database writ
 The new client deliberately fails safely if the RPC or version columns are
 missing. It must not fall back to the old sequence of independent writes.
 
-The local test harness bootstraps only the Supabase auth/role surfaces needed to
-exercise the persistence migrations. It does not reproduce hosted Clerk token
-verification, the storage service, or all Supabase platform settings.
+The local test harness bootstraps the Supabase auth/role and Storage metadata
+surfaces needed to exercise persistence and ownership policies. It does not
+reproduce hosted Clerk token verification, image storage, or all Supabase platform
+settings.
 
 ## Recovery and rollback
 
@@ -191,11 +197,52 @@ The private pre-release archive is outside the repository under the local
 archive does not include Storage object bytes. Scheduled off-device backups and
 PITR are separate operational work; this release does not claim either is enabled.
 
-The reliability release is staged on Vercel with a healthy readiness response;
-the LeetCode proxy returns JSON successfully after repairing its ESM import.
-GitHub's complete reliability workflow passed on release commit `4c6e0bf`.
+The reliability release was promoted to `lc-tracker.app` after the database checks.
+The live readiness endpoint reports both providers healthy, the LeetCode proxy
+returns HTTP 200 JSON, and all six live public browser checks pass. GitHub's full
+reliability workflow passed on `d851959` and the release was merged through PR #262.
+The Supabase Management API confirms a custom OIDC integration trusting
+`https://clerk.lc-tracker.app`. The CLI config template's disabled Clerk section
+does not represent that hosted custom integration; verify the integrations API
+before changing authentication configuration.
 Branch protection requires the GitHub Actions `verify` check, including for
 administrators, and prevents force pushes and branch deletion. Keep the release
 PR unmerged until the database prerequisites are satisfied: merging `main`
 triggers Vercel production deployment. The runtime is pinned to Node.js 24 so
 Vercel will not silently select a future major release.
+
+The final Storage audit found the old UUID policies still deployed for feedback
+images. Forward migration `20261006000001_clerk_feedback_storage.sql` was applied
+transactionally and recorded in production migration history. It switches
+upload/delete ownership to the Clerk subject and rejects anonymous writes. Its
+PostgreSQL checks cover owned uploads/deletes, cross-account denial, and unrelated
+buckets. The historical migration was not replayed. The site owner confirmed a
+real Google sign-in, one completed/rated study session, and its persistence after
+refresh on the released site. Actual feedback delivery and image bytes were not
+tested through the live Storage API.
+
+The owner's study-time slider report was reproduced with a delayed save. The
+weekday and weekend targets now edit locally and save together with the
+`Save study time targets` button. Failed saves retain the draft; a same-field
+conflict requires `Use saved targets` before editing again. Browser checks cover
+both cases and persistence after refresh. Backups also accept the `None` weekly
+rest-day value (`-1`).
+
+The final readiness check exposed an API pool exhausted by stale saves: the
+deployed PostgREST 14.5 retries SQLSTATE `40001` internally without new RPC inputs.
+The revision checks introduced in the reliability migration used that code.
+Forward migration `20261006000002_postgrest_conflict_status.sql` was applied and
+recorded in production; it changes only those errors to `PT409` (HTTP 409), leaving
+the transaction, RLS, and receipts intact. The pool recovered and readiness
+returned HTTP 200. A targeted termination query for the observed looping RPC
+sessions found no remaining matches after the function replacement; no project
+restart or user-data restore was needed.
+
+`npm run test:api` now uses the production PostgREST version against a disposable
+cluster with local fixture JWTs. It sends more stale writes than pool slots,
+requires prompt HTTP 409 responses, confirms reads remain available, and tests
+fresh writes, lost-response receipts, and account isolation. CI downloads the
+official 14.5 binary and verifies its archive digest. The same HTTP regression
+timed out with the old conflict function and passed with the forward repair.
+Do not generate `40001` for
+application conflicts. See the [Supabase explanation and recovery procedure](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).

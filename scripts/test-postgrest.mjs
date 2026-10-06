@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { createHmac, randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
+
+// Runs only against the disposable cluster supplied by test-database.mjs.
+// Fixture JWTs have no relationship to Clerk or any hosted project.
+export async function testPostgrest(socket) {
+  const secret = 'lc-tracker-local-postgrest-test-secret-only';
+  const base = 'http://127.0.0.1:55441';
+  const server = spawn('postgrest', [], { stdio: 'ignore', env: { ...process.env,
+    PGRST_DB_URI: `postgresql://authenticator@/postgres?host=${encodeURIComponent(socket)}&port=55439`,
+    PGRST_DB_SCHEMAS: 'public', PGRST_DB_ANON_ROLE: 'anon', PGRST_DB_POOL: '2',
+    PGRST_DB_POOL_ACQUISITION_TIMEOUT: '1', PGRST_JWT_SECRET: secret,
+    PGRST_SERVER_HOST: '127.0.0.1', PGRST_SERVER_PORT: '55441',
+  } });
+  const exited = new Promise((resolve) => server.once('exit', resolve));
+  let startupError;
+  server.on('error', (error) => { startupError = error; });
+  const token = (sub) => {
+    const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({ sub, role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 120 })).toString('base64url');
+    return `${head}.${body}.${createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url')}`;
+  };
+  const headers = { Authorization: `Bearer ${token('user_api_test')}`, 'Content-Type': 'application/json' };
+  const request = (path, options = {}) => fetch(base + path, { ...options, signal: AbortSignal.timeout(3000) });
+  const save = (id, version, minutes = 60) => request('/rpc/commit_user_change', { method: 'POST', headers,
+    body: JSON.stringify({ p_operation_id: id, p_kind: 'settings', p_expected: { settings: version },
+      p_payload: { settings: { onboarding_complete: true, leetcode_username: null,
+        target_interview_date: '2027-01-01', settings_json: { settings: { studySchedule: { weekdayMinutes: minutes } } } } } }) });
+  try {
+    let ready = false;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      if (startupError) throw new Error('Install PostgREST 14.5 and add it to PATH: ' + startupError.code);
+      if (server.exitCode !== null) throw new Error('PostgREST test server exited during startup');
+      try { ready = (await request('/problem_progress?select=problem_id&limit=0')).ok; }
+      catch { /* Wait for this local test process to listen. */ }
+      if (ready) break;
+      await delay(100);
+    }
+    assert.ok(ready, 'Local PostgREST server must become ready');
+    assert.equal((await save(randomUUID(), 0)).status, 200);
+    // More conflicts than pool slots must return instead of occupying the pool.
+    const conflicts = await Promise.all(Array.from({ length: 4 }, () => save(randomUUID(), 0)));
+    for (const conflict of conflicts) {
+      assert.equal(conflict.status, 409);
+      assert.equal((await conflict.json()).code, 'PT409');
+    }
+    assert.equal((await request('/problem_progress?select=problem_id&limit=0')).status, 200);
+    const id = randomUUID();
+    assert.equal((await save(id, 1, 90)).status, 200);
+    assert.equal((await (await save(id, 1, 90)).json()).duplicate, true);
+    const settings = await (await request('/user_settings?select=version,settings_json', { headers })).json();
+    assert.equal(settings[0].version, 2);
+    assert.equal(settings[0].settings_json.settings.studySchedule.weekdayMinutes, 90);
+    const other = await request('/user_settings?select=version', { headers: { Authorization: `Bearer ${token('another_api_user')}` } });
+    assert.deepEqual(await other.json(), []);
+    console.log('PostgREST HTTP conflicts return 409 without pool starvation; retry receipts and JWT RLS passed.');
+  } finally {
+    if (server.exitCode === null && !startupError) {
+      server.kill('SIGKILL');
+      await exited;
+    }
+  }
+}

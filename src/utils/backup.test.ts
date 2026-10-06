@@ -16,4 +16,9 @@ describe('backup validation', () => {
   it('rejects unrelated JSON', () => {
     expect(() => validateBackup({ hello: 'world' })).toThrow('No backup data found');
   });
+  it('round-trips a study schedule with no weekly rest day', () => {
+    const userSettings = { ...DEFAULT_USER_SETTINGS, settings: { ...DEFAULT_USER_SETTINGS.settings,
+      studySchedule: { ...DEFAULT_USER_SETTINGS.settings.studySchedule, restDay: -1 } } };
+    expect(validateBackup(JSON.parse(JSON.stringify({ userSettings }))).userSettings.settings.studySchedule.restDay).toBe(-1);
+  });
 });

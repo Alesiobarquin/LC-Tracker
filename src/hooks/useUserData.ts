@@ -52,8 +52,8 @@ export function useUserSettings() {
     data, isLoading: query.isLoading, isSuccess: query.isSuccess, error: query.error, refetch: query.refetch,
     ...data, lastSync, lastSyncCount, syncError,
     updateUserData: updateUserSettings,
-    updateSettings: (patch: Partial<AppSettings>) => updateUserSettings((current) => ({
-      ...current, settings: applySettingsPatch(data.settings, current.settings, patch),
+    updateSettings: (patch: Partial<AppSettings>, base: AppSettings = data.settings) => updateUserSettings((current) => ({
+      ...current, settings: applySettingsPatch(base, current.settings, patch),
     })),
     setOnboardingComplete: () =>
       updateUserSettings((current) => ({ ...current, onboardingComplete: true })),

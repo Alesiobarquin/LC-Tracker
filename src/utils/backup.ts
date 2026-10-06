@@ -46,7 +46,7 @@ const settings = z.object({
   settings: z.object({
     studySchedule: z.object({
       weekdayMinutes: z.number().finite().nonnegative(), weekendMinutes: z.number().finite().nonnegative(),
-      restDay: z.number().int().min(0).max(6), blackoutDates: z.array(z.object({ start: date, end: date })),
+      restDay: z.number().int().min(-1).max(6), blackoutDates: z.array(z.object({ start: date, end: date })),
     }),
     skillLevels: z.record(z.string(), z.enum(['not_familiar', 'some_exposure', 'comfortable'])),
     targetCompanyTier: z.enum(['FAANG', 'FINTECH', 'GENERAL', 'MIXED']),

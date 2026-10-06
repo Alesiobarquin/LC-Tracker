@@ -1,8 +1,8 @@
+import { Modal } from "./ui/Modal";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@clerk/react";
 import { Link } from "react-router-dom";
 import { differenceInCalendarDays, format, isSameDay, subDays } from "date-fns";
-import { BarChart3, Clock, X } from "lucide-react";
 import {
   useProblemProgress,
   useSessionTimings,
@@ -24,10 +24,11 @@ import {
 } from "../utils/study";
 import type { SessionTiming } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
+import { SectionHeading } from "./ui/StudyTrace";
 import { AnalyticsSkeleton } from "./loadingSkeletons";
 
 const percent = (passes: number, total: number) =>
-  total ? `${Math.round((passes / total) * 100)}%` : "No data yet";
+  total ? `${Math.round((passes / total) * 100)}%` : "—";
 export function Analytics() {
   const { user } = useUser();
   const progressQuery = useProblemProgress();
@@ -160,211 +161,244 @@ export function Analytics() {
   if (progressQuery.isLoading || timingQuery.isLoading || !catalogReady)
     return <AnalyticsSkeleton />;
   return (
-    <div className="max-w-5xl mx-auto space-y-7 pb-12">
+    <div className="evidence-page space-y-7 pb-12">
       <PageHeader
         title="Learning evidence"
-        icon={<BarChart3 />}
         description="Track delayed implementation, recall, transfer to new problems, and sustainable study time."
       />
-      <p className="text-sm text-muted">
-        Outcomes are self-reported. A confidence rating, imported acceptance, or
-        repeated same-day solve is not an interview readiness score.
-      </p>
-      <section
-        className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
-        aria-label="Last 14 days"
-      >
-        {[
-          [
-            "Recall checks",
-            percent(
-              recallAttempts.filter((a) => a.outcome === "recalled").length,
-              recallAttempts.length,
-            ),
-            `${recallAttempts.filter((a) => a.outcome === "recalled").length}/${recallAttempts.length} recalled in the last 14 days`,
-          ],
-          [
-            "Delayed coding",
-            percent(
-              delayedAttempts.filter((h) => isIndependentPass(h.codingOutcome))
-                .length,
-              delayedAttempts.length,
-            ),
-            `${delayedAttempts.filter((h) => isIndependentPass(h.codingOutcome)).length}/${delayedAttempts.length} independent passes after a gap of at least 7 days`,
-          ],
-          [
-            "Unseen variations",
-            percent(
-              variants.filter((h) => isIndependentPass(h.codingOutcome)).length,
-              variants.length,
-            ),
-            `${variants.filter((h) => isIndependentPass(h.codingOutcome)).length}/${variants.length} independent variant passes in the last 14 days`,
-          ],
-          [
-            "Study time",
-            `${minuteData.reduce((sum, d) => sum + d.minutes, 0)} min`,
-            "Recorded across the last 14 days",
-          ],
-        ].map(([label, value, detail]) => (
-          <div key={label} className="premium-card p-5">
-            <h2 className="text-sm text-muted">{label}</h2>
-            <p className="text-2xl font-semibold text-foreground my-2">{value}</p>
-            <p className="text-xs text-subtle">{detail}</p>
-          </div>
-        ))}
-      </section>
-      <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground flex gap-2 items-center">
-          <Clock size={20} /> Daily study time
-        </h2>
-        <div
-          className="flex gap-2 items-end h-36"
-          role="img"
-          aria-label={`Recorded study minutes in the last fourteen days: ${minuteData.map(({ day, minutes }) => `${format(day, 'MMM d')}, ${minutes} minutes`).join('; ')}`}
-        >
-          {minuteData.map(({ day, minutes }) => (
-            <div
-              key={day.toISOString()}
-              className="flex-1 h-full flex flex-col justify-end items-center gap-2"
-              title={`${format(day, "MMM d")}: ${minutes} min`}
-            >
+      <div className="evidence-overview">
+        <div className="evidence-time">
+          <p className="register-label">Recorded / last 14 days</p>
+          <p className="evidence-time-value">
+            <span className="register-value">
+              {minuteData.reduce((sum, d) => sum + d.minutes, 0)}
+            </span>
+            <span>min</span>
+          </p>
+          <div
+            className="study-chart flex gap-2 sm:gap-3 items-end h-32"
+            role="img"
+            aria-label={`Recorded study minutes in the last fourteen days: ${minuteData.map(({ day, minutes }) => `${format(day, "MMM d")}, ${minutes} minutes`).join("; ")}`}
+          >
+            {minuteData.map(({ day, minutes }) => (
               <div
-                className="bg-accent rounded-t-sm w-full min-h-1"
-                style={{ height: `${(minutes / maxMinutes) * 100}px` }}
-              />
-              <span className="text-[10px] text-subtle">
-                {format(day, "d")}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs text-subtle">
-          {Object.values(progress).filter(hasDelayedIndependentPass).length}{" "}
-          problems have independent passes at least 7 days apart. They remain
-          eligible for maintenance.
-        </p>
-      </section>
-      <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">
-          Pattern coverage and depth
-        </h2>
-        <p className="text-sm text-muted">
-          Encountered means present in your history. Dependable means
-          independent passes on separate days at least a week apart. Established
-          requires two dependable representatives (or all available if fewer)
-          plus an independent pass on an unseen variation.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-sm text-left">
-            <thead className="text-subtle">
-              <tr>
-                <th scope="col" className="py-3 pr-4">Pattern</th>
-                <th scope="col" className="pr-4">Encountered</th>
-                <th scope="col" className="pr-4">Dependable</th>
-                <th scope="col" className="pr-4">Variant pass</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {evidence.map((row) => (
-                <tr
-                  key={row.pattern.id}
-                  className="border-t border-line text-body"
-                >
-                  <td className="py-3 pr-4">
-                    <Link
-                      to={`/patterns/${row.pattern.id}`}
-                      className="text-accent"
-                    >
-                      {row.pattern.name}
-                    </Link>
-                  </td>
-                  <td>
-                    {row.seen}/{row.ids.length}
-                  </td>
-                  <td>{row.dependable}</td>
-                  <td>{row.variantPassed ? "Recorded" : "Not yet"}</td>
-                  <td>
-                    {row.established
-                      ? "Established"
-                      : row.seen
-                        ? "Developing"
-                        : "Not started"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-      <section className="premium-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Session history</h2>
-        {history.length ? (
-          <div className="space-y-2">
-            {history.map((t) => (
-              <button
-                key={t.id}
-                className="w-full rounded-xl border border-line px-4 py-3 text-left hover:border-accent/40 flex flex-wrap justify-between gap-3"
-                onClick={() => setViewing(t)}
+                key={day.toISOString()}
+                className="study-chart-day flex-1 h-full flex flex-col justify-end items-center gap-2"
+                title={`${format(day, "MMM d")}: ${minutes} min`}
               >
-                <span className="text-sm text-foreground">
-                  {problemMap[t.problemId]?.title ?? t.problemId}
-                  <span className="block text-xs text-subtle mt-1">
-                    {format(new Date(t.date), "MMM d, yyyy · HH:mm")}
-                  </span>
+                <div
+                  className="study-chart-bar w-full"
+                  style={{
+                    height: minutes
+                      ? `${(minutes / maxMinutes) * 88}px`
+                      : "1px",
+                  }}
+                />
+                <span className="font-mono text-[9px] text-subtle">
+                  {format(day, "d")}
                 </span>
-                <span className="text-xs text-muted">
-                  {t.sessionType === "recall"
-                    ? "Recall check"
-                    : t.sessionType.replace("_", " ")}{" "}
-                  · {Math.ceil(t.elapsedSeconds / 60)} min
-                </span>
-              </button>
+              </div>
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-muted">
-            Your first recorded recall or coding session will appear here.
+          <p className="text-[11px] text-subtle mt-4">
+            {Object.values(progress).filter(hasDelayedIndependentPass).length}{" "}
+            problems have independent passes at least 7 days apart.
           </p>
-        )}
-        {historyError && (
-          <p role="alert" className="text-danger">
-            {historyError}
-          </p>
-        )}
-        {hasMore && (
-          <button
-            className="text-sm text-accent"
-            disabled={loadingOlder}
-            onClick={() => void loadOlder()}
-          >
-            {loadingOlder ? "Loading…" : "Load older sessions"}
-          </button>
-        )}
-      </section>
-      {viewing && (
-        <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-          onClick={() => setViewing(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Session detail"
-            className="premium-card max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between gap-4">
-              <h2 className="text-xl font-semibold text-foreground">
-                {problemMap[viewing.problemId]?.title ?? viewing.problemId}
-              </h2>
-              <button
-                aria-label="Close session detail"
-                onClick={() => setViewing(null)}
-              >
-                <X />
-              </button>
+        </div>
+        <section className="evidence-checks" aria-label="Last 14 days">
+          {[
+            [
+              "Recall checks",
+              percent(
+                recallAttempts.filter((a) => a.outcome === "recalled").length,
+                recallAttempts.length,
+              ),
+              `${recallAttempts.filter((a) => a.outcome === "recalled").length}/${recallAttempts.length} recalled in the last 14 days`,
+            ],
+            [
+              "Delayed coding",
+              percent(
+                delayedAttempts.filter((h) =>
+                  isIndependentPass(h.codingOutcome),
+                ).length,
+                delayedAttempts.length,
+              ),
+              `${delayedAttempts.filter((h) => isIndependentPass(h.codingOutcome)).length}/${delayedAttempts.length} independent passes after a gap of at least 7 days`,
+            ],
+            [
+              "Unseen variations",
+              percent(
+                variants.filter((h) => isIndependentPass(h.codingOutcome))
+                  .length,
+                variants.length,
+              ),
+              `${variants.filter((h) => isIndependentPass(h.codingOutcome)).length}/${variants.length} independent variant passes in the last 14 days`,
+            ],
+          ].map(([label, value, detail], index) => (
+            <div key={label} className="evidence-check">
+              <span className="evidence-kind" aria-hidden="true">
+                {["R", "C", "V"][index]}
+              </span>
+              <div className="min-w-0">
+                <h2 className="register-label">{label}</h2>
+                <span className="evidence-sample font-mono text-subtle">
+                  {detail.split(" ")[0]}
+                </span>
+                <p className="register-value text-foreground evidence-check-value">
+                  {value}
+                  {value === "—" && (
+                    <span className="sr-only"> No data yet</span>
+                  )}
+                </p>
+                <p className="evidence-check-detail text-[11px] text-subtle leading-relaxed">
+                  {detail}
+                </p>
+              </div>
             </div>
+          ))}
+        </section>
+      </div>
+      <details className="evidence-disclosure text-[11px] text-muted leading-relaxed">
+        <summary>How to read the evidence</summary>
+        <div className="evidence-definitions">
+          <p>
+            Outcomes are self-reported. A confidence rating, imported
+            acceptance, or repeated same-day solve is not an interview readiness
+            score.
+          </p>
+          <p>
+            Recall checks record an approach retrieved from memory. Delayed
+            coding records independent passes after a gap of at least 7 days.
+            Unseen variations record independent passes on a new representative
+            problem.
+          </p>
+          <p>
+            Encountered means present in your history. Dependable means
+            independent passes on separate days at least a week apart.
+            Established requires two dependable representatives (or all
+            available if fewer) plus an independent pass on an unseen variation.
+          </p>
+        </div>
+      </details>
+      <div className="evidence-ledgers">
+        <section className="coverage-ledger register-section space-y-4">
+          <SectionHeading index="02" title="Pattern coverage and depth" />
+          <div className="overflow-x-auto">
+            <table className="evidence-table w-full min-w-[560px] text-sm text-left">
+              <thead className="text-subtle">
+                <tr>
+                  <th scope="col" className="py-3 pr-4">
+                    Pattern
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Encountered
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Dependable
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Variant pass
+                  </th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {evidence.map((row) => (
+                  <tr
+                    key={row.pattern.id}
+                    className="border-t border-line text-body"
+                  >
+                    <td className="py-3 pr-4">
+                      <Link
+                        to={`/patterns/${row.pattern.id}`}
+                        className="text-foreground hover:text-accent"
+                      >
+                        {row.pattern.name}
+                      </Link>
+                    </td>
+                    <td>
+                      {row.seen}/{row.ids.length}
+                    </td>
+                    <td>{row.dependable}</td>
+                    <td>{row.variantPassed ? "Recorded" : "Not yet"}</td>
+                    <td>
+                      {row.established
+                        ? "Established"
+                        : row.seen
+                          ? "Developing"
+                          : "Not started"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section className="attempt-ledger register-section space-y-4">
+          <SectionHeading
+            index="01"
+            title="Session history"
+            detail={`${history.length} recorded`}
+          />
+          {history.length ? (
+            <div className="space-y-0">
+              {history.map((t) => (
+                <button
+                  key={t.id}
+                  className="session-history-row"
+                  onClick={() => setViewing(t)}
+                >
+                  <span className="attempt-date font-mono text-subtle">
+                    <span>{format(new Date(t.date), "MMM d")}</span>
+                    <span>{format(new Date(t.date), "HH:mm")}</span>
+                  </span>
+                  <span className="attempt-content">
+                    <span className="text-sm text-foreground block">
+                      {problemMap[t.problemId]?.title ?? t.problemId}
+                    </span>
+                    <span className="text-[10px] text-muted block mt-1">
+                      {t.sessionType === "recall"
+                        ? "Recall check"
+                        : t.sessionType.replace("_", " ")}
+                    </span>
+                  </span>
+                  <span className="attempt-minutes register-value">
+                    {Math.ceil(t.elapsedSeconds / 60)}
+                    <span>min</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted">
+              Your first recorded recall or coding session will appear here.
+            </p>
+          )}
+          {historyError && (
+            <p role="alert" className="text-danger">
+              {historyError}
+            </p>
+          )}
+          {hasMore && (
+            <button
+              className="text-sm text-accent"
+              disabled={loadingOlder}
+              onClick={() => void loadOlder()}
+            >
+              {loadingOlder ? "Loading…" : "Load older sessions"}
+            </button>
+          )}
+        </section>
+      </div>
+      {viewing && (
+        <Modal
+          isOpen
+          onClose={() => setViewing(null)}
+          title={problemMap[viewing.problemId]?.title ?? viewing.problemId}
+          description="Session detail"
+          size="lg"
+        >
+          <div className="space-y-4 max-h-[65vh] overflow-y-auto">
             {viewedRecall ? (
               <>
                 <p className="text-sm text-accent">
@@ -403,7 +437,7 @@ export function Analytics() {
               </div>
             )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

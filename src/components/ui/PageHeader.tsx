@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '../../utils/cn';
+import React from "react";
+import { cn } from "../../utils/cn";
 
 export interface PageHeaderProps {
   icon?: React.ReactNode;
@@ -10,7 +10,6 @@ export interface PageHeaderProps {
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
-  icon,
   title,
   description,
   actions,
@@ -18,13 +17,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => (
   <header
     className={cn(
-      'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
-      className
+      "page-heading flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+      className,
     )}
   >
     <div className="min-w-0 space-y-2">
-      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground flex items-center gap-3">
-        {icon ? <span className="text-muted shrink-0 [&>svg]:w-5 [&>svg]:h-5">{icon}</span> : null}
+      <h1 className="text-[28px] sm:text-[32px] font-semibold tracking-[-0.045em] leading-tight text-foreground flex items-center gap-3">
         <span className="min-w-0">{title}</span>
       </h1>
       {description ? (
@@ -33,6 +31,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         </div>
       ) : null}
     </div>
-    {actions ? <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div> : null}
+    {actions ? (
+      <div className="page-heading-actions flex flex-wrap items-center gap-2 shrink-0">
+        {actions}
+      </div>
+    ) : null}
   </header>
 );

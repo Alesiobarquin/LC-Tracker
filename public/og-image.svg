@@ -1,61 +1,31 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="76" y1="44" x2="1132" y2="614" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#040606" />
-      <stop offset="0.48" stop-color="#060F0D" />
-      <stop offset="1" stop-color="#041716" />
-    </linearGradient>
-    <linearGradient id="line" x1="0" y1="315" x2="1200" y2="315" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0D2D25" stop-opacity="0" />
-      <stop offset="0.5" stop-color="#64F8D2" stop-opacity="0.5" />
-      <stop offset="1" stop-color="#0D2D25" stop-opacity="0" />
-    </linearGradient>
-    <linearGradient id="markStroke" x1="12" y1="16" x2="88" y2="88" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#A8FFE4" />
-      <stop offset="0.52" stop-color="#4CF0C6" />
-      <stop offset="1" stop-color="#14B88C" />
-    </linearGradient>
-    <radialGradient id="markAura" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(50 62) rotate(90) scale(30 28)">
-      <stop offset="0" stop-color="#74FAD3" stop-opacity="0.95" />
-      <stop offset="0.72" stop-color="#2ECFA8" stop-opacity="0.34" />
-      <stop offset="1" stop-color="#0A2A21" stop-opacity="0" />
-    </radialGradient>
-    <filter id="markGlow" x="-60%" y="-60%" width="220%" height="220%">
-      <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#6AFFDC" flood-opacity="0.95" />
-      <feDropShadow dx="0" dy="0" stdDeviation="4.8" flood-color="#20C99A" flood-opacity="0.8" />
-      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#14906E" flood-opacity="0.45" />
-    </filter>
-    <filter id="wordGlow" x="-40%" y="-60%" width="220%" height="240%">
-      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#63F9D3" flood-opacity="0.3" />
-      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#22C79A" flood-opacity="0.22" />
-    </filter>
-  </defs>
-
-  <rect width="1200" height="630" rx="34" fill="url(#bg)" />
-  <rect x="46" y="46" width="1108" height="538" rx="26" stroke="#1A4339" stroke-opacity="0.9" />
-
-  <g opacity="0.36">
-    <path d="M80 116H1120" stroke="url(#line)" stroke-width="1" />
-    <path d="M80 514H1120" stroke="url(#line)" stroke-width="1" />
-    <path d="M600 88V542" stroke="#174137" stroke-opacity="0.55" stroke-width="1" />
+  <rect width="1200" height="630" fill="#191b19"/>
+  <path d="M64 116H1136M64 544H1136M744 164V496" stroke="#363932"/>
+  <g transform="translate(62 45) scale(1.2)" stroke="#e99575">
+    <path d="M9 5H5v22h4M23 5h4v22h-4M10 21h5V11h7" stroke-width="2"/>
+    <path d="M10 26h10V16h2" stroke-width="1.5" opacity=".45"/>
+    <rect x="19" y="8" width="5" height="5" fill="#e99575" stroke="none"/>
   </g>
-
-  <g transform="translate(88 90) scale(4.92)">
-    <path d="M10 84L29 50L37 58L50 18L61 42L69 34L90 84Z" fill="url(#markAura)" opacity="0.74" />
-
-    <g fill="none" stroke="url(#markStroke)" stroke-linecap="round" stroke-linejoin="round" filter="url(#markGlow)">
-      <path d="M10 84L29 50L37 58L50 18L61 42L69 34L90 84Z" stroke-width="3.9" opacity="0.96" />
-      <path d="M20 84L33 61L39 67L50 40L58 54L65 48L80 84Z" stroke-width="3" opacity="0.72" />
-    </g>
-
+  <g font-family="Arial, sans-serif" fill="#efeee8">
+    <text x="112" y="74" font-size="24" font-weight="600">LC Tracker</text>
+    <text x="64" y="244" font-size="56" letter-spacing="-2">A workspace for</text>
+    <text x="64" y="311" font-size="56" letter-spacing="-2" fill="#a3a79b">LeetCode practice.</text>
+    <text x="64" y="379" font-size="21" fill="#a3a79b">Plan your time. Recall an approach.</text>
+    <text x="64" y="411" font-size="21" fill="#a3a79b">Code independently. Record the outcome.</text>
+    <text x="842" y="217" font-size="23">Recall</text>
+    <text x="842" y="332" font-size="23">Implement</text>
+    <text x="842" y="447" font-size="23">Revisit</text>
   </g>
-
-  <g transform="translate(550 166)">
-    <text x="0" y="100" fill="#ECFFF9" font-family="'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="90" font-weight="650" letter-spacing="0.11em" filter="url(#wordGlow)">LC TRACKER</text>
-    <text x="2" y="178" fill="#96F6D8" font-family="'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="500" letter-spacing="0.16em">LEETCODE TRACKER FOR SPACED REPETITION</text>
-    <text x="2" y="240" fill="#B0CBC3" font-family="'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="23" font-weight="400" letter-spacing="0.03em">Progress analytics, weak-point review, and interview prep.</text>
-
-    <rect x="0" y="286" width="525" height="1" fill="#2A5F52" fill-opacity="0.88" />
-    <text x="2" y="330" fill="#78C6B0" font-family="'SFMono-Regular', Menlo, Consolas, monospace" font-size="18" font-weight="500" letter-spacing="0.16em">TRACK. REVIEW. RETAIN.</text>
+  <g font-family="monospace" font-size="14" fill="#919689">
+    <text x="64" y="581">lc-tracker.app</text>
+    <text x="955" y="581">Open source</text>
+    <text x="842" y="245">Approach + reasoning</text>
+    <text x="842" y="360">Tests + assistance</text>
+    <text x="842" y="475">Delay + variation</text>
   </g>
+  <path d="M799 222V306M799 336V422" stroke="#363932"/>
+  <rect x="786" y="190" width="26" height="26" fill="#e99575"/>
+  <rect x="786" y="305" width="26" height="26" stroke="#51554a"/>
+  <rect x="786" y="420" width="26" height="26" stroke="#51554a"/>
+  <g font-family="monospace" font-size="10" text-anchor="middle"><text x="799" y="207" fill="#28180f">01</text><text x="799" y="322" fill="#a3a79b">02</text><text x="799" y="437" fill="#a3a79b">03</text></g>
 </svg>

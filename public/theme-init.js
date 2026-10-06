@@ -11,7 +11,7 @@
     preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches
   );
   var theme = dark ? 'dark' : 'light';
-  var canvas = dark ? '#0e1419' : '#f6f8fa';
+  var canvas = dark ? '#191b19' : '#f5f3ee';
   var root = document.documentElement;
   root.dataset.theme = theme;
   root.dataset.themePreference = preference;

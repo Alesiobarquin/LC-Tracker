@@ -122,7 +122,7 @@ export const TimerPage: React.FC = () => {
   const isNew = !activeSession.isReview && !activeSession.isColdSolve;
 
   return (
-    <div className="animate-in fade-in duration-500 w-full max-w-4xl mx-auto py-8">
+    <div className="w-full animate-in">
       <Timer
         key={problem.id}
         problem={problem}

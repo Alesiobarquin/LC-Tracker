@@ -40,7 +40,7 @@ test('saved appearance is applied before the React entry point runs', async ({ p
   await expect(themeRoot(page)).toHaveAttribute('data-theme', 'light');
   await expect(themeRoot(page)).toHaveAttribute('data-theme-preference', 'light');
   expect(await themeRoot(page).evaluate(root => getComputedStyle(root).colorScheme)).toBe('light');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f6f8fa');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f5f3ee');
 });
 
 test('theme changes preserve an active recall answer and comparison stage without saving a session', async ({ page }) => {

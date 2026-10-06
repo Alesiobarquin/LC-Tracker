@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Brain,
-  Clock,
-  Play,
-  ArrowRight,
-  CircleCheck,
-} from "lucide-react";
+import { Play, ArrowRight, CircleCheck, ArrowUpRight } from "lucide-react";
 import {
   useProblemProgress,
   useSessionTimings,
@@ -29,14 +23,10 @@ import {
 import { getPatternForProblem } from "../utils/patternMapping";
 import { useStore } from "../store/useStore";
 import { PageHeader, QueryErrorBanner } from "./ui";
+import { BudgetMeter, TraceIndex } from "./ui/StudyTrace";
+import { Button } from "./ui/Button";
 import { DashboardSkeleton } from "./loadingSkeletons";
 
-const labels = {
-  learning: "Learn a representative problem",
-  variant: "Try an unseen variation",
-  coding_review: "Practice implementation",
-  recall: "Recall the approach",
-};
 export function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -190,279 +180,362 @@ export function Dashboard() {
   const activeProblemId = activeSession?.problemId ?? activeRecall?.problemId;
   const hasAssignments =
     !plan.isBlackout && !plan.isRestDay && plan.remainingMinutes > 0;
-  const primaryTask = activeProblemId ? undefined : hasAssignments ? nextTask : undefined;
+  const primaryTask = activeProblemId
+    ? undefined
+    : hasAssignments
+      ? nextTask
+      : undefined;
+  const focusedProblem =
+    problemMap[(activeProblemId ?? primaryTask?.problemId)!];
+  const dateLabel = now.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const budget = (
+    <>
+      <p className="register-label">Time available today</p>
+      <p className="mt-3 mb-5">
+        <span className="register-value text-[48px] leading-none">
+          {plan.remainingMinutes}
+        </span>
+        <span className="text-xs text-muted ml-2">min left</span>
+      </p>
+      <BudgetMeter spent={plan.spentMinutes} total={plan.dailyMinutes} />
+      <div className="flex justify-between gap-2 text-[11px] font-mono text-subtle mt-3">
+        <span>{plan.spentMinutes} min used</span>
+        <span>{plan.dailyMinutes} min target</span>
+      </div>
+    </>
+  );
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-10">
+    <div className="today-page space-y-7 pb-6">
       <PageHeader
+        className="today-heading"
         title="Today’s study plan"
-        description="A short recall warm-up, then one focused practice block."
+        description={dateLabel}
         actions={
           <Link
             to="/settings#section-schedule"
-            className="text-sm text-muted underline underline-offset-4 hover:text-foreground"
+            aria-label="Adjust study time"
+            className="quiet-action"
           >
-            Adjust study time
+            <span className="hidden sm:inline">Adjust study time</span>{" "}
+            <ArrowUpRight size={14} />
           </Link>
         }
       />
       {savedMessage && (
         <p
           role="status"
-          className="rounded-md border border-accent/25 bg-accent/5 px-4 py-3 text-accent text-sm"
+          className="border-l-2 border-success bg-success/5 px-4 py-3 text-success text-sm"
         >
           {savedMessage}
         </p>
       )}
       <section
-        className="border-b border-line pb-5 space-y-3"
         aria-label="Daily time budget"
+        className="mobile-budget md:hidden"
       >
-        <div className="flex flex-wrap gap-x-6 gap-y-2 items-center justify-between text-sm">
-          <p className="flex items-center gap-2 text-muted">
-            <Clock size={16} aria-hidden="true" />
-            Daily time budget
-            <span className="font-semibold text-foreground">{plan.dailyMinutes} min</span>
+        <span>
+          <strong className="register-value">{plan.remainingMinutes}</strong>{" "}
+          <span className="text-xs text-muted">min left today</span>
+        </span>
+        <div>
+          <BudgetMeter spent={plan.spentMinutes} total={plan.dailyMinutes} />
+          <p className="font-mono text-[10px] text-subtle mt-2">
+            {plan.spentMinutes} / {plan.dailyMinutes} min used
           </p>
-          <p className="text-muted tabular-nums">
-            <span className="text-foreground">{plan.spentMinutes} min used</span>
-            {" · "}{plan.remainingMinutes} min remaining
-          </p>
-        </div>
-        <div
-          className="h-1 bg-muted-surface overflow-hidden"
-          role="progressbar"
-          aria-label="Daily study time used"
-          aria-valuemin={0}
-          aria-valuemax={plan.dailyMinutes || 1}
-          aria-valuenow={Math.min(plan.spentMinutes, plan.dailyMinutes || 1)}
-          aria-valuetext={`${plan.spentMinutes} of ${plan.dailyMinutes} minutes used`}
-        >
-          <div
-            className="h-full bg-accent"
-            style={{
-              width: `${Math.min(100, plan.dailyMinutes ? (plan.spentMinutes / plan.dailyMinutes) * 100 : 0)}%`,
-            }}
-          />
         </div>
       </section>
-      {(activeProblemId || primaryTask) && (
-        <section
-          aria-label="Your next action"
-          className="border border-line border-l-[3px] border-l-accent rounded-md bg-surface p-5 sm:p-6"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div className="min-w-0 space-y-2">
-              <p className="text-xs font-semibold text-muted tracking-wide uppercase">
-                {activeProblemId
-                  ? "Session in progress"
-                  : primaryTask?.kind === "recall"
-                    ? "Start here · Recall warm-up"
-                    : "Start here · Coding practice"}
-              </p>
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
-                {problemMap[(activeProblemId ?? primaryTask?.problemId)!]?.title}
-              </h2>
-              <p className="text-sm text-muted leading-relaxed max-w-xl">
-                {activeProblemId
-                  ? "Continue your saved session before starting another problem."
-                  : `${primaryTask!.minutes} min · ${primaryTask!.reason}`}
-              </p>
+      <div className="study-layout">
+        <div className="study-main">
+          <section aria-label="Today's sequence" className="plan-track">
+            <div className="plan-sequence-heading">
+              <h2 className="register-label">Today’s sequence</h2>
+              <span className="font-mono text-[10px] text-subtle">
+                {plan.plannedMinutes} min planned
+              </span>
             </div>
-            {activeProblemId ? (
-              <Link
-                to={activeSession ? `/timer/${activeProblemId}` : `/recall/${activeProblemId}`}
-                className="shrink-0 inline-flex justify-center items-center gap-2 rounded-md bg-accent px-5 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-              >
-                <Play size={16} aria-hidden="true" /> Resume session
-              </Link>
-            ) : (
-              <button
-                onClick={() => start(primaryTask!)}
-                className="shrink-0 inline-flex justify-center items-center gap-2 rounded-md bg-accent px-5 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-              >
-                Begin study <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-        </section>
-      )}
-      {plan.isBlackout || plan.isRestDay ? (
-        <section className="border border-line rounded-md bg-surface p-6">
-          <h2 className="text-xl font-semibold text-foreground">
-            {plan.isBlackout ? "Scheduled break" : "Rest day"}
-          </h2>
-          <p className="text-muted mt-2 text-sm leading-relaxed">
-            No assignments today. Your study queue will wait for your next study
-            day.
-          </p>
-        </section>
-      ) : plan.remainingMinutes === 0 ? (
-        <section className="border border-line rounded-md bg-surface p-6">
-          <h2 className="text-lg font-semibold text-foreground flex gap-2 items-center">
-            <CircleCheck size={20} className="text-accent" /> Your time target is complete
-          </h2>
-          <p className="text-muted mt-2 text-sm">
-            You’ve used today’s study budget. Pick up the plan tomorrow.
-          </p>
-        </section>
-      ) : (
-        <section aria-label="Today's sequence" className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-foreground">Today’s sequence</h2>
-            <p className="text-xs text-muted">{plan.plannedMinutes} min planned</p>
-          </div>
-          <section className="border border-line rounded-md bg-surface">
-            <div className="p-4 sm:p-5 border-b border-line">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-subtle tabular-nums">01</span>
-                <Brain size={17} className="text-muted" aria-hidden="true" />
-                <h3 className="font-semibold text-foreground">Recall warm-up</h3>
-              </div>
-              <p className="mt-2 text-sm text-muted leading-relaxed">
-                Explain the approach from memory, then compare with a reference.
-                No full re-code required for this check.
-              </p>
-            </div>
-            {plan.recallTasks.length ? (
-              <div className="divide-y divide-line">
-                {plan.recallTasks.map((task) => (
-                  <div key={task.problemId} className="px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-baseline gap-3 justify-between sm:justify-start">
-                        <h4 className="text-sm font-medium text-foreground">
-                          {problemMap[task.problemId].title}
-                        </h4>
-                        <span className="text-xs text-subtle shrink-0 tabular-nums">
-                          {task.minutes} min
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted leading-relaxed">{task.reason}</p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <button
-                        onClick={() => start(task)}
-                        className="inline-flex items-center gap-2 min-h-10 rounded-md border border-line-strong px-3 text-xs font-medium text-body hover:bg-muted-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                      >
-                        Start recall check <ArrowRight size={13} aria-hidden="true" />
-                      </button>
-                      <button
-                        onClick={() => setExcludedIds((ids) => [...ids, task.problemId])}
-                        aria-label={`Swap ${problemMap[task.problemId].title} today`}
-                        className="min-h-10 px-1 text-xs text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
-                      >
-                        Swap today
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="px-4 py-4 sm:px-5 text-sm text-muted">
-                No more recall checks fit today’s allocation. Your remaining
-                time is reserved for practice.
-              </p>
-            )}
-            <p className="px-4 pb-4 sm:px-5 text-xs text-subtle leading-relaxed">
-              {plan.eligibleRecallCount} eligible in your queue. The plan
-              selects only what fits; this is not a requirement to clear them
-              all today.
-            </p>
-          </section>
-          <section className="border border-line rounded-md bg-surface p-4 sm:p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-subtle tabular-nums">02</span>
-              <Play size={17} className="text-muted" aria-hidden="true" />
-              <h3 className="font-semibold text-foreground">Main practice block</h3>
-            </div>
-            {plan.mainTask ? (
-              <div className="space-y-3">
-                <p className="text-xs text-muted">{labels[plan.mainTask.kind]}</p>
-                <h4 className="text-lg font-semibold tracking-tight text-foreground">
-                  {problemMap[plan.mainTask.problemId].title}
-                </h4>
-                <p className="text-sm text-muted leading-relaxed">{plan.mainTask.reason}</p>
-                <p className="text-xs text-body">
-                  {plan.mainTask.minutes} min coding block
-                  {plan.mainTask.minutes < plan.mainTask.estimatedMinutes
-                    ? ` · about ${plan.mainTask.estimatedMinutes} min estimated for a full attempt`
-                    : ""}
-                </p>
-                <p className="text-xs text-muted leading-relaxed">
-                  Try independently first. Afterward, record correctness, hints
-                  used, and whether you can explain the solution. If you need longer,
-                  record an unfinished attempt and continue another day.
-                </p>
-                <div className="flex flex-wrap items-center gap-4 pt-1">
-                  <button
-                    onClick={() => start(plan.mainTask!)}
-                    className="rounded-md border border-line-strong px-4 py-2.5 text-sm font-medium text-body hover:bg-muted-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                  >
-                    Start practice block
-                  </button>
-                  <button
-                    onClick={() => setExcludedIds((ids) => [...ids, plan.mainTask!.problemId])}
-                    className="text-xs min-h-10 text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
-                  >
-                    Choose another
-                  </button>
+            {(activeProblemId || primaryTask) && (
+              <section aria-label="Your next action" className="study-next">
+                <TraceIndex active>{activeProblemId ? "↳" : "01"}</TraceIndex>
+                <div className="flex items-center gap-3 text-xs text-accent font-medium">
+                  <span className="status-node bg-accent" aria-hidden="true" />
+                  {activeProblemId
+                    ? "Session in progress · draft saved"
+                    : primaryTask?.kind === "recall"
+                      ? "Recall warm-up · up next"
+                      : "Coding practice · up next"}
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted leading-relaxed">
-                No additional coding assignment fits this plan. You can revisit
-                a pattern lesson in your remaining time.
-              </p>
+                <h2 className="study-next-title">{focusedProblem?.title}</h2>
+                <p className="text-sm text-muted leading-relaxed max-w-lg">
+                  {activeProblemId
+                    ? "Continue your saved session before starting another problem."
+                    : primaryTask!.reason}
+                </p>
+                <p className="font-mono text-[11px] text-subtle mt-4">
+                  {focusedProblem?.category}
+                  <span className="mx-2 text-line-strong">/</span>
+                  {focusedProblem?.difficulty}
+                  {primaryTask && (
+                    <>
+                      <span className="mx-2 text-line-strong">/</span>
+                      {primaryTask.minutes} min
+                    </>
+                  )}
+                </p>
+                <div className="study-next-action">
+                  {activeProblemId ? (
+                    <Link
+                      to={
+                        activeSession
+                          ? `/timer/${activeProblemId}`
+                          : `/recall/${activeProblemId}`
+                      }
+                      className="brand-button-primary ui-button inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium"
+                    >
+                      <Play size={14} />
+                      Resume session
+                    </Link>
+                  ) : (
+                    <>
+                      <Button
+                        variant="primary"
+                        onClick={() => start(primaryTask!)}
+                      >
+                        {primaryTask?.kind === "recall"
+                          ? "Start recall check"
+                          : "Start practice block"}
+                        <ArrowRight size={14} />
+                      </Button>
+                      <button
+                        onClick={() =>
+                          setExcludedIds((ids) => [
+                            ...ids,
+                            primaryTask!.problemId,
+                          ])
+                        }
+                        aria-label={
+                          primaryTask?.kind === "recall"
+                            ? `Swap ${focusedProblem?.title} today`
+                            : undefined
+                        }
+                        className="quiet-action text-subtle"
+                      >
+                        {primaryTask?.kind === "recall"
+                          ? "Swap today"
+                          : "Choose another"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </section>
             )}
-            {plan.syntaxCards.length > 0 && (
-              <Link className="block text-xs text-muted hover:text-foreground pt-3 border-t border-line" to="/syntax">
-                Optional syntax practice · 3 min
-              </Link>
+            {plan.isBlackout || plan.isRestDay ? (
+              <section className="empty-register">
+                <p className="register-label mb-3">Schedule / pause</p>
+                <h2 className="text-2xl font-medium tracking-tight">
+                  {plan.isBlackout ? "Scheduled break" : "Rest day"}
+                </h2>
+                <p className="text-sm text-muted mt-3">
+                  No assignments today. Your study queue will wait for your next
+                  study day.
+                </p>
+              </section>
+            ) : plan.remainingMinutes === 0 ? (
+              <section className="empty-register">
+                <CircleCheck size={22} className="text-success mb-3" />
+                <h2 className="text-xl font-medium">
+                  Your time target is complete
+                </h2>
+                <p className="text-sm text-muted mt-2">
+                  You’ve used today’s study budget. Pick up the plan tomorrow.
+                </p>
+              </section>
+            ) : (
+              <>
+                {plan.recallTasks
+                  .filter(
+                    (task) =>
+                      activeProblemId ||
+                      task.problemId !== primaryTask?.problemId ||
+                      primaryTask.kind !== "recall",
+                  )
+                  .map((task, index) => (
+                    <section
+                      key={task.problemId}
+                      className="study-step recall-plan-step"
+                    >
+                      <TraceIndex>
+                        {String(index + 2).padStart(2, "0")}
+                      </TraceIndex>
+                      <div className="study-task-row">
+                        <div className="min-w-0">
+                          <p className="register-label mb-2">
+                            Recall check / {task.minutes} min
+                          </p>
+                          <h3 className="text-lg font-medium tracking-tight">
+                            {problemMap[task.problemId].title}
+                          </h3>
+                          <p className="text-xs text-muted mt-2 leading-relaxed">
+                            {task.reason}
+                          </p>
+                        </div>
+                        <div className="study-task-actions">
+                          <button
+                            onClick={() => start(task)}
+                            className="quiet-action"
+                          >
+                            Start recall check <ArrowUpRight size={13} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setExcludedIds((ids) => [...ids, task.problemId])
+                            }
+                            aria-label={`Swap ${problemMap[task.problemId].title} today`}
+                            className="quiet-action text-subtle"
+                          >
+                            Swap today
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+                  ))}
+                {(activeProblemId ||
+                  primaryTask?.kind === "recall" ||
+                  !primaryTask) && (
+                  <section className="study-step practice-plan-step">
+                    <TraceIndex>
+                      {String(plan.recallTasks.length + 1).padStart(2, "0")}
+                    </TraceIndex>
+                    <h3 className="register-label">Main practice block</h3>
+                    {plan.mainTask ? (
+                      <>
+                        <h4 className="practice-plan-title">
+                          {problemMap[plan.mainTask.problemId].title}
+                        </h4>
+                        <p className="text-xs text-muted leading-relaxed mt-2 max-w-lg">
+                          {plan.mainTask.reason}
+                        </p>
+                        <p className="font-mono text-[11px] text-subtle mt-3">
+                          {plan.mainTask.minutes} min coding block
+                          {plan.mainTask.minutes <
+                          plan.mainTask.estimatedMinutes
+                            ? ` · about ${plan.mainTask.estimatedMinutes} min for a full attempt`
+                            : ""}
+                        </p>
+                        <div className="flex flex-wrap gap-5 mt-3">
+                          <button
+                            onClick={() => start(plan.mainTask!)}
+                            className="quiet-action"
+                          >
+                            Start practice block <ArrowUpRight size={13} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setExcludedIds((ids) => [
+                                ...ids,
+                                plan.mainTask!.problemId,
+                              ])
+                            }
+                            className="quiet-action text-subtle"
+                          >
+                            Choose another
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted mt-3">
+                        No additional coding assignment fits. Revisit a pattern
+                        lesson in your remaining time.
+                      </p>
+                    )}
+                  </section>
+                )}
+                <div className="plan-endnote">
+                  <span className="plan-end-mark" aria-hidden="true" />
+                  <p className="text-[11px] text-subtle leading-relaxed">
+                    {plan.eligibleRecallCount} eligible in your queue. Only what
+                    fits is selected; you don’t need to clear the queue today.
+                  </p>
+                  {plan.syntaxCards.length > 0 && (
+                    <Link to="/syntax" className="quiet-action mt-2">
+                      Optional syntax practice · 3 min{" "}
+                      <ArrowUpRight size={13} />
+                    </Link>
+                  )}
+                </div>
+              </>
             )}
           </section>
-        </section>
-      )}
-      <section aria-label="Learning evidence" className="border-t border-line pt-5 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-foreground">Learning evidence</h2>
-          <Link to="/analytics" className="text-xs text-muted hover:text-foreground underline underline-offset-4">View details</Link>
         </div>
-        <div className="grid sm:grid-cols-3 gap-5">
-          <div className="space-y-1">
-            <p className="text-lg font-semibold text-body tabular-nums">{evidence.covered}/{evidence.total}</p>
+        <aside className="study-rail">
+          <section
+            className="rail-section time-budget"
+            aria-label="Daily time budget"
+          >
+            {budget}
+            <Link
+              to="/settings#section-schedule"
+              className="quiet-action mt-3 text-subtle"
+            >
+              Edit schedule <ArrowUpRight size={12} />
+            </Link>
+          </section>
+          <section className="rail-section" aria-label="Learning evidence">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <h2 className="register-label">Evidence register</h2>
+              <Link
+                to="/analytics"
+                aria-label="View learning evidence details"
+                className="quiet-action"
+              >
+                <ArrowUpRight size={14} />
+              </Link>
+            </div>
+            <div className="evidence-row">
+              <span className="register-value">
+                {evidence.covered}
+                <span className="text-xs text-subtle">/{evidence.total}</span>
+              </span>
+              <span className="text-xs text-muted leading-relaxed">
+                Patterns encountered in{" "}
+                {TARGET_CURRICULUM_LABELS[settings.targetCurriculum]}
+              </span>
+            </div>
+            <div className="evidence-row">
+              <span className="register-value">{evidence.dependable}</span>
+              <span className="text-xs text-muted leading-relaxed">
+                Problems with independent passes at least 7 days apart
+              </span>
+            </div>
+            <div className="evidence-row">
+              <span className="register-value">{evidence.assess}</span>
+              <span className="text-xs text-muted leading-relaxed">
+                Problems awaiting an assessment
+              </span>
+            </div>
+          </section>
+          <section className="rail-section">
+            <h2 className="register-label mb-3">Study rhythm</h2>
             <p className="text-xs text-muted leading-relaxed">
-              Patterns encountered in {TARGET_CURRICULUM_LABELS[settings.targetCurriculum]}
+              Recall, implement, revisit. Brief retrieval stays within about 30%
+              of your budget, protecting time for new learning.
             </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-lg font-semibold text-body tabular-nums">{evidence.dependable}</p>
-            <p className="text-xs text-muted leading-relaxed">Problems with independent passes at least 7 days apart</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-lg font-semibold text-body tabular-nums">{evidence.assess}</p>
-            <p className="text-xs text-muted leading-relaxed">Problems awaiting an assessment</p>
-          </div>
-        </div>
-      </section>
-      <details className="border-t border-line pt-4 text-sm">
-        <summary className="cursor-pointer text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md">Your study rhythm</summary>
-        <div className="pt-3 space-y-3">
-          <p className="text-sm text-muted leading-relaxed">
-            Brief retrieval stays within about 30% of your daily budget. Learning
-            days alternate with implementation checks. Unfinished attempts get a
-            continuation block, and an upcoming interview shifts practice toward
-            cold implementation.
-          </p>
-          <p className="text-xs text-subtle leading-relaxed">
-            {streak.current} day activity streak · Confidence and recorded
-            outcomes are self-reports, not an interview pass prediction.
-          </p>
-          <div className="flex flex-wrap gap-4 text-xs text-muted">
-            <Link to="/analytics" className="underline underline-offset-4 hover:text-foreground">See learning evidence</Link>
-            <Link to="/patterns" className="underline underline-offset-4 hover:text-foreground">Explore pattern lessons</Link>
-            <Link to="/library" className="underline underline-offset-4 hover:text-foreground">Open problem library</Link>
-          </div>
-        </div>
-      </details>
+            <p className="text-[11px] text-subtle mt-3">
+              {streak.current} day activity streak
+            </p>
+            <Link to="/patterns" className="quiet-action mt-3">
+              Explore pattern lessons <ArrowUpRight size={13} />
+            </Link>
+            <p className="text-[10px] text-subtle leading-relaxed mt-4">
+              Confidence and outcomes are self-reports, not an interview pass
+              prediction.
+            </p>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

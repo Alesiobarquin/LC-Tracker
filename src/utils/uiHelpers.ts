@@ -6,7 +6,7 @@ export { cn };
 export function getDifficultyColor(difficulty: Difficulty): string {
   switch (difficulty) {
     case 'Easy':
-      return 'text-accent';
+      return 'text-success';
     case 'Medium':
       return 'text-warning';
     case 'Hard':
@@ -46,7 +46,7 @@ export function getProblemStatusLabel(tone: ProblemStatusTone): string {
 export function getProblemStatusClass(tone: ProblemStatusTone): string {
   switch (tone) {
     case 'retired':
-      return 'text-accent';
+      return 'text-success';
     case 'solved':
       return 'text-warning';
     case 'needsWork':

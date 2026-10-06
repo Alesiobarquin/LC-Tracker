@@ -4,9 +4,9 @@ import { BRAND } from '../constants/brand';
 
 export function PublicHeader({ fixed = false, showSignIn = true }: { fixed?: boolean; showSignIn?: boolean }) {
   return (
-    <header className={`${fixed ? 'fixed' : 'sticky'} top-0 inset-x-0 z-50 border-b border-line bg-canvas/95`}>
-      <nav aria-label="Site" className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
-        <a href="/" className="flex shrink-0 items-center gap-2 font-semibold text-foreground">
+    <header className={`${fixed ? 'fixed' : 'sticky'} top-0 inset-x-0 z-50 border-b border-line bg-canvas`}>
+      <nav aria-label="Site" className="mx-auto flex h-16 max-w-[76rem] items-center justify-between gap-2 px-5 sm:px-8">
+        <a href="/" className="workspace-wordmark">
           <Logo className="text-accent" size={20} />
           <span>{BRAND.name}</span>
         </a>

@@ -23,7 +23,7 @@ export function applyColorTheme(preference: ThemePreference, theme: ColorTheme):
   root.dataset.theme = theme;
   root.dataset.themePreference = preference;
   root.style.colorScheme = theme;
-  const canvas = theme === 'dark' ? '#0e1419' : '#f6f8fa';
+  const canvas = theme === 'dark' ? '#191b19' : '#f5f3ee';
   root.style.backgroundColor = `var(--palette-canvas, ${canvas})`;
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', canvas);
 }

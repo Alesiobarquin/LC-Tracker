@@ -10,16 +10,16 @@ export function Logo({ className = '', size = 32, ...props }: LogoProps) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 100 100"
+      viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       {...props}
     >
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 84L29 50L37 58L50 18L61 42L69 34L90 84Z" strokeWidth="3.9" opacity="0.96" />
-        <path d="M20 84L33 61L39 67L50 40L58 54L65 48L80 84Z" strokeWidth="3" opacity="0.72" />
-      </g>
+      <path d="M9 5H5v22h4M23 5h4v22h-4" stroke="currentColor" strokeWidth="2" />
+      <path d="M10 21h5V11h7" stroke="currentColor" strokeWidth="2" />
+      <path d="M10 26h10V16h2" stroke="currentColor" strokeWidth="1.5" opacity=".45" />
+      <rect x="19" y="8" width="5" height="5" fill="currentColor" />
 
     </svg>
   );

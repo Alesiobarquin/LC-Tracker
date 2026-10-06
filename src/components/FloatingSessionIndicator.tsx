@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { allProblems, problemMap } from '../data/problems';
+import { problemMap } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
 
 interface FloatingSessionIndicatorProps {}
@@ -55,7 +55,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
     const isPaused = activeSession.pausedAt != null;
 
     return (
-        <div className="fixed bottom-24 md:bottom-5 right-4 md:right-5 z-50 select-none">
+        <div className="fixed bottom-20 lg:bottom-5 right-4 lg:right-5 z-50 select-none">
             <div className="relative">
                 <div
                     className="relative bg-surface border border-line-strong rounded-lg px-4 py-3 flex flex-col gap-2 min-w-[220px] max-w-[280px]"
@@ -75,11 +75,11 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
 
                 {/* Session type badge */}
                 <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${activeSession.isColdSolve
-                            ? 'bg-accent/10 text-accent border-accent/20'
+                    <span className={`text-[10px] font-mono ${activeSession.isColdSolve
+                            ? 'text-body'
                             : activeSession.isReview
-                                ? 'bg-warning/10 text-warning border-warning/20'
-                                : 'bg-accent/10 text-accent border-accent/20'
+                                ? 'text-body'
+                                : 'text-body'
                         }`}>
                         {activeSession.isColdSolve ? 'Cold Solve' : activeSession.isReview ? 'Review' : 'New Problem'}
                     </span>

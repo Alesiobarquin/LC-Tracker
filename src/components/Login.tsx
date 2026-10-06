@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-react';
+import { useSignIn } from '@clerk/react/legacy';
 import { motion } from 'motion/react';
 import { FloatingContextBadges, MagnetCanvas, NoiseOverlay } from './LandingPage';
 import { Logo } from './Logo';

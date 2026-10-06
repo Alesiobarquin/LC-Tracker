@@ -7,35 +7,36 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing. Check your environment variables.');
 }
 
-/** Fetches the Clerk session token with a timeout to avoid hanging on init. */
+/** Token failures must surface as errors, never as anonymous successful reads. */
 async function getClerkToken(timeoutMs = 3000): Promise<string | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    // @ts-ignore - Clerk injects itself onto the window object
-    const clerk = window.Clerk;
+    const clerk = (window as Window & {
+      Clerk?: { session?: { getToken: () => Promise<string | null> } };
+    }).Clerk;
     if (!clerk?.session) return null;
 
-    return await Promise.race([
-      clerk.session.getToken() as Promise<string | null>,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+    const token = await Promise.race([
+      clerk.session.getToken(),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error('Sign-in token timed out. Please retry.')), timeoutMs);
+      }),
     ]);
-  } catch {
-    return null;
+    if (!token) throw new Error('Sign-in session expired. Please sign in again.');
+    return token;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
 export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
+  // Supplies Clerk JWTs to REST, Storage, and Realtime through the SDK.
+  accessToken: getClerkToken,
   global: {
     fetch: async (url, options: RequestInit = {}) => {
-      // Third-Party Auth (JWKS): use the standard Clerk JWT.
-      const clerkToken = await getClerkToken();
-
-      // Build Headers safely
-      const headers = new Headers(options?.headers);
-      if (clerkToken) {
-        headers.set('Authorization', `Bearer ${clerkToken}`);
-      }
-
-      return fetch(url, { ...options, headers });
+      const timeout = AbortSignal.timeout(15_000);
+      const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
+      return fetch(url, { ...options, signal });
     },
   },
 });

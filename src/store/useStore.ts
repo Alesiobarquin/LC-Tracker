@@ -1,8 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ActiveSession } from '../types';
+import { safeUUID } from '../utils/uuid';
+import { timerStorage } from '../lib/safeStorage';
 
 interface UIState {
+  sessionUserId: string | null;
+  setSessionUser: (userId: string | null) => void;
   activeSession: ActiveSession | null;
   activeTab: string;
   sessionReturnTo: string | null;
@@ -26,23 +30,38 @@ function isValidActiveSession(value: unknown): value is ActiveSession {
   const session = value as Partial<ActiveSession>;
   return (
     typeof session.problemId === 'string' &&
-    typeof session.startTimestamp === 'number' &&
+    typeof session.startTimestamp === 'number' && Number.isFinite(session.startTimestamp) &&
     typeof session.isReview === 'boolean' &&
     typeof session.isColdSolve === 'boolean' &&
-    (session.pausedSeconds === undefined || typeof session.pausedSeconds === 'number') &&
-    (session.pausedAt === undefined || session.pausedAt === null || typeof session.pausedAt === 'number')
+    (session.pausedSeconds === undefined || (Number.isFinite(session.pausedSeconds) && session.pausedSeconds >= 0)) &&
+    (session.pausedAt === undefined || session.pausedAt === null || Number.isFinite(session.pausedAt)) &&
+    (session.finishedElapsed === undefined || (Number.isFinite(session.finishedElapsed) && session.finishedElapsed >= 0)) &&
+    (session.draftNotes === undefined || typeof session.draftNotes === 'string') &&
+    (!session.completion || (session.completion.timing?.id === session.id &&
+      session.completion.timing.problemId === session.problemId &&
+      Number.isFinite(session.completion.timing.elapsedSeconds) && session.completion.timing.elapsedSeconds >= 0 &&
+      session.completion.rating >= 1 && session.completion.rating <= 5))
   );
 }
 
 export const useStore = create<UIState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      sessionUserId: null,
+      setSessionUser: (userId) => set((state) => ({
+        sessionUserId: userId,
+        activeSession: !userId || (state.activeSession?.userId && state.activeSession.userId !== userId)
+          ? null : state.activeSession ? { ...state.activeSession, userId } : null,
+        sessionReturnTo: !userId ? null : state.sessionReturnTo,
+      })),
       activeSession: null,
       activeTab: 'dashboard',
       sessionReturnTo: null,
       startSession: (problemId, isReview, isColdSolve = false, startTimestamp = Date.now(), returnTo = null) =>
         set({
           activeSession: {
+            id: safeUUID(),
+            userId: get().sessionUserId ?? undefined,
             problemId,
             startTimestamp,
             isReview,
@@ -79,7 +98,7 @@ export const useStore = create<UIState>()(
     }),
     {
       name: 'lc-tracker-active-session',
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => timerStorage),
       partialize: (state) => ({
         activeSession: state.activeSession,
         sessionReturnTo: state.sessionReturnTo,
@@ -88,8 +107,8 @@ export const useStore = create<UIState>()(
         const incoming = (persisted ?? {}) as Partial<UIState>;
         return {
           ...current,
-          ...incoming,
-          activeSession: isValidActiveSession(incoming.activeSession) ? incoming.activeSession : null,
+          activeSession: isValidActiveSession(incoming.activeSession)
+            ? { ...incoming.activeSession, id: incoming.activeSession.id || safeUUID() } : null,
           sessionReturnTo:
             typeof incoming.sessionReturnTo === 'string' || incoming.sessionReturnTo === null
               ? incoming.sessionReturnTo ?? null

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   problems,
   allProblems,
@@ -28,7 +28,7 @@ import {
 } from '../hooks/useUserData';
 import { calculateSessionAggregates } from '../utils/progressHelpers';
 import type { SessionTiming } from '../types';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { AnalyticsSkeleton } from './loadingSkeletons';
 
 const fmtSeconds = (s: number): string => {
@@ -50,10 +50,12 @@ export const Analytics: React.FC = () => {
   const { settings, targetInterviewDate } = useUserSettings();
 
   const [olderTimings, setOlderTimings] = useState<SessionTiming[]>([]);
-  const [olderCursor, setOlderCursor] = useState<string | null>(null);
+  const [olderCursor, setOlderCursor] = useState<{ date: string; id?: string } | null>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasMoreOlder, setHasMoreOlder] = useState(true);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const historyOwner = useRef(user?.id);
+  historyOwner.current = user?.id;
   const [viewingSession, setViewingSession] = useState<any>(null);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [analyticsTab, setAnalyticsTab] = useState<'overview' | 'sessions' | 'plan'>('overview');
@@ -62,6 +64,8 @@ export const Analytics: React.FC = () => {
     setOlderTimings([]);
     setOlderCursor(null);
     setHasMoreOlder(true);
+    setLoadingOlder(false);
+    setLoadMoreError(null);
   }, [user?.id]);
 
   const combinedTimings = useMemo(() => {
@@ -81,22 +85,23 @@ export const Analytics: React.FC = () => {
   const handleLoadMoreTimings = useCallback(async () => {
     if (!user?.id || loadingOlder || !hasMoreOlder) return;
     setLoadingOlder(true);
+    const owner = user.id;
     setLoadMoreError(null);
     try {
-      const cursor = olderCursor ?? getSessionTimingsWindowStartIso();
+      const cursor = olderCursor ?? { date: getSessionTimingsWindowStartIso() };
       const batch = await fetchSessionTimingsBefore(user.id, cursor, 500);
+      if (historyOwner.current !== owner) return;
       if (batch.length === 0) {
         setHasMoreOlder(false);
       } else {
         setOlderTimings((prev) => [...prev, ...batch]);
-        setOlderCursor(batch[batch.length - 1].date);
-        if (batch.length < 500) setHasMoreOlder(false);
+        setOlderCursor({ date: batch[batch.length - 1].date, id: batch[batch.length - 1].id });
       }
     } catch (e) {
-      console.error(e);
+      if (historyOwner.current !== owner) return;
       setLoadMoreError('Could not load older sessions. Check your connection and try again.');
     } finally {
-      setLoadingOlder(false);
+      if (historyOwner.current === owner) setLoadingOlder(false);
     }
   }, [user?.id, loadingOlder, hasMoreOlder, olderCursor]);
 

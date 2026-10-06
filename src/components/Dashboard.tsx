@@ -106,7 +106,7 @@ export const Dashboard: React.FC = () => {
   const startSession = useStore((state) => state.startSession);
   const { categoryAvgSolveTimes, categoryAvgReviewTimes, sessionTimings, lastCategoryAvgUpdate } = useSessionTimings();
 
-  const { sprintState, sprintHistory, recordSprintRetro, setSprintCategory, updateSprintState } = useSprintState();
+  const { sprintState, sprintHistory, setSprintCategory, updateSprintState } = useSprintState();
   const { syntaxProgress } = useSyntaxProgress();
 
   const {
@@ -729,15 +729,10 @@ export const Dashboard: React.FC = () => {
                       <div className="flex gap-2">
                         <button onClick={() => {
                           if (newProblemData) void logProblem(newProblemData.id, 4, !progress[newProblemData.id], "Sprint Passed via Dashboard");
-                          void recordSprintRetro(true, 4);
                           setRetroCompleted(false);
                         }} className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-semibold rounded-lg border border-emerald-500/20 transition-colors">✓ Passed (4+)</button>
                         <button onClick={() => {
                           if (newProblemData) void logProblem(newProblemData.id, 1, !progress[newProblemData.id], "Sprint Struggled via Dashboard");
-                          void updateSprintState({
-                            extensionDays: (sprintState?.extensionDays ?? 0) + 2,
-                            retroAttempted: true,
-                          });
                           setRetroCompleted(false);
                         }} className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg border border-red-500/20 transition-colors">✗ Struggled (1)</button>
                       </div>
@@ -1028,8 +1023,8 @@ export const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center text-xs text-zinc-400 mb-1">
                     <span>Day {sprintDayInfo.day} of {sprintDayInfo.total}</span>
                     <div className="flex items-center gap-2">
-                       <button aria-label="Decrease Sprint Length" onClick={() => void updateSprintState({ extensionDays: Math.max(0, (sprintState?.extensionDays ?? 0) - 1) })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Decrease Sprint Length">-1d</button>
-                       <button aria-label="Increase Sprint Length" onClick={() => void updateSprintState({ extensionDays: (sprintState?.extensionDays ?? 0) + 1 })} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Increase Sprint Length">+1d</button>
+                       <button aria-label="Decrease Sprint Length" onClick={() => void updateSprintState((state) => ({ extensionDays: Math.max(0, state.extensionDays - 1) }))} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Decrease Sprint Length">-1d</button>
+                       <button aria-label="Increase Sprint Length" onClick={() => void updateSprintState((state) => ({ extensionDays: state.extensionDays + 1 }))} className="hover:text-emerald-400 transition-colors px-1 border border-zinc-700 rounded bg-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none" title="Increase Sprint Length">+1d</button>
                        <span className="ml-1 w-6 text-right">{Math.round((sprintDayInfo.day / sprintDayInfo.total) * 100)}%</span>
                     </div>
                   </div>

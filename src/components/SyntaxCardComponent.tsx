@@ -3,7 +3,7 @@ import { SyntaxCard } from '../data/syntaxCards';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useSyntaxProgress } from '../hooks/useUserData';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { SyntaxHighlightedCode } from './SyntaxHighlightedCode';
 

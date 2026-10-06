@@ -1,3 +1,4 @@
+import { preferenceStorage } from '../lib/safeStorage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyntaxCard } from '../data/syntaxCards';
 import { X, Clock, Keyboard, Trophy, RotateCcw, HelpCircle, ArrowRight, ArrowLeft, Check, BookOpen, Shuffle, Layers } from 'lucide-react';
@@ -180,7 +181,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
     useEffect(() => {
         try {
-            localStorage.setItem('syntax-session-order', orderMode);
+            preferenceStorage.setItem('syntax-session-order', orderMode);
         } catch {
             /* ignore */
         }

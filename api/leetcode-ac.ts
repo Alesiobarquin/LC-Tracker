@@ -1,5 +1,7 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { fetchRecentAcSubmissionsFromLeetCode } from '../server/leetcodeAc';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+type VercelRequest = IncomingMessage & { query: Record<string, string | string[] | undefined> };
+type VercelResponse = ServerResponse & { status: (code: number) => VercelResponse; json: (body: unknown) => void };
+import { fetchRecentAcSubmissionsFromLeetCode } from '../server/leetcodeAc.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');
@@ -10,6 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET, OPTIONS');
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
@@ -27,6 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { submissions } = await fetchRecentAcSubmissionsFromLeetCode(username, limit);
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     res.status(200).json({ submissions });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch LeetCode submissions';

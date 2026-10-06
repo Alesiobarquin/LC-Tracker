@@ -29,15 +29,16 @@ export async function fetchRecentAcSubmissionsFromLeetCode(
   }>;
 }> {
   const cleaned = username.trim().replace(/^@/, '');
-  if (!cleaned) {
+  if (!cleaned || cleaned.length > 100) {
     const error = new Error('Enter a LeetCode username');
     (error as Error & { statusCode: number }).statusCode = 400;
     throw error;
   }
 
-  const clampedLimit = Math.min(Math.max(limit, 1), 50);
+  const clampedLimit = Number.isFinite(limit) ? Math.min(Math.max(Math.trunc(limit), 1), 50) : 50;
   const response = await fetch('https://leetcode.com/graphql', {
     method: 'POST',
+    signal: AbortSignal.timeout(8_000),
     headers: {
       'Content-Type': 'application/json',
       Referer: 'https://leetcode.com',
@@ -61,7 +62,7 @@ export async function fetchRecentAcSubmissionsFromLeetCode(
   if (payload?.errors?.length) {
     const message = String(payload.errors[0]?.message || 'LeetCode GraphQL error');
     const error = new Error(message);
-    (error as Error & { statusCode: number }).statusCode = /not found|user/i.test(message)
+    (error as Error & { statusCode: number }).statusCode = /not found|does not exist/i.test(message)
       ? 404
       : 502;
     throw error;

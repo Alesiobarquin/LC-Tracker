@@ -7,7 +7,7 @@ import { clsx } from 'clsx';
 import { useProblemProgress, useSessionTimings } from '../hooks/useUserData';
 import { getDifficultyColor } from '../utils/uiHelpers';
 import { MAX_BACKDATE_HOURS, validateStartTimestamp } from '../utils/dateUtils';
-import { safeUUID } from '../utils/uuid';
+import { canPersistTimer } from '../lib/safeStorage';
 
 interface TimerProps {
   problem: Problem;
@@ -50,10 +50,10 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const updateActiveSession = useStore((state) => state.updateActiveSession);
   const endSession = useStore((state) => state.endSession);
   const abandonSession = useStore((state) => state.abandonSession);
-  const { progress, logProblem } = useProblemProgress();
-  const { personalBestTimes, recordSession } = useSessionTimings();
+  const { progress, saveSession } = useProblemProgress();
+  const { personalBestTimes } = useSessionTimings();
 
-  const [notes, setNotes] = useState(progress[problem.id]?.notes || '');
+  const [notes, setNotes] = useState(activeSession?.draftNotes ?? progress[problem.id]?.notes ?? '');
   const [phase, setPhase] = useState<'idle' | 'running' | 'rating'>('idle');
   const [elapsed, setElapsed] = useState(0);
   const [frozenElapsed, setFrozenElapsed] = useState(0);
@@ -66,6 +66,12 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
+  const notesEdited = useRef(activeSession?.draftNotes !== undefined);
+  const [storageAvailable] = useState(canPersistTimer);
+  useEffect(() => {
+    if (!notesEdited.current && !activeSession?.completion) setNotes(progress[problem.id]?.notes ?? '');
+  }, [progress[problem.id]?.notes]);
   // Total seconds that the timer was paused — subtracted from elapsed so only work time counts.
   const pausedSecondsRef = useRef(0);
   const pausedAtRef = useRef<number | null>(null);
@@ -73,6 +79,17 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
   // If there's already an active session for this problem, pick it up (including pause state)
   useEffect(() => {
     if (activeSession && activeSession.problemId === problem.id) {
+      if (activeSession.completion) {
+        setFrozenElapsed(activeSession.completion.timing.elapsedSeconds);
+        setNotes(activeSession.completion.notes ?? progress[problem.id]?.notes ?? '');
+        setPhase('rating');
+        return;
+      }
+      if (activeSession.finishedElapsed !== undefined) {
+        setFrozenElapsed(activeSession.finishedElapsed);
+        setPhase('rating');
+        return;
+      }
       pausedSecondsRef.current = activeSession.pausedSeconds ?? 0;
       pausedAtRef.current = activeSession.pausedAt ?? null;
       setIsPaused(activeSession.pausedAt != null);
@@ -191,12 +208,14 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
 
     pausedAtRef.current = null;
     setIsPaused(false);
-    updateActiveSession({ pausedSeconds: pausedSecondsRef.current, pausedAt: null });
+    updateActiveSession({ pausedSeconds: pausedSecondsRef.current, pausedAt: null, finishedElapsed: finalElapsed });
     setPhase('rating');
   };
 
   const handleRating = async (rating: ProblemSessionRating) => {
-    if (isSubmitting) return;
+    if (submittingRef.current || !activeSession) return;
+    if (activeSession.completion && activeSession.completion.rating !== rating) return;
+    submittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -208,34 +227,36 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
         ? 'review'
         : 'new';
 
-    const results = await Promise.allSettled([
-      recordSession({
-        id: safeUUID(),
+    const completion = activeSession.completion ?? {
+      timing: {
+        id: activeSession.id,
         problemId: problem.id,
         category: problem.category,
         date: new Date().toISOString(),
         elapsedSeconds: frozenElapsed,
         sessionType,
         rating,
-      }),
-      logProblem(problem.id, rating, isNew, notes, {
-        elapsedSeconds: frozenElapsed,
-        sessionType,
-      }),
-    ]);
-
-    setIsSubmitting(false);
-
-    const rejected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
-    if (rejected.length > 0) {
-      const errorMsg = rejected.map((r) => r.reason?.message || String(r.reason)).join('; ');
-      console.error('Failed to save session:', errorMsg, rejected);
-      setSubmitError(`Failed to save session: ${errorMsg}. Your timer is still here — try rating again.`);
-      return;
+      }, rating, notes: notesEdited.current ? notes : undefined,
+    };
+    // Persist the exact attempted completion before sending. Retries after an
+    // ambiguous timeout or a page reload retain both the operation ID and payload.
+    updateActiveSession({ completion });
+    try {
+      await saveSession({
+        operationId: completion.timing.id, problemId: problem.id,
+        rating: completion.rating, notes: completion.notes, timing: completion.timing,
+        additionalData: { elapsedSeconds: completion.timing.elapsedSeconds, sessionType: completion.timing.sessionType },
+      });
+      if (useStore.getState().activeSession?.id === completion.timing.id) {
+        endSession();
+        onComplete();
+      }
+    } catch {
+      setSubmitError('Could not confirm your save. Your session is preserved. Retry to save it once.');
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
     }
-
-    endSession();
-    onComplete();
   };
 
   useEffect(() => {
@@ -316,6 +337,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             <CircleCheck size={28} className="text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-zinc-50 mb-1">Session Complete</h2>
+          {!storageAvailable && <p role="alert" className="text-amber-300 text-sm mb-3">Your browser cannot preserve this timer after reload. Keep this tab open until saving finishes.</p>}
           <p className="text-zinc-400 mb-2 text-sm">
             Rate how you’d perform on <strong className="text-zinc-200">{problem.title}</strong> if you saw it again soon — not whether the code compiled once.
           </p>
@@ -333,7 +355,8 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
             )}
             <textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => { notesEdited.current = true; setNotes(e.target.value); updateActiveSession({ draftNotes: e.target.value }); }}
+              disabled={isSubmitting || !!activeSession?.completion}
               placeholder="Jot down the key trick or pattern for this problem..."
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-20 text-sm"
             />
@@ -359,7 +382,7 @@ export const Timer: React.FC<TimerProps> = ({ problem, isNew, isColdSolve, onCom
               <button
                 key={r}
                 type="button"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (!!activeSession?.completion && activeSession.completion.rating !== r)}
                 onClick={() => handleRating(r)}
                 className={clsx(
                   'w-full border p-3 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 text-left transition-colors group cursor-pointer',

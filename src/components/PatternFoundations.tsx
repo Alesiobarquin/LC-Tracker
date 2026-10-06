@@ -1,9 +1,10 @@
+import { preferenceStorage } from '../lib/safeStorage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import {
   ArrowRight,
   CheckCircle2,
@@ -121,7 +122,7 @@ const PatternList: React.FC<{
 }> = ({ patternData, isLoading, error, onRetry }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    const saved = localStorage.getItem('patternViewMode');
+    const saved = preferenceStorage.getItem('patternViewMode');
     if (saved === 'extensive' || saved === 'complete') return 'complete';
     return 'essential';
   });
@@ -129,7 +130,7 @@ const PatternList: React.FC<{
   const [statusFilter, setStatusFilter] = useState<'all' | 'next' | 'due' | 'mastered'>('all');
 
   useEffect(() => {
-    localStorage.setItem('patternViewMode', viewMode === 'essential' ? 'core' : 'complete');
+    preferenceStorage.setItem('patternViewMode', viewMode === 'essential' ? 'core' : 'complete');
   }, [viewMode]);
 
   const visiblePatternData = useMemo(() => {

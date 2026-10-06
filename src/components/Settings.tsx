@@ -35,6 +35,7 @@ export const Settings: React.FC = () => {
         lastSyncCount,
         syncError,
         restoreBackup,
+        exportBackup,
     } = useUserSettings();
     const { sprintState, sprintHistory, setSprintCategory } = useSprintState();
     const { progress } = useProblemProgress();
@@ -107,42 +108,35 @@ export const Settings: React.FC = () => {
         updateSettings({ studySchedule: { ...settings.studySchedule, blackoutDates: newDates } });
     };
 
-    const handleExportData = () => {
-        const blob = new Blob([JSON.stringify({
-            userSettings,
-            progress,
-            activityLog,
-            sessionTimings,
-            sprintState,
-            sprintHistory,
-        }, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const dateTag = new Date().toISOString().split('T')[0];
-        a.href = url;
-        a.download = `lc-tracker-backup-${dateTag}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+    const [isExporting, setIsExporting] = useState(false);
+    const handleExportData = async () => {
+        setIsExporting(true);
+        setImportMessage('');
+        try {
+            const backup = await exportBackup();
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lc-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            setImportStatus('error');
+            setImportMessage('Could not export your data. Please retry when your connection is restored.');
+        } finally { setIsExporting(false); }
     };
 
     const handleImportData = async (file: File) => {
         setImportStatus('loading');
         setImportMessage('');
         try {
+            if (file.size > 20 * 1024 * 1024) throw new Error('Backup files must be smaller than 20 MB.');
             const text = await file.text();
-            const parsed = JSON.parse(text) as {
-                userSettings?: UserSettingsData;
-                progress?: Record<string, ProblemProgress>;
-                activityLog?: ActivityLog;
-                sprintState?: SprintState | null;
-                sprintHistory?: SprintHistoryEntry[];
-            };
-            if (!parsed.userSettings && !parsed.progress && !parsed.activityLog && parsed.sprintState === undefined) {
-                throw new Error('This file does not look like an LC Tracker backup.');
-            }
+            const parsed: unknown = JSON.parse(text);
             await restoreBackup(parsed);
             setImportStatus('success');
-            setImportMessage('Backup restored. Your plan, progress, and activity were merged from the file.');
+            setImportMessage('Backup restored. Your settings, progress, activity, and session history were restored from the file.');
         } catch (error: unknown) {
             setImportStatus('error');
             setImportMessage(error instanceof Error ? error.message : 'Could not restore this backup.');
@@ -753,21 +747,22 @@ export const Settings: React.FC = () => {
                             Backup &amp; Restore
                         </h2>
                         <p className="text-sm text-zinc-400 mb-4">
-                            Export a JSON snapshot for portability, or restore settings, progress, activity, and sprint state from a previous backup.
+                            Export all your session history, settings, progress, and sprint state. Restoring a backup merges its records and replaces matching progress and settings.
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <button
                                 type="button"
-                                onClick={handleExportData}
+                                onClick={() => void handleExportData()}
+                                disabled={isExporting || importStatus === 'loading'}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl transition-all duration-200 text-sm font-medium"
                             >
                                 <Download size={16} />
-                                Export Data
+                                {isExporting ? 'Exporting…' : 'Export Data'}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => importInputRef.current?.click()}
-                                disabled={importStatus === 'loading'}
+                                disabled={isExporting || importStatus === 'loading'}
                                 className="flex items-center gap-2 px-5 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl transition-all duration-200 text-sm font-medium disabled:opacity-50"
                             >
                                 <Upload size={16} />

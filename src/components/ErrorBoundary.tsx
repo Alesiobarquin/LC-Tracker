@@ -1,5 +1,6 @@
 import React from 'react';
 import { Logo } from './Logo';
+import { reportOperationError } from '../lib/operationFeedback';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('UI crashed:', error, info.componentStack);
+    reportOperationError(error, 'render');
   }
 
   private handleReload = () => {

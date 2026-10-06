@@ -10,12 +10,13 @@ import { useUserSettings } from "../hooks/useUserData";
 import { TARGET_CURRICULUM_LABELS } from "../data/problems";
 import { PageHeader, QueryErrorBanner } from "./ui";
 import { StudyTimeTargets } from "./StudyTimeTargets";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import type { AppSettings } from "../types";
 
 const input =
-  "w-full rounded-xl border border-zinc-700 bg-zinc-950 p-3 text-zinc-100";
+  "w-full rounded-xl border border-line-strong bg-canvas p-3 text-foreground";
 const button =
-  "rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:border-emerald-500 disabled:opacity-40";
+  "rounded-xl border border-line-strong px-4 py-2 text-sm text-body hover:border-accent disabled:opacity-40";
 export function Settings() {
   const query = useUserSettings();
   const {
@@ -78,47 +79,56 @@ export function Settings() {
         description="Set a sustainable daily budget and choose the material you want to learn."
       />
       <nav
-        className="flex flex-wrap gap-4 text-sm text-emerald-400"
+        className="flex flex-wrap gap-4 text-sm text-accent"
         aria-label="Settings sections"
       >
-        {["strategy", "schedule", "targets", "leetcode", "backup"].map((id) => (
+        {["appearance", "strategy", "schedule", "targets", "leetcode", "backup"].map((id) => (
           <a key={id} href={`#section-${id}`}>
             {id[0].toUpperCase() + id.slice(1)}
           </a>
         ))}
       </nav>
       {error && (
-        <p role="alert" className="rounded-xl bg-red-500/10 p-4 text-red-300">
+        <p role="alert" className="rounded-xl bg-danger/10 p-4 text-danger">
           {error}
         </p>
       )}
       {message && (
         <p
           role="status"
-          className="rounded-xl bg-emerald-500/10 p-4 text-emerald-300"
+          className="rounded-xl bg-accent/10 p-4 text-accent"
         >
           {message}
         </p>
       )}
+      <section id="section-appearance" className="premium-card p-5 sm:p-6 scroll-mt-24">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Appearance</h2>
+            <p className="mt-1 text-sm text-muted">System follows your device. Your choice is remembered in this browser.</p>
+          </div>
+          <ThemeSwitcher />
+        </div>
+      </section>
       <fieldset
         disabled={!query.isSuccess || busy}
         className="space-y-7 disabled:opacity-60"
       >
         <section
           id="section-strategy"
-          className="premium-card p-6 space-y-5 scroll-mt-16"
+          className="premium-card p-5 sm:p-6 space-y-5 scroll-mt-24"
         >
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             Learning strategy
           </h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             All modes protect new learning, mix recall checks across patterns,
             and keep coding checks separate. Progress depends on recorded
             outcomes instead of completing every problem in one pattern. When
             your target list is covered, related unseen variations may come from
             the larger curated library.
           </p>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Target problem list
             <select
               className={`${input} mt-2`}
@@ -143,7 +153,7 @@ export function Settings() {
               )}
             </select>
           </label>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Learning order
             <select
               className={`${input} mt-2`}
@@ -169,7 +179,7 @@ export function Settings() {
               </option>
             </select>
           </label>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Practice language
             <select
               className={`${input} mt-2`}
@@ -189,7 +199,7 @@ export function Settings() {
               <option>JavaScript</option>
             </select>
           </label>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Future coding intervals
             <select
               className={`${input} mt-2`}
@@ -210,11 +220,11 @@ export function Settings() {
               <option value="AGGRESSIVE">Shorter spacing</option>
             </select>
           </label>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-subtle">
             Changes apply to future attempts. They do not rewrite previous
             results or create a batch of new due dates.
           </p>
-          <label className="flex items-start gap-3 text-sm text-zinc-300">
+          <label className="flex items-start gap-3 text-sm text-body">
             <input
               type="checkbox"
               checked={settings.includePremiumInAssignments}
@@ -233,9 +243,9 @@ export function Settings() {
         </section>
         <section
           id="section-schedule"
-          className="premium-card p-6 space-y-5 scroll-mt-16"
+          className="premium-card p-5 sm:p-6 space-y-5 scroll-mt-24"
         >
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             Daily schedule
           </h2>
           <StudyTimeTargets
@@ -243,12 +253,12 @@ export function Settings() {
             ready={query.isSuccess}
             onSave={updateSettings}
           />
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             About 30% of your budget is reserved for brief recall. The main
             block alternates learning with implementation checks. Recorded study
             time reduces the remaining budget.
           </p>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Weekly rest day
             <select
               aria-label="Weekly rest day"
@@ -284,11 +294,11 @@ export function Settings() {
             </select>
           </label>
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-zinc-200">
+            <h3 className="text-sm font-semibold text-body">
               Scheduled breaks
             </h3>
             <div className="grid sm:grid-cols-3 gap-3">
-              <label className="text-sm text-zinc-400">
+              <label className="text-sm text-muted">
                 Start
                 <input
                   aria-label="Break start"
@@ -298,7 +308,7 @@ export function Settings() {
                   onChange={(e) => setBlackoutStart(e.target.value)}
                 />
               </label>
-              <label className="text-sm text-zinc-400">
+              <label className="text-sm text-muted">
                 End
                 <input
                   aria-label="Break end"
@@ -335,7 +345,7 @@ export function Settings() {
             {settings.studySchedule.blackoutDates.map((range, index) => (
               <div
                 key={`${range.start}:${index}`}
-                className="flex gap-3 justify-between text-sm text-zinc-400"
+                className="flex gap-3 justify-between text-sm text-muted"
               >
                 <span>
                   {range.start} – {range.end}
@@ -366,17 +376,17 @@ export function Settings() {
         </section>
         <section
           id="section-targets"
-          className="premium-card p-6 space-y-5 scroll-mt-16"
+          className="premium-card p-5 sm:p-6 space-y-5 scroll-mt-24"
         >
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             Interview timeline
           </h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             An interview date is optional. Without one, the plan keeps building
             coverage. Within 30 days of an upcoming interview, main blocks
             prioritize independent implementation.
           </p>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             Next interview (optional)
             <input
               aria-label="Next interview"
@@ -412,7 +422,7 @@ export function Settings() {
             </button>
           </div>
           <details>
-            <summary className="text-sm text-emerald-400 cursor-pointer">
+            <summary className="text-sm text-accent cursor-pointer">
               Other recruiting dates
             </summary>
             <div className="space-y-3 mt-4">
@@ -450,7 +460,7 @@ export function Settings() {
               {targetEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex justify-between text-sm text-zinc-400"
+                  className="flex justify-between text-sm text-muted"
                 >
                   <span>
                     {event.title} · {event.date}
@@ -473,12 +483,12 @@ export function Settings() {
         </section>
         <section
           id="section-leetcode"
-          className="premium-card p-6 space-y-4 scroll-mt-16"
+          className="premium-card p-5 sm:p-6 space-y-4 scroll-mt-24"
         >
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             LeetCode integration
           </h2>
-          <label className="block text-sm text-zinc-300">
+          <label className="block text-sm text-body">
             LeetCode username
             <input
               aria-label="LeetCode username"
@@ -499,19 +509,19 @@ export function Settings() {
           >
             <RefreshCw size={15} className="inline mr-2" /> Save and sync
           </button>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-subtle">
             Imports preserve the original solve date and leave current
             confidence unknown. Existing study history is retained.
           </p>
         </section>
         <section
           id="section-backup"
-          className="premium-card p-6 space-y-4 scroll-mt-16"
+          className="premium-card p-5 sm:p-6 space-y-4 scroll-mt-24"
         >
-          <h2 className="text-xl font-semibold text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             Backup and restore
           </h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted">
             Export includes your settings, coding history, recall answers,
             schedules, activity, and all recorded session times. Older backup
             files remain supported.

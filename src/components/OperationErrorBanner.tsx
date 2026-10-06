@@ -9,9 +9,9 @@ export function OperationErrorBanner() {
     return () => window.removeEventListener(OPERATION_ERROR_EVENT, handler);
   }, []);
   if (!message) return null;
-  return <div role="alert" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-lg w-[90%] rounded-xl border border-red-500/30 bg-zinc-900 p-4 text-sm text-red-200 shadow-xl">
+  return <div role="alert" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-lg w-[90%] rounded-xl border border-danger/30 bg-surface p-4 text-sm text-danger shadow-xl">
     <div className="flex items-center justify-between gap-4"><p>{message}</p>
-      <button type="button" aria-label="Dismiss error" className="text-zinc-400" onClick={() => setMessage(null)}>Dismiss</button>
+      <button type="button" aria-label="Dismiss error" className="text-muted" onClick={() => setMessage(null)}>Dismiss</button>
     </div>
   </div>;
 }

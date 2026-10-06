@@ -2,14 +2,14 @@ import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import { EditorView } from '@codemirror/view';
 
-const zinc200 = '#e4e4e7';
-const zinc400 = '#a1a1aa';
-const zinc500 = '#71717a';
-const emerald400 = '#34d399';
-const violet400 = '#c084fc';
-const sky400 = '#38bdf8';
-const amber400 = '#fbbf24';
-const cyan300 = '#67e8f9';
+const zinc200 = 'var(--palette-foreground)';
+const zinc400 = 'var(--palette-muted)';
+const zinc500 = 'var(--palette-subtle)';
+const emerald400 = 'var(--palette-accent)';
+const violet400 = 'var(--palette-violet)';
+const sky400 = 'var(--palette-info)';
+const amber400 = 'var(--palette-warning)';
+const cyan300 = 'var(--palette-cyan)';
 
 export const syntaxEditorTheme = EditorView.theme({
     '&': {
@@ -46,7 +46,7 @@ export const syntaxHighlightStyle = HighlightStyle.define([
         color: zinc200 },
     { tag: [tags.punctuation, tags.separator, tags.bracket, tags.paren, tags.squareBracket, tags.brace],
         color: zinc400 },
-    { tag: tags.invalid, color: '#f87171' },
+    { tag: tags.invalid, color: 'var(--palette-danger)' },
 ]);
 
 export const syntaxHighlightExtensions = [

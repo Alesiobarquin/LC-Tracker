@@ -148,14 +148,15 @@ export const SyntaxReference: React.FC = () => {
             <header className="flex flex-col gap-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
-                            <BookOpen className="text-emerald-400" size={32} />
+                        <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+                            <BookOpen className="text-muted" size={22} />
                             Syntax Reference
                         </h1>
+                        <p className="text-sm text-muted mt-2">Recall the syntax you use, then compare it with the reference.</p>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap justify-start md:justify-end w-full md:w-auto sticky top-0 z-10 py-2 bg-zinc-950/90 backdrop-blur-sm md:static md:bg-transparent md:backdrop-blur-none md:py-0">
-                        <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 p-1 rounded-xl mr-auto md:mr-0" role="tablist" aria-label="Syntax study mode">
+                    <div className="flex items-center gap-3 flex-wrap justify-start md:justify-end w-full md:w-auto sticky top-0 z-10 py-2 bg-canvas/90 backdrop-blur-sm md:static md:bg-transparent md:backdrop-blur-none md:py-0">
+                        <div className="flex items-center gap-1 bg-canvas border border-line p-1 rounded-xl mr-auto md:mr-0" role="tablist" aria-label="Syntax study mode">
                             <button
                                 type="button"
                                 role="tab"
@@ -163,7 +164,7 @@ export const SyntaxReference: React.FC = () => {
                                 onClick={() => setViewMode('due')}
                                 className={clsx(
                                     'px-3 py-2 rounded-lg text-xs font-semibold min-h-11 transition-colors',
-                                    viewMode === 'due' ? 'bg-emerald-500/15 text-emerald-300' : 'text-zinc-500 hover:text-zinc-300'
+                                    viewMode === 'due' ? 'bg-accent/15 text-accent' : 'text-subtle hover:text-body'
                                 )}
                             >
                                 Due now ({dueCards.length})
@@ -175,7 +176,7 @@ export const SyntaxReference: React.FC = () => {
                                 onClick={() => setViewMode('browse')}
                                 className={clsx(
                                     'px-3 py-2 rounded-lg text-xs font-semibold min-h-11 transition-colors',
-                                    viewMode === 'browse' ? 'bg-emerald-500/15 text-emerald-300' : 'text-zinc-500 hover:text-zinc-300'
+                                    viewMode === 'browse' ? 'bg-accent/15 text-accent' : 'text-subtle hover:text-body'
                                 )}
                             >
                                 Browse all
@@ -188,15 +189,15 @@ export const SyntaxReference: React.FC = () => {
                             className={clsx(
                                 "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors min-h-11",
                                 dueCards.length > 0
-                                    ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20"
-                                    : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 cursor-not-allowed"
+                                    ? "bg-accent border-accent text-on-accent hover:bg-accent-strong"
+                                    : "bg-muted-surface/50 border-line-strong/50 text-subtle cursor-not-allowed"
                             )}
                         >
                             <Zap size={15} />
                             Practice Due
                             <span className={clsx(
                                 "px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums",
-                                dueCards.length > 0 ? "bg-emerald-500/20 text-emerald-300" : "bg-zinc-700 text-zinc-500"
+                                dueCards.length > 0 ? "text-on-accent" : "bg-hover-surface text-subtle"
                             )}>
                                 {dueCards.length}
                             </span>
@@ -207,44 +208,40 @@ export const SyntaxReference: React.FC = () => {
                                 allSyntaxCards.filter(c => c.language === selectedLanguage),
                                 `All ${selectedLanguage} cards`
                             )}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/70 text-sm font-medium transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line-strong bg-muted-surface/50 text-body hover:bg-hover-surface/70 text-sm font-medium transition-colors"
                         >
                             <Layers size={15} />
                             Practice All
                         </button>
 
                         {/* Stats panel */}
-                        <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                            <div className="px-4 py-2 flex flex-col items-center justify-center border-r border-zinc-800/50 min-w-[100px]">
-                                <span className="text-sm font-semibold text-zinc-100">{practicedCards} / {totalCardsForLang}</span>
-                                <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Practiced</span>
-                            </div>
-                            <div className="px-4 py-2 flex flex-col items-center justify-center min-w-[100px]">
-                                <span className="text-sm font-semibold text-emerald-400">{confidentCards}</span>
-                                <span className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Confident</span>
-                            </div>
-                        </div>
+                        <p className="text-xs text-muted w-full md:w-auto py-1">
+                            <span className="font-medium text-body">{practicedCards} / {totalCardsForLang}</span> practiced
+                            {' · '}
+                            <span className="font-medium text-body">{confidentCards}</span> confident
+                        </p>
                     </div>
                 </div>
 
                 {/* Filters Row */}
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                         <input
                             type="text"
                             placeholder="Search syntax, descriptions, or use cases..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                            className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-foreground placeholder:text-subtle focus:outline-none focus:border-accent/50 transition-colors"
                         />
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-2">
                         <select
+                            aria-label="Syntax language"
                             value={selectedLanguage}
                             onChange={(e) => setSelectedLanguage(e.target.value as any)}
-                            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none min-w-[140px]"
+                            className="bg-surface border border-line rounded-lg px-3 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors w-[132px]"
                         >
                             <option value="python">Python</option>
                             <option value="cpp">C++</option>
@@ -254,26 +251,28 @@ export const SyntaxReference: React.FC = () => {
 
                         <button
                             onClick={() => setShowOnlyWeak(!showOnlyWeak)}
+                            aria-pressed={showOnlyWeak}
                             className={clsx(
                                 "px-4 py-3 rounded-xl border flex items-center gap-2 transition-colors font-medium text-sm whitespace-nowrap",
                                 showOnlyWeak
-                                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-                                    : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800"
+                                    ? "bg-warning/10 border-warning/30 text-warning hover:bg-warning/20"
+                                    : "bg-surface border-line text-body hover:bg-muted-surface"
                             )}
                         >
                             <AlertCircle size={16} />
                             Weak Areas
                         </button>
 
-                        <div className="flex rounded-xl border border-zinc-800 bg-zinc-900 p-1">
+                        <div className="flex rounded-xl border border-line bg-surface p-1">
                             <button
                                 type="button"
                                 onClick={() => setSessionOrderMode('random')}
+                                aria-pressed={sessionOrderMode === 'random'}
                                 className={clsx(
                                     "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors whitespace-nowrap",
                                     sessionOrderMode === 'random'
-                                        ? "bg-emerald-500/10 text-emerald-300"
-                                        : "text-zinc-400 hover:text-zinc-200"
+                                        ? "bg-accent/10 text-accent"
+                                        : "text-muted hover:text-body"
                                 )}
                             >
                                 <Shuffle size={14} />
@@ -282,11 +281,12 @@ export const SyntaxReference: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setSessionOrderMode('category')}
+                                aria-pressed={sessionOrderMode === 'category'}
                                 className={clsx(
                                     "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors whitespace-nowrap",
                                     sessionOrderMode === 'category'
-                                        ? "bg-emerald-500/10 text-emerald-300"
-                                        : "text-zinc-400 hover:text-zinc-200"
+                                        ? "bg-accent/10 text-accent"
+                                        : "text-muted hover:text-body"
                                 )}
                             >
                                 <Layers size={14} />
@@ -303,7 +303,7 @@ export const SyntaxReference: React.FC = () => {
                         <a
                             key={category}
                             href={`#cat-${category.replace(/[^a-zA-Z]/g, '')}`}
-                            className="px-3 py-1.5 whitespace-nowrap bg-zinc-800/50 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg border border-zinc-700/50 transition-colors"
+                            className="px-3 py-1.5 whitespace-nowrap bg-muted-surface/50 hover:bg-hover-surface text-body text-xs font-medium rounded-lg border border-line-strong/50 transition-colors"
                         >
                             {category}
                         </a>
@@ -315,16 +315,16 @@ export const SyntaxReference: React.FC = () => {
             <div className="space-y-6 relative">
                 {viewMode === 'due' ? (
                     dueCards.length === 0 ? (
-                        <div className="py-16 text-center premium-card border border-zinc-800">
-                            <Zap size={40} className="mx-auto text-emerald-400 mb-4" />
-                            <h3 className="text-xl font-medium text-zinc-100">Nothing due right now</h3>
-                            <p className="text-zinc-500 text-sm mt-2 max-w-md mx-auto">
+                        <div className="py-16 text-center premium-card border border-line">
+                            <Zap size={40} className="mx-auto text-accent mb-4" />
+                            <h3 className="text-xl font-medium text-foreground">Nothing due right now</h3>
+                            <p className="text-subtle text-sm mt-2 max-w-md mx-auto">
                                 Catch up later or switch to Browse all to study reference cards.
                             </p>
                             <button
                                 type="button"
                                 onClick={() => setViewMode('browse')}
-                                className="mt-4 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium"
+                                className="mt-4 px-4 py-2 rounded-xl bg-muted-surface hover:bg-hover-surface text-body text-sm font-medium"
                             >
                                 Browse all
                             </button>
@@ -332,11 +332,11 @@ export const SyntaxReference: React.FC = () => {
                     ) : (
                         <div className="space-y-3">
                             <div className="flex items-center justify-between gap-3">
-                                <h2 className="text-lg font-semibold text-zinc-100">Due now · {selectedLanguage}</h2>
+                                <h2 className="text-lg font-semibold text-foreground">Due now · {selectedLanguage}</h2>
                                 <button
                                     type="button"
                                     onClick={() => launchSession(dueCards, `Due Now · ${selectedLanguage}`)}
-                                    className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm font-semibold"
+                                    className="px-4 py-2 rounded-xl bg-accent/15 border border-accent/30 text-accent text-sm font-semibold"
                                 >
                                     Start due session
                                 </button>
@@ -350,9 +350,9 @@ export const SyntaxReference: React.FC = () => {
                     )
                 ) : categories.length === 0 ? (
                     <div className="py-20 text-center">
-                        <BookOpen size={48} className="mx-auto text-zinc-700 mb-4" />
-                        <h3 className="text-xl font-medium text-zinc-400">No syntax cards found</h3>
-                        <p className="text-zinc-500 mt-2">Try adjusting your search or filters.</p>
+                        <BookOpen size={48} className="mx-auto text-body mb-4" />
+                        <h3 className="text-xl font-medium text-muted">No syntax cards found</h3>
+                        <p className="text-subtle mt-2">Try adjusting your search or filters.</p>
                     </div>
                 ) : (
                     categories.map(([category, cards]) => {
@@ -366,15 +366,15 @@ export const SyntaxReference: React.FC = () => {
                                         onClick={() => toggleCategory(category)}
                                         className="flex items-center gap-3 group flex-1 min-w-0"
                                     >
-                                        <div className="p-1 rounded-md bg-zinc-800/80 text-zinc-400 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-colors flex-shrink-0">
+                                        <div className="p-1 rounded-md bg-muted-surface/80 text-muted group-hover:text-accent group-hover:bg-accent/10 transition-colors flex-shrink-0">
                                             {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
-                                        <h2 className="text-xl font-bold text-zinc-100 whitespace-nowrap">{category} <span className="text-sm font-normal text-zinc-500 ml-2">({cards.length})</span></h2>
-                                        <div className="h-px bg-zinc-800/80 flex-1 ml-2 group-hover:bg-emerald-500/20 transition-colors" />
+                                        <h2 className="text-xl font-bold text-foreground whitespace-nowrap">{category} <span className="text-sm font-normal text-subtle ml-2">({cards.length})</span></h2>
+                                        <div className="h-px bg-muted-surface/80 flex-1 ml-2 group-hover:bg-accent/20 transition-colors" />
                                     </button>
                                     <button
                                         onClick={() => launchSession(cards, category)}
-                                        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700/60 bg-zinc-800/50 hover:bg-zinc-700/60 text-zinc-400 hover:text-emerald-400 text-xs font-medium transition-colors"
+                                        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-line-strong/60 bg-muted-surface/50 hover:bg-hover-surface/60 text-muted hover:text-accent text-xs font-medium transition-colors"
                                     >
                                         <Zap size={12} />
                                         Practice

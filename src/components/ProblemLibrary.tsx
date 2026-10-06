@@ -393,7 +393,7 @@ export const ProblemLibrary: React.FC = () => {
       setTimeout(() => setIsCopied(false), 2000);
     });
   };
-  
+
   // Conditionally navigate to timer if a session starts
   useEffect(() => {
     if (activeSession) {
@@ -420,22 +420,24 @@ export const ProblemLibrary: React.FC = () => {
       <PageHeader
         icon={<Library size={32} />}
         title="Problem Library"
+        description="Find a problem, revisit your notes, or start an independent attempt."
       />
 
       <div className="flex flex-col gap-4">
         {/* Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
           <div className="flex flex-wrap gap-2">
             {LIBRARY_TABS.map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
+                aria-pressed={activeTab === tab}
                 className={clsx(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                  activeTab === tab 
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  activeTab === tab
+                    ? "bg-accent/10 text-accent border border-accent/20"
+                    : "text-muted hover:text-body hover:bg-muted-surface/50"
                 )}
               >
                 {tab}
@@ -446,9 +448,9 @@ export const ProblemLibrary: React.FC = () => {
             <button
               type="button"
               onClick={copySolvedProblems}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors border border-zinc-700"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body transition-colors border border-line-strong"
             >
-              {isCopied ? <CircleCheck size={14} className="text-emerald-500" /> : <Copy size={14} />}
+              {isCopied ? <CircleCheck size={14} className="text-accent" /> : <Copy size={14} />}
               {isCopied ? 'Copied!' : 'Copy List'}
             </button>
           )}
@@ -456,14 +458,14 @@ export const ProblemLibrary: React.FC = () => {
 
         {/* Progress Bar */}
         {activeTab !== 'Solved Problems' && (
-          <div className="premium-card p-4">
+          <div className="px-1 py-2">
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-zinc-400">{activeTab} Progress</span>
-              <span className="text-zinc-100 font-medium">{solvedInTab} / {totalInTab}</span>
+              <span className="text-muted">{activeTab} Progress</span>
+              <span className="text-foreground font-medium">{solvedInTab} / {totalInTab}</span>
             </div>
-            <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
-              <div 
-                className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
+            <div className="h-1.5 bg-muted-surface overflow-hidden">
+              <div
+                className="h-full bg-accent transition-all duration-700"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -471,18 +473,19 @@ export const ProblemLibrary: React.FC = () => {
         )}
       </div>
 
-      <div className="sticky top-0 z-20 -mx-1 px-1 py-3 space-y-3 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800/60">
+      <div className="sticky top-0 z-20 -mx-1 px-1 py-3 space-y-3 bg-canvas/90 backdrop-blur-sm border-b border-line/60">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Saved views">
           {SAVED_VIEWS.map((view) => (
             <button
               key={view.id}
               type="button"
               onClick={() => setSavedView(view.id)}
+              aria-pressed={savedView === view.id}
               className={clsx(
-                'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                'px-3 py-2 rounded-md text-xs font-medium border transition-colors',
                 savedView === view.id
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-zinc-900/70 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700'
+                  ? 'bg-accent/15 text-accent border-accent/30'
+                  : 'bg-surface/70 text-muted border-line hover:text-body hover:border-line-strong'
               )}
             >
               {view.label}
@@ -492,13 +495,13 @@ export const ProblemLibrary: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="relative flex-1 min-w-[12rem]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={20} />
             <input
               type="text"
               placeholder="Search problems..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-foreground placeholder:text-subtle focus:outline-none focus:border-accent/50 transition-colors"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -507,19 +510,19 @@ export const ProblemLibrary: React.FC = () => {
                 value={activeCategory}
                 onChange={(e) => setActiveCategory(e.target.value as Category | 'All')}
                 aria-label="Filter by category"
-                className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                className="appearance-none bg-surface border border-line rounded-xl pl-4 pr-10 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors"
               >
                 {categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-subtle pointer-events-none" size={16} />
             </div>
             <select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value as DifficultyFilter)}
               aria-label="Filter by difficulty"
-              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              className="appearance-none bg-surface border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors"
             >
               <option value="All">All difficulties</option>
               <option value="Easy">Easy</option>
@@ -530,7 +533,7 @@ export const ProblemLibrary: React.FC = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ProgressStatusFilter)}
               aria-label="Filter by progress status"
-              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              className="appearance-none bg-surface border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors"
             >
               <option value="all">All statuses</option>
               <option value="unsolved">Unsolved</option>
@@ -541,7 +544,7 @@ export const ProblemLibrary: React.FC = () => {
               value={premiumFilter}
               onChange={(e) => setPremiumFilter(e.target.value as PremiumFilter)}
               aria-label="Filter by premium"
-              className="appearance-none bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              className="appearance-none bg-surface border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors"
             >
               <option value="all">All access</option>
               <option value="free">Free</option>
@@ -557,7 +560,7 @@ export const ProblemLibrary: React.FC = () => {
                 key={chip.key}
                 type="button"
                 onClick={chip.clear}
-                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-xs font-medium text-body hover:border-accent/40 hover:text-accent transition-colors"
               >
                 {chip.label}
                 <X size={12} aria-hidden />
@@ -568,31 +571,31 @@ export const ProblemLibrary: React.FC = () => {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-zinc-800/70 bg-zinc-900/40 px-3 py-2 text-[11px] text-zinc-400">
-        <span className="uppercase tracking-wider text-zinc-500">Status key</span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-xs text-muted">
+        <span className="font-medium text-muted">Status key</span>
         <span className="inline-flex items-center gap-1.5">
-          <CircleCheck size={13} className="text-emerald-500" />
+          <CircleCheck size={13} className="text-accent" />
           Maintenance
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <CircleCheck size={13} className="text-amber-500" />
+          <CircleCheck size={13} className="text-warning" />
           Solved (active queue)
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <CircleCheck size={13} className="text-red-500" />
+          <CircleCheck size={13} className="text-danger" />
           Needs work (last rating 1)
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block w-[13px] h-[13px] rounded-full border-2 border-zinc-700" />
+          <span className="inline-block w-[13px] h-[13px] rounded-full border-2 border-line-strong" />
           Unsolved
         </span>
       </div>
 
       {pendingImportId && (
-        <div className="premium-card p-4 border-emerald-500/30 bg-emerald-500/5 flex flex-col gap-3">
+        <div className="premium-card p-4 border-accent/30 bg-accent/5 flex flex-col gap-3">
           <div>
-            <p className="text-sm text-emerald-300 font-medium">Mark as previously solved?</p>
-            <p className="text-xs text-zinc-300 mt-1">
+            <p className="text-sm text-accent font-medium">Mark as previously solved?</p>
+            <p className="text-xs text-body mt-1">
               Record your prior solve and an honest self-rating. A recall check and independent coding attempts will assess current ability.
             </p>
           </div>
@@ -600,21 +603,21 @@ export const ProblemLibrary: React.FC = () => {
             <button
               type="button"
               onClick={() => setPendingImportId(null)}
-              className="px-3 py-2 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+              className="px-3 py-2 rounded-lg text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body border border-line-strong"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => confirmImportSolve(3)}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-white text-zinc-950"
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-muted-surface hover:bg-hover-surface text-body border border-line-strong"
             >
               Acceptable (3)
             </button>
             <button
               type="button"
               onClick={() => confirmImportSolve(4)}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950"
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-accent hover:bg-accent-strong text-on-accent"
             >
               Strong (4)
             </button>
@@ -623,12 +626,12 @@ export const ProblemLibrary: React.FC = () => {
       )}
 
       {pendingPremiumProblem && (
-        <div className="premium-card p-4 border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="premium-card p-4 border-warning/30 bg-warning/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-sm text-amber-300 font-medium flex items-center gap-2">
+            <p className="text-sm text-warning font-medium flex items-center gap-2">
               <Lock size={14} /> LeetCode Premium problem selected
             </p>
-            <p className="text-xs text-zinc-300 mt-1">
+            <p className="text-xs text-body mt-1">
               {pendingPremiumProblem.title} requires LeetCode Premium. This label is about LeetCode access, not any LC-Tracker plan.
             </p>
           </div>
@@ -636,14 +639,14 @@ export const ProblemLibrary: React.FC = () => {
             <button
               type="button"
               onClick={() => setPendingPremiumStartId(null)}
-              className="px-3 py-2 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+              className="px-3 py-2 rounded-lg text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body border border-line-strong"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={confirmPremiumStart}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-zinc-950"
+              className="px-3 py-2 rounded-lg text-xs font-semibold bg-accent hover:bg-accent-strong text-on-accent"
             >
               Start anyway
             </button>
@@ -653,7 +656,7 @@ export const ProblemLibrary: React.FC = () => {
 
       <div className="space-y-6">
         {filteredProblems.length === 0 ? (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 text-center text-zinc-500">
+          <div className="bg-surface border border-line rounded-2xl p-12 text-center text-subtle">
             No problems found matching your criteria.
           </div>
         ) : (
@@ -665,13 +668,13 @@ export const ProblemLibrary: React.FC = () => {
             }, {} as Record<string, typeof displayedProblems>)
           ).map(([category, problems]) => (
             <div key={category} className="space-y-3">
-              <div className="text-center text-sm font-medium text-zinc-300 py-2">
+              <h2 className="text-base font-semibold text-foreground pt-2">
                 {category}
-              </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              </h2>
+              <div className="bg-surface border border-line rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
+                    <thead className="bg-canvas/50 text-muted border-b border-line">
                       <tr>
                         <th
                           className="px-6 py-4 font-medium"
@@ -680,11 +683,11 @@ export const ProblemLibrary: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleSort('status')}
-                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                            className="inline-flex items-center gap-1 hover:text-body select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
                           >
                             Status
                             {sortConfig?.key === 'status' && (
-                              <span className="text-emerald-500" aria-hidden>
+                              <span className="text-accent" aria-hidden>
                                 {sortConfig.direction === 'asc' ? '↑' : '↓'}
                               </span>
                             )}
@@ -697,11 +700,11 @@ export const ProblemLibrary: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleSort('title')}
-                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                            className="inline-flex items-center gap-1 hover:text-body select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
                           >
                             Problem
                             {sortConfig?.key === 'title' && (
-                              <span className="text-emerald-500" aria-hidden>
+                              <span className="text-accent" aria-hidden>
                                 {sortConfig.direction === 'asc' ? '↑' : '↓'}
                               </span>
                             )}
@@ -714,11 +717,11 @@ export const ProblemLibrary: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleSort('difficulty')}
-                            className="inline-flex items-center gap-1 hover:text-zinc-200 select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                            className="inline-flex items-center gap-1 hover:text-body select-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
                           >
                             Difficulty
                             {sortConfig?.key === 'difficulty' && (
-                              <span className="text-emerald-500" aria-hidden>
+                              <span className="text-accent" aria-hidden>
                                 {sortConfig.direction === 'asc' ? '↑' : '↓'}
                               </span>
                             )}
@@ -727,7 +730,7 @@ export const ProblemLibrary: React.FC = () => {
                         <th className="px-6 py-4 font-medium text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800">
+                    <tbody className="divide-y divide-line">
                       {problems.map(prob => {
                         const prog = progress[prob.id];
                         const isSolved = !!prog;
@@ -744,41 +747,41 @@ export const ProblemLibrary: React.FC = () => {
                             : isSolved
                             ? `${LEARNING_STATUS_LABELS[getLearningStatus(prog)]} — mark as unsolved`
                             : 'Mark as solved';
-                        
+
                         return (
-                          <tr key={prob.id} className="hover:bg-zinc-800/50 transition-colors group" style={virtualRowStyle}>
+                          <tr key={prob.id} className="hover:bg-muted-surface/50 transition-colors group" style={virtualRowStyle}>
                             <td className="px-6 py-4">
-                              <button 
+                              <button
                                  onClick={() => toggleSolved(prob.id, isSolved)}
                                  className="focus:outline-none hover:scale-110 transition-transform active:scale-95"
                                  title={statusTitle}
                                  aria-label={statusTitle}
                               >
                                 {isRetired ? (
-                                  <CircleCheck size={20} className="text-emerald-500" />
+                                  <CircleCheck size={20} className="text-accent" />
                                 ) : needsWork ? (
-                                  <CircleCheck size={20} className="text-red-500" />
+                                  <CircleCheck size={20} className="text-danger" />
                                 ) : isSolved ? (
-                                  <CircleCheck size={20} className="text-amber-500" />
+                                  <CircleCheck size={20} className="text-warning" />
                                 ) : (
-                                  <div className="w-5 h-5 rounded-full border-2 border-zinc-700 hover:border-emerald-500/50 transition-colors" />
+                                  <div className="w-5 h-5 rounded-full border-2 border-line-strong hover:border-accent/50 transition-colors" />
                                 )}
                               </button>
                             </td>
-                            <td className="px-6 py-4 font-medium text-zinc-100">
+                            <td className="px-6 py-4 font-medium text-foreground">
                               <span className="flex items-center gap-2">
                                 {prob.title}
                                 {isPremium && (
-                                  <span title="Requires LeetCode Premium" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-amber-500/10 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/25">
+                                  <span title="Requires LeetCode Premium" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-warning/10 text-warning px-1.5 py-0.5 rounded border border-warning/25">
                                     <Lock size={9} /> LC Premium
                                   </span>
                                 )}
-                                {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">NeetCode 75</span>}
+                                {activeTab === 'NeetCode 150' && prob.isNeetCode75 && <span className="ml-1 text-[10px] uppercase tracking-wider bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20">NeetCode 75</span>}
                                 {activeTab === 'NeetCode 250' && prob.isNeetCode150 && !prob.isNeetCode75 && (
-                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/20">NC150+</span>
+                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20">NC150+</span>
                                 )}
                                 {activeTab === 'Full Catalog' && prob.isExtendedCatalog && (
-                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-zinc-500/10 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-500/20">Catalog</span>
+                                  <span className="ml-1 text-[10px] uppercase tracking-wider bg-subtle/10 text-muted px-2 py-0.5 rounded-full border border-line-strong/20">Catalog</span>
                                 )}
                               </span>
                             </td>
@@ -793,18 +796,18 @@ export const ProblemLibrary: React.FC = () => {
                                   href={prob.leetcodeUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 hover:border-zinc-600 text-xs font-medium"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-muted-surface/80 hover:bg-hover-surface text-body rounded-lg transition-colors border border-line-strong/50 hover:border-line-strong text-xs font-medium"
                                   title="Open on LeetCode to view your submission status"
                                   aria-label={`Open ${prob.title} on LeetCode`}
                                 >
                                   <ExternalLink size={14} className="shrink-0" />
                                   <span className="hidden sm:inline">LeetCode</span>
                                 </a>
-                                {isSolved && user && <button type="button" onClick={() => navigate(`/recall/${prob.id}`)} className="px-2.5 py-1.5 rounded-lg border border-zinc-700 text-xs text-emerald-400" aria-label={`Recall ${prob.title}`}>Recall</button>}
+                                {isSolved && user && <button type="button" onClick={() => navigate(`/recall/${prob.id}`)} className="px-2.5 py-1.5 rounded-lg border border-line-strong text-xs text-accent" aria-label={`Recall ${prob.title}`}>Recall</button>}
                                 <button
                                   type="button"
                                   onClick={() => handleStartSession(prob.id, isPremium)}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                                  className="p-2 bg-muted-surface hover:bg-hover-surface text-foreground rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                                   title={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : 'Start practice timer'}
                                   aria-label={isPremium && !settings.includePremiumInAssignments ? 'LeetCode Premium problem: confirm before starting' : `Start practice timer for ${prob.title}`}
                                 >
@@ -824,7 +827,7 @@ export const ProblemLibrary: React.FC = () => {
         )}
         {hiddenCount > 0 && (
           <div className="flex flex-col items-center gap-2 pt-4 pb-2">
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-subtle">
               Showing {displayedProblems.length} of {filteredProblems.length} problems
             </p>
             <button
@@ -834,7 +837,7 @@ export const ProblemLibrary: React.FC = () => {
                   Math.min(prev + PROBLEM_LIST_LOAD_MORE_CHUNK, filteredProblems.length)
                 )
               }
-              className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm font-medium border border-zinc-700 transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-muted-surface hover:bg-hover-surface text-foreground text-sm font-medium border border-line-strong transition-colors"
             >
               Show more ({hiddenCount} remaining)
             </button>

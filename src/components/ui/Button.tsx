@@ -11,14 +11,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-emerald-500 text-zinc-950 hover:bg-emerald-400 border border-emerald-400/40 shadow-[0_0_20px_rgba(16,185,129,0.18)]',
+    'bg-accent text-on-accent hover:bg-accent-strong border border-transparent ',
   secondary:
-    'bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700 border border-zinc-700/80',
-  ghost: 'bg-transparent text-zinc-300 hover:bg-zinc-800/70 hover:text-zinc-100 border border-transparent',
+    'bg-muted-surface/80 text-foreground hover:bg-hover-surface border border-line-strong/80',
+  ghost: 'bg-transparent text-body hover:bg-muted-surface/70 hover:text-foreground border border-transparent',
   danger:
-    'bg-red-500/10 text-red-300 hover:bg-red-500/20 border border-red-500/30',
+    'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/30',
   outline:
-    'bg-transparent text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30',
+    'bg-transparent text-accent hover:bg-accent/10 border border-accent/30',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -34,7 +34,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       type={type}
       className={cn(
-        'inline-flex items-center justify-center gap-2 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 disabled:pointer-events-none',
         variantClasses[variant],
         sizeClasses[size],
         className

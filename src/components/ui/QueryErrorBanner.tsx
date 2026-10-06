@@ -19,15 +19,15 @@ export const QueryErrorBanner: React.FC<QueryErrorBannerProps> = ({
   <div
     role="alert"
     className={cn(
-      'rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3',
+      'rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3',
       className
     )}
   >
     <div className="flex items-start gap-3 min-w-0 flex-1">
-      <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={18} aria-hidden="true" />
+      <AlertTriangle className="text-danger shrink-0 mt-0.5" size={18} aria-hidden="true" />
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-red-200">{title}</p>
-        <p className="text-xs text-red-200/80 mt-1 leading-relaxed">{message}</p>
+        <p className="text-sm font-semibold text-danger">{title}</p>
+        <p className="text-xs text-danger/80 mt-1 leading-relaxed">{message}</p>
       </div>
     </div>
     {onRetry ? (

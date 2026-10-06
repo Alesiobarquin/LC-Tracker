@@ -6,13 +6,13 @@ export { cn };
 export function getDifficultyColor(difficulty: Difficulty): string {
   switch (difficulty) {
     case 'Easy':
-      return 'text-emerald-400';
+      return 'text-accent';
     case 'Medium':
-      return 'text-amber-400';
+      return 'text-warning';
     case 'Hard':
-      return 'text-red-400';
+      return 'text-danger';
     default:
-      return 'text-zinc-400';
+      return 'text-muted';
   }
 }
 
@@ -46,13 +46,13 @@ export function getProblemStatusLabel(tone: ProblemStatusTone): string {
 export function getProblemStatusClass(tone: ProblemStatusTone): string {
   switch (tone) {
     case 'retired':
-      return 'text-emerald-400';
+      return 'text-accent';
     case 'solved':
-      return 'text-amber-400';
+      return 'text-warning';
     case 'needsWork':
-      return 'text-red-400';
+      return 'text-danger';
     default:
-      return 'text-zinc-500';
+      return 'text-subtle';
   }
 }
 

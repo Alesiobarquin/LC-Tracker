@@ -87,18 +87,18 @@ export const Modal: React.FC<ModalProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         className={cn(
-          'relative w-full bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in duration-200',
+          'relative w-full bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden animate-in fade-in duration-200',
           sizeClasses[size],
           className
         )}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-zinc-800 bg-zinc-950/50 px-5 py-4">
+        <div className="flex items-start justify-between gap-3 border-b border-line bg-canvas/50 px-5 py-4">
           <div className="min-w-0 space-y-1">
-            <h2 id={titleId} className="text-lg font-semibold text-zinc-50">
+            <h2 id={titleId} className="text-lg font-semibold text-foreground">
               {title}
             </h2>
             {description ? (
-              <p id={descriptionId} className="text-sm text-zinc-400">
+              <p id={descriptionId} className="text-sm text-muted">
                 {description}
               </p>
             ) : null}
@@ -107,7 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-2 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="p-2 rounded-xl text-muted hover:text-foreground hover:bg-muted-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <X size={18} aria-hidden="true" />
           </button>

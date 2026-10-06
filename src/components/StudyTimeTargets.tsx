@@ -59,12 +59,12 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
 
     return (
         <div className="space-y-6">
-            <p className="text-xs text-zinc-500">Adjust your weekday and weekend study time, then save your targets.</p>
+            <p className="text-xs text-subtle">Adjust your weekday and weekend study time, then save your targets.</p>
             {TARGETS.map(({ key, label }) => (
                 <div key={key}>
                     <div className="flex justify-between mb-2">
-                        <label htmlFor={key} className="text-sm font-medium text-zinc-300">{label}</label>
-                        <span className="text-emerald-400 font-medium">{formatMinutes(values[key])}</span>
+                        <label htmlFor={key} className="text-sm font-medium text-body">{label}</label>
+                        <span className="text-accent font-medium">{formatMinutes(values[key])}</span>
                     </div>
                     <input
                         id={key}
@@ -75,9 +75,9 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
                         value={values[key]}
                         onChange={(event) => edit(key, Number(event.target.value))}
                         disabled={!ready || saving}
-                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 disabled:opacity-50"
+                        className="w-full h-2 bg-muted-surface rounded-lg appearance-none cursor-pointer accent-warning disabled:opacity-50"
                     />
-                    <div className="relative w-full text-xs text-zinc-600 mt-1 h-4">
+                    <div className="relative w-full text-xs text-subtle mt-1 h-4">
                         <span className="absolute left-0 top-0">15 min</span>
                         <span className="absolute top-0 -translate-x-1/2" style={{ left: `${((60 - MINUTES.min) / (MINUTES.max - MINUTES.min)) * 100}%` }}>1 hr</span>
                         <span className="absolute right-0 top-0">2 hr</span>
@@ -87,14 +87,14 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
             <div className="space-y-2">
                 <div className="flex flex-wrap gap-3">
                     <button type="button" onClick={() => void save()} disabled={!changed || !ready || saving}
-                        className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50">
+                        className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:bg-accent disabled:opacity-50">
                         {saving ? 'Saving study time targets…' : 'Save study time targets'}
                     </button>
                     {draft && <button type="button" disabled={saving} onClick={() => { setDraft(null); setError(''); setSaved(false); }}
-                        className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-50">Use saved targets</button>}
+                        className="text-sm text-muted hover:text-body disabled:opacity-50">Use saved targets</button>}
                 </div>
-                {saved && <p role="status" className="text-sm text-emerald-400">Study time targets saved.</p>}
-                {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+                {saved && <p role="status" className="text-sm text-accent">Study time targets saved.</p>}
+                {error && <p role="alert" className="text-sm text-danger">{error}</p>}
             </div>
         </div>
     );

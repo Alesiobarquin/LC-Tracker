@@ -23,12 +23,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     )}
   >
     <div className="min-w-0 space-y-2">
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-50 flex items-center gap-3">
-        {icon ? <span className="text-emerald-400 shrink-0">{icon}</span> : null}
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground flex items-center gap-3">
+        {icon ? <span className="text-muted shrink-0 [&>svg]:w-5 [&>svg]:h-5">{icon}</span> : null}
         <span className="min-w-0">{title}</span>
       </h1>
       {description ? (
-        <div className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl">
+        <div className="text-sm text-muted leading-relaxed max-w-2xl">
           {description}
         </div>
       ) : null}

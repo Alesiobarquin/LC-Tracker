@@ -309,7 +309,7 @@ export const ProblemLibrary: React.FC = () => {
           ? 'Unsolved'
           : statusFilter === 'rotation'
             ? 'In rotation'
-            : 'Retired';
+            : 'Maintenance';
       chips.push({
         key: 'status',
         label: `Status: ${statusLabel}`,

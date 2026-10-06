@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useInView, useMotionValue, useSpring } from 'motion/react';
+import { motion, useMotionValue, useSpring } from 'motion/react';
 import { TerminalSquare, BrainCircuit, Activity, ChevronRight, Github, Code2, Database, Network, Cpu, ListFilter, Download, CalendarDays, Layers } from 'lucide-react';
 import { Logo } from './Logo';
 import { BRAND } from '../constants/brand';
@@ -190,171 +190,32 @@ export const NoiseOverlay = () => (
     </div>
 );
 
-// --- TYPEWRITER TERMINAL EVENT LOG ---
-const TerminalLog = () => {
-    const [logs, setLogs] = useState<{text: string, type: 'info' | 'success' | 'warn' | 'error'}[]>([
-        { text: '> INIT local_storage_layer...', type: 'info' }
-    ]);
-    const maxLogs = 6;
-
-    useEffect(() => {
-        const possibleLogs = [
-            { text: "> SOLVED: LRU Cache (Medium) - 12m 04s", type: "success" },
-            { text: "> RATING: OPTIMAL. Pushing review +14 days.", type: "success" },
-            { text: "> FAILED: Cycle detection missing.", type: "error" },
-            { text: "> COMPILING: syntax_tree.ast...", type: "info" },
-            { text: "> RE-SCHEDULING: Graph Traversal.", type: "warn" },
-            { text: "> SYNC: 100% Data integrity verified.", type: "info" },
-            { text: "> VELOCITY: +22% compared to average.", type: "success" }
-        ];
-
-        let intervalId = setInterval(() => {
-            setLogs(prevLogs => {
-                const newLog = possibleLogs[Math.floor(Math.random() * possibleLogs.length)];
-                const updatedLogs = [...prevLogs, newLog as any];
-                if (updatedLogs.length > maxLogs) updatedLogs.shift();
-                return updatedLogs;
-            });
-        }, 2500);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    return (
-        <div className="bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-5 font-mono text-xs sm:text-sm shadow-2xl relative overflow-hidden h-full group">
-            <div className="absolute top-0 left-0 w-full h-9 bg-[#121214] border-b border-zinc-800/80 flex items-center px-3 gap-2 z-10">
-                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                <div className="ml-auto flex gap-2">
-                    <Database className="w-4 h-4 text-zinc-600" />
-                    <span className="text-xs text-zinc-600">session_log.sh</span>
-                </div>
-            </div>
-            
-            <div className="mt-7 flex flex-col gap-1.5 relative z-0">
-                {logs.map((log, i) => {
-                    const isLast = i === logs.length - 1;
-                    return (
-                        <motion.div 
-                            key={i + log.text} 
-                            initial={{ opacity: 0, x: -10 }} 
-                            animate={{ opacity: 1, x: 0 }}
-                            className={`
-                                ${log.type === 'error' ? 'text-red-400' : ''}
-                                ${log.type === 'success' ? 'text-emerald-400' : ''}
-                                ${log.type === 'warn' ? 'text-yellow-400' : ''}
-                                ${log.type === 'info' ? 'text-zinc-400' : ''}
-                            `}
-                        >
-                            {log.text}
-                            {isLast && (
-                                <motion.span 
-                                    animate={{ opacity: [1, 0] }} 
-                                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                                    className="inline-block w-2 h-3.5 bg-emerald-500 ml-2 align-middle -translate-y-[1px]"
-                                />
-                            )}
-                        </motion.div>
-                    )
-                })}
-            </div>
+// Illustrative examples explain recorded fields, not observed user outcomes.
+const TerminalLog = () => (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5 space-y-3 text-xs">
+        <p className="text-zinc-500">Example coding record</p>
+        <p className="text-zinc-200">LRU Cache · 22 min</p>
+        <p className="text-emerald-400">Tests passed · no hints · explanation clear</p>
+        <p className="text-zinc-400">One independent attempt. Delayed retention still needs another check.</p>
+    </div>
+);
+const SpacedRepetitionVisual = () => (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5 space-y-4 text-sm">
+        <p className="text-zinc-500 text-xs">Two distinct checks</p>
+        <div><p className="text-emerald-400 font-semibold">Recall the approach</p><p className="text-zinc-400 mt-1">Explain from memory, then compare with a reference.</p></div>
+        <div><p className="text-emerald-400 font-semibold">Implement independently</p><p className="text-zinc-400 mt-1">Code, test, and explain it after a delay. Record any hints.</p></div>
+        <p className="text-xs text-zinc-500">Intervals respond to your recorded results; the app does not estimate when you will forget.</p>
+    </div>
+);
+const HeatmapVisual = () => (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 h-full space-y-3">
+        <p className="text-xs text-zinc-500">Example study minutes · one week</p>
+        <div className="flex gap-2 items-end h-16" role="img" aria-label="Illustrative daily study time, not user measurements">
+            {[30, 45, 0, 30, 40, 60, 30].map((minutes, i) => <div key={i} className="flex-1 bg-emerald-500/60 rounded-t" style={{ height: `${minutes}px` }} title={`${minutes} minutes`} />)}
         </div>
-    );
-}
-
-// --- SPACED REPETITION VISUAL ---
-const SpacedRepetitionVisual = () => {
-    return (
-        <div className="relative h-full min-h-[200px] border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-5 overflow-hidden flex items-end">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-            
-            <svg className="absolute inset-0 w-full h-full text-emerald-500/35" preserveAspectRatio="none">
-                 <motion.path 
-                    d="M 0 50 Q 100 200 200 220" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="3"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.4, ease: 'easeOut' }}
-                 />
-                 <motion.path 
-                    d="M 200 220 L 200 20 C 300 100 400 150 500 170" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="3"
-                    strokeDasharray="4 4"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.4, delay: 0.35, ease: 'easeOut' }}
-                 />
-            </svg>
-            
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-emerald-500/40 text-emerald-400 px-3 py-1.5 rounded-md font-mono text-xs z-10 whitespace-nowrap">
-                <div className="flex gap-2 items-center">
-                    <Code2 className="w-3.5 h-3.5" />
-                    Review: Topological Sort
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// --- HEATMAP MAP VISUAL ---
-const HeatmapVisual = () => {
-    const containerRef = useRef(null);
-    const inView = useInView(containerRef, { once: true, margin: "-50px" });
-
-    const cols = 22;
-    const rows = 6;
-    const days = Array.from({ length: cols * rows });
-
-    return (
-        <div ref={containerRef} className="border border-zinc-800/80 rounded-xl bg-[#0a0a0c] p-5 overflow-hidden h-full flex flex-col justify-center relative">
-            <div className="grid grid-rows-6 grid-flow-col gap-1 w-full justify-between overflow-hidden relative z-10">
-                {days.map((_, i) => {
-                    const intensity = Math.random();
-                     let bgClass = "bg-zinc-800/50";
-                     if (intensity > 0.8) bgClass = "bg-emerald-400";
-                     else if (intensity > 0.6) bgClass = "bg-emerald-600";
-                     else if (intensity > 0.3) bgClass = "bg-emerald-900/40";
-
-                    return (
-                        <motion.div
-                            key={i}
-                            className={`w-3 h-3 rounded-[2px] ${bgClass}`}
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={inView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-                            transition={{ 
-                                duration: 0.35, 
-                                type: "spring",
-                                bounce: 0.35,
-                                delay: (Math.floor(i / rows) * 0.03) + ((i % rows) * 0.015) 
-                            }}
-                        />
-                    )
-                })}
-            </div>
-            <div className="mt-4 flex justify-between text-[10px] text-zinc-500 font-mono items-center relative z-10">
-                <span className="flex items-center gap-1.5 border border-zinc-800 px-2 py-1 rounded bg-zinc-900/80">
-                    <Activity className="w-3 h-3 text-emerald-500" />
-                    Sprint Streak: <span className="text-emerald-400 font-bold">14 Days</span>
-                </span>
-                <span className="flex gap-1.5 items-center">
-                    Less 
-                    <div className="w-2.5 h-2.5 rounded-[2px] bg-zinc-800/50"></div>
-                    <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-900/40"></div>
-                    <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600"></div>
-                    <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-400"></div> 
-                    More
-                </span>
-            </div>
-        </div>
-    )
-}
+        <p className="text-xs text-zinc-400">Review minutes alongside learning outcomes.</p>
+    </div>
+);
 
 // --- PRODUCT PREVIEW MOCK PANELS ---
 const MockPanelChrome = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -371,20 +232,21 @@ const MockPanelChrome = ({ title, children }: { title: string; children: React.R
 );
 
 const TodayPlanMock = () => (
-    <MockPanelChrome title="Today's plan">
+    <MockPanelChrome title="Example daily plan">
         <div className="space-y-2.5">
             <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3 text-emerald-500" /> Mon sprint</span>
-                <span>62 / 90 min</span>
+                <span className="flex items-center gap-1.5"><CalendarDays className="w-3 h-3 text-emerald-500" /> 30 min budget</span>
+                <span>30 min planned</span>
             </div>
             <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                <div className="h-full w-[68%] rounded-full bg-emerald-500/80" />
+                <div className="h-full w-full rounded-full bg-emerald-500/80" />
             </div>
             <ul className="space-y-2 pt-1">
                 {[
-                    { name: 'Clone Graph', tag: 'New', tone: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-                    { name: 'Course Schedule', tag: 'Review', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-                    { name: 'Word Ladder', tag: 'Review', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                    { name: 'Clone Graph', tag: 'Code · 21 min', tone: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                    { name: 'Course Schedule', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                    { name: 'Valid Palindrome', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                    { name: 'Binary Search', tag: 'Recall · 3 min', tone: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
                 ].map((row) => (
                     <li key={row.name} className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800/70 bg-zinc-900/50 px-2.5 py-2">
                         <span className="text-xs text-zinc-200 truncate">{row.name}</span>
@@ -397,18 +259,17 @@ const TodayPlanMock = () => (
 );
 
 const ReviewQueueMock = () => (
-    <MockPanelChrome title="Review queue">
+    <MockPanelChrome title="Example recall queue">
         <div className="space-y-2.5">
             <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><ListFilter className="w-3 h-3 text-emerald-500" /> Due today</span>
-                <span>4 items</span>
+                <span className="flex items-center gap-1.5"><ListFilter className="w-3 h-3 text-emerald-500" /> Fits today</span>
+                <span>3 checks</span>
             </div>
             <ul className="space-y-2">
                 {[
-                    { name: 'LRU Cache', due: 'Now', interval: '3d → 7d' },
-                    { name: 'Pacific Atlantic', due: 'Now', interval: '1d → 3d' },
-                    { name: 'Alien Dictionary', due: '+1d', interval: '7d → 14d' },
-                    { name: 'Serialize Tree', due: '+2d', interval: '14d → 30d' },
+                    { name: 'Course Schedule', due: '3 min', interval: 'Recall the approach first' },
+                    { name: 'Valid Palindrome', due: '3 min', interval: 'Explain the correctness argument' },
+                    { name: 'Binary Search', due: '3 min', interval: 'Identify complexity and edge cases' },
                 ].map((row) => (
                     <li key={row.name} className="rounded-lg border border-zinc-800/70 bg-zinc-900/50 px-2.5 py-2">
                         <div className="flex items-center justify-between gap-2">
@@ -424,28 +285,28 @@ const ReviewQueueMock = () => (
 );
 
 const PatternMasteryMock = () => (
-    <MockPanelChrome title="Pattern mastery">
+    <MockPanelChrome title="Example pattern evidence">
         <div className="space-y-3">
             <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-emerald-500" /> Graphs</span>
-                <span>5 / 8 retired</span>
+                <span className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-emerald-500" /> Core patterns</span>
+                <span>5 / 8 dependable</span>
             </div>
             <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                 <div className="h-full w-[62%] rounded-full bg-emerald-500/80" />
             </div>
             <ul className="space-y-2">
                 {[
-                    { name: 'BFS / DFS', pct: 88 },
-                    { name: 'Topological sort', pct: 62 },
-                    { name: 'Union-Find', pct: 40 },
+                    { name: 'BFS', passed: 2, total: 3 },
+                    { name: 'Topological sort', passed: 2, total: 4 },
+                    { name: 'Two heaps', passed: 1, total: 1 },
                 ].map((row) => (
                     <li key={row.name} className="space-y-1.5">
                         <div className="flex items-center justify-between text-[11px]">
                             <span className="text-zinc-300">{row.name}</span>
-                            <span className="font-mono text-zinc-500">{row.pct}%</span>
+                            <span className="font-mono text-zinc-500">{row.passed}/{row.total}</span>
                         </div>
                         <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
-                            <div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${row.pct}%` }} />
+                            <div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${row.passed}/{row.total}` }} />
                         </div>
                     </li>
                 ))}
@@ -710,20 +571,21 @@ export const LandingPage = () => {
                             </div>
                             <h2 className="text-xl md:text-[1.65rem] font-bold text-white mb-4 tracking-tight">{BRAND.landing.featuresHeadlineA}</h2>
                             <p className="text-zinc-400 text-sm leading-relaxed mb-5">
-                                Our SuperMemo-2 derived algorithm tracks your performance metrics. It autonomously schedules reviews exactly when you are about to forget them.
+                                Recall checks and coding attempts have separate schedules. Success after a delay extends an interval; gaps in recall or implementation bring practice closer. The daily plan selects only what fits your time budget.
                             </p>
+                            <a href="https://github.com/Alesiobarquin/LC-Tracker/blob/main/docs/study-strategy.md" target="_blank" rel="noopener noreferrer" className="inline-block text-xs text-emerald-400 mb-5">Study strategy and evidence limits</a>
                             <ul className="space-y-2.5 text-xs font-mono text-zinc-500">
                                 <li className="flex gap-3 items-center">
                                     <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
-                                    Dynamic decay intervals computed per problem
+                                    Separate recall and coding dates per problem
                                 </li>
                                 <li className="flex gap-3 items-center">
                                     <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                                         <ChevronRight className="w-3 h-3"/>
                                     </div>
-                                    Attack weaknesses, not memorized solutions
+                                    Retained implementation and unseen variations
                                 </li>
                             </ul>
                         </div>
@@ -743,7 +605,7 @@ export const LandingPage = () => {
                             </div>
                             <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineB}</h2>
                             <p className="text-zinc-400 text-xs leading-relaxed">
-                                Visualize your solve velocity. Treat tactical interview prep like a continuous production deployment schedule.
+                                See recall outcomes, delayed independent coding, unseen variations, and recorded study minutes over the last fourteen days.
                             </p>
                         </div>
                         <div className="h-36 mt-auto">
@@ -759,7 +621,7 @@ export const LandingPage = () => {
                             </div>
                             <h2 className="text-lg font-bold text-white mb-2.5 tracking-tight">{BRAND.landing.featuresHeadlineC}</h2>
                             <p className="text-zinc-400 text-xs leading-relaxed">
-                                Log attempts, execution times, and time complexities. Build a personal database of solutions for immediate reference.
+                                Record correctness, assistance, explanations, and notes. Confidence remains a self-rating, separate from coding evidence.
                             </p>
                         </div>
                         <div className="h-36 mt-auto">

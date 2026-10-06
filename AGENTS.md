@@ -61,6 +61,9 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   not replace coding or recall drafts; redirect to the active session instead.
 - Keep numeric study defaults distinct from scientific evidence. Never describe
   a self-reported rating as a calibrated probability or interview prediction.
+- Keep onboarding, pattern lessons, landing descriptions, and the product tour
+  aligned with the planner. Do not claim exact forgetting predictions or automatic
+  grading. Label illustrative records and measurements as examples.
 - The study-state migration must precede the dependent client release. Extend
   `supabase/tests/study.sql`, service/backup checks, and `e2e/study.spec.ts` when
   changing recall persistence or the completion flow.

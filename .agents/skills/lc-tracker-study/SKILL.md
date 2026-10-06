@@ -30,6 +30,9 @@ When changing this behavior:
   Use primary research for new scientific claims and identify extrapolation to
   coding. Validate defaults with observed outcomes rather than claiming neural
   mechanisms prove a particular interval or interview readiness score.
+- Audit onboarding, pattern lessons, brand text, and the product tour after a
+  behavior change. Keep their descriptions consistent with the planner and label
+  illustrative results clearly; a public preview is not a measured outcome.
 - Keep drafts, frozen completions, ownership, operation IDs, and retry receipts
   through reloads and lost responses. Include new metadata in validated backups.
   Use the existing reliability workflow for persistence or migration changes.

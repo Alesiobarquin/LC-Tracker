@@ -178,11 +178,11 @@ const PatternList: React.FC<{
     <div className="space-y-8 pb-24 animate-in">
       <PageHeader
         icon={<Sparkles size={28} />}
-        title="Pattern Mastery"
+        title="Pattern learning"
         description={
           <>
             Learn recognition cues, walk a worked example, then test recall, implementation, and transfer across spaced attempts.
-            Mastery means repeated strong recall — not a one-time checkbox.
+            Established patterns require spaced independent coding and an unseen-variation pass.
           </>
         }
         actions={
@@ -265,7 +265,7 @@ const PatternList: React.FC<{
               ['all', 'All'],
               ['next', 'In progress'],
               ['due', 'Due / weak'],
-              ['mastered', 'Mastered'],
+              ['mastered', 'Established'],
             ] as const).map(([mode, label]) => (
               <button
                 key={mode}
@@ -335,7 +335,7 @@ const PatternList: React.FC<{
                             <Badge tone={pattern.isCompleted ? 'success' : isNext ? 'info' : 'neutral'}>
                               {pattern.isCompleted ? (
                                 <>
-                                  <CheckCircle2 size={12} /> Mastered
+                                  <CheckCircle2 size={12} /> Established
                                 </>
                               ) : isNext ? (
                                 'Continue here'
@@ -364,7 +364,7 @@ const PatternList: React.FC<{
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-3 text-sm">
                               <span className="text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-semibold">
-                                Mastery
+                                Implementation evidence
                               </span>
                               <span className="font-semibold text-zinc-200">
                                 {pattern.masteredCount} / {pattern.problemsCount} dependable
@@ -653,7 +653,7 @@ const PatternDetail: React.FC<{
           <Card accent className="p-5 space-y-3">
             <h2 className="text-sm font-semibold text-zinc-100">Practice ladder</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Learn a few core problems, reinforce with variants, then take on harder challenges. Retire problems with strong recall before calling the pattern mastered.
+              Learn representative problems, check implementation after a delay, and try unseen variations. Successful recall checks stay separate from coding evidence. Dependable problems remain eligible for maintenance.
             </p>
             <div className="flex flex-wrap gap-2 text-xs">
               <Badge>~{lesson.estimatedMinutes} min lesson</Badge>

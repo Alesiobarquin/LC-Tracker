@@ -49,7 +49,7 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
             setDraft(null);
             setSaved(true);
         } catch (failure) {
-            setError((failure as { code?: string })?.code === '40001'
+            setError((failure as { code?: string })?.code === 'PT409'
                 ? 'Your study time targets changed on another device. Select Use saved targets before editing again.'
                 : 'Could not save your study time targets. Your selections are still here; check your connection and retry.');
         } finally {

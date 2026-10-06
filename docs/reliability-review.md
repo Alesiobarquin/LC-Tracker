@@ -120,6 +120,11 @@ explicit save, retain selections after failure, and preserve the edit-start base
 across conflicting refetches. Regression checks cover keyboard changes, latency,
 failed-save retry, persistence after refresh, and conflict recovery. Backup
 validation also accepts the valid “no weekly rest day” schedule.
+The readiness gate also caught a flaw in the new revision checks: their `40001`
+code caused PostgREST 14.5 to retry stale inputs internally until the pool was
+exhausted. A forward migration now emits `PT409`, the client bounds its fresh-read
+retries, and production readiness recovered. A real PostgREST/JWT HTTP suite is
+now required by CI; direct PostgreSQL tests do not exercise this middleware.
 The restore check skips platform ownership/grants and disables webhook delivery;
 database archives do not contain Storage image bytes. Supabase currently lists no
 physical backups or PITR. Optional Sentry alert destinations and scheduled

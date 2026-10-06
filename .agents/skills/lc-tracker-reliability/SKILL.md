@@ -14,7 +14,9 @@ The client computes scheduling from confirmed reads; `commit_user_change` checks
 revisions and atomically commits related rows with a retry receipt. A timer's
 operation UUID and exact completion are stored in sessionStorage before sending.
 Keep that ID through timeouts, reloads, and explicit retries. Only confirmed
-`40001` conflicts may be retried automatically, with fresh source data.
+`PT409` conflicts may be retried automatically, with fresh source data. Never use
+`40001` for application version checks: PostgREST 14 retries the same stale RPC
+internally and can exhaust the API pool.
 
 For persistence changes:
 
@@ -24,6 +26,9 @@ For persistence changes:
 - Put cross-record atomicity, duplicate handling, and account isolation checks in
   `supabase/tests/reliability.sql`. `npm run test:db` uses the actual migrations in
   a disposable local PostgreSQL cluster and tests concurrent connections.
+- Run `npm run test:api` with PostgREST 14.5 and PostgreSQL binaries on PATH. It
+  tests real HTTP/JWT RLS and more stale saves than pool slots, then confirms a
+  fresh save and retry receipt. SQL-only tests cannot detect middleware retries.
 - For feedback Storage policies, use the Clerk JWT subject for folder ownership
   and test owned, cross-account, bucket, and anonymous behavior in
   `supabase/tests/storage.sql`. Avoid live feedback inserts: production sends an

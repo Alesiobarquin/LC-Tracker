@@ -12,6 +12,7 @@ Start the app with `npm run dev`.
 | `npm run lint` | TypeScript across the client, server, scripts, and tests |
 | `npm test` | Scheduling helpers, validated reads/writes, token handling, configuration, and API behavior |
 | `npm run test:db` | Actual migrations, transaction rollback, duplicate retries, revision conflicts, concurrent connections, and RLS |
+| `npm run test:api` | PostgreSQL plus PostgREST 14.5 HTTP conflicts, pool recovery, JWT RLS, and retry receipts |
 | `npm run verify:backup -- <archive-path>` | Private PostgreSQL archive restore and migration preservation in an isolated local cluster |
 | `npm run test:e2e` | Public routes and simulated authenticated failure/reload/retry flows |
 | `npm run build` | The production bundle, without mock authentication |
@@ -41,7 +42,8 @@ These public checks do not perform a real sign-in or authenticated database writ
 2. Confirm the deployed migration history. Apply any missing prerequisite schema,
    Clerk-ID/RLS, and session-rating migrations, then apply
    `supabase/migrations/20261006000000_reliable_user_writes.sql` and
-   `supabase/migrations/20261006000001_clerk_feedback_storage.sql` with the
+   `supabase/migrations/20261006000001_clerk_feedback_storage.sql`, followed by
+   `supabase/migrations/20261006000002_postgrest_conflict_status.sql`, with the
    authenticated database administration tool for the correct project. Do not run
    the historical migrations blindly on an unknown production schema.
 3. Confirm `version` exists on settings, progress, and sprint state; the
@@ -225,3 +227,22 @@ weekday and weekend targets now edit locally and save together with the
 conflict requires `Use saved targets` before editing again. Browser checks cover
 both cases and persistence after refresh. Backups also accept the `None` weekly
 rest-day value (`-1`).
+
+The final readiness check exposed an API pool exhausted by stale saves: the
+deployed PostgREST 14.5 retries SQLSTATE `40001` internally without new RPC inputs.
+The revision checks introduced in the reliability migration used that code.
+Forward migration `20261006000002_postgrest_conflict_status.sql` was applied and
+recorded in production; it changes only those errors to `PT409` (HTTP 409), leaving
+the transaction, RLS, and receipts intact. The pool recovered and readiness
+returned HTTP 200. A targeted termination query for the observed looping RPC
+sessions found no remaining matches after the function replacement; no project
+restart or user-data restore was needed.
+
+`npm run test:api` now uses the production PostgREST version against a disposable
+cluster with local fixture JWTs. It sends more stale writes than pool slots,
+requires prompt HTTP 409 responses, confirms reads remain available, and tests
+fresh writes, lost-response receipts, and account isolation. CI downloads the
+official 14.5 binary and verifies its archive digest. The same HTTP regression
+timed out with the old conflict function and passed with the forward repair.
+Do not generate `40001` for
+application conflicts. See the [Supabase explanation and recovery procedure](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).

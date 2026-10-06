@@ -18,6 +18,7 @@
     "refresh:catalog": "npm run build:extended-catalog && npm run build:premium-status",
     "migrate:legacy": "tsx scripts/migrate-legacy-data.ts",
     "test:db": "node scripts/test-database.mjs",
+    "test:api": "node scripts/test-database.mjs --api",
     "verify:backup": "node scripts/verify-backup.mjs"
   },
   "dependencies": {

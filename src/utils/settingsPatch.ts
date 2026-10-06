@@ -11,7 +11,7 @@ export function applySettingsPatch(base: AppSettings, current: AppSettings, patc
           (latest[key] ?? {}) as Record<string, unknown>, value as Record<string, unknown>);
       } else {
         if (JSON.stringify(latest[key]) !== JSON.stringify(before[key]) && JSON.stringify(latest[key]) !== JSON.stringify(value)) {
-          throw Object.assign(new Error('This setting changed on another device. Refresh and try again.'), { code: '40001' });
+          throw Object.assign(new Error('This setting changed on another device. Refresh and try again.'), { code: 'PT409' });
         }
         next[key] = value;
       }

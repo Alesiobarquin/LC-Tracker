@@ -23,6 +23,13 @@ jobs:
       - name: Add PostgreSQL binaries to PATH
         run: pg_config --bindir >> "$GITHUB_PATH"
       - run: npm run test:db
+      - name: Install the production PostgREST version
+        run: |
+          curl --fail --silent --show-error --location https://github.com/PostgREST/postgrest/releases/download/v14.5/postgrest-v14.5-linux-static-x86-64.tar.xz --output "$RUNNER_TEMP/postgrest.tar.xz"
+          echo "ab5cc7e974d4940447991804588cfb8b3f7b2c57b691f0905df04d51ede69470  $RUNNER_TEMP/postgrest.tar.xz" | sha256sum --check
+          tar -xJf "$RUNNER_TEMP/postgrest.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - run: npm run test:api
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run build

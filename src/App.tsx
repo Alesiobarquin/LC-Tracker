@@ -23,6 +23,7 @@ const SyntaxReference = lazy(() => import('./components/SyntaxReference').then((
 const Settings = lazy(() => import('./components/Settings').then((m) => ({ default: m.Settings })));
 const Onboarding = lazy(() => import('./components/Onboarding').then((m) => ({ default: m.Onboarding })));
 const RecallPage = lazy(() => import('./components/RecallPage').then(m => ({ default: m.RecallPage })));
+const ExplanationPage = lazy(() => import('./components/ExplanationPage').then(m => ({ default: m.ExplanationPage })));
 const TimerPage = lazy(() => import('./components/TimerPage').then((m) => ({ default: m.TimerPage })));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 
@@ -156,7 +157,10 @@ export default function App() {
           ...pageConfig['/patterns'],
           canonical: `${origin}${path}`,
         }
-      : (pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/']);
+      : path.startsWith('/library/')
+        ? { ...pageConfig['/library'], title: 'Problem explanation | LC Tracker',
+            description: 'Problem-specific reasoning and Python or C++ reference code.', canonical: `${origin}${path}` }
+        : (pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/']);
 
     document.title = config.title;
     updateMeta('name', 'description', config.description);
@@ -277,6 +281,7 @@ export default function App() {
             {/* Publicly indexable/previewable paths */}
             <Route path="/patterns/*" element={<PatternFoundations />} />
             <Route path="/library" element={<ProblemLibrary />} />
+            <Route path="/library/:problemId/explanation" element={<ExplanationPage />} />
             <Route path="/syntax" element={<SyntaxReference />} />
 
             <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />

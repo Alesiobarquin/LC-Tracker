@@ -11,6 +11,16 @@ import { useStore } from "../store/useStore";
 import { canPersistTimer } from "../lib/safeStorage";
 import type { RecallAttempt } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
+import {
+  hasProblemReference,
+  type ReferenceLanguage,
+} from "../data/problemReferences";
+import { ProblemExplanation, ExplanationLinks } from "./ProblemExplanation";
+import { ReferenceCode } from "./ReferenceCode";
+import {
+  parsePersonalExplanation,
+  formatPersonalExplanation,
+} from "../utils/personalExplanation";
 
 const button =
   "rounded-md bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
@@ -25,11 +35,15 @@ export function RecallPage() {
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
   const [promptsExpanded, setPromptsExpanded] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const submitting = useRef(false);
+  const closed = useRef(false);
+  const recordSection = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (draft?.compared) recordSection.current?.focus();
+  }, [draft?.compared]);
   const [storageAvailable] = useState(canPersistTimer);
   useEffect(() => {
     void ensureExtendedCatalogLoaded()
@@ -44,7 +58,8 @@ export function RecallPage() {
       problemId &&
       progress[problemId] &&
       !draft &&
-      !activeSession
+      !activeSession &&
+      !closed.current
     )
       startRecall(problemId);
   }, [
@@ -109,10 +124,18 @@ export function RecallPage() {
   }
 
   async function finish(outcome: RecallAttempt["outcome"]) {
-    if (!draft || submitting.current || (!checked && !draft.completion)) return;
-    if (outcome !== "forgot" && !draft.answer.trim()) {
+    if (!draft || submitting.current || (!draft.compared && !draft.completion))
+      return;
+    const originalAnswer = draft.retrievedAnswer ?? draft.answer;
+    if (outcome !== "forgot" && !originalAnswer.trim()) {
       setSaveError(
-        "Write your attempt before recording recalled or partial recall.",
+        "Your original attempt was empty. Record Forgot; a correction after comparison does not count as unaided recall.",
+      );
+      return;
+    }
+    if ((draft.notes?.length ?? 0) > 20000) {
+      setSaveError(
+        "Keep your personal explanation and code within 20,000 characters.",
       );
       return;
     }
@@ -125,7 +148,10 @@ export function RecallPage() {
         date: new Date().toISOString(),
         elapsedSeconds: elapsed,
         outcome,
-        answer: draft.answer,
+        answer: originalAnswer,
+        ...(originalAnswer !== draft.answer
+          ? { revisedAnswer: draft.answer }
+          : {}),
         checkedAgainst: draft.checkedAgainst,
       },
       notes: draft.notes,
@@ -133,6 +159,7 @@ export function RecallPage() {
     updateRecall({ completion });
     try {
       await saveRecall({ problemId: draft.problemId, ...completion });
+      closed.current = true;
       if (useStore.getState().activeRecall?.id === draft.id) endRecall();
       navigate("/dashboard", {
         state: {
@@ -204,6 +231,37 @@ export function RecallPage() {
     ? getPatternLessonMeta(pattern.id, pattern.isCore)
     : null;
   const frozen = !!draft.completion;
+  const compared = !!draft.compared || frozen;
+  const parsedPersonal = parsePersonalExplanation(
+    draft.notes ?? progress[problem.id].notes ?? "",
+  );
+  const personal = {
+    ...parsedPersonal,
+    language: draft.notesLanguage ?? parsedPersonal.language,
+  };
+  function revealReference() {
+    if (!draft || draft.revealed) return;
+    updateRecall({
+      revealed: true,
+      retrievedAnswer: draft.answer,
+      notes: progress[problem!.id].notes ?? "",
+      checkedAgainst: progress[problem!.id].notes
+        ? "notes"
+        : hasProblemReference(problem!.id)
+          ? "solution"
+          : "external",
+    });
+  }
+  function updatePersonal(
+    explanation: string,
+    code: string,
+    language: ReferenceLanguage,
+  ) {
+    updateRecall({
+      notes: formatPersonalExplanation(explanation, code, language),
+      notesLanguage: language,
+    });
+  }
   return (
     <div className="recall-workspace mx-auto space-y-6 pb-12">
       <div className="attempt-context-header">
@@ -226,10 +284,14 @@ export function RecallPage() {
           <li className={!draft.revealed ? "is-current" : "is-complete"}>
             <span>01</span>Retrieve
           </li>
-          <li className={draft.revealed ? "is-current" : ""}>
+          <li
+            className={
+              compared ? "is-complete" : draft.revealed ? "is-current" : ""
+            }
+          >
             <span>02</span>Compare
           </li>
-          <li>
+          <li className={compared ? "is-current" : ""}>
             <span>03</span>Record
           </li>
         </ol>
@@ -302,26 +364,46 @@ export function RecallPage() {
               rows={7}
               maxLength={20000}
               value={draft.answer}
-              disabled={draft.revealed || frozen}
+              disabled={frozen}
               onChange={(e) => updateRecall({ answer: e.target.value })}
               placeholder="Write what you remember without opening your notes or the solution."
               className="notebook-answer w-full text-foreground font-mono text-sm placeholder:text-subtle"
             />
             {!draft.revealed && (
               <div className="flex flex-wrap gap-3">
-                <button
-                  className={button}
-                  onClick={() => updateRecall({ revealed: true })}
-                >
+                <button className={button} onClick={revealReference}>
                   Compare with a reference
                 </button>
                 <button
                   className="text-sm text-muted underline"
-                  onClick={() => updateRecall({ revealed: true })}
+                  onClick={revealReference}
                 >
                   I can’t recall it
                 </button>
               </div>
+            )}
+            {draft.revealed && (
+              <p className="text-xs text-muted mt-3">
+                Keep editing to close the gaps. Your original answer is
+                preserved; rate what you remembered before seeing the reference.
+              </p>
+            )}
+            {draft.revealed && (
+              <details className="text-sm text-muted mt-3">
+                <summary className="cursor-pointer text-accent">
+                  View original answer from memory
+                </summary>
+                <p className="whitespace-pre-wrap mt-3">
+                  {draft.retrievedAnswer ||
+                    "No answer was written before comparison."}
+                </p>
+              </details>
+            )}
+            {frozen && (
+              <p role="status" className="text-sm text-muted mt-3">
+                This attempt is ready to save. Its answer and outcome are fixed
+                so a retry records it once.
+              </p>
             )}
           </div>
         </div>
@@ -330,6 +412,7 @@ export function RecallPage() {
         <button
           className="text-xs text-subtle underline"
           onClick={() => {
+            closed.current = true;
             endRecall();
             navigate("/dashboard");
           }}
@@ -340,14 +423,127 @@ export function RecallPage() {
       {draft.revealed && (
         <section className="recall-stage recall-comparison space-y-5">
           <SectionHeading index="02" title="Compare and identify gaps" />
-          {progress[problem.id].notes && (
-            <div className="saved-recall-reference">
-              <h3 className="text-sm font-semibold text-accent mb-2">
-                Your saved notes
+          <label className="block text-sm text-body">
+            Explanation to compare against
+            <select
+              aria-label="Reference used"
+              value={draft.checkedAgainst}
+              disabled={frozen}
+              onChange={(e) =>
+                updateRecall({
+                  checkedAgainst: e.target
+                    .value as RecallAttempt["checkedAgainst"],
+                  compared: false,
+                })
+              }
+              className="block mt-2 w-full rounded-md bg-surface border border-line-strong p-3 text-foreground"
+            >
+              {hasProblemReference(problem.id) && (
+                <option value="solution">Built-in problem explanation</option>
+              )}
+              <option value="notes">My explanation · edit or replace</option>
+              <option value="external">
+                LeetCode / video / external reference
+              </option>
+              {lesson && (
+                <option value="reference">General pattern guidance</option>
+              )}
+            </select>
+          </label>
+          {draft.checkedAgainst === "solution" && (
+            <ProblemExplanation problem={problem} />
+          )}
+          {draft.checkedAgainst === "notes" && (
+            <div className="personal-explanation space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                Your explanation
               </h3>
-              <p className="whitespace-pre-wrap text-sm text-body">
-                {progress[problem.id].notes}
+              <p className="text-xs text-muted">
+                Write the logic in your own words. This replaces the built-in
+                text when you revisit this problem. Changes save with your
+                recall outcome.
               </p>
+              <label className="block text-sm text-body">
+                Explanation in plain English
+                <textarea
+                  aria-label="Personal explanation"
+                  value={personal.explanation}
+                  disabled={frozen}
+                  rows={7}
+                  maxLength={20000}
+                  onChange={(e) =>
+                    updatePersonal(
+                      e.target.value,
+                      personal.code,
+                      personal.language,
+                    )
+                  }
+                  placeholder="Explain the approach, why it works, complexity, and edge cases."
+                  className="mt-2 w-full rounded-md border border-line-strong bg-surface p-3 text-foreground focus-visible:ring-2 focus-visible:ring-accent"
+                />
+              </label>
+              <label className="flex gap-3 items-center text-sm text-body">
+                Your code language
+                <select
+                  aria-label="Personal code language"
+                  value={personal.language}
+                  disabled={frozen}
+                  onChange={(e) =>
+                    updatePersonal(
+                      personal.explanation,
+                      personal.code,
+                      e.target.value as ReferenceLanguage,
+                    )
+                  }
+                  className="rounded-md border border-line-strong bg-surface text-foreground p-2"
+                >
+                  <option value="python">Python</option>
+                  <option value="cpp">C++</option>
+                </select>
+              </label>
+              <p className="text-sm text-muted">Your code example (optional)</p>
+              <ReferenceCode
+                code={personal.code}
+                language={personal.language}
+                label="Personal code example"
+                onChange={
+                  frozen
+                    ? undefined
+                    : (code) =>
+                        updatePersonal(
+                          personal.explanation,
+                          code,
+                          personal.language,
+                        )
+                }
+              />
+              {!frozen && hasProblemReference(problem.id) && (
+                <div className="flex flex-wrap gap-5">
+                  <button
+                    className="quiet-action"
+                    onClick={() =>
+                      updateRecall({
+                        checkedAgainst: "solution",
+                        compared: false,
+                      })
+                    }
+                  >
+                    Use built-in explanation
+                  </button>
+                  <button
+                    className="quiet-action text-muted"
+                    onClick={() =>
+                      updateRecall({
+                        notes: "",
+                        checkedAgainst: "solution",
+                        compared: false,
+                      })
+                    }
+                  >
+                    Remove my saved explanation
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {lesson && (
@@ -373,61 +569,48 @@ export function RecallPage() {
               </Link>
             </details>
           )}
-          <a
-            href={problem.leetcodeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-accent text-sm"
-          >
-            Check the explanation on LeetCode <ExternalLink size={14} />
-          </a>
+          <ExplanationLinks problem={problem} />
           <p className="text-sm text-muted">
             Check the approach, correctness argument, complexity, and edge
             cases. This is a self-check; the app does not automatically grade
             your answer.
           </p>
-          <label className="block text-sm text-body">
-            Reference used
-            <select
-              aria-label="Reference used"
-              value={draft.checkedAgainst}
-              disabled={frozen}
-              onChange={(e) =>
-                updateRecall({
-                  checkedAgainst: e.target
-                    .value as RecallAttempt["checkedAgainst"],
-                })
-              }
-              className="block mt-2 w-full rounded-md bg-surface border border-line-strong p-3 text-foreground"
+          {!compared && (
+            <div className="comparison-next space-y-3">
+              <p className="text-sm text-body">
+                Compare the reference with your original answer, identify the
+                gaps, then record what you recalled.
+              </p>
+              <button
+                className={button}
+                onClick={() => updateRecall({ compared: true })}
+              >
+                I’ve compared my answer — continue
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+      {draft.revealed && compared && (
+        <section
+          ref={recordSection}
+          tabIndex={-1}
+          className="recall-stage recall-record space-y-4"
+          aria-label="Record recall outcome"
+        >
+          <SectionHeading index="03" title="Record what you recalled" />
+          <p className="text-sm text-muted">
+            Rate your original answer from memory. Reading or correcting the
+            explanation does not count as unaided recall or a coding pass.
+          </p>
+          {!frozen && (
+            <button
+              className="quiet-action"
+              onClick={() => updateRecall({ compared: false })}
             >
-              <option value="external">
-                Problem explanation / external reference
-              </option>
-              <option value="notes">My saved notes</option>
-              <option value="reference">Pattern reference</option>
-            </select>
-          </label>
-          <label className="flex gap-3 text-sm text-body">
-            <input
-              type="checkbox"
-              checked={checked || frozen}
-              disabled={frozen}
-              onChange={(e) => setChecked(e.target.checked)}
-            />{" "}
-            I compared my answer with a reference and identified any gaps.
-          </label>
-          <label className="block text-sm text-body">
-            Save a corrected explanation or key insight (optional)
-            <textarea
-              aria-label="Corrected explanation"
-              rows={3}
-              maxLength={20000}
-              disabled={frozen}
-              value={draft.notes ?? ""}
-              onChange={(e) => updateRecall({ notes: e.target.value })}
-              className="mt-2 w-full rounded-md border border-line-strong bg-surface p-3 text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            />
-          </label>
+              Return to comparison
+            </button>
+          )}
           {saveError && (
             <p role="alert" className="text-danger">
               {saveError}
@@ -453,7 +636,6 @@ export function RecallPage() {
                 key={outcome}
                 disabled={
                   saving ||
-                  (!checked && !frozen) ||
                   (frozen && draft.completion?.attempt.outcome !== outcome)
                 }
                 onClick={() => void finish(outcome)}

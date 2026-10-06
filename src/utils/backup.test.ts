@@ -22,3 +22,17 @@ describe('backup validation', () => {
     expect(validateBackup(JSON.parse(JSON.stringify({ userSettings }))).userSettings.settings.studySchedule.restDay).toBe(-1);
   });
 });
+
+it('round-trips original recall, corrections, built-in reference type, and personal code', () => {
+  const date = '2026-10-06T12:00:00Z';
+  const progress = { 'two-sum': { firstSolvedAt: date, lastReviewedAt: date, nextReviewAt: date,
+    reviewCount: 0, history: [], retired: false, consecutiveThrees: 0,
+    notes: 'Personal logic\n\n```cpp\nint value = 1;\n```', studyState: {
+      version: 1, source: 'practice', recallIntervalDays: 3, codingIntervalDays: 7,
+      nextRecallAt: date, nextCodingAt: date, lapses: 0, recallHistory: [{
+        id: '00000000-0000-4000-8000-000000000001', date, elapsedSeconds: 180,
+        outcome: 'partial', answer: 'Original from memory', revisedAnswer: 'Corrected after comparing', checkedAgainst: 'solution',
+      }],
+    } } };
+  expect(validateBackup(JSON.parse(JSON.stringify({ formatVersion: 2, progress }))).progress).toEqual(progress);
+});

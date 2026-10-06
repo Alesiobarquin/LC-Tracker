@@ -1,0 +1,11 @@
+{
+  "problemId": "counting-bits",
+  "approach": "Bit Manipulation (Optimal)",
+  "explanation": "### How it works\n\nWe want to find the number of set bits (`1`s) in every number from `0` to `n`.\n\nA very important observation from binary representation is:\n\n- Right-shifting a number by 1 (`i >> 1`) removes the **least significant bit**\n- `(i & 1)` tells us whether the last bit of `i` is `1` or `0`\n\nSo, the number of set bits in `i` can be built from a **smaller number**:\n\n> **setBits(i) = setBits(i >> 1) + (i & 1)**\n\nThis means each result depends only on a previously computed value, making it a perfect fit for **Dynamic Programming**.\n\n### Steps\n\n1. Create a DP array `dp` of size `n + 1`\n    - `dp[i]` stores the number of set bits in `i`\n2. Initialize `dp[0] = 0`\n3. For every number `i` from `1` to `n`:\n    - Right shift `i` by 1 to get `i >> 1`\n    - Check the last bit using `(i & 1)`\n    - Compute:\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output array.\n\n### Things to watch for\n\n### Incorrect Bit Shift Operator\n\nWhen using the DP recurrence `dp[i] = dp[i >> 1] + (i & 1)`, a common mistake is using left shift instead of right shift, or confusing the operator precedence.\n\n### Off-by-One in Loop Bounds\n\nThe problem asks for bits count from `0` to `n` inclusive, meaning the result array should have `n + 1` elements. A common mistake is creating an array of size `n` or iterating up to `n - 1`.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def countBits(self, n: int) -> List[int]:\n        dp = [0] * (n + 1)\n        for i in range(n + 1):\n            dp[i] = dp[i >> 1] + (i & 1)\n        return dp\n",
+    "cpp": "class Solution {\npublic:\n    vector<int> countBits(int n) {\n        vector<int> dp(n + 1);\n        for (int i = 1; i <= n; i++) {\n            dp[i] = dp[i >> 1] + (i & 1);\n        }\n        return dp;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=RyBM56RIWrM",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-bits.md"
+}

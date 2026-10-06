@@ -54,13 +54,24 @@ calls it a block and supports recording unfinished work for another day.
 
 ## Evidence and schedules
 
-A recall attempt saves an answer, outcome, reference type, and elapsed time in
-`problem_progress.study_state.recallHistory`. Notes and general pattern guidance
-are hidden until the attempt is made. The comparison is a self-check against
-saved notes, a pattern reference, or the external problem explanation; general
-pattern guidance is not presented as an exact solution. Drafts and a frozen
-completion survive reloads and retry with the same operation ID. Recall timers
-support pause/resume and pause when leaving the page.
+A recall attempt saves the original answer from memory, outcome, reference type,
+and elapsed time in `problem_progress.study_state.recallHistory`. References stay
+hidden until comparison. The 250 core library problems have attributed, bundled
+NeetCode explanations with Python/C++ examples and problem-specific YouTube links.
+Full-catalog items outside that union still use notes or external explanations;
+general pattern guidance is never presented as an exact solution.
+
+The answer remains editable during comparison and recording. A snapshot taken
+before revealing the reference stays in `answer`; a later correction is optional
+`revisedAnswer`, and the outcome concerns the original answer. An explicit
+comparison button opens the outcome choices. Personal explanations and optional
+fenced code examples use the existing notes field and save with the recall
+outcome. Switching to the built-in view preserves personal notes. Removing those
+notes is explicit. Drafts, comparison progress, and a frozen completion survive
+reloads and retry with the same operation ID. A completion is fixed once saving
+starts so a lost response cannot change its payload. Recall timers support
+pause/resume and pause when leaving the page. See [reference provenance and
+verification](problem-references.md).
 
 Recall does not append coding ratings, change the last coding date, or increment
 the coding review counter. Recall success can lengthen only the recall interval.

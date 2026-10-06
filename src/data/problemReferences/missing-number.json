@@ -1,0 +1,11 @@
+{
+  "problemId": "missing-number",
+  "approach": "Math",
+  "explanation": "### How it works\n\nWe are given `n` distinct numbers from the range `[0, n]`, with **exactly one number missing**.\n\nA simple mathematical observation helps here:\n\n- The sum of numbers from `0` to `n` is known\n- If we subtract the sum of the given array from this expected sum, the result must be the missing number\n\nInstead of computing two separate sums, we can combine both ideas into a **single running calculation**, which keeps the logic clean and avoids overflow issues in some languages.\n\nThis approach uses **basic arithmetic**, making it easy to understand and language-independent.\n\n### Steps\n\n1. Let `n` be the length of the array.\n2. Initialize a variable `res = n`.\n3. For each index `i` from `0` to `n - 1`:\n    - Add `i` to `res`\n    - Subtract `nums[i]` from `res`\n4. After the loop, `res` will hold the missing number.\n5. Return `res` as the answer.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Forgetting That n Could Be the Missing Number\n\nThe range is `[0, n]` for an array of length `n`, meaning `n` itself could be missing. Solutions that only check indices `0` to `n-1` will miss this case and fail to return `n` when all other numbers are present.\n\n### Integer Overflow in Sum-Based Approach\n\nWhen using the mathematical approach, computing the full expected sum `n * (n + 1) / 2` separately before subtracting can cause overflow for large `n`. Combining addition and subtraction in a single loop avoids this issue.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def missingNumber(self, nums: List[int]) -> int:\n        res = len(nums)\n\n        for i in range(len(nums)):\n            res += i - nums[i]\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        int res = nums.size();\n\n        for (int i = 0; i < nums.size(); i++) {\n            res += i - nums[i];\n        }\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=WnPLSRLSANE",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number.md"
+}

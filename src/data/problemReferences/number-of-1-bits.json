@@ -1,0 +1,11 @@
+{
+  "problemId": "number-of-1-bits",
+  "approach": "Built-In Function",
+  "explanation": "### How it works\n\nWe want to find the **Hamming Weight** of a number, which means counting how many `1` bits are present in its binary representation.\n\nMost programming languages provide:\n\n- a way to convert a number into **binary form**, or\n- a built-in utility to **count set bits**\n\nInstead of manually checking each bit using bit manipulation, we can rely on these built-in features. This makes the solution **short, easy to understand, and less error-prone**, especially for beginners.\n\nThis approach focuses on **clarity and simplicity**, not on low-level optimizations.\n\n### Steps\n\n1. Convert the given number `n` into its binary representation\n   (using a built-in binary conversion or bit-count utility provided by the language).\n2. Count the number of `1` bits in that representation.\n3. Return the count.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Signed vs Unsigned Integer Handling\n\nIn some languages, right-shifting a signed negative integer fills with 1s (arithmetic shift) instead of 0s (logical shift). This can cause infinite loops when using `while (n != 0)` with negative inputs. Use unsigned types or the `>>>` operator in languages that support it.\n\n### Using Division Instead of Bit Shift\n\nWhile `n / 2` and `n >> 1` produce the same result for positive integers, division can behave differently for negative numbers and is generally slower. Stick to bitwise operations for clarity and consistency with the problem's intent.",
+  "code": {
+    "python": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        return bin(n).count('1')\n",
+    "cpp": "class Solution {\npublic:\n    int hammingWeight(uint32_t n) {\n        return __builtin_popcount(n);\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=5Km3utixwZs",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-one-bits.md"
+}

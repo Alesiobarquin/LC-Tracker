@@ -123,17 +123,19 @@ test("recall conceals references, preserves a draft, and retries a lost response
   await expect(answer).toHaveValue(/Use a hash map/);
   await page.getByRole("button", { name: "Resume check" }).click();
   await page.getByRole("button", { name: "Compare with a reference" }).click();
-  await expect(
-    page.getByText("Saved reference:", { exact: false }),
-  ).toBeVisible();
-  await expect(answer).toBeDisabled();
+  await expect(page.getByLabel("Personal explanation")).toHaveValue(/Saved reference:/);
+  await expect(answer).toBeEditable();
+  await answer.fill("Corrected: check the complement before inserting, and return both indices.");
   await page.screenshot({
     path: testInfo.outputPath("recall-reference.png"),
     fullPage: true,
     animations: "disabled",
   });
-  await expect(page.getByRole("button", { name: /^Recalled/ })).toBeDisabled();
-  await page.getByRole("checkbox", { name: /I compared my answer/ }).check();
+  await expect(page.getByRole("button", { name: /^Recalled/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "I’ve compared my answer — continue" }).click();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Record what you recalled" })).toBeVisible();
+  await expect(answer).toBeEditable();
   await page.getByRole("button", { name: /^Recalled/ }).click();
   await expect(
     page
@@ -141,7 +143,8 @@ test("recall conceals references, preserves a draft, and retries a lost response
       .filter({ hasText: "Your answer and attempt are preserved" }),
   ).toBeVisible();
   await page.reload();
-  await expect(answer).toHaveValue(/Use a hash map/);
+  await expect(answer).toHaveValue(/Corrected:/);
+  await expect(answer).toBeDisabled();
   await page.getByRole("button", { name: /^Retry: Recalled/ }).click();
   await expect(page).toHaveURL(/\/dashboard/);
   expect(saves).toHaveLength(2);
@@ -151,8 +154,17 @@ test("recall conceals references, preserves a draft, and retries a lost response
   expect(stored.progress[0].history).toEqual(originalHistory);
   expect(stored.progress[0].review_count).toBe(0);
   expect(stored.progress[0].study_state.recallHistory).toHaveLength(1);
+  expect(stored.progress[0].study_state.recallHistory[0].answer).toMatch(/^Use a hash map/);
+  expect(stored.progress[0].study_state.recallHistory[0].revisedAnswer).toMatch(/^Corrected:/);
+  expect(saves[0].p_payload.progress[0].study_state.recallHistory).toEqual(saves[1].p_payload.progress[0].study_state.recallHistory);
   expect(stored.timings).toHaveLength(1);
   expect(stored.timings[0].session_type).toBe("recall");
+  await page.goto('/analytics');
+  await page.locator('.session-history-row').first().click();
+  const detail = page.getByRole('dialog');
+  await expect(detail.getByRole('heading', { name: 'Original answer from memory' })).toBeVisible();
+  await expect(detail.getByRole('heading', { name: 'Correction after comparison' })).toBeVisible();
+  await expect(detail).toContainText('Corrected: check the complement before inserting');
 });
 
 test("43 eligible items produce a bounded desktop and mobile plan", async ({
@@ -300,4 +312,101 @@ test("a scheduled break suppresses all automatic assignments", async ({
   await expect(
     page.getByRole("button", { name: /Start recall check/ }),
   ).toHaveCount(0);
+});
+
+for (const theme of ['light', 'dark']) {
+  for (const width of [1280, 390]) {
+    test(`built-in recall explanation stays editable and readable at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      const row = { ...progressRow(), notes: '' };
+      await fixture(page, [row]);
+      await page.addInitScript(theme => localStorage.setItem('lc-tracker-theme', theme), theme);
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/recall/two-sum');
+      await expect(page.locator('.problem-explanation')).toHaveCount(0);
+      await expect(page.getByRole('link', { name: /Watch NeetCode/ })).toHaveCount(0);
+      const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+      await answer.fill('Try each pair.');
+      await page.getByRole('button', { name: 'Compare with a reference' }).click();
+      await expect(page.getByRole('heading', { name: 'Hash Map (One Pass)' })).toBeVisible();
+      await expect(page.locator('.reference-code .cm-lineNumbers')).toBeVisible();
+      await expect(page.locator('.reference-code .cm-content')).toContainText('twoSum');
+      await expect(page.getByRole('link', { name: /Watch NeetCode/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=KLlXCFG5TnA');
+      await expect(answer).toBeEditable();
+      await answer.fill('Use a map to look up the complement.');
+      await page.getByText('View original answer from memory', { exact: true }).click();
+      await expect(page.getByText('Try each pair.', { exact: true })).toBeVisible();
+      await page.getByLabel('Example language').selectOption('cpp');
+      await expect(page.locator('.reference-code .cm-content')).toContainText('vector<int>');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`reference-${theme}-${width}.png`), fullPage: true });
+      await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
+      await expect(answer).toBeEditable();
+      await answer.fill('Still editable in the recording step.');
+      await page.reload();
+      await expect(answer).toHaveValue('Still editable in the recording step.');
+      await expect(page.getByRole('heading', { name: 'Record what you recalled' })).toBeVisible();
+    });
+  }
+}
+
+test('a personal explanation and code survive reload, save, and switching back to the built-in reference', async ({ page }) => {
+  const stored = await fixture(page, [{ ...progressRow(), notes: '' }]);
+  await page.route('https://test.supabase.co/rest/v1/rpc/commit_user_change', async route => {
+    const request = route.request().postDataJSON();
+    stored.progress = request.p_payload.progress.map((row: any) => ({ ...row, version: 2 }));
+    stored.timings = request.p_payload.timings;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: '{"duplicate":false}' });
+  });
+  await page.goto('/recall/two-sum');
+  await page.getByLabel('Your attempt · explanation or pseudocode').fill('Use a complement map.');
+  await page.getByRole('button', { name: 'Compare with a reference' }).click();
+  await page.getByLabel('Reference used').selectOption('notes');
+  await page.getByLabel('Personal explanation').fill('My logic: check the map before adding the current value.');
+  await page.getByLabel('Personal code language').selectOption('cpp');
+  await expect(page.getByLabel('Personal code language')).toHaveValue('cpp');
+  await page.getByRole('textbox', { name: 'Personal code example' }).fill('int solve() { return 1; }');
+  await page.reload();
+  await expect(page.getByLabel('Personal explanation')).toHaveValue(/^My logic:/);
+  await expect(page.getByLabel('Personal code language')).toHaveValue('cpp');
+  await expect(page.getByRole('textbox', { name: 'Personal code example' })).toContainText('int solve');
+  await page.getByRole('button', { name: 'Use built-in explanation', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Hash Map (One Pass)' })).toBeVisible();
+  await page.getByLabel('Reference used').selectOption('notes');
+  await expect(page.getByLabel('Personal explanation')).toHaveValue(/^My logic:/);
+  await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
+  await page.getByRole('button', { name: /^Partial recall/ }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+  expect(stored.progress[0].notes).toContain('```cpp\nint solve');
+  expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall)).toBeNull();
+  await page.goto('/library/two-sum/explanation');
+  await expect(page.getByRole('heading', { name: 'Your saved explanation' })).toBeVisible();
+  await expect(page.locator('.reference-code .cm-content')).toContainText('int solve');
+  await page.getByRole('button', { name: 'Built-in explanation', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Hash Map (One Pass)' })).toBeVisible();
+});
+
+test('an empty original answer cannot become a recalled answer through editing after reveal', async ({ page }) => {
+  await fixture(page, [{ ...progressRow(), notes: '' }]);
+  await page.goto('/recall/two-sum');
+  await page.getByRole('button', { name: 'I can’t recall it' }).click();
+  await page.getByLabel('Your attempt · explanation or pseudocode').fill('Copied the answer after comparison.');
+  await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
+  await page.getByRole('button', { name: /^Recalled/ }).click();
+  await expect(page.getByRole('alert')).toContainText('Your original attempt was empty');
+});
+
+test('library explanations cover each core list and do not reveal a pending recall answer', async ({ page }) => {
+  await fixture(page, [{ ...progressRow(), notes: '' }]);
+  for (const [tab, problem] of [['pareto', 'Contains Duplicate'], ['neetcode-75', 'Two Sum'], ['neetcode-150', 'LRU Cache'], ['neetcode-250', 'Text Justification']]) {
+    await page.goto(`/library?tab=${tab}&q=${encodeURIComponent(problem)}`);
+    await page.getByRole('button', { name: `Explanation for ${problem}`, exact: true }).click();
+    await expect(page.locator('.problem-explanation')).toBeVisible();
+    await expect(page.locator('.reference-code')).toBeVisible();
+  }
+  await page.goto('/recall/two-sum');
+  await page.getByLabel('Your attempt · explanation or pseudocode').fill('Draft stays here.');
+  await page.goto('/library/two-sum/explanation');
+  await expect(page.locator('.problem-explanation')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Resume recall check' }).click();
+  await expect(page.getByLabel('Your attempt · explanation or pseudocode')).toHaveValue('Draft stays here.');
 });

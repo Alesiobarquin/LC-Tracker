@@ -18,7 +18,8 @@ export const recallAttemptSchema = z.object({
   elapsedSeconds: z.number().int().nonnegative(),
   outcome: z.enum(["recalled", "partial", "forgot"]),
   answer: z.string().max(20000),
-  checkedAgainst: z.enum(["notes", "reference", "external"]),
+  revisedAnswer: z.string().max(20000).optional(),
+  checkedAgainst: z.enum(["notes", "reference", "external", "solution"]),
 });
 export const studyStateSchema = z.object({
   version: z.literal(1),

@@ -1,0 +1,11 @@
+{
+  "problemId": "single-number",
+  "approach": "Bit Manipulation",
+  "explanation": "### How it works\n\nWe are given an array where **every number appears exactly twice except one**, and we need to find that unique number.\n\nThis problem is a perfect fit for **bit manipulation**, specifically the XOR (`^`) operation.\n\nKey properties of XOR:\n\n- `a ^ a = 0` (a number XORed with itself cancels out)\n- `a ^ 0 = a` (XOR with `0` keeps the number unchanged)\n- XOR is **commutative and associative**, so order does not matter\n\nBecause of these properties:\n\n- all numbers that appear twice will cancel each other out\n- the number that appears once will remain\n\n### Steps\n\n1. Initialize `res = 0`.\n2. Iterate through each number in the array:\n    - update `res = res ^ num`\n3. After processing all numbers:\n    - `res` contains the single number\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Not Knowing XOR Properties\n\nThe optimal solution relies on understanding that `a ^ a = 0` and `a ^ 0 = a`. Candidates unfamiliar with bitwise operations often resort to hash sets or sorting, missing the elegant `O(1)` space solution. Memorizing these XOR properties is essential for bit manipulation problems.\n\n### Using Extra Space Unnecessarily\n\nA common mistake is implementing a hash map or set to track occurrences when the problem explicitly asks for `O(1)` extra space. While these approaches work functionally, they fail to meet the space constraint and miss the intended learning objective of the problem.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        res = 0\n        for num in nums:\n            res = num ^ res\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int res = 0;\n        for (int num : nums) {\n            res ^= num;\n        }\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=qMPX1AOa83k",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number.md"
+}

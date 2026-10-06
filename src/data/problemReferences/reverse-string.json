@@ -1,0 +1,11 @@
+{
+  "problemId": "reverse-string",
+  "approach": "Two Pointers",
+  "explanation": "### How it works\n\nThe most efficient approach uses two pointers starting at opposite ends of the array. We swap the characters at these pointers, then move them toward each other. When the pointers meet or cross, every character has been swapped exactly once, and the array is reversed. This achieves O(1) space since we only swap in place.\n\n### Steps\n\n1. Initialize two pointers: `l` at index 0 and `r` at the last index.\n2. While `l < r`:\n    - Swap `s[l]` and `s[r]`.\n    - Increment `l` and decrement `r`.\n3. The array `s` is now reversed in place.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Using Incorrect Loop Termination Condition\n\nWhen using two pointers, the loop should terminate when `l >= r`, not when `l > r`. Using `l != r` works for odd-length strings but is less intuitive. The condition `l < r` correctly handles both even and odd length arrays.\n\n### Returning a New String Instead of Modifying In-Place\n\nThe problem requires modifying the input array in-place. A common mistake is creating a new reversed array or string and returning it, which violates the in-place requirement and uses unnecessary extra space.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def reverseString(self, s: List[str]) -> None:\n        \"\"\"\n        Do not return anything, modify s in-place instead.\n        \"\"\"\n        l, r = 0, len(s) - 1\n        while l < r:\n            s[l], s[r] = s[r], s[l]\n            l += 1\n            r -= 1\n",
+    "cpp": "class Solution {\npublic:\n    void reverseString(vector<char>& s) {\n        int l = 0, r = s.size() - 1;\n        while (l < r) {\n            swap(s[l++], s[r--]);\n        }\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=_d0T_2Lk2qA",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-string.md"
+}

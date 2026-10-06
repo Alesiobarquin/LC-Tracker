@@ -1,0 +1,11 @@
+{
+  "problemId": "best-time-to-buy-and-sell-stock",
+  "approach": "Dynamic Programming",
+  "explanation": "### How it works\n\nAs we scan through the prices, we keep track of two things:\n\n1. **The lowest price so far** → this is the best day to buy.\n2. **The best profit so far** → selling today minus the lowest buy price seen earlier.\n\nAt each price, we imagine selling on that day.  \nThe profit would be:  \n`current price – lowest price seen so far`\n\nWe then update:\n\n- the maximum profit,\n- and the lowest price if we find a cheaper one.\n\nThis way, we make the optimal buy–sell decision in one simple pass.\n\n### Steps\n\n1. Initialize:\n    - `minBuy` as the first price\n    - `maxP = 0` for the best profit\n2. Loop through each price `sell`:\n    - Update `maxP` with `sell - minBuy`.\n    - Update `minBuy` if we find a smaller price.\n3. Return `maxP` after scanning all days.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Selling Before Buying\n\nThe sell day must come after the buy day. Calculating `prices[i] - prices[j]` where `j > i` means you're selling in the past, which is invalid.\n\n### Returning Negative Profit\n\nIf prices only decrease, the maximum profit is 0 (don't trade), not a negative number. Always ensure the result is at least 0.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        maxP = 0\n        minBuy = prices[0]\n\n        for sell in prices:\n            maxP = max(maxP, sell - minBuy)\n            minBuy = min(minBuy, sell)\n        return maxP\n",
+    "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int maxP = 0;\n        int minBuy = prices[0];\n\n        for (int& sell : prices) {\n            maxP = max(maxP, sell - minBuy);\n            minBuy = min(minBuy, sell);\n        }\n        return maxP;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=1pkOgXD63yU",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-and-sell-crypto.md"
+}

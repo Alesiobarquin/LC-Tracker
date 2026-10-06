@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION pg_temp.study_state() RETURNS jsonb LANGUAGE SQL AS $
 SELECT '{"version":1,"source":"legacy","recallIntervalDays":5,"codingIntervalDays":14,
  "nextRecallAt":"2026-10-11T00:00:00Z","nextCodingAt":"2026-10-08T00:00:00Z","lapses":0,
  "recallHistory":[{"id":"00000000-0000-4000-8000-000000000301","date":"2026-10-06T12:00:00Z",
- "elapsedSeconds":180,"outcome":"recalled","answer":"Approach and invariant","checkedAgainst":"notes"}]}'::jsonb $$;
+ "elapsedSeconds":180,"outcome":"recalled","answer":"Approach and invariant","revisedAnswer":"Corrected after comparison","checkedAgainst":"solution"}]}'::jsonb $$;
 CREATE OR REPLACE FUNCTION pg_temp.study_timing(sid uuid, r integer DEFAULT 4) RETURNS jsonb LANGUAGE SQL AS $$
 SELECT jsonb_build_object('id',sid,'problem_id','two-sum','category','Arrays & Hashing',
  'recorded_at','2026-10-06T12:00:00Z','elapsed_seconds',180,'session_type','recall','rating',r) $$;
@@ -23,6 +23,7 @@ SELECT public.commit_user_change('00000000-0000-4000-8000-000000000301','recall'
  'timings',jsonb_build_array(pg_temp.study_timing('00000000-0000-4000-8000-000000000301')),'logDate','2026-10-06','isNew',false));
 SELECT pg_temp.study_assert((SELECT history = '[{"date":"2020-01-01T00:00:00Z","rating":4}]' AND review_count=0 AND last_reviewed_at='2020-01-01T00:00:00Z'::timestamptz FROM public.problem_progress WHERE problem_id='two-sum'), 'recall never fabricates coding history');
 SELECT pg_temp.study_assert((SELECT study_state = pg_temp.study_state() AND version=2 FROM public.problem_progress WHERE problem_id='two-sum'), 'recall state and revision committed');
+SELECT pg_temp.study_assert((SELECT study_state->'recallHistory'->0->>'answer' = 'Approach and invariant' AND study_state->'recallHistory'->0->>'revisedAnswer' = 'Corrected after comparison' AND study_state->'recallHistory'->0->>'checkedAgainst' = 'solution' FROM public.problem_progress WHERE problem_id='two-sum'), 'original recall, correction, and built-in reference remain separate');
 SELECT pg_temp.study_assert((SELECT solved=0 AND reviewed=1 FROM public.activity_log), 'recall is practice, not a new solve');
 SELECT pg_temp.study_assert((SELECT session_type='recall' FROM public.session_timings), 'modality retained');
 SELECT pg_temp.study_assert((public.commit_user_change('00000000-0000-4000-8000-000000000301','recall','{"progress":{"two-sum":1}}','{"problemId":"two-sum"}')->>'duplicate')::boolean, 'lost-response replay returns receipt');

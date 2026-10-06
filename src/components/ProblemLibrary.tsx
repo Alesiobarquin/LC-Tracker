@@ -33,6 +33,7 @@ import { getDifficultyColor } from "../utils/uiHelpers";
 import { isDueToday } from "../utils/dateUtils";
 import type { ProblemProgress } from "../types";
 import { PageHeader } from "./ui";
+import { hasProblemReference } from "../data/problemReferences";
 
 const VIRTUALIZE_THRESHOLD = 200;
 /** Initial rows to render per tab/filter (large lists load more on demand). */
@@ -989,6 +990,10 @@ export const ProblemLibrary: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="inline-flex items-center justify-end gap-2">
+                                {hasProblemReference(prob.id) && <button type="button" className="row-action"
+                                  aria-label={`Explanation for ${prob.title}`} onClick={() => navigate(`/library/${prob.id}/explanation`)}>
+                                  Explanation
+                                </button>}
                                 <a
                                   href={prob.leetcodeUrl}
                                   target="_blank"

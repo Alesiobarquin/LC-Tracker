@@ -1,0 +1,11 @@
+{
+  "problemId": "sqrtx",
+  "approach": "Newton's Method",
+  "explanation": "### How it works\n\nNewton's method is a numerical technique for finding roots of equations. To find `sqrt(x)`, we solve `r^2 = x`, or equivalently find the root of `f(r) = r^2 - x`. Newton's iteration formula gives us `r_new = (r + x/r) / 2`. Starting with an initial guess of `x`, we repeatedly apply this formula until `r^2 <= x`, which converges quickly to the answer.\n\n### Steps\n\n1. Initialize `r = x` as the starting guess.\n2. While `r * r > x`, update `r = (r + x / r) / 2` (using integer division, or right shift by 1).\n3. The loop converges when `r^2 <= x`.\n4. Return `r` as the integer square root.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Integer Overflow When Squaring\n\nWhen computing `m * m` during binary search, the result can overflow if `m` is large (e.g., close to 46340 for 32-bit integers). Always cast to a 64-bit type before multiplication, such as `(long)m * m` in Java or `(long long)m * m` in C++, to prevent incorrect comparisons.\n\n### Off-by-One Errors in Binary Search\n\nA subtle mistake is returning `m` when `m * m < x` instead of tracking it as a candidate and continuing to search for a larger valid value. The correct approach is to store `m` in a result variable when `m * m <= x` and keep searching, returning the stored result when the loop ends.",
+  "code": {
+    "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        r = x\n        while r * r > x:\n            r = (r + x // r) >> 1\n        return r\n",
+    "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        long long r = x;\n        while (r * r > x) {\n            r = (r + x / r) >> 1;\n        }\n        return r;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=zdMhGxRWutQ",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sqrtx.md"
+}

@@ -1,0 +1,11 @@
+{
+  "problemId": "contains-duplicate",
+  "approach": "Hash Set Length",
+  "explanation": "### How it works\n\nThis approach uses the same idea as the previous hash set method: a set only stores unique values, so duplicates are automatically removed.  \nInstead of checking each element manually, we simply compare the length of the set to the length of the original array.  \nIf duplicates exist, the set will contain fewer elements.  \nThe logic is identical to the earlier approach — this version is just a shorter and more concise implementation of it.\n\n### Steps\n\n1. Convert the array into a hash set, which removes duplicates.\n2. Compare the size of the set with the size of the original array.\n3. If the set is smaller, return `true` because duplicates must have been removed.\n4. Otherwise, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Using Wrong Comparison in Brute Force\n\nWhen using nested loops, a common mistake is comparing an element with itself by starting the inner loop at `i` instead of `i + 1`.\n\n### Modifying Input Array Unexpectedly\n\nThe sorting approach modifies the original array, which may not be acceptable in some contexts. If the original order matters, make a copy first.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        return len(set(nums)) < len(nums)\n",
+    "cpp": "class Solution {\npublic:\n    bool containsDuplicate(vector<int>& nums) {\n        return unordered_set<int>(nums.begin(), nums.end()).size() < nums.size();\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=3OamzN90kPg",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/duplicate-integer.md"
+}

@@ -38,7 +38,14 @@ export function useRealtimeSync(userId: string | null) {
         { event: '*', schema: 'public', table: 'sprint_state', filter: `user_id=eq.${userId}` },
         () => queryClient.invalidateQueries({ queryKey: userDataQueryKeys.sprint(userId) })
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          // Reconnects may have missed writes while the socket was offline.
+          for (const key of Object.values(userDataQueryKeys)) {
+            void queryClient.invalidateQueries({ queryKey: key(userId) });
+          }
+        }
+      });
 
     return () => {
       void supabase.removeChannel(channel);

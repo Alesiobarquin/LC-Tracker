@@ -4,13 +4,16 @@ import { Layout } from './components/Layout';
 import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
-import { useUser, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
+import { useUser, AuthenticateWithRedirectCallback } from '@clerk/react';
 import { useUserSettings } from './hooks/useUserData';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { isAdminUser } from './utils/adminAuth';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { useStore } from './store/useStore';
+import { queryClient } from './lib/queryClient';
+import { userDataQueryKeys } from './lib/userDataQueryKeys';
 
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ProblemLibrary = lazy(() => import('./components/ProblemLibrary').then((m) => ({ default: m.ProblemLibrary })));
@@ -63,6 +66,21 @@ export default function App() {
   const rawPath = location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
   const [bootTimedOut, setBootTimedOut] = React.useState(false);
+  const previousUserId = React.useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoaded) return;
+    const userId = user?.id ?? null;
+    if (previousUserId.current && previousUserId.current !== userId) {
+      for (const key of Object.values(userDataQueryKeys)) {
+        const queryKey = key(previousUserId.current);
+        void queryClient.cancelQueries({ queryKey });
+        queryClient.removeQueries({ queryKey });
+      }
+    }
+    previousUserId.current = userId;
+    useStore.getState().setSessionUser(userId);
+  }, [authLoaded, user?.id]);
 
   const handleOnboardingComplete = () => {
     navigate('/dashboard');

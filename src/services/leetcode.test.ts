@@ -1,7 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetchLeetCodeProfile, LeetCodeApiError } from './leetcode';
 
 describe('fetchLeetCodeProfile', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -102,5 +106,27 @@ describe('fetchLeetCodeProfile', () => {
     const result = await fetchLeetCodeProfile('testuser');
     expect(result).toEqual(mockSubmissions);
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('falls back when a successful proxy returns an invalid payload', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response);
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({ submission: [] }) } as Response);
+    await expect(fetchLeetCodeProfile('test')).resolves.toEqual([]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects malformed fallback responses instead of reporting an empty successful sync', async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('Proxy offline'));
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response);
+    await expect(fetchLeetCodeProfile('test')).rejects.toThrow('Unexpected fallback API response');
+  });
+
+  it('bounds both external requests with abort signals', async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new DOMException('Timed out', 'TimeoutError'));
+    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({ submission: [] }) } as Response);
+    await fetchLeetCodeProfile('test');
+    for (const [, options] of vi.mocked(fetch).mock.calls) {
+      expect(options?.signal).toBeInstanceOf(AbortSignal);
+    }
   });
 });

@@ -1,0 +1,3 @@
+interface:
+  display_name: "LC Tracker Reliability"
+  short_description: "Verify persistence, recovery, and releases in LC Tracker"

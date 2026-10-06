@@ -1,9 +1,10 @@
+import { preferenceStorage } from '../lib/safeStorage';
 import React, { useState, useMemo, useEffect } from 'react';
 import { allSyntaxCards, SyntaxCard } from '../data/syntaxCards';
 import { SyntaxCardComponent } from './SyntaxCardComponent';
 import { SyntaxFlashcardSession, SessionOrderMode } from './SyntaxFlashcardSession';
 import { Search, ChevronDown, ChevronRight, BookOpen, AlertCircle, Zap, Layers, Shuffle } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,7 +14,7 @@ const SESSION_ORDER_KEY = 'syntax-session-order';
 
 const readStoredOrderMode = (): SessionOrderMode => {
     if (typeof window === 'undefined') return 'random';
-    return localStorage.getItem(SESSION_ORDER_KEY) === 'category' ? 'category' : 'random';
+    return preferenceStorage.getItem(SESSION_ORDER_KEY) === 'category' ? 'category' : 'random';
 };
 
 function matchesSyntaxSearch(card: SyntaxCard, query: string): boolean {
@@ -46,7 +47,7 @@ export const SyntaxReference: React.FC = () => {
     const [sessionOrderMode, setSessionOrderMode] = useState<SessionOrderMode>(readStoredOrderMode);
 
     useEffect(() => {
-        localStorage.setItem(SESSION_ORDER_KEY, sessionOrderMode);
+        preferenceStorage.setItem(SESSION_ORDER_KEY, sessionOrderMode);
     }, [sessionOrderMode]);
 
     // Search is for the full reference — jump out of Due-now when the user types.

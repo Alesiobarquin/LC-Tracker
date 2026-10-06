@@ -1,20 +1,18 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { leetcodeAcDevApi } from './vite-plugins/leetcodeAcDevApi';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', '');
+export default defineConfig(({ mode, command }) => {
+  if (mode === 'e2e' && command === 'build') throw new Error('E2E authentication mocks cannot be built for deployment');
   return {
     plugins: [react(), tailwindcss(), leetcodeAcDevApi()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+      alias: [
+        ...(mode === 'e2e' ? [{ find: /^@clerk\/react(?:\/legacy)?$/, replacement: path.resolve(__dirname, 'e2e/fixtures/clerk.tsx') }] : []),
+        { find: '@', replacement: path.resolve(__dirname, '.') },
+      ],
     },
     build: {
       rollupOptions: {

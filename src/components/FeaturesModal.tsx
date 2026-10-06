@@ -1,3 +1,4 @@
+import { preferenceStorage } from '../lib/safeStorage';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +14,7 @@ export interface FeaturesModalProps {
 
 function persistDismissed() {
   try {
-    localStorage.setItem(FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION);
+    preferenceStorage.setItem(FEATURES_MODAL_STORAGE_KEY, FEATURES_MODAL_VERSION);
   } catch {
     /* ignore quota / private mode */
   }

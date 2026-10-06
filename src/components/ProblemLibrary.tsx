@@ -1,7 +1,8 @@
+import { preferenceStorage } from '../lib/safeStorage';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { problems, allProblems, problemMap, isProblemPremium, Category, Difficulty, ensureExtendedCatalogLoaded } from '../data/problems';
 import { Search, Play, CircleCheck, Filter, Lock, ExternalLink, Library, Copy, X } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { useProblemProgress, useUserSettings } from '../hooks/useUserData';
@@ -64,7 +65,7 @@ const SAVED_VIEWS: { id: SavedView; label: string }[] = [
 const parseLibraryTab = (raw: string | null): LibraryTab => {
   if (raw && PARAM_TO_TAB[raw]) return PARAM_TO_TAB[raw];
   if (raw && (LIBRARY_TABS as string[]).includes(raw)) return raw as LibraryTab;
-  const saved = localStorage.getItem('lc-tracker-active-library-tab');
+  const saved = preferenceStorage.getItem('lc-tracker-active-library-tab');
   if (saved && (LIBRARY_TABS as string[]).includes(saved)) return saved as LibraryTab;
   return 'NeetCode 75';
 };
@@ -124,7 +125,7 @@ export const ProblemLibrary: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('lc-tracker-active-library-tab', activeTab);
+    preferenceStorage.setItem('lc-tracker-active-library-tab', activeTab);
   }, [activeTab]);
 
   const updateFilterParams = useCallback(
@@ -167,7 +168,7 @@ export const ProblemLibrary: React.FC = () => {
   const [pendingPremiumStartId, setPendingPremiumStartId] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('lc-tracker-active-library-tab', activeTab);
+    preferenceStorage.setItem('lc-tracker-active-library-tab', activeTab);
   }, [activeTab]);
 
   const [visibleLimit, setVisibleLimit] = useState(PROBLEM_LIST_INITIAL_CHUNK);

@@ -19,21 +19,22 @@ function normalizeUsername(username: string): string {
 }
 
 function asSubmissions(value: unknown): LeetCodeSubmission[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((row): row is LeetCodeSubmission => {
-    return (
-      !!row &&
-      typeof row === 'object' &&
-      typeof (row as LeetCodeSubmission).titleSlug === 'string' &&
-      typeof (row as LeetCodeSubmission).timestamp === 'string'
-    );
-  });
+  if (!Array.isArray(value)) throw new LeetCodeApiError('Unexpected submissions response');
+  for (const row of value) {
+    const timestamp = Number(row?.timestamp);
+    if (!row || typeof row !== 'object' || typeof row.titleSlug !== 'string' || !row.titleSlug
+      || typeof row.timestamp !== 'string' || !Number.isFinite(timestamp) || timestamp < 0
+      || !Number.isFinite(new Date(timestamp * 1000).getTime())) {
+      throw new LeetCodeApiError('Invalid LeetCode submission data');
+    }
+  }
+  return value as LeetCodeSubmission[];
 }
 
 async function fetchViaSameOriginProxy(username: string): Promise<LeetCodeSubmission[]> {
   const response = await fetch(
     `/api/leetcode-ac?username=${encodeURIComponent(username)}&limit=50`,
-    { headers: { Accept: 'application/json' } }
+    { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10_000) }
   );
 
   const payload = await response.json().catch(() => ({}));
@@ -44,22 +45,24 @@ async function fetchViaSameOriginProxy(username: string): Promise<LeetCodeSubmis
     );
   }
 
-  const submissions = asSubmissions(payload?.submissions);
-  if (payload?.submissions && !Array.isArray(payload.submissions)) {
+  if (!Array.isArray(payload?.submissions)) {
     throw new LeetCodeApiError('Unexpected LeetCode proxy response');
   }
-  return submissions;
+  return asSubmissions(payload.submissions);
 }
 
 async function fetchViaAlfaFallback(username: string): Promise<LeetCodeSubmission[]> {
   const fallbackEndpoint = `https://alfa-leetcode-api.onrender.com/${encodeURIComponent(username)}/acSubmission`;
-  const response = await fetch(fallbackEndpoint);
+  const response = await fetch(fallbackEndpoint, { signal: AbortSignal.timeout(15_000) });
   if (!response.ok) {
     const errorText = await response.text();
     throw new LeetCodeApiError(`Fallback API failed: ${errorText || response.statusText}`);
   }
   const data = await response.json();
-  return asSubmissions(data?.submission);
+  if (!Array.isArray(data?.submission)) {
+    throw new LeetCodeApiError('Unexpected fallback API response');
+  }
+  return asSubmissions(data.submission);
 }
 
 /**

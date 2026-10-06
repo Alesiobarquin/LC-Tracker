@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, AlertCircle, CheckCircle2, ImagePlus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { safeUUID } from '../utils/uuid';
 
 interface FeedbackModalProps {

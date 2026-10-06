@@ -8,7 +8,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { getPhase } from '../utils/dateUtils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUserSettings } from '../hooks/useUserData';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/react';
 import { FeedbackModal } from './FeedbackModal';
 import { FeaturesModal } from './FeaturesModal';
 import { Logo } from './Logo';

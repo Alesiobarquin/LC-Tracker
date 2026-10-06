@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, AlertCircle, Lightbulb, RefreshCw } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { clsx } from 'clsx';
 import { isMissingRelationError } from '../utils/supabaseErrors';
 

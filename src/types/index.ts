@@ -21,6 +21,8 @@ export interface ProblemHistoryEntry {
 }
 
 export interface ProblemProgress {
+  /** Database revision for conflict detection; absent in older backups. */
+  version?: number;
   firstSolvedAt: string;
   lastReviewedAt: string;
   nextReviewAt: string;
@@ -80,6 +82,8 @@ export interface SprintHistoryEntry {
 }
 
 export interface ActiveSession {
+  id: string;
+  userId?: string;
   problemId: string;
   startTimestamp: number;
   isReview: boolean;
@@ -88,6 +92,10 @@ export interface ActiveSession {
   pausedSeconds?: number;
   /** Epoch ms when the current pause began; null/undefined when running. */
   pausedAt?: number | null;
+  finishedElapsed?: number;
+  draftNotes?: string;
+  /** Persisted before the request so a reload/retry uses the same operation ID. */
+  completion?: { timing: SessionTiming; rating: ProblemSessionRating; notes?: string };
 }
 
 export interface StreakState {
@@ -217,6 +225,7 @@ export interface AppSettings {
 }
 
 export interface UserSettingsData {
+  version?: number;
   onboardingComplete: boolean;
   leetcodeUsername: string | null;
   targetInterviewDate: string;

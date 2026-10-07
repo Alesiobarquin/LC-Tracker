@@ -255,6 +255,104 @@ test("43 eligible items produce a bounded desktop and mobile plan", async ({
   });
 });
 
+test("ends the daily plan when only three minutes remain after planned work", async ({
+  page,
+}) => {
+  const ids = [
+    "contains-duplicate",
+    "valid-anagram",
+    "two-sum",
+    "group-anagrams",
+    "top-k-frequent-elements",
+    "valid-sudoku",
+    "product-of-array-except-self",
+  ];
+  const stored = await fixture(page, ids.map((id) => progressRow(id)));
+  stored.settings.settings_json.settings.studySchedule = {
+    weekdayMinutes: 60,
+    weekendMinutes: 60,
+    restDay: -1,
+    blackoutDates: [],
+  };
+  const recordedAt = new Date().toISOString();
+  stored.timings = [
+    ...ids.slice(0, 6).map((problemId, index) => ({
+      id: `recall-${index}`,
+      problem_id: problemId,
+      category: "Arrays & Hashing",
+      recorded_at: recordedAt,
+      elapsed_seconds: 180,
+      session_type: "recall",
+      rating: 4,
+    })),
+    {
+      id: "coding-block",
+      problem_id: ids[6],
+      category: "Arrays & Hashing",
+      recorded_at: recordedAt,
+      elapsed_seconds: 39 * 60,
+      session_type: "review",
+      rating: 4,
+    },
+  ];
+
+  await page.goto("/dashboard");
+  await expect(
+    page.getByRole("heading", { name: "Today’s plan is complete" }),
+  ).toBeVisible();
+  await expect(page.getByText("57 min used", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Main practice block" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Start practice block" }),
+  ).toHaveCount(0);
+});
+
+test("does not offer another assignment while a saved coding session is active", async ({
+  page,
+}) => {
+  const stored = await fixture(page, [progressRow("two-sum")]);
+  stored.settings.settings_json.settings.studySchedule = {
+    weekdayMinutes: 60,
+    weekendMinutes: 60,
+    restDay: -1,
+    blackoutDates: [],
+  };
+  await page.addInitScript(({ userId }) => {
+    sessionStorage.setItem(
+      "lc-tracker-active-session",
+      JSON.stringify({
+        state: {
+          activeSession: {
+            id: "00000000-0000-4000-8000-000000000001",
+            userId,
+            problemId: "two-sum",
+            startTimestamp: Date.now() - 57 * 60 * 1000,
+            isReview: true,
+            isColdSolve: false,
+            finishedElapsed: 57 * 60,
+          },
+          sessionReturnTo: "/dashboard",
+        },
+        version: 0,
+      }),
+    );
+  }, { userId });
+  await page.goto("/dashboard");
+
+  await expect(
+    page.getByText("Session ended · outcome ready to save", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Record outcome" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Main practice block" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Start practice block" }),
+  ).toHaveCount(0);
+});
+
 test("independent coding saves in two taps without notes or confidence", async ({ page }) => {
   const stored = await fixture(page, []);
   let saved: any;

@@ -79,7 +79,11 @@ Guided order builds representative coverage across patterns before adding depth.
 Mixed order also favors under-covered patterns. The selected curriculum defines
 core coverage; related checks can come from the larger catalog. The premium
 preference constrains all assignments. A coding block may be shorter than the
-estimated full attempt and supports unfinished continuation.
+estimated full attempt and supports unfinished continuation. The planner starts
+a new coding assignment only when at least five minutes remain; a smaller
+leftover does not create another problem for the day. While a coding or recall
+session is saved and active, the dashboard holds other assignments until that
+session is recorded.
 
 ## Evidence and schedules
 

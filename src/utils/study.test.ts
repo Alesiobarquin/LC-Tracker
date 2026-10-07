@@ -171,6 +171,61 @@ describe("capacity and backlog planning", () => {
       }).plannedMinutes,
     ).toBe(0);
   });
+  it("does not start another coding block in a final three minutes", () => {
+    const ids = Object.keys(backlog).slice(0, 7);
+    const timings: SessionTiming[] = [
+      ...ids.slice(0, 6).map((problemId, index) => ({
+        id: `recall-${index}`,
+        problemId,
+        category: problemMap[problemId].category,
+        date: now.toISOString(),
+        elapsedSeconds: 180,
+        sessionType: "recall" as const,
+        rating: 4 as const,
+      })),
+      {
+        id: "coding-block",
+        problemId: ids[6],
+        category: problemMap[ids[6]].category,
+        date: now.toISOString(),
+        elapsedSeconds: 39 * 60,
+        sessionType: "review",
+        rating: 4,
+      },
+    ];
+    const plan = buildStudyPlan({
+      progress: backlog,
+      settings: settings(60),
+      timings,
+      now,
+    });
+    expect(plan.spentMinutes).toBe(57);
+    expect(plan.remainingMinutes).toBe(3);
+    expect(plan.recallTasks).toHaveLength(0);
+    expect(plan.mainTask).toBeNull();
+    expect(plan.plannedMinutes).toBe(0);
+  });
+  it("holds new assignments while a saved session is active", () => {
+    const plan = buildStudyPlan({
+      progress: backlog,
+      settings: settings(60),
+      activeSeconds: 57 * 60,
+      hasActiveSession: true,
+      now,
+    });
+    expect(plan.remainingMinutes).toBe(3);
+    expect(plan.recallTasks).toHaveLength(0);
+    expect(plan.mainTask).toBeNull();
+    expect(plan.plannedMinutes).toBe(0);
+  });
+  it("keeps a five-minute coding block available", () => {
+    const plan = buildStudyPlan({
+      progress: backlog,
+      settings: settings(5),
+      now,
+    });
+    expect(plan.mainTask?.minutes).toBe(5);
+  });
   it("keeps assigning unseen transfer problems when the core list has been covered", () => {
     const core = problemsPoolForTargetCurriculum("NEET_75").filter(
       (p) => !isProblemPremium(p),

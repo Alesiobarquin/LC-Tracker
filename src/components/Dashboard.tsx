@@ -99,6 +99,7 @@ export function Dashboard() {
         ],
         activeSeconds: timerSeconds + recallSeconds,
         activeRecallSeconds: recallSeconds,
+        hasActiveSession: Boolean(activeSession || activeRecall),
         now,
       }),
     [
@@ -181,6 +182,12 @@ export function Dashboard() {
     ?.studyMessage;
   const nextTask = plan.recallTasks[0] ?? plan.mainTask;
   const activeProblemId = activeSession?.problemId ?? activeRecall?.problemId;
+  const activeSessionNeedsOutcome = Boolean(
+    activeSession?.completion || activeSession?.finishedElapsed !== undefined,
+  );
+  const hasPlannedWork = Boolean(
+    plan.recallTasks.length || plan.mainTask || plan.syntaxCards.length,
+  );
   const hasAssignments =
     !plan.isBlackout && !plan.isRestDay && plan.remainingMinutes > 0;
   const primaryTask = activeProblemId
@@ -257,7 +264,9 @@ export function Dashboard() {
             <div className="plan-sequence-heading">
               <h2 className="register-label">Today’s sequence</h2>
               <span className="font-mono text-[10px] text-subtle">
-                {plan.plannedMinutes} min planned
+                {activeProblemId
+                  ? "Saved session"
+                  : `${plan.plannedMinutes} min planned`}
               </span>
             </div>
             {(activeProblemId || primaryTask) && (
@@ -266,7 +275,9 @@ export function Dashboard() {
                 <div className="flex items-center gap-3 text-xs text-accent font-medium">
                   <span className="status-node bg-accent" aria-hidden="true" />
                   {activeProblemId
-                    ? "Session in progress · draft saved"
+                    ? activeSessionNeedsOutcome
+                      ? "Session ended · outcome ready to save"
+                      : "Session in progress · draft saved"
                     : primaryTask?.kind === "recall"
                       ? "Recall warm-up · up next"
                       : "Coding practice · up next"}
@@ -276,7 +287,11 @@ export function Dashboard() {
                 </h2>
                 <p className="text-sm text-muted leading-relaxed max-w-lg">
                   {activeProblemId
-                    ? "Continue your saved session before starting another problem."
+                    ? activeRecall
+                      ? "Continue your saved recall check before starting another problem."
+                      : activeSessionNeedsOutcome
+                        ? "Record the outcome of this saved attempt to finish it. The plan will update after it is saved."
+                        : "Continue your saved session before starting another problem."
                     : primaryTask!.reason}
                 </p>
                 <p className="font-mono text-[11px] text-subtle mt-4">
@@ -303,7 +318,7 @@ export function Dashboard() {
                       className="brand-button-primary ui-button inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium"
                     >
                       <Play size={14} />
-                      Resume session
+                      {activeSessionNeedsOutcome ? "Record outcome" : "Resume session"}
                     </Link>
                   ) : (
                     <>
@@ -360,14 +375,22 @@ export function Dashboard() {
                   You’ve used today’s study budget. Pick up the plan tomorrow.
                 </p>
               </section>
+            ) : activeProblemId ? null : !hasPlannedWork ? (
+              <section className="empty-register">
+                <CircleCheck size={22} className="text-success mb-3" />
+                <h2 className="text-xl font-medium">Today’s plan is complete</h2>
+                <p className="text-sm text-muted mt-2">
+                  No additional assignment fits into the remaining time. Your
+                  queue will be ready on your next study day.
+                </p>
+              </section>
             ) : (
               <>
                 {plan.recallTasks
                   .filter(
                     (task) =>
-                      activeProblemId ||
                       task.problemId !== primaryTask?.problemId ||
-                      primaryTask.kind !== "recall",
+                      primaryTask?.kind !== "recall",
                   )
                   .map((task, index) => (
                     <section
@@ -409,9 +432,8 @@ export function Dashboard() {
                       </div>
                     </section>
                   ))}
-                {(activeProblemId ||
-                  primaryTask?.kind === "recall" ||
-                  !primaryTask) && (
+                {(primaryTask?.kind === "recall" ||
+                  (!primaryTask && plan.recallTasks.length > 0)) && (
                   <section className="study-step practice-plan-step">
                     <TraceIndex>
                       {String(plan.recallTasks.length + 1).padStart(2, "0")}
@@ -454,8 +476,8 @@ export function Dashboard() {
                       </>
                     ) : (
                       <p className="text-sm text-muted mt-3">
-                        No additional coding assignment fits. Revisit a pattern
-                        lesson in your remaining time.
+                        No additional coding block fits into the remaining
+                        time.
                       </p>
                     )}
                   </section>

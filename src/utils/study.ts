@@ -32,6 +32,7 @@ import type {
 // Product defaults, not calibrated retention probabilities or interview scores.
 export const UNSEEN_CHECK_DAYS = 7;
 export const UNSEEN_CHECK_MINUTES = 35;
+export const MIN_CODING_BLOCK_MINUTES = 5;
 export const STUDY_CATEGORIES: Category[] = [
   "Arrays & Hashing",
   "Two Pointers",
@@ -482,6 +483,7 @@ export function buildStudyPlan(params: {
   excludedIds?: string[];
   activeSeconds?: number;
   activeRecallSeconds?: number;
+  hasActiveSession?: boolean;
   now?: Date;
 }): StudyPlan {
   const {
@@ -493,6 +495,7 @@ export function buildStudyPlan(params: {
     targetInterviewDate,
     activeSeconds = 0,
     activeRecallSeconds = 0,
+    hasActiveSession = false,
     now = new Date(),
   } = params;
   const day = now.getDay();
@@ -583,7 +586,13 @@ export function buildStudyPlan(params: {
     isBlackout,
     learningDay,
   };
-  if (isRestDay || isBlackout || remainingMinutes === 0) return plan;
+  if (
+    isRestDay ||
+    isBlackout ||
+    remainingMinutes === 0 ||
+    hasActiveSession
+  )
+    return plan;
 
   const pool = problemsPoolForTargetCurriculum(
     settings.targetCurriculum,
@@ -808,7 +817,7 @@ export function buildStudyPlan(params: {
       });
     }
   let capacity = remainingMinutes - plan.recallTasks.length * 3;
-  if (mainId && capacity > 0) {
+  if (mainId && capacity >= MIN_CODING_BLOCK_MINUTES) {
     const problem = problemMap[mainId];
     const isNew = !progress[mainId];
     const kind: PracticeKind = isNew

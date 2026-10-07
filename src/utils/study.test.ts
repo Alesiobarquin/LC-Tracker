@@ -21,6 +21,11 @@ import {
   getStudyState,
   hasDelayedIndependentPass,
   scheduleCoding,
+  getCategoryEvidence,
+  getStudyEvaluation,
+  getUnseenAttempts,
+  estimateCodingMinutes,
+  hasCurrentIndependentPass,
 } from "./study";
 import { getPatternForProblem } from "./patternMapping";
 import {
@@ -80,7 +85,9 @@ describe("capacity and backlog planning", () => {
       now,
     });
     expect(plan.eligibleRecallCount).toBe(43);
-    expect(plan.recallTasks).toHaveLength(3);
+    expect(plan.recallTasks).toHaveLength(
+      plan.mainTask?.kind === "variant" ? 0 : 3,
+    );
     expect(plan.mainTask).not.toBeNull();
     const ids = [
       ...plan.recallTasks.map((t) => t.problemId),
@@ -448,4 +455,317 @@ describe("recall and coding evidence", () => {
     bad.progress["two-sum"].studyState.recallHistory[0].outcome = "perfect";
     expect(() => validateBackup(bad)).toThrow("Invalid backup");
   });
+});
+
+describe("preparation safeguards", () => {
+  it("protects an unseen check against a fully imported backlog near an interview", () => {
+    const imported = Object.fromEntries(
+      problemsPoolForTargetCurriculum("NEET_150")
+        .filter((p) => !isProblemPremium(p))
+        .map((p) => [p.id, { ...base(), history: [] }]),
+    );
+    const plan = buildStudyPlan({
+      progress: imported,
+      settings: { ...settings(), targetCurriculum: "NEET_150" },
+      targetInterviewDate: "2026-11-03",
+      now,
+    });
+    expect(plan.mainTask?.kind).toBe("variant");
+    expect(imported[plan.mainTask!.problemId]).toBeUndefined();
+    expect(
+      plan.recallTasks.some((t) => t.problemId === plan.mainTask!.problemId),
+    ).toBe(false);
+    expect(plan.plannedMinutes).toBeLessThanOrEqual(30);
+  });
+  it("repairs repeated measured failures on a learning day without converting imports into failures", () => {
+    const ids = [
+      "two-sum",
+      "valid-anagram",
+      "contains-duplicate",
+      "group-anagrams",
+    ];
+    const failure = {
+      ...passed,
+      correctness: "failed" as const,
+      assistance: "hint" as const,
+    };
+    const progress = Object.fromEntries(
+      ids.map((id) => [
+        id,
+        {
+          ...base(),
+          history: [
+            {
+              date: "2026-10-01T12:00:00",
+              rating: 2 as const,
+              codingOutcome: failure,
+            },
+          ],
+        },
+      ]),
+    );
+    // A recent unfamiliar assessment has already used the protected slot.
+    progress["group-anagrams"].history[0] = {
+      ...progress["group-anagrams"].history[0],
+      ...{ practiceKind: "variant" as const, date: "2026-10-05T12:00:00" },
+    };
+    const plan = buildStudyPlan({
+      progress,
+      settings: settings(),
+      now: new Date("2026-10-07T12:00:00"),
+    });
+    expect(plan.mainTask?.kind).toBe("coding_review");
+    expect(plan.mainTask?.reason).toContain("gap");
+    expect(ids).toContain(plan.mainTask!.problemId);
+    expect(getStudyEvaluation(progress, now).needsRemediation).toBe(true);
+    expect(
+      getStudyEvaluation({ "two-sum": base() }, now).needsRemediation,
+    ).toBe(false);
+  });
+  it("rotates an unfinished attempt after three blocks and makes it eligible again later", () => {
+    const progress = {
+      "two-sum": {
+        ...base(),
+        history: [1, 2, 3].map((i) => ({
+          date: `2026-10-0${i + 3}T12:00:00`,
+          rating: 2 as const,
+          elapsedSeconds: 600,
+          codingOutcome: { ...passed, correctness: "unfinished" as const },
+        })),
+      },
+    };
+    const plan = buildStudyPlan({ progress, settings: settings(10), now });
+    expect(plan.mainTask?.problemId).not.toBe("two-sum");
+    const later = buildStudyPlan({
+      progress,
+      settings: settings(10),
+      now: addDays(now, 3),
+    });
+    expect(later.mainTask?.problemId).toBe("two-sum");
+    expect(progress["two-sum"].history).toHaveLength(3);
+  });
+  it("prioritizes a due delayed coding check alongside a large unassessed backlog", () => {
+    const progress = Object.fromEntries(
+      allProblems
+        .filter((p) => !isProblemPremium(p))
+        .slice(0, 43)
+        .map((p) => [p.id, base()]),
+    );
+    progress["two-sum"] = {
+      ...base(),
+      lastReviewedAt: "2026-09-25T12:00:00",
+      history: [
+        {
+          date: "2026-09-25T12:00:00",
+          rating: 4,
+          ...{ codingOutcome: passed },
+        },
+      ],
+      studyState: {
+        ...getStudyState(base()),
+        nextCodingAt: "2026-10-02T12:00:00",
+      },
+    };
+    progress["group-anagrams"] = {
+      ...base(),
+      history: [
+        {
+          date: "2026-10-05T12:00:00",
+          rating: 4,
+          ...{ codingOutcome: passed, practiceKind: "variant" as const },
+        },
+      ],
+    };
+    const plan = buildStudyPlan({ progress, settings: settings(), now });
+    expect(plan.mainTask?.problemId).toBe("two-sum");
+    expect(plan.mainTask?.reason).toContain("week");
+  });
+  it("shows every category, including both DP categories and topics outside the target list", () => {
+    const pool = problemsPoolForTargetCurriculum("NEET_75").filter(
+      (p) => !isProblemPremium(p),
+    );
+    const rows = getCategoryEvidence(pool, { "coin-change": base() });
+    expect(rows).toHaveLength(18);
+    expect(rows.reduce((sum, row) => sum + row.ids.length, 0)).toBe(
+      pool.length,
+    );
+    expect(
+      rows.find((row) => row.category === "1-D Dynamic Programming")?.seen,
+    ).toBe(1);
+    expect(
+      rows.find((row) => row.category === "2-D Dynamic Programming")?.ids
+        .length,
+    ).toBeGreaterThan(0);
+    expect(
+      rows.find((row) => row.category === "Advanced Graphs")?.ids,
+    ).toHaveLength(0);
+    expect(rows.every((row) => !row.established)).toBe(true);
+  });
+  it("counts only the original unseen check and separates unknown time, assistance, and slow passes", () => {
+    const attempt = (extra = {}) => ({
+      date: now.toISOString(),
+      rating: 4 as const,
+      codingOutcome: passed,
+      practiceKind: "variant" as const,
+      ...extra,
+    });
+    const progress = {
+      "two-sum": {
+        ...base(),
+        history: [attempt({ elapsedSeconds: 1800 }), attempt()],
+      },
+      "valid-anagram": { ...base(), history: [attempt()] },
+      "group-anagrams": {
+        ...base(),
+        history: [attempt({ elapsedSeconds: 2400 })],
+      },
+      "contains-duplicate": {
+        ...base(),
+        history: [
+          attempt({
+            elapsedSeconds: 900,
+            codingOutcome: { ...passed, assistance: "hint" },
+          }),
+        ],
+      },
+      "binary-search": {
+        ...base(),
+        history: [
+          { ...attempt(), practiceKind: "learning" as const },
+          attempt(),
+        ],
+      },
+    };
+    expect(getUnseenAttempts(progress)).toHaveLength(4);
+    const evaluation = getStudyEvaluation(progress, now);
+    expect(evaluation.timed).toHaveLength(3);
+    expect(evaluation.timedPasses).toBe(1);
+    expect(evaluation.unseen).toHaveLength(4);
+  });
+  it("does not learn whole-attempt estimates from unfinished blocks or other difficulties", () => {
+    const progress = {
+      "two-sum": {
+        ...base(),
+        history: [1, 2, 3].map((i) => ({
+          sessionId: String(i),
+          date: old,
+          rating: 2 as const,
+          codingOutcome: { ...passed, correctness: "unfinished" as const },
+        })),
+      },
+    };
+    const timings = [1, 2, 3].map((i) => ({
+      id: String(i),
+      problemId: "two-sum",
+      category: "Arrays & Hashing",
+      date: old,
+      elapsedSeconds: 120,
+      sessionType: "review" as const,
+      rating: 2 as const,
+    }));
+    expect(
+      estimateCodingMinutes(problemMap["two-sum"], timings, progress),
+    ).toBe(12);
+    expect(
+      estimateCodingMinutes(problemMap["group-anagrams"], timings, progress),
+    ).toBe(22);
+  });
+});
+
+describe("unfamiliar check evidence boundaries", () => {
+  it("excludes legacy encounters, unchecked results, and short unfinished blocks from timed-check conclusions", () => {
+    const h = {
+      date: now.toISOString(),
+      rating: 4 as const,
+      practiceKind: "variant" as const,
+      codingOutcome: passed,
+      elapsedSeconds: 600,
+    };
+    const progress = {
+      "two-sum": { ...base(), history: [...base().history, h] },
+      "valid-anagram": {
+        ...base(),
+        history: [
+          {
+            ...h,
+            codingOutcome: { ...passed, correctness: "unchecked" as const },
+          },
+        ],
+      },
+      "group-anagrams": {
+        ...base(),
+        history: [
+          {
+            ...h,
+            codingOutcome: { ...passed, correctness: "unfinished" as const },
+          },
+        ],
+      },
+      "binary-search": {
+        ...base(),
+        history: [
+          {
+            ...h,
+            elapsedSeconds: 2100,
+            codingOutcome: { ...passed, correctness: "unfinished" as const },
+          },
+        ],
+      },
+    };
+    expect(getUnseenAttempts(progress)).toHaveLength(3);
+    const evaluation = getStudyEvaluation(progress, now);
+    expect(evaluation.unseen).toHaveLength(2);
+    expect(evaluation.timed).toHaveLength(1);
+    expect(evaluation.timedPasses).toBe(0);
+  });
+  it("uses the entire small budget for a protected unfamiliar check before allocating recall", () => {
+    const progress = Object.fromEntries(
+      problemsPoolForTargetCurriculum("NEET_150")
+        .filter((p) => !isProblemPremium(p))
+        .map((p) => [p.id, { ...base(), history: [] }]),
+    );
+    const plan = buildStudyPlan({
+      progress,
+      settings: { ...settings(30), targetCurriculum: "NEET_150" },
+      now,
+    });
+    expect(plan.mainTask?.kind).toBe("variant");
+    expect(plan.mainTask?.minutes).toBe(30);
+    expect(plan.recallTasks).toHaveLength(0);
+  });
+});
+
+it("a successful recall after a lapse cannot restore current independent coding evidence", () => {
+  const original = {
+    ...base(),
+    history: [
+      {
+        date: old,
+        rating: 4 as const,
+        codingOutcome: passed,
+        practiceKind: "variant" as const,
+      },
+    ],
+  };
+  const lapsed = applyRecall(original, "two-sum", recall("forgot"));
+  const rehearsed = applyRecall(lapsed, "two-sum", {
+    ...recall(),
+    id: "00000000-0000-4000-8000-000000000100",
+    date: addDays(now, 1).toISOString(),
+  });
+  expect(hasCurrentIndependentPass(rehearsed)).toBe(false);
+  expect(
+    getPatternEvidence(["two-sum"], { "two-sum": rehearsed }).variantPassed,
+  ).toBe(false);
+  const recoded = computeNewProblemProgress(
+    rehearsed,
+    "two-sum",
+    4,
+    false,
+    undefined,
+    { date: addDays(now, 2).toISOString(), codingOutcome: passed },
+    "RELAXED",
+  );
+  expect(hasCurrentIndependentPass(recoded)).toBe(true);
+  expect(hasDelayedIndependentPass(recoded)).toBe(false);
 });

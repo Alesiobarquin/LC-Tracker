@@ -216,7 +216,9 @@ test("43 eligible items produce a bounded desktop and mobile plan", async ({
     "number-of-islands",
   ];
   const rows = ids.map((id) => progressRow(id));
-  await fixture(page, rows);
+  const stored = await fixture(page, rows);
+  stored.progress[0].history = [{ date: new Date().toISOString(), rating: 4,
+    ...{ codingOutcome: { correctness: "passed", assistance: "none", explanation: "clear" }, practiceKind: "variant" } }];
   await page.goto("/dashboard");
   await expect(
     page.getByRole("heading", { name: "Today’s study plan" }),
@@ -410,3 +412,117 @@ test('library explanations cover each core list and do not reveal a pending reca
   await page.getByRole('link', { name: 'Resume recall check' }).click();
   await expect(page.getByLabel('Your attempt · explanation or pseudocode')).toHaveValue('Draft stays here.');
 });
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1280, 390]) {
+    test(`unfamiliar practice is protected and hides cues after reload at ${width}px in ${theme}`, async ({
+      page,
+    }, testInfo) => {
+      await page.clock.install({ time: new Date("2026-10-06T12:00:00") });
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript(
+        (theme) => localStorage.setItem("lc-tracker-theme", theme),
+        theme,
+      );
+      const rows = [
+        "contains-duplicate",
+        "valid-anagram",
+        "two-sum",
+        "group-anagrams",
+        "binary-search",
+        "find-minimum-in-rotated-sorted-array",
+        "reverse-linked-list",
+        "merge-two-sorted-lists",
+      ].map((id) => ({ ...progressRow(id), history: [] }));
+      const stored = await fixture(page, rows);
+      stored.settings.target_interview_date = "2026-11-03";
+      (stored.settings.settings_json.settings as any).targetCurriculum =
+        "NEET_150";
+      await page.goto("/dashboard");
+      await expect(
+        page.getByText("Protected unfamiliar check:", { exact: false }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Start practice block", exact: true })
+        .click();
+      await expect(
+        page.getByText("Unfamiliar check · topic hidden", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.locator(".timer-workspace .page-heading"),
+      ).not.toContainText("Medium");
+      await expect(
+        page.locator(".timer-workspace .page-heading"),
+      ).not.toContainText("Arrays & Hashing");
+      await page.reload();
+      await expect(
+        page.getByText("Unfamiliar check · topic hidden", { exact: true }),
+      ).toBeVisible();
+      await page.clock.fastForward(31 * 60 * 1000);
+      await expect(
+        page.getByText("Your check block has ended.", { exact: false }),
+      ).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: testInfo.outputPath("unfamiliar-check.png"),
+        fullPage: true,
+      });
+      await page.getByRole("button", { name: /Done/ }).last().click();
+      await page
+        .getByLabel("Correctness", { exact: true })
+        .selectOption("unfinished");
+      await page.getByLabel("Assistance used").selectOption("none");
+      await page
+        .getByLabel("Can you explain why it works?")
+        .selectOption("partial");
+      await page.reload();
+      await expect(page.getByLabel("Correctness", { exact: true })).toHaveValue(
+        "unfinished",
+      );
+    });
+    test(`complete topic evidence and evaluation stay readable at ${width}px in ${theme}`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript(
+        (theme) => localStorage.setItem("lc-tracker-theme", theme),
+        theme,
+      );
+      await fixture(page, []);
+      await page.goto("/analytics");
+      const table = page.getByRole("table", { name: "All topic coverage" });
+      await expect(table.getByRole("row")).toHaveCount(19);
+      await expect(
+        table.getByRole("rowheader", {
+          name: "1-D Dynamic Programming",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        table.getByRole("rowheader", {
+          name: "2-D Dynamic Programming",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        table.getByRole("row").filter({ hasText: "Advanced Graphs" }),
+      ).toContainText("Outside target list");
+      await expect(page.getByLabel("Two-week study evaluation")).toContainText(
+        "0/0",
+      );
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: testInfo.outputPath("topic-evidence.png"),
+        fullPage: true,
+      });
+    });
+  }
+}

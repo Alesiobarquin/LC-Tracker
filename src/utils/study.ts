@@ -10,6 +10,7 @@ import {
   problemMap,
   problemsPoolForTargetCurriculum,
   isProblemPremium,
+  type Category,
   type Problem,
 } from "../data/problems";
 import { patterns } from "../data/patterns";
@@ -25,12 +26,160 @@ import type {
   SessionTiming,
   StudyState,
   SyntaxProgress,
+  ProblemHistoryEntry,
 } from "../types";
+
+// Product defaults, not calibrated retention probabilities or interview scores.
+export const UNSEEN_CHECK_DAYS = 7;
+export const UNSEEN_CHECK_MINUTES = 35;
+export const STUDY_CATEGORIES: Category[] = [
+  "Arrays & Hashing",
+  "Two Pointers",
+  "Sliding Window",
+  "Stack",
+  "Binary Search",
+  "Linked List",
+  "Trees",
+  "Tries",
+  "Heap / Priority Queue",
+  "Backtracking",
+  "Graphs",
+  "Advanced Graphs",
+  "1-D Dynamic Programming",
+  "2-D Dynamic Programming",
+  "Greedy",
+  "Intervals",
+  "Math & Geometry",
+  "Bit Manipulation",
+];
+
+const studyKey = (problem: Problem) =>
+  getPatternForProblem(problem) ?? problem.category;
+
+/** A continuation or a later re-solve is never another unseen assessment. */
+export function getUnseenAttempts(progress: Record<string, ProblemProgress>) {
+  return Object.values(progress).flatMap((entry) => {
+    const first = entry.history[0];
+    return first?.codingOutcome && first.practiceKind === "variant"
+      ? [first]
+      : [];
+  });
+}
+
+export function getStudyEvaluation(
+  progress: Record<string, ProblemProgress>,
+  now = new Date(),
+) {
+  const recent = (h: ProblemHistoryEntry) => {
+    const age = differenceInCalendarDays(now, new Date(h.date));
+    return age >= 0 && age < 14;
+  };
+  const coding = Object.values(progress)
+    .flatMap((p) => p.history)
+    .filter(
+      (h) =>
+        recent(h) &&
+        h.codingOutcome &&
+        !["unchecked", "unfinished"].includes(h.codingOutcome.correctness),
+    );
+  const delayed = Object.values(progress).flatMap((p) =>
+    p.history.filter(
+      (h, index) =>
+        recent(h) &&
+        h.codingOutcome &&
+        !["unchecked", "unfinished"].includes(h.codingOutcome.correctness) &&
+        index > 0 &&
+        differenceInCalendarDays(
+          new Date(h.date),
+          new Date(p.history[index - 1].date),
+        ) >= 7,
+    ),
+  );
+  const unseen = getUnseenAttempts(progress).filter(
+    (h) => recent(h) && h.codingOutcome?.correctness !== "unchecked",
+  );
+  const timed = unseen.filter(
+    (h) =>
+      h.elapsedSeconds !== undefined &&
+      h.elapsedSeconds > 0 &&
+      (h.codingOutcome?.correctness !== "unfinished" ||
+        h.elapsedSeconds >= UNSEEN_CHECK_MINUTES * 60),
+  );
+  const timedPasses = timed.filter(
+    (h) =>
+      isIndependentPass(h.codingOutcome) &&
+      h.elapsedSeconds! <= UNSEEN_CHECK_MINUTES * 60,
+  ).length;
+  const needsRemediation =
+    coding.length >= 4 &&
+    coding.filter((h) => isIndependentPass(h.codingOutcome)).length /
+      coding.length <
+      0.5;
+  const advice = needsRemediation
+    ? "Recent independent coding is below half of recorded outcomes. The plan prioritizes repair; use references after an unaided attempt and explain the correction."
+    : unseen.length === 0
+      ? "An unfamiliar check is needed. The plan protects one when a related unseen problem is available."
+      : timed.length === 0
+        ? "No completed timed unfamiliar checks yet. Finish a check or record its result at the time limit."
+        : timedPasses < timed.length / 2
+          ? "Unfamiliar checks need work. Review the failed approach, test edge cases, and try another related problem independently."
+          : delayed.length === 0
+            ? "Delayed coding evidence is still missing. Keep the scheduled independent re-solves after at least a week."
+            : "Keep following the plan and compare delayed coding and unfamiliar checks every two weeks. These samples describe practice, not an interview pass prediction.";
+  return {
+    coding,
+    delayed,
+    unseen,
+    timed,
+    timedPasses,
+    needsRemediation,
+    advice,
+  };
+}
+
+/** Every major category stays visible, including categories absent from the target list. */
+export function getCategoryEvidence(
+  pool: Problem[],
+  progress: Record<string, ProblemProgress>,
+) {
+  return STUDY_CATEGORIES.map((category) => {
+    const ids = pool.filter((p) => p.category === category).map((p) => p.id);
+    const categoryProgress = Object.fromEntries(
+      Object.entries(progress).filter(
+        ([id]) => problemMap[id]?.category === category,
+      ),
+    );
+    const variantIds = [...new Set([...ids, ...Object.keys(categoryProgress)])];
+    return {
+      category,
+      ids,
+      seen: ids.filter((id) => progress[id]).length,
+      ...getPatternEvidence(ids, progress),
+      variantPassed: getPatternEvidence(variantIds, categoryProgress)
+        .variantPassed,
+    };
+  }).map((row) => ({
+    ...row,
+    established:
+      row.ids.length > 0 &&
+      row.dependable >= Math.min(2, row.ids.length) &&
+      row.variantPassed,
+  }));
+}
 
 export const isIndependentPass = (outcome?: CodingOutcome) =>
   outcome?.correctness === "passed" &&
   outcome.assistance === "none" &&
   outcome.explanation === "clear";
+
+export function hasCurrentIndependentPass(progress?: ProblemProgress) {
+  const latest = progress?.history.at(-1);
+  if (!isIndependentPass(latest?.codingOutcome)) return false;
+  const lapse = progress?.studyState?.recallHistory
+    .filter((h) => h.outcome !== "recalled")
+    .at(-1);
+  return !lapse || Date.parse(latest!.date) > Date.parse(lapse.date);
+}
 
 export function getStudyState(progress: ProblemProgress): StudyState {
   if (progress.studyState) return progress.studyState;
@@ -268,10 +417,20 @@ export function applyRecall(
 export function estimateCodingMinutes(
   problem: Problem,
   timings: SessionTiming[] = [],
+  progress: Record<string, ProblemProgress> = {},
 ) {
+  const unfinishedSessions = new Set(
+    Object.values(progress)
+      .flatMap((p) => p.history)
+      .filter((h) => h.codingOutcome?.correctness === "unfinished")
+      .map((h) => h.sessionId)
+      .filter(Boolean),
+  );
   const samples = timings.filter(
     (t) =>
       t.category === problem.category &&
+      problemMap[t.problemId]?.difficulty === problem.difficulty &&
+      !unfinishedSessions.has(t.id) &&
       t.sessionType !== "recall" &&
       t.elapsedSeconds >= 60,
   );
@@ -426,42 +585,213 @@ export function buildStudyPlan(params: {
   };
   if (isRestDay || isBlackout || remainingMinutes === 0) return plan;
 
+  const pool = problemsPoolForTargetCurriculum(
+    settings.targetCurriculum,
+  ).filter(allowed);
+  const seen = new Set(Object.keys(progress));
+  const coverage = new Map<string, number>();
+  const independent = new Map<string, number>();
+  for (const id of eligible) {
+    const key = studyKey(problemMap[id]);
+    coverage.set(key, (coverage.get(key) ?? 0) + 1);
+    // Historical success followed by a lapse is not current proficiency.
+    if (hasCurrentIndependentPass(progress[id]))
+      independent.set(key, (independent.get(key) ?? 0) + 1);
+  }
+  const patternCoverage = (p: Problem) => coverage.get(studyKey(p)) ?? 0;
+  const independentCoverage = (p: Problem) => independent.get(studyKey(p)) ?? 0;
+  const coveredPatterns = new Set(
+    eligible.map((id) => getPatternForProblem(problemMap[id])),
+  );
+  const unmetPrerequisites = (p: Problem) => {
+    const pattern = patterns.find(
+      (item) => item.id === getPatternForProblem(p),
+    );
+    return pattern
+      ? getPatternLessonMeta(pattern.id, pattern.isCore).prerequisites.filter(
+          (id) => !coveredPatterns.has(id),
+        ).length
+      : 0;
+  };
+  const difficulty = { Easy: 0, Medium: 1, Hard: 2 };
+  const newCandidates = pool.filter(
+    (p) => !seen.has(p.id) && !touched.has(p.id),
+  );
+  const newCandidateIds = new Set(newCandidates.map((p) => p.id));
+  newCandidates.sort((a, b) => {
+    if (settings.learningMode !== "EXPLORE") {
+      const prerequisites = unmetPrerequisites(a) - unmetPrerequisites(b);
+      if (prerequisites) return prerequisites;
+    }
+    const breadth =
+      Math.min(patternCoverage(a), 2) - Math.min(patternCoverage(b), 2);
+    if (breadth) return breadth;
+    if (settings.learningMode !== "EXPLORE") {
+      const order =
+        STUDY_CATEGORIES.indexOf(a.category) -
+        STUDY_CATEGORIES.indexOf(b.category);
+      if (order) return order;
+    }
+    return (
+      difficulty[a.difficulty] - difficulty[b.difficulty] ||
+      a.id.localeCompare(b.id)
+    );
+  });
+  const evaluation = getStudyEvaluation(progress, now);
+  const unseenHistory = getUnseenAttempts(progress);
+  const unseenDue = !unseenHistory.some((h) => {
+    const age = differenceInCalendarDays(now, new Date(h.date));
+    return age >= 0 && age < UNSEEN_CHECK_DAYS;
+  });
+  // A large imported backlog and an approaching interview cannot consume this slot.
+  // Exposure makes a related check eligible; its outcome must still be measured.
+  const relatedUnseen = allProblems.filter(
+    (p) =>
+      allowed(p) &&
+      !seen.has(p.id) &&
+      !touched.has(p.id) &&
+      patternCoverage(p) >= 2 &&
+      (settings.learningMode === "EXPLORE" || unmetPrerequisites(p) === 0) &&
+      (p.difficulty !== "Hard" || independentCoverage(p) >= 2),
+  );
+  const curatedUnseen = relatedUnseen.filter((p) => p.isNeetCode250);
+  const variationPool = curatedUnseen.length ? curatedUnseen : relatedUnseen;
+  const lastUnseenByCategory = new Map<string, number>();
+  for (const [id, entry] of Object.entries(progress)) {
+    const first = entry.history[0];
+    if (first?.practiceKind !== "variant" || !problemMap[id]) continue;
+    const category = problemMap[id].category;
+    lastUnseenByCategory.set(
+      category,
+      Math.max(lastUnseenByCategory.get(category) ?? 0, Date.parse(first.date)),
+    );
+  }
+  variationPool.sort((a, b) => {
+    const age =
+      (lastUnseenByCategory.get(a.category) ?? 0) -
+      (lastUnseenByCategory.get(b.category) ?? 0);
+    if (age) return age;
+    const preferred = (p: Problem) =>
+      evaluation.needsRemediation
+        ? difficulty[p.difficulty]
+        : p.difficulty === "Medium"
+          ? 0
+          : p.difficulty === "Easy"
+            ? 1
+            : 2;
+    return (
+      preferred(a) - preferred(b) ||
+      Number(!newCandidateIds.has(a.id)) - Number(!newCandidateIds.has(b.id)) ||
+      a.id.localeCompare(b.id)
+    );
+  });
+  const variantCandidate = variationPool[0];
+
+  const continuation = new Map<string, { deferred: boolean; blocks: number }>();
+  for (const id of eligible) {
+    const entry = progress[id];
+    if (entry.history.at(-1)?.codingOutcome?.correctness !== "unfinished")
+      continue;
+    const blocks: ProblemHistoryEntry[] = [];
+    for (const h of [...entry.history].reverse()) {
+      if (h.codingOutcome?.correctness !== "unfinished") break;
+      blocks.push(h);
+    }
+    const seconds = blocks.reduce(
+      (sum, h) =>
+        sum +
+        (h.elapsedSeconds ??
+          timings.find((t) => t.id === h.sessionId)?.elapsedSeconds ??
+          0),
+      0,
+    );
+    const longAttempt =
+      blocks.length >= 3 ||
+      seconds >= estimateCodingMinutes(problemMap[id], timings, progress) * 120;
+    continuation.set(id, {
+      blocks: blocks.length,
+      deferred:
+        longAttempt &&
+        differenceInCalendarDays(now, new Date(blocks[0].date)) < 3,
+    });
+  }
+  const availableCoding = dueCoding.filter(
+    (id) => !touched.has(id) && !continuation.get(id)?.deferred,
+  );
+  const unfinished = availableCoding.find((id) => continuation.has(id));
+  const demonstratedGap = (id: string) => {
+    const outcome = progress[id].history.at(-1)?.codingOutcome;
+    return (
+      getLearningStatus(progress[id]) === "relearning" &&
+      outcome?.correctness !== "unfinished"
+    );
+  };
+  const repair = availableCoding.find(demonstratedGap);
+  const delayedCheck = availableCoding.find(
+    (id) =>
+      isIndependentPass(progress[id].history.at(-1)?.codingOutcome) &&
+      !hasDelayedIndependentPass(progress[id]) &&
+      differenceInCalendarDays(
+        now,
+        new Date(progress[id].history.at(-1)!.date),
+      ) >= 7,
+  );
+  const codingCandidate =
+    day === maintenanceDay
+      ? availableCoding[0]
+      : (repair ?? delayedCheck ?? availableCoding[0]);
+  const newCandidate = newCandidates[0] ?? variantCandidate;
+  const repeatedTopicGaps =
+    newCandidate &&
+    eligible.filter(
+      (id) =>
+        studyKey(problemMap[id]) === studyKey(newCandidate) &&
+        demonstratedGap(id),
+    ).length >= 2;
+  const remediation =
+    day !== maintenanceDay &&
+    repair &&
+    (evaluation.needsRemediation || repeatedTopicGaps);
+  const protectedVariant = unseenDue && variantCandidate;
+  const mainId = protectedVariant
+    ? protectedVariant.id
+    : day === maintenanceDay && codingCandidate
+      ? codingCandidate
+      : (unfinished ??
+        (remediation
+          ? repair
+          : learningDay && newCandidate
+            ? newCandidate.id
+            : (codingCandidate ?? newCandidate?.id)));
+
   const recallSpent =
     todayTimings
       .filter((t) => t.sessionType === "recall")
       .reduce((s, t) => s + t.elapsedSeconds / 60, 0) +
     Math.max(0, activeRecallSeconds) / 60;
-  const recallAllowance = Math.max(
-    0,
-    Math.floor(dailyMinutes * 0.3) - Math.ceil(recallSpent),
+  const unfamiliarMain =
+    mainId &&
+    !progress[mainId] &&
+    (protectedVariant ||
+      !newCandidateIds.has(mainId) ||
+      independentCoverage(problemMap[mainId]) >= 2);
+  // On check days a small budget goes to the check, instead of a recall warm-up
+  // making a feasible independent attempt unnecessarily short.
+  let recallBudget = Math.min(
+    unfamiliarMain
+      ? Math.max(0, remainingMinutes - UNSEEN_CHECK_MINUTES)
+      : remainingMinutes,
+    Math.max(0, Math.floor(dailyMinutes * 0.3) - Math.ceil(recallSpent)),
   );
-  let recallBudget = Math.min(recallAllowance, remainingMinutes);
-  const unfinished = eligible.find(
-    (id) =>
-      !touched.has(id) &&
-      progress[id].history.at(-1)?.codingOutcome?.correctness === "unfinished",
-  );
-  const availableCoding = dueCoding.filter((id) => !touched.has(id));
-  const reservedCoding =
-    unfinished ??
-    (!learningDay
-      ? day === maintenanceDay
-        ? availableCoding[0]
-        : (availableCoding.find(
-            (id) => getLearningStatus(progress[id]) === "relearning",
-          ) ?? availableCoding[0])
-      : undefined);
   const recallCandidates = dueRecall.filter(
-    (id) => !touched.has(id) && id !== reservedCoding,
+    (id) => !touched.has(id) && id !== mainId,
   );
   const usedPatterns = new Set<string>();
   const selected = new Set<string>();
-  // Mix patterns, then fill remaining capacity without duplicating an item.
   for (const diversify of [true, false])
     for (const id of recallCandidates) {
       if (recallBudget < 3 || selected.has(id)) continue;
-      const key =
-        getPatternForProblem(problemMap[id]) ?? problemMap[id].category;
+      const key = studyKey(problemMap[id]);
       if (diversify && usedPatterns.has(key)) continue;
       selected.add(id);
       usedPatterns.add(key);
@@ -478,147 +808,37 @@ export function buildStudyPlan(params: {
       });
     }
   let capacity = remainingMinutes - plan.recallTasks.length * 3;
-  const pool = problemsPoolForTargetCurriculum(
-    settings.targetCurriculum,
-  ).filter(allowed);
-  const seen = new Set(Object.keys(progress));
-  const patternKeys = new Map<string, string>();
-  const patternKey = (p: Problem) => {
-    if (!patternKeys.has(p.id))
-      patternKeys.set(p.id, getPatternForProblem(p) ?? p.category);
-    return patternKeys.get(p.id)!;
-  };
-  const coverage = new Map<string, number>();
-  const independent = new Map<string, number>();
-  for (const id of eligible) {
-    const key = patternKey(problemMap[id]);
-    coverage.set(key, (coverage.get(key) ?? 0) + 1);
-    if (progress[id].history.some((h) => isIndependentPass(h.codingOutcome)))
-      independent.set(key, (independent.get(key) ?? 0) + 1);
-  }
-  const patternCoverage = (p: Problem) => coverage.get(patternKey(p)) ?? 0;
-  const independentCoverage = (p: Problem) =>
-    independent.get(patternKey(p)) ?? 0;
-  // The eight named pattern lessons do not cover every category. Give the
-  // remaining categories a real foundation order rather than an index of -1.
-  const categoryOrder = [
-    "Arrays & Hashing",
-    "Two Pointers",
-    "Sliding Window",
-    "Stack",
-    "Binary Search",
-    "Linked List",
-    "Trees",
-    "Tries",
-    "Heap / Priority Queue",
-    "Backtracking",
-    "Graphs",
-    "Advanced Graphs",
-    "1-D Dynamic Programming",
-    "2-D Dynamic Programming",
-    "Greedy",
-    "Intervals",
-    "Math & Geometry",
-    "Bit Manipulation",
-  ];
-  const patternOrder = (p: Problem) => {
-    const index = categoryOrder.indexOf(p.category);
-    return index < 0 ? categoryOrder.length : index;
-  };
-  const newCandidates = pool.filter(
-    (p) => !seen.has(p.id) && !touched.has(p.id),
-  );
-  const coveredPatterns = new Set(
-    eligible.map((id) => getPatternForProblem(problemMap[id])),
-  );
-  const unmetPrerequisites = (p: Problem) => {
-    const pattern = patterns.find(
-      (item) => item.id === getPatternForProblem(p),
-    );
-    return pattern
-      ? getPatternLessonMeta(pattern.id, pattern.isCore).prerequisites.filter(
-          (id) => !coveredPatterns.has(id),
-        ).length
-      : 0;
-  };
-  newCandidates.sort((a, b) => {
-    if (settings.learningMode !== "EXPLORE") {
-      const prerequisites = unmetPrerequisites(a) - unmetPrerequisites(b);
-      if (prerequisites) return prerequisites;
-    }
-    // Learn representative problems across patterns before exhausting one topic.
-    const breadth =
-      Math.min(patternCoverage(a), 2) - Math.min(patternCoverage(b), 2);
-    if (breadth) return breadth;
-    if (settings.learningMode !== "EXPLORE") {
-      const order = patternOrder(a) - patternOrder(b);
-      if (order) return order;
-    }
-    const difficulty = { Easy: 0, Medium: 1, Hard: 2 };
-    return (
-      difficulty[a.difficulty] - difficulty[b.difficulty] ||
-      a.id.localeCompare(b.id)
-    );
-  });
-  const codingOptions = dueCoding.filter(
-    (id) => !touched.has(id) && !selected.has(id),
-  );
-  // Reserve one day per week for the oldest waiting implementation check; on
-  // other implementation days, address a demonstrated gap first.
-  const codingCandidate =
-    day === maintenanceDay
-      ? codingOptions[0]
-      : (codingOptions.find(
-          (id) => getLearningStatus(progress[id]) === "relearning",
-        ) ?? codingOptions[0]);
-  // A completed target list must not eliminate transfer practice. Related
-  // unseen variations come from the larger curated catalog, with paid access
-  // still respected. Prior encounter is exposure, not proof of mastery.
-  const relatedVariants = newCandidates.length
-    ? []
-    : allProblems.filter(
-        (p) =>
-          p.isNeetCode250 &&
-          allowed(p) &&
-          !seen.has(p.id) &&
-          !touched.has(p.id) &&
-          patternCoverage(p) >= 2,
-      );
-  relatedVariants.sort(
-    (a, b) =>
-      independentCoverage(b) - independentCoverage(a) ||
-      (a.difficulty === "Hard" ? 1 : 0) - (b.difficulty === "Hard" ? 1 : 0) ||
-      a.id.localeCompare(b.id),
-  );
-  const newCandidate = newCandidates[0] ?? relatedVariants[0];
-  const relatedVariant = newCandidates.length === 0 && !!newCandidate;
-  const mainId =
-    unfinished ??
-    (learningDay && newCandidate
-      ? newCandidate.id
-      : (codingCandidate ?? newCandidate?.id));
   if (mainId && capacity > 0) {
     const problem = problemMap[mainId];
     const isNew = !progress[mainId];
     const kind: PracticeKind = isNew
-      ? relatedVariant || independentCoverage(problem) >= 2
+      ? protectedVariant ||
+        !newCandidateIds.has(mainId) ||
+        independentCoverage(problem) >= 2
         ? "variant"
         : "learning"
       : "coding_review";
-    const estimatedMinutes = estimateCodingMinutes(problem, timings);
+    const estimatedMinutes =
+      kind === "variant"
+        ? UNSEEN_CHECK_MINUTES
+        : estimateCodingMinutes(problem, timings, progress);
     plan.mainTask = {
       problemId: mainId,
       kind,
       estimatedMinutes,
       minutes: Math.min(estimatedMinutes, capacity),
       reason:
-        unfinished === mainId
-          ? "Continue the attempt you paused for time."
-          : kind === "variant"
-            ? "Test a familiar pattern on an unseen problem, without hints first."
-            : kind === "learning"
-              ? "Build coverage with a representative problem from your target list."
-              : "Check implementation independently; recall alone cannot verify it.",
+        kind === "variant"
+          ? "Protected unfamiliar check: choose the approach yourself, code without hints, then test and explain."
+          : unfinished === mainId
+            ? "Continue your unfinished attempt. Long attempts rotate with other practice."
+            : remediation && mainId === repair
+              ? "Recent attempts show a gap. Rebuild the approach, then code and test it independently."
+              : kind === "learning"
+                ? "Build coverage with a representative problem from your target list."
+                : delayedCheck === mainId
+                  ? "Test retained implementation after at least a week."
+                  : "Check implementation independently; recall alone cannot verify it.",
     };
     capacity -= plan.mainTask.minutes;
   }
@@ -657,12 +877,9 @@ export function getPatternEvidence(
     const entry = progress[id];
     return (
       entry &&
-      getLearningStatus(entry) !== "relearning" &&
-      isIndependentPass(entry.history.at(-1)?.codingOutcome) &&
-      entry.history.some(
-        (h) =>
-          h.practiceKind === "variant" && isIndependentPass(h.codingOutcome),
-      )
+      hasCurrentIndependentPass(entry) &&
+      entry.history[0]?.practiceKind === "variant" &&
+      isIndependentPass(entry.history[0].codingOutcome)
     );
   });
   return {

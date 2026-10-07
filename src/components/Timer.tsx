@@ -2,6 +2,7 @@ import { TraceIndex } from "./ui/StudyTrace";
 import React, { useState, useEffect, useRef } from "react";
 import { Problem } from "../data/problems";
 import type { ProblemSessionRating, CodingOutcome } from "../types";
+import { UNSEEN_CHECK_MINUTES } from "../utils/study";
 import { useStore } from "../store/useStore";
 import {
   ExternalLink,
@@ -59,6 +60,7 @@ export const Timer: React.FC<TimerProps> = ({
   onComplete,
 }) => {
   const activeSession = useStore((state) => state.activeSession);
+  const blindCheck = activeSession?.practiceKind === "variant";
   const startSession = useStore((state) => state.startSession);
   const setSessionStartTimestamp = useStore(
     (state) => state.setSessionStartTimestamp,
@@ -592,11 +594,17 @@ export const Timer: React.FC<TimerProps> = ({
             {problem.title}
           </h1>
           <div className="flex flex-wrap gap-2 text-xs text-muted mt-3">
-            <span>{problem.category}</span>
-            <span className="text-line-strong">/</span>
-            <span className={getDifficultyColor(problem.difficulty)}>
-              {problem.difficulty}
-            </span>
+            {blindCheck ? (
+              <span>Unfamiliar check · topic hidden</span>
+            ) : (
+              <>
+                <span>{problem.category}</span>
+                <span className="text-line-strong">/</span>
+                <span className={getDifficultyColor(problem.difficulty)}>
+                  {problem.difficulty}
+                </span>
+              </>
+            )}
             {isColdSolve && <span>· Cold Solve</span>}
             {!isNew && !isColdSolve && <span>· Review</span>}
           </div>
@@ -674,6 +682,14 @@ export const Timer: React.FC<TimerProps> = ({
               ? `${activeSession.plannedMinutes} min planned block`
               : "Independent attempt"}
           </p>
+          {blindCheck && (
+            <p className="text-xs text-muted mb-5" role="status">
+              {displayElapsed >=
+              (activeSession?.plannedMinutes ?? UNSEEN_CHECK_MINUTES) * 60
+                ? "Your check block has ended. Record the current result; unfinished work can continue later."
+                : `Work without notes, hints, or topic tags. Use this ${activeSession?.plannedMinutes ?? UNSEEN_CHECK_MINUTES}-minute block to code, test, and explain. A short block can end unfinished.`}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-3">
             {phase === "idle" ? (
               <button

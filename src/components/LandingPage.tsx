@@ -61,7 +61,9 @@ function PracticeLoop() {
             Try an unseen variation
           </p>
           <p className="text-xs text-muted mt-2 leading-relaxed">
-            Check whether the idea transfers.
+            Choose the approach with topic cues hidden.
+            <br />
+            Code, test, and explain within a timed block.
           </p>
         </div>
         <span className="loop-track-mark" aria-hidden="true">

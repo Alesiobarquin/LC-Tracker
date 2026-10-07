@@ -12,6 +12,7 @@ import {
   buildStudyPlan,
   getLearningStatus,
   hasDelayedIndependentPass,
+  getStudyEvaluation,
   type StudyTask,
 } from "../utils/study";
 import {
@@ -56,6 +57,7 @@ export function Dashboard() {
   }, [activeSession?.id, activeRecall?.id]);
   const { settings, targetInterviewDate } = settingsQuery;
   const { progress } = progressQuery;
+  const evaluation = getStudyEvaluation(progress, now);
   const timedIds = new Set(timingQuery.sessionTimings.map((t) => t.id));
   const timerSeconds =
     activeSession && !timedIds.has(activeSession.id)
@@ -278,9 +280,11 @@ export function Dashboard() {
                     : primaryTask!.reason}
                 </p>
                 <p className="font-mono text-[11px] text-subtle mt-4">
-                  {focusedProblem?.category}
+                  {primaryTask?.kind === "variant" || activeSession?.practiceKind === "variant"
+                    ? "Topic hidden for unfamiliar check" : focusedProblem?.category}
                   <span className="mx-2 text-line-strong">/</span>
-                  {focusedProblem?.difficulty}
+                  {primaryTask?.kind === "variant" || activeSession?.practiceKind === "variant"
+                    ? "Choose your approach" : focusedProblem?.difficulty}
                   {primaryTask && (
                     <>
                       <span className="mx-2 text-line-strong">/</span>
@@ -519,6 +523,7 @@ export function Dashboard() {
                 Problems awaiting an assessment
               </span>
             </div>
+            <p className="text-xs text-muted leading-relaxed mt-4">{evaluation.advice}</p>
           </section>
           <section className="rail-section">
             <h2 className="register-label mb-3">Study rhythm</h2>

@@ -134,11 +134,12 @@ export function Settings() {
             <details className="settings-policy">
               <summary>How the planner uses evidence</summary>
               <p className="text-xs text-muted leading-relaxed mt-3">
-                All modes protect new learning, mix recall checks across
-                patterns, and keep coding checks separate. Progress depends on
-                recorded outcomes instead of completing every problem in one
-                pattern. When your target list is covered, related unseen
-                variations may come from the larger curated library.
+                All modes mix recall, independent coding, and new learning.
+                Repeated measured failures shift ordinary blocks toward repair.
+                A related unfamiliar check keeps a place every seven days when
+                an accessible problem is available, including near an interview.
+                Its topic stays hidden and it may come from the larger library.
+                Long unfinished attempts rotate with other practice.
               </p>
             </details>
           </div>
@@ -408,7 +409,8 @@ export function Settings() {
             <p className="text-sm text-muted">
               An interview date is optional. Without one, the plan keeps
               building coverage. Within 30 days of an upcoming interview, main
-              blocks prioritize independent implementation.
+              blocks prioritize independent implementation while keeping the
+              protected unfamiliar check.
             </p>
           </div>
           <div className="settings-section-fields space-y-5">

@@ -22,11 +22,14 @@ export type Category =
 
 import type { TargetCurriculum } from '../types';
 import leetcodePremiumStatusJson from './leetcodePremiumStatus.json';
+import leetcodeProblemNumbersJson from './leetcodeProblemNumbers.json';
 import problemVideos from './problemVideos.json';
 
 export interface Problem {
   id: string;
   title: string;
+  /** Public LeetCode problem number (not its internal question ID). */
+  leetcodeNumber?: number;
   difficulty: Difficulty;
   category: Category;
   leetcodeUrl: string;
@@ -108,6 +111,14 @@ const premiumStatusById = ((leetcodePremiumStatusJson as PremiumStatusPayload).s
   string,
   boolean
 >;
+const leetcodeNumberById: Record<string, number> = leetcodeProblemNumbersJson.numberById;
+
+export function getNumberedProblemTitle(problem: Problem | undefined): string {
+  if (!problem) return '';
+  return problem.leetcodeNumber
+    ? `${problem.leetcodeNumber}. ${problem.title}`
+    : problem.title;
+}
 
 export function isProblemPremium(problem: Pick<Problem, 'id' | 'isPremium'>): boolean {
   if (typeof problem.isPremium === 'boolean') return problem.isPremium;
@@ -390,6 +401,7 @@ export const problems: Problem[] = ([
   { id: 'shuffle-the-array', title: 'Shuffle the Array', difficulty: 'Easy', category: 'Bit Manipulation', leetcodeUrl: 'https://leetcode.com/problems/shuffle-the-array/', videoUrl: '', isNeetCode75: false, isBlind75: false, isNeetCode150: false, isNeetCode250: true },
 ] as Problem[]).map(problem => ({
   ...problem,
+  leetcodeNumber: leetcodeNumberById[problem.id],
   videoUrl: (problemVideos as Record<string, string>)[problem.id] ?? problem.videoUrl,
   isPareto: PARETO_PROBLEM_IDS.has(problem.id),
   isPremium: isProblemPremium(problem),
@@ -401,6 +413,7 @@ let extendedCatalogPromise: Promise<Problem[]> | null = null;
 function decorateCatalogProblem(p: Problem): Problem {
   return {
     ...p,
+    leetcodeNumber: leetcodeNumberById[p.id],
     isPareto: PARETO_PROBLEM_IDS.has(p.id),
     isPremium: isProblemPremium(p),
   } as Problem;

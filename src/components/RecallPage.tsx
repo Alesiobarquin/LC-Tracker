@@ -1,7 +1,7 @@
 import { SectionHeading } from "./ui/StudyTrace";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, ArrowLeft, Clock } from "lucide-react";
+import { ExternalLink, ArrowLeft, Clock, Pause, Play } from "lucide-react";
 import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
 import { patterns } from "../data/patterns";
 import { getPatternForProblem } from "../utils/patternMapping";
@@ -301,24 +301,37 @@ export function RecallPage() {
         </ol>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="attempt-problem-title text-foreground">
+            {problem.leetcodeNumber != null && (
+              <span className="mr-3 font-mono text-subtle">
+                {problem.leetcodeNumber}.
+              </span>
+            )}
             {problem.title}
           </h2>
-          <span className="text-subtle text-xs font-mono inline-flex gap-2 items-center">
-            <Clock size={16} /> {Math.floor(elapsed / 60)}:
-            {String(elapsed % 60).padStart(2, "0")} · aim for 3 min
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-subtle text-xs font-mono inline-flex gap-2 items-center">
+              <Clock size={16} /> {Math.floor(elapsed / 60)}:
+              {String(elapsed % 60).padStart(2, "0")} · aim for 3 min
+            </span>
+            {!frozen && (
+              <div className="flex gap-3 items-center text-sm">
+                <button
+                  type="button"
+                  className="text-accent inline-flex items-center gap-1.5"
+                  onClick={togglePause}
+                  aria-pressed={!!draft.pausedAt}
+                >
+                  {draft.pausedAt ? <Play size={14} /> : <Pause size={14} />}
+                  {draft.pausedAt ? "Resume check" : "Pause check"}
+                </button>
+                {draft.pausedAt && (
+                  <span className="text-subtle">Timer paused</span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <div className="attempt-tools">
-          {!frozen && (
-            <div className="flex gap-4 items-center text-sm">
-              <button className="text-accent" onClick={togglePause}>
-                {draft.pausedAt ? "Resume check" : "Pause check"}
-              </button>
-              {draft.pausedAt && (
-                <span className="text-subtle">Timer paused</span>
-              )}
-            </div>
-          )}
           <a
             href={problem.leetcodeUrl}
             target="_blank"

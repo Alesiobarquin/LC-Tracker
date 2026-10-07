@@ -61,6 +61,32 @@ describe('transactional user-data service', () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it('keeps skipped confidence separate from coding evidence and scheduling', async () => {
+    const codingOutcome = { correctness: 'passed', assistance: 'none', explanation: 'clear' } as const;
+    await saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3, timing,
+      codingOutcome, additionalData: { confidenceReported: false } });
+    const unrated = mocks.rpc.mock.calls[0][1].p_payload.progress[0];
+    expect(unrated.history[0]).toMatchObject({ rating: 3, confidenceReported: false, codingOutcome });
+    await saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 1, timing,
+      codingOutcome, additionalData: { confidenceReported: true } });
+    expect(mocks.rpc.mock.calls[1][1].p_payload.progress[0].study_state).toEqual(unrated.study_state);
+  });
+
+  it('cannot pass an existing sprint check using an unrated placeholder', async () => {
+    mocks.rows.set('sprint_state', { version: 1, current_category: 'Arrays & Hashing',
+      sprint_start_date: '2026-10-01', sprint_length: 7, sprint_status: 'retrospective',
+      sprint_index: 0, extension_days: 0, retro_problem_id: 'two-sum', retro_attempted: false, sprint_history: [] });
+    await saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3, timing: { ...timing, sessionType: 'cold_solve' },
+      codingOutcome: { correctness: 'unfinished', assistance: 'none', explanation: 'partial' },
+      additionalData: { confidenceReported: false } });
+    const sprint = mocks.rpc.mock.calls[0][1].p_payload.sprint;
+    expect(sprint.current_category).toBe('Arrays & Hashing');
+    expect(sprint.sprint_status).toBe('retrospective');
+    expect(sprint.extension_days).toBe(2);
+    expect(sprint.retro_attempted).toBe(true);
+    expect(sprint.sprint_history).toHaveLength(0);
+  });
+
   it('retries confirmed version conflicts with the original operation ID', async () => {
     mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: 'PT409' } });
     await saveProblemSession('user_test', { operationId, problemId: 'two-sum', rating: 3 });

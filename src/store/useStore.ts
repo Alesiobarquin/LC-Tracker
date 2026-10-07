@@ -49,13 +49,16 @@ function isValidActiveSession(value: unknown): value is ActiveSession {
         session.finishedElapsed >= 0)) &&
     (session.draftNotes === undefined ||
       typeof session.draftNotes === "string") &&
+    (session.confidenceRating === undefined ||
+      (Number.isInteger(session.confidenceRating) && session.confidenceRating >= 1 && session.confidenceRating <= 5)) &&
     (!session.completion ||
       (session.completion.timing?.id === session.id &&
         session.completion.timing.problemId === session.problemId &&
         Number.isFinite(session.completion.timing.elapsedSeconds) &&
         session.completion.timing.elapsedSeconds >= 0 &&
         session.completion.rating >= 1 &&
-        session.completion.rating <= 5))
+        session.completion.rating <= 5 &&
+        (session.completion.confidenceReported === undefined || typeof session.completion.confidenceReported === "boolean")))
   );
 }
 

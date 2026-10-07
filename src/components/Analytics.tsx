@@ -503,7 +503,9 @@ export function Analytics() {
             ) : (
               <>
                 <p className="text-sm text-muted">
-                  Confidence: {viewing.rating}/5 (self-rating)
+                  {viewedCoding?.confidenceReported === false
+                    ? "Confidence: not recorded"
+                    : `Confidence: ${viewing.rating}/5 (self-rating)`}
                 </p>
                 {viewedCoding?.codingOutcome ? (
                   <p className="text-sm text-body">

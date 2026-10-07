@@ -235,13 +235,7 @@ for (const theme of ["light", "dark"] as const) {
           await page
             .getByRole("button", { name: "I'm Done", exact: true })
             .click();
-          await page
-            .getByLabel("Correctness", { exact: true })
-            .selectOption("passed");
-          await page.getByLabel("Assistance used").selectOption("none");
-          await page
-            .getByLabel("Can you explain why it works?")
-            .selectOption("clear");
+          await page.getByRole("button", { name: /^Solved independently/ }).click();
           await page
             .getByRole("heading", { name: "Session Complete" })
             .scrollIntoViewIfNeeded();

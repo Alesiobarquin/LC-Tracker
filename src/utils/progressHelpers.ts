@@ -438,6 +438,7 @@ export function deriveMomentumState(progress: Record<string, ProblemProgress>) {
     if (!problem) return;
 
     prog.history.forEach((entry, index) => {
+      if (entry.confidenceReported === false) return;
       const isNew =
         index === 0 ||
         entry.sessionType === 'new' ||
@@ -673,4 +674,3 @@ export function computePatternCompletion(
   return { problemsCompletedCount: evidence.dependable, masteredCount: evidence.dependable,
     dueCount, needsWorkCount, isCompleted: evidence.established };
 }
-

@@ -177,6 +177,16 @@ describe('deriveMomentumState', () => {
     expect(result.proactiveNeetCodeProblemId).toBeNull();
   });
 
+  it('does not interpret an unrated compatibility field as reported confidence', () => {
+    const base = createBaseProgress();
+    const result = deriveMomentumState({
+      'group-anagrams': { ...base, history: [{ date: '2023-01-01', rating: 1, sessionType: 'new' }] },
+      'valid-anagram': { ...base, history: [{ date: '2023-01-02', rating: 3, sessionType: 'new', confidenceReported: false }] },
+      'top-k-frequent-elements': { ...base, history: [{ date: '2023-01-03', rating: 1, sessionType: 'new' }] },
+    });
+    expect(result.consecutiveLowConfTotal).toBe(2);
+  });
+
   it('returns zeros/false and null when there is no low confidence (rating 3+)', () => {
     const progress: Record<string, ProblemProgress> = {
       'valid-anagram': {

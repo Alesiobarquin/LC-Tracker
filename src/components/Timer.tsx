@@ -2,12 +2,11 @@ import { TraceIndex } from "./ui/StudyTrace";
 import React, { useState, useEffect, useRef } from "react";
 import { Problem } from "../data/problems";
 import type { ProblemSessionRating, CodingOutcome } from "../types";
-import { UNSEEN_CHECK_MINUTES } from "../utils/study";
+import { isIndependentPass, UNSEEN_CHECK_MINUTES } from "../utils/study";
 import { useStore } from "../store/useStore";
 import {
   ExternalLink,
   CircleCheck,
-  BookOpen,
   Timer as TimerIcon,
   Pause,
   Play,
@@ -78,6 +77,22 @@ export const Timer: React.FC<TimerProps> = ({
       activeSession?.codingOutcome ??
       {},
   );
+  const [confidenceRating, setConfidenceRating] = useState<ProblemSessionRating | undefined>(
+    activeSession?.completion
+      ? activeSession.completion.confidenceReported === false
+        ? undefined
+        : activeSession.completion.rating
+      : activeSession?.confidenceRating,
+  );
+  const independent = isIndependentPass(codingOutcome as CodingOutcome);
+  const outcomeComplete = Boolean(
+    codingOutcome.correctness && codingOutcome.assistance && codingOutcome.explanation,
+  );
+  const changeOutcome = (next: Partial<CodingOutcome>) => {
+    setCodingOutcome(next);
+    updateActiveSession({ codingOutcome: next });
+    setSubmitError(null);
+  };
   const [phase, setPhase] = useState<"idle" | "running" | "rating">("idle");
   const [elapsed, setElapsed] = useState(0);
   const [frozenElapsed, setFrozenElapsed] = useState(0);
@@ -257,19 +272,10 @@ export const Timer: React.FC<TimerProps> = ({
     setPhase("rating");
   };
 
-  const handleRating = async (rating: ProblemSessionRating) => {
+  const handleSave = async () => {
     if (submittingRef.current || !activeSession) return;
-    if (activeSession.completion && activeSession.completion.rating !== rating)
-      return;
-    if (
-      !activeSession.completion &&
-      (!codingOutcome.correctness ||
-        !codingOutcome.assistance ||
-        !codingOutcome.explanation)
-    ) {
-      setSubmitError(
-        "Record correctness, assistance, and explanation before saving your confidence.",
-      );
+    if (!activeSession.completion && !outcomeComplete) {
+      setSubmitError("Choose a result and answer the follow-ups before saving.");
       return;
     }
     submittingRef.current = true;
@@ -284,6 +290,10 @@ export const Timer: React.FC<TimerProps> = ({
         ? "review"
         : "new";
 
+    // The legacy numeric field remains required by the database. An unreported
+    // placeholder is marked in history and never displayed as self-confidence.
+    // Scheduling uses the coding outcome, so this value does not change intervals.
+    const rating = confidenceRating ?? 3;
     const completion = activeSession.completion ?? {
       timing: {
         id: activeSession.id,
@@ -295,6 +305,7 @@ export const Timer: React.FC<TimerProps> = ({
         rating,
       },
       rating,
+      confidenceReported: confidenceRating !== undefined,
       notes: notesEdited.current ? notes : undefined,
       codingOutcome: codingOutcome as CodingOutcome,
       practiceKind: activeSession.practiceKind,
@@ -312,6 +323,9 @@ export const Timer: React.FC<TimerProps> = ({
         codingOutcome: completion.codingOutcome,
         practiceKind: completion.practiceKind,
         additionalData: {
+          ...(completion.confidenceReported !== undefined
+            ? { confidenceReported: completion.confidenceReported }
+            : {}),
           elapsedSeconds: completion.timing.elapsedSeconds,
           sessionType: completion.timing.sessionType,
         },
@@ -372,13 +386,6 @@ export const Timer: React.FC<TimerProps> = ({
         handleDone();
         return;
       }
-      if (phase === "rating" && !isSubmitting) {
-        const rating = Number(e.key) as ProblemSessionRating;
-        if (rating >= 1 && rating <= 5) {
-          e.preventDefault();
-          void handleRating(rating);
-        }
-      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -389,8 +396,6 @@ export const Timer: React.FC<TimerProps> = ({
     const minutes = Math.floor(frozenElapsed / 60);
     const seconds = frozenElapsed % 60;
     const timeLabel = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-
-    const existingNotes = progress[problem.id]?.notes;
 
     return (
       <div className="timer-assessment animate-in">
@@ -418,159 +423,139 @@ export const Timer: React.FC<TimerProps> = ({
             </p>
           )}
           <p className="text-muted mb-2 text-sm">
-            Record what happened on{" "}
-            <strong className="text-body">{problem.title}</strong>, then rate
-            your confidence.
+            How did <strong className="text-body">{problem.title}</strong> go?
           </p>
           <p className="text-subtle text-xs mb-6">
-            Independent passes need passing tests, no hints, and a clear
-            explanation. These outcomes are self-reported.
+            Timer stopped. Your result sets the next review.
           </p>
-          <div className="space-y-3 text-left mb-6">
-            {(
-              [
-                {
-                  key: "correctness",
-                  label: "Correctness",
-                  options: [
-                    ["passed", "Passed the problem tests"],
-                    ["failed", "Failed tests / incorrect"],
-                    ["unfinished", "Unfinished — continue another day"],
-                    ["unchecked", "Not checked against tests"],
-                  ],
-                },
-                {
-                  key: "assistance",
-                  label: "Assistance used",
-                  options: [
-                    ["none", "No hints or solution"],
-                    ["hint", "Used hints"],
-                    ["solution", "Read / followed the solution"],
-                  ],
-                },
-                {
-                  key: "explanation",
-                  label: "Can you explain why it works?",
-                  options: [
-                    ["clear", "Yes, including complexity and edge cases"],
-                    ["partial", "Partly"],
-                    ["not_yet", "Not yet"],
-                  ],
-                },
-              ] as const
-            ).map(({ key, label, options }) => (
-              <label key={key} className="block text-sm text-body">
-                {label}
+          <fieldset disabled={isSubmitting || !!activeSession?.completion} className="mb-5">
+            <legend className="sr-only">Session result</legend>
+            <div className="grid grid-cols-2 gap-2 text-left">
+              {([
+                { value: "independent", title: "Solved independently", hint: "Tests passed, no hints or solution; I can explain correctness, complexity, and edge cases.", correctness: "passed" },
+                { value: "passed", title: "Passed with help or gaps", hint: "Used help or need a better explanation.", correctness: "passed" },
+                { value: "unfinished", title: "Not finished", hint: "Continue in another block.", correctness: "unfinished" },
+                { value: "failed", title: "Tests failed", hint: "The solution needs a fix.", correctness: "failed" },
+                { value: "unchecked", title: "Not tested", hint: "Correctness is still unknown.", correctness: "unchecked" },
+              ] as const).map(({ value, title, hint, correctness }) => {
+                const selected = value === (independent ? "independent" : codingOutcome.correctness);
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => {
+                      if (!selected) changeOutcome(value === "independent"
+                        ? { correctness: "passed", assistance: "none", explanation: "clear" }
+                        : { correctness });
+                    }}
+                    className={clsx(
+                      "rounded-md border p-3 text-left transition-colors disabled:cursor-default",
+                      value === "independent" && "col-span-2",
+                      selected ? "border-accent bg-accent/10" : "border-line hover:bg-surface",
+                    )}
+                  >
+                    <span className="block text-sm font-medium text-foreground">{title}</span>
+                    <span className="block text-xs text-muted mt-1">{hint}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {codingOutcome.correctness && !independent && (
+            <fieldset disabled={isSubmitting || !!activeSession?.completion} className="space-y-4 mb-5">
+              <legend className="sr-only">Result details</legend>
+              <div>
+                <label htmlFor="coding-assistance" className="block text-sm text-body mb-2">Assistance used</label>
                 <select
-                  aria-label={label}
-                  value={codingOutcome[key] ?? ""}
+                  id="coding-assistance"
+                  value={codingOutcome.assistance ?? ""}
+                  onChange={(e) => changeOutcome({ ...codingOutcome, assistance: e.target.value as CodingOutcome["assistance"] })}
+                  className="w-full rounded-md border border-line-strong bg-canvas p-2.5 text-sm"
+                >
+                  <option value="">Choose assistance</option>
+                  <option value="none">No hints or solution</option>
+                  <option value="hint">Used hints</option>
+                  <option value="solution">Read / followed the solution</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="coding-explanation" className="block text-sm text-body mb-2">Can you explain why it works?</label>
+                <select
+                  id="coding-explanation"
+                  value={codingOutcome.explanation ?? ""}
+                  onChange={(e) => changeOutcome({ ...codingOutcome, explanation: e.target.value as CodingOutcome["explanation"] })}
+                  className="w-full rounded-md border border-line-strong bg-canvas p-2.5 text-sm"
+                >
+                  <option value="">Choose explanation</option>
+                  <option value="clear">Yes, including complexity and edge cases</option>
+                  <option value="partial">Partly</option>
+                  <option value="not_yet">Not yet</option>
+                </select>
+              </div>
+            </fieldset>
+          )}
+
+          <details className="mb-5 text-left" open={notesEdited.current || activeSession?.completion?.notes !== undefined || confidenceRating !== undefined || undefined}>
+            <summary className="quiet-action cursor-pointer py-2">Notes & confidence (optional)</summary>
+            <div className="space-y-4 pt-3">
+              <div>
+                <label htmlFor="session-notes" className="block text-sm text-body mb-2">Key insight or corrected explanation</label>
+                <textarea
+                  id="session-notes"
+                  value={notes}
+                  onChange={(e) => {
+                    notesEdited.current = true;
+                    setNotes(e.target.value);
+                    updateActiveSession({ draftNotes: e.target.value });
+                  }}
+                  disabled={isSubmitting || !!activeSession?.completion}
+                  placeholder="Jot down the key trick or pattern for this problem..."
+                  className="w-full bg-canvas border border-line rounded-md px-3 py-2 text-foreground resize-none h-20 text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="session-confidence" className="block text-sm text-body mb-2">Confidence (optional)</label>
+                <select
+                  id="session-confidence"
+                  value={confidenceRating ?? ""}
                   disabled={isSubmitting || !!activeSession?.completion}
                   onChange={(e) => {
-                    const next = { ...codingOutcome, [key]: e.target.value };
-                    setCodingOutcome(next);
-                    updateActiveSession({
-                      codingOutcome: next as CodingOutcome,
-                    });
-                    setSubmitError(null);
+                    const next = e.target.value ? Number(e.target.value) as ProblemSessionRating : undefined;
+                    setConfidenceRating(next);
+                    updateActiveSession({ confidenceRating: next });
                   }}
-                  className="mt-2 w-full rounded-xl border border-line-strong bg-canvas p-3"
+                  className="w-full rounded-md border border-line-strong bg-canvas p-2.5 text-sm"
                 >
-                  <option value="">Select an outcome</option>
-                  {options.map(([value, text]) => (
-                    <option key={value} value={value}>
-                      {text}
-                    </option>
-                  ))}
+                  <option value="">Skip confidence rating</option>
+                  <option value="5">5 — Automatic</option>
+                  <option value="4">4 — Strong</option>
+                  <option value="3">3 — Acceptable</option>
+                  <option value="2">2 — Shaky</option>
+                  <option value="1">1 — Could not</option>
                 </select>
-              </label>
-            ))}
-          </div>
-
-          <div className="mb-6 text-left">
-            <label className="block text-sm font-medium text-body mb-2 flex items-center gap-2">
-              <BookOpen size={16} className="text-accent" />
-              Corrected Explanation / Key Insight (Optional)
-            </label>
-            {existingNotes && (
-              <div className="mb-2 p-3 bg-accent/5 border border-accent/15 rounded-lg text-xs text-muted">
-                <span className="text-accent font-medium">Previous: </span>
-                {existingNotes}
+                <p className="text-xs text-subtle mt-2">For your own history. Review timing uses your result.</p>
               </div>
-            )}
-            <textarea
-              value={notes}
-              onChange={(e) => {
-                notesEdited.current = true;
-                setNotes(e.target.value);
-                updateActiveSession({ draftNotes: e.target.value });
-              }}
-              disabled={isSubmitting || !!activeSession?.completion}
-              placeholder="Jot down the key trick or pattern for this problem..."
-              className="w-full bg-canvas border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-accent/50 transition-colors resize-none h-20 text-sm"
-            />
-          </div>
+            </div>
+          </details>
 
           {submitError && (
-            <div className="mb-4 flex items-start gap-2 p-3 text-left text-danger bg-danger/10 border border-danger/20 rounded-xl text-sm">
+            <div role="alert" className="mb-4 flex items-start gap-2 p-3 text-left text-danger bg-danger/10 border border-danger/20 rounded-md text-sm">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               <span>{submitError}</span>
             </div>
           )}
 
-          <div className="space-y-2">
-            {(
-              [
-                {
-                  r: 5 as const,
-                  title: "5 — Automatic",
-                  hint: "Very confident after this attempt.",
-                  tone: "text-accent border-accent/30 bg-accent/10 hover:bg-accent/20",
-                },
-                {
-                  r: 4 as const,
-                  title: "4 — Strong",
-                  hint: "Confident, with small slips.",
-                  tone: "text-accent border-accent/30 bg-accent/10 hover:bg-accent/20",
-                },
-                {
-                  r: 3 as const,
-                  title: "3 — Acceptable",
-                  hint: "Some confidence, still rough.",
-                  tone: "text-accent border-accent/30 bg-accent/10 hover:bg-accent/20",
-                },
-                {
-                  r: 2 as const,
-                  title: "2 — Shaky",
-                  hint: "Low confidence; needs practice.",
-                  tone: "text-warning border-warning/30 bg-warning/10 hover:bg-warning/20",
-                },
-                {
-                  r: 1 as const,
-                  title: "1 — Could not",
-                  hint: "Not confident yet.",
-                  tone: "text-danger border-danger/30 bg-danger/10 hover:bg-danger/20",
-                },
-              ] as const
-            ).map(({ r, title, hint, tone }) => (
-              <button
-                key={r}
-                type="button"
-                disabled={
-                  isSubmitting ||
-                  (!!activeSession?.completion &&
-                    activeSession.completion.rating !== r)
-                }
-                onClick={() => handleRating(r)}
-                className={clsx(
-                  "rating-row w-full p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 text-left transition-colors group cursor-pointer",
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : "",
-                )}
-              >
-                <span className="font-medium text-sm">{title}</span>
-                <span className="text-xs opacity-85 sm:text-right">{hint}</span>
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSubmitting || (!activeSession?.completion && !outcomeComplete)}
+            className="brand-button-primary w-full rounded-md px-4 py-3 text-sm font-medium disabled:opacity-40"
+          >
+            {isSubmitting ? "Saving…" : activeSession?.completion ? "Retry save" : "Save & continue"}
+          </button>
+          <p className="text-xs text-subtle mt-3">Self-reported result; the app does not grade your code.</p>
         </div>
       </div>
     );
@@ -818,7 +803,7 @@ export const Timer: React.FC<TimerProps> = ({
             </li>
             <li>
               <span className="text-foreground block mb-1">Record</span>Save the
-              result, assistance used, and an honest confidence rating.
+              result. Notes and confidence are optional.
             </li>
           </ol>
           <div className="border-t border-line mt-6 pt-4 space-y-2 text-[10px] font-mono text-subtle">

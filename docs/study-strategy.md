@@ -109,6 +109,15 @@ record tests passed/failed/unfinished/unchecked, assistance, explanation, practi
 kind, actual timestamp, and timing ID. An independent pass requires passed tests,
 no hints or solution, and a clear explanation.
 
+Coding completion starts with a compact result choice. `Solved independently`
+explicitly reports all three facts together; other results ask only for assistance
+and explanation. Notes and confidence are optional. New unrated attempts retain a
+numeric `3` for compatibility with the existing database rating column and mark
+`confidenceReported: false` in coding history. This placeholder is not displayed
+as self-confidence or used in confidence-based legacy momentum. Coding outcomes
+control review intervals and any remaining sprint check. Draft result selections,
+optional confidence, and the frozen completion survive reloads and exact retries.
+
 Each item has separate recall and coding intervals. Delayed success extends an
 interval; failures shorten it. Same-day rehearsal does not grow intervals.
 Longer dates have deterministic spreading based on problem, date, and modality,

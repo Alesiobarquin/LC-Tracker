@@ -37,12 +37,12 @@ test('failed timer saves preserve the operation across reload and retry', async 
   });
   await page.goto('/timer/two-sum');
   await expect(page.getByRole('heading', { name: 'Session Complete' })).toBeVisible();
-  await page.getByRole('button', { name: /3 — Acceptable/ }).click();
+  await page.getByRole('button', { name: 'Retry save' }).click();
   await expect(page.getByText('Could not confirm your save.', { exact: false })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Session Complete' })).toBeVisible();
   await expect(page.getByPlaceholder(/Jot down/)).toHaveValue('Preserved notes');
-  await page.getByRole('button', { name: /3 — Acceptable/ }).click();
+  await page.getByRole('button', { name: 'Retry save' }).click();
   await expect(page).toHaveURL(/\/library/);
   expect(saves).toHaveLength(2);
   expect(saves[0].p_operation_id).toBe(operationId);

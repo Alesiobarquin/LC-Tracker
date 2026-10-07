@@ -20,7 +20,7 @@ const sessionType = z.enum(['new', 'review', 'cold_solve', 'mock', 'recall']);
 const historyEntry = z.object({
   sessionId: z.uuid().optional(),
   codingOutcome: codingOutcomeSchema.optional(), practiceKind: practiceKindSchema.optional(),
-  date, rating, elapsedSeconds: count.optional(), sessionType: sessionType.optional(),
+  date, rating, confidenceReported: z.boolean().optional(), elapsedSeconds: count.optional(), sessionType: sessionType.optional(),
   rawCode: z.string().optional(), optimalSolution: z.string().optional(),
   approachSimilarity: z.number().finite().optional(), usedInAppEditor: z.boolean().optional(),
   mockTimeLimitSeconds: count.optional(), mockActualSecondsUsed: count.optional(),

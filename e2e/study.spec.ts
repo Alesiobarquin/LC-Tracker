@@ -255,46 +255,101 @@ test("43 eligible items produce a bounded desktop and mobile plan", async ({
   });
 });
 
-test("coding requires explicit outcomes and preserves them across refresh", async ({
-  page,
-}) => {
-  await fixture(page, []);
+test("independent coding saves in two taps without notes or confidence", async ({ page }) => {
+  const stored = await fixture(page, []);
   let saved: any;
-  await page.route(
-    "https://test.supabase.co/rest/v1/rpc/commit_user_change",
-    async (route) => {
-      saved = route.request().postDataJSON();
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: '{"duplicate":false}',
-      });
-    },
-  );
-  await page.goto("/timer/two-sum");
-  await page.getByRole("button", { name: /Done/ }).last().click();
-  await page.getByRole("button", { name: /4 — Strong/ }).click();
-  await expect(
-    page.getByText("Record correctness, assistance, and explanation", {
-      exact: false,
-    }),
-  ).toBeVisible();
-  expect(saved).toBeUndefined();
-  await page.getByLabel("Correctness", { exact: true }).selectOption("passed");
-  await page.getByLabel("Assistance used").selectOption("none");
-  await page.getByLabel("Can you explain why it works?").selectOption("clear");
-  await page.reload();
-  await expect(page.getByLabel("Correctness", { exact: true })).toHaveValue(
-    "passed",
-  );
-  await expect(page.getByLabel("Assistance used")).toHaveValue("none");
-  await page.getByRole("button", { name: /4 — Strong/ }).click();
-  await expect(page).toHaveURL(/\/library/);
-  expect(saved.p_payload.progress[0].history.at(-1).codingOutcome).toEqual({
-    correctness: "passed",
-    assistance: "none",
-    explanation: "clear",
+  await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+    saved = route.request().postDataJSON();
+    stored.progress = saved.p_payload.progress;
+    stored.timings = saved.p_payload.timings;
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"duplicate":false}' });
   });
+  await page.goto("/timer/two-sum");
+  await page.getByRole("button", { name: "I'm Done", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save & continue" })).toBeDisabled();
+  await expect(page.getByLabel("Confidence (optional)")).not.toBeVisible();
+  await expect(page.getByLabel("Key insight or corrected explanation")).not.toBeVisible();
+  await page.getByRole("button", { name: /^Solved independently/ }).click();
+  await expect(page.getByLabel("Assistance used")).not.toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: /^Solved independently/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await expect(page).toHaveURL(/\/library/);
+  const history = saved.p_payload.progress[0].history.at(-1);
+  expect(history.codingOutcome).toEqual({ correctness: "passed", assistance: "none", explanation: "clear" });
+  expect(history.confidenceReported).toBe(false);
+  expect(saved.p_payload.progress[0].study_state.codingIntervalDays).toBe(7);
+  await page.goto("/analytics");
+  await page.locator(".session-history-row").first().click();
+  await expect(page.getByRole("dialog")).toContainText("Confidence: not recorded");
+});
+
+for (const [result, correctness, assistance, explanation, interval] of [
+  ["Passed with help or gaps", "passed", "hint", "clear", 2],
+  ["Passed with help or gaps", "passed", "none", "partial", 2],
+  ["Not finished", "unfinished", "none", "partial", 1],
+  ["Tests failed", "failed", "solution", "not_yet", 2],
+  ["Not tested", "unchecked", "none", "clear", 2],
+] as const) {
+  test(`coding ${correctness}/${assistance}/${explanation} preserves explicit evidence`, async ({ page }) => {
+    await fixture(page, []);
+    let saved: any;
+    await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+      saved = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{}' });
+    });
+    await page.goto("/timer/two-sum");
+    await page.getByRole("button", { name: "I'm Done", exact: true }).click();
+    await page.getByRole("button", { name: new RegExp(`^${result}`) }).click();
+    await expect(page.getByLabel("Assistance used")).toHaveValue("");
+    await expect(page.getByRole("button", { name: "Save & continue" })).toBeDisabled();
+    await page.getByLabel("Assistance used").selectOption(assistance);
+    await page.reload();
+    await expect(page.getByLabel("Assistance used")).toHaveValue(assistance);
+    await expect(page.getByLabel("Can you explain why it works?")).toHaveValue("");
+    await page.getByLabel("Can you explain why it works?").selectOption(explanation);
+    await page.getByRole("button", { name: "Save & continue" }).click();
+    await expect(page).toHaveURL(/\/library/);
+    expect(saved.p_payload.progress[0].history.at(-1).codingOutcome).toEqual({ correctness, assistance, explanation });
+    expect(saved.p_payload.progress[0].study_state.codingIntervalDays).toBe(interval);
+  });
+}
+
+test("quick completion freezes optional details and retries the same operation after reload", async ({ page }) => {
+  await fixture(page, []);
+  const saves: any[] = [];
+  await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+    saves.push(route.request().postDataJSON());
+    await route.fulfill({ status: saves.length === 1 ? 503 : 200, contentType: "application/json",
+      body: saves.length === 1 ? '{"code":"XX000","message":"Lost response"}' : '{"duplicate":true}' });
+  });
+  await page.goto("/timer/two-sum");
+  await page.getByRole("button", { name: "I'm Done", exact: true }).click();
+  await page.getByRole("button", { name: /^Solved independently/ }).click();
+  await page.getByText("Notes & confidence (optional)", { exact: true }).click();
+  await page.getByLabel("Key insight or corrected explanation").fill("Check the complement before insertion.");
+  await page.getByLabel("Confidence (optional)").selectOption("4");
+  await page.reload();
+  await expect(page.getByLabel("Confidence (optional)")).toHaveValue("4");
+  // Number keys no longer submit a confidence rating or bypass the save button.
+  await page.getByRole("heading", { name: "Session Complete" }).click();
+  await page.keyboard.press("4");
+  expect(saves).toHaveLength(0);
+  await page.getByRole("button", { name: "Save & continue" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "Your session is preserved" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Key insight or corrected explanation")).toHaveValue("Check the complement before insertion.");
+  await expect(page.getByLabel("Confidence (optional)")).toBeDisabled();
+  await expect(page.getByRole("button", { name: /^Not finished/ })).toBeDisabled();
+  await page.getByRole("button", { name: "Retry save" }).click();
+  await expect(page).toHaveURL(/\/library/);
+  expect(saves).toHaveLength(2);
+  expect(saves[0].p_operation_id).toBe(saves[1].p_operation_id);
+  expect(saves[0].p_payload.timings).toEqual(saves[1].p_payload.timings);
+  expect(saves[0].p_payload.progress[0].history).toEqual(saves[1].p_payload.progress[0].history);
+  expect(saves[0].p_payload.progress[0].notes).toEqual(saves[1].p_payload.progress[0].notes);
+  expect(saves[0].p_payload.progress[0].study_state).toEqual(saves[1].p_payload.progress[0].study_state);
+  expect(saves[0].p_payload.progress[0].history.at(-1).confidenceReported).toBe(true);
 });
 
 test("a scheduled break suppresses all automatic assignments", async ({
@@ -472,17 +527,13 @@ for (const theme of ["light", "dark"]) {
         fullPage: true,
       });
       await page.getByRole("button", { name: /Done/ }).last().click();
-      await page
-        .getByLabel("Correctness", { exact: true })
-        .selectOption("unfinished");
+      await page.getByRole("button", { name: /^Not finished/ }).click();
       await page.getByLabel("Assistance used").selectOption("none");
       await page
         .getByLabel("Can you explain why it works?")
         .selectOption("partial");
       await page.reload();
-      await expect(page.getByLabel("Correctness", { exact: true })).toHaveValue(
-        "unfinished",
-      );
+      await expect(page.getByRole("button", { name: /^Not finished/ })).toHaveAttribute("aria-pressed", "true");
     });
     test(`complete topic evidence and evaluation stay readable at ${width}px in ${theme}`, async ({
       page,

@@ -54,6 +54,19 @@ SELECT pg_temp.study_assert((SELECT study_state=pg_temp.study_state() AND versio
 SELECT pg_temp.study_assert((SELECT reviewed=2 FROM public.activity_log), 'failed recall never increments activity');
 SELECT pg_temp.study_assert((SELECT count(*)=3 FROM public.user_write_receipts), 'failed recall has no receipt');
 SELECT pg_temp.study_assert((public.export_user_data()->'progress'->0->'study_state')=pg_temp.study_state(), 'consistent backup includes recall answers');
+
+-- The compact completion keeps evidence and skipped confidence in the same
+-- transaction as timing/activity; replay must not manufacture a second attempt.
+SELECT public.commit_user_change('00000000-0000-4000-8000-000000000306','session','{"progress":{"two-sum":3}}',
+ jsonb_build_object('problemId','two-sum','progress',jsonb_build_array(pg_temp.study_progress() ||
+ jsonb_build_object('history','[{"date":"2020-01-01T00:00:00Z","rating":4},{"sessionId":"00000000-0000-4000-8000-000000000306","date":"2026-10-06T12:00:00Z","rating":3,"confidenceReported":false,"codingOutcome":{"correctness":"passed","assistance":"none","explanation":"clear"}}]'::jsonb)),
+ 'timings',jsonb_build_array(pg_temp.study_timing('00000000-0000-4000-8000-000000000306',3) || '{"session_type":"review"}'::jsonb),
+ 'logDate','2026-10-06','isNew',false));
+SELECT pg_temp.study_assert((SELECT history->1->'confidenceReported'='false'::jsonb AND history->1->'codingOutcome'='{"correctness":"passed","assistance":"none","explanation":"clear"}'::jsonb FROM public.problem_progress WHERE problem_id='two-sum'), 'quick completion preserves explicit evidence and skipped confidence');
+SELECT pg_temp.study_assert((public.commit_user_change('00000000-0000-4000-8000-000000000306','session','{"progress":{"two-sum":3}}','{"problemId":"two-sum"}')->>'duplicate')::boolean, 'quick completion replay uses its receipt');
+SELECT pg_temp.study_assert((SELECT reviewed=3 FROM public.activity_log), 'quick completion counted once');
+SELECT pg_temp.study_assert((SELECT count(*)=1 FROM public.session_timings WHERE id='00000000-0000-4000-8000-000000000306'), 'quick completion timing counted once');
+SELECT pg_temp.study_assert((public.export_user_data()->'progress'->0->'history'->1->'confidenceReported')='false'::jsonb, 'backup retains skipped confidence');
 SELECT set_config('request.jwt.claims', '{"sub":"user_study_other","role":"authenticated"}', false);
 SELECT pg_temp.study_assert((SELECT count(*)=0 FROM public.problem_progress), 'recall answers isolated by account');
 RESET ROLE;

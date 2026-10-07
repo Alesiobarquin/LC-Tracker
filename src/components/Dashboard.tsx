@@ -16,6 +16,7 @@ import {
 } from "../utils/study";
 import {
   problemMap,
+  getNumberedProblemTitle,
   ensureExtendedCatalogLoaded,
   TARGET_CURRICULUM_LABELS,
   problemsPoolForTargetCurriculum,
@@ -268,7 +269,9 @@ export function Dashboard() {
                       ? "Recall warm-up · up next"
                       : "Coding practice · up next"}
                 </div>
-                <h2 className="study-next-title">{focusedProblem?.title}</h2>
+                <h2 className="study-next-title">
+                  {getNumberedProblemTitle(focusedProblem)}
+                </h2>
                 <p className="text-sm text-muted leading-relaxed max-w-lg">
                   {activeProblemId
                     ? "Continue your saved session before starting another problem."
@@ -376,7 +379,7 @@ export function Dashboard() {
                             Recall check / {task.minutes} min
                           </p>
                           <h3 className="text-lg font-medium tracking-tight">
-                            {problemMap[task.problemId].title}
+                            {getNumberedProblemTitle(problemMap[task.problemId])}
                           </h3>
                           <p className="text-xs text-muted mt-2 leading-relaxed">
                             {task.reason}
@@ -413,7 +416,7 @@ export function Dashboard() {
                     {plan.mainTask ? (
                       <>
                         <h4 className="practice-plan-title">
-                          {problemMap[plan.mainTask.problemId].title}
+                          {getNumberedProblemTitle(problemMap[plan.mainTask.problemId])}
                         </h4>
                         <p className="text-xs text-muted leading-relaxed mt-2 max-w-lg">
                           {plan.mainTask.reason}

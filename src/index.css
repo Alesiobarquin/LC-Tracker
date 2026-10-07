@@ -2690,17 +2690,34 @@ button:active:not(:disabled),
 }
 
 /* Problem-specific references share the semantic palette with the recall sheet. */
-.explanation-prose { color: var(--palette-body); font-size: 14px; line-height: 1.85; overflow-wrap: anywhere; }
-.explanation-prose h3 { color: var(--palette-foreground); font-size: 14px; font-weight: 600; margin: 22px 0 8px; }
-.explanation-prose h3:first-child { margin-top: 0; }
-.explanation-prose p { margin: 8px 0; }
-.explanation-prose ol, .explanation-prose ul { padding-left: 24px; margin: 10px 0; }
+.explanation-approach { color: var(--palette-foreground); font-size: 20px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.4; margin-top: 8px; }
+.explanation-sections { display: grid; gap: 28px; max-width: 72ch; font-size: 15px; }
+.explanation-prose { max-width: 72ch; color: var(--palette-body); font-size: 15px; line-height: 1.85; overflow-wrap: anywhere; }
+.explanation-prose :is(h1, h2, h3, h4) { color: var(--palette-foreground); font-weight: 650; line-height: 1.4; margin: 28px 0 14px; }
+.explanation-prose :is(h1, h2) { font-size: 18px; }
+.explanation-prose h3 { font-size: 16px; }
+.explanation-prose h4 { font-size: 15px; }
+.explanation-prose :is(h1, h2, h3, h4):first-child { margin-top: 0; }
+.explanation-section .explanation-prose > h3:first-child { border-left: 3px solid var(--palette-accent); padding-left: 12px; }
+.explanation-section:first-child .explanation-prose > p:first-of-type { color: var(--palette-foreground); }
+.explanation-prose p { margin: 12px 0; }
+.explanation-prose ol, .explanation-prose ul { padding-left: 26px; margin: 14px 0; }
 .explanation-prose ol { list-style: decimal; }
 .explanation-prose ul { list-style: disc; }
-.explanation-prose li { margin: 4px 0; }
-.explanation-prose code { font: 0.92em var(--font-mono); color: var(--palette-accent); }
+.explanation-prose li { margin: 10px 0; padding-left: 6px; }
+.explanation-prose li::marker { color: var(--palette-accent); font-weight: 650; }
+.explanation-prose li > p { margin: 6px 0; }
+.explanation-prose li :is(ol, ul) { margin: 8px 0; }
+.explanation-prose strong { color: var(--palette-foreground); font-weight: 650; }
+.explanation-prose code { padding: 2px 5px; border-radius: 3px; background: var(--palette-muted-surface); font: 0.9em var(--font-mono); color: var(--palette-code-function); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .explanation-prose pre { overflow-x: auto; padding: 12px; background: var(--palette-muted-surface); }
+.explanation-prose pre code { padding: 0; background: transparent; }
 .explanation-prose a { color: var(--palette-accent); text-decoration: underline; }
+.explanation-complexity { padding: 18px 20px; border: 1px solid var(--palette-line); border-radius: 4px; background: var(--palette-muted-surface); }
+.explanation-complexity .explanation-prose > h3:first-child { border: 0; padding: 0; }
+.explanation-complexity .explanation-prose > ul { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 0; margin-bottom: 0; list-style: none; }
+.explanation-complexity .explanation-prose > ul > li { flex: 1 1 180px; min-width: 0; margin: 0; padding: 0; color: var(--palette-foreground); font-size: 14px; font-weight: 550; }
+.explanation-complexity code { background: var(--palette-surface); }
 .explanation-links { display: flex; flex-wrap: wrap; gap: 14px 26px; }
 .explanation-links a { display: inline-flex; align-items: center; gap: 7px; color: var(--palette-accent); font-size: 13px; }
 .reference-code { min-width: 0; border: 1px solid var(--palette-line-strong); border-radius: 4px; overflow: hidden; }

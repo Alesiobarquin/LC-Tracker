@@ -32,7 +32,7 @@ import { ProblemLibrarySkeleton } from "./loadingSkeletons";
 import { getDifficultyColor } from "../utils/uiHelpers";
 import { isDueToday } from "../utils/dateUtils";
 import type { ProblemProgress } from "../types";
-import { PageHeader } from "./ui";
+import { Modal, PageHeader } from "./ui";
 import { hasProblemReference } from "../data/problemReferences";
 
 const VIRTUALIZE_THRESHOLD = 200;
@@ -199,6 +199,7 @@ export const ProblemLibrary: React.FC = () => {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [pendingImportId, setPendingImportId] = useState<string | null>(null);
+  const closeImportDialog = useCallback(() => setPendingImportId(null), []);
   const [pendingPremiumStartId, setPendingPremiumStartId] = useState<
     string | null
   >(null);
@@ -731,42 +732,44 @@ export const ProblemLibrary: React.FC = () => {
         </div>
       </details>
 
-      {pendingImportId && (
-        <div className="premium-card p-4 border-accent/30 bg-accent/5 flex flex-col gap-3">
-          <div>
-            <p className="text-sm text-accent font-medium">
-              Mark as previously solved?
-            </p>
-            <p className="text-xs text-body mt-1">
-              Record your prior solve and an honest self-rating. A recall check
-              and independent coding attempts will assess current ability.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+      <Modal
+        isOpen={pendingImportId !== null}
+        onClose={closeImportDialog}
+        title="Mark as previously solved?"
+        description={
+          pendingImportId ? problemMap[pendingImportId]?.title : undefined
+        }
+      >
+        <div className="space-y-5">
+          <p className="text-sm text-body">
+            Record your prior solve and an honest self-rating. A recall check
+            and independent coding attempts will assess current ability.
+          </p>
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
-              onClick={() => setPendingImportId(null)}
-              className="px-3 py-2 rounded-lg text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body border border-line-strong"
+              onClick={closeImportDialog}
+              className="px-3 py-2 rounded-sm text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body border border-line-strong focus-visible:ring-2 focus-visible:ring-accent"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => confirmImportSolve(3)}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-muted-surface hover:bg-hover-surface text-body border border-line-strong"
+              className="px-3 py-2 rounded-sm text-xs font-semibold bg-muted-surface hover:bg-hover-surface text-body border border-line-strong focus-visible:ring-2 focus-visible:ring-accent"
             >
               Acceptable (3)
             </button>
             <button
               type="button"
               onClick={() => confirmImportSolve(4)}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-accent hover:bg-accent-strong text-on-accent"
+              className="px-3 py-2 rounded-sm text-xs font-semibold bg-accent hover:bg-accent-strong text-on-accent focus-visible:ring-2 focus-visible:ring-accent"
             >
               Strong (4)
             </button>
           </div>
         </div>
-      )}
+      </Modal>
 
       {pendingPremiumProblem && (
         <div className="premium-card p-4 border-warning/30 bg-warning/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

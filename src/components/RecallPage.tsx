@@ -302,7 +302,7 @@ export function RecallPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="attempt-problem-title text-foreground">
             {problem.leetcodeNumber != null && (
-              <span className="mr-3 font-mono text-subtle">
+              <span className="mr-3 font-mono text-foreground">
                 {problem.leetcodeNumber}.
               </span>
             )}
@@ -317,16 +317,13 @@ export function RecallPage() {
               <div className="flex gap-3 items-center text-sm">
                 <button
                   type="button"
-                  className="text-accent inline-flex items-center gap-1.5"
+                  className="text-accent inline-flex w-[7.5rem] shrink-0 items-center justify-start gap-1.5"
                   onClick={togglePause}
                   aria-pressed={!!draft.pausedAt}
                 >
                   {draft.pausedAt ? <Play size={14} /> : <Pause size={14} />}
                   {draft.pausedAt ? "Resume check" : "Pause check"}
                 </button>
-                {draft.pausedAt && (
-                  <span className="text-subtle">Timer paused</span>
-                )}
               </div>
             )}
           </div>

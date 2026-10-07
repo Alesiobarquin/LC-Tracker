@@ -237,7 +237,8 @@ const StepLearningMode: React.FC<{
         </div>
         <p className="text-sm text-muted leading-relaxed">
           Start with foundations and build representative coverage across
-          patterns. Brief recall and coding checks share your daily budget.
+          patterns. Recall and coding share your budget. Repeated failures
+          prompt repair, and related unfamiliar checks keep a place in the plan.
         </p>
       </button>
     </div>

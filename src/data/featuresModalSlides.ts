@@ -20,7 +20,7 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     icon: LayoutDashboard,
     highlights: [
       'Daily plan within your remaining study time',
-      'Brief recall checks, coding blocks, and new learning',
+      'Recall, repair blocks, and protected unfamiliar checks',
       'Immediate next actions so sessions start without context switching',
     ],
     tabId: 'dashboard',
@@ -43,9 +43,9 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
     subtitle: 'Measure how your practice behavior is changing.',
     icon: LineChart,
     highlights: [
-      'Delayed coding outcomes and pattern coverage',
+      'Delayed coding outcomes and coverage of all major topics',
       'Recall results, unseen variations, and study time',
-      'Spot strengths and weak areas so next sessions are targeted',
+      'Review timed unfamiliar checks and two-week practice evidence',
     ],
     tabId: 'analytics',
   },

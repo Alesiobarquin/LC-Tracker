@@ -14,6 +14,7 @@ import {
   problemMap,
   problemsPoolForTargetCurriculum,
   ensureExtendedCatalogLoaded,
+  isProblemPremium,
 } from "../data/problems";
 import { patterns } from "../data/patterns";
 import { getPatternForProblem } from "../utils/patternMapping";
@@ -21,6 +22,9 @@ import {
   getPatternEvidence,
   hasDelayedIndependentPass,
   isIndependentPass,
+  getCategoryEvidence,
+  getStudyEvaluation,
+  UNSEEN_CHECK_MINUTES,
 } from "../utils/study";
 import type { SessionTiming } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
@@ -102,25 +106,17 @@ export function Analytics() {
   const recallAttempts = Object.values(progress)
     .flatMap((p) => p.studyState?.recallHistory ?? [])
     .filter((a) => recent(a.date));
-  const codingAttempts = Object.values(progress)
-    .flatMap((p) => p.history)
-    .filter((h) => h.codingOutcome && recent(h.date));
-  const delayedAttempts = Object.values(progress).flatMap((p) =>
-    p.history.filter(
-      (h, index) =>
-        h.codingOutcome &&
-        recent(h.date) &&
-        index > 0 &&
-        differenceInCalendarDays(
-          new Date(h.date),
-          new Date(p.history[index - 1].date),
-        ) >= 7,
-    ),
-  );
-  const variants = codingAttempts.filter((h) => h.practiceKind === "variant");
+  const evaluation = getStudyEvaluation(progress, now);
+  const delayedAttempts = evaluation.delayed;
+  const variants = evaluation.unseen;
   const coveredPool = problemsPoolForTargetCurriculum(
     settingsQuery.settings.targetCurriculum,
+  ).filter(
+    (p) =>
+      settingsQuery.settings.includePremiumInAssignments ||
+      !isProblemPremium(p),
   );
+  const categoryEvidence = getCategoryEvidence(coveredPool, progress);
   const evidence = patterns
     .map((pattern) => {
       const ids = coveredPool
@@ -282,6 +278,80 @@ export function Analytics() {
       </details>
       <div className="evidence-ledgers">
         <section className="coverage-ledger register-section space-y-4">
+          <SectionHeading index="02" title="All topic coverage" />
+          <p className="text-xs text-muted">
+            Every major topic is listed. Encountered records exposure;
+            dependable requires delayed independent coding. Categories outside
+            your selected list are shown explicitly.
+          </p>
+          <div className="overflow-x-auto">
+            <table
+              className="evidence-table w-full min-w-[560px] text-sm text-left"
+              aria-label="All topic coverage"
+            >
+              <thead className="text-subtle">
+                <tr>
+                  <th scope="col" className="py-3 pr-4">
+                    Topic
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Encountered
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Dependable
+                  </th>
+                  <th scope="col" className="pr-4">
+                    Variant pass
+                  </th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categoryEvidence.map((row) => (
+                  <tr
+                    key={row.category}
+                    className="border-t border-line text-body"
+                  >
+                    <th scope="row" className="py-3 pr-4 font-normal">
+                      {row.category}
+                    </th>
+                    <td>
+                      {row.seen}/{row.ids.length}
+                    </td>
+                    <td>{row.dependable}</td>
+                    <td>{row.variantPassed ? "Recorded" : "Not yet"}</td>
+                    <td>
+                      {!row.ids.length
+                        ? "Outside target list"
+                        : row.established
+                          ? "Established"
+                          : row.seen
+                            ? "Developing"
+                            : "Not started"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div
+            className="border-t border-line pt-4 space-y-2"
+            aria-label="Two-week study evaluation"
+          >
+            <h2 className="register-label">Two-week study evaluation</h2>
+            <p className="text-sm text-body">
+              {evaluation.timedPasses}/{evaluation.timed.length} independent
+              unfamiliar checks finished within {UNSEEN_CHECK_MINUTES} minutes.{" "}
+              {evaluation.unseen.length - evaluation.timed.length} unseen
+              outcomes have unknown time or ended early.
+            </p>
+            <p className="text-xs text-muted">{evaluation.advice}</p>
+            <p className="text-xs text-subtle">
+              Use a full check block for comparable timing. Short or interrupted
+              checks can continue as practice. The 35-minute limit is a product
+              default; these self-reported samples are not a readiness score.
+            </p>
+          </div>
           <SectionHeading index="02" title="Pattern coverage and depth" />
           <div className="overflow-x-auto">
             <table className="evidence-table w-full min-w-[560px] text-sm text-left">

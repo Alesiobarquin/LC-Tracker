@@ -1,6 +1,7 @@
 /**
  * Problem session self-rating: how confident you felt after **this session** (not a test score).
  * 1–2: unreliable · 3: acceptable but rough · 4: strong recall · 5: could solve cold / automatic.
+ * Unrated coding stores a compatibility 3 with confidenceReported=false in history.
  */
 export type ProblemSessionRating = 1 | 2 | 3 | 4 | 5;
 
@@ -41,6 +42,8 @@ export interface ProblemHistoryEntry {
   sessionId?: string;
   date: string;
   rating: ProblemSessionRating;
+  /** False when the legacy numeric field is a placeholder, not a self-rating. */
+  confidenceReported?: boolean;
   elapsedSeconds?: number;
   sessionType?: 'new' | 'review' | 'cold_solve' | 'mock';
   codingOutcome?: CodingOutcome;
@@ -128,11 +131,12 @@ export interface ActiveSession {
   pausedAt?: number | null;
   finishedElapsed?: number;
   draftNotes?: string;
-  codingOutcome?: CodingOutcome;
+  codingOutcome?: Partial<CodingOutcome>;
+  confidenceRating?: ProblemSessionRating;
   practiceKind?: PracticeKind;
   plannedMinutes?: number;
   /** Persisted before the request so a reload/retry uses the same operation ID. */
-  completion?: { timing: SessionTiming; rating: ProblemSessionRating; notes?: string; codingOutcome?: CodingOutcome; practiceKind?: PracticeKind };
+  completion?: { timing: SessionTiming; rating: ProblemSessionRating; confidenceReported?: boolean; notes?: string; codingOutcome?: CodingOutcome; practiceKind?: PracticeKind };
 }
 
 export interface RecallDraft {

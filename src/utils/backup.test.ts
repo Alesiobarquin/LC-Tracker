@@ -16,6 +16,18 @@ describe('backup validation', () => {
   it('rejects unrelated JSON', () => {
     expect(() => validateBackup({ hello: 'world' })).toThrow('No backup data found');
   });
+  it('preserves skipped and reported confidence without changing legacy history', () => {
+    const date = '2026-10-06T12:00:00Z';
+    const progress = { 'two-sum': { firstSolvedAt: date, lastReviewedAt: date, nextReviewAt: date,
+      reviewCount: 2, retired: false, consecutiveThrees: 0, history: [
+        { date, rating: 3 },
+        { date, rating: 3, confidenceReported: false, codingOutcome: { correctness: 'unfinished', assistance: 'hint', explanation: 'partial' } },
+        { date, rating: 4, confidenceReported: true, codingOutcome: { correctness: 'passed', assistance: 'none', explanation: 'clear' } },
+      ] } };
+    expect(validateBackup(JSON.parse(JSON.stringify({ progress }))).progress).toEqual(progress);
+    expect(() => validateBackup({ progress: { 'two-sum': { ...progress['two-sum'],
+      history: [{ date, rating: 3, confidenceReported: 'false' }] } } })).toThrow('Invalid backup');
+  });
   it('round-trips a study schedule with no weekly rest day', () => {
     const userSettings = { ...DEFAULT_USER_SETTINGS, settings: { ...DEFAULT_USER_SETTINGS.settings,
       studySchedule: { ...DEFAULT_USER_SETTINGS.settings.studySchedule, restDay: -1 } } };

@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { advanceSprintState, applyLeetCodeSubmissions, calculateSessionAggregates,
   computeNewProblemProgress } from '../utils/progressHelpers';
-import { applyRecall } from '../utils/study';
+import { applyRecall, isIndependentPass } from '../utils/study';
 import { recallAttemptSchema, codingOutcomeSchema, studyStateSchema } from '../utils/studySchemas';
 import { problemMap } from '../data/problems';
 import { safeUUID } from '../utils/uuid';
@@ -380,7 +380,8 @@ export async function saveProblemSession(userId: string, input: SaveProblemInput
       timings: input.timing ? [timingToRow(userId, input.timing)] : [],
     };
     if (sprint.sprintState?.sprintStatus === 'retrospective' && sprint.sprintState.retroProblemId === input.problemId) {
-      const nextSprint = input.rating >= 3
+      const passed = input.codingOutcome ? isIndependentPass(input.codingOutcome) : input.rating >= 3;
+      const nextSprint = passed
         ? advanceSprintState(sprint.sprintState, sprint.sprintHistory, { ...progress, [input.problemId]: next },
           settings.settings, calculateSessionAggregates(input.timing ? [input.timing, ...timings] : timings).categoryAvgSolveTimes)
         : { ...sprint, sprintState: { ...sprint.sprintState, extensionDays: sprint.sprintState.extensionDays + 2, retroAttempted: true } };

@@ -2931,6 +2931,7 @@ button:active:not(:disabled),
   align-items: start;
   gap: clamp(42px, 8vw, 126px);
   padding-block: clamp(60px, 9vw, 112px);
+  scroll-margin-top: 88px;
 }
 .landing-section-intro {
   max-width: 450px;

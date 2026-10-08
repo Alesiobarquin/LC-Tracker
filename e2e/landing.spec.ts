@@ -43,6 +43,17 @@ test('landing explains the planner and updates its sample from the goal', async 
   await expect(page.getByText(/Continue with Google|Google/i).first()).toBeVisible();
 });
 
+test('shared header takes utility pages to the landing story section', async ({ page }) => {
+  for (const route of ['/login', '/privacy', '/terms']) {
+    await page.goto(route);
+    await expect(page.getByRole('link', { name: 'How it works' })).toHaveAttribute('href', '/#how-it-works');
+  }
+
+  await page.getByRole('link', { name: 'How it works' }).click();
+  await expect(page).toHaveURL(/\/#how-it-works$/);
+  await expect(page.getByRole('heading', { name: 'A clear next step. A reason behind it.' })).toBeInViewport();
+});
+
 test('landing controls remain usable on mobile in both themes and with reduced motion', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });

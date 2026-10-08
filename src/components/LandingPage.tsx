@@ -43,6 +43,13 @@ function useLandingReveals() {
   }, []);
 }
 
+function useLandingHashNavigation() {
+  useEffect(() => {
+    if (window.location.hash !== '#how-it-works') return;
+    document.getElementById('how-it-works')?.scrollIntoView({ block: 'start' });
+  }, []);
+}
+
 const journey = [
   {
     number: "01",
@@ -69,6 +76,7 @@ const journey = [
 
 export function LandingPage() {
   useLandingReveals();
+  useLandingHashNavigation();
 
   return (
     <div className="brand-shell landing-page text-foreground">

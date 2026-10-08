@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Navigate,
   useLocation,
@@ -16,6 +16,7 @@ export const TimerPage: React.FC = () => {
   const location = useLocation();
   const activeSession = useStore((state) => state.activeSession);
   const activeRecall = useStore((state) => state.activeRecall);
+  const sessionOpened = useRef(Boolean(activeSession || activeRecall));
   const sessionReturnTo = useStore((state) => state.sessionReturnTo);
   const clearSessionReturnTo = useStore((state) => state.clearSessionReturnTo);
   const startSession = useStore((state) => state.startSession);
@@ -41,17 +42,23 @@ export const TimerPage: React.FC = () => {
     "/library";
 
   useEffect(() => {
+    if (activeSession || activeRecall) {
+      sessionOpened.current = true;
+      return;
+    }
     if (
       !targetProblemId ||
       progressLoading ||
       error ||
       !catalogReady ||
-      activeSession ||
-      activeRecall
+      sessionOpened.current
     )
       return;
     const problem = problemMap[targetProblemId];
     if (!problem) return;
+    // Opening this route starts at most one attempt. Clearing a saved/cancelled
+    // attempt can render here again while the destination route is loading.
+    sessionOpened.current = true;
     startSession(
       problem.id,
       Boolean(progress[problem.id]),

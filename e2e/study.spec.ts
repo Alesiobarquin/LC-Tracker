@@ -373,6 +373,9 @@ test("independent coding saves in two taps without notes or confidence", async (
   await expect(page.getByRole("button", { name: /^Solved independently/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Save & continue" }).click();
   await expect(page).toHaveURL(/\/library/);
+  await expect.poll(() => page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+  )).toBeNull();
   const history = saved.p_payload.progress[0].history.at(-1);
   expect(history.codingOutcome).toEqual({ correctness: "passed", assistance: "none", explanation: "clear" });
   expect(history.confidenceReported).toBe(false);
@@ -441,6 +444,9 @@ test("quick completion freezes optional details and retries the same operation a
   await expect(page.getByRole("button", { name: /^Not finished/ })).toBeDisabled();
   await page.getByRole("button", { name: "Retry save" }).click();
   await expect(page).toHaveURL(/\/library/);
+  await expect.poll(() => page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+  )).toBeNull();
   expect(saves).toHaveLength(2);
   expect(saves[0].p_operation_id).toBe(saves[1].p_operation_id);
   expect(saves[0].p_payload.timings).toEqual(saves[1].p_payload.timings);
@@ -448,6 +454,96 @@ test("quick completion freezes optional details and retries the same operation a
   expect(saves[0].p_payload.progress[0].notes).toEqual(saves[1].p_payload.progress[0].notes);
   expect(saves[0].p_payload.progress[0].study_state).toEqual(saves[1].p_payload.progress[0].study_state);
   expect(saves[0].p_payload.progress[0].history.at(-1).confidenceReported).toBe(true);
+});
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1280, 390]) {
+    test(`completed coding stays closed and tomorrow gets reviews and a new cold solve at ${width}px in ${theme}`, async ({ page }) => {
+      await page.clock.install({ time: new Date("2026-10-07T12:00:00") });
+      await page.setViewportSize({ width, height: 900 });
+      const stored = await fixture(page, [
+        "min-cost-climbing-stairs", "contains-duplicate", "valid-anagram",
+        "two-sum", "group-anagrams", "binary-search",
+        "find-minimum-in-rotated-sorted-array", "reverse-linked-list",
+        "merge-two-sorted-lists",
+      ].map(id => progressRow(id)));
+      stored.settings.settings_json.settings.studySchedule.weekdayMinutes = 60;
+      await page.addInitScript(({ userId, theme }) => {
+        localStorage.setItem("lc-tracker-theme", theme);
+        if (!sessionStorage.getItem("lc-tracker-active-session")) {
+          sessionStorage.setItem("lc-tracker-active-session", JSON.stringify({ state: {
+            activeSession: {
+              id: "00000000-0000-4000-8000-000000000010",
+              userId, problemId: "min-cost-climbing-stairs",
+              startTimestamp: Date.now() - 60 * 60 * 1000,
+              isReview: true, isColdSolve: false, practiceKind: "coding_review",
+              finishedElapsed: 60 * 60,
+            },
+            sessionReturnTo: "/dashboard",
+          }, version: 0 }));
+        }
+      }, { userId, theme });
+      const saves: any[] = [];
+      await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+        const request = route.request().postDataJSON();
+        saves.push(request);
+        for (const row of request.p_payload.progress) {
+          const index = stored.progress.findIndex(p => p.problem_id === row.problem_id);
+          stored.progress[index] = { ...row, version: stored.progress[index].version + 1 };
+        }
+        stored.timings.push(...request.p_payload.timings);
+        await route.fulfill({ status: 200, contentType: "application/json", body: '{"duplicate":false}' });
+      });
+      await page.goto("/dashboard");
+      await page.getByRole("link", { name: "Record outcome", exact: true }).click();
+      await page.getByRole("button", { name: /^Solved independently/ }).click();
+      await page.getByRole("button", { name: "Save & continue" }).click();
+      await expect(page).toHaveURL(/\/dashboard/);
+      await expect(page.getByRole("heading", { name: "Your time target is complete" })).toBeVisible();
+      await expect.poll(() => page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+      )).toBeNull();
+      expect(saves).toHaveLength(1);
+      expect(stored.timings).toHaveLength(1);
+      await page.reload();
+      await expect(page.getByRole("heading", { name: "Your time target is complete" })).toBeVisible();
+      await page.clock.fastForward(24 * 60 * 60 * 1000 + 60_000);
+      await expect(page.locator(".time-budget .register-value")).toHaveText("60");
+      await expect(page.getByRole("link", { name: "Resume session", exact: true })).toHaveCount(0);
+      await expect(page.getByLabel("Your next action").getByRole("button", { name: "Start recall check", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Main practice block" })).toBeVisible();
+      await expect(page.locator(".plan-track")).not.toContainText("Min Cost Climbing Stairs");
+      await page.getByRole("button", { name: "Start practice block", exact: true }).click();
+      await expect(page.getByText("Unfamiliar check · topic hidden", { exact: true })).toBeVisible();
+      const next = await page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+      );
+      expect(next.problemId).not.toBe("min-cost-climbing-stairs");
+      expect(next.id).not.toBe(saves[0].p_operation_id);
+      expect(next.isColdSolve).toBe(true);
+    });
+  }
+}
+
+test("cancelling a leftover coding draft clears it and allows another problem", async ({ page }) => {
+  await fixture(page, []);
+  let writes = 0;
+  await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+    writes++;
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{}' });
+  });
+  await page.goto("/timer/min-cost-climbing-stairs");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.getByRole("button", { name: "Yes, Cancel", exact: true }).click();
+  await expect(page).toHaveURL(/\/library/);
+  await expect.poll(() => page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+  )).toBeNull();
+  expect(writes).toBe(0);
+  await page.goto("/dashboard");
+  await expect(page.getByRole("button", { name: "Start practice block", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Start practice block", exact: true }).click();
+  await expect(page).toHaveURL(/\/timer\/(?!min-cost-climbing-stairs)/);
 });
 
 test("a scheduled break suppresses all automatic assignments", async ({

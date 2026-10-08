@@ -98,7 +98,7 @@ export default function App() {
     const pageConfig = {
       '/': {
         title: 'LC Tracker | Know what LeetCode problem to solve next',
-        description: 'Set an interview target and study time. LC Tracker uses recorded coding and recall outcomes to choose the next LeetCode problem and explain its place in today’s plan.',
+        description: 'Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.',
         canonical: `${origin}/`,
         robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
       },

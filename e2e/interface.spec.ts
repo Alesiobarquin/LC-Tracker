@@ -25,7 +25,7 @@ const progress = ["two-sum", "valid-anagram", "contains-duplicate"].map(
 const surfaces = [
   { name: "login", path: "/login", heading: "Sign in to LC Tracker" },
   { name: "onboarding", path: "/onboarding", heading: "Welcome to LC Tracker" },
-  { name: "landing", path: "/", heading: "A workspace for" },
+  { name: "landing", path: "/", heading: "Know what to solve next." },
   { name: "today", path: "/dashboard", heading: "Today’s study plan" },
   { name: "library", path: "/library", heading: "Problem Library" },
   { name: "patterns", path: "/patterns", heading: "Pattern learning" },

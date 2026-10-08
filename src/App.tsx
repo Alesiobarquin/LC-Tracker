@@ -97,8 +97,8 @@ export default function App() {
     const origin = window.location.origin;
     const pageConfig = {
       '/': {
-        title: 'LC Tracker | LeetCode Tracker for Spaced Repetition',
-        description: 'LC Tracker is a LeetCode tracker for spaced repetition. Track sessions, expose weak patterns, and schedule reviews to improve interview retention.',
+        title: 'LC Tracker | Know what LeetCode problem to solve next',
+        description: 'Set an interview target and study time. LC Tracker uses recorded coding and recall outcomes to choose the next LeetCode problem and explain its place in today’s plan.',
         canonical: `${origin}/`,
         robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
       },

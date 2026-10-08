@@ -8,20 +8,20 @@
   </g>
   <g font-family="Arial, sans-serif" fill="#efeee8">
     <text x="112" y="74" font-size="24" font-weight="600">LC Tracker</text>
-    <text x="64" y="244" font-size="56" letter-spacing="-2">A workspace for</text>
-    <text x="64" y="311" font-size="56" letter-spacing="-2" fill="#a3a79b">LeetCode practice.</text>
-    <text x="64" y="379" font-size="21" fill="#a3a79b">Plan your time. Recall an approach.</text>
-    <text x="64" y="411" font-size="21" fill="#a3a79b">Code independently. Record the outcome.</text>
-    <text x="842" y="217" font-size="23">Recall</text>
-    <text x="842" y="332" font-size="23">Implement</text>
-    <text x="842" y="447" font-size="23">Revisit</text>
+    <text x="64" y="244" font-size="56" letter-spacing="-2">Know what to</text>
+    <text x="64" y="311" font-size="56" letter-spacing="-2" fill="#a3a79b">solve next.</text>
+    <text x="64" y="379" font-size="21" fill="#a3a79b">Your interview goal and recorded practice</text>
+    <text x="64" y="411" font-size="21" fill="#a3a79b">shape the next problem in your daily plan.</text>
+    <text x="842" y="217" font-size="23">Your goal</text>
+    <text x="842" y="332" font-size="23">Your history</text>
+    <text x="842" y="447" font-size="23">Today's plan</text>
   </g>
   <g font-family="monospace" font-size="14" fill="#919689">
     <text x="64" y="581">lc-tracker.app</text>
     <text x="955" y="581">Open source</text>
-    <text x="842" y="245">Approach + reasoning</text>
-    <text x="842" y="360">Tests + assistance</text>
-    <text x="842" y="475">Delay + variation</text>
+    <text x="842" y="245">Interview target</text>
+    <text x="842" y="360">Coding + recall</text>
+    <text x="842" y="475">A reasoned next step</text>
   </g>
   <path d="M799 222V306M799 336V422" stroke="#363932"/>
   <rect x="786" y="190" width="26" height="26" fill="#e99575"/>

@@ -5,7 +5,12 @@ test('landing explains the planner and updates its sample from the goal', async 
 
   await expect(page.getByRole('heading', { name: 'Know what to solve next.' })).toBeVisible();
   await expect(page.getByText('Personalized LeetCode practice')).toBeVisible();
-  await expect(page.getByText('Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.')).toBeVisible();
+  const landingDescription = 'Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.';
+  await expect(page.getByText(landingDescription)).toBeVisible();
+  await expect(page).toHaveTitle('LC Tracker | Know what LeetCode problem to solve next');
+  for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) {
+    await expect(page.locator(selector)).toHaveAttribute('content', landingDescription);
+  }
   await expect(page.getByRole('heading', { name: 'A clear next step. A reason behind it.' })).toBeVisible();
   await expect(page.getByText(/Example practice history/)).toBeVisible();
   await expect(page.locator('.landing-plan-task--main')).toContainText('Two Sum');

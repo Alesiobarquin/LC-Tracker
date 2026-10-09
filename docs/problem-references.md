@@ -50,8 +50,8 @@ Python translations are supplied for five C++-only examples. Complexity notes
 state language-specific workspace or algorithm differences where they exist.
 
 All 100 new Python entries have behavioral checks, including in-place results,
-list/tree structure, and a 10,000-character string. Selected C++ boundary
-programs compile and run as part of the required GitHub verification check.
+list/tree structure, and a 10,000-character string. All 100 new C++ snippets are syntax checked, and 14 boundary programs compile
+and run as part of the required GitHub verification check.
 The broader snippet verifier checks syntax across all bundled C++ entries.
 These checks are finite examples and boundaries, not exhaustive correctness proofs.
 

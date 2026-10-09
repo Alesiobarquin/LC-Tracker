@@ -4,6 +4,7 @@
 """
 import argparse
 import copy
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import runpy
@@ -237,6 +238,13 @@ def main():
     tested, checks = verify(namespaces)
     print(f'{tested} new Python solutions exercised; {checks} example, edge, mutation, and structural checks passed.', flush=True)
     if args.cpp:
+        def syntax_check(record):
+            code = COMMON['cpp_headers'](record['code']['cpp']) + record['code']['cpp']
+            result = subprocess.run(['c++','-std=c++20','-fsyntax-only','-x','c++','-'], input=code, text=True, capture_output=True)
+            assert result.returncode == 0, (record['problemId'], result.stderr)
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            list(pool.map(syntax_check, records.values()))
+        print(f"{len(records)} new C++ snippets passed syntax validation.", flush=True)
         with tempfile.TemporaryDirectory() as folder:
             for number, body in CPP_CASES.items():
                 code = COMMON['cpp_headers'](records[number]['code']['cpp']) + '\n#include <cassert>\n' + records[number]['code']['cpp'] + '\nint main() { Solution s; ' + body + ' }\n'

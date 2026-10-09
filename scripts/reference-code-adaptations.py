@@ -277,6 +277,7 @@ def adapt(number, language, code):
         if number == 486:
             code = code.replace('PredictTheWinner', 'predictTheWinner')
         if number == 653:
+            code = code.replace('stack<TreeNode*> stack;', 'std::stack<TreeNode*> nodes;').replace('stack.top()', 'nodes.top()').replace('stack.pop()', 'nodes.pop()').replace('stack.push(', 'nodes.push(')
             code = code.replace('int next()', 'TreeNode* next()').replace('return root->val;', 'return root;')
             code = code.replace('int l = left.next(), r = right.next(); l < r;', 'TreeNode* l = left.next(), *r = right.next(); l != r;')
             code = code.replace('const int sum = l + r;', 'const int sum = l->val + r->val;')

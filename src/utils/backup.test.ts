@@ -42,9 +42,13 @@ it('round-trips original recall, corrections, built-in reference type, and perso
     notes: 'Personal logic\n\n```cpp\nint value = 1;\n```', studyState: {
       version: 1, source: 'practice', recallIntervalDays: 3, codingIntervalDays: 7,
       nextRecallAt: date, nextCodingAt: date, lapses: 0, recallHistory: [{
-        id: '00000000-0000-4000-8000-000000000001', date, elapsedSeconds: 180,
+        id: '00000000-0000-4000-8000-000000000001', date, elapsedSeconds: 177,
         outcome: 'partial', answer: 'Original from memory', revisedAnswer: 'Corrected after comparing', checkedAgainst: 'solution',
       }],
     } } };
-  expect(validateBackup(JSON.parse(JSON.stringify({ formatVersion: 2, progress }))).progress).toEqual(progress);
+  const sessionTimings = [{ id: '00000000-0000-4000-8000-000000000001', problemId: 'two-sum',
+    category: 'Arrays & Hashing', date, elapsedSeconds: 177, sessionType: 'recall', rating: 3 }];
+  const backup = validateBackup(JSON.parse(JSON.stringify({ formatVersion: 2, progress, sessionTimings })));
+  expect(backup.progress).toEqual(progress);
+  expect(backup.sessionTimings).toEqual(sessionTimings);
 });

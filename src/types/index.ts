@@ -118,6 +118,12 @@ export interface SprintHistoryEntry {
   sprintLength: number;
 }
 
+/** Strings preserve an unfinished time edit through navigation and reloads. */
+export interface TimeSpentDraft {
+  minutes: string;
+  seconds: string;
+}
+
 export interface ActiveSession {
   id: string;
   userId?: string;
@@ -130,6 +136,7 @@ export interface ActiveSession {
   /** Epoch ms when the current pause began; null/undefined when running. */
   pausedAt?: number | null;
   finishedElapsed?: number;
+  timeSpentDraft?: TimeSpentDraft;
   draftNotes?: string;
   codingOutcome?: Partial<CodingOutcome>;
   confidenceRating?: ProblemSessionRating;
@@ -146,6 +153,7 @@ export interface RecallDraft {
   startedAt: number;
   pausedSeconds?: number;
   pausedAt?: number | null;
+  timeSpentDraft?: TimeSpentDraft;
   answer: string;
   retrievedAnswer?: string;
   revealed: boolean;

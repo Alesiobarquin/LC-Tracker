@@ -138,6 +138,8 @@ test("recall conceals references, preserves a draft, and retries a lost response
   await page.reload();
   await expect(page.getByRole("heading", { name: "Record what you recalled" })).toBeVisible();
   await expect(answer).toBeEditable();
+  await page.getByRole("spinbutton", { name: "Minutes spent" }).fill("2");
+  await page.getByRole("spinbutton", { name: "Seconds spent" }).fill("57");
   await page.getByRole("button", { name: /^Recalled/ }).click();
   await expect(
     page
@@ -150,6 +152,9 @@ test("recall conceals references, preserves a draft, and retries a lost response
   await expect(answer).not.toBeEditable();
   await answer.press('x');
   await expect(answer).toHaveText('Corrected: check the complement before inserting, and return both indices.');
+  await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toHaveValue("2");
+  await expect(page.getByRole("spinbutton", { name: "Seconds spent" })).toHaveValue("57");
+  await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toBeDisabled();
   await page.getByRole("button", { name: /^Retry: Recalled/ }).click();
   await expect(page).toHaveURL(/\/dashboard/);
   expect(saves).toHaveLength(2);
@@ -164,6 +169,8 @@ test("recall conceals references, preserves a draft, and retries a lost response
   expect(saves[0].p_payload.progress[0].study_state.recallHistory).toEqual(saves[1].p_payload.progress[0].study_state.recallHistory);
   expect(stored.timings).toHaveLength(1);
   expect(stored.timings[0].session_type).toBe("recall");
+  expect(stored.timings[0].elapsed_seconds).toBe(177);
+  expect(stored.progress[0].study_state.recallHistory[0].elapsedSeconds).toBe(177);
   await page.goto('/analytics');
   await page.locator('.session-history-row').first().click();
   const detail = page.getByRole('dialog');
@@ -541,6 +548,8 @@ test("quick completion freezes optional details and retries the same operation a
   await page.getByText("Notes & confidence (optional)", { exact: true }).click();
   await page.getByLabel("Key insight or corrected explanation").fill("Check the complement before insertion.");
   await page.getByLabel("Confidence (optional)").selectOption("4");
+  await page.getByRole("spinbutton", { name: "Minutes spent" }).fill("12");
+  await page.getByRole("spinbutton", { name: "Seconds spent" }).fill("30");
   await page.reload();
   await expect(page.getByLabel("Confidence (optional)")).toHaveValue("4");
   // Number keys no longer submit a confidence rating or bypass the save button.
@@ -552,6 +561,9 @@ test("quick completion freezes optional details and retries the same operation a
   await page.reload();
   await expect(page.getByLabel("Key insight or corrected explanation")).toHaveValue("Check the complement before insertion.");
   await expect(page.getByLabel("Confidence (optional)")).toBeDisabled();
+  await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toHaveValue("12");
+  await expect(page.getByRole("spinbutton", { name: "Seconds spent" })).toHaveValue("30");
+  await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toBeDisabled();
   await expect(page.getByRole("button", { name: /^Not finished/ })).toBeDisabled();
   await page.getByRole("button", { name: "Retry save" }).click();
   await expect(page).toHaveURL(/\/library/);
@@ -565,7 +577,82 @@ test("quick completion freezes optional details and retries the same operation a
   expect(saves[0].p_payload.progress[0].notes).toEqual(saves[1].p_payload.progress[0].notes);
   expect(saves[0].p_payload.progress[0].study_state).toEqual(saves[1].p_payload.progress[0].study_state);
   expect(saves[0].p_payload.progress[0].history.at(-1).confidenceReported).toBe(true);
+  expect(saves[0].p_payload.timings[0].elapsed_seconds).toBe(750);
+  expect(saves[0].p_payload.progress[0].history.at(-1).elapsedSeconds).toBe(750);
 });
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1280, 390]) {
+    test(`correct forgotten coding and recall timers at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      await page.clock.install({ time: new Date("2026-10-09T12:00:00") });
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript(theme => localStorage.setItem("lc-tracker-theme", theme), theme);
+      const stored = await fixture(page);
+      await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+        const saved = route.request().postDataJSON();
+        stored.progress = saved.p_payload.progress.map((row: any) => ({ ...row, version: 2 }));
+        stored.timings.push(...saved.p_payload.timings);
+        await route.fulfill({ status: 200, contentType: "application/json", body: '{"duplicate":false}' });
+      });
+      const minutes = page.getByRole("spinbutton", { name: "Minutes spent" });
+      const seconds = page.getByRole("spinbutton", { name: "Seconds spent" });
+      await page.goto("/timer/two-sum");
+      await expect(page.getByRole("button", { name: "I'm Done", exact: true })).toBeVisible();
+      await page.clock.fastForward(90 * 60 * 1000);
+      await page.getByRole("button", { name: "I'm Done", exact: true }).click();
+      await expect(minutes).toHaveValue("90");
+      await page.getByRole("button", { name: /^Solved independently/ }).click();
+      await minutes.fill("");
+      await page.reload();
+      await expect(minutes).toHaveValue("");
+      await expect(page.getByRole("button", { name: "Save & continue" })).toBeDisabled();
+      await minutes.fill("12");
+      await seconds.fill("60");
+      await expect(page.getByRole("button", { name: "Save & continue" })).toBeDisabled();
+      await seconds.fill("30");
+      await page.getByRole("button", { name: "Use timer", exact: true }).click();
+      await expect(minutes).toHaveValue("90");
+      await minutes.fill("12");
+      await seconds.fill("30");
+      await minutes.focus();
+      await page.keyboard.press("Tab");
+      await expect(seconds).toBeFocused();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath("correct-coding-time.png"), fullPage: true });
+      await page.goto("/dashboard");
+      await expect(page.getByText(width < 640 ? "13 / 30 min used" : "13 min used", { exact: true })).toBeVisible();
+      await page.getByRole("link", { name: "Record outcome", exact: true }).click();
+      await expect(minutes).toHaveValue("12");
+      await expect(seconds).toHaveValue("30");
+      await page.getByRole("button", { name: "Save & continue" }).click();
+      await expect(page).toHaveURL(/\/library/);
+      expect(stored.timings[0].elapsed_seconds).toBe(750);
+      expect(stored.progress[0].history.at(-1)).toMatchObject({ elapsedSeconds: 750 });
+
+      await page.goto("/recall/two-sum");
+      await page.getByLabel("Your attempt · explanation or pseudocode").fill("Check the complement in a map before insertion.");
+      await page.clock.fastForward(60 * 60 * 1000);
+      await page.getByRole("button", { name: "Compare with a reference" }).click();
+      await page.getByRole("button", { name: "I’ve compared my answer — continue" }).click();
+      await expect(minutes).toHaveValue("60");
+      await minutes.fill("2");
+      await seconds.fill("57");
+      await page.reload();
+      await expect(minutes).toHaveValue("2");
+      await expect(seconds).toHaveValue("57");
+      await seconds.fill("");
+      await expect(page.getByRole("button", { name: /^Recalled/ })).toBeDisabled();
+      await seconds.fill("57");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath("correct-recall-time.png"), fullPage: true });
+      await page.getByRole("button", { name: /^Recalled/ }).click();
+      await expect(page).toHaveURL(/\/dashboard/);
+      expect(stored.timings[1].elapsed_seconds).toBe(177);
+      expect(stored.progress[0].study_state.recallHistory.at(-1).elapsedSeconds).toBe(177);
+      await expect(page.getByText(width < 640 ? "16 / 30 min used" : "16 min used", { exact: true })).toBeVisible();
+    });
+  }
+}
 
 for (const theme of ["light", "dark"]) {
   for (const width of [1280, 390]) {

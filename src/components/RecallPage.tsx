@@ -9,6 +9,8 @@ import { getPatternLessonMeta } from "../data/patternLessonMeta";
 import { useProblemProgress } from "../hooks/useUserData";
 import { useStore } from "../store/useStore";
 import { canPersistTimer } from "../lib/safeStorage";
+import { TimeSpentInput } from "./TimeSpentInput";
+import { parseTimeSpent } from "../utils/sessionTime";
 import type { RecallAttempt } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
 import {
@@ -151,6 +153,11 @@ export function RecallPage() {
   async function finish(outcome: RecallAttempt["outcome"]) {
     if (!draft || submitting.current || (!draft.compared && !draft.completion))
       return;
+    const correctedElapsed = draft.timeSpentDraft ? parseTimeSpent(draft.timeSpentDraft) : elapsed;
+    if (!draft.completion && correctedElapsed === null) {
+      setSaveError("Enter a valid time spent before saving.");
+      return;
+    }
     const originalAnswer = draft.retrievedAnswer ?? draft.answer;
     if (outcome !== "forgot" && !originalAnswer.trim()) {
       setSaveError(
@@ -171,7 +178,7 @@ export function RecallPage() {
       attempt: {
         id: draft.id,
         date: new Date().toISOString(),
-        elapsedSeconds: elapsed,
+        elapsedSeconds: correctedElapsed ?? elapsed,
         outcome,
         answer: originalAnswer,
         ...(originalAnswer !== draft.answer
@@ -636,6 +643,15 @@ export function RecallPage() {
             Rate your original answer from memory. Reading or correcting the
             explanation does not count as unaided recall or a coding pass.
           </p>
+          <TimeSpentInput
+            timerSeconds={elapsed}
+            draft={frozen ? undefined : draft.timeSpentDraft}
+            disabled={saving || frozen}
+            onChange={(timeSpentDraft) => {
+              updateRecall({ timeSpentDraft });
+              setSaveError("");
+            }}
+          />
           {!frozen && (
             <button
               className="quiet-action"
@@ -669,6 +685,7 @@ export function RecallPage() {
                 key={outcome}
                 disabled={
                   saving ||
+                  (!frozen && !!draft.timeSpentDraft && parseTimeSpent(draft.timeSpentDraft) === null) ||
                   (frozen && draft.completion?.attempt.outcome !== outcome)
                 }
                 onClick={() => void finish(outcome)}

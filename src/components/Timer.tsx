@@ -17,6 +17,8 @@ import { useProblemProgress } from "../hooks/useUserData";
 import { getDifficultyColor } from "../utils/uiHelpers";
 import { MAX_BACKDATE_HOURS, validateStartTimestamp } from "../utils/dateUtils";
 import { canPersistTimer } from "../lib/safeStorage";
+import { TimeSpentInput } from "./TimeSpentInput";
+import { parseTimeSpent } from "../utils/sessionTime";
 
 interface TimerProps {
   problem: Problem;
@@ -274,6 +276,13 @@ export const Timer: React.FC<TimerProps> = ({
 
   const handleSave = async () => {
     if (submittingRef.current || !activeSession) return;
+    const correctedElapsed = activeSession.timeSpentDraft
+      ? parseTimeSpent(activeSession.timeSpentDraft)
+      : frozenElapsed;
+    if (!activeSession.completion && correctedElapsed === null) {
+      setSubmitError("Enter a valid time spent before saving.");
+      return;
+    }
     if (!activeSession.completion && !outcomeComplete) {
       setSubmitError("Choose a result and answer the follow-ups before saving.");
       return;
@@ -300,7 +309,7 @@ export const Timer: React.FC<TimerProps> = ({
         problemId: problem.id,
         category: problem.category,
         date: new Date().toISOString(),
-        elapsedSeconds: frozenElapsed,
+        elapsedSeconds: correctedElapsed ?? frozenElapsed,
         sessionType,
         rating,
       },
@@ -393,23 +402,19 @@ export const Timer: React.FC<TimerProps> = ({
 
   // ── Rating Screen ────────────────────────────────────────────────────────
   if (phase === "rating") {
-    const minutes = Math.floor(frozenElapsed / 60);
-    const seconds = frozenElapsed % 60;
-    const timeLabel = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-
     return (
       <div className="timer-assessment animate-in">
         <div className="timer-assessment-body">
-          {/* Time taken banner */}
-          <div className="mb-6 flex items-center justify-between gap-4 border-b border-line pb-5">
-            <div className="flex items-center gap-2">
-              <TimerIcon size={16} className="text-accent" />
-              <span className="text-muted text-sm">Time spent</span>
-            </div>
-            <div className="register-value text-3xl text-foreground">
-              {fmtTime(frozenElapsed)}
-            </div>
-            <div className="text-subtle text-xs mt-1">{timeLabel} elapsed</div>
+          <div className="mb-6 border-b border-line pb-5">
+            <TimeSpentInput
+              timerSeconds={activeSession?.completion?.timing.elapsedSeconds ?? frozenElapsed}
+              draft={activeSession?.completion ? undefined : activeSession?.timeSpentDraft}
+              disabled={isSubmitting || !!activeSession?.completion}
+              onChange={(timeSpentDraft) => {
+                updateActiveSession({ timeSpentDraft });
+                setSubmitError(null);
+              }}
+            />
           </div>
 
           <p className="register-label mb-3">02 / Record the outcome</p>
@@ -550,7 +555,8 @@ export const Timer: React.FC<TimerProps> = ({
           <button
             type="button"
             onClick={() => void handleSave()}
-            disabled={isSubmitting || (!activeSession?.completion && !outcomeComplete)}
+            disabled={isSubmitting || (!activeSession?.completion && (!outcomeComplete ||
+              (!!activeSession?.timeSpentDraft && parseTimeSpent(activeSession.timeSpentDraft) === null)))}
             className="brand-button-primary w-full rounded-md px-4 py-3 text-sm font-medium disabled:opacity-40"
           >
             {isSubmitting ? "Saving…" : activeSession?.completion ? "Retry save" : "Save & continue"}

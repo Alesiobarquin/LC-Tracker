@@ -113,6 +113,12 @@ starts so a lost response cannot change its payload. Recall timers support
 pause/resume and pause when leaving the page. See [reference provenance and
 verification](problem-references.md).
 
+Before saving a coding or recall outcome, time spent can be entered in minutes
+and seconds to correct a timer left running. Edits survive reloads and reduce
+the active daily budget by the corrected duration; Use timer restores the measured
+duration. The saved timing and history use the same corrected seconds. Time becomes
+fixed with the completion when saving starts, including after an unconfirmed save.
+
 Recall does not append coding ratings, change the last coding date, or increment
 the coding review counter. Recall success can lengthen only the recall interval.
 A partial or forgotten answer brings a future coding check closer. Coding results

@@ -158,7 +158,7 @@ describe('transactional user-data service', () => {
       last_reviewed_at: timing.date, next_review_at: timing.date, review_count: 0, history,
       retired: false, consecutive_threes: 1, consecutive_successes: 1, notes: null }]);
     await saveRecallSession('user_test', { problemId: 'two-sum', attempt: { id: operationId, date: timing.date,
-      elapsedSeconds: 180, outcome: 'partial', answer: 'An attempt from memory', revisedAnswer: 'A correction after comparison', checkedAgainst: 'solution' },
+      elapsedSeconds: 177, outcome: 'partial', answer: 'An attempt from memory', revisedAnswer: 'A correction after comparison', checkedAgainst: 'solution' },
       notes: 'My logic\n\n```python\nprint(1)\n```' });
     const request = mocks.rpc.mock.calls[0][1];
     expect(request.p_kind).toBe('recall');
@@ -169,6 +169,8 @@ describe('transactional user-data service', () => {
     expect(request.p_payload.progress[0].study_state.recallHistory[0]).toMatchObject({ answer: 'An attempt from memory', revisedAnswer: 'A correction after comparison', checkedAgainst: 'solution' });
     expect(request.p_payload.progress[0].notes).toBe('My logic\n\n```python\nprint(1)\n```');
     expect(request.p_payload.timings[0].session_type).toBe('recall');
+    expect(request.p_payload.timings[0].elapsed_seconds).toBe(177);
+    expect(request.p_payload.progress[0].study_state.recallHistory[0].elapsedSeconds).toBe(177);
     expect(request.p_payload.isNew).toBe(false);
   });
   it('does not recreate a removed problem or write after a failed recall source read', async () => {

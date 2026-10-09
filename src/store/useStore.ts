@@ -4,6 +4,7 @@ import type { ActiveSession, RecallDraft } from "../types";
 import { safeUUID } from "../utils/uuid";
 import { timerStorage } from "../lib/safeStorage";
 import { recallAttemptSchema } from "../utils/studySchemas";
+import { isTimeSpentDraft } from "../utils/sessionTime";
 
 interface UIState {
   sessionUserId: string | null;
@@ -39,6 +40,7 @@ function isValidActiveSession(value: unknown): value is ActiveSession {
     Number.isFinite(session.startTimestamp) &&
     typeof session.isReview === "boolean" &&
     typeof session.isColdSolve === "boolean" &&
+    (session.timeSpentDraft === undefined || isTimeSpentDraft(session.timeSpentDraft)) &&
     (session.pausedSeconds === undefined ||
       (Number.isFinite(session.pausedSeconds) && session.pausedSeconds >= 0)) &&
     (session.pausedAt === undefined ||
@@ -70,6 +72,7 @@ function isValidRecallDraft(value: unknown): value is RecallDraft {
     typeof draft.problemId === "string" &&
     typeof draft.startedAt === "number" &&
     Number.isFinite(draft.startedAt) &&
+    (draft.timeSpentDraft === undefined || isTimeSpentDraft(draft.timeSpentDraft)) &&
     (draft.pausedSeconds === undefined ||
       (Number.isFinite(draft.pausedSeconds) && draft.pausedSeconds >= 0)) &&
     (draft.pausedAt === undefined ||

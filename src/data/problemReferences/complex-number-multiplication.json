@@ -1,0 +1,14 @@
+{
+  "problemId": "complex-number-multiplication",
+  "approach": "Multiply Real and Imaginary Components",
+  "explanation": "### How it works\n\nParse each input into its real and imaginary integer components. Distribute the multiplication using i² = -1: the real part is ac - bd and the imaginary part is ad + bc. Format both signed components in the required a+bi representation.\n\n### Steps\n\n1. Split at the separating plus and remove the trailing i.\n2. Compute real and imaginary products.\n3. Return real + \"+\" + imaginary + \"i\".\n\n### Complexity\n\n- Time: O(n + m) for parsing and formatting the input strings.\n- Space: O(n + m) for substring and output strings.\n\n### Things to watch for\n\n- The imaginary component may be negative, as in `1+-1i`.\n- Keep the separating plus in the formatted result.\n- Do not use floating-point complex parsing.",
+  "code": {
+    "python": "class Solution:\n  def complexNumberMultiply(self, num1: str, num2: str) -> str:\n    a0, a1 = self._getReala0ndImag(num1)\n    b0, b1 = self._getReala0ndImag(num2)\n    return str(a0 * b0 - a1 * b1) + '+' + str(a0 * b1 + a1 * b0) + 'i'\n\n  def _getReala0ndImag(self, s: str) -> tuple:\n    return int(s[:s.index('+')]), int(s[s.index('+') + 1:-1])\n",
+    "cpp": "class Solution {\n public:\n  string complexNumberMultiply(string num1, string num2) {\n    const auto& [a0, a1] = getReala0ndImag(num1);\n    const auto& [b0, b1] = getReala0ndImag(num2);\n    return to_string(a0 * b0 - a1 * b1) + \"+\" + to_string(a0 * b1 + a1 * b0) +\n           \"i\";\n  }\n\n private:\n  pair<int, int> getReala0ndImag(const string& s) {\n    const string& real = s.substr(0, s.find_first_of('+'));\n    const string& imag = s.substr(s.find_first_of('+') + 1);\n    return {stoi(real), stoi(imag)};\n  };\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/537.%20Complex%20Number%20Multiplication",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

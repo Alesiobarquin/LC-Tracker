@@ -1,0 +1,14 @@
+{
+  "problemId": "heaters",
+  "approach": "Sorted Houses and a Monotone Heater Pointer",
+  "explanation": "### How it works\n\nAs houses advance in sorted order, their nearest heater never moves backward in sorted heater order. Move the heater pointer while the next heater is closer, measure the chosen distance, and take the maximum nearest-heater distance across all houses.\n\n### Steps\n\n1. Sort houses and heaters.\n2. For each house, advance the heater pointer while the next heater is closer.\n3. Track the maximum nearest-heater distance.\n\n### Complexity\n\n- Time: O(h log h + t log t + h + t), for h houses and t heaters.\n- Space: Python O(h + t) worst-case sorting workspace; C++ O(log h + log t) sorting stack.\n\n### Things to watch for\n\n- One heater may cover houses on both sides.\n- Tied heater distances can choose either heater.\n- Sorting changes both input arrays.",
+  "code": {
+    "python": "class Solution:\n    def findRadius(self, houses: list[int], heaters: list[int]) -> int:\n        houses.sort()\n        heaters.sort()\n        radius, index = 0, 0\n        for house in houses:\n            while index + 1 < len(heaters) and house - heaters[index] > heaters[index + 1] - house:\n                index += 1\n            radius = max(radius, abs(house - heaters[index]))\n        return radius\n",
+    "cpp": "class Solution {\n public:\n  int findRadius(vector<int>& houses, vector<int>& heaters) {\n    ranges::sort(houses);\n    ranges::sort(heaters);\n\n    int ans = 0;\n    int i = 0;  // heaters' index (currently used)\n\n    for (const int house : houses) {\n      while (i + 1 < heaters.size() &&\n             house - heaters[i] > heaters[i + 1] - house)\n        ++i;  // The next heater is better.\n      ans = max(ans, abs(heaters[i] - house));\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/475.%20Heaters",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

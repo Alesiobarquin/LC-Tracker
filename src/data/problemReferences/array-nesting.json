@@ -1,0 +1,14 @@
+{
+  "problemId": "array-nesting",
+  "approach": "Walk and Mark Permutation Cycles",
+  "explanation": "### How it works\n\nThe array is a permutation, so repeatedly using a value as the next index walks a cycle. Once a cycle is visited, it cannot give a new answer from another starting index. Mark consumed entries as -1, saving each next index before overwriting it.\n\n### Steps\n\n1. Skip already marked entries.\n2. Walk the cycle, storing the next index before marking the current entry.\n3. Track the largest number of visited entries in one walk.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- This mutates the input array.\n- Save the next index before writing -1.\n- The permutation guarantee makes visited components cycles.",
+  "code": {
+    "python": "from functools import cache\n\nclass Solution:\n  def arrayNesting(self, nums: list[int]) -> int:\n    ans = 0\n\n    for num in nums:\n      if num == -1:\n        continue\n      index = num\n      count = 0\n      while nums[index] != -1:\n        cache = index\n        index = nums[index]\n        nums[cache] = -1\n        count += 1\n      ans = max(ans, count)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int arrayNesting(vector<int>& nums) {\n    int ans = 0;\n\n    for (const int num : nums) {\n      if (num == -1)\n        continue;\n      int index = num;\n      int count = 0;\n      while (nums[index] != -1) {\n        const int cache = index;\n        index = nums[index];\n        nums[cache] = -1;\n        ++count;\n      }\n      ans = max(ans, count);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/565.%20Array%20Nesting",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "number-of-boomerangs",
+  "approach": "Squared-Distance Frequencies",
+  "explanation": "### How it works\n\nFix the middle point of a boomerang and group other points by squared distance from it. A group of size c gives c × (c - 1) ordered pairs. Python adds 2c as each new point enters a group; C++ sums the equivalent final group formula.\n\n### Steps\n\n1. Choose each point as the center.\n2. Count squared distances to other points.\n3. For a new distance occurrence, add twice its prior count, then increment it.\n\n### Complexity\n\n- Time: O(n²) expected with hashing.\n- Space: O(n).\n\n### Things to watch for\n\n- Order matters: swapping the two outer points is a different boomerang.\n- Squared distances avoid floating-point comparison.\n- The problem guarantees distinct points, so the center’s zero-distance entry contributes nothing.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def numberOfBoomerangs(self, points: list[list[int]]) -> int:\n    ans = 0\n\n    for x1, y1 in points:\n      count = collections.Counter()\n      for x2, y2 in points:\n        ans += 2 * count[(x1 - x2)**2 + (y1 - y2)**2]\n        count[(x1 - x2)**2 + (y1 - y2)**2] += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int numberOfBoomerangs(vector<vector<int>>& points) {\n    int ans = 0;\n\n    for (const vector<int>& p : points) {\n      unordered_map<int, int> distCount;\n      for (const vector<int>& q : points) {\n        const int dist = getDist(p, q);\n        ++distCount[dist];\n      }\n      for (const auto& [_, freq] : distCount)\n        ans += freq * (freq - 1);  // Ordered pairs with this distance\n    }\n\n    return ans;\n  }\n\n private:\n  int getDist(const vector<int>& p, const vector<int>& q) {\n    return pow(p[0] - q[0], 2) + pow(p[1] - q[1], 2);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/447.%20Number%20of%20Boomerangs",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

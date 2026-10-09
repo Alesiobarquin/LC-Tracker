@@ -42,32 +42,34 @@ export function ExplanationLinks({ problem }: { problem: Problem }) {
 }
 
 export function ProblemExplanationFootnote({ problem }: { problem: Problem }) {
-  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  const [reference, setReference] = useState<ProblemReference | null>(null);
   useEffect(() => {
     let cancelled = false;
-    setSourceUrl(null);
+    setReference(null);
     void loadProblemReference(problem.id)
       .then((reference) => {
-        if (!cancelled) setSourceUrl(reference?.sourceUrl ?? null);
+        if (!cancelled) setReference(reference);
       })
       .catch(() => {
-        if (!cancelled) setSourceUrl(null);
+        if (!cancelled) setReference(null);
       });
     return () => {
       cancelled = true;
     };
   }, [problem.id]);
-  if (!sourceUrl) return null;
+  if (!reference?.sourceUrl) return null;
   return (
     <details className="explanation-footnote">
       <summary>Source and license</summary>
       <p>
-        Adapted from{" "}
-        <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-          NeetCode’s source
+        {reference.explanationAuthor
+          ? `Explanation by ${reference.explanationAuthor}. Code adapted from `
+          : "Adapted from "}
+        <a href={reference.sourceUrl} target="_blank" rel="noopener noreferrer">
+          {reference.sourceName ?? "NeetCode’s source"}
         </a>{" "}
         ·{" "}
-        <a href="/neetcode-license.txt" target="_blank" rel="noopener noreferrer">
+        <a href={reference.licenseUrl ?? "/neetcode-license.txt"} target="_blank" rel="noopener noreferrer">
           MIT license
         </a>
         . Node types are supplied by LeetCode where needed.

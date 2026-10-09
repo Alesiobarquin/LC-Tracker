@@ -1,0 +1,14 @@
+{
+  "problemId": "hamming-distance",
+  "approach": "Compare Bits and Shift",
+  "explanation": "### How it works\n\nAt each position, XOR the two low bits to determine whether they differ. Add that contribution and shift both values right. Continue until neither value has remaining set bits.\n\n### Steps\n\n1. Initialize the distance to zero.\n2. Add (x & 1) XOR (y & 1).\n3. Shift both values until both are zero.\n\n### Complexity\n\n- Time: O(log(max(x, y) + 1)), at most the fixed input bit width.\n- Space: O(1).\n\n### Things to watch for\n\n- Use XOR to detect different bits.\n- Equal inputs have distance zero.\n- The problem supplies nonnegative integers.",
+  "code": {
+    "python": "class Solution:\n  def hammingDistance(self, x: int, y: int) -> int:\n    ans = 0\n\n    while x > 0 or y > 0:\n      ans += (x & 1) ^ (y & 1)\n      x >>= 1\n      y >>= 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int hammingDistance(int x, int y) {\n    int ans = 0;\n\n    while (x > 0 || y > 0) {\n      ans += (x & 1) ^ (y & 1);\n      x >>= 1;\n      y >>= 1;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/461.%20Hamming%20Distance",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

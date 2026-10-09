@@ -1,0 +1,14 @@
+{
+  "problemId": "maximum-size-subarray-sum-equals-k",
+  "approach": "Prefix Sums with Earliest Indices",
+  "explanation": "### How it works\n\nA subarray ending at i has sum k when an earlier prefix equals currentPrefix - k. Store the earliest index for each prefix, which maximizes the length of any later matching subarray. A zero prefix at index -1 allows subarrays starting at zero.\n\n### Steps\n\n1. Initialize prefix zero at index -1.\n2. Update the prefix and look for prefix - k.\n3. Update the maximum length and store a prefix only on its first occurrence.\n\n### Complexity\n\n- Time: O(n) expected with hashing.\n- Space: O(n).\n\n### Things to watch for\n\n- Do not replace the earliest index for a repeated prefix.\n- Negative values make a simple sliding window unsuitable.\n- Seed the zero prefix before reading the array.",
+  "code": {
+    "python": "class Solution:\n  def maxSubArrayLen(self, nums: list[int], k: int) -> int:\n    ans = 0\n    prefix = 0\n    prefixToIndex = {0: -1}\n\n    for i, num in enumerate(nums):\n      prefix += num\n      target = prefix - k\n      if target in prefixToIndex:\n        ans = max(ans, i - prefixToIndex[target])\n      if prefix not in prefixToIndex:\n        prefixToIndex[prefix] = i\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int maxSubArrayLen(vector<int>& nums, int k) {\n    int ans = 0;\n    int prefix = 0;\n    unordered_map<int, int> prefixToIndex{{0, -1}};\n\n    for (int i = 0; i < nums.size(); ++i) {\n      prefix += nums[i];\n      const int target = prefix - k;\n      if (const auto it = prefixToIndex.find(target);\n          it != prefixToIndex.cend())\n        ans = max(ans, i - it->second);\n      if (!prefixToIndex.contains(prefix))\n        prefixToIndex[prefix] = i;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/325.%20Maximum%20Size%20Subarray%20Sum%20Equals%20k",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

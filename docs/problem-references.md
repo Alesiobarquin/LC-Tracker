@@ -1,8 +1,8 @@
 # Built-in problem references
 
 The 250 core library problems share one reference each across Pareto, NeetCode
-75, 150, and 250. Another 486 extended-catalog problems have built-in references,
-for 736 total. This includes String Compression (#443) and Reverse Words in a
+75, 150, and 250. Another 586 extended-catalog problems have built-in references,
+for 836 total. This includes String Compression (#443) and Reverse Words in a
 String (#151), II (#186), and III (#557). Remaining catalog problems use external
 references or personal notes; no general pattern lesson is labeled as their
 exact solution.
@@ -16,6 +16,44 @@ has Python code but no article at this revision; its explanation and C++
 translation were written for LC Tracker following that source example.
 Videos are included only when the source publishes a valid mapping (420 total);
 missing videos do not prevent comparison with the explanation and code.
+
+The next batch adds 100 references (80 medium, 20 easy), prioritizing earlier
+interview-style catalog problems across arrays, strings, linked lists, trees,
+heaps, and dynamic programming. Their explanations, steps, complexity notes,
+and pitfalls are written for LC Tracker. Code is adapted from
+[walkccc/LeetCode](https://github.com/walkccc/LeetCode), pinned to
+`9b85aa15e086d0b5dc1ead7184bca547942e6ff6`. Each entry links to its source folder,
+credits Peng-Yu Chen, and links to `public/walkccc-license.txt` (MIT).
+These entries do not invent NeetCode video mappings.
+
+The reviewed source paths, hashes, difficulty mix, and authored notes are in
+`scripts/additional-reference-manifest.json`. Rebuild them with:
+
+```sh
+python3 scripts/build-additional-problem-references.py --cache-dir /private/tmp/walkccc-source
+python3 scripts/verify-additional-references.py --cpp
+```
+
+The generator downloads only the pinned source files and checks their SHA-256
+hashes. Add `--offline` to require previously cached sources. The original
+NeetCode importer and this generator can be run independently; neither replaces
+entries attributed to the other source.
+
+`scripts/reference-code-adaptations.py` keeps the reviewed translations and
+repairs reproducible. It chooses matching iterative flatten and bit-mask
+approaches, uses the complete-tree shortcut, replaces `SortedDict` with standard
+Python binary search, materializes a range-update result, avoids expression
+`eval`, and uses an iterative string reversal. It also widens ugly-number
+intermediates, handles an unchanged mutation target, and compares BST node
+identities so equal-valued distinct nodes are not mistaken for one node.
+Python translations are supplied for five C++-only examples. Complexity notes
+state language-specific workspace or algorithm differences where they exist.
+
+All 100 new Python entries have behavioral checks, including in-place results,
+list/tree structure, and a 10,000-character string. Selected C++ boundary
+programs compile and run as part of the required GitHub verification check.
+The broader snippet verifier checks syntax across all bundled C++ entries.
+These checks are finite examples and boundaries, not exhaustive correctness proofs.
 
 `src/data/problemReferences/*.json` contains the bundled references. Vite loads
 only the requested reference after comparison or an explicit library visit.

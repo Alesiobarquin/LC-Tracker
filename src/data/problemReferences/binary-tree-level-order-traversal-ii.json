@@ -1,0 +1,14 @@
+{
+  "problemId": "binary-tree-level-order-traversal-ii",
+  "approach": "Breadth-First Search and Reverse",
+  "explanation": "### How it works\n\nA queue visits the tree one depth at a time. Save each level in its own list, then reverse the order of the level lists. Values inside a level retain their left-to-right order.\n\n### Steps\n\n1. Return an empty list for an empty tree.\n2. Process exactly the current queue length for each level.\n3. Append the level and reverse all levels at the end.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) including the queue and returned levels.\n\n### Things to watch for\n\n- Reverse level order, keeping values within each level in order.\n- Capture queue length before adding children.\n- An empty tree has no levels.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def levelOrderBottom(self, root: TreeNode | None) -> list[list[int]]:\n    if not root:\n      return []\n\n    ans = []\n    q = collections.deque([root])\n\n    while q:\n      currLevel = []\n      for _ in range(len(q)):\n        node = q.popleft()\n        currLevel.append(node.val)\n        if node.left:\n          q.append(node.left)\n        if node.right:\n          q.append(node.right)\n      ans.append(currLevel)\n\n    return ans[::-1]\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> levelOrderBottom(TreeNode* root) {\n    if (root == nullptr)\n      return {};\n\n    vector<vector<int>> ans;\n    queue<TreeNode*> q{{root}};\n\n    while (!q.empty()) {\n      vector<int> currLevel;\n      for (int sz = q.size(); sz > 0; --sz) {\n        TreeNode* node = q.front();\n        q.pop();\n        currLevel.push_back(node->val);\n        if (node->left)\n          q.push(node->left);\n        if (node->right)\n          q.push(node->right);\n      }\n      ans.push_back(currLevel);\n    }\n\n    ranges::reverse(ans);\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/107.%20Binary%20Tree%20Level%20Order%20Traversal%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

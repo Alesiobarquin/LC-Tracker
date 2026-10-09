@@ -1,0 +1,14 @@
+{
+  "problemId": "3sum-smaller",
+  "approach": "Sorting and Two-Pointer Counting",
+  "explanation": "### How it works\n\nFix the first value in a sorted array. If the current left/right pair makes a sum below target, every smaller right index paired with that same left value also works. Count all r - l choices at once, then advance the left pointer.\n\n### Steps\n\n1. Sort and choose each first index.\n2. Scan its suffix with left and right pointers.\n3. Count r - l valid pairs when the sum is small; otherwise move right leftward.\n\n### Complexity\n\n- Time: O(n²).\n- Space: Python O(n) worst-case sorting workspace; C++ O(log n) sorting stack.\n\n### Things to watch for\n\n- Use a strict comparison with target.\n- Count index triplets, including repeated values at different positions.\n- Return zero for fewer than three values.",
+  "code": {
+    "python": "class Solution:\n  def threeSumSmaller(self, nums: list[int], target: int) -> int:\n    if len(nums) < 3:\n      return 0\n\n    ans = 0\n\n    nums.sort()\n\n    for i in range(len(nums) - 2):\n      l = i + 1\n      r = len(nums) - 1\n      while l < r:\n        if nums[i] + nums[l] + nums[r] < target:\n          # (nums[i], nums[l], nums[r])\n          # (nums[i], nums[l], nums[r - 1])\n          # ...,\n          # (nums[i], nums[l], nums[l + 1])\n          ans += r - l\n          l += 1\n        else:\n          r -= 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int threeSumSmaller(vector<int>& nums, int target) {\n    if (nums.size() < 3)\n      return 0;\n\n    int ans = 0;\n\n    ranges::sort(nums);\n\n    for (int i = 0; i + 2 < nums.size(); ++i) {\n      int l = i + 1;\n      int r = nums.size() - 1;\n      while (l < r)\n        if (nums[i] + nums[l] + nums[r] < target) {\n          // (nums[i], nums[l], nums[r])\n          // (nums[i], nums[l], nums[r - 1])\n          // ...,\n          // (nums[i], nums[l], nums[l + 1])\n          ans += r - l;\n          ++l;\n        } else {\n          --r;\n        }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/259.%203Sum%20Smaller",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

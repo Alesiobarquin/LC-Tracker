@@ -1,0 +1,14 @@
+{
+  "problemId": "remove-duplicate-letters",
+  "approach": "Monotone Stack with Remaining Counts",
+  "explanation": "### How it works\n\nBuild the smallest possible subsequence while keeping every distinct letter once. Before adding a letter, remove larger letters from the stack only if they occur again later. Remaining counts make each removal safe; a used set prevents duplicates.\n\n### Steps\n\n1. Count all remaining occurrences.\n2. For each letter, decrement its count and skip it if already used.\n3. Pop larger reusable letters, then push the current letter.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) for the fixed 26-letter alphabet.\n\n### Things to watch for\n\n- Never pop a letter whose remaining count is zero.\n- Clear its used flag when popping.\n- Keep relative order; sorting the letters is not a valid subsequence.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def removeDuplicateLetters(self, s: str) -> str:\n    ans = []\n    count = collections.Counter(s)\n    used = [False] * 26\n\n    for c in s:\n      count[c] -= 1\n      if used[ord(c) - ord('a')]:\n        continue\n      while ans and ans[-1] > c and count[ans[-1]] > 0:\n        used[ord(ans[-1]) - ord('a')] = False\n        ans.pop()\n      ans.append(c)\n      used[ord(ans[-1]) - ord('a')] = True\n\n    return ''.join(ans)\n",
+    "cpp": "class Solution {\n public:\n  string removeDuplicateLetters(string s) {\n    string ans;\n    vector<int> count(128);\n    vector<bool> used(128);\n\n    for (const char c : s)\n      ++count[c];\n\n    for (const char c : s) {\n      --count[c];\n      if (used[c])\n        continue;\n      while (!ans.empty() && ans.back() > c && count[ans.back()] > 0) {\n        used[ans.back()] = false;\n        ans.pop_back();\n      }\n      used[c] = true;\n      ans.push_back(c);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/316.%20Remove%20Duplicate%20Letters",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

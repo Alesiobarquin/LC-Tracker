@@ -1,0 +1,14 @@
+{
+  "problemId": "water-and-jug-problem",
+  "approach": "Capacity Bound and Greatest Common Divisor",
+  "explanation": "### How it works\n\nPouring between the two jugs can create amounts that are multiples of their greatest common divisor. A nonzero target is reachable exactly when it is such a multiple and does not exceed the combined capacity. Zero is reachable without pouring.\n\n### Steps\n\n1. Accept target zero.\n2. Reject targets above the sum of capacities.\n3. Check divisibility by gcd(capacity1, capacity2).\n\n### Complexity\n\n- Time: O(log min(a, b)) for Euclid gcd.\n- Space: O(1).\n\n### Things to watch for\n\n- Check the combined capacity bound before divisibility.\n- Handle target zero separately.\n- The result allows water split across both jugs.",
+  "code": {
+    "python": "from math import gcd\n\nclass Solution:\n  def canMeasureWater(\n      self,\n      jug1Capacity: int,\n      jug2Capacity: int,\n      targetCapacity: int,\n  ) -> bool:\n    return (targetCapacity == 0 or\n            jug1Capacity + jug2Capacity >= targetCapacity and\n            targetCapacity % gcd(jug1Capacity, jug2Capacity) == 0)\n",
+    "cpp": "class Solution {\n public:\n  bool canMeasureWater(int jug1Capacity, int jug2Capacity, int targetCapacity) {\n    return targetCapacity == 0 ||\n           jug1Capacity + jug2Capacity >= targetCapacity &&\n               targetCapacity % std::gcd(jug1Capacity, jug2Capacity) == 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/365.%20Water%20and%20Jug%20Problem",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

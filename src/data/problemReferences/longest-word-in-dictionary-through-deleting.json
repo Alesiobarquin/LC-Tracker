@@ -1,0 +1,14 @@
+{
+  "problemId": "longest-word-in-dictionary-through-deleting",
+  "approach": "Subsequence Checks with Tie Breaking",
+  "explanation": "### How it works\n\nA dictionary word can be formed by deletion exactly when it is a subsequence of the input. Scan the input with a pointer into each candidate word. Among matched words, prefer the longest, then the lexicographically smallest on equal length.\n\n### Steps\n\n1. Check each dictionary word as a subsequence.\n2. Compare its length with the best matched word.\n3. Use lexical order to break equal-length ties.\n\n### Complexity\n\n- Time: O(dn + L) for d words, input length n, and dictionary characters L.\n- Space: O(1) auxiliary space, excluding the returned word.\n\n### Things to watch for\n\n- Characters must retain order.\n- The lexical tie rule is required.\n- Return an empty string if no word is a subsequence.",
+  "code": {
+    "python": "class Solution:\n  def findLongestWord(self, s: str, d: list[str]) -> str:\n    ans = ''\n\n    for word in d:\n      i = 0\n      for c in s:\n        if i < len(word) and c == word[i]:\n          i += 1\n      if i == len(word):\n        if len(word) > len(ans) or len(word) == len(ans) and word < ans:\n          ans = word\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  string findLongestWord(string s, vector<string>& d) {\n    string ans;\n\n    for (const string& word : d)\n      if (isSubsequence(word, s))\n        if (word.length() > ans.length() ||\n            word.length() == ans.length() && word.compare(ans) < 0)\n          ans = word;\n\n    return ans;\n  }\n\n private:\n  // Returns true if a is a subsequence of b.\n  bool isSubsequence(const string& a, const string& b) {\n    int i = 0;\n    for (const char c : b)\n      if (i < a.length() && c == a[i])\n        ++i;\n    return i == a.length();\n  };\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/524.%20Longest%20Word%20in%20Dictionary%20through%20Deleting",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

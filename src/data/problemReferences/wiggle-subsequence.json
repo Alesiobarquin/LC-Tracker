@@ -1,0 +1,14 @@
+{
+  "problemId": "wiggle-subsequence",
+  "approach": "Up and Down Subsequence Lengths",
+  "explanation": "### How it works\n\nA wiggle subsequence alternates positive and negative differences. Track the best length ending with an upward move and with a downward move. An increase extends the downward state, while a decrease extends the upward state; equal adjacent values add nothing.\n\n### Steps\n\n1. Start both lengths at one.\n2. Compare adjacent values and update the matching direction state.\n3. Return the larger length.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Equal values are skipped.\n- The answer is a subsequence, so turning points matter more than every value.\n- A nonempty constant array has answer one.",
+  "code": {
+    "python": "import itertools\n\nclass Solution:\n  def wiggleMaxLength(self, nums: list[int]) -> int:\n    increasing = 1\n    decreasing = 1\n\n    for a, b in itertools.pairwise(nums):\n      if b > a:\n        increasing = decreasing + 1\n      elif b < a:\n        decreasing = increasing + 1\n\n    return max(increasing, decreasing)\n",
+    "cpp": "class Solution {\n public:\n  int wiggleMaxLength(vector<int>& nums) {\n    int increasing = 1;\n    int decreasing = 1;\n\n    for (int i = 1; i < nums.size(); ++i)\n      if (nums[i] > nums[i - 1])\n        increasing = decreasing + 1;\n      else if (nums[i] < nums[i - 1])\n        decreasing = increasing + 1;\n\n    return max(increasing, decreasing);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/376.%20Wiggle%20Subsequence",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

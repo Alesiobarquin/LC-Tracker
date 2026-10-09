@@ -1,0 +1,14 @@
+{
+  "problemId": "arithmetic-slices",
+  "approach": "Count Arithmetic Runs Ending at Each Index",
+  "explanation": "### How it works\n\nAn arithmetic slice ending at i extends an earlier slice when the last two differences match. In that case, the previous ending count gains one new length-three slice. Summing the ending counts counts every contiguous arithmetic slice once.\n\n### Steps\n\n1. Compare the two newest adjacent differences.\n2. Set dp[i] = dp[i - 1] + 1 when they match, otherwise zero.\n3. Sum all ending counts.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for the shown DP arrays.\n\n### Things to watch for\n\n- Slices must be contiguous and contain at least three values.\n- Equal values form arithmetic slices with difference zero.\n- Reset the count when the difference changes.",
+  "code": {
+    "python": "class Solution:\n  def numberOfArithmeticSlices(self, nums: list[int]) -> int:\n    n = len(nums)\n    if n < 3:\n      return 0\n\n    dp = [0] * n  # dp[i] := the number of arithmetic slices ending in index i\n\n    for i in range(2, len(nums)):\n      if nums[i] - nums[i - 1] == nums[i - 1] - nums[i - 2]:\n        dp[i] = dp[i - 1] + 1\n\n    return sum(dp)\n",
+    "cpp": "class Solution {\n public:\n  int numberOfArithmeticSlices(vector<int>& nums) {\n    const int n = nums.size();\n    if (n < 3)\n      return 0;\n\n    vector<int> dp(\n        n);  // dp[i] := the number of arithmetic slices ending in index i\n\n    for (int i = 2; i < nums.size(); ++i)\n      if (nums[i] - nums[i - 1] == nums[i - 1] - nums[i - 2])\n        dp[i] = dp[i - 1] + 1;\n\n    return accumulate(dp.begin(), dp.end(), 0);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/413.%20Arithmetic%20Slices",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

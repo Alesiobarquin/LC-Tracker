@@ -1,0 +1,14 @@
+{
+  "problemId": "non-decreasing-subsequences",
+  "approach": "Backtracking with Depth-Local Deduplication",
+  "explanation": "### How it works\n\nBuild subsequences by choosing later indices whose values are at least the path’s last value. At one recursion depth, choosing the same value twice would duplicate results, so keep a used set local to that depth. Equal values remain allowed at different depths.\n\n### Steps\n\n1. Save every path with length at least two.\n2. Try later indices that preserve nondecreasing order.\n3. Skip values already used at this depth and recurse.\n\n### Complexity\n\n- Time: O(n × 2^n) including copying returned paths.\n- Space: O(n²) conservative working bound for copied paths and per-depth sets, excluding output.\n\n### Things to watch for\n\n- Use a fresh deduplication set at each depth.\n- Nondecreasing allows equal values.\n- Do not sort the input; the subsequence must preserve its original order.",
+  "code": {
+    "python": "class Solution:\n  def findSubsequences(self, nums: list[int]) -> list[list[int]]:\n    ans = []\n\n    def dfs(s: int, path: list[int]) -> None:\n      if len(path) > 1:\n        ans.append(path)\n\n      used = set()\n\n      for i in range(s, len(nums)):\n        if nums[i] in used:\n          continue\n        if not path or nums[i] >= path[-1]:\n          used.add(nums[i])\n          dfs(i + 1, path + [nums[i]])\n\n    dfs(0, [])\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> findSubsequences(vector<int>& nums) {\n    vector<vector<int>> ans;\n    dfs(nums, 0, {}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(const vector<int>& nums, int s, vector<int>&& path,\n           vector<vector<int>>& ans) {\n    if (path.size() > 1)\n      ans.push_back(path);\n\n    unordered_set<int> used;\n\n    for (int i = s; i < nums.size(); ++i) {\n      if (used.contains(nums[i]))\n        continue;\n      if (path.empty() || nums[i] >= path.back()) {\n        used.insert(nums[i]);\n        path.push_back(nums[i]);\n        dfs(nums, i + 1, std::move(path), ans);\n        path.pop_back();\n      }\n    }\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/491.%20Increasing%20Subsequences",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

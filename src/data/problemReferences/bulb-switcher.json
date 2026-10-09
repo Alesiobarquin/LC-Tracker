@@ -1,0 +1,14 @@
+{
+  "problemId": "bulb-switcher",
+  "approach": "Count Perfect Squares",
+  "explanation": "### How it works\n\nBulb k is toggled once per positive divisor of k. Divisors usually come in pairs, leaving an even number of toggles. Only perfect squares have an unpaired square-root divisor, so exactly the square-numbered bulbs remain on.\n\n### Steps\n\n1. Recognize that only squares have an odd divisor count.\n2. Compute floor(sqrt(n)).\n3. Return that count.\n\n### Complexity\n\n- Time: O(1) in the fixed-width integer model.\n- Space: O(1).\n\n### Things to watch for\n\n- Use an integer square root in Python.\n- For n = 0, there are no bulbs.\n- A square at the upper boundary must be included.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def bulbSwitch(self, n: int) -> int:\n    # The k-th bulb can only be switched when k % i == 0.\n    # So, we can rephrase the problem:\n    # To find number of numbers <= n that have odd factors.\n    # Obviously, only square numbers have odd factor(s).\n    # e.g. n = 10, only 1, 4, and 9 are square numbers that <= 10\n    return math.isqrt(n)\n",
+    "cpp": "class Solution {\n public:\n  int bulbSwitch(int n) {\n    // The k-th bulb can only be switched when k % i == 0.\n    // So, we can rephrase the problem:\n    // To find number of numbers <= n that have odd factors.\n    // Obviously, only square numbers have odd factor(s).\n    // e.g. n = 10, only 1, 4, and 9 are square numbers that <= 10\n    return sqrt(n);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/319.%20Bulb%20Switcher",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

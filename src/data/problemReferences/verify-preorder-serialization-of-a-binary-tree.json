@@ -1,0 +1,14 @@
+{
+  "problemId": "verify-preorder-serialization-of-a-binary-tree",
+  "approach": "Available Child Slots",
+  "explanation": "### How it works\n\nStart with one available slot for the root. Every token consumes a slot; a non-null node creates two child slots. A valid serialization never consumes a nonexistent slot and uses exactly all slots by the end.\n\n### Steps\n\n1. Start the slot balance at one.\n2. Subtract one for every comma-separated token and reject a negative balance.\n3. Add two for non-null tokens and accept only a final zero balance.\n\n### Complexity\n\n- Time: O(n) input characters.\n- Space: Python O(n) for split tokens; C++ O(n) for the stream copy.\n\n### Things to watch for\n\n- A complete tree followed by extra tokens is invalid.\n- A final positive slot count means children are missing.\n- The single token # represents an empty tree.",
+  "code": {
+    "python": "class Solution:\n  def isValidSerialization(self, preorder: str) -> bool:\n    degree = 1  # out-degree (children) - in-degree (parent)\n\n    for node in preorder.split(','):\n      degree -= 1\n      if degree < 0:\n        return False\n      if node != '#':\n        degree += 2\n\n    return degree == 0\n",
+    "cpp": "class Solution {\n public:\n  bool isValidSerialization(string preorder) {\n    int degree = 1;  // out-degree (children) - in-degree (parent)\n    istringstream iss(preorder);\n\n    for (string node; getline(iss, node, ',');) {\n      if (--degree < 0)\n        return false;\n      if (node != \"#\")\n        degree += 2;\n    }\n\n    return degree == 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/331.%20Verify%20Preorder%20Serialization%20of%20a%20Binary%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

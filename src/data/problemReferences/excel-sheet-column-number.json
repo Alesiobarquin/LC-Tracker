@@ -1,0 +1,14 @@
+{
+  "problemId": "excel-sheet-column-number",
+  "approach": "Base-26 Accumulation",
+  "explanation": "### How it works\n\nExcel columns use digits A through Z with values one through 26. Read left to right: multiplying the previous total by 26 shifts it one place, and adding the new letter’s value extends the column number. There is no zero digit.\n\n### Steps\n\n1. Initialize the total to zero.\n2. For each letter, multiply the total by 26.\n3. Add its one-based letter value.\n\n### Complexity\n\n- Time: O(n) for n letters.\n- Space: O(1).\n\n### Things to watch for\n\n- A maps to one, rather than zero.\n- For `AB`, the result is 1 × 26 + 2 = 28.\n- Do not treat the title as ordinary zero-based base 26.",
+  "code": {
+    "python": "import functools\n\nclass Solution:\n  def titleToNumber(self, columnTitle: str) -> int:\n    return functools.reduce(lambda subtotal, c:\n                            subtotal * 26 + ord(c) - ord('@'), columnTitle, 0)\n",
+    "cpp": "class Solution {\n public:\n  int titleToNumber(string columnTitle) {\n    return accumulate(columnTitle.begin(), columnTitle.end(), 0,\n                      [](int acc, char c) { return acc * 26 + (c - 'A' + 1); });\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/171.%20Excel%20Sheet%20Column%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

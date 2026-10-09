@@ -1,0 +1,14 @@
+{
+  "problemId": "number-complement",
+  "approach": "Flip Significant Bits",
+  "explanation": "### How it works\n\nThe complement flips every bit from the least significant bit through the original highest set bit. Keep the original bit-width boundary fixed, then XOR with one mask bit at a time. Leading zero positions above that boundary must remain zero.\n\n### Steps\n\n1. Record the original positive value.\n2. For each power-of-two mask not exceeding that value, XOR the result.\n3. Return the flipped significant bits.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(1).\n\n### Things to watch for\n\n- Use the original value as the loop bound; the result changes while flipping.\n- Do not complement leading zero bits.\n- For one, return zero.",
+  "code": {
+    "python": "class Solution:\n    def findComplement(self, num: int) -> int:\n        original, mask = num, 1\n        while mask <= original:\n            num ^= mask\n            mask <<= 1\n        return num\n",
+    "cpp": "class Solution {\n public:\n  int findComplement(long num) {\n    for (long i = 1; i <= num; i <<= 1)\n      num ^= i;\n    return num;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/476.%20Number%20Complement",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

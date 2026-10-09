@@ -1,0 +1,14 @@
+{
+  "problemId": "integer-replacement",
+  "approach": "Greedy Bit Reduction",
+  "explanation": "### How it works\n\nEven values reduce directly by shifting right. For an odd value, choose the increment or decrement that creates more trailing zero bits, enabling more divisions by two. Three is the exception: decrementing to two reaches one faster than incrementing to four.\n\n### Steps\n\n1. Divide even values by two.\n2. For odd values, decrement three or a value ending in binary 01; otherwise increment.\n3. Count operations until one.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(1).\n\n### Things to watch for\n\n- Treat three specially.\n- Use a widened integer in C++ so incrementing INT_MAX does not overflow.\n- For n = 1, the answer is zero.",
+  "code": {
+    "python": "class Solution:\n  def integerReplacement(self, n: int) -> int:\n    ans = 0\n\n    while n > 1:\n      if n % 2 == 0:  # `n` ends in 0.\n        n >>= 1\n      elif n == 3 or (n >> 1 & 1) == 0:  # `n` = 3 or ends in 0b01.\n        n -= 1\n      else:  # `n` ends in 0b11.\n        n += 1\n      ans += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int integerReplacement(long n) {\n    int ans = 0;\n\n    for (; n > 1; ++ans)\n      if (n % 2 == 0)  // `n` ends in 0.\n        n >>= 1;\n      else if (n == 3 || (n >> 1 & 1) == 0)  // `n` = 3 or ends in 0b01.\n        --n;\n      else  // `n` ends in 0b11.\n        ++n;\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/397.%20Integer%20Replacement",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

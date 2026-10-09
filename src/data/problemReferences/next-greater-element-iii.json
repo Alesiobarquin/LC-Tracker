@@ -1,0 +1,14 @@
+{
+  "problemId": "next-greater-element-iii",
+  "approach": "Next Permutation of Decimal Digits",
+  "explanation": "### How it works\n\nThe rightmost digit that is smaller than its successor is the pivot for the smallest increase. Swap it with the smallest larger digit in the suffix, then reverse that descending suffix to minimize the remaining digits. Reject if no larger permutation or if the result exceeds signed 32-bit range.\n\n### Steps\n\n1. Find the rightmost increasing pivot.\n2. Swap it with the rightmost larger suffix digit.\n3. Reverse the suffix and validate the numeric result.\n\n### Complexity\n\n- Time: O(d), for d digits.\n- Space: O(d) for the digit string/list.\n\n### Things to watch for\n\n- Use exactly the original digits.\n- A fully descending digit sequence has no answer.\n- Check INT_MAX after constructing the permutation.",
+  "code": {
+    "python": "class Solution:\n  def nextGreaterElement(self, n: int) -> int:\n    def nextPermutation(s: list[str]) -> str:\n      i = len(s) - 2\n      while i >= 0:\n        if s[i] < s[i + 1]:\n          break\n        i -= 1\n\n      if i >= 0:\n        for j in range(len(s) - 1, i, -1):\n          if s[j] > s[i]:\n            break\n        s[i], s[j] = s[j], s[i]\n\n      reverse(s, i + 1, len(s) - 1)\n      return ''.join(s)\n\n    def reverse(s: list[str], l: int, r: int):\n      while l < r:\n        s[l], s[r] = s[r], s[l]\n        l += 1\n        r -= 1\n\n    s = nextPermutation(list(str(n)))\n    ans = int(s)\n    return -1 if ans > 2**31 - 1 or ans <= n else ans\n",
+    "cpp": "class Solution {\n public:\n  int nextGreaterElement(int n) {\n    string s = to_string(n);\n    ranges::next_permutation(s);\n    const long ans = stol(s);\n    return ans > INT_MAX || ans <= n ? -1 : ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/556.%20Next%20Greater%20Element%20III",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

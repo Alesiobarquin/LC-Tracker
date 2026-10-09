@@ -1,0 +1,14 @@
+{
+  "problemId": "most-frequent-subtree-sum",
+  "approach": "Postorder Sums and a Frequency Map",
+  "explanation": "### How it works\n\nA subtree sum is its root value plus the sums of its two child subtrees. Compute sums postorder and count each result in a frequency map. Return every sum whose frequency equals the maximum, since ties are allowed.\n\n### Steps\n\n1. Recursively compute the left and right sums.\n2. Count their sum with the current node value.\n3. Find the maximum frequency and return all matching sums.\n\n### Complexity\n\n- Time: O(n) expected with hashing.\n- Space: O(n) map plus O(h) recursion stack.\n\n### Things to watch for\n\n- Negative subtree sums are valid.\n- Return all tied modes.\n- An empty root returns an empty list.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def findFrequentTreeSum(self, root: TreeNode | None) -> list[int]:\n    if not root:\n      return []\n\n    count = collections.Counter()\n\n    def dfs(root: TreeNode | None) -> int:\n      if not root:\n        return 0\n\n      summ = root.val + dfs(root.left) + dfs(root.right)\n      count[summ] += 1\n      return summ\n\n    dfs(root)\n    maxFreq = max(count.values())\n    return [summ for summ in count if count[summ] == maxFreq]\n",
+    "cpp": "class Solution {\n public:\n  vector<int> findFrequentTreeSum(TreeNode* root) {\n    vector<int> ans;\n    unordered_map<int, int> count;\n    int maxCount = 0;\n\n    sumDownFrom(root, count);\n\n    for (const auto& [_, freq] : count)\n      maxCount = max(maxCount, freq);\n\n    for (const auto& [sum, freq] : count)\n      if (freq == maxCount)\n        ans.push_back(sum);\n\n    return ans;\n  }\n\n private:\n  int sumDownFrom(TreeNode* root, unordered_map<int, int>& count) {\n    if (root == nullptr)\n      return 0;\n\n    const int sum = root->val + sumDownFrom(root->left, count) +\n                    sumDownFrom(root->right, count);\n    ++count[sum];\n    return sum;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/508.%20Most%20Frequent%20Subtree%20Sum",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

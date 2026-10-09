@@ -1,0 +1,14 @@
+{
+  "problemId": "fraction-to-recurring-decimal",
+  "approach": "Long Division with Remainder Positions",
+  "explanation": "### How it works\n\nLong division produces the next digit from the current remainder. If the same remainder appears again, every following division step repeats. Store the output position of each remainder so the repeated part can be enclosed in parentheses.\n\n### Steps\n\n1. Determine the sign and emit the integer part.\n2. Map each remainder to its digit position before multiplying it by ten.\n3. Generate digits until the remainder is zero or repeats, then mark the cycle.\n\n### Complexity\n\n- Time: O(L) for L generated digits, using amortized string/list appends.\n- Space: O(L) for remainder positions and output.\n\n### Things to watch for\n\n- Promote signed integers before taking an absolute value in C++.\n- Store the remainder position before generating its digit.\n- Zero numerator returns `0`, with no negative sign.",
+  "code": {
+    "python": "class Solution:\n    def fractionToDecimal(self, numerator: int, denominator: int) -> str:\n        if numerator == 0:\n            return \"0\"\n        sign = \"-\" if (numerator < 0) != (denominator < 0) else \"\"\n        numerator, denominator = abs(numerator), abs(denominator)\n        integer, remainder = divmod(numerator, denominator)\n        prefix = sign + str(integer)\n        if remainder == 0:\n            return prefix\n        positions, digits = {}, []\n        while remainder and remainder not in positions:\n            positions[remainder] = len(digits)\n            digit, remainder = divmod(remainder * 10, denominator)\n            digits.append(str(digit))\n        if remainder:\n            start = positions[remainder]\n            digits.insert(start, \"(\")\n            digits.append(\")\")\n        return prefix + \".\" + \"\".join(digits)\n",
+    "cpp": "class Solution {\n public:\n  string fractionToDecimal(int numerator, int denominator) {\n    if (numerator == 0)\n      return \"0\";\n\n    string ans;\n\n    if (numerator < 0 ^ denominator < 0)\n      ans += \"-\";\n\n    long n = labs(numerator);\n    long d = labs(denominator);\n    ans += to_string(n / d);\n\n    if (n % d == 0)\n      return ans;\n\n    ans += '.';\n    unordered_map<int, int> seen;\n\n    for (long r = n % d; r; r %= d) {\n      if (const auto it = seen.find(r); it != seen.cend()) {\n        ans.insert(it->second, 1, '(');\n        ans += ')';\n        break;\n      }\n      seen[r] = ans.size();\n      r *= 10;\n      ans += to_string(r / d);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/166.%20Fraction%20to%20Recurring%20Decimal",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

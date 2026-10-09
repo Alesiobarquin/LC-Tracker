@@ -1,0 +1,14 @@
+{
+  "problemId": "shortest-unsorted-continuous-subarray",
+  "approach": "Find the Disorder Extremes and Expand Bounds",
+  "explanation": "### How it works\n\nAfter the first decrease from the left, record the minimum of the remaining suffix. After the first increase while scanning backward, record the maximum of the earlier prefix. Values outside the disorder range that exceed that minimum or fall below that maximum must be included in the sorted interval.\n\n### Steps\n\n1. Find the minimum after a left-to-right inversion.\n2. Find the maximum after a right-to-left inversion.\n3. Locate the first value above the minimum and the last below the maximum.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) for scans in the adapted examples.\n\n### Things to watch for\n\n- An already sorted array returns zero.\n- Repeated equal values alone are not inversions.\n- The interval can extend beyond the initially adjacent inversion.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def findUnsortedSubarray(self, nums: list[int]) -> int:\n    mn = math.inf\n    mx = -math.inf\n    flag = False\n\n    for i in range(1, len(nums)):\n      if nums[i] < nums[i - 1]:\n        flag = True\n      if flag:\n        mn = min(mn, nums[i])\n\n    flag = False\n\n    for i in reversed(range(len(nums) - 1)):\n      if nums[i] > nums[i + 1]:\n        flag = True\n      if flag:\n        mx = max(mx, nums[i])\n\n    for l in range(len(nums)):\n      if nums[l] > mn:\n        break\n\n    for r, num in ((i, nums[i]) for i in range(len(nums) - 1, -1, -1)):\n      if num < mx:\n        break\n\n    return 0 if l >= r else r - l + 1\n",
+    "cpp": "class Solution {\n public:\n  int findUnsortedSubarray(vector<int>& nums) {\n    const int n = nums.size();\n    int mn = INT_MAX;\n    int mx = INT_MIN;\n    bool meetDecrease = false;\n    bool meetIncrease = false;\n\n    for (int i = 1; i < n; ++i) {\n      if (nums[i] < nums[i - 1])\n        meetDecrease = true;\n      if (meetDecrease)\n        mn = min(mn, nums[i]);\n    }\n\n    for (int i = n - 2; i >= 0; --i) {\n      if (nums[i] > nums[i + 1])\n        meetIncrease = true;\n      if (meetIncrease)\n        mx = max(mx, nums[i]);\n    }\n\n    int l;\n    for (l = 0; l < n; ++l)\n      if (nums[l] > mn)\n        break;\n\n    int r;\n    for (r = n - 1; r >= 0; --r)\n      if (nums[r] < mx)\n        break;\n\n    return l < r ? r - l + 1 : 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/581.%20Shortest%20Unsorted%20Continuous%20Subarray",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

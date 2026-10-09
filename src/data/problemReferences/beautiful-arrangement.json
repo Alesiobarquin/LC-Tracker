@@ -1,0 +1,14 @@
+{
+  "problemId": "beautiful-arrangement",
+  "approach": "Memoized Backtracking by Used Positions",
+  "explanation": "### How it works\n\nAssign numbers one through n to still-empty positions that divide the number or are divisible by it. The filled-position state determines the next number and all future choices, so memoize the number of completions for that state. Backtrack each temporary position assignment.\n\n### Steps\n\n1. Try each empty position satisfying either divisibility condition.\n2. Mark it filled, recurse with the next number, then undo it.\n3. Memoize completed states and return one after all numbers are placed.\n\n### Complexity\n\n- Time: O(n² × 2^n) conservative bound including copied/hashed string states.\n- Space: O(n × 2^n) for string-key memo storage.\n\n### Things to watch for\n\n- Either direction of divisibility qualifies.\n- Undo a position after returning.\n- The Python example copies a state string; account for that work rather than claiming a bitmask bound.",
+  "code": {
+    "python": "from functools import lru_cache\n\nclass Solution:\n    def countArrangement(self, n: int) -> int:\n        @lru_cache(None)\n        def dfs(number, filled):\n            if number == n + 1:\n                return 1\n            count = 0\n            for position in range(1, n + 1):\n                if filled[position] == \"x\" and (number % position == 0 or position % number == 0):\n                    next_state = filled[:position] + \"o\" + filled[position + 1:]\n                    count += dfs(number + 1, next_state)\n            return count\n        return dfs(1, \"x\" * (n + 1))\n",
+    "cpp": "class Solution {\n public:\n  int countArrangement(int n) {\n    return dfs(n, 1, string(n + 1, 'x'), {});\n  }\n\n private:\n  int dfs(int n, int num, string&& filled, unordered_map<string, int>&& mem) {\n    if (num == n + 1)\n      return 1;\n    if (const auto it = mem.find(filled); it != mem.cend())\n      return it->second;\n\n    int count = 0;\n\n    for (int i = 1; i <= n; ++i)\n      if (filled[i] == 'x' && (num % i == 0 || i % num == 0)) {\n        filled[i] = 'o';\n        count += dfs(n, num + 1, std::move(filled), std::move(mem));\n        filled[i] = 'x';\n      }\n\n    return mem[filled] = count;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/526.%20Beautiful%20Arrangement",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

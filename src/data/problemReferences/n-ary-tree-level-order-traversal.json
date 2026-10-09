@@ -1,0 +1,14 @@
+{
+  "problemId": "n-ary-tree-level-order-traversal",
+  "approach": "Breadth-First Search",
+  "explanation": "### How it works\n\nUse a queue to visit an N-ary tree one level at a time. The queue length at the start of a level tells how many nodes belong to that level. Append each node’s children in order, then begin the next level.\n\n### Steps\n\n1. Return [] for an empty root.\n2. Process the current queue length and collect node values.\n3. Enqueue children and append the finished level.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) including the queue and output.\n\n### Things to watch for\n\n- Each node can have any number of children.\n- Capture the level size before enqueueing children.\n- Preserve the given child order.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def levelOrder(self, root: 'Node') -> list[list[int]]:\n    if not root:\n      return []\n\n    ans = []\n    q = collections.deque([root])\n\n    while q:\n      currLevel = []\n      for _ in range(len(q)):\n        node = q.popleft()\n        currLevel.append(node.val)\n        for child in node.children:\n          q.append(child)\n      ans.append(currLevel)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> levelOrder(Node* root) {\n    if (root == nullptr)\n      return {};\n\n    vector<vector<int>> ans;\n    queue<Node*> q{{root}};\n\n    while (!q.empty()) {\n      vector<int> currLevel;\n      for (int sz = q.size(); sz > 0; --sz) {\n        Node* node = q.front();\n        q.pop();\n        currLevel.push_back(node->val);\n        for (Node* child : node->children)\n          q.push(child);\n      }\n      ans.push_back(currLevel);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/429.%20N-ary%20Tree%20Level%20Order%20Traversal",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

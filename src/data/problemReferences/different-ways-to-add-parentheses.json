@@ -1,0 +1,14 @@
+{
+  "problemId": "different-ways-to-add-parentheses",
+  "approach": "Memoized Expression Splitting",
+  "explanation": "### How it works\n\nEach operator can be the final operation in a parenthesization. Recursively obtain every result for its left and right substrings, combine every pair with that operator, and memoize substring results. A substring without an operator is a numeric base case.\n\n### Steps\n\n1. Split at each +, -, or * operator.\n2. Combine all left and right results for that split.\n3. Cache the result list; parse the number when no split exists.\n\n### Complexity\n\n- Time: Output-sensitive and exponential in the number of operators; there are Catalan-many parenthesizations, with substring work as well.\n- Space: Exponential result storage plus recursion and substring copies.\n\n### Things to watch for\n\n- Preserve duplicate results from different parenthesizations.\n- Parse multi-digit numeric leaves as a whole.\n- Apply arithmetic directly rather than evaluating arbitrary text.",
+  "code": {
+    "python": "import functools\n\nclass Solution:\n  @functools.lru_cache(None)\n  def diffWaysToCompute(self, expression: str) -> list[int]:\n    ans = []\n\n    for i, c in enumerate(expression):\n      if c in '+-*':\n        for a in self.diffWaysToCompute(expression[:i]):\n          for b in self.diffWaysToCompute(expression[i + 1:]):\n            ans.append(a + b if c == '+' else a - b if c == '-' else a * b)\n\n    return ans or [int(expression)]\n",
+    "cpp": "class Solution {\n public:\n  vector<int> diffWaysToCompute(string expression) {\n    return ways(expression, {});\n  }\n\n private:\n  vector<int> ways(const string& s, unordered_map<string, vector<int>>&& mem) {\n    if (const auto it = mem.find(s); it != mem.cend())\n      return it->second;\n\n    vector<int> ans;\n\n    for (int i = 0; i < s.length(); ++i)\n      if (ispunct(s[i]))\n        for (const int a : ways(s.substr(0, i), std::move(mem)))\n          for (const int b : ways(s.substr(i + 1), std::move(mem)))\n            if (s[i] == '+')\n              ans.push_back(a + b);\n            else if (s[i] == '-')\n              ans.push_back(a - b);\n            else\n              ans.push_back(a * b);\n\n    return mem[s] = (ans.empty() ? vector<int>{stoi(s)} : ans);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/241.%20Different%20Ways%20to%20Add%20Parentheses",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

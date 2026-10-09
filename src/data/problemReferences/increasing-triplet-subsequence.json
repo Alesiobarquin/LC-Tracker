@@ -1,0 +1,14 @@
+{
+  "problemId": "increasing-triplet-subsequence",
+  "approach": "Smallest First and Second Candidates",
+  "explanation": "### How it works\n\nMaintain the smallest possible first value and the smallest possible second value of an increasing pair. A new value larger than both proves that an increasing triplet exists. Replacing a candidate with a smaller value leaves more room for future values.\n\n### Steps\n\n1. Initialize both candidates to infinity.\n2. Replace first when the value is <= first; otherwise replace second when <= second.\n3. Return true if a value exceeds second.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Use <= for updates because the subsequence must be strictly increasing.\n- The values need not be adjacent.\n- Lowering first does not invalidate an earlier pair represented by second.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def increasingTriplet(self, nums: list[int]) -> bool:\n    first = math.inf\n    second = math.inf\n\n    for num in nums:\n      if num <= first:\n        first = num\n      elif num <= second:  # first < num <= second\n        second = num\n      else:\n        return True  # first < second < num (third)\n\n    return False\n",
+    "cpp": "class Solution {\n public:\n  bool increasingTriplet(vector<int>& nums) {\n    int first = INT_MAX;\n    int second = INT_MAX;\n\n    for (const int num : nums)\n      if (num <= first)\n        first = num;\n      else if (num <= second)  // first < num <= second\n        second = num;\n      else\n        return true;  // first < second < num (third)\n\n    return false;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/334.%20Increasing%20Triplet%20Subsequence",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "path-sum-ii",
+  "approach": "Depth-First Search with Backtracking",
+  "explanation": "### How it works\n\nTrack the values on the current root-to-node path and the target still needed. Only a leaf can complete a root-to-leaf path. Copy a successful path into the output, then remove the current node when returning so sibling searches start with the correct prefix.\n\n### Steps\n\n1. Append the node and reduce the remaining target.\n2. At a leaf, save the path if the remaining sum matches.\n3. Visit children, then pop the node from the path.\n\n### Complexity\n\n- Time: O(n + K), where K is the total number of values in returned paths.\n- Space: O(h) working space plus O(K) output, for tree height h.\n\n### Things to watch for\n\n- A matching internal-node sum is not a completed path.\n- Negative values prevent pruning simply because the remaining target is negative.\n- Copy saved paths before backtracking.",
+  "code": {
+    "python": "class Solution:\n    def pathSum(self, root: TreeNode | None, targetSum: int) -> list[list[int]]:\n        result, path = [], []\n        def dfs(node, remaining):\n            if node is None:\n                return\n            path.append(node.val)\n            remaining -= node.val\n            if node.left is None and node.right is None and remaining == 0:\n                result.append(path.copy())\n            dfs(node.left, remaining)\n            dfs(node.right, remaining)\n            path.pop()\n        dfs(root, targetSum)\n        return result\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> pathSum(TreeNode* root, int sum) {\n    vector<vector<int>> ans;\n    dfs(root, sum, {}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(TreeNode* root, int sum, vector<int>&& path,\n           vector<vector<int>>& ans) {\n    if (root == nullptr)\n      return;\n    if (root->val == sum && root->left == nullptr && root->right == nullptr) {\n      path.push_back(root->val);\n      ans.push_back(path);\n      path.pop_back();\n      return;\n    }\n\n    path.push_back(root->val);\n    dfs(root->left, sum - root->val, std::move(path), ans);\n    dfs(root->right, sum - root->val, std::move(path), ans);\n    path.pop_back();\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/113.%20Path%20Sum%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

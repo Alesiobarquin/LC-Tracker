@@ -1,0 +1,14 @@
+{
+  "problemId": "count-complete-tree-nodes",
+  "approach": "Recognize Perfect Complete Subtrees",
+  "explanation": "### How it works\n\nIn a complete tree, equal depths along the far-left and far-right paths identify a perfect subtree. Its node count is 2^height - 1. When the depths differ, recursively count the children; at each level one child is perfect and can be counted directly.\n\n### Steps\n\n1. Measure the far-left and far-right depths.\n2. If equal, return 2^height - 1.\n3. Otherwise return one plus both child counts.\n\n### Complexity\n\n- Time: O(log² n), relying on completeness.\n- Space: O(log n) recursion stack.\n\n### Things to watch for\n\n- The input must be a complete tree.\n- The measured height includes the root.\n- The same shortcut is not valid for an arbitrary sparse binary tree.",
+  "code": {
+    "python": "class Solution:\n  def countNodes(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n\n    left = root\n    right = root\n    heightL = 0\n    heightR = 0\n\n    while left:\n      heightL += 1\n      left = left.left\n\n    while right:\n      heightR += 1\n      right = right.right\n\n    if heightL == heightR:  # `root` is a complete tree.\n      return pow(2, heightL) - 1\n    return 1 + self.countNodes(root.left) + self.countNodes(root.right)\n",
+    "cpp": "class Solution {\n public:\n  int countNodes(TreeNode* root) {\n    if (root == nullptr)\n      return 0;\n\n    TreeNode* left = root;\n    TreeNode* right = root;\n    int heightL = 0;\n    int heightR = 0;\n\n    while (left != nullptr) {\n      ++heightL;\n      left = left->left;\n    }\n\n    while (right != nullptr) {\n      ++heightR;\n      right = right->right;\n    }\n\n    if (heightL == heightR)  // `root` is a complete tree.\n      return pow(2, heightL) - 1;\n    return 1 + countNodes(root->left) + countNodes(root->right);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/222.%20Count%20Complete%20Tree%20Nodes",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

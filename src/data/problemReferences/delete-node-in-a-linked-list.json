@@ -1,0 +1,14 @@
+{
+  "problemId": "delete-node-in-a-linked-list",
+  "approach": "Copy the Successor and Bypass It",
+  "explanation": "### How it works\n\nThe predecessor is unavailable, but the supplied node is guaranteed not to be the tail. Copy the successor value into the supplied node and bypass the successor. The resulting sequence is the same as deleting the supplied value at that position.\n\n### Steps\n\n1. Copy node.next.val into node.val.\n2. Set node.next to node.next.next.\n3. Finish without traversing the list.\n\n### Complexity\n\n- Time: O(1).\n- Space: O(1).\n\n### Things to watch for\n\n- This relies on the non-tail guarantee.\n- The physical supplied node remains; its value and next link change.\n- Returning a new head is unnecessary.",
+  "code": {
+    "python": "class Solution:\n  def deleteNode(self, node):\n    node.val = node.next.val\n    node.next = node.next.next\n",
+    "cpp": "class Solution {\n public:\n  void deleteNode(ListNode* node) {\n    node->val = node->next->val;\n    node->next = node->next->next;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/237.%20Delete%20Node%20in%20a%20Linked%20List",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "add-digits",
+  "approach": "Digital Root Modulo Nine",
+  "explanation": "### How it works\n\nA number has the same remainder modulo nine as the sum of its decimal digits, because ten is congruent to one modulo nine. Repeating digit sums therefore yields its digital root: zero stays zero, and a positive multiple of nine maps to nine.\n\n### Steps\n\n1. Return zero for input zero.\n2. For positive input compute 1 + (num - 1) % 9.\n3. Return the single-digit result.\n\n### Complexity\n\n- Time: O(1) for fixed-width input.\n- Space: O(1).\n\n### Things to watch for\n\n- A positive multiple of nine returns nine, rather than zero.\n- Keep zero as its own case.\n- The input is nonnegative.",
+  "code": {
+    "python": "class Solution:\n  def addDigits(self, num: int) -> int:\n    return 0 if num == 0 else 1 + (num - 1) % 9\n",
+    "cpp": "class Solution {\n public:\n  int addDigits(int num) {\n    return 1 + (num - 1) % 9;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/258.%20Add%20Digits",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

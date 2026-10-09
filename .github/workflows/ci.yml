@@ -20,6 +20,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - name: Verify additional solution examples
+        run: python3 scripts/verify-additional-references.py --cpp
       - name: Add PostgreSQL binaries to PATH
         run: pg_config --bindir >> "$GITHUB_PATH"
       - run: npm run test:db

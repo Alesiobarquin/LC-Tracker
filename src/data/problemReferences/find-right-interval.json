@@ -1,0 +1,14 @@
+{
+  "problemId": "find-right-interval",
+  "approach": "Ordered Starts and Lower Bound",
+  "explanation": "### How it works\n\nFor each interval end, find the smallest start value at least as large as that end. Store original indices alongside sorted starts. Python uses binary search over sorted pairs; C++ uses an ordered map’s lower_bound to perform the same successor query.\n\n### Steps\n\n1. Index each interval’s start.\n2. Build the sorted starts or ordered map.\n3. For each end, return the first qualifying start’s original index, or -1.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n).\n\n### Things to watch for\n\n- Equality qualifies, so use lower_bound rather than upper_bound.\n- Return original indices, rather than sorted positions.\n- An interval with start == end can point to itself.",
+  "code": {
+    "python": "from bisect import bisect_left\n\nclass Solution:\n    def findRightInterval(self, intervals: list[list[int]]) -> list[int]:\n        starts = sorted((start, index) for index, (start, _) in enumerate(intervals))\n        values = [start for start, _ in starts]\n        result = []\n        for _, end in intervals:\n            index = bisect_left(values, end)\n            result.append(starts[index][1] if index < len(starts) else -1)\n        return result\n",
+    "cpp": "class Solution {\n public:\n  vector<int> findRightInterval(vector<vector<int>>& intervals) {\n    vector<int> ans;\n    map<int, int> startToIndex;\n\n    for (int i = 0; i < intervals.size(); ++i)\n      startToIndex[intervals[i][0]] = i;\n\n    for (const vector<int>& interval : intervals) {\n      const auto it = startToIndex.lower_bound(interval[1]);\n      ans.push_back(it == startToIndex.cend() ? -1 : it->second);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/436.%20Find%20Right%20Interval",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

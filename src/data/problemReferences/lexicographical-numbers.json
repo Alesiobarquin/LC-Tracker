@@ -1,0 +1,14 @@
+{
+  "problemId": "lexicographical-numbers",
+  "approach": "Iterative Decimal-Prefix Traversal",
+  "explanation": "### How it works\n\nLexicographic order follows a decimal prefix tree. Descend by multiplying the current value by ten when that child exists. Otherwise remove exhausted trailing digits and move to the next sibling, visiting each integer without sorting strings.\n\n### Steps\n\n1. Start at one and append the current value.\n2. Descend to current × 10 when it is <= n.\n3. Otherwise climb past trailing nines or the upper boundary and increment.\n\n### Complexity\n\n- Time: O(n) amortized.\n- Space: O(n) output and O(1) extra workspace.\n\n### Things to watch for\n\n- Numeric sorting does not match lexicographic order.\n- Climbing can remove several trailing digits.\n- Emit exactly n values.",
+  "code": {
+    "python": "class Solution:\n  def lexicalOrder(self, n: int) -> list[int]:\n    ans = []\n    curr = 1\n\n    while len(ans) < n:\n      ans.append(curr)\n      if curr * 10 <= n:\n        curr *= 10\n      else:\n        while curr % 10 == 9 or curr == n:\n          curr //= 10\n        curr += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> lexicalOrder(int n) {\n    vector<int> ans;\n    int curr = 1;\n\n    while (ans.size() < n) {\n      ans.push_back(curr);\n      if (curr * 10 <= n) {\n        curr *= 10;\n      } else {\n        while (curr % 10 == 9 || curr == n)\n          curr /= 10;\n        ++curr;\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/386.%20Lexicographical%20Numbers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

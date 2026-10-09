@@ -903,3 +903,24 @@ for (const [id, method] of [
     await expect(page.getByRole("link", { name: "NeetCode’s source", exact: true })).toHaveAttribute("href", /github.com\/neetcode-gh\/leetcode\/blob\//);
   });
 }
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1280, 390]) {
+    test(`additional medium/easy comparisons and attribution at ${width}px in ${theme}`, async ({ page }) => {
+      await fixture(page, []);
+      await page.addInitScript(theme => localStorage.setItem('lc-tracker-theme', theme), theme);
+      await page.setViewportSize({ width, height: 900 });
+      for (const [id, method] of [["3sum-closest", "threeSumClosest"], ["add-strings", "addStrings"]]) {
+        await page.goto(`/library/${id}/explanation`);
+        await expect(page.getByRole("heading", { name: "How it works", exact: true })).toBeVisible();
+        await expect(page.locator(".reference-code .cm-content")).toContainText(method);
+        await page.getByLabel("Example language").selectOption("cpp");
+        await expect(page.locator(".reference-code .cm-content")).toContainText(method);
+        await page.getByText("Source and license", { exact: true }).click();
+        await expect(page.getByRole("link", { name: "walkccc / Peng-Yu Chen", exact: true })).toHaveAttribute("href", /github.com\/walkccc\/LeetCode\/tree\/9b85aa15/);
+        await expect(page.getByRole("link", { name: "MIT license", exact: true })).toHaveAttribute("href", "/walkccc-license.txt");
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      }
+    });
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "factorial-trailing-zeroes",
+  "approach": "Count Factors of Five",
+  "explanation": "### How it works\n\nEach trailing zero needs a factor pair of two and five. Factorials contain more twos than fives, so count fives. Multiples of 25 contribute an extra five, multiples of 125 another, and repeated division by five counts all these contributions.\n\n### Steps\n\n1. Add n // 5.\n2. Repeat with n // 5 until it is zero.\n3. Return the accumulated contributions.\n\n### Complexity\n\n- Time: O(log₅ n).\n- Space: O(log₅ n) for the recursive examples.\n\n### Things to watch for\n\n- Do not compute n!; it quickly overflows.\n- Multiples of 25 contribute twice.\n- Zero factorial has zero trailing zeros.",
+  "code": {
+    "python": "class Solution:\n  def trailingZeroes(self, n: int) -> int:\n    return 0 if n == 0 else n // 5 + self.trailingZeroes(n // 5)\n",
+    "cpp": "class Solution {\n public:\n  int trailingZeroes(int n) {\n    return n == 0 ? 0 : n / 5 + trailingZeroes(n / 5);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/172.%20Factorial%20Trailing%20Zeroes",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

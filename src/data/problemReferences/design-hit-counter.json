@@ -1,0 +1,14 @@
+{
+  "problemId": "design-hit-counter",
+  "approach": "Timestamped Circular Buckets",
+  "explanation": "### How it works\n\nThe query window covers the latest 300 seconds. Use timestamp modulo 300 to choose a bucket, and store the exact timestamp alongside its hit count. When a slot is reused by a newer second, reset it so stale hits cannot leak into the current window.\n\n### Steps\n\n1. On hit, reuse or reset the matching timestamp bucket.\n2. On getHits, sum buckets whose age is less than 300 seconds.\n3. Keep 300 timestamp and count slots.\n\n### Complexity\n\n- Time: O(1) per hit; O(300) per query.\n- Space: O(300).\n\n### Things to watch for\n\n- At time 301, hits at time 1 have expired.\n- Multiple hits at one timestamp accumulate.\n- The problem guarantees calls use nondecreasing timestamps.",
+  "code": {
+    "python": "class HitCounter:\n  def __init__(self):\n    self.timestamps = [0] * 300\n    self.hits = [0] * 300\n\n  def hit(self, timestamp: int) -> None:\n    i = timestamp % 300\n    if self.timestamps[i] == timestamp:\n      self.hits[i] += 1\n    else:\n      self.timestamps[i] = timestamp\n      self.hits[i] = 1  # Reset the hit count to 1.\n\n  def getHits(self, timestamp: int) -> int:\n    return sum(h for t, h in zip(self.timestamps, self.hits)\n               if timestamp - t < 300)\n",
+    "cpp": "class HitCounter {\n public:\n  void hit(int timestamp) {\n    const int i = timestamp % 300;\n    if (timestamps[i] == timestamp) {\n      ++hits[i];\n    } else {\n      timestamps[i] = timestamp;\n      hits[i] = 1;  // Reset the hit count to 1.\n    }\n  }\n\n  int getHits(int timestamp) {\n    int countHits = 0;\n    for (int i = 0; i < 300; ++i)\n      if (timestamp - timestamps[i] < 300)\n        countHits += hits[i];\n    return countHits;\n  }\n\n private:\n  vector<int> timestamps = vector<int>(300);\n  vector<int> hits = vector<int>(300);\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/362.%20Design%20Hit%20Counter",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

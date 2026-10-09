@@ -1,0 +1,14 @@
+{
+  "problemId": "range-addition",
+  "approach": "Difference Array and Prefix Sum",
+  "explanation": "### How it works\n\nA range increment changes the running value at its start and undoes that change immediately after its end. Store only these two boundary differences for each update. One prefix-sum pass then reconstructs every final array value.\n\n### Steps\n\n1. Add the increment at start.\n2. Subtract it at end + 1 when that index exists.\n3. Prefix-sum the differences into the returned array.\n\n### Complexity\n\n- Time: O(length + number of updates).\n- Space: O(length).\n\n### Things to watch for\n\n- Ranges include both endpoints.\n- Negative increments work with the same boundaries.\n- Return a concrete list in Python, rather than a lazy accumulate iterator.",
+  "code": {
+    "python": "import itertools\n\nclass Solution:\n  def getModifiedArray(\n      self,\n      length: int,\n      updates: list[list[int]],\n  ) -> list[int]:\n    line = [0] * length\n\n    for start, end, inc in updates:\n      line[start] += inc\n      if end + 1 < length:\n        line[end + 1] -= inc\n\n    return list(itertools.accumulate(line))\n",
+    "cpp": "class Solution {\n public:\n  vector<int> getModifiedArray(int length, vector<vector<int>>& updates) {\n    vector<int> ans;\n    vector<int> line(length);\n    int prefix = 0;\n\n    for (const vector<int>& update : updates) {\n      const int start = update[0];\n      const int end = update[1];\n      const int inc = update[2];\n      line[start] += inc;\n      if (end + 1 < length)\n        line[end + 1] -= inc;\n    }\n\n    for (const int diff : line) {\n      prefix += diff;\n      ans.push_back(prefix);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/370.%20Range%20Addition",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

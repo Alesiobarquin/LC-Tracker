@@ -1,0 +1,14 @@
+{
+  "problemId": "unique-substrings-in-wraparound-string",
+  "approach": "Longest Wraparound Run per Ending Letter",
+  "explanation": "### How it works\n\nA consecutive run can continue from z to a. For each ending letter, keep the longest valid run ending there. Every shorter suffix ending with that letter is determined uniquely, so adding these maxima counts distinct substrings without storing them.\n\n### Steps\n\n1. Extend the run when adjacent letters are consecutive, including z to a.\n2. Otherwise restart the run at one.\n3. Update the ending letter’s maximum and sum all 26 maxima.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(26).\n\n### Things to watch for\n\n- Include the z-to-a transition.\n- Sum maxima per ending letter, rather than every encountered run length.\n- Repeated occurrences must not count the same substring twice.",
+  "code": {
+    "python": "class Solution:\n  def findSubstringInWraproundString(self, s: str) -> int:\n    maxLength = 1\n    # count[i] := the number of substrings ending in ('a' + i)\n    count = [0] * 26\n\n    for i in range(len(s)):\n      if i > 0 and (ord(s[i]) - ord(s[i - 1]) == 1\n                    or ord(s[i - 1]) - ord(s[i]) == 25):\n        maxLength += 1\n      else:\n        maxLength = 1\n      index = ord(s[i]) - ord('a')\n      count[index] = max(count[index], maxLength)\n\n    return sum(count)\n",
+    "cpp": "class Solution {\n public:\n  int findSubstringInWraproundString(string s) {\n    int maxLength = 1;\n    // count[i] := the number of substrings ending in ('a' + i)\n    vector<int> count(26);\n\n    for (int i = 0; i < s.length(); ++i) {\n      if (i > 0 && (s[i] - s[i - 1] == 1 || s[i - 1] - s[i] == 25))\n        ++maxLength;\n      else\n        maxLength = 1;\n      const int index = s[i] - 'a';\n      count[index] = max(count[index], maxLength);\n    }\n\n    return accumulate(count.begin(), count.end(), 0);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/467.%20Unique%20Substrings%20in%20Wraparound%20String",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "flatten-binary-tree-to-linked-list",
+  "approach": "Iterative Pointer Rewiring",
+  "explanation": "### How it works\n\nPreorder visits the left subtree before the right subtree. Attach the original right subtree to the rightmost node of the left subtree, then move the left subtree to the right link. Continue along the right chain, gradually forming the required preorder list.\n\n### Steps\n\n1. If a left child exists, find its rightmost node.\n2. Attach the old right subtree there and move the left subtree to root.right.\n3. Clear root.left and advance to root.right.\n\n### Complexity\n\n- Time: O(n); predecessor scans and the main walk traverse edges a bounded number of times.\n- Space: O(1).\n\n### Things to watch for\n\n- Save the original right subtree through rewiring so it is not lost.\n- Every left pointer must become null.\n- The tree is modified in place; no new list nodes are needed.",
+  "code": {
+    "python": "class Solution:\n  def flatten(self, root: TreeNode | None) -> None:\n    if not root:\n      return\n\n    while root:\n      if root.left:\n        # Find the rightmost root\n        rightmost = root.left\n        while rightmost.right:\n          rightmost = rightmost.right\n        # Rewire the connections\n        rightmost.right = root.right\n        root.right = root.left\n        root.left = None\n      # Move on to the right side of the tree\n      root = root.right\n",
+    "cpp": "class Solution {\n public:\n  void flatten(TreeNode* root) {\n    if (root == nullptr)\n      return;\n\n    while (root != nullptr) {\n      if (root->left != nullptr) {\n        // Find the rightmost root.\n        TreeNode* rightmost = root->left;\n        while (rightmost->right != nullptr)\n          rightmost = rightmost->right;\n        // Rewire the connections.\n        rightmost->right = root->right;\n        root->right = root->left;\n        root->left = nullptr;\n      }\n      // Move on to the right side of the tree.\n      root = root->right;\n    }\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/114.%20Flatten%20Binary%20Tree%20to%20Linked%20List",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "utf-8-validation",
+  "approach": "Track Expected Continuation Bytes",
+  "explanation": "### How it works\n\nInspect a leading byte’s prefix to determine whether zero, one, two, or three continuation bytes must follow. While continuation bytes remain, each byte must begin with binary 10. The input is valid only if every leading prefix is recognized and no continuation remains at the end.\n\n### Steps\n\n1. Classify each leading byte by its high bits.\n2. Require 10-prefixed bytes while a sequence is unfinished.\n3. Accept only when the expected continuation count returns to zero.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Reject a continuation byte where a leading byte is required.\n- Reject a truncated final sequence.\n- This checks the problem’s byte-prefix rules, rather than all Unicode code-point restrictions.",
+  "code": {
+    "python": "class Solution:\n  def validUtf8(self, data: list[int]) -> bool:\n    followedBytes = 0\n\n    for d in data:\n      if followedBytes == 0:\n        if (d >> 3) == 0b11110:\n          followedBytes = 3\n        elif (d >> 4) == 0b1110:\n          followedBytes = 2\n        elif (d >> 5) == 0b110:\n          followedBytes = 1\n        elif (d >> 7) == 0b0:\n          followedBytes = 0\n        else:\n          return False\n      else:\n        if (d >> 6) != 0b10:\n          return False\n        followedBytes -= 1\n\n    return followedBytes == 0\n",
+    "cpp": "class Solution {\n public:\n  bool validUtf8(vector<int>& data) {\n    int followedBytes = 0;\n\n    for (const int d : data)\n      if (followedBytes == 0) {\n        if ((d >> 3) == 0b11110)\n          followedBytes = 3;\n        else if ((d >> 4) == 0b1110)\n          followedBytes = 2;\n        else if ((d >> 5) == 0b110)\n          followedBytes = 1;\n        else if ((d >> 7) == 0b0)\n          followedBytes = 0;\n        else\n          return false;\n      } else {\n        if ((d >> 6) != 0b10)\n          return false;\n        --followedBytes;\n      }\n\n    return followedBytes == 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/393.%20UTF-8%20Validation",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

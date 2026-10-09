@@ -6,6 +6,9 @@ export interface ProblemReference {
   code: Record<ReferenceLanguage, string>;
   videoUrl: string;
   sourceUrl: string;
+  sourceName?: string;
+  licenseUrl?: string;
+  explanationAuthor?: string;
 }
 
 // Load only the requested solution, after retrieval or an explicit library visit.

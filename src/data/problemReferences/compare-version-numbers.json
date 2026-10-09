@@ -1,0 +1,14 @@
+{
+  "problemId": "compare-version-numbers",
+  "approach": "Compare Numeric Revisions",
+  "explanation": "### How it works\n\nSplit or stream each version into numeric revisions. Compare matching revisions from left to right, interpreting a missing revision as zero. Converting each revision to an integer removes leading zeros without changing its numeric value.\n\n### Steps\n\n1. Read the next revision from each version.\n2. Compare them numerically, substituting zero when one version ends.\n3. Return zero when all revisions match.\n\n### Complexity\n\n- Time: O(n + m) for the two input lengths.\n- Space: Python O(n + m) for split revisions; C++ O(n + m) for stream copies.\n\n### Things to watch for\n\n- Compare numeric values rather than strings; `10` exceeds `2`.\n- `1.0` and `1` are equal.\n- Leading zeros do not create a different revision.",
+  "code": {
+    "python": "class Solution:\n  def compareVersion(self, version1: str, version2: str) -> int:\n    levels1 = version1.split('.')\n    levels2 = version2.split('.')\n    length = max(len(levels1), len(levels2))\n\n    for i in range(length):\n      v1 = int(levels1[i]) if i < len(levels1) else 0\n      v2 = int(levels2[i]) if i < len(levels2) else 0\n      if v1 < v2:\n        return -1\n      if v1 > v2:\n        return 1\n\n    return 0\n",
+    "cpp": "class Solution {\n public:\n  int compareVersion(string version1, string version2) {\n    istringstream iss1(version1);\n    istringstream iss2(version2);\n    int v1 = 0;\n    int v2 = 0;\n    char dotChar;\n\n    while (bool(iss1 >> v1) + bool(iss2 >> v2)) {\n      if (v1 < v2)\n        return -1;\n      if (v1 > v2)\n        return 1;\n      iss1 >> dotChar;\n      iss2 >> dotChar;\n      v1 = 0;\n      v2 = 0;\n    }\n\n    return 0;\n  };\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/165.%20Compare%20Version%20Numbers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

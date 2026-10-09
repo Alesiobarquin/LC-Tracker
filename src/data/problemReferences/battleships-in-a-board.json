@@ -1,0 +1,14 @@
+{
+  "problemId": "battleships-in-a-board",
+  "approach": "Count Only Ship Starts",
+  "explanation": "### How it works\n\nA horizontal or vertical ship has exactly one cell with no ship cell immediately above or to its left. Count those starts while scanning the board. The guaranteed separation between ships makes this local test sufficient, without marking cells.\n\n### Steps\n\n1. Skip empty cells.\n2. Skip an X with an X above or left.\n3. Count every remaining X as a new ship.\n\n### Complexity\n\n- Time: O(rows × columns).\n- Space: O(1).\n\n### Things to watch for\n\n- This relies on valid separated horizontal or vertical ships.\n- Do not count every X.\n- The board is read without mutation.",
+  "code": {
+    "python": "class Solution:\n  def countBattleships(self, board: list[list[str]]) -> int:\n    ans = 0\n\n    for i, row in enumerate(board):\n      for j, cell in enumerate(row):\n        if cell == '.':\n          continue\n        if i > 0 and board[i - 1][j] == 'X':\n          continue\n        if j > 0 and board[i][j - 1] == 'X':\n          continue\n        ans += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int countBattleships(vector<vector<char>>& board) {\n    int ans = 0;\n\n    for (int i = 0; i < board.size(); ++i)\n      for (int j = 0; j < board[0].size(); ++j) {\n        if (board[i][j] == '.')\n          continue;\n        if (i > 0 && board[i - 1][j] == 'X')\n          continue;\n        if (j > 0 && board[i][j - 1] == 'X')\n          continue;\n        ++ans;\n      }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/419.%20Battleships%20in%20a%20Board",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "game-of-life",
+  "approach": "Store Old and New Cell States in Bits",
+  "explanation": "### How it works\n\nEncode the old generation in the low bit and the next generation in the second bit. Neighbor counts always read the low bit, so earlier updates cannot contaminate later counts. Shift every cell right once all next states have been computed.\n\n### Steps\n\n1. Count low-bit ones in each surrounding 3×3 region.\n2. Set the second bit when the cell survives or is born.\n3. Shift all cells right to expose the next generation.\n\n### Complexity\n\n- Time: O(rows × columns).\n- Space: O(1).\n\n### Things to watch for\n\n- The count includes the cell itself, so a live cell survives at counts three or four.\n- Read neighbor old states with & 1.\n- Do not replace the old state before all cells have been examined.",
+  "code": {
+    "python": "class Solution:\n  def gameOfLife(self, board: list[list[int]]) -> None:\n    m = len(board)\n    n = len(board[0])\n\n    for i in range(m):\n      for j in range(n):\n        ones = 0\n        for x in range(max(0, i - 1), min(m, i + 2)):\n          for y in range(max(0, j - 1), min(n, j + 2)):\n            ones += board[x][y] & 1\n        # Any live cell with two or three live neighbors lives on to the next\n        # generation.\n        if board[i][j] == 1 and (ones == 3 or ones == 4):\n          board[i][j] |= 0b10\n        # Any dead cell with exactly three live neighbors becomes a live cell,\n        # as if by reproduction.\n        if board[i][j] == 0 and ones == 3:\n          board[i][j] |= 0b10\n\n    for i in range(m):\n      for j in range(n):\n        board[i][j] >>= 1\n",
+    "cpp": "class Solution {\n public:\n  void gameOfLife(vector<vector<int>>& board) {\n    const int m = board.size();\n    const int n = board[0].size();\n\n    for (int i = 0; i < m; ++i)\n      for (int j = 0; j < n; ++j) {\n        int ones = 0;\n        for (int x = max(0, i - 1); x < min(m, i + 2); ++x)\n          for (int y = max(0, j - 1); y < min(n, j + 2); ++y)\n            ones += board[x][y] & 1;\n        // Any live cell with two or three live neighbors lives on to the next\n        // generation.\n        if (board[i][j] == 1 && (ones == 3 || ones == 4))\n          board[i][j] |= 0b10;\n        // Any dead cell with exactly three live neighbors becomes a live cell,\n        // as if by reproduction.\n        if (board[i][j] == 0 && ones == 3)\n          board[i][j] |= 0b10;\n      }\n\n    for (int i = 0; i < m; ++i)\n      for (int j = 0; j < n; ++j)\n        board[i][j] >>= 1;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/289.%20Game%20of%20Life",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -73,6 +73,7 @@ HEADERS = '''#include <algorithm>
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <cctype>
 #include <cstdint>
 #include <cstdlib>
 #include <deque>
@@ -83,10 +84,12 @@ HEADERS = '''#include <algorithm>
 #include <map>
 #include <numeric>
 #include <queue>
+#include <ranges>
 #include <set>
 #include <sstream>
 #include <stack>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>

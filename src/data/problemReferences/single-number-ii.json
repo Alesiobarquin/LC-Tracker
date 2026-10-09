@@ -1,0 +1,14 @@
+{
+  "problemId": "single-number-ii",
+  "approach": "Bit Counts Modulo Three",
+  "explanation": "### How it works\n\nTwo bit masks represent bits seen once and twice modulo three. Update the once mask while excluding bits already in the twice mask, then update the twice mask using the new once mask. A third occurrence clears both states, leaving the unique number in the once mask.\n\n### Steps\n\n1. Initialize the once and twice masks to zero.\n2. Update once, then twice, for every number.\n3. Return the once mask.\n\n### Complexity\n\n- Time: O(n) for fixed-width integers.\n- Space: O(1).\n\n### Things to watch for\n\n- The second update must use the newly updated once mask.\n- Negative values must retain their signed bit representation.\n- Ordinary XOR only cancels pairs, so it cannot handle triples.",
+  "code": {
+    "python": "class Solution:\n  def singleNumber(self, nums: list[int]) -> int:\n    ones = 0\n    twos = 0\n\n    for num in nums:\n      ones ^= num & ~twos\n      twos ^= num & ~ones\n\n    return ones\n",
+    "cpp": "class Solution {\n public:\n  int singleNumber(vector<int>& nums) {\n    int ones = 0;\n    int twos = 0;\n\n    for (const int num : nums) {\n      ones ^= (num & ~twos);\n      twos ^= (num & ~ones);\n    }\n\n    return ones;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/137.%20Single%20Number%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

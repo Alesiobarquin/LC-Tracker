@@ -86,12 +86,13 @@ describe("capacity and backlog planning", () => {
     const first = buildStudyPlan({ progress: backlog, settings: settings(60), timings, now });
     expect(first.recallTasks).toHaveLength(0);
     expect(first.mainTask).not.toBeNull();
-    expect(first.mainTask!.explanation.join(" ")).toContain("0 min remains in that allowance");
+    expect(first.mainTask!.explanation.recallMinutesAvailable).toBe(0);
+    expect(first.mainTask!.explanation.recallUsed).toBe(18);
     timings.push({ ...timings[0], id: "coding-block", problemId: first.mainTask!.problemId, elapsedSeconds: 10 * 60, sessionType: "review" });
     const next = buildStudyPlan({ progress: backlog, settings: settings(60), timings, now });
     expect(next.recallTasks).toHaveLength(0);
     expect(next.mainTask?.problemId).not.toBe(first.mainTask!.problemId);
-    expect(next.mainTask!.explanation.join(" ")).toContain("32 min remaining");
+    expect(next.mainTask!.explanation.remainingMinutes).toBe(32);
     expect(next.plannedMinutes).toBeLessThanOrEqual(32);
   });
   it("turns 43 eligible reviews into a small budgeted plan with one distinct coding block", () => {

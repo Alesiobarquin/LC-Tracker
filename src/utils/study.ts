@@ -457,7 +457,18 @@ export interface StudyTask {
   minutes: number;
   estimatedMinutes: number;
   reason: string;
-  explanation: string[];
+  explanation: {
+    title: string;
+    summary: string;
+    dailyMinutes: number;
+    spentMinutes: number;
+    remainingMinutes: number;
+    recallAllowance: number;
+    recallUsed: number;
+    recallMinutesAvailable: number;
+    recallEligibleCount: number;
+    unfamiliarReservation: boolean;
+  };
 }
 export interface StudyPlan {
   dailyMinutes: number;
@@ -794,33 +805,36 @@ export function buildStudyPlan(params: {
     Math.max(0, Math.floor(dailyMinutes * 0.3) - Math.ceil(recallSpent)),
   );
   const recallAllowance = Math.floor(dailyMinutes * 0.3);
-  const allocationExplanation = [
-    `${dailyMinutes} min daily budget − ${spentMinutes} min recorded or active = ${remainingMinutes} min remaining.`,
-    `Recall gets up to ${recallAllowance} min (30% of the daily budget, rounded down). ${Math.ceil(recallSpent)} min has been used today; ${Math.max(0, recallAllowance - Math.ceil(recallSpent))} min remains in that allowance.`,
-    ...(unfamiliarMain ? [`An unfamiliar coding check reserves up to ${UNSEEN_CHECK_MINUTES} min before recall is allocated.`] : []),
-    `This plan can allocate ${Math.floor(recallBudget / 3)} three-minute recall checks, subject to eligible problems. Completed or swapped problems are excluded for today.`,
-    "The plan recalculates after each save using actual time spent. Once recall's allowance is used, another coding block can be recommended while at least five minutes remain. Recall success does not replace an independent coding check.",
-  ];
-  const selectionExplanation = protectedVariant
-    ? "Your weekly unfamiliar check is due: no first attempt at an unseen problem was recorded in the last seven days. This eligible unseen problem takes priority."
-    : day === maintenanceDay && codingCandidate
-      ? "Today is your maintenance day. Due coding checks are ordered by how overdue they are, with extra priority for relearning."
-      : unfinished
-        ? "An eligible unfinished attempt takes priority so you can continue it. Long attempts temporarily rotate out after three blocks or twice their estimated time."
-        : remediation
-          ? "Recent coding outcomes or repeated gaps call for rebuilding an approach before adding new material. This due relearning problem was selected."
-          : learningDay && newCandidate
-            ? "Today allows new learning. This unseen problem ranks first for coverage of your target curriculum, with prerequisite order in guided mode and difficulty used to break ties."
-            : codingCandidate
-              ? codingCandidate === repair
-                ? "This due coding check has a recorded learning gap, so it takes priority over other coding reviews."
-                : codingCandidate === delayedCheck
-                  ? "An independent pass was recorded at least seven days ago, but delayed independent retention has not yet been demonstrated."
-                  : "This coding check is due. Due checks are ordered by overdue time, with extra priority for relearning."
-              : "No eligible due coding check is available, so the planner selected an unseen problem to continue coverage.";
   const recallCandidates = dueRecall.filter(
     (id) => !touched.has(id) && id !== mainId,
   );
+  const allocationExplanation = {
+    dailyMinutes,
+    spentMinutes,
+    remainingMinutes,
+    recallAllowance,
+    recallUsed: Math.ceil(recallSpent),
+    recallMinutesAvailable: recallBudget,
+    recallEligibleCount: recallCandidates.length,
+    unfamiliarReservation: !!unfamiliarMain,
+  };
+  const selectionExplanation = protectedVariant
+    ? { title: "Weekly unfamiliar check", summary: "Your weekly check is due. Try an unseen question without hints." }
+    : day === maintenanceDay && codingCandidate
+      ? { title: "Maintenance day", summary: "Revisit a due problem to keep your coding skills fresh." }
+      : unfinished
+        ? { title: "Continue your attempt", summary: "Pick up an unfinished problem before starting another." }
+        : remediation
+          ? { title: "Rebuild a weak spot", summary: "Recent attempts show a gap. Practice it before adding new material." }
+          : learningDay && newCandidate
+            ? { title: "New learning", summary: "This question builds coverage in your target list." }
+            : codingCandidate
+              ? codingCandidate === repair
+                ? { title: "Rebuild a weak spot", summary: "A recorded coding gap puts this problem first." }
+                : codingCandidate === delayedCheck
+                  ? { title: "Check it after a week", summary: "You solved it independently. Now check whether that skill has stuck." }
+                  : { title: "Coding review is due", summary: "This problem is ready for another independent attempt." }
+              : { title: "New learning", summary: "No coding reviews are available. Practice a new problem instead." };
   const usedPatterns = new Set<string>();
   const selected = new Set<string>();
   for (const diversify of [true, false])
@@ -836,10 +850,11 @@ export function buildStudyPlan(params: {
         kind: "recall",
         minutes: 3,
         estimatedMinutes: 3,
-        explanation: [
-          "This recall check is due. The queue prioritizes overdue checks and relearning, then mixes different approaches before filling any remaining slots.",
+        explanation: {
           ...allocationExplanation,
-        ],
+          title: "Recall is due",
+          summary: "Check what you remember before reopening the solution.",
+        },
         reason:
           getLearningStatus(progress[id]) === "needs_assessment"
             ? "Assess what you remember before choosing a full re-solve."
@@ -866,11 +881,14 @@ export function buildStudyPlan(params: {
       kind,
       estimatedMinutes,
       minutes: Math.min(estimatedMinutes, capacity),
-      explanation: [
-        selectionExplanation,
+      explanation: {
         ...allocationExplanation,
-        `${plan.recallTasks.length * 3} min is allocated to recall in this plan. This coding block gets ${Math.min(estimatedMinutes, capacity)} min from the remaining ${capacity} min; its full-attempt estimate is ${estimatedMinutes} min. An unfinished attempt can be saved and continued later.`,
-      ],
+        ...selectionExplanation,
+        ...(kind === "variant" && !protectedVariant ? {
+          title: "Unfamiliar practice",
+          summary: "Practice choosing an approach without hints.",
+        } : {}),
+      },
       reason:
         kind === "variant"
           ? `${protectedVariant ? "Protected unfamiliar check" : "Unfamiliar check"}: choose the approach yourself, code without hints, then test and explain.`

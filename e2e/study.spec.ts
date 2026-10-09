@@ -1050,22 +1050,41 @@ for (const theme of ["light", "dark"]) {
 
 for (const theme of ["light", "dark"]) {
   for (const width of [1280, 390]) {
-  test(`recommendation explanation is accessible at ${width}px in ${theme}`, async ({ page }) => {
-    await fixture(page);
-    await page.addInitScript((theme) => localStorage.setItem("lc-tracker-theme", theme), theme);
-    await page.setViewportSize({ width, height: 844 });
-    await page.goto("/");
-    const why = page.getByRole("button", { name: "Why this recommendation?", exact: true }).first();
-    await why.click();
-    const dialog = page.getByRole("dialog", { name: "Why this recommendation?" });
-    await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText("30% of the daily budget");
-    await expect(dialog).toContainText("recalculates after each save");
-    expect(await dialog.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
-    await page.keyboard.press("Escape");
-    await expect(dialog).not.toBeVisible();
-    await expect(why).toBeFocused();
-  });
-}
-
+    test(`recommendation explanation is accessible at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      const time = new Date("2026-10-09T12:00:00");
+      await page.clock.install({ time });
+      const stored = await fixture(page);
+      stored.settings.settings_json.settings.studySchedule.weekdayMinutes = 60;
+      stored.timings = [
+        { id: "used-recall", problem_id: "two-sum", category: "Arrays & Hashing", recorded_at: time.toISOString(), elapsed_seconds: 20 * 60, session_type: "recall", rating: 4 },
+        { id: "used-coding", problem_id: "two-sum", category: "Arrays & Hashing", recorded_at: time.toISOString(), elapsed_seconds: 11 * 60, session_type: "review", rating: 4 },
+      ];
+      await page.addInitScript((theme) => localStorage.setItem("lc-tracker-theme", theme), theme);
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/");
+      const why = page.getByRole("button", { name: "Why this recommendation?", exact: true }).first();
+      await why.click();
+      const dialog = page.getByRole("dialog", { name: "Why this recommendation?" });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("heading", { name: "New learning", exact: true })).toBeVisible();
+      await expect(dialog).toContainText("Recall allowance used");
+      await expect(dialog).toContainText("20 / 18 min used");
+      await expect(dialog.getByRole("progressbar")).toHaveAttribute("aria-valuetext", "31 of 60 minutes used");
+      expect(await dialog.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+      expect(await dialog.locator("a").last().evaluate(el => el.getBoundingClientRect().bottom <= window.innerHeight)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath("recommendation.png"), animations: "disabled" });
+      await page.keyboard.press("Escape");
+      await expect(dialog).not.toBeVisible();
+      await expect(why).toBeFocused();
+      await why.click();
+      await dialog.getByRole("link", { name: "How the planner works" }).click();
+      await expect(page.getByRole("heading", { name: "How the planner works", exact: true })).toBeVisible();
+      await page.getByText("Time budget and recall allocation", { exact: true }).click();
+      await expect(page.getByText("Recall allowance =", { exact: false })).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath("planner-guide.png"), animations: "disabled" });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.reload();
+      await expect(page.getByRole("heading", { name: "How the planner works", exact: true })).toBeVisible();
+    });
+  }
 }

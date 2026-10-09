@@ -102,6 +102,12 @@ existing meanings.
 
 Personal explanations continue to use `problem_progress.notes`, optionally with
 a trailing Python or C++ fenced code block. Historical plain notes still work.
+Recall comparison opens the built-in solution first when one exists and moves
+focus to the comparison section. Saved notes remain selectable and editable;
+their presence does not replace the solution. The selector contains only built-in
+solutions and personal notes; external links and pattern guidance remain below.
+Resumed checks using a removed selector option display the built-in solution if
+available. Historical reference types and frozen completions remain intact.
 Choosing the built-in view does not delete a personal draft. Removing the personal
 explanation is explicit and takes effect when the recall outcome saves.
 Original answer, corrections, personal notes, timing, activity, and receipt save

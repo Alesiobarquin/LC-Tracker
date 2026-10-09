@@ -123,6 +123,8 @@ test("recall conceals references, preserves a draft, and retries a lost response
   await expect(answer).toHaveText(/Use a hash map/);
   await page.getByRole("button", { name: "Resume check" }).click();
   await page.getByRole("button", { name: "Compare with a reference" }).click();
+  await expect(page.getByRole('heading', { name: 'Hash Map (One Pass)' })).toBeVisible();
+  await page.getByLabel('Reference used').selectOption('notes');
   await expect(page.getByLabel("Personal explanation")).toHaveValue(/Saved reference:/);
   await expect(answer).toBeEditable();
   await answer.fill("Corrected: check the complement before inserting, and return both indices.");
@@ -769,6 +771,119 @@ test('library explanations cover each core list and do not reveal a pending reca
   await expect(page.locator('.problem-explanation')).toHaveCount(0);
   await page.getByRole('link', { name: 'Resume recall check' }).click();
   await expect(page.getByLabel('Your attempt · explanation or pseudocode')).toHaveText('Draft stays here.');
+});
+
+test('recall shows the built-in level-order solution when a problem has ordinary saved notes', async ({ page }) => {
+  const id = 'binary-tree-level-order-traversal';
+  const notes = 'Review the queue boundary next time.';
+  await fixture(page, [{ ...progressRow(id), notes }]);
+  await page.goto(`/recall/${id}`);
+  const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+  await answer.fill('Use a queue and collect one level at a time.');
+  await expect(page.locator('.problem-explanation')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Compare with a reference' }).click();
+  await expect(page.getByLabel('Reference used').locator('option')).toHaveText([
+    'Built-in problem explanation', 'My explanation · edit or replace',
+  ]);
+  await expect(page.getByRole('heading', { name: 'Breadth First Search', exact: true })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Solution code' })).toContainText('def levelOrder');
+  await page.getByLabel('Example language').selectOption('cpp');
+  await expect(page.getByRole('textbox', { name: 'Solution code' })).toContainText('levelOrder(TreeNode* root)');
+  await page.getByLabel('Reference used').selectOption('notes');
+  await expect(page.getByLabel('Personal explanation')).toHaveValue(notes);
+  await page.getByLabel('Personal explanation').fill('My revised queue explanation.');
+  await page.getByRole('button', { name: 'Use built-in explanation', exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Breadth First Search', exact: true })).toBeVisible();
+  await expect(answer).toHaveText('Use a queue and collect one level at a time.');
+  await page.getByLabel('Reference used').selectOption('notes');
+  await expect(page.getByLabel('Personal explanation')).toHaveValue('My revised queue explanation.');
+});
+
+for (const theme of ['light', 'dark']) {
+  for (const width of [1280, 390]) {
+    test(`revealing the level-order solution brings comparison into view at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      const id = 'binary-tree-level-order-traversal';
+      await fixture(page, [{ ...progressRow(id), notes: '' }]);
+      await page.setViewportSize({ width, height: 720 });
+      await page.addInitScript(theme => localStorage.setItem('lc-tracker-theme', theme), theme);
+      await page.goto(`/recall/${id}`);
+      await page.getByLabel('Your attempt · explanation or pseudocode').fill('Use a queue.\n'.repeat(25));
+      await page.getByRole('button', { name: 'Compare with a reference' }).click();
+      const comparison = page.getByRole('region', { name: 'Compare recall answer' });
+      await expect(comparison).toBeFocused();
+      await expect(page.getByRole('heading', { name: 'Compare and identify gaps' })).toBeInViewport();
+      await expect(page.getByRole('heading', { name: 'Breadth First Search', exact: true })).toBeInViewport();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`level-order-${theme}-${width}.png`) });
+    });
+  }
+}
+
+for (const source of ['external', 'reference']) {
+  for (const frozen of [false, true]) {
+    test(`a resumed ${source} reference shows the solution and preserves ${frozen ? 'a frozen completion' : 'the original answer'}`, async ({ page }) => {
+      const id = 'binary-tree-level-order-traversal';
+      await fixture(page, [{ ...progressRow(id), notes: '' }]);
+      await page.goto(`/recall/${id}`);
+      await page.getByLabel('Your attempt · explanation or pseudocode').fill('Remember the queue boundary.');
+      await page.getByRole('button', { name: 'Compare with a reference' }).click();
+      const before = await page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall,
+      );
+      before.checkedAgainst = source;
+      if (frozen) {
+        before.compared = true;
+        before.completion = {
+          attempt: { id: before.id, date: new Date().toISOString(), elapsedSeconds: 5,
+            outcome: 'partial', answer: before.retrievedAnswer, checkedAgainst: source },
+          notes: before.notes,
+        };
+      }
+      // Seed on the next load, after the current page's pause-on-unload save.
+      await page.addInitScript(draft => {
+        const key = 'lc-tracker-active-session';
+        const saved = JSON.parse(sessionStorage.getItem(key)!);
+        saved.state.activeRecall = draft;
+        sessionStorage.setItem(key, JSON.stringify(saved));
+      }, before);
+      await page.reload();
+      await expect(page.getByLabel('Reference used')).toHaveValue('solution');
+      await expect(page.getByLabel('Reference used').locator('option')).toHaveCount(2);
+      await expect(page.getByRole('heading', { name: 'Breadth First Search', exact: true })).toBeVisible();
+      await expect(page.getByRole('link', { name: /Check the explanation on LeetCode/ })).toBeVisible();
+      await expect(page.getByRole('link', { name: /Watch NeetCode/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=6ZnyEApgFYg');
+      const after = await page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall,
+      );
+      expect(after.id).toBe(before.id);
+      expect(after.retrievedAnswer).toBe(before.retrievedAnswer);
+      expect(after.checkedAgainst).toBe(source);
+      if (frozen) {
+        expect(after.completion).toEqual(before.completion);
+        await expect(page.getByLabel('Reference used')).toBeDisabled();
+        await expect(page.getByRole('heading', { name: 'Record what you recalled' })).toBeInViewport();
+      } else {
+        await expect(page.getByRole('heading', { name: 'Compare and identify gaps' })).toBeInViewport();
+        await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
+        expect(await page.evaluate(() =>
+          JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall.checkedAgainst,
+        )).toBe('solution');
+      }
+    });
+  }
+}
+
+test('recall explains missing solution coverage and keeps external links available', async ({ page }) => {
+  const id = 'count-commas-in-range';
+  await fixture(page, [{ ...progressRow(id), notes: '' }]);
+  await page.goto(`/recall/${id}`);
+  await page.getByRole('button', { name: 'I can’t recall it' }).click();
+  await expect(page.getByText('A built-in solution isn’t available for this problem yet.', { exact: false })).toBeVisible();
+  await expect(page.getByLabel('Reference used')).toHaveValue('notes');
+  await expect(page.getByLabel('Reference used').locator('option')).toHaveText(['My explanation · edit or replace']);
+  await expect(page.getByLabel('Personal explanation')).toBeEditable();
+  await expect(page.getByRole('link', { name: /Check the explanation on LeetCode/ })).toHaveAttribute('href', 'https://leetcode.com/problems/count-commas-in-range/editorial/');
 });
 
 for (const theme of ["light", "dark"]) {

@@ -49,10 +49,26 @@ export function RecallPage() {
   const [elapsed, setElapsed] = useState(0);
   const submitting = useRef(false);
   const closed = useRef(false);
+  const comparisonSection = useRef<HTMLElement>(null);
   const recordSection = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (draft?.compared) recordSection.current?.focus();
-  }, [draft?.compared]);
+    if (isLoading || error || !catalogReady) return;
+    const section = draft?.compared || draft?.completion
+      ? recordSection.current
+      : draft?.revealed
+        ? comparisonSection.current
+        : null;
+    section?.focus({ preventScroll: true });
+    section?.scrollIntoView({ block: "start" });
+    if (section === recordSection.current && section && comparisonSection.current) {
+      // A lazy explanation can expand above the outcome after a reload.
+      const observer = new ResizeObserver(() => {
+        if (document.activeElement === section) section.scrollIntoView({ block: "start" });
+      });
+      observer.observe(comparisonSection.current);
+      return () => observer.disconnect();
+    }
+  }, [isLoading, error, catalogReady, draft?.revealed, draft?.compared, draft?.completion]);
   const [storageAvailable] = useState(canPersistTimer);
   useEffect(() => {
     void ensureExtendedCatalogLoaded()
@@ -241,6 +257,12 @@ export function RecallPage() {
     : null;
   const frozen = !!draft.completion;
   const compared = !!draft.compared || frozen;
+  const hasBuiltIn = hasProblemReference(problem.id);
+  // Older drafts retain their recorded source. Display a usable reference even
+  // when their external/pattern option is no longer part of the selector.
+  const comparisonReference = draft.checkedAgainst === "notes" || !hasBuiltIn
+    ? "notes"
+    : "solution";
   const parsedPersonal = parsePersonalExplanation(
     draft.notes ?? progress[problem.id].notes ?? "",
   );
@@ -254,10 +276,10 @@ export function RecallPage() {
       revealed: true,
       retrievedAnswer: draft.answer,
       notes: progress[problem!.id].notes ?? "",
-      checkedAgainst: progress[problem!.id].notes
-        ? "notes"
-        : hasProblemReference(problem!.id)
-          ? "solution"
+      checkedAgainst: hasProblemReference(problem!.id)
+        ? "solution"
+        : progress[problem!.id].notes
+          ? "notes"
           : "external",
     });
   }
@@ -432,13 +454,18 @@ export function RecallPage() {
         </button>
       )}
       {draft.revealed && (
-        <section className="recall-stage recall-comparison space-y-5">
+        <section
+          ref={comparisonSection}
+          tabIndex={-1}
+          aria-label="Compare recall answer"
+          className="recall-stage recall-comparison space-y-5 scroll-mt-24"
+        >
           <SectionHeading index="02" title="Compare and identify gaps" />
           <label className="block text-sm text-body">
             Explanation to compare against
             <select
               aria-label="Reference used"
-              value={draft.checkedAgainst}
+              value={comparisonReference}
               disabled={frozen}
               onChange={(e) =>
                 updateRecall({
@@ -449,30 +476,30 @@ export function RecallPage() {
               }
               className="block mt-2 w-full rounded-md bg-surface border border-line-strong p-3 text-foreground"
             >
-              {hasProblemReference(problem.id) && (
+              {hasBuiltIn && (
                 <option value="solution">Built-in problem explanation</option>
               )}
               <option value="notes">My explanation · edit or replace</option>
-              <option value="external">
-                LeetCode / video / external reference
-              </option>
-              {lesson && (
-                <option value="reference">General pattern guidance</option>
-              )}
             </select>
           </label>
-          {draft.checkedAgainst === "solution" && (
+          {!hasBuiltIn && (
+            <p className="text-sm text-muted">
+              A built-in solution isn’t available for this problem yet. Use the
+              linked explanations below or write your own notes.
+            </p>
+          )}
+          {comparisonReference === "solution" && (
             <ProblemExplanation problem={problem} />
           )}
-          {draft.checkedAgainst === "notes" && (
+          {comparisonReference === "notes" && (
             <div className="personal-explanation space-y-4">
               <h3 className="text-sm font-semibold text-foreground">
                 Your explanation
               </h3>
               <p className="text-xs text-muted">
-                Write the logic in your own words. This replaces the built-in
-                text when you revisit this problem. Changes save with your
-                recall outcome.
+                Write the logic in your own words. Your notes stay available
+                alongside the built-in solution. Changes save with your recall
+                outcome.
               </p>
               <label className="block text-sm text-body">
                 Explanation in plain English
@@ -528,7 +555,7 @@ export function RecallPage() {
                         )
                 }
               />
-              {!frozen && hasProblemReference(problem.id) && (
+              {!frozen && hasBuiltIn && (
                 <div className="flex flex-wrap gap-5">
                   <button
                     className="quiet-action"
@@ -589,7 +616,7 @@ export function RecallPage() {
               </p>
               <button
                 className={button}
-                onClick={() => updateRecall({ compared: true })}
+                onClick={() => updateRecall({ compared: true, checkedAgainst: comparisonReference })}
               >
                 I’ve compared my answer — continue
               </button>
@@ -601,7 +628,7 @@ export function RecallPage() {
         <section
           ref={recordSection}
           tabIndex={-1}
-          className="recall-stage recall-record space-y-4"
+          className="recall-stage recall-record space-y-4 scroll-mt-24"
           aria-label="Record recall outcome"
         >
           <SectionHeading index="03" title="Record what you recalled" />
@@ -659,7 +686,7 @@ export function RecallPage() {
           </p>
         </section>
       )}
-      {draft.revealed && draft.checkedAgainst === "solution" && (
+      {draft.revealed && comparisonReference === "solution" && (
         <ProblemExplanationFootnote problem={problem} />
       )}
     </div>

@@ -92,7 +92,14 @@ and elapsed time in `problem_progress.study_state.recallHistory`. References sta
 hidden until comparison. The 250 core library problems have attributed, bundled
 NeetCode explanations with Python/C++ examples and problem-specific YouTube links.
 Full-catalog items outside that union still use notes or external explanations;
-general pattern guidance is never presented as an exact solution.
+general pattern guidance is never presented as an exact solution. Revealing a
+reference brings the comparison section into view and selects the built-in
+solution when available. Ordinary saved notes remain a separate selectable
+reference; their presence does not hide the solution. The selector contains only
+the built-in solution and personal notes. External links and general pattern
+guidance stay below it. Older drafts using a removed selector option display the
+built-in solution when available, or personal notes with a missing-coverage
+message. Historical records and frozen completion payloads keep their sources.
 
 The answer remains editable during comparison and recording. A snapshot taken
 before revealing the reference stays in `answer`; a later correction is optional

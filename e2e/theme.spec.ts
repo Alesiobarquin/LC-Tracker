@@ -90,6 +90,7 @@ test('theme changes preserve an active recall answer and comparison stage withou
   await expect(page.getByRole('button', { name: 'Pause check', exact: true })).toBeVisible();
   await expect(page.getByText('Saved reference:', { exact: false })).not.toBeVisible();
   await page.getByRole('button', { name: 'Compare with a reference' }).click();
+  await page.getByLabel('Reference used').selectOption('notes');
   await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
   await themeControl(page).selectOption('light');
   await expect(themeRoot(page)).toHaveAttribute('data-theme', 'light');
@@ -102,6 +103,7 @@ test('theme changes preserve an active recall answer and comparison stage withou
   await expect(answer).toHaveText(draftText);
   await expect(answer).toBeEditable();
   await expect(page.getByLabel('Personal explanation')).toHaveValue(/Saved reference:/);
+  await expect(page.getByRole('heading', { name: 'Record what you recalled' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Resume check', exact: true })).toBeVisible();
   expect(writes).toEqual([]);
 });

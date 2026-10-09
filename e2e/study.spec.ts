@@ -335,8 +335,8 @@ test("43 eligible items produce a bounded desktop and mobile plan", async ({
     page.getByRole("heading", { name: "Today’s study plan" }),
   ).toBeVisible();
   await expect(
-    page.getByText("43 eligible in your queue.", { exact: false }),
-  ).toBeVisible();
+    page.getByText("eligible in your queue.", { exact: false }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: /Start recall check/ }),
   ).toHaveCount(3);

@@ -293,15 +293,17 @@ export function Dashboard() {
                   {getNumberedProblemTitle(focusedProblem)}
                 </h2>
                 {!activeProblemId && primaryTask && explanationButton(primaryTask)}
-                <p className="text-sm text-muted leading-relaxed max-w-lg">
-                  {activeProblemId
-                    ? activeRecall
-                      ? "Continue your saved recall check before starting another problem."
-                      : activeSessionNeedsOutcome
-                        ? "Record the outcome of this saved attempt to finish it. The plan will update after it is saved."
-                        : "Continue your saved session before starting another problem."
-                    : primaryTask!.reason}
-                </p>
+                {(activeProblemId || primaryTask?.kind !== "learning") && (
+                  <p className="text-sm text-muted leading-relaxed max-w-lg">
+                    {activeProblemId
+                      ? activeRecall
+                        ? "Continue your saved recall check before starting another problem."
+                        : activeSessionNeedsOutcome
+                          ? "Record the outcome of this saved attempt to finish it. The plan will update after it is saved."
+                          : "Continue your saved session before starting another problem."
+                      : primaryTask!.reason}
+                  </p>
+                )}
                 <p className="font-mono text-[11px] text-subtle mt-4">
                   {primaryTask?.kind === "variant" || activeSession?.practiceKind === "variant"
                     ? "Topic hidden for unfamiliar check" : focusedProblem?.category}
@@ -454,9 +456,11 @@ export function Dashboard() {
                           {getNumberedProblemTitle(problemMap[plan.mainTask.problemId])}
                         </h4>
                         {explanationButton(plan.mainTask)}
-                        <p className="text-xs text-muted leading-relaxed mt-2 max-w-lg">
-                          {plan.mainTask.reason}
-                        </p>
+                        {plan.mainTask.kind !== "learning" && (
+                          <p className="text-xs text-muted leading-relaxed mt-2 max-w-lg">
+                            {plan.mainTask.reason}
+                          </p>
+                        )}
                         <p className="font-mono text-[11px] text-subtle mt-3">
                           {plan.mainTask.minutes} min coding block
                           {plan.mainTask.minutes <
@@ -492,19 +496,15 @@ export function Dashboard() {
                     )}
                   </section>
                 )}
-                <div className="plan-endnote">
-                  <span className="plan-end-mark" aria-hidden="true" />
-                  <p className="text-[11px] text-subtle leading-relaxed">
-                    {plan.eligibleRecallCount} eligible in your queue. Only what
-                    fits is selected; you don’t need to clear the queue today.
-                  </p>
-                  {plan.syntaxCards.length > 0 && (
-                    <Link to="/syntax" className="quiet-action mt-2">
+                {plan.syntaxCards.length > 0 && (
+                  <div className="plan-endnote">
+                    <span className="plan-end-mark" aria-hidden="true" />
+                    <Link to="/syntax" className="quiet-action">
                       Optional syntax practice · 3 min{" "}
                       <ArrowUpRight size={13} />
                     </Link>
-                  )}
-                </div>
+                  </div>
+                )}
               </>
             )}
           </section>

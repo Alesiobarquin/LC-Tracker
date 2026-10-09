@@ -1067,8 +1067,8 @@ for (const theme of ["light", "dark"]) {
       const dialog = page.getByRole("dialog", { name: "Why this recommendation?" });
       await expect(dialog).toBeVisible();
       await expect(dialog.getByRole("heading", { name: "New learning", exact: true })).toBeVisible();
-      await expect(dialog).toContainText("Recall allowance used");
-      await expect(dialog).toContainText("20 / 18 min used");
+      await expect(dialog).toContainText("Recall done for today");
+      await expect(dialog).toContainText("20 min on recall today, using your 18 min allowance. Next: a new coding question.");
       await expect(dialog.getByRole("progressbar")).toHaveAttribute("aria-valuetext", "31 of 60 minutes used");
       expect(await dialog.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
       expect(await dialog.locator("a").last().evaluate(el => el.getBoundingClientRect().bottom <= window.innerHeight)).toBe(true);
@@ -1079,6 +1079,9 @@ for (const theme of ["light", "dark"]) {
       await why.click();
       await dialog.getByRole("link", { name: "How the planner works" }).click();
       await expect(page.getByRole("heading", { name: "How the planner works", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Why you get more coding", exact: true })).toBeVisible();
+      await expect(page.getByRole("img", { name: /Example daily budget:/ })).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath("planner-overview.png"), fullPage: true, animations: "disabled" });
       await page.getByText("Time budget and recall allocation", { exact: true }).click();
       await expect(page.getByText("Recall allowance =", { exact: false })).toBeVisible();
       await page.screenshot({ path: testInfo.outputPath("planner-guide.png"), animations: "disabled" });

@@ -14,12 +14,17 @@ export function RecommendationDialog({ task, onClose }: {
   const recallReserved = details?.unfamiliarReservation &&
     details.recallMinutesAvailable < details.recallAllowance - details.recallUsed;
   const recallTooSmall = details && details.recallMinutesAvailable < 3;
-  const recallTitle = recallUsed ? "Recall allowance used"
+  const nextCoding = task?.kind === "learning" ? "a new coding question"
+    : task?.kind === "variant" ? "an unfamiliar coding check"
+    : "a coding review";
+  const recallTitle = recallUsed ? "Recall done for today"
     : recallReserved ? "Coding time protected"
     : recallTooSmall ? "No room for another recall"
     : details?.recallEligibleCount === 0 ? "No other recall checks due"
     : "Room for recall, too";
-  const recallDetail = recallUsed ? "The time left goes to coding."
+  const recallDetail = recallUsed ? (
+    <>You’ve spent <strong className="font-semibold text-foreground">{details.recallUsed} min on recall today</strong>, using your {details.recallAllowance} min allowance. Next: {nextCoding}.</>
+  )
     : recallReserved ? "Up to 35 min reserved before recall."
     : recallTooSmall ? "Recall checks need at least 3 min."
     : details?.recallEligibleCount === 0 ? "Completed and swapped questions are excluded."
@@ -52,8 +57,7 @@ export function RecommendationDialog({ task, onClose }: {
             {recallUsed ? <CheckCircle2 size={20} className="shrink-0 text-success mt-0.5" aria-hidden="true" /> : <Clock3 size={20} className="shrink-0 text-info mt-0.5" aria-hidden="true" />}
             <div className="min-w-0 space-y-1">
               <h4 className="text-base font-semibold text-foreground">{recallTitle}</h4>
-              <p className="text-sm text-body">{recallDetail}</p>
-              {recallUsed && <p className="text-sm tabular-nums text-muted">{details.recallUsed} / {details.recallAllowance} min used</p>}
+              <p className="text-base leading-relaxed text-body">{recallDetail}</p>
             </div>
           </div>
           <Link to="/study-plan" onClick={onClose} className="quiet-action text-accent text-sm">

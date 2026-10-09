@@ -15,7 +15,6 @@ const rules = [
   },
   {
     title: "Which coding block comes first?",
-    ordered: true,
     items: [
       "Weekly unfamiliar check: if no first unseen attempt was recorded in the previous seven calendar days and an eligible related question exists, select it first.",
       "Maintenance day: select the highest-priority available due coding check. This is the day before your rest day, or Saturday if no rest day is set.",
@@ -58,26 +57,97 @@ const rules = [
   },
 ];
 
+const priorities = [
+  ["Weekly unfamiliar check", "Due after a week without a first unseen attempt."],
+  ["Maintenance day", "Revisit a due coding problem."],
+  ["Continue unfinished work", "Return to an attempt that can still be continued."],
+  ["Repair a gap", "Recent outcomes call for rebuilding an approach."],
+  ["Learn something new", "On learning days, add coverage to your target list."],
+  ["Other coding practice", "Check a gap, delayed retention, or another due problem."],
+];
+
+const detailLabels = [
+  ["Daily time", "Recall allowance", "Recall queue", "Coding and syntax", "After each save"],
+  ["Weekly check", "Maintenance", "Continuation", "Repair", "Learning days", "Other days"],
+  ["When assignments pause", "Which questions can appear", "Due-date priority", "New-question ranking", "Guided category order"],
+  ["Unfamiliar eligibility", "Unfamiliar ranking", "Other unfamiliar practice", "Continuation rotation", "Time estimates"],
+  ["Separate evidence", "Recall outcomes", "Coding outcomes", "Recall after coding", "Date spreading", "Retention evidence"],
+];
+
 export function StudyPlanGuide() {
   return (
-    <div className="mx-auto max-w-3xl space-y-8 pb-12">
+    <div className="mx-auto max-w-3xl space-y-10 pb-12">
       <Link to="/dashboard" className="quiet-action"><ArrowLeft size={15} /> Back to your plan</Link>
-      <PageHeader title="How the planner works" description="The rules behind your daily recommendations. Your plan updates after each saved attempt." />
-      <div className="border-l-2 border-accent pl-4 text-base text-body leading-relaxed">
-        <strong className="text-foreground">One daily budget.</strong> Recall and coding share the time left. These numbers are app defaults; outcomes are self-reported.
-      </div>
-      <div className="space-y-3">
-        {rules.map(({ title, items, ordered }) => (
-          <details key={title} className="group rounded-md border border-line bg-surface">
-            <summary className="cursor-pointer px-5 py-4 text-lg font-semibold text-foreground focus-visible:outline-accent">{title}</summary>
-            {ordered ? (
-              <ol className="list-decimal space-y-4 px-5 pb-5 pl-10 text-base text-body leading-relaxed">{items.map(item => <li key={item}>{item}</li>)}</ol>
-            ) : (
-              <div className="space-y-4 px-5 pb-5 text-base text-body leading-relaxed">{items.map(item => <p key={item}>{item}</p>)}</div>
-            )}
-          </details>
-        ))}
-      </div>
+      <PageHeader title="How the planner works" description="One daily budget. Recall and coding share the time left." />
+
+      <section aria-labelledby="budget-guide-title" className="space-y-5">
+        <h2 id="budget-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Why you get more coding</h2>
+        <p className="text-lg leading-relaxed text-body">Recall uses up to <strong className="text-foreground">30% of your daily budget</strong>. Once that allowance is used, the time left goes to coding.</p>
+        <figure className="rounded-md border border-line bg-surface p-5 sm:p-6 space-y-5">
+          <figcaption className="text-sm font-semibold text-muted">Example · a 60-minute day</figcaption>
+          <div className="grid grid-cols-2 gap-5">
+            <div><p className="text-3xl font-semibold text-foreground">18 <span className="text-base font-normal text-muted">min</span></p><p className="mt-1 text-base text-body">Recall allowance</p></div>
+            <div><p className="text-3xl font-semibold text-accent">20 <span className="text-base font-normal text-muted">min</span></p><p className="mt-1 text-base text-body">Recall already done</p></div>
+          </div>
+          <p className="border-l-2 border-success pl-3 text-base leading-relaxed text-body"><strong className="text-foreground">Recall is done for today.</strong> With 29 minutes left, the next block can be coding.</p>
+          <div className="flex h-5 overflow-hidden rounded-sm" role="img" aria-label="Example daily budget: 31 minutes already used, 22 minutes for the next coding block, 7 minutes left afterward. Total 60 minutes.">
+            <span className="bg-line-strong" style={{ width: `${31 / 60 * 100}%` }} />
+            <span className="bg-accent" style={{ width: `${22 / 60 * 100}%` }} />
+            <span className="bg-success" style={{ width: `${7 / 60 * 100}%` }} />
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <div><p className="font-semibold text-foreground">31 min</p><p className="mt-1 text-muted"><span className="inline-block h-2 w-2 bg-line-strong mr-1" aria-hidden="true" />Already used</p></div>
+            <div><p className="font-semibold text-accent">22 min</p><p className="mt-1 text-muted"><span className="inline-block h-2 w-2 bg-accent mr-1" aria-hidden="true" />Next coding block</p></div>
+            <div><p className="font-semibold text-success">7 min</p><p className="mt-1 text-muted"><span className="inline-block h-2 w-2 bg-success mr-1" aria-hidden="true" />Left afterward</p></div>
+          </div>
+          <p className="text-sm text-muted">Already used includes recall and coding. Actual elapsed time counts toward your budget.</p>
+        </figure>
+        <p className="text-base leading-relaxed text-body"><strong className="text-foreground">The plan updates after every save.</strong> More coding blocks can appear until your time runs out. An unfamiliar check can reserve coding time before recall.</p>
+      </section>
+
+      <section aria-labelledby="priority-guide-title" className="space-y-5">
+        <h2 id="priority-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Why this question?</h2>
+        <p className="text-base text-body leading-relaxed">For coding, the first rule that applies wins.</p>
+        <ol className="divide-y divide-line border-y border-line">
+          {priorities.map(([title, description], index) => (
+            <li key={title} className="flex gap-4 py-4">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-muted-surface text-sm font-semibold text-accent" aria-hidden="true">{index + 1}</span>
+              <div><h3 className="text-lg font-semibold text-foreground">{title}</h3><p className="mt-1 text-base leading-relaxed text-body">{description}</p></div>
+            </li>
+          ))}
+        </ol>
+        <p className="text-base text-body leading-relaxed">Learning days are usually <strong className="text-foreground">Sun, Mon, Wed and Fri</strong>. Near an interview, coding reviews get more priority.</p>
+      </section>
+
+      <section aria-labelledby="changes-guide-title" className="space-y-5">
+        <h2 id="changes-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">What changes the plan?</h2>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="border-l-2 border-info pl-4"><h3 className="text-lg font-semibold text-foreground">Your schedule</h3><p className="mt-2 text-base leading-relaxed text-body">Rest days and breaks pause assignments. A saved session comes first.</p></div>
+          <div className="border-l-2 border-accent pl-4"><h3 className="text-lg font-semibold text-foreground">Your outcomes</h3><p className="mt-2 text-base leading-relaxed text-body">Gaps bring practice forward. Delayed independent passes can increase the gap between checks.</p></div>
+        </div>
+        <p className="text-base text-body leading-relaxed"><strong className="text-foreground">Remembering an approach and coding it are separate checks.</strong> Successful recall doesn’t replace a coding review.</p>
+      </section>
+
+      <section aria-labelledby="exact-guide-title" className="space-y-4">
+        <h2 id="exact-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Exact rules, when you need them</h2>
+        <p className="text-base text-body">Open a section for formulas, ordering and exceptions.</p>
+        <div className="space-y-3">
+          {rules.map(({ title, items }, sectionIndex) => (
+            <details key={title} className="rounded-md border border-line bg-surface">
+              <summary className="cursor-pointer px-5 py-4 text-lg font-semibold text-foreground focus-visible:outline-accent">{title}</summary>
+              <div className="divide-y divide-line px-5 pb-2">
+                {items.map((item, index) => (
+                  <div key={item} className="py-4 space-y-2">
+                    <h3 className="text-base font-semibold text-foreground">{detailLabels[sectionIndex][index]}</h3>
+                    <p className="text-base text-body leading-relaxed">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+        <p className="text-sm text-muted">These numbers are app defaults. Outcomes are self-reported.</p>
+      </section>
       <Link to="/settings#section-schedule" className="quiet-action text-accent">Adjust your daily budget in settings</Link>
     </div>
   );

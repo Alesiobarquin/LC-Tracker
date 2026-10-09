@@ -28,6 +28,7 @@ import { PageHeader, QueryErrorBanner } from "./ui";
 import { BudgetMeter, TraceIndex } from "./ui/StudyTrace";
 import { Button } from "./ui/Button";
 import { RecommendationDialog } from "./RecommendationDialog";
+import { codingElapsedSeconds, recallElapsedSeconds } from "../utils/sessionTime";
 import { DashboardSkeleton } from "./loadingSkeletons";
 
 export function Dashboard() {
@@ -69,28 +70,11 @@ export function Dashboard() {
   const timedIds = new Set(timingQuery.sessionTimings.map((t) => t.id));
   const timerSeconds =
     activeSession && !timedIds.has(activeSession.id)
-      ? (activeSession.completion?.timing.elapsedSeconds ??
-        activeSession.finishedElapsed ??
-        Math.max(
-          0,
-          Math.floor((now.getTime() - activeSession.startTimestamp) / 1000) -
-            (activeSession.pausedSeconds ?? 0) -
-            (activeSession.pausedAt
-              ? Math.floor((now.getTime() - activeSession.pausedAt) / 1000)
-              : 0),
-        ))
+      ? codingElapsedSeconds(activeSession, now.getTime())
       : 0;
   const recallSeconds =
     activeRecall && !timedIds.has(activeRecall.id)
-      ? (activeRecall.completion?.attempt.elapsedSeconds ??
-        Math.max(
-          0,
-          Math.floor((now.getTime() - activeRecall.startedAt) / 1000) -
-            (activeRecall.pausedSeconds ?? 0) -
-            (activeRecall.pausedAt
-              ? Math.floor((now.getTime() - activeRecall.pausedAt) / 1000)
-              : 0),
-        ))
+      ? recallElapsedSeconds(activeRecall, now.getTime())
       : 0;
   const plan = useMemo(
     () =>

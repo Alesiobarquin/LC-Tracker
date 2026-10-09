@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { problemMap } from '../data/problems';
 import { ArrowRight, X, Timer } from 'lucide-react';
+import { codingElapsedSeconds } from '../utils/sessionTime';
 
 interface FloatingSessionIndicatorProps {}
 
@@ -24,14 +25,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
             return;
         }
         const tick = () => {
-            const pausedSeconds = activeSession.pausedSeconds ?? 0;
-            const currentPause = activeSession.pausedAt
-                ? Math.floor((Date.now() - activeSession.pausedAt) / 1000)
-                : 0;
-            setElapsed(Math.max(
-                0,
-                Math.floor((Date.now() - activeSession.startTimestamp) / 1000) - pausedSeconds - currentPause
-            ));
+            setElapsed(codingElapsedSeconds(activeSession));
         };
         tick();
         // Keep ticking while paused so the display stays frozen (currentPause grows with wall clock

@@ -84,4 +84,17 @@ describe("useStore session persistence", () => {
     state.clearSessionReturnTo();
     expect(useStore.getState().sessionReturnTo).toBeNull();
   });
+
+  it("restores unfinished time edits without discarding the session", () => {
+    const merge = useStore.persist.getOptions().merge!;
+    useStore.getState().startSession("two-sum", true);
+    useStore.getState().updateActiveSession({ timeSpentDraft: { minutes: "", seconds: "30" } });
+    const coding = useStore.getState().activeSession!;
+    expect(merge({ activeSession: coding }, useStore.getState()).activeSession).toEqual(coding);
+    useStore.getState().endSession();
+    useStore.getState().startRecall("two-sum");
+    useStore.getState().updateRecall({ timeSpentDraft: { minutes: "2", seconds: "" } });
+    const recall = useStore.getState().activeRecall!;
+    expect(merge({ activeRecall: recall }, useStore.getState()).activeRecall).toEqual(recall);
+  });
 });

@@ -179,7 +179,8 @@ test('finished timers and draft notes survive reload before a rating is submitte
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Session Complete' })).toBeVisible();
   await expect(page.getByPlaceholder(/Jot down/)).toHaveValue('My draft survives');
-  await expect(page.getByText('02:00', { exact: true })).toBeVisible();
+  await expect(page.getByRole('spinbutton', { name: 'Minutes spent' })).toHaveValue('2');
+  await expect(page.getByRole('spinbutton', { name: 'Seconds spent' })).toHaveValue('0');
 });
 
 test('invalid configuration shows an unavailable page before app services load', async ({ page }) => {

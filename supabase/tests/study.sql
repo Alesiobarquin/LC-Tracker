@@ -9,10 +9,10 @@ CREATE OR REPLACE FUNCTION pg_temp.study_state() RETURNS jsonb LANGUAGE SQL AS $
 SELECT '{"version":1,"source":"legacy","recallIntervalDays":5,"codingIntervalDays":14,
  "nextRecallAt":"2026-10-11T00:00:00Z","nextCodingAt":"2026-10-08T00:00:00Z","lapses":0,
  "recallHistory":[{"id":"00000000-0000-4000-8000-000000000301","date":"2026-10-06T12:00:00Z",
- "elapsedSeconds":180,"outcome":"recalled","answer":"Approach and invariant","revisedAnswer":"Corrected after comparison","checkedAgainst":"solution"}]}'::jsonb $$;
+ "elapsedSeconds":177,"outcome":"recalled","answer":"Approach and invariant","revisedAnswer":"Corrected after comparison","checkedAgainst":"solution"}]}'::jsonb $$;
 CREATE OR REPLACE FUNCTION pg_temp.study_timing(sid uuid, r integer DEFAULT 4) RETURNS jsonb LANGUAGE SQL AS $$
 SELECT jsonb_build_object('id',sid,'problem_id','two-sum','category','Arrays & Hashing',
- 'recorded_at','2026-10-06T12:00:00Z','elapsed_seconds',180,'session_type','recall','rating',r) $$;
+ 'recorded_at','2026-10-06T12:00:00Z','elapsed_seconds',177,'session_type','recall','rating',r) $$;
 
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claims', '{"sub":"user_study","role":"authenticated"}', false);
@@ -26,6 +26,7 @@ SELECT pg_temp.study_assert((SELECT study_state = pg_temp.study_state() AND vers
 SELECT pg_temp.study_assert((SELECT study_state->'recallHistory'->0->>'answer' = 'Approach and invariant' AND study_state->'recallHistory'->0->>'revisedAnswer' = 'Corrected after comparison' AND study_state->'recallHistory'->0->>'checkedAgainst' = 'solution' FROM public.problem_progress WHERE problem_id='two-sum'), 'original recall, correction, and built-in reference remain separate');
 SELECT pg_temp.study_assert((SELECT solved=0 AND reviewed=1 FROM public.activity_log), 'recall is practice, not a new solve');
 SELECT pg_temp.study_assert((SELECT session_type='recall' FROM public.session_timings), 'modality retained');
+SELECT pg_temp.study_assert((SELECT elapsed_seconds=177 FROM public.session_timings), 'corrected recall time retained exactly');
 SELECT pg_temp.study_assert((public.commit_user_change('00000000-0000-4000-8000-000000000301','recall','{"progress":{"two-sum":1}}','{"problemId":"two-sum"}')->>'duplicate')::boolean, 'lost-response replay returns receipt');
 SELECT pg_temp.study_assert((SELECT reviewed=1 FROM public.activity_log), 'retry counted once');
 
@@ -54,18 +55,20 @@ SELECT pg_temp.study_assert((SELECT study_state=pg_temp.study_state() AND versio
 SELECT pg_temp.study_assert((SELECT reviewed=2 FROM public.activity_log), 'failed recall never increments activity');
 SELECT pg_temp.study_assert((SELECT count(*)=3 FROM public.user_write_receipts), 'failed recall has no receipt');
 SELECT pg_temp.study_assert((public.export_user_data()->'progress'->0->'study_state')=pg_temp.study_state(), 'consistent backup includes recall answers');
+SELECT pg_temp.study_assert((public.export_user_data()->'timings'->0->>'elapsed_seconds')::integer=177, 'backup retains corrected recall time');
 
 -- The compact completion keeps evidence and skipped confidence in the same
 -- transaction as timing/activity; replay must not manufacture a second attempt.
 SELECT public.commit_user_change('00000000-0000-4000-8000-000000000306','session','{"progress":{"two-sum":3}}',
  jsonb_build_object('problemId','two-sum','progress',jsonb_build_array(pg_temp.study_progress() ||
- jsonb_build_object('history','[{"date":"2020-01-01T00:00:00Z","rating":4},{"sessionId":"00000000-0000-4000-8000-000000000306","date":"2026-10-06T12:00:00Z","rating":3,"confidenceReported":false,"codingOutcome":{"correctness":"passed","assistance":"none","explanation":"clear"}}]'::jsonb)),
- 'timings',jsonb_build_array(pg_temp.study_timing('00000000-0000-4000-8000-000000000306',3) || '{"session_type":"review"}'::jsonb),
+ jsonb_build_object('history','[{"date":"2020-01-01T00:00:00Z","rating":4},{"sessionId":"00000000-0000-4000-8000-000000000306","date":"2026-10-06T12:00:00Z","elapsedSeconds":750,"rating":3,"confidenceReported":false,"codingOutcome":{"correctness":"passed","assistance":"none","explanation":"clear"}}]'::jsonb)),
+ 'timings',jsonb_build_array(pg_temp.study_timing('00000000-0000-4000-8000-000000000306',3) || '{"session_type":"review","elapsed_seconds":750}'::jsonb),
  'logDate','2026-10-06','isNew',false));
 SELECT pg_temp.study_assert((SELECT history->1->'confidenceReported'='false'::jsonb AND history->1->'codingOutcome'='{"correctness":"passed","assistance":"none","explanation":"clear"}'::jsonb FROM public.problem_progress WHERE problem_id='two-sum'), 'quick completion preserves explicit evidence and skipped confidence');
 SELECT pg_temp.study_assert((public.commit_user_change('00000000-0000-4000-8000-000000000306','session','{"progress":{"two-sum":3}}','{"problemId":"two-sum"}')->>'duplicate')::boolean, 'quick completion replay uses its receipt');
 SELECT pg_temp.study_assert((SELECT reviewed=3 FROM public.activity_log), 'quick completion counted once');
 SELECT pg_temp.study_assert((SELECT count(*)=1 FROM public.session_timings WHERE id='00000000-0000-4000-8000-000000000306'), 'quick completion timing counted once');
+SELECT pg_temp.study_assert((SELECT elapsed_seconds=750 FROM public.session_timings WHERE id='00000000-0000-4000-8000-000000000306'), 'corrected coding time retained exactly');
 SELECT pg_temp.study_assert((public.export_user_data()->'progress'->0->'history'->1->'confidenceReported')='false'::jsonb, 'backup retains skipped confidence');
 SELECT set_config('request.jwt.claims', '{"sub":"user_study_other","role":"authenticated"}', false);
 SELECT pg_temp.study_assert((SELECT count(*)=0 FROM public.problem_progress), 'recall answers isolated by account');

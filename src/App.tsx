@@ -15,6 +15,7 @@ import { useStore } from './store/useStore';
 import { queryClient } from './lib/queryClient';
 import { userDataQueryKeys } from './lib/userDataQueryKeys';
 
+const StudyPlanGuide = lazy(() => import('./components/StudyPlanGuide').then(m => ({ default: m.StudyPlanGuide })));
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ProblemLibrary = lazy(() => import('./components/ProblemLibrary').then((m) => ({ default: m.ProblemLibrary })));
 const PatternFoundations = lazy(() => import('./components/PatternFoundations').then((m) => ({ default: m.PatternFoundations })));
@@ -270,6 +271,7 @@ export default function App() {
             {user && (
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/study-plan" element={<StudyPlanGuide />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/recall/:problemId" element={<RecallPage />} />

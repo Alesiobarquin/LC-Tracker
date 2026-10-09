@@ -24,9 +24,10 @@ import {
 } from "../data/problems";
 import { getPatternForProblem } from "../utils/patternMapping";
 import { useStore } from "../store/useStore";
-import { Modal, PageHeader, QueryErrorBanner } from "./ui";
+import { PageHeader, QueryErrorBanner } from "./ui";
 import { BudgetMeter, TraceIndex } from "./ui/StudyTrace";
 import { Button } from "./ui/Button";
+import { RecommendationDialog } from "./RecommendationDialog";
 import { DashboardSkeleton } from "./loadingSkeletons";
 
 export function Dashboard() {
@@ -566,6 +567,9 @@ export function Dashboard() {
             <p className="text-[11px] text-subtle mt-3">
               {streak.current} day activity streak
             </p>
+            <Link to="/study-plan" className="quiet-action mt-3">
+              How the planner works <ArrowUpRight size={13} />
+            </Link>
             <Link to="/patterns" className="quiet-action mt-3">
               Explore pattern lessons <ArrowUpRight size={13} />
             </Link>
@@ -576,11 +580,7 @@ export function Dashboard() {
           </section>
         </aside>
       </div>
-      <Modal isOpen={!!explainedTask} onClose={closeExplanation} title="Why this recommendation?" description={explainedTask ? getNumberedProblemTitle(problemMap[explainedTask.problemId]) : undefined}>
-        <div className="space-y-4 text-sm text-muted leading-relaxed">
-          {explainedTask?.explanation.map((detail) => <p key={detail}>{detail}</p>)}
-        </div>
-      </Modal>
+      <RecommendationDialog task={explainedTask} onClose={closeExplanation} />
     </div>
   );
 }

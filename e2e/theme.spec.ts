@@ -70,6 +70,7 @@ test('theme changes preserve an active recall answer and comparison stage withou
   await answer.fill(draftText);
   const pauseButton = page.getByRole('button', { name: 'Pause check', exact: true });
   await expect(pauseButton).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   const pauseBounds = await pauseButton.boundingBox();
   const headingColor = await page.locator('.attempt-problem-title').evaluate(el => getComputedStyle(el).color);
   const problemNumberColor = await page.locator('.attempt-problem-title span').evaluate(el => getComputedStyle(el).color);
@@ -84,7 +85,7 @@ test('theme changes preserve an active recall answer and comparison stage withou
   expect(await pauseButton.boundingBox()).toEqual(pauseBounds);
   await themeControl(page).selectOption('dark');
   await expect(themeRoot(page)).toHaveAttribute('data-theme', 'dark');
-  await expect(answer).toHaveValue(draftText);
+  await expect(answer).toHaveText(draftText);
   await expect(answer).toBeEditable();
   await expect(page.getByRole('button', { name: 'Pause check', exact: true })).toBeVisible();
   await expect(page.getByText('Saved reference:', { exact: false })).not.toBeVisible();
@@ -92,13 +93,13 @@ test('theme changes preserve an active recall answer and comparison stage withou
   await page.getByRole('button', { name: 'I’ve compared my answer — continue' }).click();
   await themeControl(page).selectOption('light');
   await expect(themeRoot(page)).toHaveAttribute('data-theme', 'light');
-  await expect(answer).toHaveValue(draftText);
+  await expect(answer).toHaveText(draftText);
   await expect(answer).toBeEditable();
   await expect(page.getByRole('heading', { name: 'Record what you recalled' })).toBeVisible();
   await expect(page.getByLabel('Personal explanation')).toHaveValue(/Saved reference:/);
   await page.reload();
   await expect(themeControl(page)).toHaveValue('light');
-  await expect(answer).toHaveValue(draftText);
+  await expect(answer).toHaveText(draftText);
   await expect(answer).toBeEditable();
   await expect(page.getByLabel('Personal explanation')).toHaveValue(/Saved reference:/);
   await expect(page.getByRole('button', { name: 'Resume check', exact: true })).toBeVisible();

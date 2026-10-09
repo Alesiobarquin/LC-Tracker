@@ -176,7 +176,7 @@ for (const theme of ["light", "dark"] as const) {
           await expect(page.locator("#recall-prompts")).not.toBeVisible();
           await expect(
             page.getByLabel("Your attempt · explanation or pseudocode"),
-          ).toHaveValue(
+          ).toHaveText(
             "Check complements using a hash map. O(n) time and space.",
           );
         }

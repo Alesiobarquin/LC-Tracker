@@ -51,6 +51,7 @@ for (const theme of ['light', 'dark'] as const) {
       const title = problemTitle!.replace('Start practice timer for ', '');
       const leetcodeUrl = await row.getByRole('link', { name: /^Open .* on LeetCode$/ }).getAttribute('href');
       const problemId = new URL(leetcodeUrl!).pathname.split('/').filter(Boolean).at(-1);
+      await page.evaluate(() => document.fonts.ready);
       await trigger.scrollIntoViewIfNeeded();
       await trigger.focus();
       const scrollY = await page.evaluate(() => window.scrollY);

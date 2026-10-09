@@ -204,7 +204,7 @@ test('recall editor supports IDE keys and keeps code mixed with plain English th
   await expect.poll(savedAnswer).toBe('def compress(chars):\n    # count this run in plain English');
   await answer.press('ControlOrMeta+z');
   await expect.poll(savedAnswer).toBe(mixedAnswer);
-  await answer.press('ControlOrMeta+Shift+z');
+  await answer.press('ControlOrMeta+Shift+Z');
   await expect.poll(savedAnswer).toContain('# count');
   await answer.press('ControlOrMeta+z');
   await answer.press('Alt+ArrowUp');
@@ -224,6 +224,25 @@ test('recall editor supports IDE keys and keeps code mixed with plain English th
   await expect(page.getByLabel('Answer highlighting')).toHaveValue('javascript');
   await expect.poll(savedAnswer).toBe(mixedAnswer);
   await expect(answer).toContainText('count this run in plain English');
+});
+
+test('recall editor supports both Windows redo shortcuts', async ({ page }) => {
+  await fixture(page);
+  await page.addInitScript(() => Object.defineProperty(navigator, 'platform', { value: 'Win32' }));
+  await page.goto('/recall/two-sum');
+  const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+  await answer.fill('Keep the original draft.');
+  await answer.press('Control+a');
+  await page.keyboard.insertText('Revised draft.');
+  await expect(answer).toHaveText('Revised draft.');
+  await answer.press('Control+z');
+  await expect(answer).toHaveText('Keep the original draft.');
+  await answer.press('Control+Shift+Z');
+  await expect(answer).toHaveText('Revised draft.');
+  await answer.press('Control+z');
+  await expect(answer).toHaveText('Keep the original draft.');
+  await answer.press('Control+y');
+  await expect(answer).toHaveText('Revised draft.');
 });
 
 test('recall editor switches highlighting without rewriting the answer and enforces its length limit', async ({ page }) => {

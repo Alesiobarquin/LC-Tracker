@@ -3,9 +3,10 @@ import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import { javascript } from "@codemirror/lang-javascript";
+import { redo } from "@codemirror/commands";
 import { indentUnit, syntaxHighlighting } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorView, keymap } from "@codemirror/view";
 import { FileCode2 } from "lucide-react";
 import { preferenceStorage } from "../lib/safeStorage";
 import { syntaxHighlightStyle } from "../utils/syntaxHighlightTheme";
@@ -95,6 +96,8 @@ export const RecallEditor = memo(function RecallEditor({
       syntaxHighlighting(syntaxHighlightStyle),
       editorTheme,
       EditorView.lineWrapping,
+      // Keep the advertised redo shortcut available on Windows as well.
+      keymap.of([{ key: "Mod-Shift-z", run: redo, preventDefault: true }]),
       indentUnit.of("    "),
       EditorState.tabSize.of(4),
       EditorView.contentAttributes.of({

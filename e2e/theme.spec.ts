@@ -70,6 +70,7 @@ test('theme changes preserve an active recall answer and comparison stage withou
   await answer.fill(draftText);
   const pauseButton = page.getByRole('button', { name: 'Pause check', exact: true });
   await expect(pauseButton).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   const pauseBounds = await pauseButton.boundingBox();
   const headingColor = await page.locator('.attempt-problem-title').evaluate(el => getComputedStyle(el).color);
   const problemNumberColor = await page.locator('.attempt-problem-title span').evaluate(el => getComputedStyle(el).color);

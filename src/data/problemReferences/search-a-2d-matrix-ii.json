@@ -1,0 +1,14 @@
+{
+  "problemId": "search-a-2d-matrix-ii",
+  "approach": "Staircase Search",
+  "explanation": "### How it works\n\nAt the top-right corner, every value to the left is smaller and every value below is larger. A comparison therefore eliminates one whole column or row. Move left when the current value is too large and down when it is too small.\n\n### Steps\n\n1. Start at row zero and the last column.\n2. Compare the current cell with the target.\n3. Move left or down until the target is found or the matrix bounds are crossed.\n\n### Complexity\n\n- Time: O(rows + columns).\n- Space: O(1).\n\n### Things to watch for\n\n- Rows and columns are individually sorted; flattening the matrix is not generally sorted.\n- A single row or column still works.\n- The problem guarantees a nonempty matrix.",
+  "code": {
+    "python": "class Solution:\n  def searchMatrix(self, matrix: list[list[int]], target: int) -> bool:\n    r = 0\n    c = len(matrix[0]) - 1\n\n    while r < len(matrix) and c >= 0:\n      if matrix[r][c] == target:\n        return True\n      if target < matrix[r][c]:\n        c -= 1\n      else:\n        r += 1\n\n    return False\n",
+    "cpp": "class Solution {\n public:\n  bool searchMatrix(vector<vector<int>>& matrix, int target) {\n    int r = 0;\n    int c = matrix[0].size() - 1;\n\n    while (r < matrix.size() && c >= 0) {\n      if (matrix[r][c] == target)\n        return true;\n      if (matrix[r][c] > target)\n        --c;\n      else\n        ++r;\n    }\n\n    return false;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/240.%20Search%20a%202D%20Matrix%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

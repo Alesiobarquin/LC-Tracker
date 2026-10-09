@@ -1,0 +1,14 @@
+{
+  "problemId": "valid-square",
+  "approach": "Six Squared Distances",
+  "explanation": "### How it works\n\nFor four distinct points to form a square, their six pair distances consist of four equal nonzero sides and two equal diagonals twice the squared side length. Compute and sort squared distances to check these counts without depending on the input point order.\n\n### Steps\n\n1. Compute all six squared pair distances.\n2. Sort them.\n3. Check four equal positive sides and two equal diagonals of twice that size.\n\n### Complexity\n\n- Time: O(1) for four points.\n- Space: O(1).\n\n### Things to watch for\n\n- A duplicate point creates a zero side and must fail.\n- Equal sides alone could describe a rhombus; validate diagonals too.\n- Avoid floating-point square roots.",
+  "code": {
+    "python": "from itertools import combinations\n\nclass Solution:\n    def validSquare(self, p1, p2, p3, p4) -> bool:\n        distances = sorted((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2\n                           for a, b in combinations((p1, p2, p3, p4), 2))\n        return (distances[0] > 0 and\n                distances[0] == distances[1] == distances[2] == distances[3] and\n                distances[4] == distances[5] == 2 * distances[0])\n",
+    "cpp": "class Solution {\npublic:\n    bool validSquare(vector<int>& p1, vector<int>& p2, vector<int>& p3, vector<int>& p4) {\n        vector<vector<int>> points{p1, p2, p3, p4};\n        vector<long long> distances;\n        for (int i = 0; i < 4; ++i)\n            for (int j = i + 1; j < 4; ++j) {\n                long long dx = points[i][0] - points[j][0];\n                long long dy = points[i][1] - points[j][1];\n                distances.push_back(dx * dx + dy * dy);\n            }\n        sort(distances.begin(), distances.end());\n        return distances[0] > 0 && distances[0] == distances[1] &&\n               distances[0] == distances[2] && distances[0] == distances[3] &&\n               distances[4] == distances[5] && distances[4] == 2 * distances[0];\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/593.%20Valid%20Square",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

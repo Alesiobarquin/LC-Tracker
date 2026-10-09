@@ -1,0 +1,14 @@
+{
+  "problemId": "minimum-moves-to-equal-array-elements-ii",
+  "approach": "Move All Values to a Median",
+  "explanation": "### How it works\n\nFor absolute-distance cost, moving the target within the middle pair changes left and right costs equally; outside the median range, more values pull the target back toward the middle. Choose a median and sum distances. Python sorts to find it; C++ selects it with nth_element.\n\n### Steps\n\n1. Find a median value.\n2. Compute the absolute difference from each value to the median.\n3. Return the sum.\n\n### Complexity\n\n- Time: Python O(n log n); C++ O(n) average with nth_element.\n- Space: Python O(n) for median sorting; C++ selection is in place.\n\n### Things to watch for\n\n- For even length, any value between the two middle values is optimal.\n- C++ selection rearranges the input.\n- Use absolute differences, rather than signed sums.",
+  "code": {
+    "python": "import statistics\n\n\nclass Solution:\n  def minMoves2(self, nums: list[int]) -> int:\n    median = int(statistics.median(nums))\n    return sum(abs(num - median) for num in nums)\n",
+    "cpp": "class Solution {\n public:\n  int minMoves2(vector<int>& nums) {\n    const int n = nums.size();\n    nth_element(nums.begin(), nums.begin() + n / 2, nums.end());\n    const int median = nums[n / 2];\n    return accumulate(nums.begin(), nums.end(), 0, [&](int acc, int num) {\n      return acc + abs(num - median);\n    });\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/462.%20Minimum%20Moves%20to%20Equal%20Array%20Elements%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

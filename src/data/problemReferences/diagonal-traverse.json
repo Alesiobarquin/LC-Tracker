@@ -1,0 +1,14 @@
+{
+  "problemId": "diagonal-traverse",
+  "approach": "Alternating Diagonal Walk",
+  "explanation": "### How it works\n\nMove up-right on one diagonal and down-left on the next. After emitting a cell, advance in the current direction and correct any crossed matrix boundary, flipping direction. Carefully ordered boundary corrections handle rectangular matrices as well as squares.\n\n### Steps\n\n1. Start at the top-left cell moving up-right.\n2. Emit each cell and advance diagonally.\n3. Correct row/column overflow and switch direction until rows × columns values are emitted.\n\n### Complexity\n\n- Time: O(rows × columns).\n- Space: O(rows × columns) output and O(1) extra workspace.\n\n### Things to watch for\n\n- The correction order matters when a move crosses two bounds.\n- Check single-row and single-column matrices.\n- The traversal visits cells, rather than sorting by their values.",
+  "code": {
+    "python": "class Solution:\n    def findDiagonalOrder(self, mat: list[list[int]]) -> list[int]:\n        m, n = len(mat), len(mat[0])\n        result, direction, row, col = [], 1, 0, 0\n        for _ in range(m * n):\n            result.append(mat[row][col])\n            row -= direction\n            col += direction\n            if row == m:\n                row = m - 1\n                col += 2\n                direction = -direction\n            if col == n:\n                col = n - 1\n                row += 2\n                direction = -direction\n            if row < 0:\n                row = 0\n                direction = -direction\n            if col < 0:\n                col = 0\n                direction = -direction\n        return result\n",
+    "cpp": "class Solution {\n public:\n  vector<int> findDiagonalOrder(vector<vector<int>>& matrix) {\n    const int m = matrix.size();\n    const int n = matrix[0].size();\n    vector<int> ans(m * n);\n    int d = 1;  // left-bottom -> right-top\n    int row = 0;\n    int col = 0;\n\n    for (int i = 0; i < m * n; ++i) {\n      ans[i] = matrix[row][col];\n      row -= d;\n      col += d;\n      // out-of-bounds\n      if (row == m)\n        row = m - 1, col += 2, d = -d;\n      if (col == n)\n        col = n - 1, row += 2, d = -d;\n      if (row < 0)\n        row = 0, d = -d;\n      if (col < 0)\n        col = 0, d = -d;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/498.%20Diagonal%20Traverse",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

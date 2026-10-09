@@ -1,0 +1,14 @@
+{
+  "problemId": "fizz-buzz",
+  "approach": "Independent Divisibility Rules",
+  "explanation": "### How it works\n\nFor each integer, append Fizz when divisible by three and Buzz when divisible by five. These conditions are independent, so multiples of fifteen receive both words. When neither applies, use the integer’s decimal representation.\n\n### Steps\n\n1. Visit integers from one through n.\n2. Append each matching word in Fizz-then-Buzz order.\n3. Use the number when the constructed string is empty.\n\n### Complexity\n\n- Time: O(n + L) for L returned characters.\n- Space: O(L) output and O(1) extra workspace.\n\n### Things to watch for\n\n- Using else between the rules would miss FizzBuzz.\n- Start at one.\n- Return strings rather than printing them.",
+  "code": {
+    "python": "class Solution:\n  def fizzBuzz(self, n: int) -> list[str]:\n    d = {3: 'Fizz', 5: 'Buzz'}\n    return [''.join([d[k] for k in d if i % k == 0]) or str(i) for i in range(1, n + 1)]\n",
+    "cpp": "class Solution {\n public:\n  vector<string> fizzBuzz(int n) {\n    vector<string> ans;\n\n    for (int i = 1; i <= n; ++i) {\n      string s;\n      if (i % 3 == 0)\n        s += \"Fizz\";\n      if (i % 5 == 0)\n        s += \"Buzz\";\n      ans.push_back(s.empty() ? to_string(i) : s);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/412.%20Fizz%20Buzz",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

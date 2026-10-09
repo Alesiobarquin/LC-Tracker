@@ -1,0 +1,14 @@
+{
+  "problemId": "power-of-three",
+  "approach": "Divisibility by the Largest 32-Bit Power",
+  "explanation": "### How it works\n\nThe largest power of three within signed 32-bit range is 3^19. Its only positive divisors are powers of three. A positive input is therefore a power of three exactly when it divides this constant.\n\n### Steps\n\n1. Reject nonpositive values.\n2. Compute 3^19 modulo n.\n3. Accept when the remainder is zero.\n\n### Complexity\n\n- Time: O(1) for the specified 32-bit bound.\n- Space: O(1).\n\n### Things to watch for\n\n- This constant depends on the integer range.\n- One counts as 3^0.\n- Avoid logarithm rounding errors by testing integer divisibility.",
+  "code": {
+    "python": "class Solution:\n  def isPowerOfThree(self, n: int) -> bool:\n    return n > 0 and 3**19 % n == 0\n",
+    "cpp": "class Solution {\n public:\n  bool isPowerOfThree(int n) {\n    return n > 0 && static_cast<int>(pow(3, 19)) % n == 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/326.%20Power%20of%20Three",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

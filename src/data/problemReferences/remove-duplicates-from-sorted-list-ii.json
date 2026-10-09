@@ -1,0 +1,14 @@
+{
+  "problemId": "remove-duplicates-from-sorted-list-ii",
+  "approach": "Dummy Node and Run Skipping",
+  "explanation": "### How it works\n\nBecause the list is sorted, every repeated value forms one consecutive run. Keep a pointer to the last accepted node and move the scanning pointer to the end of a run. Keep a run only when it contained one node.\n\n### Steps\n\n1. Place a dummy before the head.\n2. Scan to the last node of each equal-value run.\n3. Advance the accepted pointer for a singleton, or bypass the entire repeated run.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Remove every copy of a repeated value, including the first.\n- The dummy handles a repeated run at the head.\n- An entirely duplicated list returns an empty list.",
+  "code": {
+    "python": "class Solution:\n  def deleteDuplicates(self, head: ListNode) -> ListNode:\n    dummy = ListNode(0, head)\n    prev = dummy\n\n    while head:\n      while head.next and head.val == head.next.val:\n        head = head.next\n      if prev.next == head:\n        prev = prev.next\n      else:\n        prev.next = head.next\n      head = head.next\n\n    return dummy.next\n",
+    "cpp": "class Solution {\n public:\n  ListNode* deleteDuplicates(ListNode* head) {\n    ListNode dummy(0, head);\n    ListNode* prev = &dummy;\n\n    while (head != nullptr) {\n      while (head->next && head->val == head->next->val)\n        head = head->next;\n      if (prev->next == head)\n        prev = prev->next;\n      else\n        prev->next = head->next;\n      head = head->next;\n    }\n\n    return dummy.next;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/82.%20Remove%20Duplicates%20from%20Sorted%20List%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

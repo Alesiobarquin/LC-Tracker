@@ -1,0 +1,14 @@
+{
+  "problemId": "minimum-moves-to-equal-array-elements",
+  "approach": "Reduce to the Minimum Value",
+  "explanation": "### How it works\n\nIncreasing n - 1 values is equivalent, up to a shared shift, to decreasing the one excluded value. Reduce every value to the minimum and sum the required decreases. This counts the original operations without simulating them.\n\n### Steps\n\n1. Find the minimum array value.\n2. Sum each value minus the minimum.\n3. Return the total.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Use the minimum, rather than the maximum or median.\n- Negative values work with the same differences.\n- The original operation increases all but one value.",
+  "code": {
+    "python": "class Solution:\n  def minMoves(self, nums: list[int]) -> int:\n    mn = min(nums)\n    return sum(num - mn for num in nums)\n",
+    "cpp": "class Solution {\n public:\n  int minMoves(vector<int>& nums) {\n    const int mn = ranges::min(nums);\n    return accumulate(nums.begin(), nums.end(), 0,\n                      [&](int acc, int num) { return acc + (num - mn); });\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/453.%20Minimum%20Moves%20to%20Equal%20Array%20Elements",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

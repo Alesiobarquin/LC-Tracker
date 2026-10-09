@@ -1,0 +1,14 @@
+{
+  "problemId": "sum-of-left-leaves",
+  "approach": "Sum Only Left Leaf Children",
+  "explanation": "### How it works\n\nAt each node, inspect its left child. Add its value only if that child has no children; otherwise recurse into it. Search the right subtree as well because it can contain left leaves farther down.\n\n### Steps\n\n1. Return zero for an empty root.\n2. Add a left child only when it is a leaf; otherwise recurse left.\n3. Always recurse into the right subtree.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion stack.\n\n### Things to watch for\n\n- A root that is a leaf is not a left leaf.\n- A left child with children does not count yet.\n- Left leaves can occur inside right subtrees.",
+  "code": {
+    "python": "class Solution:\n  def sumOfLeftLeaves(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n\n    ans = 0\n\n    if root.left:\n      if not root.left.left and not root.left.right:\n        ans += root.left.val\n      else:\n        ans += self.sumOfLeftLeaves(root.left)\n    ans += self.sumOfLeftLeaves(root.right)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int sumOfLeftLeaves(TreeNode* root) {\n    if (root == nullptr)\n      return 0;\n\n    int ans = 0;\n\n    if (root->left) {\n      if (root->left->left == nullptr && root->left->right == nullptr)\n        ans += root->left->val;\n      else\n        ans += sumOfLeftLeaves(root->left);\n    }\n    ans += sumOfLeftLeaves(root->right);\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/404.%20Sum%20of%20Left%20Leaves",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "rectangle-area",
+  "approach": "Subtract Rectangle Intersection",
+  "explanation": "### How it works\n\nThe union area is the sum of the two rectangle areas minus their overlap. The overlap width and height come from the intersection of the two axis intervals, with a negative or zero extent treated as no overlap.\n\n### Steps\n\n1. Compute each rectangle area.\n2. Find the intersecting x and y extents and clamp them at zero.\n3. Subtract overlap width times height from the area sum.\n\n### Complexity\n\n- Time: O(1).\n- Space: O(1).\n\n### Things to watch for\n\n- Touching edges have zero overlap area.\n- Coordinates may be negative.\n- Subtract only the intersection, rather than a bounding rectangle.",
+  "code": {
+    "python": "class Solution:\n  def computeArea(self,\n                  A: int, B: int, C: int, D: int,\n                  E: int, F: int, G: int, H: int) -> int:\n    x = min(C, G) - max(A, E) if max(A, E) < min(C, G) else 0\n    y = min(D, H) - max(B, F) if max(B, F) < min(D, H) else 0\n    return (C - A) * (D - B) + (G - E) * (H - F) - x * y\n",
+    "cpp": "class Solution {\n public:\n  int computeArea(long A, long B, long C, long D,  //\n                  long E, long F, long G, long H) {\n    const long x = max(A, E) < min(C, G) ? (min(C, G) - max(A, E)) : 0;\n    const long y = max(B, F) < min(D, H) ? (min(D, H) - max(B, F)) : 0;\n    return (C - A) * (D - B) + (G - E) * (H - F) - x * y;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/223.%20Rectangle%20Area",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

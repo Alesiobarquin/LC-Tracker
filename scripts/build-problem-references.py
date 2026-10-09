@@ -155,7 +155,7 @@ def main():
             continue
         # Last complete approach is the article's final implementation, not an
         # explanation taken from a different solution or a general pattern.
-        preferred = {'data-stream-as-disjoint-intervals': 'Hash Set + Sorting', 'subtree-of-another-tree': 'Depth First Search (DFS)', 'kth-largest-element-in-an-array': 'Min-Heap', 'sort-an-array': 'Merge Sort'}.get(problem_id)
+        preferred = {'data-stream-as-disjoint-intervals': 'Hash Set + Sorting', 'subtree-of-another-tree': 'Depth First Search (DFS)', 'kth-largest-element-in-an-array': 'Min-Heap', 'sort-an-array': 'Merge Sort', 'valid-sudoku': 'Hash Set (One Pass)'}.get(problem_id)
         chosen = next((s for s in candidates if s.splitlines()[0].endswith(preferred)), candidates[-1]) if preferred else candidates[-1]
         approach = re.sub(r'^\d+\.\s*', '', chosen.splitlines()[0])
         intuition = re.search(r'### Intuition[^\n]*\n(.*?)(?=^### |^## |\Z)', chosen, re.S | re.M).group(1)
@@ -172,6 +172,32 @@ def main():
         if problem_id == 'walls-and-gates':
             explanation = explanation.replace('treasures', 'gates').replace('treasure', 'gate').replace('Treasure', 'Gate')
             explanation = explanation.split('### Updating Distance Before Adding to Queue')[0].rstrip()
+        if problem_id == 'valid-sudoku':
+            explanation = '''### How it works
+
+Scan the board once and keep the digits already seen in each row, column, and 3×3 box. A filled cell is valid only if its digit is absent from all three sets. Check for a duplicate before adding the digit, so a cell never conflicts with itself.
+
+In Python, `collections.defaultdict(set)` creates an empty set when a row, column, or box is first accessed. `rows[r]` tracks row `r`, `cols[c]` tracks column `c`, and `squares[(r // 3, c // 3)]` tracks the box. Integer division groups indices `0–2`, `3–5`, and `6–8` into box coordinates `0`, `1`, and `2`. For example, cells `(3, 6)` and `(5, 8)` share box key `(1, 2)`. The C++ example uses the same sets with the box key `{r / 3, c / 3}`.
+
+### Steps
+
+1. Create the `rows`, `cols`, and `squares` maps of sets.
+2. Visit each cell `(r, c)` in the 9×9 board. Skip `"."`, which represents an empty cell.
+3. If `board[r][c]` is already in `rows[r]`, `cols[c]`, or `squares[(r // 3, c // 3)]`, return `False`.
+4. Otherwise, add the digit to all three sets and continue.
+5. Return `True` after scanning the entire board without a duplicate.
+
+### Complexity
+
+For this fixed 9×9 board, time and auxiliary space are `O(1)`: visit at most 81 cells and store each filled digit in three sets. If generalized to an `n×n` board, expected time and auxiliary space are `O(n²)` with constant-time hash-set operations. The C++ box map has at most nine keys here; a generalized ordered map would add a logarithmic lookup factor.
+
+### Things to watch for
+
+- Skip empty cells before checking or inserting; multiple `"."` cells are allowed.
+- Use integer division for both box coordinates. `r // 3 + c // 3` can merge different boxes into the same key.
+- Check all three sets before inserting the current digit.
+- This validates the filled cells; it does not solve the puzzle or determine whether it can be completed.
+- The board is read without modifying it.'''
         codes = {}
         for language in ['python', 'cpp']:
             block = re.search(r'```' + language + r'\s*\n(.*?)```', chosen, re.S)
@@ -193,6 +219,10 @@ def main():
                         code = code.replace('int diameter = 0;', 'int bestDiameter = 0;').replace('this->diameter', 'this->bestDiameter').replace('return diameter;', 'return bestDiameter;')
                 if problem_id == 'reverse-words-in-a-string-iii' and language == 'python':
                     code = code.replace('                i = j + 1', '                i = j\n            i += 1')
+                if problem_id == 'valid-sudoku' and language == 'python':
+                    code = code.replace('defaultdict(set)', 'collections.defaultdict(set)')
+                    code = code.replace('squares = collections.defaultdict(set)', 'squares = collections.defaultdict(set)  # key = (r // 3, c // 3)')
+                    code = code.replace('if ( board[r][c] in rows[r]\n                    or board[r][c] in cols[c]\n                    or board[r][c] in squares[(r // 3, c // 3)]):', 'if (board[r][c] in rows[r] or\n                    board[r][c] in cols[c] or\n                    board[r][c] in squares[(r // 3, c // 3)]):')
                 codes[language] = python_imports(code) if language == 'python' else code + '\n'
         video_id = metadata.get(problem_id, {}).get('video', '')
         if re.fullmatch(r'[\w-]{11}', video_id):

@@ -1,3 +1,4 @@
+import manifest from "../../scripts/additional-reference-manifest.json";
 import { describe, expect, it } from "vitest";
 import { ensureExtendedCatalogLoaded, problems } from "./problems";
 import { hasProblemReference, loadProblemReference } from "./problemReferences";
@@ -23,7 +24,7 @@ describe("problem references", () => {
   it("provides coherent Python/C++ references for the supported extended catalog", async () => {
     const catalog = await ensureExtendedCatalogLoaded();
     const supported = catalog.filter((problem) => hasProblemReference(problem.id));
-    expect(supported).toHaveLength(486);
+    expect(supported).toHaveLength(586);
     for (const problem of supported) {
       const reference = await loadProblemReference(problem.id);
       expect(reference?.problemId).toBe(problem.id);
@@ -35,12 +36,36 @@ describe("problem references", () => {
       expect(reference?.code.cpp, problem.id).toMatch(/class |struct /);
       expect(reference?.videoUrl).toBe(problem.videoUrl);
       expect(reference?.sourceUrl).toMatch(
-        /^https:\/\/github.com\/neetcode-gh\/leetcode\/blob\/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9\/(articles|python)\//,
+        /^(https:\/\/github.com\/neetcode-gh\/leetcode\/blob\/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9\/(articles|python)\/|https:\/\/github.com\/walkccc\/LeetCode\/tree\/9b85aa15e086d0b5dc1ead7184bca547942e6ff6\/solutions\/)/,
       );
     }
     for (const id of ["string-compression", "reverse-words-in-a-string", "reverse-words-in-a-string-ii", "reverse-words-in-a-string-iii"]) {
       expect(hasProblemReference(id), id).toBe(true);
     }
+  });
+  it("adds 80 medium and 20 easy references with source-specific attribution", async () => {
+    expect(manifest.references.filter((r) => r.difficulty === "Medium")).toHaveLength(80);
+    expect(manifest.references.filter((r) => r.difficulty === "Easy")).toHaveLength(20);
+    for (const entry of manifest.references) {
+      const reference = await loadProblemReference(entry.id);
+      expect(reference?.sourceName).toBe("walkccc / Peng-Yu Chen");
+      expect(reference?.licenseUrl).toBe("/walkccc-license.txt");
+      expect(reference?.explanationAuthor).toBe("LC Tracker");
+      expect(reference?.explanation).toContain("### Things to watch for");
+      expect(reference?.code.python).not.toContain("sortedcontainers");
+      expect(reference?.code.python).not.toContain("eval(");
+    }
+  });
+  it("uses the requested row, column, and box sets for Valid Sudoku", async () => {
+    const reference = await loadProblemReference("valid-sudoku");
+    expect(reference?.approach).toBe("Hash Set (One Pass)");
+    expect(reference?.code.python).toContain("import collections");
+    expect(reference?.code.python).toContain("collections.defaultdict(set)");
+    expect(reference?.code.python).toContain("squares[(r // 3, c // 3)]");
+    expect(reference?.code.cpp).toContain("unordered_set<char>");
+    expect(reference?.explanation).toContain("collections.defaultdict(set)");
+    expect(reference?.explanation).toContain("fixed 9×9 board");
+    expect(reference?.explanation).not.toContain("mask");
   });
   it("does not present core guidance as the solution for an extended-catalog problem", async () => {
     expect(hasProblemReference("count-commas-in-range")).toBe(false);

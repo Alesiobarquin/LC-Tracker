@@ -1,0 +1,14 @@
+{
+  "problemId": "predict-the-winner",
+  "approach": "Interval DP for Score Difference",
+  "explanation": "### How it works\n\nTrack the best score difference the current player can guarantee on an interval. Choosing an end value gains that value, but the opponent then owns the best difference on the remaining interval, so subtract it. A nonnegative final difference means the first player can win or tie.\n\n### Steps\n\n1. Initialize one-value interval differences to their value.\n2. For increasing interval lengths, take max(left - inner-left, right - inner-right).\n3. Accept when the whole-interval difference is at least zero.\n\n### Complexity\n\n- Time: O(n²).\n- Space: O(n²).\n\n### Things to watch for\n\n- Ties count as success for the first player.\n- The DP stores a score difference, rather than a raw score.\n- Subtract the opponent’s result after each choice.",
+  "code": {
+    "python": "class Solution:\n    def predictTheWinner(self, nums: list[int]) -> bool:\n        n = len(nums)\n        dp = [[0] * n for _ in range(n)]\n        for i, value in enumerate(nums):\n            dp[i][i] = value\n        for length in range(2, n + 1):\n            for i in range(n - length + 1):\n                j = i + length - 1\n                dp[i][j] = max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1])\n        return dp[0][n - 1] >= 0\n",
+    "cpp": "class Solution {\n public:\n  bool predictTheWinner(vector<int>& nums) {\n    const int n = nums.size();\n    // dp[i][j] := the maximum number you can get more than your opponent in\n    // nums[i..j]\n    vector<vector<int>> dp(n, vector<int>(n));\n\n    for (int i = 0; i < n; ++i)\n      dp[i][i] = nums[i];\n\n    for (int d = 1; d < n; ++d)\n      for (int i = 0; i + d < n; ++i) {\n        const int j = i + d;\n        dp[i][j] = max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1]);\n      }\n\n    return dp[0][n - 1] >= 0;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/486.%20Predict%20the%20Winner",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

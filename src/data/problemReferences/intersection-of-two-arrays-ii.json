@@ -1,0 +1,14 @@
+{
+  "problemId": "intersection-of-two-arrays-ii",
+  "approach": "Frequency-Limited Intersection",
+  "explanation": "### How it works\n\nCount values from the smaller input, then scan the other input. A value is part of the intersection only while its remaining count is positive. Decrementing after each match gives each value the smaller of its two occurrence counts.\n\n### Steps\n\n1. Choose the smaller array for the frequency table.\n2. For each value in the other array, append it if a count remains.\n3. Decrement the matched count.\n\n### Complexity\n\n- Time: O(n + m) expected with hashing.\n- Space: O(min(n, m)) working space plus output.\n\n### Things to watch for\n\n- Preserve duplicate matches up to the available frequency.\n- A set alone loses multiplicities.\n- The returned order is not prescribed.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def intersect(self, nums1: list[int], nums2: list[int]) -> list[int]:\n    if len(nums1) > len(nums2):\n      return self.intersect(nums2, nums1)\n\n    ans = []\n    count = collections.Counter(nums1)\n\n    for num in nums2:\n      if count[num] > 0:\n        ans.append(num)\n        count[num] -= 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> intersect(vector<int>& nums1, vector<int>& nums2) {\n    if (nums1.size() > nums2.size())\n      return intersect(nums2, nums1);\n\n    vector<int> ans;\n    unordered_map<int, int> count;\n\n    for (const int num : nums1)\n      ++count[num];\n\n    for (const int num : nums2)\n      if (const auto it = count.find(num);\n          it != count.cend() && it->second-- > 0)\n        ans.push_back(num);\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/350.%20Intersection%20of%20Two%20Arrays%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

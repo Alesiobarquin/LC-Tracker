@@ -1,0 +1,14 @@
+{
+  "problemId": "sort-transformed-array",
+  "approach": "Two Pointers on a Quadratic Transform",
+  "explanation": "### How it works\n\nA quadratic that opens upward has its largest transformed values at the ends of a sorted interval; one that opens downward has its smallest values there. Compare transformed endpoints and fill the result from the appropriate end without sorting it again.\n\n### Steps\n\n1. Transform every input value.\n2. Compare the two endpoints.\n3. Fill backward for a > 0, or forward otherwise, advancing the chosen endpoint.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for transformed values and result in these examples.\n\n### Things to watch for\n\n- For a = 0 the function is linear, and the endpoint rule still works.\n- Choose the fill direction from the sign of a.\n- Do not assume the transformed input remains sorted.",
+  "code": {
+    "python": "class Solution:\n  def sortTransformedArray(\n      self,\n      nums: list[int],\n      a: int,\n      b: int,\n      c: int,\n  ) -> list[int]:\n    n = len(nums)\n    upward = a > 0\n    ans = [0] * n\n\n    # The concavity of f only depends on a's sign.\n    def f(x: int, a: int, b: int, c: int) -> int:\n      return (a * x + b) * x + c\n\n    quad = [f(num, a, b, c) for num in nums]\n\n    i = n - 1 if upward else 0\n    l = 0\n    r = n - 1\n    while l <= r:\n      if upward:  # is the maximum in the both ends\n        if quad[l] > quad[r]:\n          ans[i] = quad[l]\n          l += 1\n        else:\n          ans[i] = quad[r]\n          r -= 1\n        i -= 1\n      else:  # is the minimum in the both ends\n        if quad[l] < quad[r]:\n          ans[i] = quad[l]\n          l += 1\n        else:\n          ans[i] = quad[r]\n          r -= 1\n        i += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> sortTransformedArray(vector<int>& nums, int a, int b, int c) {\n    const int n = nums.size();\n    const bool upward = a > 0;\n    vector<int> ans(n);\n    vector<int> quad;\n\n    for (const int num : nums)\n      quad.push_back(f(num, a, b, c));\n\n    int i = upward ? n - 1 : 0;\n    for (int l = 0, r = n - 1; l <= r;)\n      if (upward)  // is the maximum in the both ends\n        ans[i--] = quad[l] > quad[r] ? quad[l++] : quad[r--];\n      else  // is the minimum in the both ends\n        ans[i++] = quad[l] < quad[r] ? quad[l++] : quad[r--];\n\n    return ans;\n  }\n\n private:\n  // The concavity of f only depends on a's sign.\n  int f(int x, int a, int b, int c) {\n    return (a * x + b) * x + c;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/360.%20Sort%20Transformed%20Array",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

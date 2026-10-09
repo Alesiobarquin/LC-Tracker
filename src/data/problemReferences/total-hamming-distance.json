@@ -1,0 +1,14 @@
+{
+  "problemId": "total-hamming-distance",
+  "approach": "Count Different Bits Independently",
+  "explanation": "### How it works\n\nAt a fixed bit position, every pair with one set bit and one clear bit contributes one to Hamming distance. If ones values have that bit set, its contribution is ones × (n - ones). Sum this over the 30 relevant bit positions.\n\n### Steps\n\n1. For each bit, count set bits among the input values.\n2. Multiply that count by the number of clear bits.\n3. Sum all bit contributions.\n\n### Complexity\n\n- Time: O(30n), or O(n) for the stated integer bound.\n- Space: O(1).\n\n### Things to watch for\n\n- Do not divide the product by two; set/clear groups already count each pair once.\n- The 30-bit bound comes from the input constraints.\n- Equal values contribute zero.",
+  "code": {
+    "python": "class Solution:\n  def totalHammingDistance(self, nums: list[int]) -> int:\n    MAX_BIT = 30\n    ans = 0\n\n    for i in range(MAX_BIT):\n      ones = sum(num & (1 << i) > 0 for num in nums)\n      zeros = len(nums) - ones\n      ans += ones * zeros\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int totalHammingDistance(vector<int>& nums) {\n    constexpr int maxMask = 1 << 30;\n    int ans = 0;\n\n    for (int mask = 1; mask < maxMask; mask <<= 1) {\n      const int ones =\n          ranges::count_if(nums, [mask](int num) { return num & mask; });\n      const int zeros = nums.size() - ones;\n      ans += ones * zeros;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/477.%20Total%20Hamming%20Distance",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "gray-code",
+  "approach": "Reflect and Prefix",
+  "explanation": "### How it works\n\nReflect the current Gray-code sequence and prefix the reflected half with the next bit. The boundary between the old and new halves differs only in that bit, while adjacency inside each half preserves the earlier one-bit property.\n\n### Steps\n\n1. Start with [0].\n2. For each bit position, walk the existing sequence backward.\n3. Append each visited value with the new bit set.\n\n### Complexity\n\n- Time: O(2^n).\n- Space: O(2^n) for the returned sequence; O(1) additional workspace.\n\n### Things to watch for\n\n- Traverse the old sequence in reverse to preserve adjacency.\n- Do not iterate over newly appended values.\n- The first and last codes must also differ by one bit.",
+  "code": {
+    "python": "class Solution:\n  def grayCode(self, n: int) -> list[int]:\n    ans = [0]\n\n    for i in range(n):\n      for j in reversed(range(len(ans))):\n        ans.append(ans[j] | 1 << i)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> grayCode(int n) {\n    vector<int> ans{0};\n\n    for (int i = 0; i < n; ++i)\n      for (int j = ans.size() - 1; j >= 0; --j)\n        ans.push_back(ans[j] | 1 << i);\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/89.%20Gray%20Code",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

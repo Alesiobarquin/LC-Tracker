@@ -1,0 +1,14 @@
+{
+  "problemId": "odd-even-linked-list",
+  "approach": "Separate Odd and Even Positions",
+  "explanation": "### How it works\n\nBuild two chains using the existing nodes: one for odd positions and one for even positions. Append nodes in their original order, terminate the even chain, and attach it after the odd chain. Only links change; node values are untouched.\n\n### Steps\n\n1. Alternate appending each node to the odd or even chain.\n2. Set the even tail next link to null.\n3. Attach the even head after the odd tail and return the odd head.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Odd/even refers to positions, rather than values.\n- Terminate the even chain to avoid a cycle.\n- Empty and one-node lists need no special ordering.",
+  "code": {
+    "python": "class Solution:\n  def oddEvenList(self, head: ListNode) -> ListNode:\n    oddHead = ListNode(0)\n    evenHead = ListNode(0)\n    odd = oddHead\n    even = evenHead\n    isOdd = True\n\n    while head:\n      if isOdd:\n        odd.next = head\n        odd = head\n      else:\n        even.next = head\n        even = head\n      head = head.next\n      isOdd = not isOdd\n\n    even.next = None\n    odd.next = evenHead.next\n    return oddHead.next\n",
+    "cpp": "class Solution {\n public:\n  ListNode* oddEvenList(ListNode* head) {\n    ListNode oddHead(0);\n    ListNode evenHead(0);\n    ListNode* odd = &oddHead;\n    ListNode* even = &evenHead;\n\n    for (int isOdd = 0; head; head = head->next)\n      if (isOdd ^= 1) {\n        odd->next = head;\n        odd = odd->next;\n      } else {\n        even->next = head;\n        even = even->next;\n      }\n\n    odd->next = evenHead.next;\n    even->next = nullptr;\n    return oddHead.next;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/328.%20Odd%20Even%20Linked%20List",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

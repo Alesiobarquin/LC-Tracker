@@ -1,0 +1,14 @@
+{
+  "problemId": "inorder-successor-in-bst",
+  "approach": "BST Successor Search",
+  "explanation": "### How it works\n\nThe successor is the smallest value strictly greater than p.val. A root no greater than p cannot qualify, so search its right subtree. Otherwise search left for a closer candidate and fall back to the root if none exists.\n\n### Steps\n\n1. Compare each root with p.val.\n2. Search right when root.val <= p.val.\n3. Otherwise return a successor found on the left, or the root.\n\n### Complexity\n\n- Time: O(h), where h is tree height.\n- Space: O(h) recursive stack.\n\n### Things to watch for\n\n- The successor need not be a descendant of p.\n- The largest node has no successor.\n- A successor must be strictly greater.",
+  "code": {
+    "python": "class Solution:\n  def inorderSuccessor(\n      self,\n      root: TreeNode | None,\n      p: TreeNode | None,\n  ) -> TreeNode | None:\n    if not root:\n      return None\n    if root.val <= p.val:\n      return self.inorderSuccessor(root.right, p)\n    return self.inorderSuccessor(root.left, p) or root\n",
+    "cpp": "class Solution {\n public:\n  TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {\n    if (root == nullptr)\n      return nullptr;\n    if (root->val <= p->val)\n      return inorderSuccessor(root->right, p);\n\n    TreeNode* left = inorderSuccessor(root->left, p);\n    return left ? left : root;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/285.%20Inorder%20Successor%20in%20BST",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

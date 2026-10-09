@@ -1,0 +1,14 @@
+{
+  "problemId": "third-maximum-number",
+  "approach": "Three Distinct Maximum Candidates",
+  "explanation": "### How it works\n\nMaintain the largest, second-largest, and third-largest distinct values seen so far. Insert a new distinct value into its rank and shift lower candidates. If fewer than three distinct values exist, return the largest value instead.\n\n### Steps\n\n1. Initialize three candidate slots below every valid value.\n2. Insert each value at its distinct rank, shifting candidates as needed.\n3. Return third when it exists, otherwise first.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Repeated copies of a maximum do not occupy multiple ranks.\n- The sentinel must be below INT_MIN in C++.\n- Fewer than three distinct values returns the maximum.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def thirdMax(self, nums: list[int]) -> int:\n    max1 = -math.inf  # the maximum\n    max2 = -math.inf  # the second maximum\n    max3 = -math.inf  # the third maximum\n\n    for num in nums:\n      if num > max1:\n        max3 = max2\n        max2 = max1\n        max1 = num\n      elif max1 > num and num > max2:\n        max3 = max2\n        max2 = num\n      elif max2 > num and num > max3:\n        max3 = num\n\n    return max1 if max3 == -math.inf else max3\n",
+    "cpp": "class Solution {\n public:\n  int thirdMax(vector<int>& nums) {\n    long max1 = LONG_MIN;  // the maximum\n    long max2 = LONG_MIN;  // the second maximum\n    long max3 = LONG_MIN;  // the third maximum\n\n    for (const int num : nums)\n      if (num > max1) {\n        max3 = max2;\n        max2 = max1;\n        max1 = num;\n      } else if (max1 > num && num > max2) {\n        max3 = max2;\n        max2 = num;\n      } else if (max2 > num && num > max3) {\n        max3 = num;\n      }\n\n    return max3 == LONG_MIN ? max1 : max3;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/414.%20Third%20Maximum%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

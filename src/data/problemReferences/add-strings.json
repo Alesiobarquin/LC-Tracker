@@ -1,0 +1,14 @@
+{
+  "problemId": "add-strings",
+  "approach": "Digit Addition with Carry",
+  "explanation": "### How it works\n\nSimulate column addition from the rightmost digits. Add the available digit from each string and the previous carry, emit the remainder modulo ten, then carry the quotient. Reverse the collected digits at the end.\n\n### Steps\n\n1. Start at both strings’ last indices with carry zero.\n2. Emit one result digit while either input or carry remains.\n3. Reverse the digits and join them.\n\n### Complexity\n\n- Time: O(max(n, m)).\n- Space: O(max(n, m)) for output construction.\n\n### Things to watch for\n\n- Continue when a final carry remains.\n- Treat an exhausted input as a zero digit.\n- Avoid converting the whole strings to integers.",
+  "code": {
+    "python": "class Solution:\n  def addStrings(self, num1: str, num2: str) -> str:\n    ans = []\n    carry = 0\n    i = len(num1) - 1\n    j = len(num2) - 1\n\n    while i >= 0 or j >= 0 or carry:\n      if i >= 0:\n        carry += int(num1[i])\n      if j >= 0:\n        carry += int(num2[j])\n      ans.append(str(carry % 10))\n      carry //= 10\n      i -= 1\n      j -= 1\n\n    return ''.join(reversed(ans))\n",
+    "cpp": "class Solution {\n public:\n  string addStrings(string num1, string num2) {\n    string ans;\n    int carry = 0;\n    int i = num1.length() - 1;\n    int j = num2.length() - 1;\n\n    while (i >= 0 || j >= 0 || carry) {\n      if (i >= 0)\n        carry += num1[i--] - '0';\n      if (j >= 0)\n        carry += num2[j--] - '0';\n      ans += carry % 10 + '0';\n      carry /= 10;\n    }\n\n    ranges::reverse(ans);\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/415.%20Add%20Strings",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

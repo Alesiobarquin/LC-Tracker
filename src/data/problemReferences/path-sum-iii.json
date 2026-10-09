@@ -1,0 +1,14 @@
+{
+  "problemId": "path-sum-iii",
+  "approach": "Try Every Downward Path Start",
+  "explanation": "### How it works\n\nA valid downward path may begin at any node. For each possible start, a DFS counts paths whose running sum reaches the target. Recursively repeat this count with starts in the left and right subtrees, covering all choices without requiring a path to end at a leaf.\n\n### Steps\n\n1. Count matching downward paths starting at the current root.\n2. Repeat the start search for both child subtrees.\n3. Add all three counts.\n\n### Complexity\n\n- Time: O(nh), worst-case O(n²) for a chain.\n- Space: O(h) recursion stack.\n\n### Things to watch for\n\n- A matching path can stop at an internal node.\n- Negative values mean searching must continue after a match.\n- This is the simpler repeated-DFS approach; it is not the linear prefix-sum variant.",
+  "code": {
+    "python": "class Solution:\n  def pathSum(self, root: TreeNode | None, summ: int) -> int:\n    if not root:\n      return 0\n\n    def dfs(root: TreeNode, summ: int) -> int:\n      if not root:\n        return 0\n      return (int(summ == root.val) +\n              dfs(root.left, summ - root.val) +\n              dfs(root.right, summ - root.val))\n\n    return (dfs(root, summ) +\n            self.pathSum(root.left, summ) +\n            self.pathSum(root.right, summ))\n",
+    "cpp": "class Solution {\n public:\n  int pathSum(TreeNode* root, int sum) {\n    if (root == nullptr)\n      return 0;\n    return dfs(root, sum) +            //\n           pathSum(root->left, sum) +  //\n           pathSum(root->right, sum);\n  }\n\n private:\n  int dfs(TreeNode* root, int sum) {\n    if (root == nullptr)\n      return 0;\n    return (sum == root->val) +                //\n           dfs(root->left, sum - root->val) +  //\n           dfs(root->right, sum - root->val);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/437.%20Path%20Sum%20III",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

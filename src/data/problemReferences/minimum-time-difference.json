@@ -1,0 +1,14 @@
+{
+  "problemId": "minimum-time-difference",
+  "approach": "Minute Buckets on a Circular Day",
+  "explanation": "### How it works\n\nConvert each time to a minute from zero to 1439. Mark seen minutes in a fixed-size table; a duplicate gives difference zero. Scan marked minutes in order and also compare the last with the first across midnight.\n\n### Steps\n\n1. Mark each minute and return zero for duplicates.\n2. Scan consecutive marked minutes for the smallest gap.\n3. Include 1440 - last + first.\n\n### Complexity\n\n- Time: O(n + 1440).\n- Space: O(1440).\n\n### Things to watch for\n\n- The day wraps at midnight.\n- Repeated time strings produce zero.\n- A first/last comparison is needed even after ordered scanning.",
+  "code": {
+    "python": "class Solution:\n    def findMinDifference(self, timePoints: list[str]) -> int:\n        seen = [False] * 1440\n        for time in timePoints:\n            minute = int(time[:2]) * 60 + int(time[3:])\n            if seen[minute]:\n                return 0\n            seen[minute] = True\n        first = previous = None\n        result = 1440\n        for minute, present in enumerate(seen):\n            if not present:\n                continue\n            if first is None:\n                first = minute\n            if previous is not None:\n                result = min(result, minute - previous)\n            previous = minute\n        return min(result, 1440 - previous + first)\n",
+    "cpp": "class Solution {\n public:\n  int findMinDifference(vector<string>& timePoints) {\n    int ans = 24 * 60;\n    int first = 24 * 60;\n    vector<bool> bucket(24 * 60);\n\n    for (const string& time : timePoints) {\n      const int num = stoi(time.substr(0, 2)) * 60 + stoi(time.substr(3));\n      first = min(first, num);\n      if (bucket[num])\n        return 0;\n      bucket[num] = true;\n    }\n\n    int prev = first;\n\n    for (int i = first + 1; i < bucket.size(); ++i)\n      if (bucket[i]) {\n        ans = min(ans, i - prev);\n        prev = i;\n      }\n\n    return min(ans, 24 * 60 - prev + first);\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/539.%20Minimum%20Time%20Difference",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

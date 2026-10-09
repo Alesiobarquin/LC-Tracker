@@ -1,0 +1,14 @@
+{
+  "problemId": "fibonacci-number",
+  "approach": "Rolling Fibonacci State",
+  "explanation": "### How it works\n\nEach Fibonacci number depends only on the previous two numbers. Keep a fixed-size state and update it from lower indices upward so the old values are available when computing the new sum. This avoids exponential recursive recomputation.\n\n### Steps\n\n1. Handle n = 0 and n = 1 directly.\n2. Start from the values zero and one.\n3. Iteratively sum the previous two values through n.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- Use F(0) = 0 and F(1) = 1.\n- Preserve both old values before overwriting them.\n- A full n-element DP array is unnecessary.",
+  "code": {
+    "python": "class Solution:\n  def fib(self, n: int) -> int:\n    if n < 2:\n      return n\n\n    dp = [0, 0, 1]\n\n    for i in range(2, n + 1):\n      dp[0] = dp[1]\n      dp[1] = dp[2]\n      dp[2] = dp[0] + dp[1]\n\n    return dp[2]\n",
+    "cpp": "class Solution {\n public:\n  int fib(int n) {\n    if (n < 2)\n      return n;\n\n    vector<int> dp{0, 0, 1};\n\n    for (int i = 2; i <= n; ++i) {\n      dp[0] = dp[1];\n      dp[1] = dp[2];\n      dp[2] = dp[0] + dp[1];\n    }\n\n    return dp.back();\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/509.%20Fibonacci%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

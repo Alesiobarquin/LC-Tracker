@@ -1,0 +1,14 @@
+{
+  "problemId": "01-matrix",
+  "approach": "Multi-Source Breadth-First Search",
+  "explanation": "### How it works\n\nStart BFS from every zero simultaneously. Every step from this frontier adds one to the nearest-zero distance, so the first visit to a cell gives its minimum distance. Store distances in the matrix while a separate seen grid prevents repeat visits.\n\n### Steps\n\n1. Enqueue all zeros and mark them seen.\n2. Visit unvisited orthogonal neighbors at parent distance + 1.\n3. Mark when enqueueing and return the updated matrix.\n\n### Complexity\n\n- Time: O(rows × columns).\n- Space: O(rows × columns).\n\n### Things to watch for\n\n- Start from all zeros, rather than one zero.\n- Only orthogonal moves count.\n- This implementation overwrites the input matrix with distances.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def updateMatrix(self, mat: list[list[int]]) -> list[list[int]]:\n    DIRS = ((0, 1), (1, 0), (0, -1), (-1, 0))\n    m = len(mat)\n    n = len(mat[0])\n    q = collections.deque()\n    seen = [[False] * n for _ in range(m)]\n\n    for i in range(m):\n      for j in range(n):\n        if mat[i][j] == 0:\n          q.append((i, j))\n          seen[i][j] = True\n\n    while q:\n      i, j = q.popleft()\n      for dx, dy in DIRS:\n        x = i + dx\n        y = j + dy\n        if x < 0 or x == m or y < 0 or y == n:\n          continue\n        if seen[x][y]:\n          continue\n        mat[x][y] = mat[i][j] + 1\n        q.append((x, y))\n        seen[x][y] = True\n\n    return mat\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {\n    constexpr int kDirs[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};\n    const int m = mat.size();\n    const int n = mat[0].size();\n    queue<pair<int, int>> q;\n    vector<vector<bool>> seen(m, vector<bool>(n));\n\n    for (int i = 0; i < m; ++i)\n      for (int j = 0; j < n; ++j)\n        if (mat[i][j] == 0) {\n          q.emplace(i, j);\n          seen[i][j] = true;\n        }\n\n    while (!q.empty()) {\n      const auto [i, j] = q.front();\n      q.pop();\n      for (const auto& [dx, dy] : kDirs) {\n        const int x = i + dx;\n        const int y = j + dy;\n        if (x < 0 || x == m || y < 0 || y == n)\n          continue;\n        if (seen[x][y])\n          continue;\n        mat[x][y] = mat[i][j] + 1;\n        q.emplace(x, y);\n        seen[x][y] = true;\n      }\n    }\n\n    return mat;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/542.%2001%20Matrix",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

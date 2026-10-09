@@ -1,0 +1,14 @@
+{
+  "problemId": "bulls-and-cows",
+  "approach": "Exact Matches and Remaining Digit Counts",
+  "explanation": "### How it works\n\nFirst count digits that match at the same position as bulls. For the remaining positions, build one frequency table per string. The minimum of the two counts for each digit gives cows without reusing digits that already counted as bulls.\n\n### Steps\n\n1. Count equal-position bulls.\n2. Count unmatched digits in two ten-element tables.\n3. Sum per-digit minima and format the bulls and cows counts.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1), because there are ten digit values.\n\n### Things to watch for\n\n- Remove bulls before counting cows.\n- Repeated digits are limited by the smaller remaining frequency.\n- Format the result as xAyB.",
+  "code": {
+    "python": "class Solution:\n    def getHint(self, secret: str, guess: str) -> str:\n        bulls = 0\n        secret_count, guess_count = [0] * 10, [0] * 10\n        for a, b in zip(secret, guess):\n            if a == b:\n                bulls += 1\n            else:\n                secret_count[int(a)] += 1\n                guess_count[int(b)] += 1\n        cows = sum(min(a, b) for a, b in zip(secret_count, guess_count))\n        return f\"{bulls}A{cows}B\"\n",
+    "cpp": "class Solution {\n public:\n  string getHint(string secret, string guess) {\n    int A = 0;\n    int B = 0;\n    vector<int> count1(10);\n    vector<int> count2(10);\n\n    for (int i = 0; i < secret.length(); ++i)\n      if (secret[i] == guess[i])\n        ++A;\n      else {\n        ++count1[secret[i] - '0'];\n        ++count2[guess[i] - '0'];\n      }\n\n    for (int i = 0; i < 10; ++i)\n      B += min(count1[i], count2[i]);\n\n    return to_string(A) + \"A\" + to_string(B) + \"B\";\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/299.%20Bulls%20and%20Cows",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

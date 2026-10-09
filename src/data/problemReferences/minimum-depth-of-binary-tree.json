@@ -1,0 +1,14 @@
+{
+  "problemId": "minimum-depth-of-binary-tree",
+  "approach": "Recursive Minimum Leaf Depth",
+  "explanation": "### How it works\n\nA leaf requires both children to be absent. When one child is missing, the minimum depth must follow the existing child; taking the minimum with an empty child would incorrectly end the path early. When both exist, take the shallower subtree depth.\n\n### Steps\n\n1. Return zero for an empty root.\n2. Follow the existing child when the other is absent.\n3. Otherwise return one plus the smaller child depth.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion stack.\n\n### Things to watch for\n\n- Minimum depth ends at a leaf, rather than a missing child.\n- A chain’s minimum depth equals its full length.\n- An empty tree has depth zero.",
+  "code": {
+    "python": "class Solution:\n  def minDepth(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n    if not root.left:\n      return self.minDepth(root.right) + 1\n    if not root.right:\n      return self.minDepth(root.left) + 1\n    return min(self.minDepth(root.left), self.minDepth(root.right)) + 1\n",
+    "cpp": "class Solution {\n public:\n  int minDepth(TreeNode* root) {\n    if (root == nullptr)\n      return 0;\n    if (root->left == nullptr)\n      return minDepth(root->right) + 1;\n    if (root->right == nullptr)\n      return minDepth(root->left) + 1;\n    return min(minDepth(root->left), minDepth(root->right)) + 1;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/111.%20Minimum%20Depth%20of%20Binary%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "rotate-function",
+  "approach": "Rotate-Sum Recurrence",
+  "explanation": "### How it works\n\nWhen the last value moves to index zero, every other value’s weight increases by one. The new weighted sum equals the old weighted sum plus the total array sum minus n times the moved value. Reuse this recurrence instead of recomputing each rotation.\n\n### Steps\n\n1. Compute the initial weighted sum and total sum.\n2. Process moved values from the array’s right end.\n3. Update the weighted sum with total - n × moved and track its maximum.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1).\n\n### Things to watch for\n\n- The subtracted term belongs to the value moving from last to first.\n- Initialize from the real weighted sum so negative answers work.\n- No physical array rotation is needed.",
+  "code": {
+    "python": "class Solution:\n  def maxRotateFunction(self, nums: list[int]) -> int:\n    f = sum(i * num for i, num in enumerate(nums))\n    ans = f\n    summ = sum(nums)\n\n    for a in reversed(nums):\n      f += summ - len(nums) * a\n      ans = max(ans, f)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int maxRotateFunction(vector<int>& nums) {\n    const int sum = accumulate(nums.begin(), nums.end(), 0);\n    int f = 0;\n\n    // Calculate F(0) first.\n    for (int i = 0; i < nums.size(); ++i)\n      f += i * nums[i];\n\n    int ans = f;\n\n    for (int i = nums.size() - 1; i > 0; --i) {\n      f += sum - static_cast<int>(nums.size()) * nums[i];\n      ans = max(ans, f);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/396.%20Rotate%20Function",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

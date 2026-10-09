@@ -1,0 +1,14 @@
+{
+  "problemId": "count-numbers-with-unique-digits",
+  "approach": "Count Choices by Digit Length",
+  "explanation": "### How it works\n\nCount zero and all one-digit values first. For a longer number, its first digit has nine choices and each following digit has one fewer unused choice. Sum the counts for each valid length; there are no unique-digit numbers longer than ten digits.\n\n### Steps\n\n1. Handle n = 0 as the single value zero.\n2. Start with ten one-digit values.\n3. Multiply available choices for each new digit length and add the count.\n\n### Complexity\n\n- Time: O(min(n, 10)).\n- Space: O(1).\n\n### Things to watch for\n\n- The first digit cannot be zero.\n- Zero still counts as a value.\n- Stop once all ten digits have been used.",
+  "code": {
+    "python": "class Solution:\n  def countNumbersWithUniqueDigits(self, n: int) -> int:\n    if n == 0:\n      return 1\n\n    ans = 10\n    uniqueDigits = 9\n    availableNum = 9\n\n    while n > 1 and availableNum > 0:\n      uniqueDigits *= availableNum\n      ans += uniqueDigits\n      n -= 1\n      availableNum -= 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int countNumbersWithUniqueDigits(int n) {\n    if (n == 0)\n      return 1;\n\n    int ans = 10;\n    int uniqueDigits = 9;\n\n    for (int availableNum = 9; n > 1 && availableNum > 0; --n, --availableNum) {\n      uniqueDigits *= availableNum;\n      ans += uniqueDigits;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/357.%20Count%20Numbers%20with%20Unique%20Digits",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

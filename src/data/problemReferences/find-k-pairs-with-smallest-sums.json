@@ -1,0 +1,14 @@
+{
+  "problemId": "find-k-pairs-with-smallest-sums",
+  "approach": "Heap Merge of Pair-Sum Rows",
+  "explanation": "### How it works\n\nFor a fixed first-array index, pairing it with successive second-array values creates a sorted row of sums. Seed a min-heap with the first pair from each relevant row. After removing a pair, advance only that row to merge the globally smallest pairs.\n\n### Steps\n\n1. Seed up to min(k, len(nums1)) rows at second-array index zero.\n2. Pop the minimum sum and append its values.\n3. Push the next pair in the same row until k pairs or heap exhaustion.\n\n### Complexity\n\n- Time: O((k + r) log(r + 1)), with r = min(k, len(nums1)).\n- Space: O(r) heap work plus O(k) returned pairs.\n\n### Things to watch for\n\n- Inputs must be sorted.\n- Return pairs of values, rather than their indices.\n- Duplicate values can form distinct valid index pairs.",
+  "code": {
+    "python": "import heapq\n\nclass Solution:\n  def kSmallestPairs(self, nums1: list[int],\n                     nums2: list[int],\n                     k: int) -> list[list[int]]:\n    minHeap = []\n\n    for i in range(min(k, len(nums1))):\n      heapq.heappush(minHeap, (nums1[i] + nums2[0], i, 0))\n\n    ans = []\n    while minHeap and len(ans) < k:\n      _, i, j = heapq.heappop(minHeap)\n      ans.append([nums1[i], nums2[j]])\n      if j + 1 < len(nums2):\n        heapq.heappush(minHeap, (nums1[i] + nums2[j + 1], i, j + 1))\n\n    return ans\n",
+    "cpp": "struct T {\n  int i;\n  int j;\n  int sum;  // nums1[i] + nums2[j]\n};\n\nclass Solution {\n public:\n  vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2,\n                                     int k) {\n    vector<vector<int>> ans;\n    auto compare = [&](const T& a, const T& b) { return a.sum > b.sum; };\n    priority_queue<T, vector<T>, decltype(compare)> minHeap(compare);\n\n    for (int i = 0; i < k && i < nums1.size(); ++i)\n      minHeap.emplace(i, 0, nums1[i] + nums2[0]);\n\n    while (!minHeap.empty() && ans.size() < k) {\n      const auto [i, j, _] = minHeap.top();\n      minHeap.pop();\n      ans.push_back({nums1[i], nums2[j]});\n      if (j + 1 < nums2.size())\n        minHeap.emplace(i, j + 1, nums1[i] + nums2[j + 1]);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/373.%20Find%20K%20Pairs%20with%20Smallest%20Sums",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

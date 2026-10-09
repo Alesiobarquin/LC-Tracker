@@ -1,0 +1,14 @@
+{
+  "problemId": "combination-sum-iii",
+  "approach": "Backtracking over Distinct Digits",
+  "explanation": "### How it works\n\nChoose increasing digits from one through nine. Increasing the next starting digit prevents reuse and duplicate orderings. Track how many digits remain and how much of the target sum remains, accepting only when both reach zero together.\n\n### Steps\n\n1. Try digits from the current start through nine.\n2. Recurse with one fewer slot, a smaller sum, and the next start.\n3. Save a path only when both remaining count and sum are zero.\n\n### Complexity\n\n- Time: O(k × 2^9) as a conservative bound for exploring digit subsets and copying paths.\n- Space: O(k) stack/path work, excluding output.\n\n### Things to watch for\n\n- A correct sum with the wrong number of digits is invalid.\n- Each digit may appear once.\n- Use increasing choices so different permutations are not counted separately.",
+  "code": {
+    "python": "class Solution:\n    def combinationSum3(self, k: int, n: int) -> list[list[int]]:\n        result, path = [], []\n        def dfs(slots, remaining, start):\n            if slots == 0 and remaining == 0:\n                result.append(path.copy())\n                return\n            if slots == 0 or remaining <= 0:\n                return\n            for value in range(start, 10):\n                path.append(value)\n                dfs(slots - 1, remaining - value, value + 1)\n                path.pop()\n        dfs(k, n, 1)\n        return result\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> combinationSum3(int k, int n) {\n    vector<vector<int>> ans;\n    dfs(k, n, 1, {}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(int k, int n, int s, vector<int>&& path, vector<vector<int>>& ans) {\n    if (k == 0 && n == 0) {\n      ans.push_back(path);\n      return;\n    }\n    if (k == 0 || n <= 0)\n      return;\n\n    for (int i = s; i <= 9; ++i) {\n      path.push_back(i);\n      dfs(k - 1, n - i, i + 1, std::move(path), ans);\n      path.pop_back();\n    }\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/216.%20Combination%20Sum%20III",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "ugly-number-ii",
+  "approach": "Three Monotone Candidate Streams",
+  "explanation": "### How it works\n\nEvery ugly number after one is an earlier ugly number multiplied by two, three, or five. Keep one index for each stream and append the smallest next candidate. Advance every stream that produced that candidate so duplicates are generated only once.\n\n### Steps\n\n1. Start the sequence at one.\n2. Compute the next multiples from the three indices.\n3. Append the minimum and advance all matching indices until n values exist.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n).\n\n### Things to watch for\n\n- Use separate if checks rather than elif when candidates tie.\n- One is the first ugly number.\n- Advancing only one tied stream creates duplicates.",
+  "code": {
+    "python": "class Solution:\n  def nthUglyNumber(self, n: int) -> int:\n    nums = [1]\n    i2 = 0\n    i3 = 0\n    i5 = 0\n\n    while len(nums) < n:\n      next2 = nums[i2] * 2\n      next3 = nums[i3] * 3\n      next5 = nums[i5] * 5\n      next = min(next2, next3, next5)\n      if next == next2:\n        i2 += 1\n      if next == next3:\n        i3 += 1\n      if next == next5:\n        i5 += 1\n      nums.append(next)\n\n    return nums[-1]\n",
+    "cpp": "class Solution {\n public:\n  int nthUglyNumber(int n) {\n    vector<int> uglyNums{1};\n    int i2 = 0;\n    int i3 = 0;\n    int i5 = 0;\n\n    while (uglyNums.size() < n) {\n      const long long next2 = 2LL * uglyNums[i2];\n      const long long next3 = 3LL * uglyNums[i3];\n      const long long next5 = 5LL * uglyNums[i5];\n      const int next = min({next2, next3, next5});\n      if (next == next2)\n        ++i2;\n      if (next == next3)\n        ++i3;\n      if (next == next5)\n        ++i5;\n      uglyNums.push_back(next);\n    }\n\n    return uglyNums.back();\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/264.%20Ugly%20Number%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

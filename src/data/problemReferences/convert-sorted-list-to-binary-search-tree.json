@@ -1,0 +1,14 @@
+{
+  "problemId": "convert-sorted-list-to-binary-search-tree",
+  "approach": "Middle Node Divide and Conquer",
+  "explanation": "### How it works\n\nThe middle value of a sorted list is a suitable root for a balanced search tree. Slow and fast pointers locate it; detach the left half and recursively build the two subtrees. Repeating this split keeps subtree sizes close.\n\n### Steps\n\n1. Handle empty and one-node lists.\n2. Find the middle and disconnect its predecessor.\n3. Create the root and recursively build its left and right halves.\n\n### Complexity\n\n- Time: O(n log n), because each recursion level scans its lists.\n- Space: O(log n) recursion stack, excluding O(n) output tree.\n\n### Things to watch for\n\n- This implementation disconnects links in the input list.\n- Handle one node before accessing the middle predecessor.\n- The resulting tree need not have one unique shape.",
+  "code": {
+    "python": "class Solution:\n  def sortedListToBST(self, head: ListNode) -> TreeNode:\n    def findMid(head: ListNode) -> ListNode:\n      prev = None\n      slow = head\n      fast = head\n\n      while fast and fast.next:\n        prev = slow\n        slow = slow.next\n        fast = fast.next.next\n      prev.next = None\n\n      return slow\n\n    if not head:\n      return None\n    if not head.next:\n      return TreeNode(head.val)\n\n    mid = findMid(head)\n    root = TreeNode(mid.val)\n    root.left = self.sortedListToBST(head)\n    root.right = self.sortedListToBST(mid.next)\n    return root\n",
+    "cpp": "class Solution {\n public:\n  TreeNode* sortedListToBST(ListNode* head) {\n    if (head == nullptr)\n      return nullptr;\n    if (!head->next)\n      return new TreeNode(head->val);\n\n    ListNode* mid = findMid(head);\n    TreeNode* root = new TreeNode(mid->val);\n    root->left = sortedListToBST(head);\n    root->right = sortedListToBST(mid->next);\n    return root;\n  }\n\n private:\n  ListNode* findMid(ListNode* head) {\n    ListNode* prev = nullptr;\n    ListNode* slow = head;\n    ListNode* fast = head;\n\n    while (fast != nullptr && fast->next != nullptr) {\n      prev = slow;\n      slow = slow->next;\n      fast = fast->next->next;\n    }\n    prev->next = nullptr;\n\n    return slow;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/109.%20Convert%20Sorted%20List%20to%20Binary%20Search%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

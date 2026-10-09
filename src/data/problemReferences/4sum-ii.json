@@ -1,0 +1,14 @@
+{
+  "problemId": "4sum-ii",
+  "approach": "Hash Pair Sums",
+  "explanation": "### How it works\n\nSplit the four-array sum into two pair sums. Count how often each sum from the first two arrays appears. For each pair from the other two arrays, look up the frequency of its negated sum to count every zero-sum index tuple.\n\n### Steps\n\n1. Count every nums1 + nums2 pair sum.\n2. Enumerate nums3 + nums4 pair sums.\n3. Add the stored frequency of the opposite sum.\n\n### Complexity\n\n- Time: O(n²) expected for four arrays of length n.\n- Space: O(n²).\n\n### Things to watch for\n\n- Store frequencies, rather than a set, because repeated values create multiple index tuples.\n- Each array contributes one index.\n- The lookup sum must be negated.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def fourSumCount(self, nums1: list[int], nums2: list[int],\n                   nums3: list[int], nums4: list[int]) -> int:\n    count = collections.Counter(a + b for a in nums1 for b in nums2)\n    return sum(count[-c - d] for c in nums3 for d in nums4)\n",
+    "cpp": "class Solution {\n public:\n  int fourSumCount(vector<int>& nums1, vector<int>& nums2, vector<int>& nums3,\n                   vector<int>& nums4) {\n    int ans = 0;\n    unordered_map<int, int> count;\n\n    for (const int a : nums1)\n      for (const int b : nums2)\n        ++count[a + b];\n\n    for (const int c : nums3)\n      for (const int d : nums4)\n        if (const auto it = count.find(-c - d); it != count.cend())\n          ans += it->second;\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/454.%204Sum%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

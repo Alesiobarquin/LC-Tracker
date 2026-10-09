@@ -1,0 +1,14 @@
+{
+  "problemId": "count-and-say",
+  "approach": "Run-Length Description",
+  "explanation": "### How it works\n\nEach term describes consecutive runs in the previous term. For a run of three ones, write `31`, meaning three occurrences of one. Build the next term from complete runs before replacing the current term.\n\n### Steps\n\n1. Start from `1`.\n2. Count each consecutive run and append its count followed by its character.\n3. Repeat n - 1 times.\n\n### Complexity\n\n- Time: O(S), where S is the sum of the lengths of all generated terms.\n- Space: O(L), where L is the longest generated term.\n\n### Things to watch for\n\n- The count describes a run, rather than the total frequency of a digit.\n- For n = 1, return `1`.\n- Use a list of fragments in Python to avoid repeated copying during construction.",
+  "code": {
+    "python": "class Solution:\n    def countAndSay(self, n: int) -> str:\n        term = \"1\"\n        for _ in range(n - 1):\n            parts = []\n            i = 0\n            while i < len(term):\n                j = i + 1\n                while j < len(term) and term[j] == term[i]:\n                    j += 1\n                parts.extend((str(j - i), term[i]))\n                i = j\n            term = \"\".join(parts)\n        return term\n",
+    "cpp": "class Solution {\n public:\n  string countAndSay(int n) {\n    string ans = \"1\";\n\n    while (--n > 0) {\n      string next;\n      for (int i = 0; i < ans.length(); ++i) {\n        int count = 1;\n        while (i + 1 < ans.length() && ans[i] == ans[i + 1]) {\n          ++count;\n          ++i;\n        }\n        next += to_string(count) + ans[i];\n      }\n      ans = std::move(next);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/38.%20Count%20and%20Say",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

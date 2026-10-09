@@ -1,0 +1,14 @@
+{
+  "problemId": "reverse-vowels-of-a-string",
+  "approach": "Two Pointers on Vowels",
+  "explanation": "### How it works\n\nAdvance a left pointer and a right pointer past consonants until both point at vowels. Swapping those vowels reverses only the vowel sequence, preserving all other characters at their original positions. Continue until the pointers meet.\n\n### Steps\n\n1. Find the next vowel from each end.\n2. Swap them and advance both pointers.\n3. Return the resulting character sequence.\n\n### Complexity\n\n- Time: O(n).\n- Space: Python O(n) for a mutable character list; C++ uses the O(n) by-value string buffer.\n\n### Things to watch for\n\n- Uppercase vowels count too.\n- A string with no vowels remains unchanged.\n- Check pointer bounds while skipping consonants.",
+  "code": {
+    "python": "class Solution:\n  def reverseVowels(self, s: str) -> str:\n    chars = list(s)\n    VOWELS = 'aeiouAEIOU'\n    l = 0\n    r = len(s) - 1\n\n    while l < r:\n      while l < r and chars[l] not in VOWELS:\n        l += 1\n      while l < r and chars[r] not in VOWELS:\n        r -= 1\n      chars[l], chars[r] = chars[r], chars[l]\n      l += 1\n      r -= 1\n\n    return ''.join(chars)\n",
+    "cpp": "class Solution {\n public:\n  string reverseVowels(string s) {\n    int l = 0;\n    int r = s.length() - 1;\n\n    while (l < r) {\n      while (l < r && !isVowel(s[l]))\n        ++l;\n      while (l < r && !isVowel(s[r]))\n        --r;\n      swap(s[l++], s[r--]);\n    }\n\n    return s;\n  }\n\n private:\n  bool isVowel(char c) {\n    static constexpr string_view kVowels = \"aeiouAEIOU\";\n    return kVowels.find(c) != string_view::npos;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/345.%20Reverse%20Vowels%20of%20a%20String",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

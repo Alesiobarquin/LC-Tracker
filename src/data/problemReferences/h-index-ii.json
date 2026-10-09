@@ -1,0 +1,14 @@
+{
+  "problemId": "h-index-ii",
+  "approach": "Binary Search for the First Valid Position",
+  "explanation": "### How it works\n\nAt sorted index i, there are n - i papers with citations at least citations[i]. The condition citations[i] >= n - i becomes true monotonically as i increases. Find its first true position and return n minus that position.\n\n### Steps\n\n1. Binary search indices in the half-open range [0, n).\n2. Move right toward the first position with citations[mid] + mid >= n.\n3. Return n - left.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(1).\n\n### Things to watch for\n\n- The input must already be sorted.\n- Allow the search to end at n, meaning h = 0.\n- Use >= so equality is valid.",
+  "code": {
+    "python": "class Solution:\n    def hIndex(self, citations: list[int]) -> int:\n        n = len(citations)\n        left, right = 0, n\n        while left < right:\n            mid = (left + right) // 2\n            if citations[mid] + mid >= n:\n                right = mid\n            else:\n                left = mid + 1\n        return n - left\n",
+    "cpp": "class Solution {\n public:\n  int hIndex(vector<int>& citations) {\n    const int n = citations.size();\n    int l = 0;\n    int r = n;\n\n    while (l < r) {\n      const int m = (l + r) / 2;\n      if (citations[m] + m >= n)\n        r = m;\n      else\n        l = m + 1;\n    }\n\n    return n - l;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/275.%20H-Index%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,14 @@
+{
+  "problemId": "maximum-product-of-word-lengths",
+  "approach": "Letter Masks and Pair Comparison",
+  "explanation": "### How it works\n\nRepresent the letters of each word with a 26-bit mask. Repeated occurrences do not change the mask. Two words have no common letter exactly when their masks have zero bitwise intersection; compare the products of lengths for these pairs.\n\n### Steps\n\n1. Build one letter mask per word.\n2. Check each pair with mask[i] & mask[j].\n3. Update the maximum length product when the masks are disjoint.\n\n### Complexity\n\n- Time: O(L + w²), for total characters L and w words.\n- Space: O(w).\n\n### Things to watch for\n\n- Use bitwise OR while building masks.\n- Repeated letters do not occupy new bits.\n- The product uses original word lengths, rather than distinct-letter counts.",
+  "code": {
+    "python": "class Solution:\n  def maxProduct(self, words: list[str]) -> int:\n    ans = 0\n\n    def getMask(word: str) -> int:\n      mask = 0\n      for c in word:\n        mask |= 1 << ord(c) - ord('a')\n      return mask\n\n    masks = [getMask(word) for word in words]\n\n    for i in range(len(words)):\n      for j in range(i):\n        if not (masks[i] & masks[j]):\n          ans = max(ans, len(words[i]) * len(words[j]))\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int maxProduct(vector<string>& words) {\n    size_t ans = 0;\n    vector<int> masks;\n\n    for (const string& word : words)\n      masks.push_back(getMask(word));\n\n    for (int i = 0; i < words.size(); ++i)\n      for (int j = 0; j < i; ++j)\n        if ((masks[i] & masks[j]) == 0)\n          ans = max(ans, words[i].length() * words[j].length());\n\n    return ans;\n  }\n\n private:\n  int getMask(const string& word) {\n    int mask = 0;\n    for (const char c : word)\n      mask |= 1 << c - 'a';\n    return mask;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/318.%20Maximum%20Product%20of%20Word%20Lengths",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

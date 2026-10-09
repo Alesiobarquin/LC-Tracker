@@ -1,0 +1,14 @@
+{
+  "problemId": "delete-operation-for-two-strings",
+  "approach": "Longest Common Subsequence",
+  "explanation": "### How it works\n\nThe characters retained in both strings after deletions form a common subsequence. Keep the longest such subsequence to minimize deletions. If its length is L, remove len(word1) - L characters from the first and len(word2) - L from the second.\n\n### Steps\n\n1. Build the LCS table over string prefixes.\n2. On equal characters extend the diagonal; otherwise take the larger neighboring state.\n3. Return both lengths minus twice the LCS length.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(mn).\n\n### Things to watch for\n\n- Only deletions are allowed, unlike full edit distance.\n- The retained characters need not be contiguous.\n- Empty-string prefix rows and columns start at zero.",
+  "code": {
+    "python": "class Solution:\n  def minDistance(self, word1: str, word2: str) -> int:\n    k = self._lcs(word1, word2)\n    return (len(word1) - k) + (len(word2) - k)\n\n  def _lcs(self, a: str, b: str) -> int:\n    m = len(a)\n    n = len(b)\n    # dp[i][j] := the length of LCS(a[0..i), b[0..j))\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n\n    for i in range(1, m + 1):\n      for j in range(1, n + 1):\n        if a[i - 1] == b[j - 1]:\n          dp[i][j] = 1 + dp[i - 1][j - 1]\n        else:\n          dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])\n\n    return dp[m][n]\n",
+    "cpp": "class Solution {\n public:\n  int minDistance(string word1, string word2) {\n    const int k = lcs(word1, word2);\n    return (word1.length() - k) + (word2.length() - k);\n  }\n\n private:\n  int lcs(const string& a, const string& b) {\n    const int m = a.length();\n    const int n = b.length();\n    // dp[i][j] := the length of LCS(a[0..i), b[0..j))\n    vector<vector<int>> dp(m + 1, vector<int>(n + 1));\n\n    for (int i = 1; i <= m; ++i)\n      for (int j = 1; j <= n; ++j)\n        if (a[i - 1] == b[j - 1])\n          dp[i][j] = 1 + dp[i - 1][j - 1];\n        else\n          dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);\n\n    return dp[m][n];\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/583.%20Delete%20Operation%20for%20Two%20Strings",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

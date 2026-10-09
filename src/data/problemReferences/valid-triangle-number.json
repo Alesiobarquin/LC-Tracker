@@ -1,0 +1,14 @@
+{
+  "problemId": "valid-triangle-number",
+  "approach": "Sorting and Two-Pointer Triangle Counting",
+  "explanation": "### How it works\n\nAfter sorting nonnegative lengths, only the sum of the two smaller sides needs checking against the largest. Fix the largest index; if the current smaller pair exceeds it, every larger left choice up to the right pointer also works. Count those pairs together.\n\n### Steps\n\n1. Sort and choose each possible largest side.\n2. Scan the smaller prefix with two pointers.\n3. Add right - left when the inequality holds and move right; otherwise advance left.\n\n### Complexity\n\n- Time: O(n²).\n- Space: Python O(n) worst-case sorting workspace; C++ O(log n) sorting stack.\n\n### Things to watch for\n\n- The inequality is strict; degenerate triangles do not count.\n- Zero sides fail naturally.\n- Count index triplets, including equal lengths at different positions.",
+  "code": {
+    "python": "class Solution:\n  def triangleNumber(self, nums: list[int]) -> int:\n    ans = 0\n\n    nums.sort()\n\n    for k in range(len(nums) - 1, 1, -1):\n      i = 0\n      j = k - 1\n      while i < j:\n        if nums[i] + nums[j] > nums[k]:\n          ans += j - i\n          j -= 1\n        else:\n          i += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int triangleNumber(vector<int>& nums) {\n    if (nums.size() < 3)\n      return 0;\n\n    int ans = 0;\n\n    ranges::sort(nums);\n\n    for (int k = nums.size() - 1; k > 1; --k) {\n      int i = 0;\n      int j = k - 1;\n      while (i < j)\n        if (nums[i] + nums[j] > nums[k]) {\n          // (nums[i], nums[j], nums[k])\n          // (nums[i + 1], nums[j], nums[k])\n          // ...\n          // (nums[j - 1], nums[j], nums[k])\n          ans += j - i;\n          --j;\n        } else {\n          ++i;\n        }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/611.%20Valid%20Triangle%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

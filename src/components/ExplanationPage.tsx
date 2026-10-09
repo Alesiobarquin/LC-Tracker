@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { problemMap } from "../data/problems";
+import { useEffect, useState } from "react";
+import { ensureExtendedCatalogLoaded, problemMap } from "../data/problems";
 import { useProblemProgress } from "../hooks/useUserData";
 import { useStore } from "../store/useStore";
 import { parsePersonalExplanation } from "../utils/personalExplanation";
@@ -20,6 +20,36 @@ export function ExplanationPage() {
   const { progress } = useProblemProgress();
   const activeRecall = useStore((state) => state.activeRecall);
   const [personal, setPersonal] = useState(true);
+  const [catalogReady, setCatalogReady] = useState(false);
+  const [catalogError, setCatalogError] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    setCatalogReady(false);
+    setCatalogError(false);
+    if (!problemId || problemMap[problemId]) {
+      setCatalogReady(true);
+      return;
+    }
+    void ensureExtendedCatalogLoaded()
+      .then(() => {
+        if (!cancelled) setCatalogReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setCatalogError(true);
+      });
+    return () => { cancelled = true; };
+  }, [problemId]);
+  if (!problem && catalogError)
+    return (
+      <div role="alert">
+        Could not load the problem catalog.{" "}
+        <button className="quiet-action" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  if (!problem && !catalogReady)
+    return <p role="status">Loading problem…</p>;
   if (!problem)
     return (
       <p>

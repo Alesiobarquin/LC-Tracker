@@ -1,0 +1,14 @@
+{
+  "problemId": "k-diff-pairs-in-an-array",
+  "approach": "Value-to-Index Map and One-Time Pair Counting",
+  "explanation": "### How it works\n\nMap each distinct value to one of its indices. For a value x, a pair exists when x + k is present at another index. After counting it, remove that target entry so later duplicates cannot count the same value pair again.\n\n### Steps\n\n1. Build a value-to-index map.\n2. For each original index, look up value + k and ensure it uses another index.\n3. Count the pair and remove the target value from the map.\n\n### Complexity\n\n- Time: O(n) expected with hashing.\n- Space: O(n).\n\n### Things to watch for\n\n- Count distinct value pairs, rather than every index pair.\n- When k = 0, require at least two occurrences.\n- Removing targets prevents duplicate counts.",
+  "code": {
+    "python": "class Solution:\n  def findPairs(self, nums: list[int], k: int) -> int:\n    ans = 0\n    numToIndex = {num: i for i, num in enumerate(nums)}\n\n    for i, num in enumerate(nums):\n      target = num + k\n      if target in numToIndex and numToIndex[target] != i:\n        ans += 1\n        del numToIndex[target]\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findPairs(vector<int>& nums, int k) {\n    int ans = 0;\n    unordered_map<int, int> numToIndex;\n\n    for (int i = 0; i < nums.size(); ++i)\n      numToIndex[nums[i]] = i;\n\n    for (int i = 0; i < nums.size(); ++i) {\n      const int target = nums[i] + k;\n      if (const auto it = numToIndex.find(target);\n          it != numToIndex.cend() && it->second != i) {\n        ++ans;\n        numToIndex.erase(target);\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/532.%20K-diff%20Pairs%20in%20an%20Array",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

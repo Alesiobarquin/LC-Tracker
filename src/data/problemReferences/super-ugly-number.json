@@ -1,0 +1,14 @@
+{
+  "problemId": "super-ugly-number",
+  "approach": "Merge Prime-Multiple Streams",
+  "explanation": "### How it works\n\nGeneralize ugly-number generation to the supplied primes. Each prime points into the previously generated sequence and proposes its next multiple. Append the minimum proposal and advance every tied stream, preserving sorted order without duplicate numbers.\n\n### Steps\n\n1. Start with one and one index per prime.\n2. Compute each prime times its indexed sequence value.\n3. Append the minimum and advance all matching indices.\n\n### Complexity\n\n- Time: O(nk), for n generated numbers and k primes.\n- Space: O(n + k).\n\n### Things to watch for\n\n- Advance all tied prime streams.\n- One is included even though it has no prime factors.\n- Use a sufficiently wide multiplication type in C++.",
+  "code": {
+    "python": "class Solution:\n  def nthSuperUglyNumber(self, n: int, primes: list[int]) -> int:\n    k = len(primes)\n    nums = [1]\n    indices = [0] * k\n\n    while len(nums) < n:\n      nexts = [0] * k\n      for i in range(k):\n        nexts[i] = nums[indices[i]] * primes[i]\n      next = min(nexts)\n      for i in range(k):\n        if next == nexts[i]:\n          indices[i] += 1\n      nums.append(next)\n\n    return nums[-1]\n",
+    "cpp": "class Solution {\n public:\n  int nthSuperUglyNumber(int n, vector<int>& primes) {\n    const int k = primes.size();\n    vector<int> indices(k);\n    vector<long long> uglyNums{1};\n\n    while (uglyNums.size() < n) {\n      vector<long long> nexts(k);\n      for (int i = 0; i < k; ++i)\n        nexts[i] = uglyNums[indices[i]] * primes[i];\n      const long long next = ranges::min(nexts);\n      for (int i = 0; i < k; ++i)\n        if (next == nexts[i])\n          ++indices[i];\n      uglyNums.push_back(next);\n    }\n\n    return uglyNums.back();\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/313.%20Super%20Ugly%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

@@ -1,0 +1,2306 @@
+{
+  "revision": "9b85aa15e086d0b5dc1ead7184bca547942e6ff6",
+  "references": [
+    {
+      "number": 8,
+      "id": "string-to-integer-atoi",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/8. String to Integer (atoi)/8.py",
+      "cppPath": "solutions/8. String to Integer (atoi)/8.cpp",
+      "pythonSha256": "cfe89bb906d0080f72d5c4ee0699e2c9bfb9ae77903279224ca021e5813d21ec",
+      "cppSha256": "5ade6a8f77378ee62e2520e6108f9a5db72c5177ead9083ee31a3c9a3d5e5442",
+      "approach": "Parse and Clamp",
+      "insight": "Read the optional sign, then consume the initial run of digits. Each digit extends the current value by multiplying by ten and adding the digit; stop at the first other character. Clamp as soon as the signed value leaves the 32-bit range.",
+      "steps": [
+        "Skip leading spaces and read one optional sign.",
+        "Accumulate consecutive digits.",
+        "Clamp overflow or return the signed value."
+      ],
+      "time": "O(n) for n input characters.",
+      "space": "Python O(n) for stripped/sliced strings; C++ O(n) for the string copy.",
+      "pitfalls": [
+        "A sign without digits returns zero.",
+        "Later digits after a non-digit are ignored; `4193 with words` yields 4193.",
+        "Include both negative and positive overflow cases."
+      ]
+    },
+    {
+      "number": 16,
+      "id": "3sum-closest",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/16. 3Sum Closest/16.py",
+      "cppPath": "solutions/16. 3Sum Closest/16.cpp",
+      "pythonSha256": "1b571039697d57ff642ee2268072ef8dcb5558c3d179131355531ab1aad881b2",
+      "cppSha256": "f18512be353e41507d6ac83ecbdd51a8bf07cb65f3ecaeb3c40eb8bb7ab15da2",
+      "approach": "Sorting and Two Pointers",
+      "insight": "After sorting, fix the first number and search the remaining suffix with two pointers. A sum below the target needs a larger left value; a sum above it needs a smaller right value. Track the closest sum encountered, returning immediately on an exact match.",
+      "steps": [
+        "Sort the array and initialize a valid three-number sum.",
+        "For each first index, scan the suffix from both ends.",
+        "Update the closest sum and move the appropriate pointer."
+      ],
+      "time": "O(n²).",
+      "space": "Python O(n) worst-case sorting workspace; C++ O(log n) sorting stack.",
+      "pitfalls": [
+        "Return the sum, rather than the distance to the target.",
+        "Each triplet must use three different indices.",
+        "Sorting changes the input order."
+      ]
+    },
+    {
+      "number": 38,
+      "id": "count-and-say",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/38. Count and Say/38.py",
+      "cppPath": "solutions/38. Count and Say/38.cpp",
+      "pythonSha256": "20b2182e0736be98ebd165b5686928eae4939f3359d3b6b149b1f7f7e2a00b1d",
+      "cppSha256": "5a0e42538468cf75d59fb9938f503bcea415513fdb6647459aba9b9987270a59",
+      "approach": "Run-Length Description",
+      "insight": "Each term describes consecutive runs in the previous term. For a run of three ones, write `31`, meaning three occurrences of one. Build the next term from complete runs before replacing the current term.",
+      "steps": [
+        "Start from `1`.",
+        "Count each consecutive run and append its count followed by its character.",
+        "Repeat n - 1 times."
+      ],
+      "time": "O(S), where S is the sum of the lengths of all generated terms.",
+      "space": "O(L), where L is the longest generated term.",
+      "pitfalls": [
+        "The count describes a run, rather than the total frequency of a digit.",
+        "For n = 1, return `1`.",
+        "Use a list of fragments in Python to avoid repeated copying during construction."
+      ]
+    },
+    {
+      "number": 82,
+      "id": "remove-duplicates-from-sorted-list-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/82. Remove Duplicates from Sorted List II/82.py",
+      "cppPath": "solutions/82. Remove Duplicates from Sorted List II/82.cpp",
+      "pythonSha256": "f20a21539e9719c77e8190781fa7ab76210b8456b96ed05e104e5e7fcd1921a7",
+      "cppSha256": "dd1c0e6ee33d09ebbcf3c420728a7057c8b054c67eb3e6d159cb7ad8e5acf61d",
+      "approach": "Dummy Node and Run Skipping",
+      "insight": "Because the list is sorted, every repeated value forms one consecutive run. Keep a pointer to the last accepted node and move the scanning pointer to the end of a run. Keep a run only when it contained one node.",
+      "steps": [
+        "Place a dummy before the head.",
+        "Scan to the last node of each equal-value run.",
+        "Advance the accepted pointer for a singleton, or bypass the entire repeated run."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Remove every copy of a repeated value, including the first.",
+        "The dummy handles a repeated run at the head.",
+        "An entirely duplicated list returns an empty list."
+      ]
+    },
+    {
+      "number": 89,
+      "id": "gray-code",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/89. Gray Code/89.py",
+      "cppPath": "solutions/89. Gray Code/89.cpp",
+      "pythonSha256": "6d69c11bf12bd3d9928daab734f2fa8faeb7bdc426e5c3935809c90c4c89a59d",
+      "cppSha256": "5f8bdd5576e70311187d96e519918c9f7432bd180383ca986f424678f4984de0",
+      "approach": "Reflect and Prefix",
+      "insight": "Reflect the current Gray-code sequence and prefix the reflected half with the next bit. The boundary between the old and new halves differs only in that bit, while adjacency inside each half preserves the earlier one-bit property.",
+      "steps": [
+        "Start with [0].",
+        "For each bit position, walk the existing sequence backward.",
+        "Append each visited value with the new bit set."
+      ],
+      "time": "O(2^n).",
+      "space": "O(2^n) for the returned sequence; O(1) additional workspace.",
+      "pitfalls": [
+        "Traverse the old sequence in reverse to preserve adjacency.",
+        "Do not iterate over newly appended values.",
+        "The first and last codes must also differ by one bit."
+      ]
+    },
+    {
+      "number": 107,
+      "id": "binary-tree-level-order-traversal-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/107. Binary Tree Level Order Traversal II/107.py",
+      "cppPath": "solutions/107. Binary Tree Level Order Traversal II/107.cpp",
+      "pythonSha256": "38aba30dcde08d083b86e2bb00e7d3f4cb188c4d2af775c89cc7ae98e95fd702",
+      "cppSha256": "3ec65b9ab0e9e6786c784f875cf536e9600d9e046cec6b911f061f43cb6f510e",
+      "approach": "Breadth-First Search and Reverse",
+      "insight": "A queue visits the tree one depth at a time. Save each level in its own list, then reverse the order of the level lists. Values inside a level retain their left-to-right order.",
+      "steps": [
+        "Return an empty list for an empty tree.",
+        "Process exactly the current queue length for each level.",
+        "Append the level and reverse all levels at the end."
+      ],
+      "time": "O(n).",
+      "space": "O(n) including the queue and returned levels.",
+      "pitfalls": [
+        "Reverse level order, keeping values within each level in order.",
+        "Capture queue length before adding children.",
+        "An empty tree has no levels."
+      ]
+    },
+    {
+      "number": 109,
+      "id": "convert-sorted-list-to-binary-search-tree",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/109. Convert Sorted List to Binary Search Tree/109.py",
+      "cppPath": "solutions/109. Convert Sorted List to Binary Search Tree/109.cpp",
+      "pythonSha256": "cd772cb4d87202fd52697a77f73e27c3aa58311b9df638f579dfbfa5e09668a2",
+      "cppSha256": "e61bcea70c53f336238a07ed69ea27084d45e27dfac134bbc19b1d9f98053267",
+      "approach": "Middle Node Divide and Conquer",
+      "insight": "The middle value of a sorted list is a suitable root for a balanced search tree. Slow and fast pointers locate it; detach the left half and recursively build the two subtrees. Repeating this split keeps subtree sizes close.",
+      "steps": [
+        "Handle empty and one-node lists.",
+        "Find the middle and disconnect its predecessor.",
+        "Create the root and recursively build its left and right halves."
+      ],
+      "time": "O(n log n), because each recursion level scans its lists.",
+      "space": "O(log n) recursion stack, excluding O(n) output tree.",
+      "pitfalls": [
+        "This implementation disconnects links in the input list.",
+        "Handle one node before accessing the middle predecessor.",
+        "The resulting tree need not have one unique shape."
+      ]
+    },
+    {
+      "number": 111,
+      "id": "minimum-depth-of-binary-tree",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/111. Minimum Depth of Binary Tree/111.py",
+      "cppPath": "solutions/111. Minimum Depth of Binary Tree/111.cpp",
+      "pythonSha256": "e63a1b22beee523fa2139f942eeb27445d123abb5d101ef59c18336d4537b181",
+      "cppSha256": "1a34be02a92337eca774e10ba6f6140eabc6613dc8d90d6c2c114cfca280d99a",
+      "approach": "Recursive Minimum Leaf Depth",
+      "insight": "A leaf requires both children to be absent. When one child is missing, the minimum depth must follow the existing child; taking the minimum with an empty child would incorrectly end the path early. When both exist, take the shallower subtree depth.",
+      "steps": [
+        "Return zero for an empty root.",
+        "Follow the existing child when the other is absent.",
+        "Otherwise return one plus the smaller child depth."
+      ],
+      "time": "O(n).",
+      "space": "O(h) recursion stack.",
+      "pitfalls": [
+        "Minimum depth ends at a leaf, rather than a missing child.",
+        "A chain’s minimum depth equals its full length.",
+        "An empty tree has depth zero."
+      ]
+    },
+    {
+      "number": 113,
+      "id": "path-sum-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/113. Path Sum II/113.py",
+      "cppPath": "solutions/113. Path Sum II/113.cpp",
+      "pythonSha256": "c981431a4fe83b5b007bc7c62e55d9e389e4e5eea93e5c722b772f2dfad55ccb",
+      "cppSha256": "1e76b22779d086ddc4963a99eca139c08048c06b550adebe9cac022be3ea74bf",
+      "approach": "Depth-First Search with Backtracking",
+      "insight": "Track the values on the current root-to-node path and the target still needed. Only a leaf can complete a root-to-leaf path. Copy a successful path into the output, then remove the current node when returning so sibling searches start with the correct prefix.",
+      "steps": [
+        "Append the node and reduce the remaining target.",
+        "At a leaf, save the path if the remaining sum matches.",
+        "Visit children, then pop the node from the path."
+      ],
+      "time": "O(n + K), where K is the total number of values in returned paths.",
+      "space": "O(h) working space plus O(K) output, for tree height h.",
+      "pitfalls": [
+        "A matching internal-node sum is not a completed path.",
+        "Negative values prevent pruning simply because the remaining target is negative.",
+        "Copy saved paths before backtracking."
+      ]
+    },
+    {
+      "number": 114,
+      "id": "flatten-binary-tree-to-linked-list",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/114. Flatten Binary Tree to Linked List/114-3.py",
+      "cppPath": "solutions/114. Flatten Binary Tree to Linked List/114-3.cpp",
+      "pythonSha256": "5292e8d5016c53aceb154466a4c28f80e6a9d97870818ab5b5a9764456ad9995",
+      "cppSha256": "b6b4108bcb4dfc45c50a681f69766555bd499fd06bbbb67610e06d13b78b2da4",
+      "approach": "Iterative Pointer Rewiring",
+      "insight": "Preorder visits the left subtree before the right subtree. Attach the original right subtree to the rightmost node of the left subtree, then move the left subtree to the right link. Continue along the right chain, gradually forming the required preorder list.",
+      "steps": [
+        "If a left child exists, find its rightmost node.",
+        "Attach the old right subtree there and move the left subtree to root.right.",
+        "Clear root.left and advance to root.right."
+      ],
+      "time": "O(n); predecessor scans and the main walk traverse edges a bounded number of times.",
+      "space": "O(1).",
+      "pitfalls": [
+        "Save the original right subtree through rewiring so it is not lost.",
+        "Every left pointer must become null.",
+        "The tree is modified in place; no new list nodes are needed."
+      ]
+    },
+    {
+      "number": 137,
+      "id": "single-number-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/137. Single Number II/137.py",
+      "cppPath": "solutions/137. Single Number II/137-2.cpp",
+      "pythonSha256": "9382268203a4b143f9bfdde95d2438b58000e5e496fa81e040977c8d0043c38d",
+      "cppSha256": "25c3da6e2d86f9580af8afda3c1b6c35b83e3d4dd66ddef0c219fb05b86d32a1",
+      "approach": "Bit Counts Modulo Three",
+      "insight": "Two bit masks represent bits seen once and twice modulo three. Update the once mask while excluding bits already in the twice mask, then update the twice mask using the new once mask. A third occurrence clears both states, leaving the unique number in the once mask.",
+      "steps": [
+        "Initialize the once and twice masks to zero.",
+        "Update once, then twice, for every number.",
+        "Return the once mask."
+      ],
+      "time": "O(n) for fixed-width integers.",
+      "space": "O(1).",
+      "pitfalls": [
+        "The second update must use the newly updated once mask.",
+        "Negative values must retain their signed bit representation.",
+        "Ordinary XOR only cancels pairs, so it cannot handle triples."
+      ]
+    },
+    {
+      "number": 165,
+      "id": "compare-version-numbers",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/165. Compare Version Numbers/165.py",
+      "cppPath": "solutions/165. Compare Version Numbers/165.cpp",
+      "pythonSha256": "bd0f6c6fa9286e2e8a7e0c91ae98c9aa44487cea4b9f511201e86c66c6166e24",
+      "cppSha256": "beed0faa80f5b00d2c0bdc1424c8c9f9034b9880e075f39b540c44103cd4339f",
+      "approach": "Compare Numeric Revisions",
+      "insight": "Split or stream each version into numeric revisions. Compare matching revisions from left to right, interpreting a missing revision as zero. Converting each revision to an integer removes leading zeros without changing its numeric value.",
+      "steps": [
+        "Read the next revision from each version.",
+        "Compare them numerically, substituting zero when one version ends.",
+        "Return zero when all revisions match."
+      ],
+      "time": "O(n + m) for the two input lengths.",
+      "space": "Python O(n + m) for split revisions; C++ O(n + m) for stream copies.",
+      "pitfalls": [
+        "Compare numeric values rather than strings; `10` exceeds `2`.",
+        "`1.0` and `1` are equal.",
+        "Leading zeros do not create a different revision."
+      ]
+    },
+    {
+      "number": 166,
+      "id": "fraction-to-recurring-decimal",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/166. Fraction to Recurring Decimal/166.py",
+      "cppPath": "solutions/166. Fraction to Recurring Decimal/166.cpp",
+      "pythonSha256": "8107e5f9933b33eded3ac7bb66f13266b328ee15be1087b7583d1b6b0ee0520d",
+      "cppSha256": "0728f08c5ed6fdf6a848722ac67601c6f3eadc2048b1c8df74337a2dd9137e66",
+      "approach": "Long Division with Remainder Positions",
+      "insight": "Long division produces the next digit from the current remainder. If the same remainder appears again, every following division step repeats. Store the output position of each remainder so the repeated part can be enclosed in parentheses.",
+      "steps": [
+        "Determine the sign and emit the integer part.",
+        "Map each remainder to its digit position before multiplying it by ten.",
+        "Generate digits until the remainder is zero or repeats, then mark the cycle."
+      ],
+      "time": "O(L) for L generated digits, using amortized string/list appends.",
+      "space": "O(L) for remainder positions and output.",
+      "pitfalls": [
+        "Promote signed integers before taking an absolute value in C++.",
+        "Store the remainder position before generating its digit.",
+        "Zero numerator returns `0`, with no negative sign."
+      ]
+    },
+    {
+      "number": 171,
+      "id": "excel-sheet-column-number",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/171. Excel Sheet Column Number/171.py",
+      "cppPath": "solutions/171. Excel Sheet Column Number/171.cpp",
+      "pythonSha256": "aa57a09a54b4791be57a02c2d42d2ccb6ec8a35a693c3734efbf7ac81551f1b6",
+      "cppSha256": "52e234e9d911d7ea36b08ac97a9f68af74dfae26b52e6ebe5e9b47cb0039e0e8",
+      "approach": "Base-26 Accumulation",
+      "insight": "Excel columns use digits A through Z with values one through 26. Read left to right: multiplying the previous total by 26 shifts it one place, and adding the new letter’s value extends the column number. There is no zero digit.",
+      "steps": [
+        "Initialize the total to zero.",
+        "For each letter, multiply the total by 26.",
+        "Add its one-based letter value."
+      ],
+      "time": "O(n) for n letters.",
+      "space": "O(1).",
+      "pitfalls": [
+        "A maps to one, rather than zero.",
+        "For `AB`, the result is 1 × 26 + 2 = 28.",
+        "Do not treat the title as ordinary zero-based base 26."
+      ]
+    },
+    {
+      "number": 172,
+      "id": "factorial-trailing-zeroes",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/172. Factorial Trailing Zeroes/172.py",
+      "cppPath": "solutions/172. Factorial Trailing Zeroes/172.cpp",
+      "pythonSha256": "97dee13cc90b2e258409ce935cfb5a4d70363119f605bce726b4741f4d594a90",
+      "cppSha256": "8f73a92df29b0e0ad0a95b81ba852b726a049759dfff52ba2799bf7eb6d5fafe",
+      "approach": "Count Factors of Five",
+      "insight": "Each trailing zero needs a factor pair of two and five. Factorials contain more twos than fives, so count fives. Multiples of 25 contribute an extra five, multiples of 125 another, and repeated division by five counts all these contributions.",
+      "steps": [
+        "Add n // 5.",
+        "Repeat with n // 5 until it is zero.",
+        "Return the accumulated contributions."
+      ],
+      "time": "O(log₅ n).",
+      "space": "O(log₅ n) for the recursive examples.",
+      "pitfalls": [
+        "Do not compute n!; it quickly overflows.",
+        "Multiples of 25 contribute twice.",
+        "Zero factorial has zero trailing zeros."
+      ]
+    },
+    {
+      "number": 216,
+      "id": "combination-sum-iii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/216. Combination Sum III/216.py",
+      "cppPath": "solutions/216. Combination Sum III/216.cpp",
+      "pythonSha256": "9ad18d7c751a367b40028ca9479c8c1718138fd6ccf8ce93918542e02cb6e35e",
+      "cppSha256": "0739e9d66ad44474722c4405de0fa58ae7ed21c1639e861d412e219e3bc2ffa2",
+      "approach": "Backtracking over Distinct Digits",
+      "insight": "Choose increasing digits from one through nine. Increasing the next starting digit prevents reuse and duplicate orderings. Track how many digits remain and how much of the target sum remains, accepting only when both reach zero together.",
+      "steps": [
+        "Try digits from the current start through nine.",
+        "Recurse with one fewer slot, a smaller sum, and the next start.",
+        "Save a path only when both remaining count and sum are zero."
+      ],
+      "time": "O(k × 2^9) as a conservative bound for exploring digit subsets and copying paths.",
+      "space": "O(k) stack/path work, excluding output.",
+      "pitfalls": [
+        "A correct sum with the wrong number of digits is invalid.",
+        "Each digit may appear once.",
+        "Use increasing choices so different permutations are not counted separately."
+      ]
+    },
+    {
+      "number": 222,
+      "id": "count-complete-tree-nodes",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/222. Count Complete Tree Nodes/222-2.py",
+      "cppPath": "solutions/222. Count Complete Tree Nodes/222-2.cpp",
+      "pythonSha256": "cba47c1682127b8450d7f332b8dd684eaf71648fa80967368264ce313b035aab",
+      "cppSha256": "fa5eb23a29911bd9f6af1f93bc08753d3074d64b740e9537b4a4596782b66e58",
+      "approach": "Recognize Perfect Complete Subtrees",
+      "insight": "In a complete tree, equal depths along the far-left and far-right paths identify a perfect subtree. Its node count is 2^height - 1. When the depths differ, recursively count the children; at each level one child is perfect and can be counted directly.",
+      "steps": [
+        "Measure the far-left and far-right depths.",
+        "If equal, return 2^height - 1.",
+        "Otherwise return one plus both child counts."
+      ],
+      "time": "O(log² n), relying on completeness.",
+      "space": "O(log n) recursion stack.",
+      "pitfalls": [
+        "The input must be a complete tree.",
+        "The measured height includes the root.",
+        "The same shortcut is not valid for an arbitrary sparse binary tree."
+      ]
+    },
+    {
+      "number": 223,
+      "id": "rectangle-area",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/223. Rectangle Area/223.py",
+      "cppPath": "solutions/223. Rectangle Area/223.cpp",
+      "pythonSha256": "9cbb8b2682b71c9c010797455c0fe5cb763fd54088c7595da101efa211e8d747",
+      "cppSha256": "347c8a656e8bd45b58a99e9ad0d530a63092797326838b243a2165b3408ae406",
+      "approach": "Subtract Rectangle Intersection",
+      "insight": "The union area is the sum of the two rectangle areas minus their overlap. The overlap width and height come from the intersection of the two axis intervals, with a negative or zero extent treated as no overlap.",
+      "steps": [
+        "Compute each rectangle area.",
+        "Find the intersecting x and y extents and clamp them at zero.",
+        "Subtract overlap width times height from the area sum."
+      ],
+      "time": "O(1).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Touching edges have zero overlap area.",
+        "Coordinates may be negative.",
+        "Subtract only the intersection, rather than a bounding rectangle."
+      ]
+    },
+    {
+      "number": 228,
+      "id": "summary-ranges",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/228. Summary Ranges/228.py",
+      "cppPath": "solutions/228. Summary Ranges/228.cpp",
+      "pythonSha256": "142a10bc7df590f0e5f5eba33281ef2272ab0f8f39bcc731e2c981d25a253a6f",
+      "cppSha256": "9686cd00d24fa0e0f778e8dc58bf9daa2cad9398a37e72ac685158e2ce24fa5a",
+      "approach": "Scan Consecutive Runs",
+      "insight": "The sorted distinct input splits into maximal runs of consecutive values. Scan each run once, remembering its first and last values. Emit one number for a singleton and a start->end string for a longer run.",
+      "steps": [
+        "Remember the first value of a run.",
+        "Advance while the next value differs by one.",
+        "Format the run and continue at the next unconsumed value."
+      ],
+      "time": "O(n), excluding integer formatting proportional to output characters.",
+      "space": "O(1) working space plus output.",
+      "pitfalls": [
+        "The input is sorted with no duplicates.",
+        "A singleton has no arrow.",
+        "Avoid overflowing a boundary value when checking adjacency in C++."
+      ]
+    },
+    {
+      "number": 237,
+      "id": "delete-node-in-a-linked-list",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/237. Delete Node in a Linked List/237.py",
+      "cppPath": "solutions/237. Delete Node in a Linked List/237.cpp",
+      "pythonSha256": "52e79b2876b46b6960d50b887eccddc6e5d398993feefbe7206966ef70cce01f",
+      "cppSha256": "8cadc2d594379e0ec5856e7a726b98901a2ac84800442a6da7aa68471708a111",
+      "approach": "Copy the Successor and Bypass It",
+      "insight": "The predecessor is unavailable, but the supplied node is guaranteed not to be the tail. Copy the successor value into the supplied node and bypass the successor. The resulting sequence is the same as deleting the supplied value at that position.",
+      "steps": [
+        "Copy node.next.val into node.val.",
+        "Set node.next to node.next.next.",
+        "Finish without traversing the list."
+      ],
+      "time": "O(1).",
+      "space": "O(1).",
+      "pitfalls": [
+        "This relies on the non-tail guarantee.",
+        "The physical supplied node remains; its value and next link change.",
+        "Returning a new head is unnecessary."
+      ]
+    },
+    {
+      "number": 240,
+      "id": "search-a-2d-matrix-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/240. Search a 2D Matrix II/240.py",
+      "cppPath": "solutions/240. Search a 2D Matrix II/240.cpp",
+      "pythonSha256": "d7a0f86fbd493ac3ddfaf289e50a9cafff33433807552ba63b4a64cde8d13f23",
+      "cppSha256": "3e4d7957e7ae66a5922edb07b3e80a7ed2bc14a33ba42986ede7d5c802e717fe",
+      "approach": "Staircase Search",
+      "insight": "At the top-right corner, every value to the left is smaller and every value below is larger. A comparison therefore eliminates one whole column or row. Move left when the current value is too large and down when it is too small.",
+      "steps": [
+        "Start at row zero and the last column.",
+        "Compare the current cell with the target.",
+        "Move left or down until the target is found or the matrix bounds are crossed."
+      ],
+      "time": "O(rows + columns).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Rows and columns are individually sorted; flattening the matrix is not generally sorted.",
+        "A single row or column still works.",
+        "The problem guarantees a nonempty matrix."
+      ]
+    },
+    {
+      "number": 241,
+      "id": "different-ways-to-add-parentheses",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/241. Different Ways to Add Parentheses/241.py",
+      "cppPath": "solutions/241. Different Ways to Add Parentheses/241.cpp",
+      "pythonSha256": "f93642fca16289c49c60b201a3055f5ec53d2b4f90ff229ccaf3bd0c3c7d0d38",
+      "cppSha256": "1aeb1e200326b5c0af0e6d129d320aa4ad23fd333b8573c16adb20025458e9a5",
+      "approach": "Memoized Expression Splitting",
+      "insight": "Each operator can be the final operation in a parenthesization. Recursively obtain every result for its left and right substrings, combine every pair with that operator, and memoize substring results. A substring without an operator is a numeric base case.",
+      "steps": [
+        "Split at each +, -, or * operator.",
+        "Combine all left and right results for that split.",
+        "Cache the result list; parse the number when no split exists."
+      ],
+      "time": "Output-sensitive and exponential in the number of operators; there are Catalan-many parenthesizations, with substring work as well.",
+      "space": "Exponential result storage plus recursion and substring copies.",
+      "pitfalls": [
+        "Preserve duplicate results from different parenthesizations.",
+        "Parse multi-digit numeric leaves as a whole.",
+        "Apply arithmetic directly rather than evaluating arbitrary text."
+      ]
+    },
+    {
+      "number": 257,
+      "id": "binary-tree-paths",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/257. Binary Tree Paths/257.py",
+      "cppPath": "solutions/257. Binary Tree Paths/257.cpp",
+      "pythonSha256": "e745561fc76d1c0238b3ac3f6611350aa291db505acdbc6d1ee987df21405701",
+      "cppSha256": "4fe936aa721c648ca237daaebc240d1af5cf37e3ad74760e6d85eb61867cce03",
+      "approach": "Root-to-Leaf DFS Paths",
+      "insight": "Maintain a shared path prefix during depth-first search. At a leaf, join the prefix and leaf value into one output string. Append before visiting children and remove afterward so the next sibling receives the correct path.",
+      "steps": [
+        "Visit the current node and test whether it is a leaf.",
+        "Save a complete root-to-leaf string at leaves.",
+        "Append the current prefix for child visits, then pop it."
+      ],
+      "time": "O(n + K) for n nodes and K returned characters, under fixed-width node values.",
+      "space": "O(h) working path/stack plus O(K) output.",
+      "pitfalls": [
+        "Only leaves finish a path.",
+        "Backtrack after both child calls.",
+        "Keep separators between values, with none after the final value."
+      ]
+    },
+    {
+      "number": 258,
+      "id": "add-digits",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/258. Add Digits/258.py",
+      "cppPath": "solutions/258. Add Digits/258.cpp",
+      "pythonSha256": "b46f3cef7d3111bfa06c8d0c5c592579936ae3e0783720e280048c633f5a127b",
+      "cppSha256": "1e0ca9a53d032d70d62d1cc1e77c6d66268b909966cc1fbaebd8ca21f1266d8b",
+      "approach": "Digital Root Modulo Nine",
+      "insight": "A number has the same remainder modulo nine as the sum of its decimal digits, because ten is congruent to one modulo nine. Repeating digit sums therefore yields its digital root: zero stays zero, and a positive multiple of nine maps to nine.",
+      "steps": [
+        "Return zero for input zero.",
+        "For positive input compute 1 + (num - 1) % 9.",
+        "Return the single-digit result."
+      ],
+      "time": "O(1) for fixed-width input.",
+      "space": "O(1).",
+      "pitfalls": [
+        "A positive multiple of nine returns nine, rather than zero.",
+        "Keep zero as its own case.",
+        "The input is nonnegative."
+      ]
+    },
+    {
+      "number": 259,
+      "id": "3sum-smaller",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/259. 3Sum Smaller/259.py",
+      "cppPath": "solutions/259. 3Sum Smaller/259.cpp",
+      "pythonSha256": "0b630d19cf6a3d44a0a5798287af0e03c3a219e7dd8d2574e7acd458d397dd7c",
+      "cppSha256": "1d70ab002127a8e887f42e598956bb40095a734bb4d5563324dc3132a66b26d2",
+      "approach": "Sorting and Two-Pointer Counting",
+      "insight": "Fix the first value in a sorted array. If the current left/right pair makes a sum below target, every smaller right index paired with that same left value also works. Count all r - l choices at once, then advance the left pointer.",
+      "steps": [
+        "Sort and choose each first index.",
+        "Scan its suffix with left and right pointers.",
+        "Count r - l valid pairs when the sum is small; otherwise move right leftward."
+      ],
+      "time": "O(n²).",
+      "space": "Python O(n) worst-case sorting workspace; C++ O(log n) sorting stack.",
+      "pitfalls": [
+        "Use a strict comparison with target.",
+        "Count index triplets, including repeated values at different positions.",
+        "Return zero for fewer than three values."
+      ]
+    },
+    {
+      "number": 264,
+      "id": "ugly-number-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/264. Ugly Number II/264.py",
+      "cppPath": "solutions/264. Ugly Number II/264.cpp",
+      "pythonSha256": "d036385cacf7d7d4b8fe1a1af933ca6eb835e8d1d6ccb929557b3cc0d3bd019a",
+      "cppSha256": "0555051cb657555b7f8fc1f5d1949c0163caaef1e99b3f8aa3d2e64efd30d7e8",
+      "approach": "Three Monotone Candidate Streams",
+      "insight": "Every ugly number after one is an earlier ugly number multiplied by two, three, or five. Keep one index for each stream and append the smallest next candidate. Advance every stream that produced that candidate so duplicates are generated only once.",
+      "steps": [
+        "Start the sequence at one.",
+        "Compute the next multiples from the three indices.",
+        "Append the minimum and advance all matching indices until n values exist."
+      ],
+      "time": "O(n).",
+      "space": "O(n).",
+      "pitfalls": [
+        "Use separate if checks rather than elif when candidates tie.",
+        "One is the first ugly number.",
+        "Advancing only one tied stream creates duplicates."
+      ]
+    },
+    {
+      "number": 274,
+      "id": "h-index",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/274. H-Index/274.py",
+      "cppPath": "solutions/274. H-Index/274.cpp",
+      "pythonSha256": "697a9db210e807f1aad12e92c0782bd0fe3a53405ff50fe56b87ca37521c67be",
+      "cppSha256": "f9807604acef7fe8a81fab3bd5bce3f9f12d553e582191c0a27d34b2a0cacaa8",
+      "approach": "Citation Buckets",
+      "insight": "An h-index cannot exceed the number of papers. Bucket every citation count at its value capped to n. Scanning downward accumulates the number of papers with at least the current candidate h; the first candidate with at least h papers is the maximum valid answer.",
+      "steps": [
+        "Count citations into n + 1 capped buckets.",
+        "Scan candidate h values downward while accumulating papers.",
+        "Return the first h whose accumulated count is at least h."
+      ],
+      "time": "O(n).",
+      "space": "O(n).",
+      "pitfalls": [
+        "Citations above n belong in the n bucket.",
+        "The h-index counts papers, rather than total citations.",
+        "All zero citations produce zero."
+      ]
+    },
+    {
+      "number": 275,
+      "id": "h-index-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/275. H-Index II/275.py",
+      "cppPath": "solutions/275. H-Index II/275.cpp",
+      "pythonSha256": "81024091697b772026c50024f14e4814d875d79fcc65ddb655ba965e3be34f39",
+      "cppSha256": "a298e6f941a81cab03f40adeeeff77b4a21b4aa4e4f2e5c055ca26db78dfc9b8",
+      "approach": "Binary Search for the First Valid Position",
+      "insight": "At sorted index i, there are n - i papers with citations at least citations[i]. The condition citations[i] >= n - i becomes true monotonically as i increases. Find its first true position and return n minus that position.",
+      "steps": [
+        "Binary search indices in the half-open range [0, n).",
+        "Move right toward the first position with citations[mid] + mid >= n.",
+        "Return n - left."
+      ],
+      "time": "O(log n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "The input must already be sorted.",
+        "Allow the search to end at n, meaning h = 0.",
+        "Use >= so equality is valid."
+      ]
+    },
+    {
+      "number": 285,
+      "id": "inorder-successor-in-bst",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/285. Inorder Successor in BST/285.py",
+      "cppPath": "solutions/285. Inorder Successor in BST/285.cpp",
+      "pythonSha256": "d74ef17ed6a4c615223e5f51f020dcac4f3c7ac91763a94e2a19d7180ceb1f42",
+      "cppSha256": "3d7960e75488c02e3e2a6be70e595e5633b35c9bb69c7263f3ec77d24160e1d2",
+      "approach": "BST Successor Search",
+      "insight": "The successor is the smallest value strictly greater than p.val. A root no greater than p cannot qualify, so search its right subtree. Otherwise search left for a closer candidate and fall back to the root if none exists.",
+      "steps": [
+        "Compare each root with p.val.",
+        "Search right when root.val <= p.val.",
+        "Otherwise return a successor found on the left, or the root."
+      ],
+      "time": "O(h), where h is tree height.",
+      "space": "O(h) recursive stack.",
+      "pitfalls": [
+        "The successor need not be a descendant of p.",
+        "The largest node has no successor.",
+        "A successor must be strictly greater."
+      ]
+    },
+    {
+      "number": 289,
+      "id": "game-of-life",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/289. Game of Life/289.py",
+      "cppPath": "solutions/289. Game of Life/289.cpp",
+      "pythonSha256": "ea2bd93bfe7abb9b1d65e17b744f8c64f210a717fe4d8855941aa41dba6633c3",
+      "cppSha256": "b817128d49b55e8bc6d24ca56c568ab0c8f20aa9f254226f9e70b7c619cf6b9e",
+      "approach": "Store Old and New Cell States in Bits",
+      "insight": "Encode the old generation in the low bit and the next generation in the second bit. Neighbor counts always read the low bit, so earlier updates cannot contaminate later counts. Shift every cell right once all next states have been computed.",
+      "steps": [
+        "Count low-bit ones in each surrounding 3×3 region.",
+        "Set the second bit when the cell survives or is born.",
+        "Shift all cells right to expose the next generation."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(1).",
+      "pitfalls": [
+        "The count includes the cell itself, so a live cell survives at counts three or four.",
+        "Read neighbor old states with & 1.",
+        "Do not replace the old state before all cells have been examined."
+      ]
+    },
+    {
+      "number": 299,
+      "id": "bulls-and-cows",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/299. Bulls and Cows/299.py",
+      "cppPath": "solutions/299. Bulls and Cows/299.cpp",
+      "pythonSha256": "fc4fdd5823056907047473a7b761948b2b5a559f9e6d70badb64f59c44b18d1a",
+      "cppSha256": "710bc3622df9dcdc3356f6cc59d3fb282d27640e1484ea0117669c5085727db0",
+      "approach": "Exact Matches and Remaining Digit Counts",
+      "insight": "First count digits that match at the same position as bulls. For the remaining positions, build one frequency table per string. The minimum of the two counts for each digit gives cows without reusing digits that already counted as bulls.",
+      "steps": [
+        "Count equal-position bulls.",
+        "Count unmatched digits in two ten-element tables.",
+        "Sum per-digit minima and format the bulls and cows counts."
+      ],
+      "time": "O(n).",
+      "space": "O(1), because there are ten digit values.",
+      "pitfalls": [
+        "Remove bulls before counting cows.",
+        "Repeated digits are limited by the smaller remaining frequency.",
+        "Format the result as xAyB."
+      ]
+    },
+    {
+      "number": 313,
+      "id": "super-ugly-number",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/313. Super Ugly Number/313.py",
+      "cppPath": "solutions/313. Super Ugly Number/313.cpp",
+      "pythonSha256": "d2ad70b5f8e9778fa8c611ed6d618a73cbdf34664cc323d0e7006c98928ce57b",
+      "cppSha256": "d41d036d0dabb9ca7aef73e2eaa567d6a4048bd27e39266d83cc19a498ffda29",
+      "approach": "Merge Prime-Multiple Streams",
+      "insight": "Generalize ugly-number generation to the supplied primes. Each prime points into the previously generated sequence and proposes its next multiple. Append the minimum proposal and advance every tied stream, preserving sorted order without duplicate numbers.",
+      "steps": [
+        "Start with one and one index per prime.",
+        "Compute each prime times its indexed sequence value.",
+        "Append the minimum and advance all matching indices."
+      ],
+      "time": "O(nk), for n generated numbers and k primes.",
+      "space": "O(n + k).",
+      "pitfalls": [
+        "Advance all tied prime streams.",
+        "One is included even though it has no prime factors.",
+        "Use a sufficiently wide multiplication type in C++."
+      ]
+    },
+    {
+      "number": 316,
+      "id": "remove-duplicate-letters",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/316. Remove Duplicate Letters/316.py",
+      "cppPath": "solutions/316. Remove Duplicate Letters/316.cpp",
+      "pythonSha256": "e19d9c1996e9c160d618b5955610e998ba89b811987acb02764075137bc23140",
+      "cppSha256": "c74e0df89a564141bb0d6328eed711401e77b704532535f73ff4268b57e5bb3c",
+      "approach": "Monotone Stack with Remaining Counts",
+      "insight": "Build the smallest possible subsequence while keeping every distinct letter once. Before adding a letter, remove larger letters from the stack only if they occur again later. Remaining counts make each removal safe; a used set prevents duplicates.",
+      "steps": [
+        "Count all remaining occurrences.",
+        "For each letter, decrement its count and skip it if already used.",
+        "Pop larger reusable letters, then push the current letter."
+      ],
+      "time": "O(n).",
+      "space": "O(1) for the fixed 26-letter alphabet.",
+      "pitfalls": [
+        "Never pop a letter whose remaining count is zero.",
+        "Clear its used flag when popping.",
+        "Keep relative order; sorting the letters is not a valid subsequence."
+      ]
+    },
+    {
+      "number": 318,
+      "id": "maximum-product-of-word-lengths",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/318. Maximum Product of Word Lengths/318.py",
+      "cppPath": "solutions/318. Maximum Product of Word Lengths/318.cpp",
+      "pythonSha256": "ac23f3d24905c05f6206505ad233ab6ef78905c84760866e15ec62f2c359c66f",
+      "cppSha256": "85c2126098849acc8aec1168a9b97801a94a7c90f5c5ebf0e04b9cb6812b87e3",
+      "approach": "Letter Masks and Pair Comparison",
+      "insight": "Represent the letters of each word with a 26-bit mask. Repeated occurrences do not change the mask. Two words have no common letter exactly when their masks have zero bitwise intersection; compare the products of lengths for these pairs.",
+      "steps": [
+        "Build one letter mask per word.",
+        "Check each pair with mask[i] & mask[j].",
+        "Update the maximum length product when the masks are disjoint."
+      ],
+      "time": "O(L + w²), for total characters L and w words.",
+      "space": "O(w).",
+      "pitfalls": [
+        "Use bitwise OR while building masks.",
+        "Repeated letters do not occupy new bits.",
+        "The product uses original word lengths, rather than distinct-letter counts."
+      ]
+    },
+    {
+      "number": 319,
+      "id": "bulb-switcher",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/319. Bulb Switcher/319.py",
+      "cppPath": "solutions/319. Bulb Switcher/319.cpp",
+      "pythonSha256": "aaf313e91bd7b137b61daa60a08bb32ec266dc856f3f4f9ed4ff9426a6d877c3",
+      "cppSha256": "59bd538f4ea22874884df95610802a1678d0632c34b076e4420f7bd6ee90aa2e",
+      "approach": "Count Perfect Squares",
+      "insight": "Bulb k is toggled once per positive divisor of k. Divisors usually come in pairs, leaving an even number of toggles. Only perfect squares have an unpaired square-root divisor, so exactly the square-numbered bulbs remain on.",
+      "steps": [
+        "Recognize that only squares have an odd divisor count.",
+        "Compute floor(sqrt(n)).",
+        "Return that count."
+      ],
+      "time": "O(1) in the fixed-width integer model.",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use an integer square root in Python.",
+        "For n = 0, there are no bulbs.",
+        "A square at the upper boundary must be included."
+      ]
+    },
+    {
+      "number": 325,
+      "id": "maximum-size-subarray-sum-equals-k",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/325. Maximum Size Subarray Sum Equals k/325.py",
+      "cppPath": "solutions/325. Maximum Size Subarray Sum Equals k/325.cpp",
+      "pythonSha256": "3232dcb24094ee677d7e59442feb920a4d8f1ff4346796f4c1cf20afdcacd41f",
+      "cppSha256": "808a3c50e3efa938f646a6922142bb839ae80f8589ade8a12e3840f755146465",
+      "approach": "Prefix Sums with Earliest Indices",
+      "insight": "A subarray ending at i has sum k when an earlier prefix equals currentPrefix - k. Store the earliest index for each prefix, which maximizes the length of any later matching subarray. A zero prefix at index -1 allows subarrays starting at zero.",
+      "steps": [
+        "Initialize prefix zero at index -1.",
+        "Update the prefix and look for prefix - k.",
+        "Update the maximum length and store a prefix only on its first occurrence."
+      ],
+      "time": "O(n) expected with hashing.",
+      "space": "O(n).",
+      "pitfalls": [
+        "Do not replace the earliest index for a repeated prefix.",
+        "Negative values make a simple sliding window unsuitable.",
+        "Seed the zero prefix before reading the array."
+      ]
+    },
+    {
+      "number": 326,
+      "id": "power-of-three",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/326. Power of Three/326.py",
+      "cppPath": "solutions/326. Power of Three/326.cpp",
+      "pythonSha256": "90e39a600cc1aba35e58946f1b44b0d8a2a17f737a08e3014f46fe94cced01bc",
+      "cppSha256": "88892736eda51223f3b9be364e0a0e06481c98a3b387a1a48f4ede82ca19c123",
+      "approach": "Divisibility by the Largest 32-Bit Power",
+      "insight": "The largest power of three within signed 32-bit range is 3^19. Its only positive divisors are powers of three. A positive input is therefore a power of three exactly when it divides this constant.",
+      "steps": [
+        "Reject nonpositive values.",
+        "Compute 3^19 modulo n.",
+        "Accept when the remainder is zero."
+      ],
+      "time": "O(1) for the specified 32-bit bound.",
+      "space": "O(1).",
+      "pitfalls": [
+        "This constant depends on the integer range.",
+        "One counts as 3^0.",
+        "Avoid logarithm rounding errors by testing integer divisibility."
+      ]
+    },
+    {
+      "number": 328,
+      "id": "odd-even-linked-list",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/328. Odd Even Linked List/328.py",
+      "cppPath": "solutions/328. Odd Even Linked List/328.cpp",
+      "pythonSha256": "ba5626e80c77aefe167f129caff7306b1a6272df4f21e6f5d75c9d798546fd4a",
+      "cppSha256": "6d9d41383640bd0255ccc430859a63516fde7b6e7a6cfef13f378c7089a22bb9",
+      "approach": "Separate Odd and Even Positions",
+      "insight": "Build two chains using the existing nodes: one for odd positions and one for even positions. Append nodes in their original order, terminate the even chain, and attach it after the odd chain. Only links change; node values are untouched.",
+      "steps": [
+        "Alternate appending each node to the odd or even chain.",
+        "Set the even tail next link to null.",
+        "Attach the even head after the odd tail and return the odd head."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Odd/even refers to positions, rather than values.",
+        "Terminate the even chain to avoid a cycle.",
+        "Empty and one-node lists need no special ordering."
+      ]
+    },
+    {
+      "number": 331,
+      "id": "verify-preorder-serialization-of-a-binary-tree",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/331. Verify Preorder Serialization of a Binary Tree/331.py",
+      "cppPath": "solutions/331. Verify Preorder Serialization of a Binary Tree/331.cpp",
+      "pythonSha256": "3863d634daa42bd757c62877d04464029f4d3b9a10c79069a2b3e4b65cef5986",
+      "cppSha256": "86a5fa0862330e964174f607ab306e5a2815bd99ac125b9a3cd72740ff9b7602",
+      "approach": "Available Child Slots",
+      "insight": "Start with one available slot for the root. Every token consumes a slot; a non-null node creates two child slots. A valid serialization never consumes a nonexistent slot and uses exactly all slots by the end.",
+      "steps": [
+        "Start the slot balance at one.",
+        "Subtract one for every comma-separated token and reject a negative balance.",
+        "Add two for non-null tokens and accept only a final zero balance."
+      ],
+      "time": "O(n) input characters.",
+      "space": "Python O(n) for split tokens; C++ O(n) for the stream copy.",
+      "pitfalls": [
+        "A complete tree followed by extra tokens is invalid.",
+        "A final positive slot count means children are missing.",
+        "The single token # represents an empty tree."
+      ]
+    },
+    {
+      "number": 334,
+      "id": "increasing-triplet-subsequence",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/334. Increasing Triplet Subsequence/334.py",
+      "cppPath": "solutions/334. Increasing Triplet Subsequence/334.cpp",
+      "pythonSha256": "ed381a56e2692e15c0d920154b0a94994bb23a97845b81cb173fc8f3412c4f1e",
+      "cppSha256": "1868b553d4dcf51b607b3f1ef4231315c7319dbea8f46d5f58113e0b5ddf3d1d",
+      "approach": "Smallest First and Second Candidates",
+      "insight": "Maintain the smallest possible first value and the smallest possible second value of an increasing pair. A new value larger than both proves that an increasing triplet exists. Replacing a candidate with a smaller value leaves more room for future values.",
+      "steps": [
+        "Initialize both candidates to infinity.",
+        "Replace first when the value is <= first; otherwise replace second when <= second.",
+        "Return true if a value exceeds second."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use <= for updates because the subsequence must be strictly increasing.",
+        "The values need not be adjacent.",
+        "Lowering first does not invalidate an earlier pair represented by second."
+      ]
+    },
+    {
+      "number": 345,
+      "id": "reverse-vowels-of-a-string",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/345. Reverse Vowels of a String/345.py",
+      "cppPath": "solutions/345. Reverse Vowels of a String/345.cpp",
+      "pythonSha256": "723ab17d7c9c090004500f7e37298c2d90e13392b4406110cf94b7176605d1ea",
+      "cppSha256": "6b5e86d96bb4547d5bd053e4329b4356996a90958e3edef8df8eea0d6c20d4a8",
+      "approach": "Two Pointers on Vowels",
+      "insight": "Advance a left pointer and a right pointer past consonants until both point at vowels. Swapping those vowels reverses only the vowel sequence, preserving all other characters at their original positions. Continue until the pointers meet.",
+      "steps": [
+        "Find the next vowel from each end.",
+        "Swap them and advance both pointers.",
+        "Return the resulting character sequence."
+      ],
+      "time": "O(n).",
+      "space": "Python O(n) for a mutable character list; C++ uses the O(n) by-value string buffer.",
+      "pitfalls": [
+        "Uppercase vowels count too.",
+        "A string with no vowels remains unchanged.",
+        "Check pointer bounds while skipping consonants."
+      ]
+    },
+    {
+      "number": 350,
+      "id": "intersection-of-two-arrays-ii",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/350. Intersection of Two Arrays II/350.py",
+      "cppPath": "solutions/350. Intersection of Two Arrays II/350.cpp",
+      "pythonSha256": "67bf178c222c4ac103225640211eb68651538ef391b36e3a5d805c4a5b6d7f1b",
+      "cppSha256": "10dc646f963ba7664833800caf4cd888adccd96edc8157707abdf4501c0da4e1",
+      "approach": "Frequency-Limited Intersection",
+      "insight": "Count values from the smaller input, then scan the other input. A value is part of the intersection only while its remaining count is positive. Decrementing after each match gives each value the smaller of its two occurrence counts.",
+      "steps": [
+        "Choose the smaller array for the frequency table.",
+        "For each value in the other array, append it if a count remains.",
+        "Decrement the matched count."
+      ],
+      "time": "O(n + m) expected with hashing.",
+      "space": "O(min(n, m)) working space plus output.",
+      "pitfalls": [
+        "Preserve duplicate matches up to the available frequency.",
+        "A set alone loses multiplicities.",
+        "The returned order is not prescribed."
+      ]
+    },
+    {
+      "number": 357,
+      "id": "count-numbers-with-unique-digits",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/357. Count Numbers with Unique Digits/357.py",
+      "cppPath": "solutions/357. Count Numbers with Unique Digits/357.cpp",
+      "pythonSha256": "426b8bcf06e8eefc79edf632c62fa02a841a78b08c463c558b3a5c448b5bce92",
+      "cppSha256": "8aff48137aeb982fc144b959cff7ddafdb85e6cac3aa8acfedfcfa735bc570cc",
+      "approach": "Count Choices by Digit Length",
+      "insight": "Count zero and all one-digit values first. For a longer number, its first digit has nine choices and each following digit has one fewer unused choice. Sum the counts for each valid length; there are no unique-digit numbers longer than ten digits.",
+      "steps": [
+        "Handle n = 0 as the single value zero.",
+        "Start with ten one-digit values.",
+        "Multiply available choices for each new digit length and add the count."
+      ],
+      "time": "O(min(n, 10)).",
+      "space": "O(1).",
+      "pitfalls": [
+        "The first digit cannot be zero.",
+        "Zero still counts as a value.",
+        "Stop once all ten digits have been used."
+      ]
+    },
+    {
+      "number": 360,
+      "id": "sort-transformed-array",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/360. Sort Transformed Array/360.py",
+      "cppPath": "solutions/360. Sort Transformed Array/360.cpp",
+      "pythonSha256": "529edc2b0a6d1a6f80a9918bb1e853e60343eb1d0fd1f481aefcf06dbe8a0d5d",
+      "cppSha256": "09fbb78aae3e5a4a8131c603c04fbf6def843ddf829d2557259c4dfe87f6f670",
+      "approach": "Two Pointers on a Quadratic Transform",
+      "insight": "A quadratic that opens upward has its largest transformed values at the ends of a sorted interval; one that opens downward has its smallest values there. Compare transformed endpoints and fill the result from the appropriate end without sorting it again.",
+      "steps": [
+        "Transform every input value.",
+        "Compare the two endpoints.",
+        "Fill backward for a > 0, or forward otherwise, advancing the chosen endpoint."
+      ],
+      "time": "O(n).",
+      "space": "O(n) for transformed values and result in these examples.",
+      "pitfalls": [
+        "For a = 0 the function is linear, and the endpoint rule still works.",
+        "Choose the fill direction from the sign of a.",
+        "Do not assume the transformed input remains sorted."
+      ]
+    },
+    {
+      "number": 361,
+      "id": "bomb-enemy",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/361. Bomb Enemy/361.py",
+      "cppPath": "solutions/361. Bomb Enemy/361.cpp",
+      "pythonSha256": "568e9ca826771be355e395dc2f4af374fdfba6ea24fbb348620c7efeaa49a06c",
+      "cppSha256": "77c4ce5e6d0b45894e8cf1f181540cf62e1db6ef4a1c261df228f4626cd667c2",
+      "approach": "Four Directional Sweeps",
+      "insight": "For each empty cell, count visible enemies along its row and column until a wall. Four sweeps accumulate enemies from the left, right, top, and bottom. Reset the running count at every wall and add it only at empty cells.",
+      "steps": [
+        "Sweep each row in both directions.",
+        "Sweep each column in both directions.",
+        "Return the largest accumulated empty-cell count."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(rows × columns).",
+      "pitfalls": [
+        "Walls stop visibility.",
+        "Enemies cannot host a bomb.",
+        "Reset counts at the start of each new row or column."
+      ]
+    },
+    {
+      "number": 362,
+      "id": "design-hit-counter",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/362. Design Hit Counter/362.py",
+      "cppPath": "solutions/362. Design Hit Counter/362.cpp",
+      "pythonSha256": "1cbb05891f69fe7cbf09329877da1b0b60c5d6829e99a0d9985c6cfa55436e7a",
+      "cppSha256": "e4c83949b14aa66c18c0c8ac25811a73b08c9593df72a7bb893b6139fe6f0e55",
+      "approach": "Timestamped Circular Buckets",
+      "insight": "The query window covers the latest 300 seconds. Use timestamp modulo 300 to choose a bucket, and store the exact timestamp alongside its hit count. When a slot is reused by a newer second, reset it so stale hits cannot leak into the current window.",
+      "steps": [
+        "On hit, reuse or reset the matching timestamp bucket.",
+        "On getHits, sum buckets whose age is less than 300 seconds.",
+        "Keep 300 timestamp and count slots."
+      ],
+      "time": "O(1) per hit; O(300) per query.",
+      "space": "O(300).",
+      "pitfalls": [
+        "At time 301, hits at time 1 have expired.",
+        "Multiple hits at one timestamp accumulate.",
+        "The problem guarantees calls use nondecreasing timestamps."
+      ]
+    },
+    {
+      "number": 365,
+      "id": "water-and-jug-problem",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/365. Water and Jug Problem/365.py",
+      "cppPath": "solutions/365. Water and Jug Problem/365.cpp",
+      "pythonSha256": "ce366b4d6f680905ee53b9dfbc2997942c232425ede7fb6b1469b16630d1479f",
+      "cppSha256": "032a928bdde26865701c3f0586c258e1f4538881498dfe102751cb3dd9a91854",
+      "approach": "Capacity Bound and Greatest Common Divisor",
+      "insight": "Pouring between the two jugs can create amounts that are multiples of their greatest common divisor. A nonzero target is reachable exactly when it is such a multiple and does not exceed the combined capacity. Zero is reachable without pouring.",
+      "steps": [
+        "Accept target zero.",
+        "Reject targets above the sum of capacities.",
+        "Check divisibility by gcd(capacity1, capacity2)."
+      ],
+      "time": "O(log min(a, b)) for Euclid gcd.",
+      "space": "O(1).",
+      "pitfalls": [
+        "Check the combined capacity bound before divisibility.",
+        "Handle target zero separately.",
+        "The result allows water split across both jugs."
+      ]
+    },
+    {
+      "number": 370,
+      "id": "range-addition",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/370. Range Addition/370.py",
+      "cppPath": "solutions/370. Range Addition/370.cpp",
+      "pythonSha256": "dcff3dc15d54d5c24d549e184e65046f880912a09f7d36dbbf73d81d669c9f7a",
+      "cppSha256": "08a1856193819a330ad359fbf6e80f39911a29ecd5ee0a713a348016b2d9879f",
+      "approach": "Difference Array and Prefix Sum",
+      "insight": "A range increment changes the running value at its start and undoes that change immediately after its end. Store only these two boundary differences for each update. One prefix-sum pass then reconstructs every final array value.",
+      "steps": [
+        "Add the increment at start.",
+        "Subtract it at end + 1 when that index exists.",
+        "Prefix-sum the differences into the returned array."
+      ],
+      "time": "O(length + number of updates).",
+      "space": "O(length).",
+      "pitfalls": [
+        "Ranges include both endpoints.",
+        "Negative increments work with the same boundaries.",
+        "Return a concrete list in Python, rather than a lazy accumulate iterator."
+      ]
+    },
+    {
+      "number": 373,
+      "id": "find-k-pairs-with-smallest-sums",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/373. Find K Pairs with Smallest Sums/373.py",
+      "cppPath": "solutions/373. Find K Pairs with Smallest Sums/373.cpp",
+      "pythonSha256": "6d60c43531747a281d828fc968edbf4c8159582228c29e2628aab202efed4ae8",
+      "cppSha256": "3064edfb836065bebd4c708b2910bea278837e44f21847693008800950437ca4",
+      "approach": "Heap Merge of Pair-Sum Rows",
+      "insight": "For a fixed first-array index, pairing it with successive second-array values creates a sorted row of sums. Seed a min-heap with the first pair from each relevant row. After removing a pair, advance only that row to merge the globally smallest pairs.",
+      "steps": [
+        "Seed up to min(k, len(nums1)) rows at second-array index zero.",
+        "Pop the minimum sum and append its values.",
+        "Push the next pair in the same row until k pairs or heap exhaustion."
+      ],
+      "time": "O((k + r) log(r + 1)), with r = min(k, len(nums1)).",
+      "space": "O(r) heap work plus O(k) returned pairs.",
+      "pitfalls": [
+        "Inputs must be sorted.",
+        "Return pairs of values, rather than their indices.",
+        "Duplicate values can form distinct valid index pairs."
+      ]
+    },
+    {
+      "number": 375,
+      "id": "guess-number-higher-or-lower-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/375. Guess Number Higher or Lower II/375.py",
+      "cppPath": "solutions/375. Guess Number Higher or Lower II/375.cpp",
+      "pythonSha256": "155dfb458883d407ee86cedc9cf068bd4d4b5273ba58ff44dba842230d3c7725",
+      "cppSha256": "ae9b1019e357c7f1fe36bf20cab9cb78a4b025f4a415d7bba68f3979c4ba468e",
+      "approach": "Memoized Minimax on Intervals",
+      "insight": "For a guess k, an incorrect answer costs k plus the cost of the remaining interval. To guarantee a win, account for the more expensive side. Try every guess and choose the minimum of these worst-case costs; an interval with at most one value needs no payment.",
+      "steps": [
+        "Memoize the guaranteed cost for each interval.",
+        "For every possible guess, add its value to the maximum cost of the two remaining sides.",
+        "Take the minimum candidate cost."
+      ],
+      "time": "O(n³).",
+      "space": "O(n²) memo plus O(n) recursion stack.",
+      "pitfalls": [
+        "Take the maximum over outcomes, then the minimum over guesses.",
+        "A correct guess costs zero.",
+        "The single-value base case is zero, rather than the value itself."
+      ]
+    },
+    {
+      "number": 376,
+      "id": "wiggle-subsequence",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/376. Wiggle Subsequence/376.py",
+      "cppPath": "solutions/376. Wiggle Subsequence/376.cpp",
+      "pythonSha256": "414893cb15e208ec907fb63ab2e0418a4291b1c1ff3bfd2fa763216971999a2b",
+      "cppSha256": "f28c32f18eefe6d996225c8ae646b2d75792a23b079df2b191cad9302a178941",
+      "approach": "Up and Down Subsequence Lengths",
+      "insight": "A wiggle subsequence alternates positive and negative differences. Track the best length ending with an upward move and with a downward move. An increase extends the downward state, while a decrease extends the upward state; equal adjacent values add nothing.",
+      "steps": [
+        "Start both lengths at one.",
+        "Compare adjacent values and update the matching direction state.",
+        "Return the larger length."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Equal values are skipped.",
+        "The answer is a subsequence, so turning points matter more than every value.",
+        "A nonempty constant array has answer one."
+      ]
+    },
+    {
+      "number": 378,
+      "id": "kth-smallest-element-in-a-sorted-matrix",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/378. Kth Smallest Element in a Sorted Matrix/378.py",
+      "cppPath": "solutions/378. Kth Smallest Element in a Sorted Matrix/378.cpp",
+      "pythonSha256": "baf9753889744507dd7131db3cd2fc3016b9736a11e4a6bad6cb4ed174dd3a23",
+      "cppSha256": "a24c9cab6df856624ef5365dfbb1f14a376c513fa5e1a60f0d5ddfb67e1942fb",
+      "approach": "Heap Merge of Sorted Matrix Rows",
+      "insight": "Treat each matrix row as a sorted stream. A min-heap containing the next unconsumed cell of each relevant row always exposes the globally next value. Remove k - 1 values, pushing the successor from each removed value’s row, then read the heap minimum.",
+      "steps": [
+        "Seed the first cell of up to min(k, rows) rows.",
+        "Pop and advance the same row k - 1 times.",
+        "Return the current smallest heap value."
+      ],
+      "time": "O(k log(r + 1)), with r = min(k, rows).",
+      "space": "O(r).",
+      "pitfalls": [
+        "Duplicate values count as separate elements.",
+        "k is one-based.",
+        "Use the value to order the heap, rather than row or column indices."
+      ]
+    },
+    {
+      "number": 386,
+      "id": "lexicographical-numbers",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/386. Lexicographical Numbers/386.py",
+      "cppPath": "solutions/386. Lexicographical Numbers/386.cpp",
+      "pythonSha256": "7316ebbfcc151c8f8c53c41f0a03fa7e8c7d559740e0e24988d8d26850828bdd",
+      "cppSha256": "9d19471fb3c0beda49d13b3f3e3cd16f57ba406de83b8b8a12786057b9736b06",
+      "approach": "Iterative Decimal-Prefix Traversal",
+      "insight": "Lexicographic order follows a decimal prefix tree. Descend by multiplying the current value by ten when that child exists. Otherwise remove exhausted trailing digits and move to the next sibling, visiting each integer without sorting strings.",
+      "steps": [
+        "Start at one and append the current value.",
+        "Descend to current × 10 when it is <= n.",
+        "Otherwise climb past trailing nines or the upper boundary and increment."
+      ],
+      "time": "O(n) amortized.",
+      "space": "O(n) output and O(1) extra workspace.",
+      "pitfalls": [
+        "Numeric sorting does not match lexicographic order.",
+        "Climbing can remove several trailing digits.",
+        "Emit exactly n values."
+      ]
+    },
+    {
+      "number": 393,
+      "id": "utf-8-validation",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/393. UTF-8 Validation/393.py",
+      "cppPath": "solutions/393. UTF-8 Validation/393.cpp",
+      "pythonSha256": "b06651b263438580997ad497309336a061a653c4ac462f3ba92168ce78a6763d",
+      "cppSha256": "a3540eb57f18305f69cdb7d89df571a11472ce509e42a583bf2739106fb3c4e1",
+      "approach": "Track Expected Continuation Bytes",
+      "insight": "Inspect a leading byte’s prefix to determine whether zero, one, two, or three continuation bytes must follow. While continuation bytes remain, each byte must begin with binary 10. The input is valid only if every leading prefix is recognized and no continuation remains at the end.",
+      "steps": [
+        "Classify each leading byte by its high bits.",
+        "Require 10-prefixed bytes while a sequence is unfinished.",
+        "Accept only when the expected continuation count returns to zero."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Reject a continuation byte where a leading byte is required.",
+        "Reject a truncated final sequence.",
+        "This checks the problem’s byte-prefix rules, rather than all Unicode code-point restrictions."
+      ]
+    },
+    {
+      "number": 395,
+      "id": "longest-substring-with-at-least-k-repeating-characters",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/395. Longest Substring with At Least K Repeating Characters/395.py",
+      "cppPath": "solutions/395. Longest Substring with At Least K Repeating Characters/395.cpp",
+      "pythonSha256": "81fb45a8db2fcf38a98dcabcefe7eea87750eb69177d50514d61bb0775223e93",
+      "cppSha256": "f6a44c72e61f2499a1b6c88ae862d06c4b3b56f5d5d777f3ddda31b796dadfe4",
+      "approach": "Sliding Windows with a Fixed Distinct Count",
+      "insight": "The lowercase alphabet has only 26 possibilities for the number of distinct letters in a valid substring. For each possible count, maintain a window with at most that many distinct letters. A window qualifies when every present letter has reached frequency k.",
+      "steps": [
+        "Try each allowed distinct-letter count from one to 26.",
+        "Expand the window and shrink when too many distinct letters appear.",
+        "Update the answer when all distinct letters have frequency at least k."
+      ],
+      "time": "O(26n), or O(n) for a fixed lowercase alphabet.",
+      "space": "O(26).",
+      "pitfalls": [
+        "Update threshold counts when frequency crosses k in either direction.",
+        "A total window length >= k does not guarantee each letter qualifies.",
+        "The fixed-alphabet bound is part of this approach."
+      ]
+    },
+    {
+      "number": 396,
+      "id": "rotate-function",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/396. Rotate Function/396.py",
+      "cppPath": "solutions/396. Rotate Function/396.cpp",
+      "pythonSha256": "7e66e2e0c36f229c48acaf6adb1205c16aea037d15d9508eaa5aad2b3fb5076b",
+      "cppSha256": "87b2732cfcee1b89c574a6ace110bce231375e21a8bc898777fbcd4def167b61",
+      "approach": "Rotate-Sum Recurrence",
+      "insight": "When the last value moves to index zero, every other value’s weight increases by one. The new weighted sum equals the old weighted sum plus the total array sum minus n times the moved value. Reuse this recurrence instead of recomputing each rotation.",
+      "steps": [
+        "Compute the initial weighted sum and total sum.",
+        "Process moved values from the array’s right end.",
+        "Update the weighted sum with total - n × moved and track its maximum."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "The subtracted term belongs to the value moving from last to first.",
+        "Initialize from the real weighted sum so negative answers work.",
+        "No physical array rotation is needed."
+      ]
+    },
+    {
+      "number": 397,
+      "id": "integer-replacement",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/397. Integer Replacement/397.py",
+      "cppPath": "solutions/397. Integer Replacement/397.cpp",
+      "pythonSha256": "9fd1437ed20d80526cb27b3b6e93fcbebd5c2844d3120f9a93941682c4db1291",
+      "cppSha256": "b37f6b3ed8fa98d6225397ec5659d8f9c5acffbbdd25be19bc36169ef4493e8e",
+      "approach": "Greedy Bit Reduction",
+      "insight": "Even values reduce directly by shifting right. For an odd value, choose the increment or decrement that creates more trailing zero bits, enabling more divisions by two. Three is the exception: decrementing to two reaches one faster than incrementing to four.",
+      "steps": [
+        "Divide even values by two.",
+        "For odd values, decrement three or a value ending in binary 01; otherwise increment.",
+        "Count operations until one."
+      ],
+      "time": "O(log n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Treat three specially.",
+        "Use a widened integer in C++ so incrementing INT_MAX does not overflow.",
+        "For n = 1, the answer is zero."
+      ]
+    },
+    {
+      "number": 404,
+      "id": "sum-of-left-leaves",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/404. Sum of Left Leaves/404.py",
+      "cppPath": "solutions/404. Sum of Left Leaves/404.cpp",
+      "pythonSha256": "78e970d014696b68b8f4a86d2f80116aa85723728015f2df0f6512fb36649d8f",
+      "cppSha256": "2b8899434f7a5f6ca107a38d56f15c7aa2ef1de40d8eb05cca951e1ad35179e8",
+      "approach": "Sum Only Left Leaf Children",
+      "insight": "At each node, inspect its left child. Add its value only if that child has no children; otherwise recurse into it. Search the right subtree as well because it can contain left leaves farther down.",
+      "steps": [
+        "Return zero for an empty root.",
+        "Add a left child only when it is a leaf; otherwise recurse left.",
+        "Always recurse into the right subtree."
+      ],
+      "time": "O(n).",
+      "space": "O(h) recursion stack.",
+      "pitfalls": [
+        "A root that is a leaf is not a left leaf.",
+        "A left child with children does not count yet.",
+        "Left leaves can occur inside right subtrees."
+      ]
+    },
+    {
+      "number": 412,
+      "id": "fizz-buzz",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/412. Fizz Buzz/412.py",
+      "cppPath": "solutions/412. Fizz Buzz/412.cpp",
+      "pythonSha256": "dd4e59973f5d7b31aa463658355c3a488ce5c8356dfbdaba3d619bf5357b30fd",
+      "cppSha256": "01bb06bbd544433b68dd10739cdabbe0ef42a95e2e4e2f31a78da2dd5d525d18",
+      "approach": "Independent Divisibility Rules",
+      "insight": "For each integer, append Fizz when divisible by three and Buzz when divisible by five. These conditions are independent, so multiples of fifteen receive both words. When neither applies, use the integer’s decimal representation.",
+      "steps": [
+        "Visit integers from one through n.",
+        "Append each matching word in Fizz-then-Buzz order.",
+        "Use the number when the constructed string is empty."
+      ],
+      "time": "O(n + L) for L returned characters.",
+      "space": "O(L) output and O(1) extra workspace.",
+      "pitfalls": [
+        "Using else between the rules would miss FizzBuzz.",
+        "Start at one.",
+        "Return strings rather than printing them."
+      ]
+    },
+    {
+      "number": 413,
+      "id": "arithmetic-slices",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/413. Arithmetic Slices/413.py",
+      "cppPath": "solutions/413. Arithmetic Slices/413.cpp",
+      "pythonSha256": "095066770907addb08bae288ec446c036becc870a9217a948261ea9b7514aedb",
+      "cppSha256": "71a12ee9cdc032e8fcd0c9c225dffd8f8de8174d803df5fd47f902b20f4b95ed",
+      "approach": "Count Arithmetic Runs Ending at Each Index",
+      "insight": "An arithmetic slice ending at i extends an earlier slice when the last two differences match. In that case, the previous ending count gains one new length-three slice. Summing the ending counts counts every contiguous arithmetic slice once.",
+      "steps": [
+        "Compare the two newest adjacent differences.",
+        "Set dp[i] = dp[i - 1] + 1 when they match, otherwise zero.",
+        "Sum all ending counts."
+      ],
+      "time": "O(n).",
+      "space": "O(n) for the shown DP arrays.",
+      "pitfalls": [
+        "Slices must be contiguous and contain at least three values.",
+        "Equal values form arithmetic slices with difference zero.",
+        "Reset the count when the difference changes."
+      ]
+    },
+    {
+      "number": 414,
+      "id": "third-maximum-number",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/414. Third Maximum Number/414.py",
+      "cppPath": "solutions/414. Third Maximum Number/414.cpp",
+      "pythonSha256": "a44e0c0f282c9a8e2e200b255e47d05f36785f7da5f62c9cae03d66e6ab5e46e",
+      "cppSha256": "ec5f71d88b6d4df4c745377368e80636ccbf4975d9b90d491357ccf627f555c4",
+      "approach": "Three Distinct Maximum Candidates",
+      "insight": "Maintain the largest, second-largest, and third-largest distinct values seen so far. Insert a new distinct value into its rank and shift lower candidates. If fewer than three distinct values exist, return the largest value instead.",
+      "steps": [
+        "Initialize three candidate slots below every valid value.",
+        "Insert each value at its distinct rank, shifting candidates as needed.",
+        "Return third when it exists, otherwise first."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Repeated copies of a maximum do not occupy multiple ranks.",
+        "The sentinel must be below INT_MIN in C++.",
+        "Fewer than three distinct values returns the maximum."
+      ]
+    },
+    {
+      "number": 415,
+      "id": "add-strings",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/415. Add Strings/415.py",
+      "cppPath": "solutions/415. Add Strings/415.cpp",
+      "pythonSha256": "ee5e32abf61978ef623ac3d92e30c2a870b84547c9e71531bb18d1894a1bd371",
+      "cppSha256": "9db993804983711aedc413b9b394894e651ff4f94d83ef40a64abf02088d732f",
+      "approach": "Digit Addition with Carry",
+      "insight": "Simulate column addition from the rightmost digits. Add the available digit from each string and the previous carry, emit the remainder modulo ten, then carry the quotient. Reverse the collected digits at the end.",
+      "steps": [
+        "Start at both strings’ last indices with carry zero.",
+        "Emit one result digit while either input or carry remains.",
+        "Reverse the digits and join them."
+      ],
+      "time": "O(max(n, m)).",
+      "space": "O(max(n, m)) for output construction.",
+      "pitfalls": [
+        "Continue when a final carry remains.",
+        "Treat an exhausted input as a zero digit.",
+        "Avoid converting the whole strings to integers."
+      ]
+    },
+    {
+      "number": 419,
+      "id": "battleships-in-a-board",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/419. Battleships in a Board/419.py",
+      "cppPath": "solutions/419. Battleships in a Board/419.cpp",
+      "pythonSha256": "db38dbcff68eee3dc20a61686f6b4bd6b0594627a62bd38348d20ce9fb1c9b8c",
+      "cppSha256": "0d8c22d113460ab99d1d7365ecfc2e7fc0ad14e4b32d14718ac435be7730320a",
+      "approach": "Count Only Ship Starts",
+      "insight": "A horizontal or vertical ship has exactly one cell with no ship cell immediately above or to its left. Count those starts while scanning the board. The guaranteed separation between ships makes this local test sufficient, without marking cells.",
+      "steps": [
+        "Skip empty cells.",
+        "Skip an X with an X above or left.",
+        "Count every remaining X as a new ship."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(1).",
+      "pitfalls": [
+        "This relies on valid separated horizontal or vertical ships.",
+        "Do not count every X.",
+        "The board is read without mutation."
+      ]
+    },
+    {
+      "number": 429,
+      "id": "n-ary-tree-level-order-traversal",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/429. N-ary Tree Level Order Traversal/429.py",
+      "cppPath": "solutions/429. N-ary Tree Level Order Traversal/429.cpp",
+      "pythonSha256": "f557474e5c7b64d986638a9100e61d8760a554bae999b458b151ea0572893e23",
+      "cppSha256": "ac0d3e574cdf5caff17955e6e0740634de81472ff2f0a301765fcb1c1ec4582e",
+      "approach": "Breadth-First Search",
+      "insight": "Use a queue to visit an N-ary tree one level at a time. The queue length at the start of a level tells how many nodes belong to that level. Append each node’s children in order, then begin the next level.",
+      "steps": [
+        "Return [] for an empty root.",
+        "Process the current queue length and collect node values.",
+        "Enqueue children and append the finished level."
+      ],
+      "time": "O(n).",
+      "space": "O(n) including the queue and output.",
+      "pitfalls": [
+        "Each node can have any number of children.",
+        "Capture the level size before enqueueing children.",
+        "Preserve the given child order."
+      ]
+    },
+    {
+      "number": 433,
+      "id": "minimum-genetic-mutation",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/433. Minimum Genetic Mutation/433.py",
+      "cppPath": "solutions/433. Minimum Genetic Mutation/433.cpp",
+      "pythonSha256": "069519d71b857656e7433217c872efda53c0847ba8d71608f1afb52cec48769a",
+      "cppSha256": "2766f98c0ab361779fa0efdb804583f7e70062abc77843bc698d721118ab133a",
+      "approach": "Breadth-First Search over Valid Genes",
+      "insight": "Each allowed one-character mutation is an unweighted edge between genes. Breadth-first search therefore reaches the target with the fewest changes. Generate candidates by changing each position to A, C, G, or T, and enqueue a bank gene only once.",
+      "steps": [
+        "Reject a target absent from the bank.",
+        "Explore all one-character candidates for each BFS level.",
+        "Remove newly queued genes from the available bank and return the target level."
+      ],
+      "time": "O(b × a × g²) with string construction, for b bank genes, gene length g, and alphabet size a = 4; fixed g = 8 gives O(b).",
+      "space": "O(bg) for the bank and queue.",
+      "pitfalls": [
+        "Only genes in the bank are legal intermediate steps.",
+        "Restore a changed position before trying the next position.",
+        "Mark genes visited when enqueueing them."
+      ]
+    },
+    {
+      "number": 436,
+      "id": "find-right-interval",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/436. Find Right Interval/436.py",
+      "cppPath": "solutions/436. Find Right Interval/436.cpp",
+      "pythonSha256": "505332fd4cbb217dd7b65a046dda950e91cbcd9b40b4a587d49bc03775277f26",
+      "cppSha256": "b62aebe4b49483682149e357df3ee60efacfd228535258793b73a041bbfb1a92",
+      "approach": "Ordered Starts and Lower Bound",
+      "insight": "For each interval end, find the smallest start value at least as large as that end. Store original indices alongside sorted starts. Python uses binary search over sorted pairs; C++ uses an ordered map’s lower_bound to perform the same successor query.",
+      "steps": [
+        "Index each interval’s start.",
+        "Build the sorted starts or ordered map.",
+        "For each end, return the first qualifying start’s original index, or -1."
+      ],
+      "time": "O(n log n).",
+      "space": "O(n).",
+      "pitfalls": [
+        "Equality qualifies, so use lower_bound rather than upper_bound.",
+        "Return original indices, rather than sorted positions.",
+        "An interval with start == end can point to itself."
+      ]
+    },
+    {
+      "number": 437,
+      "id": "path-sum-iii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/437. Path Sum III/437.py",
+      "cppPath": "solutions/437. Path Sum III/437.cpp",
+      "pythonSha256": "14c4772c6be742bfe391664c5089632f4d059cb9e326db545f85b6ac700e77a2",
+      "cppSha256": "b6bcf24b3133ecf60ebd7b81d296da697090d0712b5fe93d59368d8e8076cba0",
+      "approach": "Try Every Downward Path Start",
+      "insight": "A valid downward path may begin at any node. For each possible start, a DFS counts paths whose running sum reaches the target. Recursively repeat this count with starts in the left and right subtrees, covering all choices without requiring a path to end at a leaf.",
+      "steps": [
+        "Count matching downward paths starting at the current root.",
+        "Repeat the start search for both child subtrees.",
+        "Add all three counts."
+      ],
+      "time": "O(nh), worst-case O(n²) for a chain.",
+      "space": "O(h) recursion stack.",
+      "pitfalls": [
+        "A matching path can stop at an internal node.",
+        "Negative values mean searching must continue after a match.",
+        "This is the simpler repeated-DFS approach; it is not the linear prefix-sum variant."
+      ]
+    },
+    {
+      "number": 447,
+      "id": "number-of-boomerangs",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/447. Number of Boomerangs/447.py",
+      "cppPath": "solutions/447. Number of Boomerangs/447.cpp",
+      "pythonSha256": "55ca424446be03223c8bd405ae3b87735e2d490f65283da935d1a0587da1c7a1",
+      "cppSha256": "49d124a9410b6748c4e3e01cffcbc558df2204b3a7bb211b10c11ac1deeddef3",
+      "approach": "Squared-Distance Frequencies",
+      "insight": "Fix the middle point of a boomerang and group other points by squared distance from it. A group of size c gives c × (c - 1) ordered pairs. Python adds 2c as each new point enters a group; C++ sums the equivalent final group formula.",
+      "steps": [
+        "Choose each point as the center.",
+        "Count squared distances to other points.",
+        "For a new distance occurrence, add twice its prior count, then increment it."
+      ],
+      "time": "O(n²) expected with hashing.",
+      "space": "O(n).",
+      "pitfalls": [
+        "Order matters: swapping the two outer points is a different boomerang.",
+        "Squared distances avoid floating-point comparison.",
+        "The problem guarantees distinct points, so the center’s zero-distance entry contributes nothing."
+      ]
+    },
+    {
+      "number": 453,
+      "id": "minimum-moves-to-equal-array-elements",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/453. Minimum Moves to Equal Array Elements/453.py",
+      "cppPath": "solutions/453. Minimum Moves to Equal Array Elements/453.cpp",
+      "pythonSha256": "cfac75cebc40a7a401e961afe01709ac836a7c94e1e9684e205ee09900c61bc2",
+      "cppSha256": "d06e8628c7097ddeeeaf4a249d4e44c13054233d4771dd8938c133f66ded3d91",
+      "approach": "Reduce to the Minimum Value",
+      "insight": "Increasing n - 1 values is equivalent, up to a shared shift, to decreasing the one excluded value. Reduce every value to the minimum and sum the required decreases. This counts the original operations without simulating them.",
+      "steps": [
+        "Find the minimum array value.",
+        "Sum each value minus the minimum.",
+        "Return the total."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use the minimum, rather than the maximum or median.",
+        "Negative values work with the same differences.",
+        "The original operation increases all but one value."
+      ]
+    },
+    {
+      "number": 454,
+      "id": "4sum-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/454. 4Sum II/454.py",
+      "cppPath": "solutions/454. 4Sum II/454.cpp",
+      "pythonSha256": "a2653bebc1f1be2906495a363a2fd3d5d524565a6f2e71bc85a61eaca5cfa267",
+      "cppSha256": "b11a94778682e2c6f7b1ed56b959748fc9df7ccbfab6c97580d6854a1b5a18e8",
+      "approach": "Hash Pair Sums",
+      "insight": "Split the four-array sum into two pair sums. Count how often each sum from the first two arrays appears. For each pair from the other two arrays, look up the frequency of its negated sum to count every zero-sum index tuple.",
+      "steps": [
+        "Count every nums1 + nums2 pair sum.",
+        "Enumerate nums3 + nums4 pair sums.",
+        "Add the stored frequency of the opposite sum."
+      ],
+      "time": "O(n²) expected for four arrays of length n.",
+      "space": "O(n²).",
+      "pitfalls": [
+        "Store frequencies, rather than a set, because repeated values create multiple index tuples.",
+        "Each array contributes one index.",
+        "The lookup sum must be negated."
+      ]
+    },
+    {
+      "number": 459,
+      "id": "repeated-substring-pattern",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/459. Repeated Substring Pattern/459.py",
+      "cppPath": "solutions/459. Repeated Substring Pattern/459.cpp",
+      "pythonSha256": "89ca2b0de155f39c0e07c095351fea3acc79b6fd092bd588f2fef68af75d96d1",
+      "cppSha256": "4df36ece99ee9026ba0af27fb34f250905fbe9ca19d1f1a9aae4351211b39c84",
+      "approach": "Search Inside a Doubled String",
+      "insight": "If a string consists of repeated copies of a shorter block, rotating it by one block produces the same string. Doubling the string contains all such rotations. Removing the first and last positions excludes the two trivial matches, leaving a match exactly when a proper repeat exists.",
+      "steps": [
+        "Build s + s.",
+        "Remove its first and last characters.",
+        "Check whether s occurs in the remaining string."
+      ],
+      "time": "Conservative O(n²) worst-case substring search; library implementations may be faster.",
+      "space": "O(n) for the doubled string and substring.",
+      "pitfalls": [
+        "Exclude both trivial boundary matches.",
+        "A one-character string cannot repeat a shorter nonempty block.",
+        "The returned answer is a boolean, not the repeated block."
+      ]
+    },
+    {
+      "number": 461,
+      "id": "hamming-distance",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/461. Hamming Distance/461.py",
+      "cppPath": "solutions/461. Hamming Distance/461.cpp",
+      "pythonSha256": "3198cfe40d1d1d90ce50cb708b3cac5b1eef9b81cf7ca16ba4bdde02b34dc583",
+      "cppSha256": "7cac445f9f29487fbedac831af4f87806c7c18d3198107a63259fc5576e6005a",
+      "approach": "Compare Bits and Shift",
+      "insight": "At each position, XOR the two low bits to determine whether they differ. Add that contribution and shift both values right. Continue until neither value has remaining set bits.",
+      "steps": [
+        "Initialize the distance to zero.",
+        "Add (x & 1) XOR (y & 1).",
+        "Shift both values until both are zero."
+      ],
+      "time": "O(log(max(x, y) + 1)), at most the fixed input bit width.",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use XOR to detect different bits.",
+        "Equal inputs have distance zero.",
+        "The problem supplies nonnegative integers."
+      ]
+    },
+    {
+      "number": 462,
+      "id": "minimum-moves-to-equal-array-elements-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/462. Minimum Moves to Equal Array Elements II/462.py",
+      "cppPath": "solutions/462. Minimum Moves to Equal Array Elements II/462.cpp",
+      "pythonSha256": "73b80802d6db5546b359ffa923dabef9b728e9e82a7dd4cf4ef4f06eb9643ee5",
+      "cppSha256": "190d806c64683b7d8d45fcf287f6dde4915c5d8b55bcde7c59765fd3f8841846",
+      "approach": "Move All Values to a Median",
+      "insight": "For absolute-distance cost, moving the target within the middle pair changes left and right costs equally; outside the median range, more values pull the target back toward the middle. Choose a median and sum distances. Python sorts to find it; C++ selects it with nth_element.",
+      "steps": [
+        "Find a median value.",
+        "Compute the absolute difference from each value to the median.",
+        "Return the sum."
+      ],
+      "time": "Python O(n log n); C++ O(n) average with nth_element.",
+      "space": "Python O(n) for median sorting; C++ selection is in place.",
+      "pitfalls": [
+        "For even length, any value between the two middle values is optimal.",
+        "C++ selection rearranges the input.",
+        "Use absolute differences, rather than signed sums."
+      ]
+    },
+    {
+      "number": 467,
+      "id": "unique-substrings-in-wraparound-string",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/467. Unique Substrings in Wraparound String/467.py",
+      "cppPath": "solutions/467. Unique Substrings in Wraparound String/467.cpp",
+      "pythonSha256": "2b580a25cbe72cc412192db8edc0c25f97b11665082ed5941013b879f6b9ad04",
+      "cppSha256": "d930c53b4ecbc2dd73de259905b8e0a572058887c8eee42974e8d1e4aa87f76e",
+      "approach": "Longest Wraparound Run per Ending Letter",
+      "insight": "A consecutive run can continue from z to a. For each ending letter, keep the longest valid run ending there. Every shorter suffix ending with that letter is determined uniquely, so adding these maxima counts distinct substrings without storing them.",
+      "steps": [
+        "Extend the run when adjacent letters are consecutive, including z to a.",
+        "Otherwise restart the run at one.",
+        "Update the ending letter’s maximum and sum all 26 maxima."
+      ],
+      "time": "O(n).",
+      "space": "O(26).",
+      "pitfalls": [
+        "Include the z-to-a transition.",
+        "Sum maxima per ending letter, rather than every encountered run length.",
+        "Repeated occurrences must not count the same substring twice."
+      ]
+    },
+    {
+      "number": 475,
+      "id": "heaters",
+      "difficulty": "Medium",
+      "pythonPath": null,
+      "cppPath": "solutions/475. Heaters/475.cpp",
+      "pythonSha256": null,
+      "cppSha256": "ac1a91e5e013431dc8435361e1b59b6e60685e6aa0733f6d4484ef3fef0027fe",
+      "approach": "Sorted Houses and a Monotone Heater Pointer",
+      "insight": "As houses advance in sorted order, their nearest heater never moves backward in sorted heater order. Move the heater pointer while the next heater is closer, measure the chosen distance, and take the maximum nearest-heater distance across all houses.",
+      "steps": [
+        "Sort houses and heaters.",
+        "For each house, advance the heater pointer while the next heater is closer.",
+        "Track the maximum nearest-heater distance."
+      ],
+      "time": "O(h log h + t log t + h + t), for h houses and t heaters.",
+      "space": "Python O(h + t) worst-case sorting workspace; C++ O(log h + log t) sorting stack.",
+      "pitfalls": [
+        "One heater may cover houses on both sides.",
+        "Tied heater distances can choose either heater.",
+        "Sorting changes both input arrays."
+      ]
+    },
+    {
+      "number": 476,
+      "id": "number-complement",
+      "difficulty": "Easy",
+      "pythonPath": null,
+      "cppPath": "solutions/476. Number Complement/476.cpp",
+      "pythonSha256": null,
+      "cppSha256": "a030530cc4b880ddb44957b6d03319097ccf24f350298bf230f3aaef60aa3bb7",
+      "approach": "Flip Significant Bits",
+      "insight": "The complement flips every bit from the least significant bit through the original highest set bit. Keep the original bit-width boundary fixed, then XOR with one mask bit at a time. Leading zero positions above that boundary must remain zero.",
+      "steps": [
+        "Record the original positive value.",
+        "For each power-of-two mask not exceeding that value, XOR the result.",
+        "Return the flipped significant bits."
+      ],
+      "time": "O(log n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use the original value as the loop bound; the result changes while flipping.",
+        "Do not complement leading zero bits.",
+        "For one, return zero."
+      ]
+    },
+    {
+      "number": 477,
+      "id": "total-hamming-distance",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/477. Total Hamming Distance/477.py",
+      "cppPath": "solutions/477. Total Hamming Distance/477.cpp",
+      "pythonSha256": "e05df1a536ff9bd48695e5b8457b788564801160fc5afb159c1d99607858d72d",
+      "cppSha256": "358f89df6783e72571ac78b590093b6886afcddcece7528867534227ca466fbe",
+      "approach": "Count Different Bits Independently",
+      "insight": "At a fixed bit position, every pair with one set bit and one clear bit contributes one to Hamming distance. If ones values have that bit set, its contribution is ones × (n - ones). Sum this over the 30 relevant bit positions.",
+      "steps": [
+        "For each bit, count set bits among the input values.",
+        "Multiply that count by the number of clear bits.",
+        "Sum all bit contributions."
+      ],
+      "time": "O(30n), or O(n) for the stated integer bound.",
+      "space": "O(1).",
+      "pitfalls": [
+        "Do not divide the product by two; set/clear groups already count each pair once.",
+        "The 30-bit bound comes from the input constraints.",
+        "Equal values contribute zero."
+      ]
+    },
+    {
+      "number": 486,
+      "id": "predict-the-winner",
+      "difficulty": "Medium",
+      "pythonPath": null,
+      "cppPath": "solutions/486. Predict the Winner/486.cpp",
+      "pythonSha256": null,
+      "cppSha256": "42695fb85d207743aa66bac8e8df407384a0951ff0f36122d1abf6765a567e7e",
+      "approach": "Interval DP for Score Difference",
+      "insight": "Track the best score difference the current player can guarantee on an interval. Choosing an end value gains that value, but the opponent then owns the best difference on the remaining interval, so subtract it. A nonnegative final difference means the first player can win or tie.",
+      "steps": [
+        "Initialize one-value interval differences to their value.",
+        "For increasing interval lengths, take max(left - inner-left, right - inner-right).",
+        "Accept when the whole-interval difference is at least zero."
+      ],
+      "time": "O(n²).",
+      "space": "O(n²).",
+      "pitfalls": [
+        "Ties count as success for the first player.",
+        "The DP stores a score difference, rather than a raw score.",
+        "Subtract the opponent’s result after each choice."
+      ]
+    },
+    {
+      "number": 491,
+      "id": "non-decreasing-subsequences",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/491. Increasing Subsequences/491.py",
+      "cppPath": "solutions/491. Increasing Subsequences/491.cpp",
+      "pythonSha256": "834dac37a2b826f58636189ab3b5f864fc02eeb4a5649ee6dbcbaed43de60a70",
+      "cppSha256": "2b856fb5c9fdafe4b77fd9a262f5625051bb17035a7c8c9272caca8f5af00a72",
+      "approach": "Backtracking with Depth-Local Deduplication",
+      "insight": "Build subsequences by choosing later indices whose values are at least the path’s last value. At one recursion depth, choosing the same value twice would duplicate results, so keep a used set local to that depth. Equal values remain allowed at different depths.",
+      "steps": [
+        "Save every path with length at least two.",
+        "Try later indices that preserve nondecreasing order.",
+        "Skip values already used at this depth and recurse."
+      ],
+      "time": "O(n × 2^n) including copying returned paths.",
+      "space": "O(n²) conservative working bound for copied paths and per-depth sets, excluding output.",
+      "pitfalls": [
+        "Use a fresh deduplication set at each depth.",
+        "Nondecreasing allows equal values.",
+        "Do not sort the input; the subsequence must preserve its original order."
+      ]
+    },
+    {
+      "number": 498,
+      "id": "diagonal-traverse",
+      "difficulty": "Medium",
+      "pythonPath": null,
+      "cppPath": "solutions/498. Diagonal Traverse/498.cpp",
+      "pythonSha256": null,
+      "cppSha256": "3a4d1ae49cce72cc7e3b333fe6f15b8e4abada6f4efeedb49b3392ad92e991c9",
+      "approach": "Alternating Diagonal Walk",
+      "insight": "Move up-right on one diagonal and down-left on the next. After emitting a cell, advance in the current direction and correct any crossed matrix boundary, flipping direction. Carefully ordered boundary corrections handle rectangular matrices as well as squares.",
+      "steps": [
+        "Start at the top-left cell moving up-right.",
+        "Emit each cell and advance diagonally.",
+        "Correct row/column overflow and switch direction until rows × columns values are emitted."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(rows × columns) output and O(1) extra workspace.",
+      "pitfalls": [
+        "The correction order matters when a move crosses two bounds.",
+        "Check single-row and single-column matrices.",
+        "The traversal visits cells, rather than sorting by their values."
+      ]
+    },
+    {
+      "number": 503,
+      "id": "next-greater-element-ii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/503. Next Greater Element II/503.py",
+      "cppPath": "solutions/503. Next Greater Element II/503.cpp",
+      "pythonSha256": "ce23d175ecc35fb014078fa15456334d8cec40c742ada78bdd0eaa19edea01b7",
+      "cppSha256": "cf375d8267e48dd6f7c421c91c77ebec519a05bdcef8bd569f909562886fbc46",
+      "approach": "Circular Monotone Stack",
+      "insight": "Scan the array twice to let values near the beginning resolve candidates near the end. A decreasing stack holds indices still waiting for a strictly larger value. Push indices only on the first pass, so each index is stored and resolved at most once.",
+      "steps": [
+        "Initialize all answers to -1.",
+        "Read nums[i % n] for 2n positions and pop smaller waiting values.",
+        "Push an index only during the first pass."
+      ],
+      "time": "O(n).",
+      "space": "O(n).",
+      "pitfalls": [
+        "A next greater value must be strictly greater, so equal values stay waiting.",
+        "Do not push duplicate indices on the second pass.",
+        "An array maximum retains answer -1."
+      ]
+    },
+    {
+      "number": 508,
+      "id": "most-frequent-subtree-sum",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/508. Most Frequent Subtree Sum/508.py",
+      "cppPath": "solutions/508. Most Frequent Subtree Sum/508.cpp",
+      "pythonSha256": "7a284808bb044404ca021a8aabaf28dc63889341f197e3e8c58613967ee27bb6",
+      "cppSha256": "379615cb877dadb36965f42711d696ef16f1fe5760c0e04ae335c5633d13f0ca",
+      "approach": "Postorder Sums and a Frequency Map",
+      "insight": "A subtree sum is its root value plus the sums of its two child subtrees. Compute sums postorder and count each result in a frequency map. Return every sum whose frequency equals the maximum, since ties are allowed.",
+      "steps": [
+        "Recursively compute the left and right sums.",
+        "Count their sum with the current node value.",
+        "Find the maximum frequency and return all matching sums."
+      ],
+      "time": "O(n) expected with hashing.",
+      "space": "O(n) map plus O(h) recursion stack.",
+      "pitfalls": [
+        "Negative subtree sums are valid.",
+        "Return all tied modes.",
+        "An empty root returns an empty list."
+      ]
+    },
+    {
+      "number": 509,
+      "id": "fibonacci-number",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/509. Fibonacci Number/509.py",
+      "cppPath": "solutions/509. Fibonacci Number/509.cpp",
+      "pythonSha256": "64deff063763eeee94bc08e06f822dacdead7f604a59a400d284a2630d2f9e0c",
+      "cppSha256": "52c291822dfb2975f9003859c315fd0389d7a39caec2ed034bffeb857ccbfce7",
+      "approach": "Rolling Fibonacci State",
+      "insight": "Each Fibonacci number depends only on the previous two numbers. Keep a fixed-size state and update it from lower indices upward so the old values are available when computing the new sum. This avoids exponential recursive recomputation.",
+      "steps": [
+        "Handle n = 0 and n = 1 directly.",
+        "Start from the values zero and one.",
+        "Iteratively sum the previous two values through n."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "Use F(0) = 0 and F(1) = 1.",
+        "Preserve both old values before overwriting them.",
+        "A full n-element DP array is unnecessary."
+      ]
+    },
+    {
+      "number": 524,
+      "id": "longest-word-in-dictionary-through-deleting",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/524. Longest Word in Dictionary through Deleting/524.py",
+      "cppPath": "solutions/524. Longest Word in Dictionary through Deleting/524.cpp",
+      "pythonSha256": "be82df57d7cd94938143fa054b4366683f9fd872e3b60f3bba8c4bc24f6b42c0",
+      "cppSha256": "68fcf18e792c03e046a79182eb0ee0e8fecdcf95666563b8d71af8f1d3e3f113",
+      "approach": "Subsequence Checks with Tie Breaking",
+      "insight": "A dictionary word can be formed by deletion exactly when it is a subsequence of the input. Scan the input with a pointer into each candidate word. Among matched words, prefer the longest, then the lexicographically smallest on equal length.",
+      "steps": [
+        "Check each dictionary word as a subsequence.",
+        "Compare its length with the best matched word.",
+        "Use lexical order to break equal-length ties."
+      ],
+      "time": "O(dn + L) for d words, input length n, and dictionary characters L.",
+      "space": "O(1) auxiliary space, excluding the returned word.",
+      "pitfalls": [
+        "Characters must retain order.",
+        "The lexical tie rule is required.",
+        "Return an empty string if no word is a subsequence."
+      ]
+    },
+    {
+      "number": 526,
+      "id": "beautiful-arrangement",
+      "difficulty": "Medium",
+      "pythonPath": null,
+      "cppPath": "solutions/526. Beautiful Arrangement/526.cpp",
+      "pythonSha256": null,
+      "cppSha256": "6f624102b7341e0a87dce5b744724bb8e47a2815c96349cb3b09f550a630f161",
+      "approach": "Memoized Backtracking by Used Positions",
+      "insight": "Assign numbers one through n to still-empty positions that divide the number or are divisible by it. The filled-position state determines the next number and all future choices, so memoize the number of completions for that state. Backtrack each temporary position assignment.",
+      "steps": [
+        "Try each empty position satisfying either divisibility condition.",
+        "Mark it filled, recurse with the next number, then undo it.",
+        "Memoize completed states and return one after all numbers are placed."
+      ],
+      "time": "O(n² × 2^n) conservative bound including copied/hashed string states.",
+      "space": "O(n × 2^n) for string-key memo storage.",
+      "pitfalls": [
+        "Either direction of divisibility qualifies.",
+        "Undo a position after returning.",
+        "The Python example copies a state string; account for that work rather than claiming a bitmask bound."
+      ]
+    },
+    {
+      "number": 529,
+      "id": "minesweeper",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/529. Minesweeper/529.py",
+      "cppPath": "solutions/529. Minesweeper/529.cpp",
+      "pythonSha256": "69bbd46db7f0026f1b22e2d94d1c7aa72aec00295cc5d5dcc252b58e10d6a7e4",
+      "cppSha256": "7ae1a60747c958cf762d857862ca3824a83edb198e063a2d441ade1b9d95a56e",
+      "approach": "Reveal Blank Regions with DFS",
+      "insight": "Clicking a mine immediately marks it X. For an unrevealed empty cell, count adjacent mines in all eight directions. Show the count when positive; otherwise mark the cell blank and recursively reveal neighboring empty cells, using the changed board as the visited marker.",
+      "steps": [
+        "Handle a clicked mine.",
+        "Count adjacent mines at each empty cell.",
+        "Write its number or B; expand neighbors only from a blank cell."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(rows × columns) worst-case recursion stack.",
+      "pitfalls": [
+        "Mark a cell before expanding neighbors.",
+        "Numbered cells stop expansion.",
+        "Include diagonal neighbors and respect the matrix boundary."
+      ]
+    },
+    {
+      "number": 532,
+      "id": "k-diff-pairs-in-an-array",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/532. K-diff Pairs in an Array/532.py",
+      "cppPath": "solutions/532. K-diff Pairs in an Array/532.cpp",
+      "pythonSha256": "2f1f6b170bc9a7acde9eee1f3bd45fc3ee645ad1cdd046b84ce6c0442213cb0f",
+      "cppSha256": "7588b7bfb7aa7a5e112b4b0a8b0b94e0cd833c4bc034d0b4ca4a6a2ef31fb45c",
+      "approach": "Value-to-Index Map and One-Time Pair Counting",
+      "insight": "Map each distinct value to one of its indices. For a value x, a pair exists when x + k is present at another index. After counting it, remove that target entry so later duplicates cannot count the same value pair again.",
+      "steps": [
+        "Build a value-to-index map.",
+        "For each original index, look up value + k and ensure it uses another index.",
+        "Count the pair and remove the target value from the map."
+      ],
+      "time": "O(n) expected with hashing.",
+      "space": "O(n).",
+      "pitfalls": [
+        "Count distinct value pairs, rather than every index pair.",
+        "When k = 0, require at least two occurrences.",
+        "Removing targets prevents duplicate counts."
+      ]
+    },
+    {
+      "number": 537,
+      "id": "complex-number-multiplication",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/537. Complex Number Multiplication/537.py",
+      "cppPath": "solutions/537. Complex Number Multiplication/537.cpp",
+      "pythonSha256": "1292c78f4c3e6be1c144ab62a6fcfb5976a35b7adc3fc5bfe66516a5ae078beb",
+      "cppSha256": "4af36d5055909c15c4a5a394fea1da4fd0d19563fe54e09aee40ba8eb97e3297",
+      "approach": "Multiply Real and Imaginary Components",
+      "insight": "Parse each input into its real and imaginary integer components. Distribute the multiplication using i² = -1: the real part is ac - bd and the imaginary part is ad + bc. Format both signed components in the required a+bi representation.",
+      "steps": [
+        "Split at the separating plus and remove the trailing i.",
+        "Compute real and imaginary products.",
+        "Return real + \"+\" + imaginary + \"i\"."
+      ],
+      "time": "O(n + m) for parsing and formatting the input strings.",
+      "space": "O(n + m) for substring and output strings.",
+      "pitfalls": [
+        "The imaginary component may be negative, as in `1+-1i`.",
+        "Keep the separating plus in the formatted result.",
+        "Do not use floating-point complex parsing."
+      ]
+    },
+    {
+      "number": 539,
+      "id": "minimum-time-difference",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/539. Minimum Time Difference/539.py",
+      "cppPath": "solutions/539. Minimum Time Difference/539.cpp",
+      "pythonSha256": "a498c405f0b65b60d3f8a3f0696c4ef47008b7b4f094beebd122b08a9d7d854e",
+      "cppSha256": "84f53bd8e23b6a26cc8c7c846b7d2d7fd128d58a94d9cfb8d1be3bf37c5dba37",
+      "approach": "Minute Buckets on a Circular Day",
+      "insight": "Convert each time to a minute from zero to 1439. Mark seen minutes in a fixed-size table; a duplicate gives difference zero. Scan marked minutes in order and also compare the last with the first across midnight.",
+      "steps": [
+        "Mark each minute and return zero for duplicates.",
+        "Scan consecutive marked minutes for the smallest gap.",
+        "Include 1440 - last + first."
+      ],
+      "time": "O(n + 1440).",
+      "space": "O(1440).",
+      "pitfalls": [
+        "The day wraps at midnight.",
+        "Repeated time strings produce zero.",
+        "A first/last comparison is needed even after ordered scanning."
+      ]
+    },
+    {
+      "number": 541,
+      "id": "reverse-string-ii",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/541. Reverse String II/541.py",
+      "cppPath": "solutions/541. Reverse String II/541.cpp",
+      "pythonSha256": "320b83591dd0316966bbfee70b1aafcaa9b60b3b779d5cfbec4eed1d7f0ace70",
+      "cppSha256": "488a786e3d4c9d951470c6e1cc0f0cecd69c2d67fa4ba267c91b588a5a6d6ef1",
+      "approach": "Reverse the First Half of Each 2k Block",
+      "insight": "Divide the character positions into blocks of size 2k. Reverse the first k positions in each block, or all remaining characters when fewer than k remain. Leave the second half unchanged and use iteration to avoid recursion-depth limits.",
+      "steps": [
+        "Visit block starts 0, 2k, 4k, ...",
+        "Reverse from the block start to min(start + k - 1, last index).",
+        "Join or return the resulting string."
+      ],
+      "time": "O(n).",
+      "space": "Python O(n) for the mutable character list; C++ uses the by-value string buffer.",
+      "pitfalls": [
+        "The last partial block still needs reversal.",
+        "When fewer than k remain, reverse all of them.",
+        "k is positive."
+      ]
+    },
+    {
+      "number": 542,
+      "id": "01-matrix",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/542. 01 Matrix/542.py",
+      "cppPath": "solutions/542. 01 Matrix/542.cpp",
+      "pythonSha256": "cfb565375f00819c7231f127388b72304bf28a47d8590f32ca5cde792b5cb807",
+      "cppSha256": "6e781ca0be67a9c63570ab987ef548385ec319572c63c390cfe0c97e622e3c0f",
+      "approach": "Multi-Source Breadth-First Search",
+      "insight": "Start BFS from every zero simultaneously. Every step from this frontier adds one to the nearest-zero distance, so the first visit to a cell gives its minimum distance. Store distances in the matrix while a separate seen grid prevents repeat visits.",
+      "steps": [
+        "Enqueue all zeros and mark them seen.",
+        "Visit unvisited orthogonal neighbors at parent distance + 1.",
+        "Mark when enqueueing and return the updated matrix."
+      ],
+      "time": "O(rows × columns).",
+      "space": "O(rows × columns).",
+      "pitfalls": [
+        "Start from all zeros, rather than one zero.",
+        "Only orthogonal moves count.",
+        "This implementation overwrites the input matrix with distances."
+      ]
+    },
+    {
+      "number": 553,
+      "id": "optimal-division",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/553. Optimal Division/553.py",
+      "cppPath": "solutions/553. Optimal Division/553.cpp",
+      "pythonSha256": "b3c8d517dad97f7e8839b9b68690e798719b34727686e38adb6fe1e2a904a05f",
+      "cppSha256": "f5dc915f0c90b49f0f419231e1a5233a03bb32822d4a58d16fe9f4dde75f31d4",
+      "approach": "Minimize the Denominator",
+      "insight": "For positive numbers, maximize the whole expression by minimizing the denominator after the first value. With at least three values, divide the second by all remaining values inside one parenthesized group. One or two inputs need no parentheses.",
+      "steps": [
+        "Handle one or two values directly.",
+        "For longer input, format first/(second/third/.../last).",
+        "Return the expression string."
+      ],
+      "time": "O(L), for L output characters.",
+      "space": "O(L) output storage.",
+      "pitfalls": [
+        "Add parentheses only around the denominator group.",
+        "The reasoning relies on the problem’s positive values greater than one.",
+        "Do not add unnecessary parentheses for two values."
+      ]
+    },
+    {
+      "number": 556,
+      "id": "next-greater-element-iii",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/556. Next Greater Element III/556.py",
+      "cppPath": "solutions/556. Next Greater Element III/556.cpp",
+      "pythonSha256": "1a9504eb91e3f50dc3f3d4b355384cfec3745c36aeabc655f86fb7b85cb6f31e",
+      "cppSha256": "650bbbcb4165537ea1146acb9f3999b9cd5b954ed5295d3a20abe4cba4495de6",
+      "approach": "Next Permutation of Decimal Digits",
+      "insight": "The rightmost digit that is smaller than its successor is the pivot for the smallest increase. Swap it with the smallest larger digit in the suffix, then reverse that descending suffix to minimize the remaining digits. Reject if no larger permutation or if the result exceeds signed 32-bit range.",
+      "steps": [
+        "Find the rightmost increasing pivot.",
+        "Swap it with the rightmost larger suffix digit.",
+        "Reverse the suffix and validate the numeric result."
+      ],
+      "time": "O(d), for d digits.",
+      "space": "O(d) for the digit string/list.",
+      "pitfalls": [
+        "Use exactly the original digits.",
+        "A fully descending digit sequence has no answer.",
+        "Check INT_MAX after constructing the permutation."
+      ]
+    },
+    {
+      "number": 565,
+      "id": "array-nesting",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/565. Array Nesting/565.py",
+      "cppPath": "solutions/565. Array Nesting/565.cpp",
+      "pythonSha256": "39c4cade467c4f2be1ab291316a4a1e38c8e3509bca86b11371795e46ed7d4d9",
+      "cppSha256": "b93d3d70dacc25d561db1c5067fac36e4558d552141f55d4d25569a0f67423e5",
+      "approach": "Walk and Mark Permutation Cycles",
+      "insight": "The array is a permutation, so repeatedly using a value as the next index walks a cycle. Once a cycle is visited, it cannot give a new answer from another starting index. Mark consumed entries as -1, saving each next index before overwriting it.",
+      "steps": [
+        "Skip already marked entries.",
+        "Walk the cycle, storing the next index before marking the current entry.",
+        "Track the largest number of visited entries in one walk."
+      ],
+      "time": "O(n).",
+      "space": "O(1).",
+      "pitfalls": [
+        "This mutates the input array.",
+        "Save the next index before writing -1.",
+        "The permutation guarantee makes visited components cycles."
+      ]
+    },
+    {
+      "number": 581,
+      "id": "shortest-unsorted-continuous-subarray",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/581. Shortest Unsorted Continuous Subarray/581.py",
+      "cppPath": "solutions/581. Shortest Unsorted Continuous Subarray/581.cpp",
+      "pythonSha256": "b10e369e51014e7d7968c9545141e3d6bff3ec37cc5d1a1f00d586efed5b6333",
+      "cppSha256": "082890f6045da686a1e8714975cc8bc3e9ed78d832ebcfff5a2eab05914846ab",
+      "approach": "Find the Disorder Extremes and Expand Bounds",
+      "insight": "After the first decrease from the left, record the minimum of the remaining suffix. After the first increase while scanning backward, record the maximum of the earlier prefix. Values outside the disorder range that exceed that minimum or fall below that maximum must be included in the sorted interval.",
+      "steps": [
+        "Find the minimum after a left-to-right inversion.",
+        "Find the maximum after a right-to-left inversion.",
+        "Locate the first value above the minimum and the last below the maximum."
+      ],
+      "time": "O(n).",
+      "space": "O(1) for scans in the adapted examples.",
+      "pitfalls": [
+        "An already sorted array returns zero.",
+        "Repeated equal values alone are not inversions.",
+        "The interval can extend beyond the initially adjacent inversion."
+      ]
+    },
+    {
+      "number": 583,
+      "id": "delete-operation-for-two-strings",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/583. Delete Operation for Two Strings/583.py",
+      "cppPath": "solutions/583. Delete Operation for Two Strings/583.cpp",
+      "pythonSha256": "10e78b0d077e4191733414052293cefd013f617baaded2f3ee1751833af86f80",
+      "cppSha256": "4ea30b7e6197b55f688522fb94c827eeb2657ec2b2abc65d2df069f23da34da1",
+      "approach": "Longest Common Subsequence",
+      "insight": "The characters retained in both strings after deletions form a common subsequence. Keep the longest such subsequence to minimize deletions. If its length is L, remove len(word1) - L characters from the first and len(word2) - L from the second.",
+      "steps": [
+        "Build the LCS table over string prefixes.",
+        "On equal characters extend the diagonal; otherwise take the larger neighboring state.",
+        "Return both lengths minus twice the LCS length."
+      ],
+      "time": "O(mn).",
+      "space": "O(mn).",
+      "pitfalls": [
+        "Only deletions are allowed, unlike full edit distance.",
+        "The retained characters need not be contiguous.",
+        "Empty-string prefix rows and columns start at zero."
+      ]
+    },
+    {
+      "number": 593,
+      "id": "valid-square",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/593. Valid Square/593.py",
+      "cppPath": "solutions/593. Valid Square/593.cpp",
+      "pythonSha256": "3d2348adcf7ba229ec0ff0599b8eba5e6c5b379309347cb30f79d4671c1d801e",
+      "cppSha256": "50b70c8f74c5343ead25b07006e8ec336b69aed38dfb986c2c59ec22ced60ea0",
+      "approach": "Six Squared Distances",
+      "insight": "For four distinct points to form a square, their six pair distances consist of four equal nonzero sides and two equal diagonals twice the squared side length. Compute and sort squared distances to check these counts without depending on the input point order.",
+      "steps": [
+        "Compute all six squared pair distances.",
+        "Sort them.",
+        "Check four equal positive sides and two equal diagonals of twice that size."
+      ],
+      "time": "O(1) for four points.",
+      "space": "O(1).",
+      "pitfalls": [
+        "A duplicate point creates a zero side and must fail.",
+        "Equal sides alone could describe a rhombus; validate diagonals too.",
+        "Avoid floating-point square roots."
+      ]
+    },
+    {
+      "number": 611,
+      "id": "valid-triangle-number",
+      "difficulty": "Medium",
+      "pythonPath": "solutions/611. Valid Triangle Number/611.py",
+      "cppPath": "solutions/611. Valid Triangle Number/611.cpp",
+      "pythonSha256": "88379d6b4def28aa1040af59489b223de1a61051c04f5ef429666d59358372ee",
+      "cppSha256": "d58274acf1091d6c3f2017fb365eb0f74cd8d57a133c5db76f9bd75cea519cd0",
+      "approach": "Sorting and Two-Pointer Triangle Counting",
+      "insight": "After sorting nonnegative lengths, only the sum of the two smaller sides needs checking against the largest. Fix the largest index; if the current smaller pair exceeds it, every larger left choice up to the right pointer also works. Count those pairs together.",
+      "steps": [
+        "Sort and choose each possible largest side.",
+        "Scan the smaller prefix with two pointers.",
+        "Add right - left when the inequality holds and move right; otherwise advance left."
+      ],
+      "time": "O(n²).",
+      "space": "Python O(n) worst-case sorting workspace; C++ O(log n) sorting stack.",
+      "pitfalls": [
+        "The inequality is strict; degenerate triangles do not count.",
+        "Zero sides fail naturally.",
+        "Count index triplets, including equal lengths at different positions."
+      ]
+    },
+    {
+      "number": 643,
+      "id": "maximum-average-subarray-i",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/643. Maximum Average Subarray I/643.py",
+      "cppPath": "solutions/643. Maximum Average Subarray I/643.cpp",
+      "pythonSha256": "cbf7c625502e13d10e0033cb7b89ba6737d400e502e7a0da5bb342645c67f9e8",
+      "cppSha256": "6644d3a4563f05ea69ebd7b1d8dbfe5b9948f8b6d0a24eb5fad5fb0d1dea2b21",
+      "approach": "Fixed-Length Sliding Sum",
+      "insight": "All candidate averages share the same denominator k, so maximizing their sum also maximizes the average. Maintain a running sum of exactly k values, replacing the outgoing value with the incoming one at each step.",
+      "steps": [
+        "Sum the first k values and use that as the initial best.",
+        "Slide by adding the new value and subtracting the one leaving.",
+        "Return best sum divided by k."
+      ],
+      "time": "O(n).",
+      "space": "O(1) after summing the initial window without slicing.",
+      "pitfalls": [
+        "Initialize from a real window so all-negative inputs work.",
+        "The window length must remain exactly k.",
+        "Use floating-point division for the final average."
+      ]
+    },
+    {
+      "number": 653,
+      "id": "two-sum-iv-input-is-a-bst",
+      "difficulty": "Easy",
+      "pythonPath": "solutions/653. Two Sum IV - Input is a BST/653.py",
+      "cppPath": "solutions/653. Two Sum IV - Input is a BST/653.cpp",
+      "pythonSha256": "9e121ae516e2908509ee56c2cb9ec97d26054313f888c54af907e3f264ddc1d3",
+      "cppSha256": "5ac86fa2fba9f4da6d35e8f9c8bfb5119dbfcd9c101eb1767c32785cb32e5cc8",
+      "approach": "Opposite BST Iterators",
+      "insight": "Inorder traversal of a BST gives sorted values. Use one iterator ascending and another descending, then apply a two-pointer sum search without storing every node. Each iterator keeps only its current root-to-node traversal stack.",
+      "steps": [
+        "Initialize ascending and descending iterators.",
+        "Compare their sum with the target.",
+        "Advance the low side for a small sum or the high side for a large sum, stopping when they meet."
+      ],
+      "time": "O(n) worst case.",
+      "space": "O(h) for the two traversal stacks.",
+      "pitfalls": [
+        "Do not reuse the same node for both summands.",
+        "The adapted iterators return node identities, so equal-valued distinct nodes can form a pair.",
+        "A single-node tree cannot form a pair."
+      ]
+    }
+  ],
+  "licenseSha256": "fdf5471fdcd13a27ce9f89c336229e4f7b9a90c3b8f59e0f618aab846729a67e"
+}

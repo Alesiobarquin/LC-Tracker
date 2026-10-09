@@ -1,0 +1,14 @@
+{
+  "problemId": "guess-number-higher-or-lower-ii",
+  "approach": "Memoized Minimax on Intervals",
+  "explanation": "### How it works\n\nFor a guess k, an incorrect answer costs k plus the cost of the remaining interval. To guarantee a win, account for the more expensive side. Try every guess and choose the minimum of these worst-case costs; an interval with at most one value needs no payment.\n\n### Steps\n\n1. Memoize the guaranteed cost for each interval.\n2. For every possible guess, add its value to the maximum cost of the two remaining sides.\n3. Take the minimum candidate cost.\n\n### Complexity\n\n- Time: O(n³).\n- Space: O(n²) memo plus O(n) recursion stack.\n\n### Things to watch for\n\n- Take the maximum over outcomes, then the minimum over guesses.\n- A correct guess costs zero.\n- The single-value base case is zero, rather than the value itself.",
+  "code": {
+    "python": "import functools\n\nclass Solution:\n  def getMoneyAmount(self, n: int) -> int:\n    @functools.lru_cache(None)\n    def dp(i: int, j: int) -> int:\n      \"\"\"Returns the minimum money you need to guarantee a win of picking i..j.\n      \"\"\"\n      if i >= j:\n        return 0\n      return min(max(dp(i, k - 1), dp(k + 1, j)) + k\n                 for k in range(i, j + 1))\n\n    return dp(1, n)\n",
+    "cpp": "class Solution {\n public:\n  int getMoneyAmount(int n) {\n    vector<vector<int>> mem(n + 1, vector<int>(n + 1, INT_MAX));\n    return getMoneyAmount(1, n, mem);\n  }\n\n private:\n  // Returns the minimum money you need to guarantee a win of picking i..j.\n  int getMoneyAmount(int i, int j, vector<vector<int>>& mem) {\n    if (i >= j)\n      return 0;\n    if (mem[i][j] != INT_MAX)\n      return mem[i][j];\n\n    for (int k = i; k <= j; ++k)\n      mem[i][j] = min(mem[i][j], max(getMoneyAmount(i, k - 1, mem),\n                                     getMoneyAmount(k + 1, j, mem)) +\n                                     k);\n\n    return mem[i][j];\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/375.%20Guess%20Number%20Higher%20or%20Lower%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

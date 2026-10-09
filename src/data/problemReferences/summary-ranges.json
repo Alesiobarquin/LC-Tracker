@@ -1,0 +1,14 @@
+{
+  "problemId": "summary-ranges",
+  "approach": "Scan Consecutive Runs",
+  "explanation": "### How it works\n\nThe sorted distinct input splits into maximal runs of consecutive values. Scan each run once, remembering its first and last values. Emit one number for a singleton and a start->end string for a longer run.\n\n### Steps\n\n1. Remember the first value of a run.\n2. Advance while the next value differs by one.\n3. Format the run and continue at the next unconsumed value.\n\n### Complexity\n\n- Time: O(n), excluding integer formatting proportional to output characters.\n- Space: O(1) working space plus output.\n\n### Things to watch for\n\n- The input is sorted with no duplicates.\n- A singleton has no arrow.\n- Avoid overflowing a boundary value when checking adjacency in C++.",
+  "code": {
+    "python": "class Solution:\n  def summaryRanges(self, nums: list[int]) -> list[str]:\n    ans = []\n\n    i = 0\n    while i < len(nums):\n      begin = nums[i]\n      while i < len(nums) - 1 and nums[i] == nums[i + 1] - 1:\n        i += 1\n      end = nums[i]\n      if begin == end:\n        ans.append(str(begin))\n      else:\n        ans.append(str(begin) + \"->\" + str(end))\n      i += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> summaryRanges(vector<int>& nums) {\n    vector<string> ans;\n\n    for (int i = 0; i < nums.size(); ++i) {\n      const int begin = nums[i];\n      while (i + 1 < nums.size() && nums[i] == nums[i + 1] - 1)\n        ++i;\n      const int end = nums[i];\n      if (begin == end)\n        ans.push_back(to_string(begin));\n      else\n        ans.push_back(to_string(begin) + \"->\" + to_string(end));\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/228.%20Summary%20Ranges",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

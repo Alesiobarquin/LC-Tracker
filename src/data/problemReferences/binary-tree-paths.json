@@ -1,0 +1,14 @@
+{
+  "problemId": "binary-tree-paths",
+  "approach": "Root-to-Leaf DFS Paths",
+  "explanation": "### How it works\n\nMaintain a shared path prefix during depth-first search. At a leaf, join the prefix and leaf value into one output string. Append before visiting children and remove afterward so the next sibling receives the correct path.\n\n### Steps\n\n1. Visit the current node and test whether it is a leaf.\n2. Save a complete root-to-leaf string at leaves.\n3. Append the current prefix for child visits, then pop it.\n\n### Complexity\n\n- Time: O(n + K) for n nodes and K returned characters, under fixed-width node values.\n- Space: O(h) working path/stack plus O(K) output.\n\n### Things to watch for\n\n- Only leaves finish a path.\n- Backtrack after both child calls.\n- Keep separators between values, with none after the final value.",
+  "code": {
+    "python": "class Solution:\n  def binaryTreePaths(self, root: TreeNode | None) -> list[str]:\n    ans = []\n\n    def dfs(root: TreeNode | None, path: list[str]) -> None:\n      if not root:\n        return\n      if not root.left and not root.right:\n        ans.append(''.join(path) + str(root.val))\n        return\n\n      path.append(str(root.val) + '->')\n      dfs(root.left, path)\n      dfs(root.right, path)\n      path.pop()\n\n    dfs(root, [])\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> binaryTreePaths(TreeNode* root) {\n    vector<string> ans;\n    dfs(root, {}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(TreeNode* root, vector<string>&& path, vector<string>& ans) {\n    if (root == nullptr)\n      return;\n    if (root->left == nullptr && root->right == nullptr) {\n      ans.push_back(join(path) + to_string(root->val));\n      return;\n    }\n\n    path.push_back(to_string(root->val) + \"->\");\n    dfs(root->left, std::move(path), ans);\n    dfs(root->right, std::move(path), ans);\n    path.pop_back();\n  }\n\n  string join(const vector<string>& path) {\n    string joined;\n    for (const string& s : path)\n      joined += s;\n    return joined;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/257.%20Binary%20Tree%20Paths",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

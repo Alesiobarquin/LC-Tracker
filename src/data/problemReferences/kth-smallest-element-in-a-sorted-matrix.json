@@ -1,0 +1,14 @@
+{
+  "problemId": "kth-smallest-element-in-a-sorted-matrix",
+  "approach": "Heap Merge of Sorted Matrix Rows",
+  "explanation": "### How it works\n\nTreat each matrix row as a sorted stream. A min-heap containing the next unconsumed cell of each relevant row always exposes the globally next value. Remove k - 1 values, pushing the successor from each removed value’s row, then read the heap minimum.\n\n### Steps\n\n1. Seed the first cell of up to min(k, rows) rows.\n2. Pop and advance the same row k - 1 times.\n3. Return the current smallest heap value.\n\n### Complexity\n\n- Time: O(k log(r + 1)), with r = min(k, rows).\n- Space: O(r).\n\n### Things to watch for\n\n- Duplicate values count as separate elements.\n- k is one-based.\n- Use the value to order the heap, rather than row or column indices.",
+  "code": {
+    "python": "import heapq\n\nclass Solution:\n  def kthSmallest(self, matrix: list[list[int]], k: int) -> int:\n    minHeap = []  # (matrix[i][j], i, j)\n\n    i = 0\n    while i < k and i < len(matrix):\n      heapq.heappush(minHeap, (matrix[i][0], i, 0))\n      i += 1\n\n    while k > 1:\n      k -= 1\n      _, i, j = heapq.heappop(minHeap)\n      if j + 1 < len(matrix[0]):\n        heapq.heappush(minHeap, (matrix[i][j + 1], i, j + 1))\n\n    return minHeap[0][0]\n",
+    "cpp": "struct T {\n  int i;\n  int j;\n  int num;  // matrix[i][j]\n};\n\nclass Solution {\n public:\n  int kthSmallest(vector<vector<int>>& matrix, int k) {\n    auto compare = [&](const T& a, const T& b) { return a.num > b.num; };\n    priority_queue<T, vector<T>, decltype(compare)> minHeap(compare);\n\n    for (int i = 0; i < k && i < matrix.size(); ++i)\n      minHeap.emplace(i, 0, matrix[i][0]);\n\n    while (k-- > 1) {\n      const auto [i, j, _] = minHeap.top();\n      minHeap.pop();\n      if (j + 1 < matrix[0].size())\n        minHeap.emplace(i, j + 1, matrix[i][j + 1]);\n    }\n\n    return minHeap.top().num;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/378.%20Kth%20Smallest%20Element%20in%20a%20Sorted%20Matrix",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

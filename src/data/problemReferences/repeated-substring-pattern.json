@@ -1,0 +1,14 @@
+{
+  "problemId": "repeated-substring-pattern",
+  "approach": "Search Inside a Doubled String",
+  "explanation": "### How it works\n\nIf a string consists of repeated copies of a shorter block, rotating it by one block produces the same string. Doubling the string contains all such rotations. Removing the first and last positions excludes the two trivial matches, leaving a match exactly when a proper repeat exists.\n\n### Steps\n\n1. Build s + s.\n2. Remove its first and last characters.\n3. Check whether s occurs in the remaining string.\n\n### Complexity\n\n- Time: Conservative O(n²) worst-case substring search; library implementations may be faster.\n- Space: O(n) for the doubled string and substring.\n\n### Things to watch for\n\n- Exclude both trivial boundary matches.\n- A one-character string cannot repeat a shorter nonempty block.\n- The returned answer is a boolean, not the repeated block.",
+  "code": {
+    "python": "class Solution:\n  def repeatedSubstringPattern(self, s: str) -> bool:\n    return s in (s + s)[1:-1]\n",
+    "cpp": "class Solution {\n public:\n  bool repeatedSubstringPattern(string s) {\n    const string ss = s + s;\n    return ss.substr(1, ss.length() - 2).find(s) != string::npos;\n  }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/459.%20Repeated%20Substring%20Pattern",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker"
+}

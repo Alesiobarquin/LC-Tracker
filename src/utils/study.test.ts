@@ -78,6 +78,22 @@ describe("capacity and backlog planning", () => {
       .slice(0, 43)
       .map((p) => [p.id, base()]),
   );
+  it("explains why spent recall allowance leaves successive coding blocks", () => {
+    const timings: SessionTiming[] = [{
+      rating: 4, id: "recall-budget", problemId: "not-in-pool", category: "Arrays & Hashing",
+      date: now.toISOString(), elapsedSeconds: 18 * 60, sessionType: "recall",
+    }];
+    const first = buildStudyPlan({ progress: backlog, settings: settings(60), timings, now });
+    expect(first.recallTasks).toHaveLength(0);
+    expect(first.mainTask).not.toBeNull();
+    expect(first.mainTask!.explanation.join(" ")).toContain("0 min remains in that allowance");
+    timings.push({ ...timings[0], id: "coding-block", problemId: first.mainTask!.problemId, elapsedSeconds: 10 * 60, sessionType: "review" });
+    const next = buildStudyPlan({ progress: backlog, settings: settings(60), timings, now });
+    expect(next.recallTasks).toHaveLength(0);
+    expect(next.mainTask?.problemId).not.toBe(first.mainTask!.problemId);
+    expect(next.mainTask!.explanation.join(" ")).toContain("32 min remaining");
+    expect(next.plannedMinutes).toBeLessThanOrEqual(32);
+  });
   it("turns 43 eligible reviews into a small budgeted plan with one distinct coding block", () => {
     const plan = buildStudyPlan({
       progress: backlog,

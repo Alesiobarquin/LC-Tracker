@@ -1047,3 +1047,25 @@ for (const theme of ["light", "dark"]) {
     });
   }
 }
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1280, 390]) {
+  test(`recommendation explanation is accessible at ${width}px in ${theme}`, async ({ page }) => {
+    await fixture(page);
+    await page.addInitScript((theme) => localStorage.setItem("lc-tracker-theme", theme), theme);
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    const why = page.getByRole("button", { name: "Why this recommendation?", exact: true }).first();
+    await why.click();
+    const dialog = page.getByRole("dialog", { name: "Why this recommendation?" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText("30% of the daily budget");
+    await expect(dialog).toContainText("recalculates after each save");
+    expect(await dialog.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(why).toBeFocused();
+  });
+}
+
+}

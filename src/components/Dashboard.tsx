@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Play, ArrowRight, CircleCheck, ArrowUpRight } from "lucide-react";
 import {
@@ -24,7 +24,7 @@ import {
 } from "../data/problems";
 import { getPatternForProblem } from "../utils/patternMapping";
 import { useStore } from "../store/useStore";
-import { PageHeader, QueryErrorBanner } from "./ui";
+import { Modal, PageHeader, QueryErrorBanner } from "./ui";
 import { BudgetMeter, TraceIndex } from "./ui/StudyTrace";
 import { Button } from "./ui/Button";
 import { DashboardSkeleton } from "./loadingSkeletons";
@@ -39,6 +39,13 @@ export function Dashboard() {
   const { streak } = useStreak();
   const activeSession = useStore((state) => state.activeSession);
   const activeRecall = useStore((state) => state.activeRecall);
+  const [explainedTask, setExplainedTask] = useState<StudyTask | null>(null);
+  const closeExplanation = useCallback(() => setExplainedTask(null), []);
+  const explanationButton = (task: StudyTask) => (
+    <button type="button" className="quiet-action mt-2" onClick={() => setExplainedTask(task)}>
+      Why this recommendation?
+    </button>
+  );
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
@@ -285,6 +292,7 @@ export function Dashboard() {
                 <h2 className="study-next-title">
                   {getNumberedProblemTitle(focusedProblem)}
                 </h2>
+                {!activeProblemId && primaryTask && explanationButton(primaryTask)}
                 <p className="text-sm text-muted leading-relaxed max-w-lg">
                   {activeProblemId
                     ? activeRecall
@@ -408,6 +416,7 @@ export function Dashboard() {
                           <h3 className="text-lg font-medium tracking-tight">
                             {getNumberedProblemTitle(problemMap[task.problemId])}
                           </h3>
+                          {explanationButton(task)}
                           <p className="text-xs text-muted mt-2 leading-relaxed">
                             {task.reason}
                           </p>
@@ -444,6 +453,7 @@ export function Dashboard() {
                         <h4 className="practice-plan-title">
                           {getNumberedProblemTitle(problemMap[plan.mainTask.problemId])}
                         </h4>
+                        {explanationButton(plan.mainTask)}
                         <p className="text-xs text-muted leading-relaxed mt-2 max-w-lg">
                           {plan.mainTask.reason}
                         </p>
@@ -566,6 +576,11 @@ export function Dashboard() {
           </section>
         </aside>
       </div>
+      <Modal isOpen={!!explainedTask} onClose={closeExplanation} title="Why this recommendation?" description={explainedTask ? getNumberedProblemTitle(problemMap[explainedTask.problemId]) : undefined}>
+        <div className="space-y-4 text-sm text-muted leading-relaxed">
+          {explainedTask?.explanation.map((detail) => <p key={detail}>{detail}</p>)}
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { SectionHeading } from "./ui/StudyTrace";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ExternalLink, ArrowLeft, Clock, Pause, Play } from "lucide-react";
 import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
@@ -21,6 +21,7 @@ import {
   ProblemExplanationFootnote,
 } from "./ProblemExplanation";
 import { ReferenceCode } from "./ReferenceCode";
+import { RecallEditor } from "./RecallEditor";
 import {
   parsePersonalExplanation,
   formatPersonalExplanation,
@@ -36,6 +37,10 @@ export function RecallPage() {
   const draft = useStore((state) => state.activeRecall);
   const activeSession = useStore((state) => state.activeSession);
   const { startRecall, updateRecall, endRecall } = useStore.getState();
+  const updateAnswer = useCallback(
+    (answer: string) => updateRecall({ answer }),
+    [updateRecall],
+  );
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
   const [promptsExpanded, setPromptsExpanded] = useState(false);
@@ -370,18 +375,10 @@ export function RecallPage() {
             </ol>
           </aside>
           <div className="recall-writing-sheet">
-            <label htmlFor="recall-answer" className="block text-sm text-body">
-              Your attempt · explanation or pseudocode
-            </label>
-            <textarea
-              id="recall-answer"
-              rows={7}
-              maxLength={20000}
+            <RecallEditor
               value={draft.answer}
-              disabled={frozen}
-              onChange={(e) => updateRecall({ answer: e.target.value })}
-              placeholder="Write what you remember without opening your notes or the solution."
-              className="notebook-answer w-full text-foreground font-mono text-sm placeholder:text-subtle"
+              readOnly={frozen}
+              onChange={updateAnswer}
             />
             {!draft.revealed && (
               <div className="flex flex-wrap gap-3">

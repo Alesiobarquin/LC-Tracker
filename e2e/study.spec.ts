@@ -114,13 +114,13 @@ test("recall conceals references, preserves a draft, and retries a lost response
     "Use a hash map of seen values; check the complement before insertion. O(n) time and space.",
   );
   await page.reload();
-  await expect(answer).toHaveValue(/Use a hash map/);
+  await expect(answer).toHaveText(/Use a hash map/);
   await expect(
     page.getByRole("button", { name: "Resume check" }),
   ).toBeVisible();
   await page.goto("/timer/valid-anagram");
   await expect(page).toHaveURL(/\/recall\/two-sum/);
-  await expect(answer).toHaveValue(/Use a hash map/);
+  await expect(answer).toHaveText(/Use a hash map/);
   await page.getByRole("button", { name: "Resume check" }).click();
   await page.getByRole("button", { name: "Compare with a reference" }).click();
   await expect(page.getByLabel("Personal explanation")).toHaveValue(/Saved reference:/);
@@ -143,8 +143,11 @@ test("recall conceals references, preserves a draft, and retries a lost response
       .filter({ hasText: "Your answer and attempt are preserved" }),
   ).toBeVisible();
   await page.reload();
-  await expect(answer).toHaveValue(/Corrected:/);
-  await expect(answer).toBeDisabled();
+  await expect(answer).toHaveText(/Corrected:/);
+  await expect(answer).toHaveAttribute('aria-readonly', 'true');
+  await expect(answer).not.toBeEditable();
+  await answer.press('x');
+  await expect(answer).toHaveText('Corrected: check the complement before inserting, and return both indices.');
   await page.getByRole("button", { name: /^Retry: Recalled/ }).click();
   await expect(page).toHaveURL(/\/dashboard/);
   expect(saves).toHaveLength(2);
@@ -165,6 +168,93 @@ test("recall conceals references, preserves a draft, and retries a lost response
   await expect(detail.getByRole('heading', { name: 'Original answer from memory' })).toBeVisible();
   await expect(detail.getByRole('heading', { name: 'Correction after comparison' })).toBeVisible();
   await expect(detail).toContainText('Corrected: check the complement before inserting');
+});
+
+test('recall editor supports IDE keys and keeps code mixed with plain English through reload', async ({ page }) => {
+  await fixture(page);
+  await page.goto('/recall/two-sum');
+  const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+  const savedAnswer = () => page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall.answer as string,
+  );
+  await answer.fill('def compress(chars):');
+  const keyword = answer.locator('span').filter({ hasText: /^def$/ });
+  await expect(keyword).toBeVisible();
+  expect(await keyword.evaluate(element => getComputedStyle(element).color)).toBe(
+    await page.locator('html').evaluate(element => getComputedStyle(element).getPropertyValue('--palette-code-keyword').trim())
+      .then(hex => hex.match(/\w\w/g)!.map(channel => parseInt(channel, 16)))
+      .then(rgb => `rgb(${rgb.join(', ')})`),
+  );
+  await answer.press('ControlOrMeta+a');
+  await answer.press('ArrowRight');
+  await answer.press('Enter');
+  await expect.poll(savedAnswer).toBe('def compress(chars):\n    ');
+  await answer.press('Tab');
+  await expect.poll(savedAnswer).toBe('def compress(chars):\n        ');
+  await answer.press('Shift+Tab');
+  await expect.poll(savedAnswer).toBe('def compress(chars):\n    ');
+  await page.keyboard.insertText('count this run in plain English');
+  const mixedAnswer = 'def compress(chars):\n    count this run in plain English';
+  await expect.poll(savedAnswer).toBe(mixedAnswer);
+  await expect(page.locator('.cm-tooltip-autocomplete')).toHaveCount(0);
+  // Move the caret to finish the typing group before testing comment undo.
+  await answer.press('ArrowLeft');
+  await answer.press('ArrowRight');
+  await answer.press('ControlOrMeta+/');
+  await expect.poll(savedAnswer).toBe('def compress(chars):\n    # count this run in plain English');
+  await answer.press('ControlOrMeta+z');
+  await expect.poll(savedAnswer).toBe(mixedAnswer);
+  await answer.press('ControlOrMeta+Shift+z');
+  await expect.poll(savedAnswer).toContain('# count');
+  await answer.press('ControlOrMeta+z');
+  await answer.press('Alt+ArrowUp');
+  await expect.poll(savedAnswer).toBe('    count this run in plain English\ndef compress(chars):');
+  await answer.press('Alt+ArrowDown');
+  await expect.poll(savedAnswer).toBe(mixedAnswer);
+  await answer.press('ControlOrMeta+f');
+  await expect(page.locator('.recall-editor .cm-search')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.recall-editor .cm-search')).toHaveCount(0);
+  await answer.press('Escape');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.recall-editor-shortcuts summary')).toBeFocused();
+  await page.getByLabel('Answer highlighting').selectOption('javascript');
+  await expect.poll(savedAnswer).toBe(mixedAnswer);
+  await page.reload();
+  await expect(page.getByLabel('Answer highlighting')).toHaveValue('javascript');
+  await expect.poll(savedAnswer).toBe(mixedAnswer);
+  await expect(answer).toContainText('count this run in plain English');
+});
+
+test('recall editor switches highlighting without rewriting the answer and enforces its length limit', async ({ page }) => {
+  await fixture(page);
+  await page.goto('/recall/two-sum');
+  const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+  const highlighting = page.getByLabel('Answer highlighting');
+  for (const [language, code, keyword] of [
+    ['python', 'return 1', 'return'],
+    ['javascript', 'const count = 1;', 'const'],
+    ['cpp', 'int count = 1;', 'int'],
+  ]) {
+    await highlighting.selectOption(language);
+    await answer.fill(code);
+    await expect(answer.locator('span').filter({ hasText: new RegExp(`^${keyword}$`) })).toBeVisible();
+    await highlighting.selectOption('text');
+    await expect(answer).toHaveText(code);
+    await expect(answer.locator('span')).toHaveCount(0);
+  }
+  const fullAnswer = 'x'.repeat(20000);
+  await answer.fill(fullAnswer);
+  await expect(page.locator('.recall-editor-status')).toContainText('20,000 / 20,000');
+  await answer.press('ControlOrMeta+a');
+  await answer.press('ArrowRight');
+  await page.keyboard.insertText('overflow');
+  await expect.poll(() => page.evaluate(() => {
+    const answer = JSON.parse(sessionStorage.getItem('lc-tracker-active-session')!).state.activeRecall.answer as string;
+    return answer.length === 20000 && !answer.includes('overflow');
+  })).toBe(true);
+  await answer.press('Backspace');
+  await expect(page.locator('.recall-editor-status')).toContainText('19,999 / 20,000');
 });
 
 test("43 eligible items produce a bounded desktop and mobile plan", async ({
@@ -583,7 +673,7 @@ for (const theme of ['light', 'dark']) {
       await expect(page.locator('.reference-code .cm-content')).toContainText('twoSum');
       await expect(page.getByRole('link', { name: /Watch NeetCode/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=KLlXCFG5TnA');
       await expect(answer).toBeEditable();
-      await answer.fill('Use a map to look up the complement.');
+      await answer.fill('def two_sum(nums, target):\n    seen = {}\n    return ...\n\nLook up the complement before insertion.');
       await page.getByText('View original answer from memory', { exact: true }).click();
       await expect(page.getByText('Try each pair.', { exact: true })).toBeVisible();
       await page.getByLabel('Example language').selectOption('cpp');
@@ -594,7 +684,7 @@ for (const theme of ['light', 'dark']) {
       await expect(answer).toBeEditable();
       await answer.fill('Still editable in the recording step.');
       await page.reload();
-      await expect(answer).toHaveValue('Still editable in the recording step.');
+      await expect(answer).toHaveText('Still editable in the recording step.');
       await expect(page.getByRole('heading', { name: 'Record what you recalled' })).toBeVisible();
     });
   }
@@ -659,7 +749,7 @@ test('library explanations cover each core list and do not reveal a pending reca
   await page.goto('/library/two-sum/explanation');
   await expect(page.locator('.problem-explanation')).toHaveCount(0);
   await page.getByRole('link', { name: 'Resume recall check' }).click();
-  await expect(page.getByLabel('Your attempt · explanation or pseudocode')).toHaveValue('Draft stays here.');
+  await expect(page.getByLabel('Your attempt · explanation or pseudocode')).toHaveText('Draft stays here.');
 });
 
 for (const theme of ["light", "dark"]) {
@@ -787,7 +877,7 @@ for (const [id, method] of [
     await page.getByRole("button", { name: "Compare with a reference" }).click();
     await expect(page.getByRole("heading", { name: "How it works", exact: true })).toBeVisible();
     await expect(page.locator(".reference-code .cm-content")).toContainText(method);
-    await expect(answer).toHaveValue("My original approach before comparison.");
+    await expect(answer).toHaveText("My original approach before comparison.");
     await page.getByLabel("Example language").selectOption("cpp");
     await expect(page.locator(".reference-code .cm-content")).toContainText(method);
     await page.getByText("Source and license", { exact: true }).click();

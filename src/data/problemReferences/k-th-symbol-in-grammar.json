@@ -1,0 +1,11 @@
+{
+  "problemId": "k-th-symbol-in-grammar",
+  "approach": "Math",
+  "explanation": "### How it works\n\nThere's an elegant mathematical pattern here. The value at position `k` depends on how many times we flip while tracing from `k` back to the root. Each flip happens when we're a right child, which corresponds to a `1` bit in the binary representation of `k - 1`. So the answer is simply the parity (odd or even) of the number of `1` bits in `k - 1`.\n\n### Steps\n\n1. Convert `k - 1` to binary.\n2. Count the number of `1` bits.\n3. Return the count modulo 2 (i.e., `count & 1`).\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)` or `O(log n)` depending on the language.\n\n### Things to watch for\n\n### Using 0-Indexed vs 1-Indexed Position\n\nThe problem uses 1-indexed positions for `k`, but many solutions require converting to 0-indexed logic. A common mistake is forgetting to subtract 1 when counting bits or when comparing positions. For the bit-counting solution, you must use `k - 1` (not `k`) to correctly count the number of flips from the root.\n\n### Integer Overflow When Computing Row Size\n\nWhen calculating the size of row `n` as `2^(n-1)`, this can overflow for large values of `n` (up to 30 in the constraints). Using `1 << (n - 1)` is safe in most languages for n <= 30, but be careful with signed 32-bit integers when `n = 31` or higher. Always ensure your bit-shift operations use appropriate integer types.\n\n### Confusing Left Child vs Right Child Logic\n\nIn the recursive solutions, the logic for determining whether a position is a left child or right child is subtle. Left children (odd `k` values) inherit the parent's value, while right children (even `k` values) flip it. Mixing up this logic or incorrectly computing the parent position `(k + 1) / 2` vs `k / 2` leads to wrong answers.",
+  "code": {
+    "python": "class Solution:\n    def kthGrammar(self, n: int, k: int) -> int:\n        return bin(k - 1).count('1') & 1\n",
+    "cpp": "class Solution {\npublic:\n    int kthGrammar(int n, int k) {\n        return __builtin_popcount(k - 1) & 1;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-symbol-in-grammar.md"
+}

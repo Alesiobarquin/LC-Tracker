@@ -1,0 +1,11 @@
+{
+  "problemId": "sort-the-people",
+  "approach": "Sorting the Indices",
+  "explanation": "### How it works\n\nRather than copying data into pairs, we can sort an array of indices based on the heights they point to. This approach is memory efficient when names are long strings, since we only move integers during sorting rather than entire strings.\n\n### Steps\n\n1. Create an array of indices from `0` to `n-1`.\n2. Sort the `indices` array using a custom comparator that compares the heights at those indices in descending order.\n3. Build the result by mapping each sorted index to its corresponding name.\n4. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Sorting in Ascending Instead of Descending Order\n\nThe problem asks for people sorted by height in descending order (tallest first). A common mistake is to sort in ascending order and forget to reverse the result or adjust the comparator.\n\n### Losing the Name-Height Association After Sorting\n\nWhen sorting heights separately from names, you must maintain a way to retrieve the corresponding name for each height. Using a hash map or pairing heights with indices before sorting prevents this association from being lost.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def sortPeople(self, names: List[str], heights: List[int]) -> List[str]:\n        indices = list(range(len(names)))\n        indices.sort(key=lambda i: -heights[i])\n        return [names[i] for i in indices]\n",
+    "cpp": "class Solution {\npublic:\n    vector<string> sortPeople(vector<string>& names, vector<int>& heights) {\n        int n = names.size();\n        vector<int> indices(n);\n        iota(indices.begin(), indices.end(), 0);\n\n        sort(indices.begin(), indices.end(), [&](int a, int b) {\n            return heights[a] > heights[b];\n        });\n\n        vector<string> res;\n        for (int i : indices) {\n            res.push_back(names[i]);\n        }\n\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-the-people.md"
+}

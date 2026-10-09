@@ -1,0 +1,11 @@
+{
+  "problemId": "design-parking-system",
+  "approach": "Array - II",
+  "explanation": "### How it works\n\nThis is a more concise version of the array approach. Instead of checking before decrementing, we decrement first and then check if the result is non-negative. The logic works because if there were no available slots, the count becomes negative, which we use to indicate failure. This allows the check and update to happen in a single expression.\n\n### Steps\n\n1. **Initialization:** Store the slot counts for big, medium, and small in an array `spaces`.\n2. **addCar(carType):** Decrement `spaces[carType - 1]` and return `true` if the new value is greater than or equal to `0`, otherwise return `false`.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` time for initialization.\n    - `O(1)` time for each `addCar()` function call.\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Off-by-One Index Error\n\nCar types are 1-indexed (`1` = big, `2` = medium, `3` = small), but arrays are 0-indexed. Forgetting to subtract 1 causes an index out of bounds error.\n\n### Decrementing Before Checking Availability\n\nWhen using the concise approach that decrements first, you must check the value before decrementing (using post-decrement) or check if the result is non-negative. Checking for `> 0` after decrementing gives wrong results.",
+  "code": {
+    "python": "class ParkingSystem:\n\n    def __init__(self, big: int, medium: int, small: int):\n        self.spaces = [big, medium, small]\n\n    def addCar(self, carType: int) -> bool:\n        self.spaces[carType - 1] -= 1\n        return self.spaces[carType - 1] >= 0\n",
+    "cpp": "class ParkingSystem {\n    int spaces[3];\n\npublic:\n    ParkingSystem(int big, int medium, int small) {\n        spaces[0] = big, spaces[1] = medium, spaces[2] = small;\n    }\n\n    bool addCar(int carType) {\n        return spaces[carType - 1]-- > 0;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=d5zCHesOrSk",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-parking-system.md"
+}

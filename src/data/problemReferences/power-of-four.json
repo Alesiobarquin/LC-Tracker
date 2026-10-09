@@ -1,0 +1,11 @@
+{
+  "problemId": "power-of-four",
+  "approach": "Bit Mask - II",
+  "explanation": "### How it works\n\nPowers of four follow a pattern when divided by 3: `4^k mod 3 = 1` for all non-negative `k`. This is because `4 = 3 + 1`, so `4^k = (3+1)^k`, which when expanded always leaves remainder `1`.\n\nPowers of two that are not powers of four (like `2`, `8`, `32`) give remainder `2` when divided by `3`. This gives us a simple way to distinguish between them.\n\n### Steps\n\n1. Check that `n` is positive.\n2. Check that `n` is a power of two: `(n & (n - 1)) == 0`.\n3. Check that `n % 3 == 1` to confirm it's specifically a power of four.\n4. Return `true` if all conditions are met.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Confusing Power of Two with Power of Four\n\nAll powers of four are powers of two, but not vice versa. Checking only `(n & (n - 1)) == 0` accepts values like `2`, `8`, and `32` which are powers of two but not four. You must add an additional check to verify the set bit is at an even position.\n\n### Floating-Point Precision Errors with Logarithms\n\nUsing `log(n) / log(4)` can introduce floating-point errors. For example, `log(64) / log(4)` might return `2.9999999...` instead of exactly `3`. Comparing with `== 0` after modulo may incorrectly reject valid powers of four. Consider rounding or using integer-based approaches instead.",
+  "code": {
+    "python": "class Solution:\n    def isPowerOfFour(self, n: int) -> bool:\n        return n > 0 and (n & (n - 1)) == 0 and (n % 3 == 1)\n",
+    "cpp": "class Solution {\npublic:\n    bool isPowerOfFour(int n) {\n        return n > 0 && (n & (n - 1)) == 0 && (n % 3 == 1);\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-four.md"
+}

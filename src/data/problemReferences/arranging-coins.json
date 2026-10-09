@@ -1,0 +1,11 @@
+{
+  "problemId": "arranging-coins",
+  "approach": "Math",
+  "explanation": "### How it works\n\nWe can solve this directly with algebra. We need the largest `k` where `k * (k + 1) / 2 <= n`. Rearranging: `k^2 + k - 2n <= 0`. Using the quadratic formula, `k = (-1 + sqrt(1 + 8n)) / 2`.\n\nSimplifying gives us `k = sqrt(2n + 0.25) - 0.5`. We take the floor of this value to get the answer.\n\n### Steps\n\n1. Compute `sqrt(2 * n + 0.25) - 0.5`.\n2. Return the integer part.\n\n### Complexity\n\n- Time complexity: `O(1)` or `O(sqrt {n})` depending on the language.\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Integer Overflow When Computing mid \\* (mid + 1)\n\nWhen using binary search, computing `mid * (mid + 1)` can overflow for large values of `mid` if using 32-bit integers. Always cast to a larger type before multiplication.\n\n### Off-by-One Error in the Result\n\nThe formula `k * (k + 1) / 2` gives the total coins needed for `k` complete rows. A common mistake is returning the wrong value when the sum exactly equals `n` or when determining whether to include the current row.",
+  "code": {
+    "python": "from math import sqrt\n\nclass Solution:\n    def arrangeCoins(self, n: int) -> int:\n        return int(sqrt(2 * n + 0.25) - 0.5)\n",
+    "cpp": "class Solution {\npublic:\n    int arrangeCoins(int n) {\n        return (int)(sqrt(2.0 * n + 0.25) - 0.5);\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=5rHz_6s2Buw",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/arranging-coins.md"
+}

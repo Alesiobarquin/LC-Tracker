@@ -1,0 +1,11 @@
+{
+  "problemId": "sign-of-the-product-of-an-array",
+  "approach": "Track the Sign of the Product",
+  "explanation": "### How it works\n\nInstead of counting negatives and checking parity at the end, we can track the running sign directly. Start with a sign of `1` (positive). Each time we encounter a negative number, we flip the sign by multiplying by `-1`. If we encounter zero, the product is immediately `0`. This approach mirrors the actual multiplication process but only tracks the sign.\n\n### Steps\n\n1. Initialize `sign = 1`.\n2. Iterate through each number in the array:\n    - If the number is `0`, return `0` immediately.\n    - If the number is negative, flip the sign: `sign *= -1`.\n3. Return `sign`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Not Handling Zero as a Special Case\n\nIf any element in the array is zero, the entire product is zero, and the function should immediately return `0`. A common mistake is forgetting to check for zeros and only focusing on counting or tracking negative numbers, which leads to returning `1` or `-1` when the answer should be `0`.\n\n### Computing the Actual Product\n\nAttempting to calculate the actual product of all elements is unnecessary and dangerous. For large arrays or large values, the product can overflow even 64-bit integers, causing undefined behavior or incorrect results. The problem only asks for the sign, so you should track sign changes without computing the full product.",
+  "code": {
+    "python": "class Solution:\n    def arraySign(self, nums: list[int]) -> int:\n        sign = 1\n        for num in nums:\n            if num == 0:\n                return 0\n            if num < 0:\n                sign *= -1\n        return sign\n",
+    "cpp": "class Solution {\npublic:\n    int arraySign(vector<int>& nums) {\n        int sign = 1;\n        for (int num : nums) {\n            if (num == 0) {\n                return 0;\n            }\n            if (num < 0) {\n                sign *= -1;\n            }\n        }\n        return sign;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=ILDLM86jNow",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sign-of-the-product-of-an-array.md"
+}

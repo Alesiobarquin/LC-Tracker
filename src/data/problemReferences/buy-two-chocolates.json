@@ -1,0 +1,11 @@
+{
+  "problemId": "buy-two-chocolates",
+  "approach": "Greedy",
+  "explanation": "### How it works\n\nWe can find the two cheapest chocolates in a single pass without sorting. As we iterate through the prices, we maintain the two smallest values seen so far. This gives us the optimal pair to buy.\n\n### Steps\n\n1. Initialize two variables to track the smallest (`min1`) and second smallest (`min2`) prices, both set to infinity.\n2. Iterate through each price:\n    - If the current price is less than `min1`, update `min2` to be the old `min1`, and `min1` to be the current price.\n    - Otherwise, if the current price is less than `min2`, update `min2` to be the current price.\n3. Calculate the leftover money after buying chocolates at `min1` and `min2` prices.\n4. If leftover is non-negative, return it; otherwise, return the original money.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.\n\n### Things to watch for\n\n### Returning Leftover When You Cannot Afford Both Chocolates\n\nIf the sum of the two cheapest chocolates exceeds your money, you should return the original money (buy nothing), not a negative leftover or zero.\n\n### Not Updating Both Minimums Correctly\n\nWhen finding a new smallest price, forgetting to shift the old minimum to become the second minimum loses track of valid candidates.",
+  "code": {
+    "python": "class Solution:\n    def buyChoco(self, prices: list[int], money: int) -> int:\n        min1 = min2 = float('inf')\n\n        for p in prices:\n            if p < min1:\n                min1, min2 = p, min1\n            elif p < min2:\n                min2 = p\n\n        leftover = money - min1 - min2\n        return leftover if leftover >= 0 else money\n",
+    "cpp": "class Solution {\npublic:\n    int buyChoco(vector<int>& prices, int money) {\n        int min1 = INT_MAX, min2 = INT_MAX;\n\n        for (int p : prices) {\n            if (p < min1) {\n                min2 = min1;\n                min1 = p;\n            } else if (p < min2) {\n                min2 = p;\n            }\n        }\n\n        int leftover = money - min1 - min2;\n        return leftover >= 0 ? leftover : money;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-two-chocolates.md"
+}

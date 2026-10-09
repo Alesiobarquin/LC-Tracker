@@ -771,3 +771,26 @@ for (const theme of ["light", "dark"]) {
     });
   }
 }
+
+for (const [id, method] of [
+  ["string-compression", "compress"],
+  ["reverse-words-in-a-string", "reverseWords"],
+  ["reverse-words-in-a-string-ii", "reverseWords"],
+  ["reverse-words-in-a-string-iii", "reverseWords"],
+]) {
+  test(`extended recall comparison loads Python and C++ for ${id}`, async ({ page }) => {
+    await fixture(page, [{ ...progressRow(id), notes: "" }]);
+    await page.goto(`/recall/${id}`);
+    await expect(page.locator(".problem-explanation")).toHaveCount(0);
+    const answer = page.getByLabel("Your attempt · explanation or pseudocode");
+    await answer.fill("My original approach before comparison.");
+    await page.getByRole("button", { name: "Compare with a reference" }).click();
+    await expect(page.getByRole("heading", { name: "How it works", exact: true })).toBeVisible();
+    await expect(page.locator(".reference-code .cm-content")).toContainText(method);
+    await expect(answer).toHaveValue("My original approach before comparison.");
+    await page.getByLabel("Example language").selectOption("cpp");
+    await expect(page.locator(".reference-code .cm-content")).toContainText(method);
+    await page.getByText("Source and license", { exact: true }).click();
+    await expect(page.getByRole("link", { name: "NeetCode’s source", exact: true })).toHaveAttribute("href", /github.com\/neetcode-gh\/leetcode\/blob\//);
+  });
+}

@@ -1,0 +1,11 @@
+{
+  "problemId": "stone-game",
+  "approach": "Return TRUE",
+  "explanation": "### How it works\n\nHere is the key insight: with an even number of piles and an odd total sum, Alice can always win. She can always choose to take all even-indexed piles or all odd-indexed piles. Since the total is odd, one of these sets must have a larger sum. Alice, moving first, can force the game to give her whichever set she prefers, guaranteeing a win.\n\n### Steps\n\n1. Simply return `true`.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Overcomplicating the Solution\n\nThe mathematical insight that Alice always wins (due to even pile count and odd total) means you can simply return `true`. However, many solvers implement full DP without recognizing this property. While the DP approach is valid and educational, understanding why Alice always wins demonstrates deeper problem analysis.\n\n### Confusing Whose Turn It Is\n\nIn the DP approach, determining whose turn it is based on the range `[l, r]` can be tricky. Alice moves when the number of remaining piles is even (since the game starts with an even number and she goes first). Using `(r - l + 1) % 2 == 0` or equivalently `(r - l) % 2 == 1` indicates Alice's turn, but off-by-one errors here are common.\n\n### Wrong Comparison for Final Result\n\nThe question asks whether Alice wins (strictly greater score), not whether she ties or wins. Comparing `alice_score >= total - alice_score` instead of `alice_score > total - alice_score` gives incorrect results. Since the total is odd and all values are positive integers, a tie is impossible in this specific problem, but the comparison should still be strictly greater.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def stoneGame(self, piles: List[int]) -> bool:\n        return True\n",
+    "cpp": "class Solution {\npublic:\n    bool stoneGame(vector<int>& piles) {\n        return true;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=uhgdXOlGYqE",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/stone-game.md"
+}

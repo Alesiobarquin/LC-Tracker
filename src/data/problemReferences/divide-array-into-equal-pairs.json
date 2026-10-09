@@ -1,0 +1,11 @@
+{
+  "problemId": "divide-array-into-equal-pairs",
+  "approach": "Hash Set",
+  "explanation": "### How it works\n\nInstead of counting all frequencies, we can use a set to track elements with odd occurrences. When we see an element, if it is already in the set (meaning we have seen it an odd number of times), we remove it. If it is not in the set, we add it. At the end, if the set is empty, all elements appeared an even number of times.\n\n### Steps\n\n1. Create an empty hash set.\n2. Iterate through each element in the array.\n3. If the element is in the set, remove it (completing a pair).\n4. Otherwise, add it to the set (unpaired element).\n5. After processing all elements, return `true` if the set is empty, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Checking for Pairs Instead of Even Counts\n\nA common mistake is trying to actually form pairs and check if adjacent elements match after sorting. The problem only requires checking if each element appears an even number of times, not that the pairs are adjacent.\n\n### Forgetting the Array Length is Always Even\n\nThe problem guarantees that `nums` has `2n` elements. Some solutions add unnecessary checks for odd-length arrays or forget that the total count of elements is always even, which simplifies the problem to just checking individual element frequencies.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def divideArray(self, nums: List[int]) -> bool:\n        odd_set = set()\n\n        for num in nums:\n            if num not in odd_set:\n                odd_set.add(num)\n            else:\n                odd_set.remove(num)\n\n        return not len(odd_set)\n",
+    "cpp": "class Solution {\npublic:\n    bool divideArray(vector<int>& nums) {\n        unordered_set<int> oddSet;\n\n        for (int num : nums) {\n            if (oddSet.count(num)) {\n                oddSet.erase(num);\n            } else {\n                oddSet.insert(num);\n            }\n        }\n\n        return oddSet.empty();\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-array-into-equal-pairs.md"
+}

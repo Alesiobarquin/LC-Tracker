@@ -1,0 +1,11 @@
+{
+  "problemId": "uncommon-words-from-two-sentences",
+  "approach": "Hash Map - II",
+  "explanation": "### How it works\n\nThis is a more concise version of the same approach. We use built-in functions like `Counter` (in Python) or stream operations (in Java) to reduce boilerplate while maintaining the same logic.\n\n### Steps\n\n1. Combine and split both sentences into words.\n2. Count word frequencies using a built-in counter or grouping function.\n3. Filter to keep only words with count equal to `1`.\n4. Return the filtered words.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n + m)`\n\n> Where `n` and `m` are the lengths of the strings `s1` and `s2`, respectively.\n\n### Things to watch for\n\n### Misunderstanding \"Uncommon\" Definition\n\nA word is uncommon if it appears exactly once across both sentences combined, not once per sentence. Some mistakenly check if a word appears in one sentence but not the other, which is incorrect. A word appearing twice in the same sentence is also not uncommon.\n\n### Incorrect String Splitting\n\nWhen splitting sentences into words, be careful with edge cases like multiple spaces or empty strings. The problem guarantees single spaces between words, but forgetting to handle the concatenation properly (e.g., not adding a space between `s1` and `s2`) can cause words at the boundary to merge incorrectly.",
+  "code": {
+    "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def uncommonFromSentences(self, s1: str, s2: str) -> List[str]:\n        return [w for w, cnt in Counter(s1.split(\" \") + s2.split(\" \")).items() if cnt == 1]\n",
+    "cpp": "class Solution {\npublic:\n    vector<string> uncommonFromSentences(string s1, string s2) {\n        unordered_map<string, int> count;\n        istringstream ss(s1 + \" \" + s2);\n        string w;\n        while (ss >> w) {\n            count[w]++;\n        }\n\n        vector<string> res;\n        for (auto& [w, c] : count) {\n            if (c == 1) {\n                res.push_back(w);\n            }\n        }\n\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/uncommon-words-from-two-sentences.md"
+}

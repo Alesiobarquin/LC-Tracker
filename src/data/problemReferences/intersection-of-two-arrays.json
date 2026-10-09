@@ -1,0 +1,11 @@
+{
+  "problemId": "intersection-of-two-arrays",
+  "approach": "Built-In Functions",
+  "explanation": "### How it works\n\nMost programming languages provide built-in set intersection operations. By converting both arrays to sets and using the intersection function, we get a clean one-liner solution. The implementation details are handled by the language's standard library.\n\n### Steps\n\n1. Convert `nums1` to a set.\n2. Convert `nums2` to a set.\n3. Compute the intersection of the two sets using the built-in function.\n4. Convert the result to an array and return it.\n\n### Complexity\n\n- Time complexity: `O(n + m)` in average case, `O(n * m)` in worst case.\n- Space complexity: `O(n + m)`\n\n> Where `n` is the size of the array `nums1` and `m` is the size of the array `nums2`.\n\n### Things to watch for\n\n### Including Duplicates in the Result\n\nThe intersection should contain each common element only once, even if it appears multiple times in both arrays. For example, if `nums1 = [1, 1, 2]` and `nums2 = [1, 1]`, the result should be `[1]`, not `[1, 1]`. Using a set for the result or marking elements as \"already added\" prevents this issue.\n\n### Comparing Values Instead of Using Efficient Lookups\n\nA brute force approach comparing every pair of elements is O(n \\* m), which is inefficient for large arrays. The optimal approach uses a hash set for O(1) lookups, reducing time complexity to O(n + m). Always consider converting one array to a set before checking membership.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:\n            return list(set(nums1) & set(nums2))\n",
+    "cpp": "class Solution {\npublic:\n    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {\n        set<int> set1(nums1.begin(), nums1.end()), set2(nums2.begin(), nums2.end());\n        vector<int> res;\n        set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), back_inserter(res));\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-arrays.md"
+}

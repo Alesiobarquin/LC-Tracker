@@ -6,6 +6,7 @@ This never accesses user data, executes a network request, or grades user answer
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
+import re
 from pathlib import Path
 import subprocess
 
@@ -22,6 +23,12 @@ class Node:
         self.left = self.right = self.next = self.random = None
 
 CASES = {
+ 'reverse-words-in-a-string': ('reverseWords', [(('the sky is blue',), 'blue is sky the'), (('  hello   world  ',), 'world hello'), (('a',), 'a')]),
+ 'reverse-words-in-a-string-iii': ('reverseWords', [(("Let's take LeetCode contest",), "s'teL ekat edoCteeL tsetnoc"), (('a b',), 'a b')]),
+ 'subarray-sum-equals-k': ('subarraySum', [(([1,1,1],2),2), (([1,-1,0],0),3)]),
+ 'sort-an-array': ('sortArray', [(([5,2,3,1],),[1,2,3,5]), (([5,1,1,2,0,0],),[0,0,1,1,2,5]), (([-3,-1,-2],),[-3,-2,-1])]),
+ 'maximum-profit-in-job-scheduling': ('jobScheduling', [(([1,2,3,3],[3,4,5,6],[50,10,40,70]),120), (([1,1,1],[2,3,4],[5,6,4]),6)]),
+ 'subarray-product-less-than-k': ('numSubarrayProductLessThanK', [(([10,5,2,6],100),8), (([1,2,3],0),0)]),
  'contains-duplicate': ('containsDuplicate', [(([1,2,3,1],), True), (([1,2,3],), False)]),
  'valid-anagram': ('isAnagram', [(('anagram','nagaram'),True), (('rat','car'),False)]),
  'two-sum': ('twoSum', [(([2,7,11,15],9),[0,1]), (([3,3],6),[0,1])]),
@@ -64,6 +71,7 @@ HEADERS = '''#include <algorithm>
 #include <bit>
 #include <bitset>
 #include <climits>
+#include <cfloat>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -87,8 +95,24 @@ HEADERS = '''#include <algorithm>
 using namespace std;
 struct TreeNode { int val; TreeNode *left, *right; TreeNode(int v=0, TreeNode* l=nullptr, TreeNode* r=nullptr):val(v),left(l),right(r){} };
 struct ListNode { int val; ListNode* next; ListNode(int v=0, ListNode* n=nullptr):val(v),next(n){} };
-struct Node { int val; Node *left=nullptr,*right=nullptr,*next=nullptr,*random=nullptr; vector<Node*> neighbors; Node(int v=0):val(v){} Node(int v,vector<Node*> n):val(v),neighbors(n){} };
+struct Node { int val; Node *left=nullptr,*right=nullptr,*next=nullptr,*random=nullptr; vector<Node*> neighbors, children; Node* parent=nullptr; bool isLeaf=false; Node *topLeft=nullptr,*topRight=nullptr,*bottomLeft=nullptr,*bottomRight=nullptr; Node(int v=0):val(v){} Node(int v,vector<Node*> n):val(v),neighbors(n),children(n){} Node(int v,Node* n):val(v),next(n){} Node(bool v,bool leaf,Node* tl=nullptr,Node* tr=nullptr,Node* bl=nullptr,Node* br=nullptr):val(v),isLeaf(leaf),topLeft(tl),topRight(tr),bottomLeft(bl),bottomRight(br){} };
+bool isBadVersion(int);
+bool knows(int, int);
+int guess(int);
+class MountainArray { public: int get(int); int length(); };
+class ArrayReader { public: int compareSub(int,int,int,int); int length(); int query(int,int,int,int); };
+class NestedInteger { public: bool isInteger() const; int getInteger() const; const vector<NestedInteger>& getList() const; };
+class ImmutableListNode { public: void printValue(); ImmutableListNode* getNext(); };
+class HtmlParser { public: vector<string> getUrls(string); };
 '''
+
+def cpp_headers(code):
+    # Some examples define their own helper named Node; supply judge types only
+    # when that name has not been defined by the solution itself.
+    uncommented = re.sub(r'/\*.*?\*/|//[^\n]*', '', code, flags=re.S)
+    if re.search(r'^\s*(?:class|struct) Node\s*\{', uncommented, re.M):
+        return re.sub(r'^struct Node .*?;\n', '', HEADERS, flags=re.M)
+    return HEADERS
 
 def main():
     parser = argparse.ArgumentParser()
@@ -115,10 +139,31 @@ def main():
     assert ranges.getIntervals()==[[1,3],[6,7]]
     codec = namespaces['encode-and-decode-strings']['Solution']()
     assert codec.decode(codec.encode(['', '#', 'a#b', 'hello'])) == ['', '#', 'a#b', 'hello']
+    # In-place examples must return the specified length/None and mutate the
+    # required prefix. Checking the return value alone misses lost characters.
+    for original, expected in [('aabbccc','a2b2c3'), ('a','a'), ('abbbbbbbbbbbb','ab12'), ('abc','abc'), ('aaaaaaaaaaaabbbcc','a12b3c2')]:
+        chars = list(original)
+        length = namespaces['string-compression']['Solution']().compress(chars)
+        assert length == len(expected) and ''.join(chars[:length]) == expected
+        checked += 1
+    for original, expected in [('the sky is blue','blue is sky the'), ('a','a'), ('a b','b a')]:
+        chars = list(original)
+        assert namespaces['reverse-words-in-a-string-ii']['Solution']().reverseWords(chars) is None
+        assert ''.join(chars) == expected
+        checked += 1
+    for original, expected in [([1,2,3],[1,3,2]), ([3,2,1],[1,2,3]), ([1,1,5],[1,5,1])]:
+        assert namespaces['next-permutation']['Solution']().nextPermutation(original) is None
+        assert original == expected
+        checked += 1
+    cache = namespaces['lfu-cache']['LFUCache'](2)
+    cache.put(1,1); cache.put(2,2); assert cache.get(1)==1
+    cache.put(3,3); assert cache.get(2)==-1 and cache.get(3)==3
+    cache.put(4,4); assert cache.get(1)==-1 and cache.get(4)==4
+    checked += 1
     print(f'{len(references)} Python snippets loaded; {checked + 4} example/edge checks passed.', flush=True)
     if args.cpp:
         def check(reference):
-            result = subprocess.run(['c++','-std=c++20','-fsyntax-only','-x','c++','-'], input=HEADERS+reference['code']['cpp'], text=True, capture_output=True)
+            result = subprocess.run(['c++','-std=c++20','-fsyntax-only','-x','c++','-'], input=cpp_headers(reference['code']['cpp'])+reference['code']['cpp'], text=True, capture_output=True)
             return reference['problemId'], result.returncode, result.stderr
         failures = []
         with ThreadPoolExecutor(max_workers=6) as pool:

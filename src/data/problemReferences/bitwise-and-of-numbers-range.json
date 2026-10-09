@@ -1,0 +1,11 @@
+{
+  "problemId": "bitwise-and-of-numbers-range",
+  "approach": "Bit Manipulation - III",
+  "explanation": "### How it works\n\nInstead of shifting both numbers, we can repeatedly clear the rightmost set bit of `right` until `right` becomes less than or equal to `left`. The operation `(n & (n-1))` clears the lowest set bit of `n`. This works because any bit position where `right` has a `1` but needs to flip within the range will be cleared, leaving only the common prefix.\n\n### Steps\n\n1. While `left` is less than `right`:\n    - Apply the operation `right = right AND (right - 1)` to clear the rightmost set bit of `right`.\n2. Return `right` (which now equals the common prefix with trailing zeros).\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Iterating Through All Numbers in the Range\n\nThe brute force approach of ANDing every number from `left` to `right` will time out for large ranges. For example, when `left = 1` and `right = 2^31 - 1`, this requires billions of operations.\n\n### Misunderstanding the Common Prefix Property\n\nThe result is the common binary prefix of `left` and `right` with trailing zeros. A common mistake is trying to AND only `left` and `right` directly, missing that intermediate values determine which bits survive.\n\n### Integer Overflow in Bit Calculations\n\nWhen calculating `(1 << (i + 1))` for bit position 31, the result exceeds 32-bit signed integer range in some languages. Use unsigned types or 64-bit integers to avoid overflow.",
+  "code": {
+    "python": "class Solution:\n    def rangeBitwiseAnd(self, left: int, right: int) -> int:\n        while left < right:\n            right &= right - 1\n        return right\n",
+    "cpp": "class Solution {\npublic:\n    int rangeBitwiseAnd(int left, int right) {\n        while (left < right) {\n            right &= (right - 1);\n        }\n        return right;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/bitwise-and-of-numbers-range.md"
+}

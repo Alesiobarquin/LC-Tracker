@@ -64,7 +64,7 @@ export function ProblemExplanationFootnote({ problem }: { problem: Problem }) {
       <p>
         Adapted from{" "}
         <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-          NeetCode’s explanation and code
+          NeetCode’s source
         </a>{" "}
         ·{" "}
         <a href="/neetcode-license.txt" target="_blank" rel="noopener noreferrer">

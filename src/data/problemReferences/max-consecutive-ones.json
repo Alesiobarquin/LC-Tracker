@@ -1,0 +1,11 @@
+{
+  "problemId": "max-consecutive-ones",
+  "approach": "Iteration - II",
+  "explanation": "### How it works\n\nWe can simplify the logic by updating the maximum inside the loop at every step. If we see a `1`, we increment the count; otherwise, we reset it to `0`. After each element, we update the result. This eliminates the need for a final comparison after the loop.\n\n### Steps\n\n1. Initialize `res` and `cnt` to `0`.\n2. For each element in the array:\n    - If the element is `1`, increment `cnt`.\n    - Otherwise, set `cnt` to `0`.\n    - Update `res` to be the maximum of `res` and `cnt`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Forgetting the Final Comparison\n\nWhen tracking consecutive ones by resetting the counter on encountering a zero, the longest sequence might end at the last element of the array. If you only update the maximum inside the loop when hitting a zero, you will miss this case. Always compare the final count with the result after the loop ends, or update the maximum on every iteration.\n\n### Resetting the Counter Incorrectly\n\nA subtle bug is resetting the counter to `1` instead of `0` when encountering a zero, or incrementing before checking the current element. The counter should be reset to `0` when a zero is found, then the next `1` will increment it to `1`. Mixing up this logic leads to off-by-one errors in the count.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:\n        res = cnt = 0\n        for num in nums:\n            cnt = cnt + 1 if num else 0\n            res = max(res, cnt)\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int findMaxConsecutiveOnes(vector<int>& nums) {\n        int res = 0, cnt = 0;\n        for (int num : nums) {\n            cnt = num ? cnt + 1 : 0;\n            res = max(res, cnt);\n        }\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones.md"
+}

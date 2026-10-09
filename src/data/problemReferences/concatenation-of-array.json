@@ -1,0 +1,11 @@
+{
+  "problemId": "concatenation-of-array",
+  "approach": "Iteration (One Pass)",
+  "explanation": "### How it works\n\nThe problem defines the result array `ans` such that `ans[i] == nums[i]` and `ans[i + n] == nums[i]` for `0 <= i < n`. Instead of looping through the input twice, we can fill both required positions in the result array simultaneously while iterating through the input array just once. This utilizes the index mapping `i` and `i + n` directly.\n\n### Steps\n\n1. Determine the length `n` of the input array.\n2. Initialize a result array `ans` of size `2n`.\n3. Iterate through the input array `nums` using an index `i` from `0` to `n - 1`.\n4. For each element at index `i`:\n    - Set `ans[i] = nums[i]`.\n    - Set `ans[i + n] = nums[i]`.\n5. Return the resulting array.\n\n### Complexity\n\n- Time complexity: `O(n)` where `n` is the length of the input array. Although we iterate through the input once, we still perform `2n` total writes to the output array.\n- Space complexity: `O(n)` as we must allocate an array of size `2n` for the output.\n\n### Things to watch for\n\n### Incorrect Result Array Size\n\nAllocating an array of size `n` instead of `2n` causes an index out of bounds error when writing to the second half.\n\n### Off-by-One When Using Index Offset\n\nWhen using the one-pass approach with `ans[i + n] = nums[i]`, forgetting that indices are zero-based or miscalculating the offset leads to incorrect placement of elements in the second half.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def getConcatenation(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        ans = [0] * (2 * n)\n        for i, num in enumerate(nums):\n            ans[i] = ans[i + n] = num\n        return ans\n",
+    "cpp": "class Solution {\npublic:\n    vector<int> getConcatenation(vector<int>& nums) {\n        int n = nums.size();\n        vector<int> ans(2 * n);\n        for (int i = 0; i < n; ++i) {\n            ans[i] = ans[i + n] = nums[i];\n        }\n        return ans;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=68isPRHgcFQ",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/concatenation-of-array.md"
+}

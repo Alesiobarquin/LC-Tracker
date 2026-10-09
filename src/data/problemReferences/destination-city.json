@@ -1,0 +1,11 @@
+{
+  "problemId": "destination-city",
+  "approach": "Hash Map",
+  "explanation": "### How it works\n\nWe can model the paths as a linked chain where each city points to its next destination. By building this chain in a hash map and following the links from any starting city, we will eventually reach the final destination, which has no outgoing path.\n\n### Steps\n\n1. Build a hash map where each key is a starting city and its value is the destination city.\n2. Start with the first city from the first path.\n3. Keep following the chain: while the current city exists as a key in the map, move to its destination.\n4. When the current city is not a key in the map, it means there is no outgoing path from it, return it as the destination city.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Adding Both Cities to the Set\n\nWhen using the hash set approach, only starting cities should be added to the set. Adding both starting and ending cities defeats the purpose since you need to find which destination is never a starting point.\n\n### Checking Starting Cities Instead of Destinations\n\nA common logic error is checking if starting cities are absent from the set of destinations, rather than checking if destinations are absent from the set of starting cities.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def destCity(self, paths: List[List[str]]) -> str:\n        mp = {p[0]: p[1] for p in paths}\n\n        start = paths[0][0]\n        while start in mp:\n            start = mp[start]\n        return start\n",
+    "cpp": "class Solution {\npublic:\n    string destCity(vector<vector<string>>& paths) {\n        unordered_map<string, string> mp;\n        for (auto& p : paths) {\n            mp[p[0]] = p[1];\n        }\n\n        string start = paths[0][0];\n        while (mp.find(start) != mp.end()) {\n            start = mp[start];\n        }\n        return start;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/destination-city.md"
+}

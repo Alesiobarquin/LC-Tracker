@@ -414,6 +414,7 @@ function decorateCatalogProblem(p: Problem): Problem {
   return {
     ...p,
     leetcodeNumber: leetcodeNumberById[p.id],
+    videoUrl: (problemVideos as Record<string, string>)[p.id] ?? p.videoUrl,
     isPareto: PARETO_PROBLEM_IDS.has(p.id),
     isPremium: isProblemPremium(p),
   } as Problem;

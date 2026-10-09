@@ -1,0 +1,11 @@
+{
+  "problemId": "ugly-number",
+  "approach": "Math",
+  "explanation": "### How it works\n\nAn ugly number has only 2, 3, and 5 as prime factors. This means if we keep dividing the number by 2, 3, and 5 (as long as it is divisible), we should eventually reach 1. If any other prime factor exists, the number will not reduce to 1.\n\n### Steps\n\n1. Handle edge case: if `n <= 0`, return `false` (ugly numbers are positive).\n2. For each prime factor in `[2, 3, 5]`:\n    - While `n` is divisible by the prime, divide `n` by it.\n3. After all divisions, check if `n == 1`.\n4. Return `true` if `n` is `1`, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Forgetting to Handle Non-Positive Numbers\n\nUgly numbers are defined as positive integers. A common mistake is not checking for `n <= 0` at the start, which can lead to infinite loops when trying to divide zero or incorrect results for negative numbers. Always return `false` immediately for non-positive inputs.\n\n### Dividing by Primes in the Wrong Order\n\nWhile the order of dividing by 2, 3, and 5 does not affect correctness, some implementations accidentally skip primes or use incorrect loop conditions. Ensure each prime factor is completely divided out before moving to the next one, using a `while` loop rather than an `if` statement.",
+  "code": {
+    "python": "class Solution:\n    def isUgly(self, n: int) -> bool:\n        if n <= 0:\n            return False\n\n        for p in [2, 3, 5]:\n            while n % p == 0:\n                n //= p\n\n        return n == 1\n",
+    "cpp": "class Solution {\npublic:\n    bool isUgly(int n) {\n        if (n <= 0) return false;\n\n        for (int p = 2; p <= 5 && n > 0; p++) {\n            while (n % p == 0) {\n                n /= p;\n            }\n        }\n\n        return n == 1;\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=M0Zay1Qr9ws",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ugly-number.md"
+}

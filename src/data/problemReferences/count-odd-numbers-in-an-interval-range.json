@@ -1,0 +1,11 @@
+{
+  "problemId": "count-odd-numbers-in-an-interval-range",
+  "approach": "Math (One Liner)",
+  "explanation": "### How it works\n\nThe count of odd numbers from `1` to `n` is `(n + 1) / 2` (or equivalently `(n + 1) >> 1`). To find odd numbers in range `[low, high]`, we take the count up to `high` and subtract the count below `low`. The count below `low` equals the count up to `(low - 1)`, which is `low / 2` or `low >> 1`.\n\n### Steps\n\n1. Compute the number of odd integers from `1` to `high`: `(high + 1) >> 1`.\n2. Compute the number of odd integers from `1` to `(low - 1)`: `low >> 1`.\n3. Subtract the second from the first to get odds in `[low, high]`.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Off-by-One with Range Boundaries\n\nWhen the range length is odd, whether you get an extra odd number depends on whether `low` (or `high`) is odd. Forgetting to check this boundary condition leads to undercounting by 1.\n\n### Using Division Without Considering Endpoints\n\nSimply computing `(high - low) / 2` ignores whether the range starts or ends on an odd number. The formula must account for the parity of the boundaries, not just the length.",
+  "code": {
+    "python": "class Solution:\n    def countOdds(self, low: int, high: int) -> int:\n        return ((high + 1) >> 1) - (low >> 1)\n",
+    "cpp": "class Solution {\npublic:\n    int countOdds(int low, int high) {\n        return ((high + 1) >> 1) - (low >> 1);\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=wrIWye928JQ",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-odd-numbers-in-an-interval-range.md"
+}

@@ -1,0 +1,11 @@
+{
+  "problemId": "score-of-a-string",
+  "approach": "Iteration",
+  "explanation": "### How it works\n\nThe score of a string is defined as the sum of absolute differences between adjacent characters' ASCII values. Since we need to compare each character with its neighbor, we simply walk through the string once, computing the difference between consecutive characters and accumulating the result in `res`.\n\n### Steps\n\n1. Initialize a variable `res` to store the running total.\n2. Iterate through the string from index `0` to `n - 2`:\n    - For each position `i`, compute the absolute difference between the ASCII values of `s[i]` and `s[i + 1]`.\n    - Add this difference to `res`.\n3. Return `res` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Off-by-One Error in Loop Bounds\n\nA frequent mistake is iterating to `n` instead of `n - 1`, causing an index out of bounds error when accessing `s[i + 1]`. Since you compare adjacent pairs, the loop should run from `0` to `len(s) - 2` inclusive, processing `n - 1` pairs for a string of length `n`.\n\n### Forgetting Absolute Value\n\nSome solutions subtract ASCII values without taking the absolute value, resulting in negative contributions to the score. The problem requires the sum of absolute differences, so always wrap the subtraction with `abs()` to handle cases where `s[i] > s[i + 1]`.",
+  "code": {
+    "python": "class Solution:\n    def scoreOfString(self, s: str) -> int:\n        res = 0\n        for i in range(len(s) - 1):\n            res += abs(ord(s[i]) - ord(s[i + 1]))\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int scoreOfString(string s) {\n        int res = 0;\n        for (int i = 0; i < s.length() - 1; i++) {\n            res += abs(s[i] - s[i + 1]);\n        }\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/score-of-a-string.md"
+}

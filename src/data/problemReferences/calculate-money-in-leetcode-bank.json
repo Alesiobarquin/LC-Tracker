@@ -1,0 +1,11 @@
+{
+  "problemId": "calculate-money-in-leetcode-bank",
+  "approach": "Math (Optimal)",
+  "explanation": "### How it works\n\nWe can derive a closed-form formula using the sum of first `k` natural numbers: `SUM(k) = k*(k+1)/2`. Each week's extra contribution above the base week follows a pattern, and the remaining days also follow an arithmetic progression. This eliminates the loop needed for remaining days in the previous approach.\n\n### Steps\n\n1. Define a helper function `SUM(x) = x*(x+1)/2` which gives the sum of first `x` natural numbers.\n2. Calculate the number of complete weeks.\n3. The contribution from complete weeks is: `SUM(weeks-1) * 7 + weeks * SUM(7)`. This accounts for the increasing weekly base and the standard week pattern.\n4. The contribution from remaining days is: `SUM(n % 7) + weeks * (n % 7)`. This adds the base daily progression plus the offset from the current week.\n5. Return the total sum.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Using Wrong Starting Deposit for Each Week\n\nEach Monday starts with `week_number` dollars (week 1 starts with 1, week 2 starts with 2, etc.), not always 1. Forgetting to increment the Monday deposit each week gives incorrect totals.\n\n### Off-by-One in Week Calculation\n\nWhen computing complete weeks, using `(n + 6) // 7` instead of `n // 7` overcounts partial weeks as complete, leading to incorrect sums in the math-based approach.",
+  "code": {
+    "python": "class Solution:\n    def totalMoney(self, n: int) -> int:\n        SUM = lambda x: (x * (x + 1)) >> 1\n        weeks = n // 7\n        res = SUM(weeks - 1) * 7 + weeks * SUM(7)\n        res += SUM(n % 7) + weeks * (n % 7)\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int totalMoney(int n) {\n        auto SUM = [](int x) { return (x * (x + 1)) / 2; };\n\n        int weeks = n / 7;\n        int res = SUM(weeks - 1) * 7 + weeks * SUM(7);\n        res += SUM(n % 7) + weeks * (n % 7);\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/calculate-money-in-leetcode-bank.md"
+}

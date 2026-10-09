@@ -1,0 +1,11 @@
+{
+  "problemId": "reverse-words-in-a-string",
+  "approach": "Split, Reverse, and Join",
+  "explanation": "### How it works\n\nSplit the input into words, reverse their order, and join them with one space. Splitting on whitespace removes leading and trailing spaces and collapses repeated spaces. Reverse the list of words, preserving the character order inside each word. The C++ example reads words with a string stream, which performs the same whitespace handling.\n\n### Steps\n\n1. Extract the nonempty words from the input.\n2. Reverse the word list.\n3. Join the words with exactly one space between adjacent words.\n4. Return the resulting string.\n\n### Complexity\n\nFor `n` input characters, time is `O(n)` and auxiliary space is `O(n)` for the words and output. This approach builds a new string.\n\n### Things to watch for\n\n- Split on whitespace rather than a literal single space so repeated spaces do not create empty words.\n- Reverse word order, keeping each word intact. For example, `  hello   world  ` becomes `world hello`.\n- Produce no leading or trailing space.\n\nThe explanation and C++ translation follow the linked NeetCode Python example.",
+  "code": {
+    "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        # Remove leading and trailing spaces\n        s = s.strip()\n        \n        # Split the string into words\n        words = s.split()\n        \n        # Reverse the order of words\n        words = words[::-1]\n        \n        # Join the words with a single space\n        reversed_str = ' '.join(words)\n        \n        return reversed_str\n",
+    "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        istringstream input(s);\n        vector<string> words;\n        string word;\n        while (input >> word) words.push_back(word);\n        reverse(words.begin(), words.end());\n        string result;\n        for (const string& current : words) {\n            if (!result.empty()) result += \" \";\n            result += current;\n        }\n        return result;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/python/0151-reverse-words-in-a-string.py"
+}

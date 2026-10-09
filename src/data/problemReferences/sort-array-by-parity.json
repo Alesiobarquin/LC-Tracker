@@ -1,0 +1,11 @@
+{
+  "problemId": "sort-array-by-parity",
+  "approach": "Two Pointers - II",
+  "explanation": "### How it works\n\nThis approach uses a slow and fast pointer moving in the same direction. The slow pointer `l` tracks where the next even number should be placed. The fast pointer `r` scans through the array. Whenever we find an even number, we swap it to position `l` and advance `l`. This collects all even numbers at the front.\n\n### Steps\n\n1. Initialize a slow pointer `l` at `0`.\n2. Iterate through the array with a fast pointer `r`:\n    - If `nums[r]` is even, swap `nums[l]` with `nums[r]` and increment `l`.\n3. Return the modified array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.\n\n### Things to watch for\n\n### Incrementing the Pointer After Swapping with the Right Boundary\n\nIn the two-pointer approach where you swap odd elements to the right, you must not increment the left pointer after a swap. The element swapped from the right side has not been checked yet and could be odd, requiring another swap.\n\n### Using Modulo on Negative Numbers\n\nWhile this problem only has non-negative integers, using `num % 2` can behave unexpectedly with negative numbers in some languages (returning -1 instead of 1 for odd negatives). Using bitwise AND (`num & 1`) is safer and more efficient for parity checking.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def sortArrayByParity(self, nums: List[int]) -> List[int]:\n        l = 0\n        for r in range(len(nums)):\n            if nums[r] % 2 == 0:\n                nums[l], nums[r] = nums[r], nums[l]\n                l += 1\n        return nums\n",
+    "cpp": "class Solution {\npublic:\n    vector<int> sortArrayByParity(vector<int>& nums) {\n        for (int l = 0, r = 0; r < nums.size(); r++) {\n            if (nums[r] % 2 == 0) {\n                swap(nums[l], nums[r]);\n                l++;\n            }\n        }\n        return nums;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-array-by-parity.md"
+}

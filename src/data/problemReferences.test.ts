@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { problems } from "./problems";
+import { ensureExtendedCatalogLoaded, problems } from "./problems";
 import { hasProblemReference, loadProblemReference } from "./problemReferences";
 
-describe("core problem references", () => {
+describe("problem references", () => {
   it("provides a matching explanation, two code examples, and a NeetCode video for every core library item", async () => {
     expect(problems).toHaveLength(250);
     for (const problem of problems) {
@@ -18,6 +18,28 @@ describe("core problem references", () => {
         /^https:\/\/www.youtube.com\/watch\?v=[\w-]{11}$/,
       );
       expect(reference?.sourceUrl).toContain("/articles/");
+    }
+  });
+  it("provides coherent Python/C++ references for the supported extended catalog", async () => {
+    const catalog = await ensureExtendedCatalogLoaded();
+    const supported = catalog.filter((problem) => hasProblemReference(problem.id));
+    expect(supported).toHaveLength(486);
+    for (const problem of supported) {
+      const reference = await loadProblemReference(problem.id);
+      expect(reference?.problemId).toBe(problem.id);
+      expect(reference?.approach, problem.id).toBeTruthy();
+      for (const section of ["How it works", "Steps", "Complexity"]) {
+        expect(reference?.explanation, problem.id).toContain(`### ${section}`);
+      }
+      expect(reference?.code.python, problem.id).toMatch(/class /);
+      expect(reference?.code.cpp, problem.id).toMatch(/class |struct /);
+      expect(reference?.videoUrl).toBe(problem.videoUrl);
+      expect(reference?.sourceUrl).toMatch(
+        /^https:\/\/github.com\/neetcode-gh\/leetcode\/blob\/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9\/(articles|python)\//,
+      );
+    }
+    for (const id of ["string-compression", "reverse-words-in-a-string", "reverse-words-in-a-string-ii", "reverse-words-in-a-string-iii"]) {
+      expect(hasProblemReference(id), id).toBe(true);
     }
   });
   it("does not present core guidance as the solution for an extended-catalog problem", async () => {

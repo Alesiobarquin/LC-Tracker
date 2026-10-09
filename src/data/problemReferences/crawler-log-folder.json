@@ -1,0 +1,11 @@
+{
+  "problemId": "crawler-log-folder",
+  "approach": "Iteration",
+  "explanation": "### How it works\n\nWe do not actually need to store the folder names since we only care about the depth. A simple counter can track how many levels deep we are. Moving into a folder increments the counter, moving to parent decrements it (but never below `0` since we cannot go above the main folder), and `\"./\"` leaves it unchanged.\n\n### Steps\n\n1. Initialize a depth counter to `0`.\n2. For each log operation:\n    - If it is `\"./\"`, skip (no change in depth).\n    - If it is `\"../\"`, decrement the counter but ensure it does not go below `0`.\n    - Otherwise, increment the counter (moving into a child folder).\n3. Return the counter value as the minimum operations to return to main folder.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Allowing Depth to Go Negative\n\nWhen processing `\"../\"`, you must ensure the depth does not go below zero. Going above the main folder is impossible, so decrementing when already at depth `0` produces wrong results.\n\n### Forgetting to Handle the Current Directory Operation\n\nThe operation `\"./\"` means stay in the current folder and should not change the depth. Treating it like a folder name and incrementing depth is a common mistake.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def minOperations(self, logs: List[str]) -> int:\n        res = 0\n        for log in logs:\n            if log == \"./\":\n                continue\n            if log == \"../\":\n                res = max(0, res - 1)\n            else:\n                res += 1\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int minOperations(vector<string>& logs) {\n        int res = 0;\n        for (auto& log : logs) {\n            if (log == \"./\") {\n                continue;\n            }\n            if (log == \"../\") {\n                res = max(0, res - 1);\n            } else {\n                res++;\n            }\n        }\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/crawler-log-folder.md"
+}

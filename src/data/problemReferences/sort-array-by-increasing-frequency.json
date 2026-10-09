@@ -1,0 +1,11 @@
+{
+  "problemId": "sort-array-by-increasing-frequency",
+  "approach": "Custom Sort",
+  "explanation": "### How it works\n\nWe need to sort elements by how often they appear, with less frequent elements coming first. When two elements have the same frequency, the larger one should come first. A custom comparator lets us define this two-level sorting logic: primary sort by frequency (ascending), secondary sort by value (descending).\n\n### Steps\n\n1. Count the frequency of each number using a hash map.\n2. Sort the array using a custom comparator that:\n    - Compares by frequency first (lower frequency comes first).\n    - If frequencies are equal, compares by `value` (larger `value` comes first).\n3. Return the sorted array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`\n\n### Things to watch for\n\n### Reversing the Tiebreaker Logic\n\nThe problem requires that when frequencies are equal, larger values should come first (descending order by value). A common mistake is sorting by ascending value instead, which produces incorrect output for elements with the same frequency.\n\n### Sorting by Frequency in Descending Order\n\nThe problem asks for increasing frequency order (less frequent elements first). Accidentally sorting by descending frequency places the most frequent elements first, which is the opposite of what is required.",
+  "code": {
+    "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def frequencySort(self, nums: List[int]) -> List[int]:\n        count = Counter(nums)\n        nums.sort(key=lambda n: (count[n], -n))\n        return nums\n",
+    "cpp": "class Solution {\npublic:\n    vector<int> frequencySort(vector<int>& nums) {\n        unordered_map<int, int> count;\n        for (int num : nums) {\n            count[num]++;\n        }\n\n        sort(nums.begin(), nums.end(), [&](int a, int b) {\n            if (count[a] != count[b]) return count[a] < count[b];\n            return a > b;\n        });\n\n        return nums;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-array-by-increasing-frequency.md"
+}

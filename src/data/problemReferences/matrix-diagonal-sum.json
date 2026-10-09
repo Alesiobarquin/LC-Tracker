@@ -1,0 +1,11 @@
+{
+  "problemId": "matrix-diagonal-sum",
+  "approach": "Iteration (Optimal)",
+  "explanation": "### How it works\n\nWe can directly compute both diagonal sums in a single pass. For row `r`, the primary diagonal element is at column `r`, and the secondary diagonal element is at column `n - r - 1`. We simply add both for each row. When `n` is odd, the center element (at row `n / 2`, column `n / 2`) is counted twice, so we subtract it once at the end.\n\n### Steps\n\n1. Initialize the result sum to `0`.\n2. For each row index `r` from `0` to `n - 1`:\n    - Add `mat[r][r]` (primary diagonal element).\n    - Add `mat[r][n - r - 1]` (secondary diagonal element).\n3. If `n` is odd, subtract the center element `mat[n / 2][n / 2]` to correct for double-counting.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.\n\n### Things to watch for\n\n### Double-Counting the Center Element for Odd-Sized Matrices\n\nWhen the matrix has an odd dimension, the center element lies on both diagonals and gets added twice. You must subtract it once at the end. Forgetting this check causes incorrect results for odd-sized matrices like 3x3 or 5x5.\n\n### Using Incorrect Index Formula for Secondary Diagonal\n\nThe secondary diagonal element in row `r` is at column `n - r - 1`, not `n - r`. Using the wrong formula causes an index out of bounds error or accesses the wrong elements.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def diagonalSum(self, mat: List[List[int]]) -> int:\n        res, n = 0, len(mat)\n\n        for r in range(n):\n            res += mat[r][r]\n            res += mat[r][n - r - 1]\n\n        return res - (mat[n // 2][n // 2] if n & 1 else 0)\n",
+    "cpp": "class Solution {\npublic:\n    int diagonalSum(vector<vector<int>>& mat) {\n        int res = 0, n = mat.size();\n\n        for (int r = 0; r < n; r++) {\n            res += mat[r][r];\n            res += mat[r][n - r - 1];\n        }\n\n        return res - (n % 2 == 1 ? mat[n / 2][n / 2] : 0);\n    }\n};\n"
+  },
+  "videoUrl": "https://www.youtube.com/watch?v=WliTu6gIK7o",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/matrix-diagonal-sum.md"
+}

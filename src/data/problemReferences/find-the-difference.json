@@ -1,0 +1,11 @@
+{
+  "problemId": "find-the-difference",
+  "approach": "Bitwise XOR",
+  "explanation": "### How it works\n\nXOR has a useful property: `a ^ a = 0` and `a ^ 0 = a`. If we XOR all characters from both strings together, each character that appears in both `s` and `t` will cancel out (XOR with itself gives `0`). The only character remaining is the added one, since it appears an odd number of times total.\n\n### Steps\n\n1. Initialize `res = 0`.\n2. XOR `res` with each character's ASCII value in `s`.\n3. XOR `res` with each character's ASCII value in `t`.\n4. Convert `res` to a character and return it.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.\n\n### Things to watch for\n\n### Forgetting to Handle Empty String s\n\nWhen `s` is an empty string, `t` contains exactly one character (the added one). Solutions that iterate through `s` first or rely on finding a mismatch between sorted strings must handle this edge case. The XOR and sum-based approaches naturally handle this since XORing or summing over an empty string contributes nothing.\n\n### Comparing Characters Instead of Counts\n\nA common mistake is to iterate through both strings and return the first character in `t` that does not appear in `s`. This fails when the added character is a duplicate of an existing character. For example, if `s = \"a\"` and `t = \"aa\"`, the added character is `'a'`, but a naive check would miss it since `'a'` already exists in `s`.",
+  "code": {
+    "python": "class Solution:\n    def findTheDifference(self, s: str, t: str) -> str:\n        res = 0\n        for c in s:\n            res ^= ord(c)\n        for c in t:\n            res ^= ord(c)\n        return chr(res)\n",
+    "cpp": "class Solution {\npublic:\n    char findTheDifference(string s, string t) {\n        int res = 0;\n        for (char c : s) {\n            res ^= c;\n        }\n        for (char c : t) {\n            res ^= c;\n        }\n        return (char) (res);\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference.md"
+}

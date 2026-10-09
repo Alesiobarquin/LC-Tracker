@@ -1,0 +1,11 @@
+{
+  "problemId": "assign-cookies",
+  "approach": "Two Pointers - II",
+  "explanation": "### How it works\n\nThis is a cleaner version of the two-pointer approach. We iterate through cookies one by one. For each cookie, if it can satisfy the current child, we move to the next child. Either way, we move to the next cookie. The key insight is that once a child is satisfied, we never revisit them, and we never skip a potentially useful cookie.\n\n### Steps\n\n1. Sort both the greed array and the cookie array.\n2. Use pointer `i` for children (starting at 0) and iterate through cookies with `j`.\n3. If the current cookie satisfies the current child (`cookie >= greed`), increment `i`.\n4. Always increment `j` to move to the next cookie.\n5. Return `i`, the count of satisfied children.\n\n### Complexity\n\n- Time complexity: `O(n log n + m log m)`\n- Space complexity: `O(1)` or `O(n + m)` depending on the sorting algorithm.\n\n> Where `n` is the size of the array `g` and `m` is the size of the array `s`.\n\n### Things to watch for\n\n### Forgetting to Sort Both Arrays\n\nThe two-pointer greedy approach only works when both the greed factors and cookie sizes are sorted. Forgetting to sort one of them leads to suboptimal assignments.\n\n### Using the Wrong Comparison Operator\n\nA child is satisfied when the cookie size is greater than or equal to the greed factor. Using strict greater-than misses valid matches where the cookie exactly equals the greed.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def findContentChildren(self, g: List[int], s: List[int]) -> int:\n        g.sort()\n        s.sort()\n\n        i = j = 0\n        while i < len(g) and j < len(s):\n            if g[i] <= s[j]:\n                i += 1\n            j += 1\n\n        return i\n",
+    "cpp": "class Solution {\npublic:\n    int findContentChildren(vector<int>& g, vector<int>& s) {\n        sort(g.begin(), g.end());\n        sort(s.begin(), s.end());\n\n        int i = 0;\n        for (int j = 0; i < g.size() && j < s.size(); j++) {\n            if (g[i] <= s[j]) i++;\n        }\n        return i;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/assign-cookies.md"
+}

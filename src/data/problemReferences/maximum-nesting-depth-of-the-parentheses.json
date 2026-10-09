@@ -1,0 +1,11 @@
+{
+  "problemId": "maximum-nesting-depth-of-the-parentheses",
+  "approach": "Iteration",
+  "explanation": "### How it works\n\nWe don't actually need to store the parentheses in a stack. Since we only care about the depth (stack size), we can replace the stack with a simple counter. This reduces space complexity to O(1) while maintaining the same logic.\n\n### Steps\n\n1. Initialize `res = 0` to track the maximum depth and `cur = 0` to track the current depth.\n2. Iterate through each character in the string.\n3. If the character is `(`, increment `cur`. If it's `)`, decrement `cur`.\n4. After each character, update `res` with the maximum of `res` and `cur`.\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.\n\n### Things to watch for\n\n### Counting All Characters\n\nA frequent mistake is incrementing or decrementing the depth counter for every character in the string. The string may contain digits, operators, and other characters that should be ignored. Only parentheses `(` and `)` affect the nesting depth.\n\n### Updating Maximum at the Wrong Time\n\nWhen using a counter approach, the maximum depth should be updated after incrementing for `(`, not after decrementing for `)`. Updating after processing `)` will miss the peak depth that occurred when the matching `(` was processed.",
+  "code": {
+    "python": "class Solution:\n    def maxDepth(self, s: str) -> int:\n        res = 0\n        cur = 0\n\n        for c in s:\n            if c == \"(\":\n                cur += 1\n            elif c == \")\":\n                cur -= 1\n            res = max(res, cur)\n\n        return res\n",
+    "cpp": "class Solution {\npublic:\n    int maxDepth(string s) {\n        int res = 0, cur = 0;\n\n        for (char c : s) {\n            if (c == '(') {\n                cur++;\n            } else if (c == ')') {\n                cur--;\n            }\n            res = max(res, cur);\n        }\n\n        return res;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-nesting-depth-of-the-parentheses.md"
+}

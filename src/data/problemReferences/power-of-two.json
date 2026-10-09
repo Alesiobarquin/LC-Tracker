@@ -1,0 +1,11 @@
+{
+  "problemId": "power-of-two",
+  "approach": "Math",
+  "explanation": "### How it works\n\nThe largest power of two that fits in a 32-bit signed integer is `2^30` (since `2^31` exceeds the positive range). Any smaller power of two must divide evenly into `2^30`.\n\nIf `n` is a power of two, then `2^30 mod n` equals `0`. If `n` is not a power of two, the division will have a remainder.\n\n### Steps\n\n1. Check that `n` is positive.\n2. Compute `(1 << 30) % n` (i.e., `2^30 mod n`).\n3. Return `true` if the result is `0`.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Forgetting to Handle Non-Positive Numbers\n\nA common mistake is forgetting that `n` must be strictly positive. Zero and negative numbers cannot be powers of two, but the bit manipulation tricks like `n & (n - 1) == 0` will incorrectly return `true` for `n = 0`. Always check `n > 0` before applying bit operations.\n\n### Integer Overflow in Iterative Approaches\n\nWhen iteratively multiplying by `2` (e.g., `x *= 2`), the variable can overflow if using a 32-bit integer type. In languages like Java or C++, use a `long` or `long long` type for the accumulator to avoid wrapping around to negative values before reaching large inputs like `2^30`.",
+  "code": {
+    "python": "class Solution:\n    def isPowerOfTwo(self, n: int) -> bool:\n        return n > 0 and ((1 << 30) % n) == 0\n",
+    "cpp": "class Solution {\npublic:\n    bool isPowerOfTwo(int n) {\n        return n > 0 && ((1 << 30) % n) == 0;\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-two.md"
+}

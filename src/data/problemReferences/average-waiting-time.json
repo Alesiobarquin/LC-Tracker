@@ -1,0 +1,11 @@
+{
+  "problemId": "average-waiting-time",
+  "approach": "Simulation - II",
+  "explanation": "### How it works\n\nThis is a more concise version of the simulation. The key observation is that the chef starts cooking at whichever is later: their current finish time or the customer's arrival. The finish time becomes `max(t, arrival) + order`. The customer's waiting time is simply `finish_time - arrival`. This formula captures both cases (chef idle or busy) in one expression.\n\n### Steps\n\n1. Initialize `t` (finish time) and `total` to `0`.\n2. For each customer:\n    - Update `t` to `max(t, arrival) + order` (when the order finishes).\n    - Add `t - arrival` to `total` (customer's wait time).\n3. Return `total` divided by the number of customers.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n### Things to watch for\n\n### Integer Overflow\n\nWith large arrival times and order durations, the sum of waiting times can exceed 32-bit integer limits. Use 64-bit integers for accumulating totals.\n\n### Confusing Waiting Time with Service Time\n\nWaiting time is from arrival until the order is complete (includes cooking time), not just the time spent waiting before cooking starts.\n\n### Forgetting to Update Current Time\n\nWhen a customer arrives after the chef is idle, the current time must jump forward to the arrival time, not stay at the previous finish time.",
+  "code": {
+    "python": "from typing import List\n\nclass Solution:\n    def averageWaitingTime(self, customers: List[List[int]]) -> float:\n        t = total = 0\n        for arrival, order in customers:\n            t = max(t, arrival) + order\n            total += t - arrival\n        return total / len(customers)\n",
+    "cpp": "class Solution {\npublic:\n    double averageWaitingTime(vector<vector<int>>& customers) {\n        long long t = 0, total = 0;\n\n        for (auto& c : customers) {\n            int arrival = c[0], order = c[1];\n            t = max(t, (long long)arrival) + order;\n            total += t - arrival;\n        }\n\n        return (double) total / customers.size();\n    }\n};\n"
+  },
+  "videoUrl": "",
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/average-waiting-time.md"
+}

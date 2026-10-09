@@ -56,6 +56,17 @@ describe("problem references", () => {
       expect(reference?.code.python).not.toContain("eval(");
     }
   });
+  it("uses the requested row, column, and box sets for Valid Sudoku", async () => {
+    const reference = await loadProblemReference("valid-sudoku");
+    expect(reference?.approach).toBe("Hash Set (One Pass)");
+    expect(reference?.code.python).toContain("import collections");
+    expect(reference?.code.python).toContain("collections.defaultdict(set)");
+    expect(reference?.code.python).toContain("squares[(r // 3, c // 3)]");
+    expect(reference?.code.cpp).toContain("unordered_set<char>");
+    expect(reference?.explanation).toContain("collections.defaultdict(set)");
+    expect(reference?.explanation).toContain("fixed 9×9 board");
+    expect(reference?.explanation).not.toContain("mask");
+  });
   it("does not present core guidance as the solution for an extended-catalog problem", async () => {
     expect(hasProblemReference("count-commas-in-range")).toBe(false);
     expect(await loadProblemReference("count-commas-in-range")).toBeNull();

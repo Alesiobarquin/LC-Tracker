@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise every reference in the reviewed medium/easy batch.
+"""Exercise every reference in the reviewed medium/easy batch and the revised Sudoku.
 --cpp compiles and runs selected C++ boundary checks as well. No network or user data.
 """
 import argparse
@@ -209,6 +209,12 @@ def verify(namespaces):
 
 
 CPP_CASES = {
+36: ' '.join(
+    '{ vector<string> rows{' + ','.join(json.dumps(row) for row in rows) + '}; '
+    'vector<vector<char>> board; for (const string& row : rows) board.emplace_back(row.begin(),row.end()); '
+    'const auto original = board; assert(s.isValidSudoku(board) == ' + str(expected).lower() + '); assert(board == original); }'
+    for _, rows, expected in COMMON['SUDOKU_CASES']
+),
 8: 'assert(s.myAtoi("2147483648") == INT_MAX); assert(s.myAtoi("-91283472332") == INT_MIN);',
 137: 'vector<int> v{-2,-2,-2,-4}; assert(s.singleNumber(v) == -4);',
 165: 'assert(s.compareVersion("1.0", "1.0.0") == 0); assert(s.compareVersion("1.10", "1.2") == 1);',
@@ -237,6 +243,9 @@ def main():
         namespaces[r['id']], records[r['number']] = namespace, reference
     tested, checks = verify(namespaces)
     print(f'{tested} new Python solutions exercised; {checks} example, edge, mutation, and structural checks passed.', flush=True)
+    sudoku = json.loads((ROOT / 'src/data/problemReferences/valid-sudoku.json').read_text())
+    sudoku_checks = COMMON['verify_sudoku'](sudoku)
+    print(f'Valid Sudoku passed {sudoku_checks} Python checks, including independent row/column/box conflicts and input preservation.', flush=True)
     if args.cpp:
         def syntax_check(record):
             code = COMMON['cpp_headers'](record['code']['cpp']) + record['code']['cpp']
@@ -245,6 +254,8 @@ def main():
         with ThreadPoolExecutor(max_workers=4) as pool:
             list(pool.map(syntax_check, records.values()))
         print(f"{len(records)} new C++ snippets passed syntax validation.", flush=True)
+        syntax_check(sudoku)
+        records[36] = sudoku
         with tempfile.TemporaryDirectory() as folder:
             for number, body in CPP_CASES.items():
                 code = COMMON['cpp_headers'](records[number]['code']['cpp']) + '\n#include <cassert>\n' + records[number]['code']['cpp'] + '\nint main() { Solution s; ' + body + ' }\n'

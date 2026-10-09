@@ -50,8 +50,14 @@ Python translations are supplied for five C++-only examples. Complexity notes
 state language-specific workspace or algorithm differences where they exist.
 
 All 100 new Python entries have behavioral checks, including in-place results,
-list/tree structure, and a 10,000-character string. All 100 new C++ snippets are syntax checked, and 14 boundary programs compile
+list/tree structure, and a 10,000-character string. All 100 new C++ snippets are
+syntax checked, and 15 boundary programs (including Valid Sudoku) compile
 and run as part of the required GitHub verification check.
+Valid Sudoku uses the requested one-pass row, column, and box sets, with Python
+matching the supplied example and C++ following the same approach. Its rewritten
+explanation covers box coordinates, checking before insertion, empty cells, and
+the fixed 9×9 complexity. Both languages check empty, valid partial, valid complete,
+and independent row, column, and box conflicts while preserving the board.
 The broader snippet verifier checks syntax across all bundled C++ entries.
 These checks are finite examples and boundaries, not exhaustive correctness proofs.
 
@@ -72,7 +78,7 @@ The importer takes intuition, steps, complexity, and code from the same approach
 It requires an explanation, steps, complexity, Python, and C++ from one approach,
 without a third-party Python dependency. It prefers the final complete approach,
 with explicit choices for the simpler subtree DFS, kth-largest min-heap, and dependency-free interval-stream set/sort
-examples, and merge sort instead of shell sort for Sort an Array.
+examples, merge sort for Sort an Array, and the one-pass sets for Valid Sudoku.
 Design In-Memory File System is skipped because the pinned article lacks a
 complete bilingual approach. It adds missing standard Python imports, adapts
 NeetCode method names

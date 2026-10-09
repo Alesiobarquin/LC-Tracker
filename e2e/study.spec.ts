@@ -921,6 +921,14 @@ for (const theme of ["light", "dark"]) {
         await expect(page.getByRole("link", { name: "MIT license", exact: true })).toHaveAttribute("href", "/walkccc-license.txt");
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       }
+      await page.goto('/library/valid-sudoku/explanation');
+      await expect(page.getByRole('heading', { name: 'How it works', exact: true })).toBeVisible();
+      await expect(page.locator('.reference-code .cm-content')).toContainText('collections.defaultdict(set)');
+      await expect(page.getByText('Hash Set (One Pass)', { exact: true })).toBeVisible();
+      await expect(page.getByText('Bitmask', { exact: true })).toHaveCount(0);
+      await page.getByLabel('Example language').selectOption('cpp');
+      await expect(page.locator('.reference-code .cm-content')).toContainText('unordered_set<char>');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     });
   }
 }

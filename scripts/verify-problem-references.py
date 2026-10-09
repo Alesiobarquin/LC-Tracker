@@ -4,6 +4,7 @@ Python is required. --cpp also checks each C++ snippet with a C++20 compiler.
 This never accesses user data, executes a network request, or grades user answers.
 """
 import argparse
+import copy
 from concurrent.futures import ThreadPoolExecutor
 import json
 import re
@@ -21,6 +22,28 @@ class Node:
     def __init__(self, val=0, neighbors=None):
         self.val, self.neighbors = val, neighbors or []
         self.left = self.right = self.next = self.random = None
+
+SUDOKU_CASES = [
+    ('empty', ['.........'] * 9, True),
+    ('valid partial', ['53..7....', '6..195...', '.98....6.', '8...6...3', '4..8.3..1', '7...2...6', '.6....28.', '...419..5', '....8..79'], True),
+    ('valid complete', ['534678912', '672195348', '198342567', '859761423', '426853791', '713924856', '961537284', '287419635', '345286179'], True),
+    ('row duplicate only', ['1..1.....'] + ['.........'] * 8, False),
+    ('column duplicate only', ['1........', '.........', '.........', '1........'] + ['.........'] * 5, False),
+    ('box duplicate only', ['1........', '.1.......'] + ['.........'] * 7, False),
+]
+
+
+def verify_sudoku(reference):
+    namespace = {}
+    exec(compile(reference['code']['python'], 'valid-sudoku', 'exec'), namespace)
+    for label, rows, expected in SUDOKU_CASES:
+        board = [list(row) for row in rows]
+        original = copy.deepcopy(board)
+        actual = namespace['Solution']().isValidSudoku(board)
+        assert actual is expected, ('valid-sudoku', label, actual, expected)
+        assert board == original, ('valid-sudoku modified the board', label)
+    return len(SUDOKU_CASES)
+
 
 CASES = {
  'reverse-words-in-a-string': ('reverseWords', [(('the sky is blue',), 'blue is sky the'), (('  hello   world  ',), 'world hello'), (('a',), 'a')]),
@@ -128,6 +151,7 @@ def main():
         exec(compile(reference['code']['python'], reference['problemId'], 'exec'), namespace)
         namespaces[reference['problemId']] = namespace
     checked = 0
+    checked += verify_sudoku(next(r for r in references if r['problemId'] == 'valid-sudoku'))
     for problem_id, (method, cases) in CASES.items():
         for inputs, expected in cases:
             actual = getattr(namespaces[problem_id]['Solution'](), method)(*inputs)

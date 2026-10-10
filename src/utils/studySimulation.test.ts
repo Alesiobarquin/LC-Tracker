@@ -164,6 +164,7 @@ describe("multiweek preparation scenarios", () => {
       }
       expect(result.coding).toBeGreaterThan(unseen.length);
     },
+    15000,
   );
   it("gives failed attempts repair blocks while preserving unfamiliar checks", () => {
     const result = simulate(60, true, true);

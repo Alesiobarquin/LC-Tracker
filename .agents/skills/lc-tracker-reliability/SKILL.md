@@ -14,6 +14,9 @@ The client computes scheduling from confirmed reads; `commit_user_change` checks
 revisions and atomically commits related rows with a retry receipt. A timer's
 operation UUID and exact completion are stored in sessionStorage before sending.
 Recall drafts also persist a frozen answer/outcome and operation ID before saving.
+Manual time edits must survive reloads, including incomplete input. Freeze the
+corrected duration with the completion before sending; an unconfirmed save cannot
+reopen that edit or substitute a new duration on retry.
 Keep those IDs through timeouts, reloads, and explicit retries. Only confirmed
 `PT409` conflicts may be retried automatically, with fresh source data. Never use
 `40001` for application version checks: PostgREST 14 retries the same stale RPC

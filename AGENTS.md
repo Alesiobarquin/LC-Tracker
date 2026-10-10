@@ -16,6 +16,10 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
   operation UUID. Preserve the same ID and completion payload on retries and
   reloads. Never split timing, progress, activity, and sprint updates into
   independent writes.
+- Time corrections use persisted `timeSpentDraft` fields and the helpers in
+  `src/utils/sessionTime.ts`. Keep the measured timer duration available for
+  `Use timer`; use corrected seconds consistently in the active budget, timing,
+  and history. Freeze the duration with the completion when saving starts.
 - Use confirmed source reads and revision checks before editing records. Retry
   only application conflict `PT409` with refreshed inputs. A network timeout does not prove
   a write failed; do not replay a non-idempotent operation with a new ID.

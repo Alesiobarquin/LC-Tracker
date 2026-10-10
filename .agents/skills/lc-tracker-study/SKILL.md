@@ -13,9 +13,11 @@ planner and evidence helpers are in `src/utils/study.ts`; persistence is in
 When changing this behavior:
 
 - Keep one allocator responsible for all assigned minutes. Subtract recorded
-  study time and already used recall capacity. Deduplicate problems across task
-  kinds. Exercise a large imported backlog, tiny/zero budgets, rest days, breaks,
-  completed assignments, and unfinished coding before changing priorities.
+  study time and already used recall capacity. Use `src/utils/sessionTime.ts`
+  for active durations so manual time corrections count toward the same budget.
+  Deduplicate problems across task kinds. Exercise a large imported backlog,
+  tiny/zero budgets, rest days, breaks, completed assignments, and unfinished
+  coding before changing priorities.
 - Keep recall and coding evidence separate. A successful explanation must not
   append a coding pass or defer an implementation check. Retained implementation
   needs delayed independent passes; daily rehearsal and legacy retirement flags

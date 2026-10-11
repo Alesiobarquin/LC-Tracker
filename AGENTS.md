@@ -74,6 +74,9 @@ and `docs/operations.md` for migration, verification, and rollback instructions.
 
 ## Interface and themes
 
+- For frontend layout, styling, components, or visual review, read
+  `.agents/skills/lc-tracker-frontend/SKILL.md` before editing. It captures the
+  established study-register design and points to the implemented references.
 - Use the semantic palette in `src/index.css` for backgrounds, borders, text,
   status colors, charts, and syntax highlighting. Both light and dark themes
   must stay readable; do not introduce fixed dark panels or pale text colors.

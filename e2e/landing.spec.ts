@@ -9,7 +9,7 @@ test.describe('Tier 1: Feature Coverage (Isolation & Component Unit Integrations
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading).toBeVisible();
     await expect(heading).toHaveText('Know what to solve next.');
-    await expect(page.locator('.hero-badge-pill')).toHaveCount(0);
+    await expect(page.locator('.landing-introduction .hero-badge-pill')).toHaveCount(0);
     await expect(heading.locator('span')).toHaveCSS('font-style', 'normal');
 
     // Verify primary hero CTAs

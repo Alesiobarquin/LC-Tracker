@@ -9,7 +9,6 @@ async function authenticatedFixture(page: Page, progressRows: Record<string, unk
   await page.addInitScript(() => {
     localStorage.setItem('lc-e2e-user', 'user_theme_e2e');
     localStorage.setItem('lc-tracker-features-modal-version', '1');
-    localStorage.removeItem('lc-tracker-active-recall');
   });
   await page.route('https://test.supabase.co/**', async route => {
     const url = new URL(route.request().url());

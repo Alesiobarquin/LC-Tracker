@@ -125,22 +125,17 @@ with `vercel curl`. Keep the release PR unmerged until required migrations are
 verified; merging `main` triggers production deployment. The GitHub Actions
 `verify` check is required by branch protection.
 
-## Task completion and publishing
+## Task completion and review
 
-- After a task that changes repository files is fully completed and all required
-  checks pass, automatically commit its changes and publish them to `main`.
-  This is standing user authorization; do not ask for permission again.
-- Keep commits scoped to the completed task and preserve unrelated work. Use
-  normal, non-force updates.
+- Do not automatically commit or publish changes to `main`.
+- When changes are ready and all required checks pass, show the browser preview
+  and wait for user feedback before committing, pushing, or merging.
+- Keep changes scoped to the task and preserve unrelated work.
 - Respect branch protection and the required GitHub Actions `verify` check.
-  When direct pushes to `main` are prohibited, push a task branch, create a PR,
-  and merge it after the required checks pass. This standing authorization also
-  covers that PR and merge workflow.
-- Before publishing application changes, follow the release verification and
-  staging instructions above and apply and verify any required migrations.
-  Keep incomplete or failing work off `main`; report any blocker that prevents
-  publishing.
-- Include the commit or PR and verification outcome in the final response.
+  When publishing is explicitly requested and authorized by the user, follow the
+  release verification and staging instructions above, apply and verify any
+  required migrations, and use a task branch / PR workflow if direct pushes to
+  `main` are blocked.
 
 ## Personal project presentation
 

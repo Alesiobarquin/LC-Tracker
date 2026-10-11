@@ -4,7 +4,8 @@ test('landing explains the planner and updates its sample from the goal', async 
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: 'Know what to solve next.' })).toBeVisible();
-  await expect(page.getByText('Personalized LeetCode practice')).toBeVisible();
+  await expect(page.getByText('Personalized LeetCode practice')).toHaveCount(0);
+  await expect(page.locator('#landing-title span')).toHaveCSS('font-style', 'normal');
   const landingDescription = 'Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.';
   await expect(page.getByText(landingDescription)).toBeVisible();
   await expect(page).toHaveTitle('LC Tracker | Know what LeetCode problem to solve next');

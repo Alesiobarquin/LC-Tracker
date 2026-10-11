@@ -2490,11 +2490,11 @@ button:active:not(:disabled),
 }
 .landing-hero {
   display: grid;
-  min-height: min(760px, calc(100svh - 72px));
+  min-height: min(680px, calc(100svh - 72px));
   grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
   align-items: center;
   gap: clamp(42px, 6.5vw, 100px);
-  padding-block: clamp(54px, 8vw, 108px) clamp(68px, 8vw, 104px);
+  padding-block: clamp(40px, 4.5vw, 64px);
 }
 .landing-hero-copy {
   max-width: 560px;
@@ -2534,23 +2534,22 @@ button:active:not(:disabled),
   color: var(--palette-subtle);
 }
 .landing-hero h1 {
-  max-width: 10ch;
+  max-width: none;
   margin: 0;
   color: var(--palette-foreground);
-  font-size: clamp(3.25rem, 6.3vw, 6.2rem);
+  font-size: clamp(2.5rem, 4.4vw, 4.25rem);
   font-weight: 500;
-  letter-spacing: -0.075em;
-  line-height: 0.99;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
 }
 .landing-hero h1 span {
   display: block;
   margin-top: 0.08em;
   color: var(--palette-accent-strong);
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  font-size: 1.04em;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.065em;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }
 .landing-lede {
   max-width: 460px;
@@ -3371,7 +3370,7 @@ button:active:not(:disabled),
     gap: 42px;
   }
   .landing-hero h1 {
-    font-size: clamp(3.15rem, 6.4vw, 5.2rem);
+    font-size: clamp(2.5rem, 4.4vw, 4.25rem);
   }
   .landing-plan-content {
     padding: 23px;
@@ -3386,10 +3385,10 @@ button:active:not(:disabled),
     min-height: auto;
     grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
     gap: 32px;
-    padding-block: 72px 84px;
+    padding-block: 48px 56px;
   }
   .landing-hero h1 {
-    font-size: clamp(3rem, 6.6vw, 4.4rem);
+    font-size: clamp(2.25rem, 4.4vw, 3rem);
   }
   .landing-plan-context {
     gap: 10px;
@@ -3432,8 +3431,8 @@ button:active:not(:disabled),
     max-width: 600px;
   }
   .landing-hero h1 {
-    max-width: 11ch;
-    font-size: clamp(3.1rem, 10vw, 4.8rem);
+    max-width: none;
+    font-size: clamp(2.5rem, 7.5vw, 3.5rem);
   }
   .landing-lede {
     max-width: 510px;
@@ -3540,7 +3539,7 @@ button:active:not(:disabled),
     font-size: 8px;
   }
   .landing-hero h1 {
-    font-size: clamp(3.05rem, 12.1vw, 4rem);
+    font-size: clamp(2.35rem, 10.8vw, 3rem);
   }
   .landing-lede {
     font-size: 13px;

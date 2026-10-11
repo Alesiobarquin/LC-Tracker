@@ -85,12 +85,8 @@ export function LandingPage() {
         <div className="landing-main-width">
           <section className="landing-hero" aria-labelledby="landing-title">
             <div className="landing-hero-copy">
-              <p className="landing-eyebrow">
-                <span className="landing-eyebrow-mark" aria-hidden="true" />
-                Personalized LeetCode practice
-              </p>
               <h1 id="landing-title">
-                Know what to
+                Know what to{" "}
                 <span>solve next.</span>
               </h1>
               <p className="landing-lede">

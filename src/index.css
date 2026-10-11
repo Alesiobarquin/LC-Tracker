@@ -2442,10 +2442,16 @@ button:active:not(:disabled),
   align-items: center;
 }
 .landing-introduction h1 {
+  margin: 0 0 24px;
+  font-family: var(--font-sans);
   font-size: clamp(34px, 4vw, 52px);
   line-height: 1.1;
   letter-spacing: -0.055em;
   font-weight: 550;
+}
+.landing-headline-accent {
+  display: block;
+  color: var(--palette-accent-strong);
 }
 .practice-loop {
   position: relative;
@@ -2833,11 +2839,10 @@ button:active:not(:disabled),
   display: block;
   margin-top: 0.08em;
   color: var(--palette-accent-strong);
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  font-size: 1.04em;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.065em;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }
 .landing-lede {
   max-width: 460px;

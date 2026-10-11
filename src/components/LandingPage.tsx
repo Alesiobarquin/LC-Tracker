@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, ArrowUpRight, Github, Play, Sparkles, Shield, Clock, Brain, Terminal, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Github, Play, Sparkles, Shield, Clock, Brain, Terminal } from "lucide-react";
 import { PublicHeader } from "./PublicHeader";
 import { Logo } from "./Logo";
 import { SectionHeading } from "./ui/StudyTrace";
@@ -45,26 +45,9 @@ export function LandingPage() {
         {/* HERO SECTION */}
         <section className="landing-introduction pt-12 pb-16 sm:py-20">
           <div className="landing-introduction-copy space-y-6">
-            {/* Bespoke Protocol Badge */}
-            <a
-              href="#walkthrough-theater"
-              onClick={scrollToWalkthrough}
-              className="hero-badge-pill luxury-badge-pill group"
-            >
-              <span className="hero-badge-tag">
-                <span className="hero-badge-dot" aria-hidden="true" />
-                <span>Protocol</span>
-              </span>
-              <span className="hero-badge-text">
-                Cognitive spaced retrieval for LeetCode
-              </span>
-              <ChevronRight size={13} className="hero-badge-arrow" aria-hidden="true" />
-            </a>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-foreground">
-              A workspace for
-              <br />
-              <span className="text-muted">LeetCode practice.</span>
+            <h1>
+              Know what to
+              <span className="landing-headline-accent">solve next.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl">

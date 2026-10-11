@@ -46,7 +46,7 @@ export function LandingPage() {
         <section className="landing-introduction pt-12 pb-16 sm:py-20">
           <div className="landing-introduction-copy space-y-6">
             <h1>
-              Know what to
+              Know what to{" "}
               <span className="landing-headline-accent">solve next.</span>
             </h1>
 

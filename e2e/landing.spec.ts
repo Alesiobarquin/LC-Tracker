@@ -5,18 +5,12 @@ test.describe('Tier 1: Feature Coverage (Isolation & Component Unit Integrations
     await page.goto('/');
   });
 
-  test('F1 & F3: Hero section typography, luxury badge, and interactive practice loop', async ({ page }) => {
-    // Verify H1 preserves key contractual text for interview preparation
-    const heading = page.locator('h1');
+  test('F1 & F3: Hero section typography and interactive practice loop', async ({ page }) => {
+    const heading = page.getByRole('heading', { level: 1 });
     await expect(heading).toBeVisible();
-    await expect(heading).toContainText('A workspace for');
-    await expect(heading).toContainText(/LeetCode/i);
-
-    // Verify bespoke protocol badge
-    const heroBadge = page.locator('.hero-badge-pill').first();
-    await expect(heroBadge).toBeVisible();
-    await expect(heroBadge).toContainText('Protocol');
-    await expect(heroBadge).toContainText('Cognitive spaced retrieval for LeetCode');
+    await expect(heading).toHaveText('Know what to solve next.');
+    await expect(page.locator('.hero-badge-pill')).toHaveCount(0);
+    await expect(heading.locator('span')).toHaveCSS('font-style', 'normal');
 
     // Verify primary hero CTAs
     const startStudyingCta = page.getByRole('link', { name: 'Start studying' });
@@ -528,7 +522,7 @@ test.describe('Tier 4: Real-World Application Scenarios', () => {
     await page.goto('/');
 
     // 2. Discover hero message & value proposition
-    await expect(page.locator('h1')).toContainText('A workspace for');
+    await expect(page.locator('h1')).toHaveText('Know what to solve next.');
 
     // 3. Click "Watch Walkthrough" to scroll to walkthrough theater
     const watchWalkthroughBtn = page.locator('a, button').filter({ hasText: 'Watch Walkthrough' }).first();

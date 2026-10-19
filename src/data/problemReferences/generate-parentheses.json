@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<string> generateParenthesis(int n) {\n        vector<vector<string>> res(n + 1);\n        res[0] = {\"\"};\n\n        for (int k = 0; k <= n; ++k) {\n            for (int i = 0; i < k; ++i) {\n                for (const string& left : res[i]) {\n                    for (const string& right : res[k - i - 1]) {\n                        res[k].push_back(\"(\" + left + \")\" + right);\n                    }\n                }\n            }\n        }\n\n        return res[n];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=s9fokUqJ76A",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/generate-parentheses.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/generate-parentheses.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nGenerate **all** strings of length `2n` using only `'('` and `')'`.\nMost will be invalid, so for each completed string we **validate** it:\n\n- Keep a `balance` (opens count).\n- `'('` increases `balance`, `')'` decreases it.\n- If `balance` ever becomes negative, there are too many `)` early, which is invalid.\n- At the end, `balance` must be `0`, meaning all opens are closed.\n\n### Steps\n\n1. Use DFS to build a string `s`.\n2. If `len(s) == 2n`, check if `s` is valid using the balance rule:\n    - If valid, add to result.\n3. Otherwise, branch:\n    - Try adding `'('`.\n    - Try adding `')'`.\n4. Return the collected results.\n\n### Complexity\n\n- Time complexity: `O(2 ^ {2n} * n)`\n- Space complexity: `O(2 ^ {2n} * n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def generateParenthesis(self, n: int) -> List[str]:\n        res = []\n\n        def valid(s: str):\n            open = 0\n            for c in s:\n                open += 1 if c == '(' else -1\n                if open < 0:\n                    return False\n            return not open\n\n        def dfs(s: str):\n            if n * 2 == len(s):\n                if valid(s):\n                    res.append(s)\n                return\n\n            dfs(s + '(')\n            dfs(s + ')')\n\n        dfs(\"\")\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/generate-parentheses.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Backtracking",
+      "explanation": "### How it works\n\nInstead of generating **all** strings and then checking validity, we **build only valid strings**.\n\nKey rules for valid parentheses:\n\n- You can add `'('` **only if** you still have openings left (`open < n`).\n- You can add `')'` **only if** it won't break validity (`close < open`).\n- A string is complete and valid **only when** `open == close == n`.\n\nSo at every step, we make **safe choices only**, which avoids invalid paths early.\n\n### Steps\n\n1. Start with an empty string.\n2. Track:\n    - `open` - number of `'('` used.\n    - `close` - number of `')'` used.\n3. If `open == close == n`, add the built string to the result.\n4. If `open < n`, add `'('` and recurse.\n5. If `close < open`, add `')'` and recurse.\n6. Backtrack after each choice.\n\n### Complexity\n\n- Time complexity: `O(frac{4^n}{sqrt{n}})`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def generateParenthesis(self, n: int) -> List[str]:\n        stack = []\n        res = []\n\n        def backtrack(openN, closedN):\n            if openN == closedN == n:\n                res.append(\"\".join(stack))\n                return\n\n            if openN < n:\n                stack.append(\"(\")\n                backtrack(openN + 1, closedN)\n                stack.pop()\n            if closedN < openN:\n                stack.append(\")\")\n                backtrack(openN, closedN + 1)\n                stack.pop()\n\n        backtrack(0, 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/generate-parentheses.md",
+      "id": "backtracking"
+    }
+  ]
 }

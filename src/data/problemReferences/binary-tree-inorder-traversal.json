@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> inorderTraversal(TreeNode* root) {\n        vector<int> res;\n        TreeNode* cur = root;\n\n        while (cur) {\n            if (!cur->left) {\n                res.push_back(cur->val);\n                cur = cur->right;\n            } else {\n                TreeNode* prev = cur->left;\n                while (prev->right && prev->right != cur) {\n                    prev = prev->right;\n                }\n\n                if (!prev->right) {\n                    prev->right = cur;\n                    cur = cur->left;\n                } else {\n                    prev->right = nullptr;\n                    res.push_back(cur->val);\n                    cur = cur->right;\n                }\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=g_S5WuasWUE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-inorder-traversal.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-inorder-traversal.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nInorder traversal visits nodes in the order: left subtree, current node, right subtree. For a binary search tree, this produces values in sorted order. We can use recursion to naturally handle the traversal by first recursing on the left child, then processing the current node, and finally recursing on the right child.\n\n### Steps\n\n1. Create a result list to store the node values.\n2. Define a recursive helper function that takes a node as input.\n3. If the node is `null`, return immediately (base case).\n4. Recursively call the function on the left child.\n5. Add the current node's value to the result list.\n6. Recursively call the function on the right child.\n7. Return the result list after traversing the entire tree.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(n)` space for the recursion stack.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:\n        res = []\n\n        def inorder(node):\n            if not node:\n                return\n\n            inorder(node.left)\n            res.append(node.val)\n            inorder(node.right)\n\n        inorder(root)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-inorder-traversal.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Iterative Depth First Search",
+      "explanation": "### How it works\n\nWe can simulate the recursive call stack using an explicit stack. The key insight is that we need to go as far left as possible, then process the current node, and move to the right subtree. The stack helps us remember which nodes we still need to process after finishing the left subtrees.\n\n### Steps\n\n1. Initialize an empty result list and an empty stack.\n2. Set the current node to the root.\n3. While the current node is not `null` or the stack is not empty:\n    - While the current node is not `null`, push it onto the stack and move to its left child.\n    - Pop a node from the stack, add its value to the result.\n    - Move to the right child of the popped node.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(n)` space for the stack.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:\n        res = []\n        stack = []\n        cur = root\n\n        while cur or stack:\n            while cur:\n                stack.append(cur)\n                cur = cur.left\n            cur = stack.pop()\n            res.append(cur.val)\n            cur = cur.right\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-inorder-traversal.md",
+      "id": "iterative-depth-first-search"
+    }
+  ]
 }

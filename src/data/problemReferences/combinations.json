@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> combine(int n, int k) {\n        vector<vector<int>> res;\n        for (int mask = 0; mask < (1 << n); ++mask) {\n            vector<int> comb;\n            for (int bit = 0; bit < n; ++bit) {\n                if (mask & (1 << bit)) {\n                    comb.push_back(bit + 1);\n                }\n            }\n            if (comb.size() == k) {\n                res.push_back(comb);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=q0s6m7AiM7o",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking - II",
+      "explanation": "### How it works\n\nInstead of making include/exclude decisions, we iterate through available numbers and always include one. Starting from a given position ensures we never revisit smaller numbers, avoiding duplicates. We stop when the combination reaches size `k`.\n\n### Steps\n\n1. Start with an empty combination and a starting index of `1`.\n2. If the combination size equals `k`, save a copy to the result and return.\n3. Iterate from the start index to `n`. For each number, add it to the combination.\n4. Recursively call with `start = i + 1` to only consider larger numbers.\n5. Remove the last element (backtrack) before trying the next number.\n\n### Complexity\n\n- Time complexity: `O(k * frac {n!}{(n - k)! * k!})`\n- Space complexity: `O(k * frac {n!}{(n - k)! * k!})` for the output array.\n\n> Where `n` is the number of elements and `k` is the number of elements to be picked.",
+      "code": {
+        "python": "from typing import List\nfrom math import comb\n\nclass Solution:\n    def combine(self, n: int, k: int) -> List[List[int]]:\n        res = []\n\n        def backtrack(start, comb):\n            if len(comb) == k:\n                res.append(comb.copy())\n                return\n\n            for i in range(start, n + 1):\n                comb.append(i)\n                backtrack(i + 1, comb)\n                comb.pop()\n\n        backtrack(1, [])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations.md",
+      "id": "backtracking-ii"
+    },
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nWe can simulate backtracking iteratively using an array of size `k` to track our current combination. An index pointer moves forward when we find valid numbers and backward when we need to backtrack. This eliminates recursion overhead.\n\n### Steps\n\n1. Initialize an array of size `k` with zeros and a pointer `i = 0`.\n2. Increment `comb[i]` to try the next value at position `i`.\n3. If `comb[i]` exceeds `n`, move the pointer back (`i -= 1`) to backtrack.\n4. If `i` reaches `k - 1`, we have a complete combination; save it.\n5. Otherwise, move forward (`i += 1`) and set `comb[i] = comb[i - 1]` so the next position starts just after the previous value.\n6. Repeat until `i` becomes negative.\n\n### Complexity\n\n- Time complexity: `O(k * frac {n!}{(n - k)! * k!})`\n- Space complexity: `O(k * frac {n!}{(n - k)! * k!})` for the output array.\n\n> Where `n` is the number of elements and `k` is the number of elements to be picked.",
+      "code": {
+        "python": "from typing import List\nfrom math import comb\n\nclass Solution:\n    def combine(self, n: int, k: int) -> List[List[int]]:\n        res = []\n        i = 0\n        comb = [0] * k\n\n        while i >= 0:\n            comb[i] += 1\n            if comb[i] > n:\n                i -= 1\n                continue\n\n            if i == k - 1:\n                res.append(comb.copy())\n            else:\n                i += 1\n                comb[i] = comb[i - 1]\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations.md",
+      "id": "iteration"
+    }
+  ]
 }

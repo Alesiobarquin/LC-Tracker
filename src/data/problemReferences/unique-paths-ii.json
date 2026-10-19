@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int uniquePathsWithObstacles(vector<vector<int>>& grid) {\n        int M = grid.size(), N = grid[0].size();\n        if (grid[0][0] == 1 || grid[M - 1][N - 1] == 1) {\n            return 0;\n        }\n\n        grid[M - 1][N - 1] = 1;\n\n        for (int r = M - 1; r >= 0; r--) {\n            for (int c = N - 1; c >= 0; c--) {\n                if (r == M - 1 && c == N - 1) {\n                    continue;\n                }\n\n                if (grid[r][c] == 1) {\n                    grid[r][c] = 0;\n                } else {\n                    uint down = (r + 1 < M) ? grid[r + 1][c] : 0;\n                    uint right = (c + 1 < N) ? grid[r][c + 1] : 0;\n                    grid[r][c] = down + right;\n                }\n            }\n        }\n\n        return grid[0][0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=d3UOz7zdE4I",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-paths-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-paths-ii.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nWe want to count all possible paths from the top-left corner to the bottom-right corner, but some cells are blocked by obstacles. At any cell, we can only move right or down. This naturally leads to a recursive approach: the number of paths from a cell equals the sum of paths from the cell below and the cell to the right. If we hit an obstacle or go out of bounds, that path contributes `0`. Since many subproblems overlap (the same cell gets visited through different routes), we use memoization to avoid redundant calculations.\n\n### Steps\n\n1. Define a recursive function `dfs(r, c)` that returns the number of paths from cell `(r, c)` to the destination.\n2. Base cases:\n    - If `r` or `c` is out of bounds, or the cell contains an obstacle, return `0`.\n    - If we reach the destination `(M-1, N-1)`, return `1`.\n3. If the result for `(r, c)` is already in `dp`, return the cached value.\n4. Otherwise, compute `dfs(r+1, c) + dfs(r, c+1)` and store it in `dp`.\n5. Call `dfs(0, 0)` to get the total number of unique paths.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def uniquePathsWithObstacles(self, grid: List[List[int]]) -> int:\n        M, N = len(grid), len(grid[0])\n        dp = {(M - 1, N - 1): 1}\n\n        def dfs(r, c):\n            if r == M or c == N or grid[r][c]:\n                return 0\n            if (r, c) in dp:\n                return dp[(r, c)]\n            dp[(r, c)] = dfs(r + 1, c) + dfs(r, c + 1)\n            return dp[(r, c)]\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-paths-ii.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of solving recursively from the start, we can build the solution iteratively from the destination back to the start. Each cell stores the number of ways to reach the destination from that cell. For any cell, this count is the sum of the counts from the cell below and the cell to the right. Obstacles simply have a count of `0` since no path can go through them.\n\n### Steps\n\n1. If the start or destination cell has an obstacle, return `0` immediately.\n2. Create a 2D `dp` table with an extra row and column (initialized to `0`) for boundary handling.\n3. Set `dp[M-1][N-1] = 1` since there is exactly one way to reach the destination from itself.\n4. Iterate from the bottom-right to the top-left:\n    - If the current cell has an obstacle, set `dp[r][c] = 0`.\n    - Otherwise, set `dp[r][c] = dp[r+1][c] + dp[r][c+1]`.\n5. Return `dp[0][0]` as the answer.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def uniquePathsWithObstacles(self, grid: List[List[int]]) -> int:\n        M, N = len(grid), len(grid[0])\n        if grid[0][0] == 1 or grid[M - 1][N - 1] == 1:\n            return 0\n        dp = [[0] * (N + 1) for _ in range(M + 1)]\n\n\n        dp[M - 1][N - 1] = 1\n\n        for r in range(M - 1, -1, -1):\n            for c in range(N - 1, -1, -1):\n                if grid[r][c] == 1:\n                    dp[r][c] = 0\n                else:\n                    dp[r][c] += dp[r + 1][c]\n                    dp[r][c] += dp[r][c + 1]\n\n        return dp[0][0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-paths-ii.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

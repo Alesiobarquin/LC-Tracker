@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> manacher(string& s) {\n        if (!s.size()) return {};\n        string t = \"#\" + string(1, s[0]);\n        for (int i = 1; i < s.size(); ++i)\n            t += \"#\" + string(1, s[i]);\n        t += \"#\";\n        int n = t.size();\n        vector<int> p(n, 0);\n        int l = 0, r = 0;\n        for (int i = 0; i < n; i++) {\n            p[i] = (i < r) ? min(r - i, p[l + (r - i)]) : 0;\n            while (i + p[i] + 1 < n && i - p[i] - 1 >= 0 &&\n                   t[i + p[i] + 1] == t[i - p[i] - 1])\n                p[i]++;\n            if (i + p[i] > r)\n                l = i - p[i], r = i + p[i];\n        }\n        return p;\n    }\n\n    int countSubstrings(string s) {\n        vector<int> p = manacher(s);\n        int res = 0;\n        for (int i : p) {\n            res += (i + 1) / 2;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4RACzI5-du8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindromic-substrings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindromic-substrings.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming",
+      "explanation": "### How it works\n\nA substring `s[i..j]` is **palindromic** if:\n\n- The end characters match: `s[i] == s[j]`\n- The inside substring `s[i+1..j-1]` is also a palindrome\n  (or the length is ≤ 2, which is always a palindrome if ends match)\n\nSo instead of re-checking characters every time, we **reuse previous results**:\n\n- Store whether a substring is palindromic in a DP table\n- Build solutions for longer substrings using shorter ones\n\n### Steps\n\n1. Create a 2D DP table `dp[i][j]`\n    - `dp[i][j] = true` if substring `s[i..j]` is a palindrome\n2. Initialize a counter `res = 0`\n3. Traverse the string **from bottom to top** for `i`\n    - This ensures `dp[i+1][j-1]` is already computed\n4. For each `(i, j)` where `j >= i`:\n    - If `s[i] == s[j]` AND\n      `(j - i <= 2 OR dp[i+1][j-1] == true)`\n        - Mark `dp[i][j] = true`\n        - Increment `res`\n5. Return `res`\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def countSubstrings(self, s: str) -> int:\n        n, res = len(s), 0\n        dp = [[False] * n for _ in range(n)]\n\n        for i in range(n - 1, -1, -1):\n            for j in range(i, n):\n                if s[i] == s[j] and (j - i <= 2 or dp[i + 1][j - 1]):\n                    dp[i][j] = True\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindromic-substrings.md",
+      "id": "dynamic-programming"
+    },
+    {
+      "approach": "Two Pointers",
+      "explanation": "### How it works\n\nEvery palindrome has a **center**:\n\n- For **odd-length** palindromes, the center is a single character\n- For **even-length** palindromes, the center is between two characters\n\nInstead of checking all substrings, we:\n\n- Fix a center\n- Expand **outwards** as long as characters match\n- Each successful expansion forms **one palindrome**\n\nThis way, we count palindromes directly while expanding.\n\n### Steps\n\n1. Initialize `res = 0`\n2. For each index `i` in the string:\n    - **Odd-length palindromes**\n        - Set `l = i`, `r = i`\n        - While `l >= 0`, `r < n`, and `s[l] == s[r]`:\n            - Increment `res`\n            - Expand: `l--`, `r++`\n    - **Even-length palindromes**\n        - Set `l = i`, `r = i + 1`\n        - While `l >= 0`, `r < n`, and `s[l] == s[r]`:\n            - Increment `res`\n            - Expand: `l--`, `r++`\n3. Return `res`\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def countSubstrings(self, s: str) -> int:\n        res = 0\n\n        for i in range(len(s)):\n            # odd length\n            l, r = i, i\n            while l >= 0 and r < len(s) and s[l] == s[r]:\n                res += 1\n                l -= 1\n                r += 1\n\n            # even length\n            l, r = i, i + 1\n            while l >= 0 and r < len(s) and s[l] == s[r]:\n                res += 1\n                l -= 1\n                r += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindromic-substrings.md",
+      "id": "two-pointers"
+    }
+  ]
 }

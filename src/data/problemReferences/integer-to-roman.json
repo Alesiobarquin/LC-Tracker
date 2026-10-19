@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string intToRoman(int num) {\n        string thousands[] = {\"\", \"M\", \"MM\", \"MMM\"};\n        string hundreds[] = {\"\", \"C\", \"CC\", \"CCC\", \"CD\", \"D\", \"DC\", \"DCC\", \"DCCC\", \"CM\"};\n        string tens[] = {\"\", \"X\", \"XX\", \"XXX\", \"XL\", \"L\", \"LX\", \"LXX\", \"LXXX\", \"XC\"};\n        string ones[] = {\"\", \"I\", \"II\", \"III\", \"IV\", \"V\", \"VI\", \"VII\", \"VIII\", \"IX\"};\n\n        return thousands[num / 1000] +\n               hundreds[(num % 1000) / 100] +\n               tens[(num % 100) / 10] +\n               ones[num % 10];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ohBNdSJyLh8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/integer-to-roman.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/integer-to-roman.md",
+  "alternatives": [
+    {
+      "approach": "Math - I",
+      "explanation": "### How it works\n\nRoman numerals are built by combining symbols that represent specific values. The key insight is to process values from largest to smallest, repeatedly subtracting the largest possible value and appending its symbol. We include the subtractive combinations (like IV for 4, IX for 9) in our value list to handle them naturally.\n\n### Steps\n\n1. Create a list of symbol-value pairs in ascending order, including subtractive forms (IV, IX, XL, XC, CD, CM).\n2. Iterate through the list from largest to smallest value.\n3. For each pair, divide the remaining number by the value to get the `count`.\n4. Append the symbol `count` times to the result and update the number using modulo.\n5. Return the resulting Roman numeral string.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def intToRoman(self, num: int) -> str:\n        symList = [\n            [\"I\", 1], [\"IV\", 4], [\"V\", 5], [\"IX\", 9],\n            [\"X\", 10], [\"XL\", 40], [\"L\", 50], [\"XC\", 90],\n            [\"C\", 100], [\"CD\", 400], [\"D\", 500], [\"CM\", 900],\n            [\"M\", 1000]\n        ]\n\n        res = \"\"\n        for sym, val in reversed(symList):\n            count = num // val\n            if count:\n                res += sym * count\n                num %= val\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/integer-to-roman.md",
+      "id": "math-i"
+    }
+  ]
 }

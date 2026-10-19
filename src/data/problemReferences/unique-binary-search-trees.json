@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numTrees(int n) {\n        long long res = 1;\n        for (int i = 0; i < n; i++) {\n            res *= (4 * i + 2) / (i + 2.0);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Ox0TenN3Zpg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-binary-search-trees.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-binary-search-trees.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recalculates the same values multiple times. For instance, `numTrees(3)` might be computed several times when calculating `numTrees(5)`. We can use memoization to cache results and avoid redundant work.\n\n### Steps\n\n1. Create a hash map or dictionary `dp` to store computed results.\n2. Base case: If `n <= 1`, return `1`.\n3. If `n` is already in `dp`, return the cached value.\n4. Compute `res` by summing `numTrees(i - 1) * numTrees(n - i)` for all `i` from `1` to `n`.\n5. Store `res` in `dp[n]` and return it.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n\n    def __init__(self):\n        self.dp = {}\n\n    def numTrees(self, n: int) -> int:\n        if n <= 1:\n            return 1\n        if n in self.dp:\n            return self.dp[n]\n\n        res = 0\n        for i in range(1, n + 1):\n            res += self.numTrees(i - 1) * self.numTrees(n - i)\n\n        self.dp[n] = res\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-binary-search-trees.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of recursion, we can build the solution iteratively from smaller subproblems. Since the count for `n` nodes depends only on counts for fewer nodes, we compute `numTree[0]`, `numTree[1]`, ..., `numTree[n]` in order.\n\n### Steps\n\n1. Create an array `numTree` of size `n + 1`, initialized with `1` (base cases for 0 and 1 node).\n2. For each number of `nodes` from `2` to `n`:\n    - Initialize `total = 0`.\n    - For each `root` choice from `1` to `nodes`:\n        - `left = root - 1` (nodes in left subtree).\n        - `right = nodes - root` (nodes in right subtree).\n        - Add `numTree[left] * numTree[right]` to `total`.\n    - Set `numTree[nodes] = total`.\n3. Return `numTree[n]`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def numTrees(self, n: int) -> int:\n        numTree = [1] * (n + 1)\n\n        for nodes in range(2, n + 1):\n            total = 0\n            for root in range(1, nodes + 1):\n                left = root - 1\n                right = nodes - root\n                total += numTree[left] * numTree[right]\n            numTree[nodes] = total\n\n        return numTree[n]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-binary-search-trees.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

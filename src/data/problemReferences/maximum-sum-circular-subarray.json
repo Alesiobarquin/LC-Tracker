@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxSubarraySumCircular(vector<int>& nums) {\n        int globMax = nums[0], globMin = nums[0];\n        int curMax = 0, curMin = 0, total = 0;\n\n        for (int& num : nums) {\n            curMax = max(curMax + num, num);\n            curMin = min(curMin + num, num);\n            total += num;\n            globMax = max(globMax, curMax);\n            globMin = min(globMin, curMin);\n        }\n\n        return globMax > 0 ? max(globMax, total - globMin) : globMax;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=fxT9KjakYPM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-sum-circular-subarray.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-sum-circular-subarray.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nSince the array is circular, any contiguous subarray can wrap around from the end back to the beginning. The most direct approach is to try every possible starting position and extend the subarray up to the full length of the array, tracking the maximum sum found. Using modular indexing allows us to wrap around seamlessly. While simple to understand, this method is slow because it examines every possible subarray.\n\n### Steps\n\n1. Initialize `res` with the first element.\n2. For each starting index `i` from `0` to `n` - `1`:\n    - Reset `cur_sum` to `0`.\n    - Extend the subarray from index `i` up to `i` + `n` - `1`, using `j` % `n` to wrap around.\n    - Add each element to `cur_sum` and update `res` with the maximum.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSubarraySumCircular(self, nums: List[int]) -> int:\n        n = len(nums)\n        res = nums[0]\n\n        for i in range(n):\n            cur_sum = 0\n            for j in range(i, i + n):\n                cur_sum += nums[j % n]\n                res = max(res, cur_sum)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-sum-circular-subarray.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix & Suffix Sums",
+      "explanation": "### How it works\n\nA circular subarray with maximum sum either lies entirely within the array (no wrap), or it wraps around (takes a prefix and a suffix). For the non-wrapping case, we can use standard Kadane's algorithm. For the wrapping case, we want the best prefix ending at some index combined with the best suffix starting after that index. By precomputing the maximum suffix sum from each position, we can efficiently find the best combination of prefix and suffix sums in a single pass.\n\n### Steps\n\n1. Compute `right_max[i]` as the maximum suffix sum starting at index `i` or later, iterating from right to left.\n2. Initialize `max_sum` with `nums[0]`, and set `cur_max` and `prefix_sum` to `0`.\n3. Iterate from left to right:\n    - Update `cur_max` using Kadane's logic: `cur_max` = `max(cur_max, 0)` + `nums[i]`.\n    - Update `max_sum` with `cur_max` (non-wrapping case).\n    - Add `nums[i]` to `prefix_sum`.\n    - If `i` + `1` < `n`, update `max_sum` with `prefix_sum` + `right_max[i + 1]` (wrapping case).\n4. Return `max_sum`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSubarraySumCircular(self, nums: List[int]) -> int:\n        n = len(nums)\n        right_max = [0] * n\n        right_max[-1] = nums[-1]\n        suffix_sum = nums[-1]\n\n        for i in range(n - 2, -1, -1):\n            suffix_sum += nums[i]\n            right_max[i] = max(right_max[i + 1], suffix_sum)\n\n        max_sum = nums[0]\n        cur_max = 0\n        prefix_sum = 0\n\n        for i in range(n):\n            cur_max = max(cur_max, 0) + nums[i]\n            max_sum = max(max_sum, cur_max)\n            prefix_sum += nums[i]\n            if i + 1 < n:\n                max_sum = max(max_sum, prefix_sum + right_max[i + 1])\n\n        return max_sum\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-sum-circular-subarray.md",
+      "id": "prefix-suffix-sums"
+    }
+  ]
 }

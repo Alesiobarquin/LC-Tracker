@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* sortedArrayToBST(vector<int>& nums) {\n        if (nums.empty()) return nullptr;\n\n        TreeNode* root = new TreeNode(0);\n        stack<tuple<TreeNode*, int, int>> stack;\n        stack.push({root, 0, (int)nums.size() - 1});\n\n        while (!stack.empty()) {\n            auto [node, l, r] = stack.top();\n            stack.pop();\n            int m = (l + r) / 2;\n            node->val = nums[m];\n\n            if (l <= m - 1) {\n                node->left = new TreeNode(0);\n                stack.push({node->left, l, m - 1});\n            }\n            if (m + 1 <= r) {\n                node->right = new TreeNode(0);\n                stack.push({node->right, m + 1, r});\n            }\n        }\n\n        return root;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=0K0uCMYq5ng",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-sorted-array-to-binary-search-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-sorted-array-to-binary-search-tree.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nTo create a height-balanced BST from a sorted array, we need to ensure that for every node, the left and right subtrees have roughly equal heights. Since the array is sorted, the middle element should become the root. All elements before the middle go to the left subtree, and all elements after go to the right subtree. Applying this recursively builds a balanced tree.\n\n### Steps\n\n1. Base case: If the array is empty, return `null`.\n2. Find the middle index of the current array segment.\n3. Create a new tree node with the middle element as its value.\n4. Recursively build the left subtree using the left half of the array (elements before the middle).\n5. Recursively build the right subtree using the right half of the array (elements after the middle).\n6. Return the root node.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:\n        if not nums:\n            return None\n\n        mid = len(nums) // 2\n        root = TreeNode(nums[mid])\n        root.left = self.sortedArrayToBST(nums[:mid])\n        root.right = self.sortedArrayToBST(nums[mid + 1:])\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-sorted-array-to-binary-search-tree.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Depth First Search (Optimal)",
+      "explanation": "### How it works\n\nThe previous approach creates new array copies for each recursive call, which is inefficient. Instead, we can pass indices (left and right boundaries) to indicate the current segment of the array. This avoids array slicing and reduces both time and space overhead while maintaining the same logic of choosing the middle element as root.\n\n### Steps\n\n1. Define a helper function that takes `left` and `right` boundary indices.\n2. Base case: If `left > right`, return `null` (empty segment).\n3. Calculate the middle index as `(left + right) / 2`.\n4. Create a tree node with the value at the middle index.\n5. Recursively build the left subtree with boundaries `(left, mid - 1)`.\n6. Recursively build the right subtree with boundaries `(mid + 1, right)`.\n7. Call the helper with initial boundaries `(0, n - 1)` and return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(log n)` space for recursion stack.\n    - `O(n)` space for the output.",
+      "code": {
+        "python": "from typing import List\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def sortedArrayToBST(self, nums: List[int]) -> TreeNode:\n        def helper(l, r):\n            if l > r:\n                return None\n            m = (l + r) // 2\n            root = TreeNode(nums[m])\n            root.left = helper(l, m - 1)\n            root.right = helper(m + 1, r)\n            return root\n\n        return helper(0, len(nums) - 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-sorted-array-to-binary-search-tree.md",
+      "id": "depth-first-search-optimal"
+    }
+  ]
 }

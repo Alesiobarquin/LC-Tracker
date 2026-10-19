@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool mergeTriplets(vector<vector<int>>& triplets, vector<int>& target) {\n        bool x = false, y = false, z = false;\n        for (const auto& t : triplets) {\n            x |= (t[0] == target[0] && t[1] <= target[1] && t[2] <= target[2]);\n            y |= (t[0] <= target[0] && t[1] == target[1] && t[2] <= target[2]);\n            z |= (t[0] <= target[0] && t[1] <= target[1] && t[2] == target[2]);\n            if (x && y && z) return true;\n        }\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=kShkQLQZ9K4",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-triplets-to-form-target.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-triplets-to-form-target.md",
+  "alternatives": [
+    {
+      "approach": "Greedy",
+      "explanation": "### How it works\n\nWe are given several triplets and a target triplet.\nWe can merge triplets by taking the **maximum value at each index**, and we want to know if it is possible to obtain the target exactly.\n\nA key observation is:\n\n- any triplet that has a value **greater than the target at any index** can never be used, because merging only increases values\n- so such triplets should be ignored\n\nFor the remaining valid triplets:\n\n- if a triplet matches the target at a certain index, it can help us reach that target value at that position\n\nIf we can find triplets that collectively cover **all three indices** of the target, then merging them will produce the target.\n\n### Steps\n\n1. Initialize an empty set `good` to track which target indices can be matched.\n2. Iterate through each triplet `t`:\n    - If any value in `t` is greater than the corresponding value in `target`, skip this triplet\n3. For the remaining triplets:\n    - Check each index `i`\n    - If `t[i] == target[i]`, add index `i` to the set `good`\n4. After processing all triplets:\n    - If all three indices `{0, 1, 2}` are present in `good`, return `true`\n    - Otherwise, return `false`\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def mergeTriplets(self, triplets: List[List[int]], target: List[int]) -> bool:\n        good = set()\n\n        for t in triplets:\n            if t[0] > target[0] or t[1] > target[1] or t[2] > target[2]:\n                continue\n            for i, v in enumerate(t):\n                if v == target[i]:\n                    good.add(i)\n        return len(good) == 3\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-triplets-to-form-target.md",
+      "id": "greedy"
+    }
+  ]
 }

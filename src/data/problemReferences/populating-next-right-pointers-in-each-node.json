@@ -7,5 +7,25 @@
     "cpp": "/*\n// Definition for a Node.\nclass Node {\npublic:\n    int val;\n    Node* left;\n    Node* right;\n    Node* next;\n\n    Node() : val(0), left(NULL), right(NULL), next(NULL) {}\n\n    Node(int _val) : val(_val), left(NULL), right(NULL), next(NULL) {}\n\n    Node(int _val, Node* _left, Node* _right, Node* _next)\n        : val(_val), left(_left), right(_right), next(_next) {}\n};\n*/\n\nclass Solution {\npublic:\n    Node* connect(Node* root) {\n        if (!root) return nullptr;\n\n        Node* cur = root, *nxt = root->left;\n\n        while (cur && nxt) {\n            cur->left->next = cur->right;\n            if (cur->next) {\n                cur->right->next = cur->next->left;\n            }\n\n            cur = cur->next;\n            if (!cur) {\n                cur = nxt;\n                nxt = cur->left;\n            }\n        }\n\n        return root;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=U4hFQCa1Cq0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/populating-next-right-pointers-in-each-node.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/populating-next-right-pointers-in-each-node.md",
+  "alternatives": [
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nLevel-order traversal naturally groups nodes by their depth, which is exactly what we need to connect nodes on the same level. As we process each level, the next node in the queue is the right neighbor of the current node.\n\nBy tracking the size of each level, we can connect all nodes within a level while avoiding connecting the last node of one level to the first node of the next.\n\n### Steps\n\n1. If the `root` is `null`, return `null`.\n2. Initialize a queue with the `root`.\n3. While the queue is not empty:\n    - Record the current level size.\n    - For each node in the current level:\n        - Dequeue the node.\n        - If it's not the last node in the level, set its `next` pointer to the front of the queue.\n        - Enqueue its `left` and `right` children if they exist.\n4. Return the `root`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(log n)`",
+      "code": {
+        "python": "from collections import deque\n\n\"\"\"\n# Definition for a Node.\nclass Node:\n    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n        self.next = next\n\"\"\"\n\nclass Solution:\n    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':\n        if not root:\n            return None\n\n        q = deque([root])\n        while q:\n            levelSize = len(q)\n            while levelSize:\n                node = q.popleft()\n                if levelSize > 1:\n                    node.next = q[0]\n                if node.left:\n                    q.append(node.left)\n                if node.right:\n                    q.append(node.right)\n                levelSize -= 1\n\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/populating-next-right-pointers-in-each-node.md",
+      "id": "breadth-first-search"
+    },
+    {
+      "approach": "Depth First Search (Optimal)",
+      "explanation": "### How it works\n\nIn a perfect binary tree, every node has either zero or two children, and all leaves are at the same level. This structure lets us establish `next` pointers without extra space for tracking.\n\nFor any node with children, its `left` child's `next` is always its `right` child. And if the node has a `next` pointer, its `right` child's `next` is the `left` child of the node's `next` neighbor. This recursive pattern connects the entire tree.\n\n### Steps\n\n1. If the `root` is `null`, return it.\n2. If the `root` has a `left` child:\n    - Set the `left` child's `next` to the `right` child.\n    - If the `root` has a `next` pointer, set the `right` child's `next` to the `next` node's `left` child.\n    - Recursively connect the `left` subtree.\n    - Recursively connect the `right` subtree.\n3. Return the `root`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(log n)` for the recursion stack.",
+      "code": {
+        "python": "\"\"\"\n# Definition for a Node.\nclass Node:\n    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n        self.next = next\n\"\"\"\n\nclass Solution:\n    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':\n        if not root:\n            return root\n\n        if root.left:\n            root.left.next = root.right\n            if root.next:\n                root.right.next = root.next.left\n\n            self.connect(root.left)\n            self.connect(root.right)\n\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/populating-next-right-pointers-in-each-node.md",
+      "id": "depth-first-search-optimal"
+    }
+  ]
 }

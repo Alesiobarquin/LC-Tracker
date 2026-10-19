@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        int l = 0;\n        for (int num : nums) {\n            if (l < 2 || num != nums[l - 2]) {\n                nums[l] = num;\n                l++;\n            }\n        }\n        return l;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ycAq8iqh0TI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe allow each element to appear at most twice. When we find more than two consecutive duplicates, we shift all subsequent elements left to overwrite the extras. This in-place modification is straightforward but inefficient due to repeated shifting operations.\n\n### Steps\n\n1. Handle arrays with `2` or fewer elements as base cases.\n2. Iterate through the array looking for duplicate pairs.\n3. When a duplicate pair is found, count how many extras exist beyond the allowed two.\n4. Shift all elements after the extras to the left to fill the gap.\n5. Reduce the effective array length and continue scanning.\n6. Return the final length.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def removeDuplicates(self, nums: List[int]) -> int:\n        n = len(nums)\n        if n <= 2:\n            return n\n        i = 0\n        while i < n - 1:\n            if nums[i] == nums[i + 1]:\n                j = i + 2\n                cnt = 0\n                while j < n and nums[i] == nums[j]:\n                    j += 1\n                    cnt += 1\n                for k in range(i + 2, n):\n                    if j >= n:\n                        break\n                    nums[k] = nums[j]\n                    j += 1\n                n -= cnt\n                i += 2\n            else:\n                i += 1\n        return n\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Pointers",
+      "explanation": "### How it works\n\nWe process groups of consecutive duplicates together. For each group, we write at most two copies to the result portion of the array. The left pointer tracks where to write, and the right pointer scans through the array finding groups.\n\n### Steps\n\n1. Initialize left and right pointers at `0`.\n2. For each group of duplicates, count how many there are by advancing `r`.\n3. Write `min(2, count)` copies of the element starting at position `l`.\n4. Advance `l` accordingly and move to the next group.\n5. Return `l` as the new length.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def removeDuplicates(self, nums: List[int]) -> int:\n        l, r = 0, 0\n\n        while r < len(nums):\n            count = 1\n            while r + 1 < len(nums) and nums[r] == nums[r + 1]:\n                r += 1\n                count += 1\n\n            for i in range(min(2, count)):\n                nums[l] = nums[r]\n                l += 1\n            r += 1\n\n        return l\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array-ii.md",
+      "id": "two-pointers"
+    }
+  ]
 }

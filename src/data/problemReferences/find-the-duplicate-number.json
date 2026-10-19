@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findDuplicate(vector<int>& nums) {\n        int slow = 0, fast = 0;\n        while (true) {\n            slow = nums[slow];\n            fast = nums[nums[fast]];\n            if (slow == fast) {\n                break;\n            }\n        }\n\n        int slow2 = 0;\n        while (true) {\n            slow = nums[slow];\n            slow2 = nums[slow2];\n            if (slow == slow2) {\n                return slow;\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=wjYnzkAhcNk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-duplicate-integer.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-duplicate-integer.md",
+  "alternatives": [
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nThis method uses **binary search on the value range**, not on the array itself.\n\nIf all numbers from `1` to `mid` appeared **at most once**, then the count of numbers `<= mid` should be **<= mid**.\nBut if the count is **greater than `mid`**, it means the duplicate must be in the range `[1, mid]`, because too many numbers fall into that range.\n\nSo we repeatedly:\n- Count how many values are `<= mid`.\n- Shrink the search space based on whether this count is \"too large.\"\n\nEventually, `low == high`, and that value is the duplicate.\n\n### Steps\n\n1. Let `low = 1` and `high = n - 1` (value range).\n2. While `low < high`:\n   - Compute `mid = (low + high) // 2`.\n   - Count how many numbers in the array are `<= mid`.\n   - If the count is **greater than `mid`**, the duplicate lies in `[low, mid]`, so set `high = mid`.\n   - Otherwise, it lies in `[mid + 1, high]`, so set `low = mid + 1`.\n3. When the loop ends, `low` is the duplicate.\n4. Return `low`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findDuplicate(self, nums: List[int]) -> int:\n        n = len(nums)\n        low, high = 1, n - 1\n        while low < high:\n            mid = low + (high - low) // 2\n            lessOrEqual = sum(1 for num in nums if num <= mid)\n\n            if lessOrEqual <= mid:\n                low = mid + 1\n            else:\n                high = mid\n\n        return low\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-duplicate-integer.md",
+      "id": "binary-search"
+    },
+    {
+      "approach": "Bit Manipulation",
+      "explanation": "### How it works\n\nEvery number from **1 to n−1** should appear exactly **once**, but in the array, one number appears **twice**.  \nSo for each **bit position**, we compare:\n\n- How many times this bit is set among all numbers in the array.\n- How many times this bit *should* be set among the numbers `1` to `n-1`.\n\nIf a bit appears **more times in the array** than expected, that bit must belong to the **duplicate number**.\n\nBy combining all such bits, we reconstruct the duplicate.\n\n### Steps\n\n1. Let `res = 0` to build the duplicate number bit by bit.\n2. For each bit position `b` from `0` to `31`:\n   - Compute `mask = 1 << b`.\n   - Count how many numbers in `nums` have this bit set, call it `x`.\n   - Count how many numbers from `1` to `n - 1` should have this bit set, call it `y`.\n3. If `x > y`, it means the duplicate has this bit set, so add it to the answer:\n   - `res |= mask`.\n4. After processing all bits, return `res`.\n\n### Complexity\n\n- Time complexity: `O(32 * n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findDuplicate(self, nums: List[int]) -> int:\n        n = len(nums)\n        res = 0\n        for b in range(32):\n            x = y = 0\n            mask = 1 << b\n            for num in nums:\n                if num & mask:\n                    x += 1\n\n            for num in range(1, n):\n                if num & mask:\n                    y += 1\n\n            if x > y:\n                res |= mask\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-duplicate-integer.md",
+      "id": "bit-manipulation"
+    }
+  ]
 }

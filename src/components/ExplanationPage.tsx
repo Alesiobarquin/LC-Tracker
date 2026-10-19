@@ -9,7 +9,6 @@ import {
   ProblemExplanation,
   ExplanationLinks,
   ExplanationText,
-  ProblemExplanationFootnote,
 } from "./ProblemExplanation";
 import { ReferenceCode } from "./ReferenceCode";
 import { PageHeader } from "./ui";
@@ -118,7 +117,6 @@ export function ExplanationPage() {
         <ProblemExplanation problem={problem} />
       )}
       <ExplanationLinks problem={problem} />
-      {!(notes && personal) && <ProblemExplanationFootnote problem={problem} />}
     </div>
   );
 }

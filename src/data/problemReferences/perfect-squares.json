@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numSquares(int n) {\n        while (n % 4 == 0) {\n            n /= 4;\n        }\n\n        if (n % 8 == 7) {\n            return 4;\n        }\n\n        if (isSquareNum(n)) {\n            return 1;\n        }\n\n        for (int i = 1; i * i <= n; i++) {\n            if (isSquareNum(n - i * i)) {\n                return 2;\n            }\n        }\n\n        return 3;\n    }\n\nprivate:\n    bool isSquareNum(int num) {\n        int s = (int) sqrt(num);\n        return s * s == num;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=HLZLwjzIVGo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/perfect-squares.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/perfect-squares.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of solving top-down with recursion, we can build the solution bottom-up. We compute the minimum number of squares for every value from `1` to `n`, using previously computed results. For each target, we try subtracting every perfect square and take the minimum result plus one.\n\n### Steps\n\n1. Create a `dp` array of size `n+1`, initialized to `n` (worst case of all `1`s). Set `dp[0] = 0`.\n2. For each target from `1` to `n`, iterate through all perfect squares `s*s` that do not exceed target.\n3. Update `dp[target] = min(dp[target], 1 + dp[target - s*s])`.\n4. Return `dp[n]`.\n\n### Complexity\n\n- Time complexity: `O(n * sqrt {n})`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def numSquares(self, n: int) -> int:\n        dp = [n] * (n + 1)\n        dp[0] = 0\n\n        for target in range(1, n + 1):\n            for s in range(1, target + 1):\n                square = s * s\n                if target - square < 0:\n                    break\n                dp[target] = min(dp[target], 1 + dp[target - square])\n\n        return dp[n]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/perfect-squares.md",
+      "id": "dynamic-programming-bottom-up"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nWe can view this as a shortest path problem. Starting from `0`, each step adds a perfect square. BFS explores all sums reachable with `1` square, then `2` squares, and so on. The first time we reach `n`, we have found the minimum number of squares. Using a set to track visited values prevents processing the same sum multiple times.\n\n### Steps\n\n1. Initialize a queue with `0` and a set to track seen values.\n2. Process the queue level by level, incrementing the count at each level.\n3. For each current sum, try adding every perfect square `s*s` such that `current + s*s <= n`.\n4. If `current + s*s` equals `n`, return the current count.\n5. If the new sum has not been seen, add it to the set and enqueue it.\n6. Continue until `n` is reached.\n\n### Complexity\n\n- Time complexity: `O(n * sqrt {n})`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def numSquares(self, n: int) -> int:\n        q = deque()\n        seen = set()\n\n        res = 0\n        q.append(0)\n        while q:\n            res += 1\n            for _ in range(len(q)):\n                cur = q.popleft()\n                s = 1\n                while s * s + cur <= n:\n                    nxt = cur + s * s\n                    if nxt == n:\n                        return res\n                    if nxt not in seen:\n                        seen.add(nxt)\n                        q.append(nxt)\n                    s += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/perfect-squares.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

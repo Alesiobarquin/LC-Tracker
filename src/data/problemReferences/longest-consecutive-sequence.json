@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        unordered_map<int, int> mp;\n        int res = 0;\n\n        for (int num : nums) {\n            if (!mp[num]) {\n                mp[num] = mp[num - 1] + mp[num + 1] + 1;\n                mp[num - mp[num - 1]] = mp[num];\n                mp[num + mp[num + 1]] = mp[num];\n                res = max(res, mp[num]);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=P6RZZMu_maU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-consecutive-sequence.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-consecutive-sequence.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nIf we sort the numbers first, then all consecutive values will appear next to each other.  \nThis makes it easy to walk through the sorted list and count how long each consecutive sequence is.  \nWe simply move forward while the current number matches the expected next value in the sequence.  \nDuplicates don’t affect the result—they are just skipped—while gaps reset the streak count.  \nThis approach is simpler and more organized than the brute force method because sorting places all potential sequences in order.\n\n### Steps\n\n1. If the input list is empty, return `0`.\n2. Sort the array in non-decreasing order.\n3. Initialize:\n    - `res` to track the longest streak,\n    - `curr` as the first number,\n    - `streak` as `0`,\n    - index `i = 0`.\n4. While `i` is within bounds:\n    - If `nums[i]` does not match `curr`, reset:\n        - `curr = nums[i]`\n        - `streak = 0`\n    - Skip over all duplicates of `curr` by advancing `i` while `nums[i] == curr`.\n    - Increase `streak` by `1` since we found the expected number.\n    - Increase `curr` by `1` to expect the next number in the sequence.\n    - Update `res` with the maximum streak found so far.\n5. Return `res` after scanning the entire list.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        res = 0\n        nums.sort()\n\n        curr, streak = nums[0], 0\n        i = 0\n        while i < len(nums):\n            if curr != nums[i]:\n                curr = nums[i]\n                streak = 0\n            while i < len(nums) and nums[i] == curr:\n                i += 1\n            streak += 1\n            curr += 1\n            res = max(res, streak)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-consecutive-sequence.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nTo avoid repeatedly recounting the same sequences, we only want to start counting when we find the **beginning** of a consecutive sequence.\nA number is the start of a sequence if `num - 1` is **not** in the set.\nThis guarantees that each consecutive sequence is counted exactly once.\n\nOnce we identify such a starting number, we simply keep checking if `num + 1`, `num + 2`, … exist in the set and extend the streak as far as possible.\nThis makes the solution efficient and clean because each number contributes to the sequence only one time.\n\n### Steps\n\n1. Convert the list into a set `numSet` for O(1) lookups.\n2. Initialize `longest` to track the length of the longest consecutive sequence.\n3. For each number `num` in `numSet`:\n    - Check if `num - 1` is **not** in the set:\n        - If true, `num` is the start of a sequence.\n        - Initialize `length = 1`.\n        - While `num + length` exists in the set, increase `length`.\n    - Update `longest` with the maximum length found.\n4. Return `longest` after scanning all numbers.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        numSet = set(nums)\n        longest = 0\n\n        for num in numSet:\n            if (num - 1) not in numSet:\n                length = 1\n                while (num + length) in numSet:\n                    length += 1\n                longest = max(length, longest)\n        return longest\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-consecutive-sequence.md",
+      "id": "hash-set"
+    }
+  ]
 }

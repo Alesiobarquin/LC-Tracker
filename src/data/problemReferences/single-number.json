@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int res = 0;\n        for (int num : nums) {\n            res ^= num;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=qMPX1AOa83k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe are given an array where **every element appears twice except one**, and we need to find that unique element.\n\nThe brute force idea is straightforward:\n\n- for each element in the array\n- check whether it appears **anywhere else**\n- if it does not match with any other element, then it must be the single number\n\nThis approach is simple and easy to understand, especially for beginners, because it directly follows the problem statement without using extra data structures or clever tricks.\n\n### Steps\n\n1. Loop through each index `i` in the array:\n2. Assume the current element `nums[i]` is unique (`flag = true`).\n3. Loop through the array again with index `j`:\n    - If `i != j` and `nums[i] == nums[j]`:\n        - the element is not unique\n        - set `flag = false` and stop checking\n4. After the inner loop:\n    - If `flag` is still `true`, return `nums[i]`\n5. Since the problem guarantees exactly one unique element, the function will always return an answer.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        for i in range(len(nums)):\n            flag = True\n            for j in range(len(nums)):\n                if i != j and nums[i] == nums[j]:\n                    flag = False\n                    break\n            if flag:\n                return nums[i]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nWe are given an array where **every number appears exactly twice except one**, and we need to find that single number.\n\nA convenient way to solve this is by using a **hash set** to track numbers as we iterate:\n\n- when we see a number **for the first time**, we add it to the set\n- when we see the **same number again**, we remove it from the set\n\nBecause:\n\n- duplicates are added once and removed once\n- only the number that appears **exactly once** will remain in the set\n\nAt the end, the set will contain **only one element**, which is the answer.\n\n### Steps\n\n1. Initialize an empty set `seen`.\n2. Traverse each number `num` in the array:\n    - If `num` is already in `seen`:\n        - remove it from the set\n    - Otherwise:\n        - add it to the set\n3. After processing all numbers:\n    - the set contains exactly one element\n4. Return the only element from the set.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        seen = set()\n        for num in nums:\n            if num in seen:\n                seen.remove(num)\n            else:\n                seen.add(num)\n        return list(seen)[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number.md",
+      "id": "hash-set"
+    }
+  ]
 }

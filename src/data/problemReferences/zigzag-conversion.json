@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1 || numRows >= s.size()) {\n            return s;\n        }\n\n        vector<string> res(numRows);\n        int row = 0, dir = 1;\n\n        for (char& c : s) {\n            res[row] += c;\n            row += dir;\n            if (row == 0 || row == numRows - 1) {\n                dir *= -1;\n            }\n        }\n\n        string result;\n        for (string& rowString : res) {\n            result += rowString;\n        }\n        return result;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Q2Tw6gcVEwc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/zigzag-conversion.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/zigzag-conversion.md",
+  "alternatives": [
+    {
+      "approach": "Iteration - I",
+      "explanation": "### How it works\n\nWhen writing characters in a zigzag pattern, each row follows a predictable spacing pattern. The key insight is that the distance between characters in the same row follows a cycle of length `2 * (numRows - 1)`. For the first and last rows, characters appear at regular intervals of this cycle length. For middle rows, there are two characters per cycle: one at the regular position and one at a calculated offset within the `cycle`.\n\n### Steps\n\n1. Handle the edge case where `numRows` is 1 by returning the original string.\n2. Calculate the base `increment` as `2 * (numRows - 1)`, which represents one full zigzag cycle.\n3. For each row `r` from `0` to `numRows - 1`:\n    - Start at index `r` and jump by the `increment` to collect characters at regular cycle positions.\n    - For middle rows (not first or last), also collect the \"diagonal\" character at position `i + increment - 2 * r` if it exists.\n4. Concatenate all collected characters and return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for the ouput string.",
+      "code": {
+        "python": "class Solution:\n    def convert(self, s: str, numRows: int) -> str:\n        if numRows == 1:\n            return s\n\n        res = []\n        for r in range(numRows):\n            increment = 2 * (numRows - 1)\n            for i in range(r, len(s), increment):\n                res.append(s[i])\n                if r > 0 and r < numRows - 1 and i + increment - 2 * r < len(s):\n                    res.append(s[i + increment - 2 * r])\n\n        return ''.join(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/zigzag-conversion.md",
+      "id": "iteration-i"
+    }
+  ]
 }

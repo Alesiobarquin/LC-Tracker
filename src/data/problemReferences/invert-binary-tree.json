@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        if (!root) return nullptr;\n        stack<TreeNode*> stack;\n        stack.push(root);\n        while (!stack.empty()) {\n            TreeNode* node = stack.top();\n            stack.pop();\n            swap(node->left, node->right);\n            if (node->left) stack.push(node->left);\n            if (node->right) stack.push(node->right);\n        }\n        return root;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OnSn2XEQ4MY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/invert-a-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/invert-a-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nTo invert (mirror) a binary tree, every node must swap its **left** and **right** children. Using **Breadth-First Search (BFS)**, we process the tree level-by-level:\n\n- Start from the root.\n- For each node, **swap** its children.\n- Then push the (new) left and right children into the queue.\n- Continue until every node has been processed.\n\nThis approach ensures that every node is visited exactly once and inverted immediately when encountered.\n\n### Steps\n\n1. If the tree is empty, return `null`.\n2. Initialize a queue and insert the `root` node.\n3. While the queue is not empty:\n    - Remove the front node.\n    - Swap its `left` and `right` children.\n    - If the `left` child exists, add it to the queue.\n    - If the `right` child exists, add it to the queue.\n4. After all nodes are processed, return the `root` as the inverted tree.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\nfrom collections import deque\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        if not root:\n            return None\n        queue = deque([root])\n        while queue:\n            node = queue.popleft()\n            node.left, node.right = node.right, node.left\n            if node.left:\n                queue.append(node.left)\n            if node.right:\n                queue.append(node.right)\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/invert-a-binary-tree.md",
+      "id": "breadth-first-search"
+    },
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nInverting a binary tree means swapping every node’s left and right subtree.  \nWith **Depth-First Search (DFS)**, we use recursion to invert the tree in a **top-down** manner:\n\n- At each node, **swap** the left and right children.\n- Then recursively invert the left subtree.\n- Recursively invert the right subtree.\n\nBecause every subtree is itself a smaller binary tree, recursion naturally handles this structure.  \nThe inversion happens during the descent of the recursion, and each subtree becomes correctly mirrored.\n\n### Steps\n\n1. If the current node is `null`, return `null`.\n2. Swap the node's `left` and `right` pointers.\n3. Recursively call `dfs` on the new `left` child.\n4. Recursively call `dfs` on the new `right` child.\n5. Return the current node (now inverted).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        if not root: return None\n\n        root.left, root.right = root.right, root.left\n\n        self.invertTree(root.left)\n        self.invertTree(root.right)\n\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/invert-a-binary-tree.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

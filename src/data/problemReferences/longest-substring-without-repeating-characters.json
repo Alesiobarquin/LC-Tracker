@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        unordered_map<char, int> mp;\n        int l = 0, res = 0;\n\n        for (int r = 0; r < s.size(); r++) {\n            if (mp.find(s[r]) != mp.end()) {\n                l = max(mp[s[r]] + 1, l);\n            }\n            mp[s[r]] = r;\n            res = max(res, r - l + 1);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=wiGpQwVHdE0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-without-duplicates.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-without-duplicates.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe brute-force idea is to try starting a substring at every index and keep extending it until we see a repeated character.  \nFor each starting point, we use a set to track the characters we’ve seen so far.  \nAs soon as a duplicate appears, that substring can’t grow anymore, so we stop and record its length.  \nBy doing this for every index, we are guaranteed to find the longest valid substring, though the approach is slow.\n\n### Steps\n\n1. Initialize `res = 0` to store the maximum length.\n2. For each starting index `i`:\n    - Create an empty set `charSet`.\n    - Extend the substring by moving `j` from `i` forward:\n        - If `s[j]` is already in the set, break.\n        - Otherwise, add it to the set.\n    - Update `res` with the size of `charSet`.\n3. Return `res` after checking all starting positions.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string and `m` is the total number of unique characters in the string.",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        res = 0\n        for i in range(len(s)):\n            charSet = set()\n            for j in range(i, len(s)):\n                if s[j] in charSet:\n                    break\n                charSet.add(s[j])\n            res = max(res, len(charSet))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-without-duplicates.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nInstead of restarting at every index like brute force, we can keep one **window** that always has _unique_ characters.\nWe expand the window by moving the `right` pointer.\nIf we ever see a repeated character, we shrink the window from the `left` until the duplicate is removed.\nThis way, the window always represents a valid substring, and we track its maximum size.\nIt's efficient because each character is added and removed at most once.\n\n### Steps\n\n1. Create an empty set `charSet` and two pointers:\n    - `l` = left edge of the window\n    - `r` = right edge that moves through the string\n2. For each `r`:\n    - While `s[r]` is already in the set:\n        - Remove `s[l]` from the set and move `l` right.\n    - Add `s[r]` to the set.\n    - Update the result with the window size: `r - l + 1`.\n3. Return the maximum window size found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string and `m` is the total number of unique characters in the string.",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        charSet = set()\n        l = 0\n        res = 0\n\n        for r in range(len(s)):\n            while s[r] in charSet:\n                charSet.remove(s[l])\n                l += 1\n            charSet.add(s[r])\n            res = max(res, r - l + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-without-duplicates.md",
+      "id": "sliding-window"
+    }
+  ]
 }

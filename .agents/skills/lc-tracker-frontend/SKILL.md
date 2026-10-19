@@ -137,6 +137,9 @@ must also appear on keyboard focus and remain available on touch screens.
 
 Keep keyboard focus visible without doubled outlines; preserve skip navigation,
 labels, selected/current state, dialog focus restoration, and reduced motion.
+Problem explanations use a wrapping row of title buttons for approach choices,
+with copper and `aria-pressed` identifying the selected option. Keep long titles
+inside their boxes and retain native Enter/Space activation and visible focus.
 Inspect loading, empty, filtered-empty, error, disabled, and long-content states
 as relevant. Empty reference views should not reserve a blank index column.
 

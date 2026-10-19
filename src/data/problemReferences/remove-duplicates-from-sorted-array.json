@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        int l = 1;\n        for (int r = 1; r < nums.size(); r++) {\n            if (nums[r] != nums[r - 1]) {\n                nums[l++] = nums[r];\n            }\n        }\n        return l;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=DEJAZBq0FDA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Sorted Set",
+      "explanation": "### How it works\n\nA set automatically removes duplicates, and a sorted set maintains order. We insert all elements into a sorted set, then copy the unique elements back to the original array. This approach is simple but uses extra space and doesn't take advantage of the array already being sorted.\n\n### Steps\n\n1. Insert all elements from the array into a sorted set to eliminate duplicates.\n2. Copy the unique elements from the set back into the beginning of the original array.\n3. Return the size of the set (number of unique elements).\n\nNote: This approach is simple but uses extra `O(n)` space.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeDuplicates(self, nums: list[int]) -> int:\n        unique = sorted(set(nums))\n        nums[:len(unique)] = unique\n        return len(unique)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array.md",
+      "id": "sorted-set"
+    },
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nSince the array is sorted, duplicates are adjacent. We use two pointers: one (`l`) marks where to place the next unique element, and another (`r`) scans through the array. When `r` finds a new value (different from what's at `l`), we copy it to position `l` and advance both pointers. This modifies the array in-place.\n\n### Steps\n\n1. Initialize both pointers `l` and `r` to `0`.\n2. Copy the current element at `r` to position `l`.\n3. Skip all duplicates by advancing `r` while consecutive elements are equal.\n4. Move `l` forward to prepare for the next unique element.\n5. Return `l` as the count of unique elements.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def removeDuplicates(self, nums: list[int]) -> int:\n        n = len(nums)\n        l = r = 0\n        while r < n:\n            nums[l] = nums[r]\n            while r < n and nums[r] == nums[l]:\n                r += 1\n            l += 1\n        return l\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-array.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

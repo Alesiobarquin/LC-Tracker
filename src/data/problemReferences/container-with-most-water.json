@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& heights) {\n        int l = 0;\n        int r = heights.size() - 1;\n        int res = 0;\n\n        while (l < r) {\n            int area = min(heights[l], heights[r]) * (r - l);\n            res = max(res, area);\n\n            if (heights[l] <= heights[r]) {\n                l++;\n            } else {\n                r--;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=UuiTKBwPgAo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-water-container.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-water-container.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe try every possible pair of lines and compute the area they form.  \nFor each pair `(i, j)`, the height of the container is the shorter of the two lines, and the width is the distance between them.  \nBy checking all pairs, we are guaranteed to find the maximum area.\n\n### Steps\n\n1. Initialize `res = 0` to track the maximum area found.\n2. Use two nested loops:\n    - Outer loop picks the left line `i`.\n    - Inner loop picks the right line `j > i`.\n3. For each pair `(i, j)`:\n    - Compute the height as `min(heights[i], heights[j])`.\n    - Compute the width as `j - i`.\n    - Update `res` with the maximum of its current value and the new area.\n4. After checking all pairs, return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxArea(self, heights: List[int]) -> int:\n        res = 0\n        for i in range(len(heights)):\n            for j in range(i + 1, len(heights)):\n                res = max(res, min(heights[i], heights[j]) * (j - i))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-water-container.md",
+      "id": "brute-force"
+    }
+  ]
 }

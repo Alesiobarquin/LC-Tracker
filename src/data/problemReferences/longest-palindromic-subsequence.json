@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int longestPalindromeSubseq(string s) {\n        int n = s.size();\n        vector<int> dp(n, 0);\n\n        for (int i = n - 1; i >= 0; i--) {\n            dp[i] = 1;\n            int prev = 0;\n            for (int j = i + 1; j < n; j++) {\n                int temp = dp[j];\n\n                if (s[i] == s[j]) {\n                    dp[j] = prev + 2;\n                } else {\n                    dp[j] = max(dp[j], dp[j - 1]);\n                }\n\n                prev = temp;\n            }\n        }\n\n        return dp[n - 1];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=bUr8cNWI09Q",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindromic-subsequence.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindromic-subsequence.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top Down)",
+      "explanation": "### How it works\n\nA palindrome reads the same forwards and backwards, so we can think of building one by expanding outward from a center. For each possible center (single character for odd length, between two characters for even length), we try to extend the palindrome by checking if the characters on both sides match.\n\nIf the characters match, we include both in our subsequence and continue expanding. If they don't match, we have a choice: skip the left character or skip the right character, and take whichever gives a longer result. Memoization prevents us from recomputing the same subproblems.\n\n### Steps\n\n1. Create a 2D memoization table `dp` where `dp[i][j]` stores the longest palindromic subsequence that can be formed starting at index `i` and ending at index `j`.\n2. Define a recursive function `dfs(i, j)` that:\n    - Returns `0` if indices are out of bounds.\n    - Returns the cached result if already computed.\n    - If characters at `i` and `j` match, adds `1` (if same index) or `2` (different indices) plus the result of expanding outward.\n    - Otherwise, takes the maximum of skipping either the left or right character.\n3. Call `dfs` for all possible centers (both odd and even length palindromes).\n4. Return the maximum value found in the DP table.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def longestPalindromeSubseq(self, s: str) -> int:\n        n = len(s)\n        dp = [[-1] * n for _ in range(n)]\n\n        def dfs(i, j):\n            if i < 0 or j == n:\n                return 0\n            if dp[i][j] != -1:\n                return dp[i][j]\n\n            if s[i] == s[j]:\n                length = 1 if i == j else 2\n                dp[i][j] = length + dfs(i - 1, j + 1)\n            else:\n                dp[i][j] = max(dfs(i - 1, j), dfs(i, j + 1))\n\n            return dp[i][j]\n\n        for i in range(n):\n            dfs(i, i)  # odd length\n            dfs(i, i + 1)  # even length\n\n        return max(max(row) for row in dp if row != -1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindromic-subsequence.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Using LCS Idea)",
+      "explanation": "### How it works\n\nA clever observation: the longest palindromic subsequence of a string is the same as the longest common subsequence (LCS) between the string and its reverse. Why? Any palindromic subsequence appears in the same order when read forwards or backwards, making it a common subsequence of both strings.\n\nThis transforms our problem into the classic LCS problem, which has a well-known dynamic programming solution.\n\n### Steps\n\n1. Create the reverse of the input string.\n2. Use the standard LCS algorithm:\n    - Create a 2D DP table where `dp[i][j]` represents the LCS length of the first `i` characters of the original string and the first `j` characters of the reversed string.\n    - If characters match, `dp[i+1][j+1] = dp[i][j] + 1`.\n    - Otherwise, `dp[i+1][j+1] = max(dp[i+1][j], dp[i][j+1])`.\n3. Return `dp[n][n]` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def longestPalindromeSubseq(self, s: str) -> int:\n        return self.longestCommonSubsequence(s, s[::-1])\n\n    def longestCommonSubsequence(self, s1: str, s2: str) -> int:\n        N, M = len(s1), len(s2)\n        dp = [[0] * (M + 1) for _ in range(N + 1)]\n\n        for i in range(N):\n            for j in range(M):\n                if s1[i] == s2[j]:\n                    dp[i + 1][j + 1] = 1 + dp[i][j]\n                else:\n                    dp[i + 1][j + 1] = max(dp[i + 1][j], dp[i][j + 1])\n\n        return dp[N][M]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindromic-subsequence.md",
+      "id": "dynamic-programming-using-lcs-idea"
+    }
+  ]
 }

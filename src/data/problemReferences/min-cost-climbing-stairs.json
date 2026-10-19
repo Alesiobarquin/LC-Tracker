@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minCostClimbingStairs(vector<int>& cost) {\n        for (int i = cost.size() - 3; i >= 0; i--) {\n            cost[i] += min(cost[i + 1], cost[i + 2]);\n        }\n        return min(cost[0], cost[1]);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ktmzAZWkEZ0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/min-cost-climbing-stairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/min-cost-climbing-stairs.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe brute force solution recomputes the same subproblems many times.\nWe can **optimize it by remembering results** once we compute them.\n\nFor each step `i`, the minimum cost to reach the top is:\n\n- `cost[i]` + minimum cost from step `i+1` or `i+2`\n\nBy storing this result, we avoid repeated work.\n\n### Steps\n\n1. Create a `memo` array where `memo[i]` stores the minimum cost to reach the top from step `i`.\n2. Define `dfs(i)`:\n    - If `i` is beyond the last step, return `0`.\n    - If `memo[i]` is already computed, return it.\n    - Otherwise:\n        - `memo[i] = cost[i] + min(dfs(i+1), dfs(i+2))`\n3. Since you can start from step `0` or `1`, return:\n    - `min(dfs(0), dfs(1))`\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCostClimbingStairs(self, cost: List[int]) -> int:\n        memo = [-1] * len(cost)\n\n        def dfs(i):\n            if i >= len(cost):\n                return 0\n            if memo[i] != -1:\n                return memo[i]\n            memo[i] = cost[i] + min(dfs(i + 1), dfs(i + 2))\n            return memo[i]\n\n        return min(dfs(0), dfs(1))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/min-cost-climbing-stairs.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of solving the problem recursively, we build the answer **from the bottom up**.\n\nLet `dp[i]` represent the **minimum cost to reach step `i`**.\nTo reach step `i`, you can:\n\n- Come from step `i-1`, after spending `dp[i-1]` to get there, then pay `cost[i-1]`\n- Come from step `i-2`, after spending `dp[i-2]` to get there, then pay `cost[i-2]`\n\nWe choose the cheaper total cost, not just the cheaper single step cost.\n\n### Steps\n\n1. Let `n` be the number of steps.\n2. Create a DP array `dp` of size `n+1`.\n3. Initialize:\n    - `dp[0] = 0`, `dp[1] = 0` (you can start at step `0` or `1` for free).\n4. For each step `i` from `2` to `n`:\n    - `dp[i] = min(dp[i-1] + cost[i-1], dp[i-2] + cost[i-2])`\n5. Return `dp[n]` as the minimum cost to reach the top.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCostClimbingStairs(self, cost: List[int]) -> int:\n        n = len(cost)\n        dp = [0] * (n + 1)\n\n        for i in range(2, n + 1):\n            dp[i] = min(dp[i - 1] + cost[i - 1],\n                        dp[i - 2] + cost[i - 2])\n\n        return dp[n]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/min-cost-climbing-stairs.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

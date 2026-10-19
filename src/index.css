@@ -4072,6 +4072,11 @@ button:active:not(:disabled),
 }
 
 /* Problem-specific references share the semantic palette with the recall sheet. */
+.explanation-approaches { margin: 12px 0 20px; }
+.explanation-approach-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.explanation-approach-option { min-width: 0; max-width: 100%; min-height: 44px; white-space: normal; overflow-wrap: anywhere; text-align: left; color: var(--palette-body); background: var(--palette-surface); border-color: var(--palette-line); }
+.explanation-approach-option:hover { background: var(--palette-hover-surface); border-color: var(--palette-line-strong); }
+.explanation-approach-option[aria-pressed="true"] { color: var(--palette-accent); background: color-mix(in srgb, var(--palette-accent) 8%, var(--palette-surface)); border-color: var(--palette-accent); }
 .explanation-approach { color: var(--palette-foreground); font-size: 20px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.4; margin-top: 8px; }
 .explanation-sections { display: grid; gap: 28px; max-width: 72ch; font-size: 15px; }
 .explanation-prose { max-width: 72ch; color: var(--palette-body); font-size: 15px; line-height: 1.85; overflow-wrap: anywhere; }

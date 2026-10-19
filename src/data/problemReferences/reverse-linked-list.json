@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\n\nclass Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        ListNode* prev = nullptr;\n        ListNode* curr = head;\n\n        while (curr) {\n            ListNode* temp = curr->next;\n            curr->next = prev;\n            prev = curr;\n            curr = temp;\n        }\n        return prev;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=G0_I-ZF0S38",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-a-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-a-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nReversing a linked list using recursion works by thinking in terms of **\"reverse the rest, then fix the pointer for the current node.\"**\nWhen we recursively go to the end of the list, that last node becomes the new head.\nWhile the recursion unwinds, each node points **backward** to the one that called it.\nFinally, we set the original head's `next` to `null` to finish the reversal.\n\nThis approach uses the call stack to naturally reverse the direction of the pointers.\n\n### Steps\n\n1. If the list is empty, return `null`.\n2. Recursively call the function on `head.next` to reverse the rest of the list.\n3. After the recursive call returns:\n    - Make `head.next.next = head` so the next node points back to the current node.\n4. Set `head.next = null` to avoid cycles.\n5. Return the new head returned by the deepest recursive call.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if not head:\n            return None\n\n        newHead = head\n        if head.next:\n            newHead = self.reverseList(head.next)\n            head.next.next = head\n        head.next = None\n\n        return newHead\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-a-linked-list.md",
+      "id": "recursion"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findMin(vector<int>& nums) {\n        int l = 0, r = nums.size() - 1;\n        while (l < r) {\n            int m = l + (r - l) / 2;\n            if (nums[m] < nums[r]) {\n                r = m;\n            } else {\n                l = m + 1;\n            }\n        }\n        return nums[l];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nIVW4P8b1VA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-minimum-in-rotated-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-minimum-in-rotated-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA rotated sorted array still contains all its original values, just shifted.  \nSo the simplest way to find the minimum is to **look at every element and pick the smallest one**.  \nThis requires no special logic and works in all cases, but it is not the most efficient.\n\n### Steps\n\n1. Scan through the entire array.\n2. Track the smallest value seen so far.\n3. After checking every element, return the minimum.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMin(self, nums: List[int]) -> int:\n        return min(nums)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-minimum-in-rotated-sorted-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nA rotated sorted array has one special property:  \n**one part is always sorted, and the other part contains the rotation (and the minimum element).**\n\nWe can use binary search to identify which side is sorted:\n\n- If the left half is sorted, then the minimum cannot be there, so we search the right half.\n- If the right half is sorted, then the minimum must be in the left half (or at the midpoint).\n\nThis lets us eliminate half of the array each time and quickly narrow down to the smallest value.\n\n### Steps\n\n1. Initialize `left = 0`, `right = n - 1`, and store the first element as the current answer.\n2. While `left <= right`:\n    - If the current window is already sorted, update the answer with `nums[left]` and stop.\n    - Compute `mid`.\n    - Update the answer with `nums[mid]`.\n    - If the left half is sorted:\n        - Move search to the right half.\n    - Otherwise:\n        - Search in the left half.\n3. Return the smallest value found.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMin(self, nums: List[int]) -> int:\n        res = nums[0]\n        l, r = 0, len(nums) - 1\n\n        while l <= r:\n            if nums[l] < nums[r]:\n                res = min(res, nums[l])\n                break\n\n            m = (l + r) // 2\n            res = min(res, nums[m])\n            if nums[m] >= nums[l]:\n                l = m + 1\n            else:\n                r = m - 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-minimum-in-rotated-sorted-array.md",
+      "id": "binary-search"
+    }
+  ]
 }

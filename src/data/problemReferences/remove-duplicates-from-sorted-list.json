@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* deleteDuplicates(ListNode* head) {\n        ListNode* cur = head;\n        while (cur && cur->next) {\n            if (cur->next->val == cur->val) {\n                cur->next = cur->next->next;\n            } else {\n                cur = cur->next;\n            }\n        }\n        return head;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=p10f-VpO4nE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-list.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nWe solve the problem from the end of the list backward. First, we recursively remove duplicates from the rest of the list, then check if the current node duplicates its (now cleaned) next node. If so, we skip the current node by returning its next. This naturally handles chains of duplicates.\n\n### Steps\n\n1. Base case: if the list is empty or has one node, return it.\n2. Recursively clean the rest of the list starting from `head.next`.\n3. Update `head.next` to point to the cleaned sublist.\n4. If the current node's value equals the next node's value, return `head.next` (skip current).\n5. Otherwise, return `head` (keep current).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def deleteDuplicates(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if not head or not head.next:\n            return head\n\n        head.next = self.deleteDuplicates(head.next)\n        return head if head.val != head.next.val else head.next\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-list.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Iteration - I",
+      "explanation": "### How it works\n\nSince the list is sorted, duplicates are consecutive. At each node, we skip over all following nodes with the same value by adjusting the `next` pointer. This removes entire chains of duplicates in one pass through the list.\n\n### Steps\n\n1. Start with a pointer `cur` at the head.\n2. While `cur` is not `null`, check if the next node has the same value.\n3. If so, skip the next node by setting `cur.next = cur.next.next`.\n4. Continue skipping until the next node has a different value.\n5. Move `cur` to the next node and repeat.\n6. Return the head.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def deleteDuplicates(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        cur = head\n        while cur:\n            while cur.next and cur.next.val == cur.val:\n                cur.next = cur.next.next\n            cur = cur.next\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-duplicates-from-sorted-list.md",
+      "id": "iteration-i"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\n\nclass Solution {\npublic:\n    ListNode* removeNthFromEnd(ListNode* head, int n) {\n        ListNode* dummy = new ListNode(0, head);\n        ListNode* left = dummy;\n        ListNode* right = head;\n\n        while (n > 0) {\n            right = right->next;\n            n--;\n        }\n\n        while (right != nullptr) {\n            left = left->next;\n            right = right->next;\n        }\n\n        left->next = left->next->next;\n        return dummy->next;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=XVuQxVej6y8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-node-from-end-of-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-node-from-end-of-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe store all nodes in an array so we can directly access the node that is `n` positions from the end.  \nOnce we know which node to delete, we simply adjust the `next` pointer of the previous node.\n\n### Steps\n\n1. Traverse the linked list and push every node into an array.\n2. Compute the index of the node to remove: `len(nodes) - n`.\n3. If this index is `0`, it means the head must be removed → return `head.next`.\n4. Otherwise, connect `nodes[removeIndex - 1].next` to `nodes[removeIndex].next`.\n5. Return the updated head.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(N)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:\n        nodes = []\n        cur = head\n        while cur:\n            nodes.append(cur)\n            cur = cur.next\n\n        removeIndex = len(nodes) - n\n        if removeIndex == 0:\n            return head.next\n\n        nodes[removeIndex - 1].next = nodes[removeIndex].next\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-node-from-end-of-linked-list.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Iteration (Two Pass)",
+      "explanation": "### How it works\n\nWe first count how many nodes are in the list.  \nOnce we know the total length, the node to delete is at position `N - n` from the start.  \nWe run a second pass to reach the node just before it and skip it.\n\n### Steps\n\n1. Traverse the list once to compute total nodes `N`.\n2. Compute `removeIndex = N - n`.\n3. If `removeIndex == 0`, delete the head → return `head.next`.\n4. Traverse again until reaching the node before `removeIndex`.\n5. Update its `next` pointer to skip the unwanted node.\n6. Return the modified head.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:\n        N = 0\n        cur = head\n        while cur:\n            N += 1\n            cur = cur.next\n\n        removeIndex = N - n\n        if removeIndex == 0:\n            return head.next\n\n        cur = head\n        for i in range(N - 1):\n            if (i + 1) == removeIndex:\n                cur.next = cur.next.next\n                break\n            cur = cur.next\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-node-from-end-of-linked-list.md",
+      "id": "iteration-two-pass"
+    }
+  ]
 }

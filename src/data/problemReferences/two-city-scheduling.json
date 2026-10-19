@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int twoCitySchedCost(vector<vector<int>>& costs) {\n        sort(costs.begin(), costs.end(), [](const auto& a, const auto& b) {\n            return (a[1] - a[0]) < (b[1] - b[0]);\n        });\n\n        int n = costs.size() / 2, res = 0;\n        for (int i = 0; i < n; i++) {\n            res += costs[i][1] + costs[i + n][0];\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=d-B_gk_gJtQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-city-scheduling.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-city-scheduling.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems because the same state (remaining slots for A and B) can be reached through different paths. We can use memoization to cache results and avoid redundant computation.\n\n### Steps\n\n1. Create a 2D memoization table `dp[aCount][bCount]` to store the minimum cost when `aCount` slots remain for city A and `bCount` slots remain for city B.\n2. Use the same recursive logic as before, but check the cache before computing.\n3. Store results in the cache before returning.\n4. The person index `i` can be derived from `aCount + bCount` since the total remaining equals `2n - i`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`\n\n> Where `n` is the half of the size of the array `costs`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoCitySchedCost(self, costs: List[List[int]]) -> int:\n        n = len(costs) // 2\n        dp = [[-1] * (n + 1) for _ in range(n + 1)]\n\n        def dfs(i, aCount, bCount):\n            if i == len(costs):\n                return 0\n            if dp[aCount][bCount] != -1:\n                return dp[aCount][bCount]\n\n            res = float(\"inf\")\n            if aCount > 0:\n                res = costs[i][0] + dfs(i + 1, aCount - 1, bCount)\n            if bCount > 0:\n                res = min(res, costs[i][1] + dfs(i + 1, aCount, bCount - 1))\n\n            dp[aCount][bCount] = res\n            return res\n\n        return dfs(0, n, n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-city-scheduling.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of recursion with memoization, we can build the solution iteratively. We fill a table where `dp[aCount][bCount]` represents the minimum cost to assign the first `aCount + bCount` people such that `aCount` go to city A and `bCount` go to city B.\n\n### Steps\n\n1. Initialize `dp[0][0] = 0` (no people assigned, zero cost).\n2. For each state `(aCount, bCount)`:\n    - Compute the person index as `i = aCount + bCount`.\n    - If `aCount > 0`, consider the option of sending person `i-1` to city A.\n    - If `bCount > 0`, consider the option of sending person `i-1` to city B.\n    - Take the minimum of valid options.\n3. Return `dp[n][n]`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`\n\n> Where `n` is the half of the size of the array `costs`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoCitySchedCost(self, costs: List[List[int]]) -> int:\n        n = len(costs) // 2\n        dp = [[0] * (n + 1) for _ in range(n + 1)]\n\n        for aCount in range(n + 1):\n            for bCount in range(n + 1):\n                i = aCount + bCount\n                if i == 0:\n                    continue\n\n                dp[aCount][bCount] = float(\"inf\")\n                if aCount > 0:\n                    dp[aCount][bCount] = min(dp[aCount][bCount], dp[aCount - 1][bCount] + costs[i - 1][0])\n                if bCount > 0:\n                    dp[aCount][bCount] = min(dp[aCount][bCount], dp[aCount][bCount - 1] + costs[i - 1][1])\n\n        return dp[n][n]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-city-scheduling.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

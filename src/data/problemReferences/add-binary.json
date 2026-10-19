@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        string res = \"\";\n        int carry = 0;\n\n        int i = a.size() - 1, j = b.size() - 1;\n        while (i >= 0 || j >= 0 || carry > 0) {\n            int digitA = i >= 0 ? a[i] - '0' : 0;\n            int digitB = j >= 0 ? b[j] - '0' : 0;\n\n            int total = digitA + digitB + carry;\n            res += (total % 2) + '0';\n            carry = total / 2;\n\n            i--;\n            j--;\n        }\n\n        reverse(res.begin(), res.end());\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=keuWJ47xG8g",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-binary.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-binary.md",
+  "alternatives": [
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nAdding binary numbers works just like adding decimal numbers by hand, except we only have digits 0 and 1. We start from the rightmost digits (least significant bits) and add corresponding digits along with any carry from the previous position. If the sum is 2 or more, we carry 1 to the next position. We reverse both strings first to make indexing from the right easier, then build the result and reverse it at the end.\n\n### Steps\n\n1. Reverse both input strings for easier right-to-left processing.\n2. Initialize `carry = 0` and an empty result string.\n3. For each position from 0 to the maximum length of the two strings:\n   - Get the digit from each string (0 if past the string's length).\n   - Calculate `total = digitA + digitB + carry`.\n   - Append `total % 2` to the result.\n   - Update `carry = total / 2`.\n4. If `carry` remains, append \"1\".\n5. Reverse the result string and return.\n\n### Complexity\n\n- Time complexity: `O(max(m, n))`\n- Space complexity: `O(m + n)`\n\n> Where `m` and `n` are the lengths of the strings `a` and `b` respectively.",
+      "code": {
+        "python": "class Solution:\n    def addBinary(self, a: str, b: str) -> str:\n        res = \"\"\n        carry = 0\n\n        a, b = a[::-1], b[::-1]\n        for i in range(max(len(a), len(b))):\n            digitA = ord(a[i]) - ord(\"0\") if i < len(a) else 0\n            digitB = ord(b[i]) - ord(\"0\") if i < len(b) else 0\n\n            total = digitA + digitB + carry\n            char = str(total % 2)\n            res = char + res\n            carry = total // 2\n\n        if carry:\n            res = \"1\" + res\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-binary.md",
+      "id": "iteration"
+    }
+  ]
 }

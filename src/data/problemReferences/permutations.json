@@ -7,5 +7,25 @@
     "cpp": "class Solution {\n    vector<vector<int>> res;\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        backtrack(nums, 0);\n        return res;\n    }\n\n    void backtrack(vector<int>& nums, int idx) {\n        if (idx == nums.size()) {\n            res.push_back(nums);\n            return;\n        }\n        for (int i = idx; i < nums.size(); i++) {\n            swap(nums[idx], nums[i]);\n            backtrack(nums, idx + 1);\n            swap(nums[idx], nums[i]);\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=s7AvT7cGdSo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nThe idea is to generate permutations by **building them from smaller permutations**.\n\n- If the list is empty → the only permutation is `[]`.\n- Otherwise:\n    1. Take the first number of the list.\n    2. Recursively get all permutations of the remaining numbers.\n    3. For each smaller permutation, insert the first number into **every possible position**.\n        - Example:\n          If smaller permutation = `[2,3]` and new number = `1`,\n          we create: `[1,2,3]`, `[2,1,3]`, `[2,3,1]`.\n\nThis works because inserting the new number in all positions ensures we build all unique permutations.\n\n### Steps\n\n1. If `nums` is empty → return `[[]]`.\n2. Recursively call `permute(nums[1:])` to get permutations of the smaller list.\n3. For each permutation:\n    - Insert `nums[0]` at every position:\n        - From index `0` to `len(permutation)`\n    - Add each new list to the result.\n4. Return the final result containing all permutations.\n\n### Complexity\n\n- Time complexity: `O(n! * n ^ 2)`\n- Space complexity: `O(n! * n)` for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def permute(self, nums: List[int]) -> List[List[int]]:\n        if len(nums) == 0:\n            return [[]]\n\n        perms = self.permute(nums[1:])\n        res = []\n        for p in perms:\n            for i in range(len(p) + 1):\n                p_copy = p.copy()\n                p_copy.insert(i, nums[0])\n                res.append(p_copy)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Backtracking",
+      "explanation": "### How it works\n\nBacktracking builds permutations by **choosing numbers one-by-one** and exploring all possible orders.\n\nAt every step:\n\n- We pick a number that has not been used yet.\n- Add it to the current permutation.\n- Recursively continue building.\n- When we reach a full permutation (length == len(nums)), we save it.\n- Then we **undo the last choice** (backtrack) and try a different number.\n\nWe use a `pick` array to mark which elements are already used, ensuring each number appears only once per permutation.\n\nThis method explores a decision tree where each level chooses the next number until all numbers are used.\n\n### Steps\n\n1. Maintain:\n    - `perm`: the current permutation being built.\n    - `pick[i]`: whether `nums[i]` is already used.\n    - `res`: list of all completed permutations.\n2. If `len(perm) == len(nums)`, add a copy to `res`.\n3. Loop through all indices `i`:\n    - If `pick[i]` is `false`:\n        - Mark `pick[i]` as `true`.\n        - Add `nums[i]` to `perm`.\n        - Recurse to build further.\n        - Backtrack: remove `nums[i]` and mark `pick[i]` as `false`.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n! * n)`\n- Space complexity: `O(n! * n)` for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def permute(self, nums: List[int]) -> List[List[int]]:\n        self.res = []\n        self.backtrack([], nums, [False] * len(nums))\n        return self.res\n\n    def backtrack(self, perm: List[int], nums: List[int], pick: List[bool]):\n        if len(perm) == len(nums):\n            self.res.append(perm[:])\n            return\n        for i in range(len(nums)):\n            if not pick[i]:\n                perm.append(nums[i])\n                pick[i] = True\n                self.backtrack(perm, nums, pick)\n                perm.pop()\n                pick[i] = False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations.md",
+      "id": "backtracking"
+    }
+  ]
 }

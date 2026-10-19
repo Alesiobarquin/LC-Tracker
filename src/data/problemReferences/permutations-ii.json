@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> permuteUnique(vector<int>& nums) {\n        int n = nums.size();\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> res = {nums};\n\n        while (true) {\n            int i = n - 2;\n            while (i >= 0 && nums[i] >= nums[i + 1]) i--;\n\n            if (i < 0) break;\n\n            int j = n - 1;\n            while (nums[j] <= nums[i]) j--;\n\n            swap(nums[i], nums[j]);\n            reverse(nums.begin() + i + 1, nums.end());\n            res.push_back(nums);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=qhBVWf0YafA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations-ii.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking (Hash Set)",
+      "explanation": "### How it works\n\nSince the input array may contain duplicates, generating all permutations naively would produce duplicate results. One straightforward way to handle this is to generate all permutations using standard backtracking and store them in a hash set, which automatically filters out duplicates.\n\nWe mark elements as \"used\" by temporarily replacing them with a sentinel value, ensuring each element is used exactly once per permutation.\n\n### Steps\n\n1. Initialize an empty set to store unique permutations.\n2. Use backtracking to build permutations:\n    - If the current permutation has the same length as `nums`, add it to the set.\n    - Otherwise, iterate through `nums` and for each unused element:\n        - Mark it as used (replace with sentinel value).\n        - Add it to the current permutation and recurse.\n        - Restore the original value and remove it from the permutation.\n3. Return all unique permutations from the set.\n\n### Complexity\n\n- Time complexity: `O(n! * n)`\n- Space complexity: `O(n! * n)` for the hash set.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def permuteUnique(self, nums: List[int]) -> List[List[int]]:\n        res = set()\n\n        def backtrack(perm):\n            if len(perm) == len(nums):\n                res.add(tuple(perm))\n                return\n\n            for i in range(len(nums)):\n                if nums[i] != float(\"-inf\"):\n                    perm.append(nums[i])\n                    nums[i] = float(\"-inf\")\n                    backtrack(perm)\n                    nums[i] = perm[-1]\n                    perm.pop()\n\n        backtrack([])\n        return [list(permutation) for permutation in res]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations-ii.md",
+      "id": "backtracking-hash-set"
+    },
+    {
+      "approach": "Backtracking (Optimal)",
+      "explanation": "### How it works\n\nThis approach generates permutations by swapping elements in place rather than building a separate permutation array. At each position `i`, we try placing each element from index `i` onward. By sorting first and skipping swaps that would place a duplicate value at position `i`, we avoid generating duplicate permutations.\n\nAfter each recursive call, we restore the array to its sorted state for position `i` by reverse-swapping all elements back.\n\n### Steps\n\n1. Sort `nums` so duplicates are adjacent.\n2. Use backtracking starting at index `0`:\n    - If index `i` equals the length of `nums`, add a copy of `nums` to the result.\n    - Otherwise, for each index `j` from `i` to the end:\n        - Skip if `j > i` and `nums[j]` equals `nums[i]` (duplicate at this position).\n        - Swap `nums[i]` and `nums[j]`, then recurse with `i + 1`.\n    - After the loop, restore the array by reverse-swapping elements back from the end to `i + 1`.\n3. Return all permutations.\n\n### Complexity\n\n- Time complexity: `O(n! * n)`\n- Space complexity: `O(n! * n)` for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def permuteUnique(self, nums: List[int]) -> List[List[int]]:\n        res = []\n\n        def dfs(i):\n            if i == len(nums):\n                res.append(nums.copy())\n                return\n\n            for j in range(i, len(nums)):\n                if j > i and nums[i] == nums[j]:\n                    continue\n\n                nums[i], nums[j] = nums[j], nums[i]\n                dfs(i + 1)\n\n            for j in range(len(nums) - 1, i, -1):\n                nums[j], nums[i] = nums[i], nums[j]\n\n        nums.sort()\n        dfs(0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/permutations-ii.md",
+      "id": "backtracking-optimal"
+    }
+  ]
 }

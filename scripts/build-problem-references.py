@@ -233,6 +233,15 @@ For this fixed 9×9 board, time and auxiliary space are `O(1)`: visit at most 81
             'problemId': problem_id, 'approach': approach, 'explanation': explanation,
             'code': codes, 'videoUrl': videos.get(problem_id, ''), 'sourceUrl': f'https://github.com/neetcode-gh/leetcode/blob/{REVISION}/articles/{slug}.md',
         }
+        # Alternate approaches have their own reviewed importer/manifest.
+        # Refreshing a default must not silently remove them.
+        existing_path = output / f'{problem_id}.json'
+        if existing_path.exists():
+            existing = json.loads(existing_path.read_text())
+            if existing.get('alternatives'):
+                if existing['approach'] != approach:
+                    raise ValueError(f'Default changed for {problem_id}; review alternate selections first')
+                record['alternatives'] = existing['alternatives']
         (output / f'{problem_id}.json').write_text(json.dumps(record, ensure_ascii=False, indent=2) + '\n')
         diagnostics.append((problem_id, approach, len(explanation), len(codes['python'])))
     # This problem has source code but no article at the pinned revision.

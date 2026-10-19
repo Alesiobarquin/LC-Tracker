@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool isIsomorphic(string s, string t) {\n        unordered_map<char, char> mapST, mapTS;\n\n        for (int i = 0; i < s.size(); i++) {\n            char c1 = s[i], c2 = t[i];\n\n            if ((mapST.count(c1) && mapST[c1] != c2) ||\n                (mapTS.count(c2) && mapTS[c2] != c1)) {\n                return false;\n            }\n\n            mapST[c1] = c2;\n            mapTS[c2] = c1;\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=7yF-U1hLEqQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/isomorphic-strings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/isomorphic-strings.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map (Two Pass)",
+      "explanation": "### How it works\n\nTwo strings are isomorphic if there's a one-to-one mapping between their characters. We need to ensure that each character in `s` maps to exactly one character in `t`, and vice versa. A single pass checking only `s -> t` mapping isn't enough because two different characters in `s` could map to the same character in `t`. By running the check twice (once for `(s, t)` and once for `(t, s)`), we guarantee the mapping is bijective.\n\n### Steps\n\n1. Create a helper function that checks if characters from one string map consistently to another:\n    - Use a hash map to store the character mappings.\n    - For each character, check if an existing mapping conflicts with the current pair.\n2. Call the helper twice: once with `(s, t)` and once with `(t, s)`.\n3. Return `true` only if both checks pass.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the input string and `m` is the number of unique characters in the strings.",
+      "code": {
+        "python": "class Solution:\n    def helper(self, s: str, t: str) -> bool:\n        mp = {}\n        for i in range(len(s)):\n            if (s[i] in mp) and (mp[s[i]] != t[i]):\n                return False\n            mp[s[i]] = t[i]\n        return True\n\n    def isIsomorphic(self, s: str, t: str) -> bool:\n        return self.helper(s, t) and self.helper(t, s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/isomorphic-strings.md",
+      "id": "hash-map-two-pass"
+    }
+  ]
 }

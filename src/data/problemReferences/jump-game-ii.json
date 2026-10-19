@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int res = 0, l = 0, r = 0;\n\n        while (r < nums.size() - 1) {\n            int farthest = 0;\n            for (int i = l; i <= r; i++) {\n                farthest = max(farthest, i + nums[i]);\n            }\n            l = r + 1;\n            r = farthest;\n            res++;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=dJ7sWiOoK7g",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-ii.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis problem asks for the **minimum number of jumps** required to reach the last index.\n\nAt any index `i`, the value `nums[i]` tells us the **maximum jump length** from that position.\nSo from index `i`, we can try jumping to any index in the range `(i + 1)` to `(i + nums[i])`.\n\nThe pure recursive solution tries all possibilities, but it recomputes the same results for the same indices many times.\nTo avoid this repetition, we use **top-down dynamic programming (memoization)**.\n\nThe recursive function answers the question:\n**\"What is the minimum number of jumps needed to reach the end starting from index `i`?\"**\n\nOnce we compute the answer for an index, we store it and reuse it whenever needed.\n\n### Steps\n\n1. Create a memo map `memo`:\n    - `memo[i]` stores the minimum jumps needed to reach the end from index `i`\n2. Define a recursive function `dfs(i)`:\n    - `i` is the current index\n3. If `i` is already in `memo`:\n    - Return the stored result\n4. If `i` is the last index:\n    - Return `0` since no more jumps are required\n5. If `nums[i] == 0`:\n    - We cannot move forward, so return a very large value to indicate an invalid path\n6. Compute the farthest index we can jump to from `i`\n7. Try all possible next positions within the jump range:\n    - For each `j`, compute `1 + dfs(j)`\n    - Keep track of the minimum value among all choices\n8. Store the result in `memo[i]` and return it\n9. Start the recursion from index `0`\n10. Return the final result\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def jump(self, nums: List[int]) -> int:\n        memo = {}\n\n        def dfs(i):\n            if i in memo:\n                return memo[i]\n            if i == len(nums) - 1:\n                return 0\n            if nums[i] == 0:\n                return 1000000\n\n            res = 1000000\n            end = min(len(nums), i + nums[i] + 1)\n            for j in range(i + 1, end):\n                res = min(res, 1 + dfs(j))\n            memo[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-ii.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nThis problem asks for the **minimum number of jumps** needed to reach the last index of the array.\n\nInstead of using recursion, we can solve this using **bottom-up dynamic programming** by working backwards from the end.\n\nThe key idea is:\n\n- for each index `i`, we want to know the minimum number of jumps needed to reach the end **starting from `i`**\n- from index `i`, we can jump to any index in the range `[i + 1, i + nums[i]]`\n- so the answer for `i` is: `1 + minimum(dp[j])` for all reachable `j`\n\nBy filling the DP array from right to left, all future states are already computed when needed.\n\n### Steps\n\n1. Let `n` be the length of the array.\n2. Create a DP array `dp` of size `n`:\n    - `dp[i]` represents the minimum number of jumps needed to reach the last index from index `i`\n3. Initialize:\n    - `dp[n - 1] = 0` since we are already at the last index\n    - all other values to a large number (representing unreachable initially)\n4. Iterate `i` from `n - 2` down to `0`:\n5. For each index `i`:\n    - Compute the farthest index we can jump to: `end = min(n, i + nums[i] + 1)`\n    - Try all next positions `j` from `i + 1` to `end - 1`\n    - Update `dp[i] = min(dp[i], 1 + dp[j])`\n6. After filling the array, `dp[0]` contains the minimum number of jumps from the start\n7. Return `dp[0]`\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def jump(self, nums: List[int]) -> int:\n        n = len(nums)\n        dp = [1000000] * n\n        dp[-1] = 0\n\n        for i in range(n - 2, -1, -1):\n            end = min(n, i + nums[i] + 1)\n            for j in range(i + 1, end):\n                dp[i] = min(dp[i], 1 + dp[j])\n        return dp[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-ii.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

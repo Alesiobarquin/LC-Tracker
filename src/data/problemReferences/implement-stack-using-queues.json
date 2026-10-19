@@ -7,5 +7,25 @@
     "cpp": "class MyStack {\nprivate:\n    struct Node {\n        int val;\n        shared_ptr<Node> next;\n        Node(int v, shared_ptr<Node> n) : val(v), next(n) {}\n    };\n    shared_ptr<Node> q;\n\npublic:\n    MyStack() : q(nullptr) {}\n\n    void push(int x) {\n        q = make_shared<Node>(x, q);\n    }\n\n    int pop() {\n        if (!q) return -1;\n        int top = q->val;\n        q = q->next;\n        return top;\n    }\n\n    int top() {\n        if (!q) return -1;\n        return q->val;\n    }\n\n    bool empty() {\n        return q == nullptr;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=rW4vm0-DLYc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/implement-stack-using-queues.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/implement-stack-using-queues.md",
+  "alternatives": [
+    {
+      "approach": "Using Two Queues",
+      "explanation": "### How it works\n\nA stack follows Last-In-First-Out (LIFO) order, but a queue follows First-In-First-Out (FIFO). To simulate a stack using queues, we need to reverse the order of elements on each push.\nThe idea is to use two queues: when pushing a new element, we add it to the empty second queue, then move all elements from the first queue behind it. This places the newest element at the front, ready to be popped first.\nAfter rearranging, we swap the two queues so the main queue always has elements in stack order.\n\n### Steps\n\n1. Initialize two empty queues `q1` and `q2`.\n2. **push(x)**: Add `x` to `q2`, then move all elements from `q1` to `q2` one by one. Finally, swap `q1` and `q2`.\n3. **pop()**: Remove and return the front element from `q1`.\n4. **top()**: Return the front element of `q1` without removing it.\n5. **empty()**: Return `true` if `q1` is empty.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` time for initialization.\n    - `O(n)` time for each `push()` function call.\n    - `O(1)` time for each `pop()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from collections import deque\n\nclass MyStack:\n\n    def __init__(self):\n        self.q1 = deque()\n        self.q2 = deque()\n\n    def push(self, x: int) -> None:\n        self.q2.append(x)\n        while self.q1:\n            self.q2.append(self.q1.popleft())\n\n        self.q1, self.q2 = self.q2, self.q1\n\n    def pop(self) -> int:\n        return self.q1.popleft()\n\n    def top(self) -> int:\n        return self.q1[0]\n\n    def empty(self) -> bool:\n        return len(self.q1) == 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/implement-stack-using-queues.md",
+      "id": "using-two-queues"
+    },
+    {
+      "approach": "Using One Queue",
+      "explanation": "### How it works\n\nWe can achieve the same result with just one queue. The trick is to rotate the queue after each push so the newest element moves to the front.\nWhen we add an element, we push it to the back of the queue, then dequeue and re-enqueue all the elements that were already there. This effectively moves the new element to the front.\nThis approach uses less space than two queues while maintaining the same time complexity for push operations.\n\n### Steps\n\n1. Initialize a single empty queue `q`.\n2. **push(x)**: Add `x` to the back of `q`. Then, rotate the queue by removing and re-adding elements `size - 1` times. This moves `x` to the front.\n3. **pop()**: Remove and return the front element from `q`.\n4. **top()**: Return the front element of `q` without removing it.\n5. **empty()**: Return `true` if `q` is empty.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` time for initialization.\n    - `O(n)` time for each `push()` function call.\n    - `O(1)` time for each `pop()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from collections import deque\n\nclass MyStack:\n\n    def __init__(self):\n        self.q = deque()\n\n    def push(self, x: int) -> None:\n        self.q.append(x)\n        for _ in range(len(self.q) - 1):\n            self.q.append(self.q.popleft())\n\n    def pop(self) -> int:\n        return self.q.popleft()\n\n    def top(self) -> int:\n        return self.q[0]\n\n    def empty(self) -> bool:\n        return len(self.q) == 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/implement-stack-using-queues.md",
+      "id": "using-one-queue"
+    }
+  ]
 }

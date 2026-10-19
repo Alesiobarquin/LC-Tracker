@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool searchMatrix(vector<vector<int>>& matrix, int target) {\n        int ROWS = matrix.size(), COLS = matrix[0].size();\n\n        int l = 0, r = ROWS * COLS - 1;\n        while (l <= r) {\n            int m = l + (r - l) / 2;\n            int row = m / COLS, col = m % COLS;\n            if (target > matrix[row][col]) {\n                l = m + 1;\n            } else if (target < matrix[row][col]) {\n                r = m - 1;\n            } else {\n                return true;\n            }\n        }\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Ber2pi2C0j0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-2d-matrix.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-2d-matrix.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe brute force approach simply checks every element in the matrix one by one.\nSince the matrix is sorted but we're ignoring that structure, we just scan through all rows and all columns until we either find the target or finish searching.\n\n### Steps\n\n1. Loop through every row in the matrix.\n2. For each row, loop through every column.\n3. If the current element equals the target, return `true`.\n4. After scanning the entire matrix, return `false` if the target was not found.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)`\n\n> Where `m` is the number of rows and `n` is the number of columns of matrix.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:\n        for r in range(len(matrix)):\n            for c in range(len(matrix[0])):\n                if matrix[r][c] == target:\n                    return True\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-2d-matrix.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Staircase Search",
+      "explanation": "### How it works\n\nSince each row is sorted left-to-right **and** each column is sorted top-to-bottom, we can search smartly instead of checking every cell.\n\nStart at the **top-right corner**:\n\n- If the current value is **greater** than the target → move **left** (values decrease).\n- If it is **smaller** than the target → move **down** (values increase).\n\nThis works like walking down a staircase—each step eliminates an entire row or column.\nWe keep moving until we either find the target or move out of bounds.\n\n### Steps\n\n1. Let `r = 0` (first row) and `c = n - 1` (last column).\n2. While `r` is within bounds and `c` is within bounds:\n    - If `matrix[r][c] == target`, return `true`.\n    - If the value is **greater** than the target, move **left** (`c -= 1`).\n    - If the value is **smaller**, move **down** (`r += 1`).\n3. If we exit the matrix, the target is not found → return `false`.\n\n### Complexity\n\n- Time complexity: `O(m + n)`\n- Space complexity: `O(1)`\n\n> Where `m` is the number of rows and `n` is the number of columns of matrix.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:\n        m, n = len(matrix), len(matrix[0])\n        r, c = 0, n - 1\n\n        while r < m and c >= 0:\n            if matrix[r][c] > target:\n                c -= 1\n            elif matrix[r][c] < target:\n                r += 1\n            else:\n                return True\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-2d-matrix.md",
+      "id": "staircase-search"
+    }
+  ]
 }

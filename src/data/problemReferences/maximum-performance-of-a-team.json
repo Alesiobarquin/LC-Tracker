@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {\n        constexpr int MOD = 1'000'000'007;\n        vector<pair<int, int>> engineers;\n\n        for (int i = 0; i < n; i++) {\n            engineers.emplace_back(efficiency[i], speed[i]);\n        }\n\n        sort(engineers.rbegin(), engineers.rend());\n\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        long long speedSum = 0, res = 0;\n\n        for (const auto& [eff, spd] : engineers) {\n            if (minHeap.size() == k) {\n                speedSum -= minHeap.top();\n                minHeap.pop();\n            }\n            speedSum += spd;\n            minHeap.push(spd);\n            res = max(res, speedSum * eff);\n        }\n\n        return res % MOD;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Y7UTvogADH0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-performance-of-a-team.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-performance-of-a-team.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Recursion)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to try all possible subsets of engineers with size at most `k`. For each subset, we compute the sum of speeds and multiply by the minimum efficiency in that subset. We track the maximum performance across all valid subsets.\n\nThis works because performance is defined as (sum of speeds) \\* (minimum efficiency), so we need to consider every combination to find the optimal team.\n\n### Steps\n\n1. Use recursion to explore all choices: for each engineer, decide to either include them in the team or skip them.\n2. Track the current speed sum and the minimum efficiency among selected engineers.\n3. At each step, update the result with the current performance if it improves the maximum.\n4. Base case: when we reach the end of the list or have no more slots (`k == 0`), stop recursing.\n5. Return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxPerformance(self, n: int, speed: List[int], efficiency: List[int], k: int) -> int:\n        MOD = 1000000007\n        res = 0\n\n        def dfs(i, k, speedSum, minEff):\n            nonlocal res\n            res = max(res, speedSum * minEff)\n            if i == n or k == 0:\n                return\n\n            dfs(i + 1, k, speedSum, minEff)\n            dfs(i + 1, k - 1, speedSum + speed[i], min(minEff, efficiency[i]))\n\n        dfs(0, k, 0, float(\"inf\"))\n        return res % MOD\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-performance-of-a-team.md",
+      "id": "brute-force-recursion"
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        vector<vector<int>> res;\n        if (!root) return res;\n\n        queue<TreeNode*> q;\n        q.push(root);\n\n        while (!q.empty()) {\n            vector<int> level;\n            int size = q.size();\n\n            for (int i = q.size(); i > 0; i--) {\n                TreeNode* node = q.front();\n                q.pop();\n                if (node) {\n                    level.push_back(node->val);\n                    q.push(node->left);\n                    q.push(node->right);\n                }\n            }\n            if (!level.empty()) {\n                res.push_back(level);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=6ZnyEApgFYg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/level-order-traversal-of-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/level-order-traversal-of-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nLevel order traversal means visiting the tree **level by level**, from top to bottom.  \nWith DFS, instead of using a queue, we use **recursion** and pass the current depth.  \nEach time we reach a node:\n\n- If this is the first time visiting this depth, create a new list for that level.\n- Add the node's value to the list for that depth.\n- Recursively explore left and right children with `depth + 1`.\n\n### Steps\n\n1. Maintain an empty list `res` where `res[d]` stores all nodes at depth `d`.\n2. Define a recursive function `dfs(node, depth)`:\n    - If `node` is `null`, return.\n    - If `res` has no list for this depth, append a new empty list.\n    - Append the node's value to `res[depth]`.\n    - Recurse on `node.left` with `depth + 1`.\n    - Recurse on `node.right` with `depth + 1`.\n3. Call `dfs(root, 0)`.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:\n        res = []\n\n        def dfs(node, depth):\n            if not node:\n                return None\n            if len(res) == depth:\n                res.append([])\n\n            res[depth].append(node.val)\n            dfs(node.left, depth + 1)\n            dfs(node.right, depth + 1)\n\n        dfs(root, 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/level-order-traversal-of-binary-tree.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

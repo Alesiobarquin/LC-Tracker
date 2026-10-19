@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        vector<vector<int>> res = {{}};\n\n        for (int num : nums) {\n            int size = res.size();\n            for (int i = 0; i < size; i++) {\n                vector<int> subset = res[i];\n                subset.push_back(num);\n                res.push_back(subset);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=REOH22Xwdkk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking",
+      "explanation": "### How it works\n\nThe idea is to build all possible subsets by making a choice at each step:\nfor every number, we have two options — **include it** or **exclude it**.\nThis naturally forms a decision tree.\n\nBacktracking helps us explore both choices:\n\n- Add the current number → explore further\n- Remove it (undo) → explore without it\n\nWhenever we reach the end of the array, the current list represents one\ncomplete subset, so we store it.\n\nThis systematically generates all 2ⁿ subsets.\n\n### Steps\n\n1. Maintain:\n    - `res` → final list of all subsets\n    - `subset` → current subset being built\n2. Define a recursive function `dfs(i)`:\n    - If `i` equals the length of the input:\n        - Add a copy of `subset` to `res`\n        - Return\n    - **Choice 1: include `nums[i]`**\n        - Append number to `subset`\n        - Recurse to next index\n        - Remove the number (backtrack)\n    - **Choice 2: skip `nums[i]`**\n        - Recurse to next index\n3. Start recursion with `dfs(0)`\n4. Return `res`\n\n### Complexity\n\n- Time complexity: `O(n * 2 ^ n)`\n- Space complexity:\n    - `O(n)` extra space.\n    - `O(2 ^ n)` for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subsets(self, nums: List[int]) -> List[List[int]]:\n        res = []\n        subset = []\n\n        def dfs(i):\n            if i >= len(nums):\n                res.append(subset.copy())\n                return\n            subset.append(nums[i])\n            dfs(i + 1)\n            subset.pop()\n            dfs(i + 1)\n\n        dfs(0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets.md",
+      "id": "backtracking"
+    }
+  ]
 }

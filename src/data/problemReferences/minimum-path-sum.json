@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minPathSum(vector<vector<int>>& grid) {\n        int ROWS = grid.size(), COLS = grid[0].size();\n        vector<int> dp(COLS + 1, INT_MAX);\n        dp[COLS - 1] = 0;\n\n        for (int r = ROWS - 1; r >= 0; r--) {\n            for (int c = COLS - 1; c >= 0; c--) {\n                dp[c] = grid[r][c] + min(dp[c], dp[c + 1]);\n            }\n        }\n\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=pGMsrvt0fpk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-path-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-path-sum.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe plain recursive solution recalculates the same cells many times. For instance, both `dfs(0,1)` and `dfs(1,0)` might call `dfs(1,1)`. By caching (memoizing) results for each cell, we ensure each subproblem is solved only once. This transforms exponential time into polynomial time.\n\n### Steps\n\n1. Create a 2D memoization table `dp` initialized to `-1` (indicating uncomputed).\n2. Define `dfs(r, c)` as before, but first check if `dp[r][c]` has been computed.\n3. If `dp[r][c] != -1`, return the cached value.\n4. Otherwise, compute `dp[r][c] = grid[r][c] + min(dfs(r+1, c), dfs(r, c+1))` and return it.\n5. Return `dfs(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minPathSum(self, grid: List[List[int]]) -> int:\n        m, n = len(grid), len(grid[0])\n        dp = [[-1] * n for _ in range(m)]\n\n        def dfs(r, c):\n            if r == m - 1 and c == n - 1:\n                return grid[r][c]\n            if r == m or c == n:\n                return float('inf')\n            if dp[r][c] != -1:\n                return dp[r][c]\n\n            dp[r][c] = grid[r][c] + min(dfs(r + 1, c), dfs(r, c + 1))\n            return dp[r][c]\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-path-sum.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of recursing from top-left to bottom-right, we can fill a DP table starting from the bottom-right corner. For each cell, we know the minimum path sum to reach the destination from the cell below and from the cell to the right. We take the minimum of these two and add the current cell value. This iterative approach avoids recursion overhead.\n\n### Steps\n\n1. Create a DP table of size `(ROWS+1) x (COLS+1)` initialized to infinity. The extra row and column handle boundary conditions.\n2. Set `dp[ROWS-1][COLS] = 0` as the base case (one position past the destination, allowing the destination cell to be computed correctly).\n3. Iterate from bottom-right to top-left: for each cell `(r, c)`, set `dp[r][c] = grid[r][c] + min(dp[r+1][c], dp[r][c+1])`.\n4. Return `dp[0][0]`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minPathSum(self, grid: List[List[int]]) -> int:\n        ROWS, COLS = len(grid), len(grid[0])\n        dp = [[float(\"inf\")] * (COLS + 1) for _ in range(ROWS + 1)]\n        dp[ROWS - 1][COLS] = 0\n\n        for r in range(ROWS - 1, -1, -1):\n            for c in range(COLS - 1, -1, -1):\n                dp[r][c] = grid[r][c] + min(dp[r + 1][c], dp[r][c + 1])\n\n        return dp[0][0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-path-sum.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

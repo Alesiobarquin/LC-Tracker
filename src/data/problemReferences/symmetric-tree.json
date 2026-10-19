@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isSymmetric(TreeNode* root) {\n        if (!root) return true;\n\n        queue<pair<TreeNode*, TreeNode*>> queue;\n        queue.push({root->left, root->right});\n\n        while (!queue.empty()) {\n            for (int i = queue.size(); i > 0; i--) {\n                auto [left, right] = queue.front();\n                queue.pop();\n\n                if (!left && !right) continue;\n                if (!left || !right || left->val != right->val) {\n                    return false;\n                }\n                queue.push({left->left, right->right});\n                queue.push({left->right, right->left});\n            }\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Mao9uzxwvmc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/symmetric-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/symmetric-tree.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA tree is symmetric if its left subtree is a mirror reflection of its right subtree. Two trees are mirrors of each other if their roots have the same value, and the left subtree of one is a mirror of the right subtree of the other (and vice versa). We can check this recursively by comparing pairs of nodes that should be mirror images of each other.\n\n### Steps\n\n1. Define a recursive helper that takes two nodes: one from the left subtree and one from the right subtree.\n2. If both nodes are `null`, they are mirrors (return `true`).\n3. If only one is `null`, or their values differ, they are not mirrors (return `false`).\n4. Recursively check:\n   - The left child of the left node against the right child of the right node.\n   - The right child of the left node against the left child of the right node.\n5. Return `true` only if both recursive checks pass.\n6. Start by comparing the root's left and right children.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSymmetric(self, root: Optional[TreeNode]) -> bool:\n        def dfs(left, right):\n            if not left and not right:\n                return True\n            if not left or not right:\n                return False\n            return (\n                left.val == right.val and\n                dfs(left.left, right.right) and\n                dfs(left.right, right.left)\n            )\n        return dfs(root.left, root.right)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/symmetric-tree.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Iterative DFS",
+      "explanation": "### How it works\n\nThe recursive solution can be converted to an iterative one using a stack. Instead of implicit recursive calls, we explicitly push pairs of nodes onto a stack. Each pair represents two nodes that should be mirror images. By processing pairs from the stack, we maintain the same comparison logic without recursion.\n\n### Steps\n\n1. Push the initial pair `(root.left, root.right)` onto the stack.\n2. While the stack is not empty:\n   - Pop a pair of nodes.\n   - If both are `null`, continue to the next pair.\n   - If only one is `null` or their values differ, return `false`.\n   - Push two new pairs: `(left.left, right.right)` and `(left.right, right.left)`.\n3. If all pairs pass, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSymmetric(self, root: Optional[TreeNode]) -> bool:\n        if not root:\n            return True\n\n        stack = [(root.left, root.right)]\n        while stack:\n            left, right = stack.pop()\n            if not left and not right:\n                continue\n            if not left or not right or left.val != right.val:\n                return False\n            stack.append((left.left, right.right))\n            stack.append((left.right, right.left))\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/symmetric-tree.md",
+      "id": "iterative-dfs"
+    }
+  ]
 }

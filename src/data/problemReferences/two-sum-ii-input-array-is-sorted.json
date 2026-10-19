@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int l = 0, r = numbers.size() - 1;\n\n        while (l < r) {\n            int curSum = numbers[l] + numbers[r];\n\n            if (curSum > target) {\n                r--;\n            } else if (curSum < target) {\n                l++;\n            } else {\n                return { l + 1, r + 1 };\n            }\n        }\n        return {};\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cQ1Oz4ckceM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nBrute force ignores the ordering and simply checks every possible pair.\nFor each index `i`, we look at every index `j > i` and check whether their sum equals the target.  \nThis approach is easy to understand but inefficient because it tries all combinations without using the sorted property.\n\n### Steps\n\n1. Loop through the array using index `i` from `0` to `n - 1`.\n2. For each `i`, loop through index `j` from `i + 1` to `n - 1`.\n3. If `numbers[i] + numbers[j]` equals the target:\n    - Return `[i + 1, j + 1]` (1-indexed as required by the problem).\n4. If no such pair is found, return an empty list.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        for i in range(len(numbers)):\n            for j in range(i + 1, len(numbers)):\n                if numbers[i] + numbers[j] == target:\n                    return [i + 1, j + 1]\n        return []\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nBecause the array is already sorted, we don’t need to check every pair.  \nFor each number at index `i`, we know exactly what value we need to find:  \n`target - numbers[i]`.  \nSince the array is sorted, we can efficiently search for this value using **binary search** instead of scanning linearly.  \nThis reduces the inner search from **O(n)** to **O(log n)**, making the solution much faster.\n\n### Steps\n\n1. Loop through each index `i` from `0` to `n - 1`.\n2. For each number `numbers[i]`, compute the needed complement:\n    - `tmp = target - numbers[i]`\n3. Perform binary search on the subarray from `i + 1` to the end:\n    - If `numbers[mid] == tmp`, return `[i + 1, mid + 1]`\n    - If `numbers[mid] < tmp`, search the right half\n    - Otherwise, search the left half\n4. If no pair is found after checking all indices, return an empty list.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        for i in range(len(numbers)):\n            l, r = i + 1, len(numbers) - 1\n            tmp = target - numbers[i]\n            while l <= r:\n                mid = l + (r - l)//2\n                if numbers[mid] == tmp:\n                    return [i + 1, mid + 1]\n                elif numbers[mid] < tmp:\n                    l = mid + 1\n                else:\n                    r = mid - 1\n        return []\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum-ii.md",
+      "id": "binary-search"
+    }
+  ]
 }

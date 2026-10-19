@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {\n        unordered_set<string> wordSet(words.begin(), words.end());\n        vector<string> res;\n\n        for (string& word : words) {\n            int m = word.length();\n            vector<bool> dp(m + 1, false);\n            dp[0] = true;\n\n            for (int i = 1; i <= m; i++) {\n                for (int j = 0; j < i; j++) {\n                    if (j == 0 && i == m) continue;\n                    if (dp[j] && wordSet.count(word.substr(j, i - j))) {\n                        dp[i] = true;\n                        break;\n                    }\n                }\n            }\n\n            if (dp[m]) {\n                res.push_back(word);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=iHp7fjw1R28",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/concatenated-words.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/concatenated-words.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Backtracking)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can generate all possible concatenations of words and check if any concatenation exists in our word set. By building concatenations through backtracking and checking membership, we find words that are formed by joining two or more shorter words.\n\n### Steps\n\n1. Build a hash set from all words and find the maximum word length.\n2. Use backtracking to generate all possible concatenations of words.\n3. When a concatenation has more than one word and exists in the word set, add it to results and remove it from the set to avoid duplicates.\n4. Prune branches where the current length exceeds the maximum word length.\n5. Return all found concatenated words.\n\n### Complexity\n\n- Time complexity: `O(m * n ^ n)`\n- Space complexity: `O(m * n)`\n\n> Where `n` is the size of the string array `words` and `m` is the length of the longest word in the array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findAllConcatenatedWordsInADict(self, words: List[str]) -> List[str]:\n        n = len(words)\n        res = []\n        wordSet = set(words)\n        maxLen = 0\n        for w in words:\n            maxLen = max(maxLen, len(w))\n\n        def dfs(concatWord, totLen):\n            if len(concatWord) > 1:\n                word = \"\".join(concatWord)\n                if word in wordSet:\n                    res.append(word)\n                    wordSet.remove(word)\n\n            for i in range(len(words)):\n                if totLen + len(words[i]) > maxLen:\n                    continue\n                concatWord.append(words[i])\n                dfs(concatWord, totLen + len(words[i]))\n                concatWord.pop()\n\n        dfs([], 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/concatenated-words.md",
+      "id": "brute-force-backtracking"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive approach has overlapping subproblems since the same suffix may be checked multiple times. By memoizing results for each suffix, we avoid recomputing whether a substring can be decomposed.\n\n### Steps\n\n1. Build a hash set from all words and create a memoization dictionary.\n2. For each word, use a recursive function with memoization to check if it can be split.\n3. Before computing, check if the result for the current word exists in memo.\n4. Try all prefixes; if a prefix is in the word set and the suffix can be decomposed, cache and return `true`.\n5. Cache `false` results as well to avoid recomputation. Add words that return `true` to the result.\n\n### Complexity\n\n- Time complexity: `O(n * m ^ 3)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the size of the string array `words` and `m` is the length of the longest word in the array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findAllConcatenatedWordsInADict(self, words: List[str]) -> List[str]:\n        wordSet = set(words)\n        dp = {}\n\n        def dfs(word):\n            if word in dp:\n                return dp[word]\n\n            for i in range(1, len(word)):\n                prefix, suffix = word[:i], word[i:]\n                if ((prefix in wordSet and suffix in wordSet) or\n                    (prefix in wordSet and dfs(suffix))\n                ):\n                    dp[word] = True\n                    return True\n            dp[word] = False\n            return False\n\n        res = []\n        for w in words:\n            if dfs(w):\n                res.append(w)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/concatenated-words.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

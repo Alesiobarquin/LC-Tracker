@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maximalSquare(vector<vector<char>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        vector<int> dp(n + 1, 0);\n        int maxSquare = 0;\n\n        for (int r = m - 1; r >= 0; r--) {\n            int prev = 0;\n            for (int c = n - 1; c >= 0; c--) {\n                int temp = dp[c];\n                if (matrix[r][c] == '1') {\n                    dp[c] = 1 + min({dp[c], dp[c + 1], prev});\n                    maxSquare = max(maxSquare, dp[c]);\n                } else {\n                    dp[c] = 0;\n                }\n                prev = temp;\n            }\n        }\n\n        return maxSquare * maxSquare;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=6X7Ha2PrDmM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximal-square.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximal-square.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nWe can define a recursive function where `dp(r, c)` returns the side length of the largest square whose top-left corner is at `(r, c)`. For a cell with `'1'`, the answer depends on how far we can extend to the right, down, and diagonally. The limiting factor is the minimum of these three directions. We memoize results to avoid redundant computation, then scan all cells to find the maximum value.\n\n### Steps\n\n1. Create a memoization table initialized to `-1` (unvisited).\n2. Define `dfs(r, c)`:\n    - If out of bounds, return `0`.\n    - If already computed, return the cached value.\n    - Recursively compute `dfs(r+1, c)`, `dfs(r, c+1)`, and `dfs(r+1, c+1)`.\n    - If `matrix[r][c]` is `'1'`, set `dp[r][c] = 1 + min(down, right, diag)`.\n    - Otherwise, set `dp[r][c] = 0`.\n3. Call `dfs(0, 0)` to fill the table.\n4. Find the maximum value in the table and return its square.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number columns.",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\n\nclass Solution:\n    def maximalSquare(self, matrix: List[List[str]]) -> int:\n        ROWS, COLS = len(matrix), len(matrix[0])\n        cache = {}\n\n        def dfs(r, c):\n            if r >= ROWS or c >= COLS:\n                return 0\n            if (r, c) not in cache:\n                down = dfs(r + 1, c)\n                right = dfs(r, c + 1)\n                diag = dfs(r + 1, c + 1)\n                cache[(r, c)] = 0\n                if matrix[r][c] == \"1\":\n                    cache[(r, c)] = 1 + min(down, right, diag)\n            return cache[(r, c)]\n\n        dfs(0, 0)\n        return max(cache.values()) ** 2\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximal-square.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of recursion, we can fill the DP table iteratively from bottom-right to top-left. For each `'1'` cell, the largest square ending there (as the bottom-right corner) is determined by the minimum of the squares ending at its right, bottom, and diagonal neighbors, plus one. This builds up from smaller subproblems to larger ones and avoids recursion overhead.\n\n### Steps\n\n1. Create a DP table of size `(m+1) x (n+1)` initialized to `0`.\n2. Iterate from `r = m-1` down to `0`, and `c = n-1` down to `0`:\n    - If `matrix[r][c]` is `'1'`, set `dp[r][c] = 1 + min(dp[r+1][c], dp[r][c+1], dp[r+1][c+1])`.\n    - Update `maxSquare` with `dp[r][c]`.\n3. Return `maxSquare * maxSquare`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maximalSquare(self, matrix: List[List[str]]) -> int:\n        m, n = len(matrix), len(matrix[0])\n        dp = [[0] * (n + 1) for _ in range(m + 1)]\n        max_square = 0\n\n        for r in range(m - 1, -1, -1):\n            for c in range(n - 1, -1, -1):\n                if matrix[r][c] == \"1\":\n                    dp[r][c] = 1 + min(dp[r + 1][c], dp[r][c + 1], dp[r + 1][c + 1])\n                    max_square = max(max_square, dp[r][c])\n\n        return max_square * max_square\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximal-square.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int majorityElement(vector<int>& nums) {\n        int n = nums.size();\n\n        while (true) {\n            int candidate = nums[rand() % n];\n            int count = 0;\n            for (int num : nums) {\n                if (num == candidate) {\n                    count++;\n                }\n            }\n            if (count > n / 2) {\n                return candidate;\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=7pnhv842keE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/majority-element.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/majority-element.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nWe can avoid repeated counting by using a hash map to store the frequency of each element as we iterate through the array. We track the element with the maximum count seen so far. Once any element's count exceeds `n/2`, it must be the majority element.\n\n### Steps\n\n1. Create a hash map to store element frequencies.\n2. Initialize `res` and `maxCount` to track the current best candidate.\n3. For each element `num`:\n    - Increment its count in the hash map.\n    - If its count exceeds `maxCount`, update `res = num` and `maxCount = count[num]`.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def majorityElement(self, nums: List[int]) -> int:\n        count = defaultdict(int)\n        res = maxCount = 0\n\n        for num in nums:\n            count[num] += 1\n            if maxCount < count[num]:\n                res = num\n                maxCount = count[num]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/majority-element.md",
+      "id": "hash-map"
+    },
+    {
+      "approach": "Boyer-Moore Voting Algorithm",
+      "explanation": "### How it works\n\nThe Boyer-Moore algorithm works by maintaining a candidate and a count. When we see the candidate, we increment the count; otherwise, we decrement it. When the count reaches `0`, we pick a new candidate. Since the majority element appears more than half the time, it will survive this elimination process and remain as the final candidate.\n\n### Steps\n\n1. Initialize `res` as the candidate and `count = 0`.\n2. For each element `num`:\n    - If `count == 0`, set `res = num`.\n    - If `num == res`, increment `count`; otherwise decrement `count`.\n3. Return `res` as the majority element.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def majorityElement(self, nums):\n        res = count = 0\n\n        for num in nums:\n            if count == 0:\n                res = num\n            count += (1 if num == res else -1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/majority-element.md",
+      "id": "boyer-moore-voting-algorithm"
+    }
+  ]
 }

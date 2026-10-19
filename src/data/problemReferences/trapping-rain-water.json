@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        if (height.empty()) {\n            return 0;\n        }\n\n        int l = 0, r = height.size() - 1;\n        int leftMax = height[l], rightMax = height[r];\n        int res = 0;\n        while (l < r) {\n            if (leftMax < rightMax) {\n                l++;\n                leftMax = max(leftMax, height[l]);\n                res += leftMax - height[l];\n            } else {\n                r--;\n                rightMax = max(rightMax, height[r]);\n                res += rightMax - height[r];\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ZI2z5pq0TqA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/trapping-rain-water.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/trapping-rain-water.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each position, the water trapped above it depends on the **tallest bar to its left** and the **tallest bar to its right**.\nIf we know these two values, the water at index `i` is:\n\n`min(leftMax, rightMax) - height[i]`\n\nThe brute-force method recomputes the left maximum and right maximum for every index by scanning the array each time.\n\n### Steps\n\n1. If the input list is empty, return `0`.\n2. Let `n` be the length of the array and initialize `res = 0`.\n3. For each index `i`:\n    - Compute `leftMax` by scanning from index `0` to `i`.\n    - Compute `rightMax` by scanning from index `i + 1` to the end.\n    - Add `min(leftMax, rightMax) - height[i]` to `res`.\n4. After processing all positions, return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def trap(self, height: List[int]) -> int:\n        if not height:\n            return 0\n        n = len(height)\n        res = 0\n\n        for i in range(n):\n            leftMax = rightMax = height[i]\n\n            for j in range(i):\n                leftMax = max(leftMax, height[j])\n            for j in range(i + 1, n):\n                rightMax = max(rightMax, height[j])\n\n            res += min(leftMax, rightMax) - height[i]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/trapping-rain-water.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix & Suffix Arrays",
+      "explanation": "### How it works\n\nInstead of recomputing the tallest bar to the left and right for every index, we can precompute these values once.\nWe build two arrays:\n\n- `leftMax[i]` = tallest bar from the start up to index `i`\n- `rightMax[i]` = tallest bar from the end up to index `i`\n\nOnce we have these, the trapped water at position `i` is simply:\n\n`min(leftMax[i], rightMax[i]) - height[i]`\n\nThis removes the repeated work from the brute-force approach and makes the solution more efficient and easier to understand.\n\n### Steps\n\n1. If the array is empty, return `0`.\n2. Create two arrays:\n    - `leftMax` of size `n`\n    - `rightMax` of size `n`\n3. Fill `leftMax`:\n    - `leftMax[0] = height[0]`\n    - For each `i` from `1` to `n - 1`,\n      `leftMax[i] = max(leftMax[i - 1], height[i])`\n4. Fill `rightMax`:\n    - `rightMax[n - 1] = height[n - 1]`\n    - For each `i` from `n - 2` down to `0`,\n      `rightMax[i] = max(rightMax[i + 1], height[i])`\n5. Compute trapped water:\n    - For each index `i`, add `min(leftMax[i], rightMax[i]) - height[i]` to the result.\n6. Return the total trapped water.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def trap(self, height: List[int]) -> int:\n        n = len(height)\n        if n == 0:\n            return 0\n\n        leftMax = [0] * n\n        rightMax = [0] * n\n\n        leftMax[0] = height[0]\n        for i in range(1, n):\n            leftMax[i] = max(leftMax[i - 1], height[i])\n\n        rightMax[n - 1] = height[n - 1]\n        for i in range(n - 2, -1, -1):\n            rightMax[i] = max(rightMax[i + 1], height[i])\n\n        res = 0\n        for i in range(n):\n            res += min(leftMax[i], rightMax[i]) - height[i]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/trapping-rain-water.md",
+      "id": "prefix-suffix-arrays"
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        int l = 1;\n        int r = *max_element(piles.begin(), piles.end());\n        int res = r;\n\n        while (l <= r) {\n            int k = (l + r) / 2;\n\n            long long totalTime = 0;\n            for (int p : piles) {\n                totalTime += ceil(static_cast<double>(p) / k);\n            }\n            if (totalTime <= h) {\n                res = k;\n                r = k - 1;\n            } else {\n                l = k + 1;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=U2SozAs9RzA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/eating-bananas.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/eating-bananas.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe try every possible eating speed starting from `1`.\nFor each speed, we simulate how many hours it would take to finish all piles.\nThe first speed that finishes within `h` hours is the answer.\n\n### Steps\n\n1. Start with `speed = 1`.\n2. For each speed:\n    - Compute the total hours needed by summing `ceil(pile / speed)` for every pile.\n3. If the total hours is less than or equal to `h`, return the current speed.\n4. Otherwise, increase the speed and repeat.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)`\n\n> Where `n` is the length of the input array `piles` and `m` is the maximum number of bananas in a pile.",
+      "code": {
+        "python": "from typing import List\nimport math\n\nclass Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        speed = 1\n        while True:\n            totalTime = 0\n            for pile in piles:\n                totalTime += math.ceil(pile / speed)\n\n            if totalTime <= h:\n                return speed\n            speed += 1\n        return speed\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/eating-bananas.md",
+      "id": "brute-force"
+    }
+  ]
 }

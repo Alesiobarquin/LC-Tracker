@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {\n        int L = 0, R = points.size() - 1;\n        int pivot = points.size();\n\n        while (pivot != k) {\n            pivot = partition(points, L, R);\n            if (pivot < k) {\n                L = pivot + 1;\n            } else {\n                R = pivot - 1;\n            }\n        }\n        return vector<std::vector<int>>(points.begin(), points.begin() + k);\n    }\n\nprivate:\n    int partition(vector<vector<int>>& points, int l, int r) {\n        int pivotIdx = r;\n        int pivotDist = euclidean(points[pivotIdx]);\n        int i = l;\n        for (int j = l; j < r; j++) {\n            if (euclidean(points[j]) <= pivotDist) {\n                swap(points[i], points[j]);\n                i++;\n            }\n        }\n        swap(points[i], points[r]);\n        return i;\n    }\n\n    int euclidean(vector<int>& point) {\n        return point[0] * point[0] + point[1] * point[1];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=rI2EBUEMfTk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-closest-points-to-origin.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-closest-points-to-origin.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo find the **k closest points to the origin `(0, 0)`**, we compare points by their distance from the origin.\nSince the actual distance uses a square root, and **square root preserves ordering**, we can instead compare using **squared distance**:\n\n\\[\nd^2 = x^2 + y^2\n\\]\n\nThis avoids unnecessary computation and is sufficient for sorting.\n\nIf we sort all points by this squared distance, then the **first `k` points** in sorted order must be the `k` closest ones.\n\n### Steps\n\n1. For every point `(x, y)`, compute its squared distance: `dist = x^2 + y^2`\n2. Sort all points based on this `dist` value.\n3. Return the first `k` points from the sorted list.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:\n        points.sort(key=lambda p: p[0]**2 + p[1]**2)\n        return points[:k]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-closest-points-to-origin.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Max Heap",
+      "explanation": "### How it works\n\nWe want the **`k` closest points**, not all points sorted.\n\nUse a **max-heap of size `k`**:\n\n- The heap always keeps the **`k` closest points found so far**.\n- The point with the **largest distance** among these `k` sits at the top.\n- When a new point is **closer than the farthest in the heap**, we remove the farthest and insert the new one.\n\nThis way, the heap never grows beyond size `k`, and it always contains the `k` best candidates.\n\n### Steps\n\n1. Create an empty max-heap.\n2. For each point:\n    - Compute its squared distance from origin: `d = x^2 + y^2`.\n    - Insert `(d, point)` into the heap.\n    - If heap size exceeds `k`:\n        - Remove the element with the **maximum** distance.\n3. After processing all points:\n    - The heap contains exactly the **`k` closest points**.\n4. Return all points stored in the heap.\n\n### Complexity\n\n- Time complexity: `O(n * log k)`\n- Space complexity: `O(k)`\n\n> Where `n` is the length of the array `points`.",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:\n        maxHeap = []\n        for x, y in points:\n            dist = -(x ** 2 + y ** 2)\n            heapq.heappush(maxHeap, [dist, x, y])\n            if len(maxHeap) > k:\n                heapq.heappop(maxHeap)\n\n        res = []\n        while maxHeap:\n            dist, x, y = heapq.heappop(maxHeap)\n            res.append([x, y])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-closest-points-to-origin.md",
+      "id": "max-heap"
+    }
+  ]
 }

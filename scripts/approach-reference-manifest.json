@@ -1,0 +1,2703 @@
+{
+  "revision": "3186ede2ea4c4788e87be4b509bf2b66d5eba0e9",
+  "scope": "NeetCode 250",
+  "selection": "Keep the existing default; add up to two distinct teaching comparisons, favoring common techniques and useful baselines. This is curated coverage, not a measured popularity ranking. New examples are Python only.",
+  "problems": [
+    {
+      "id": "contains-duplicate",
+      "batch": "foundations",
+      "article": "articles/duplicate-integer.md",
+      "sha256": "c147afeffd6a46b5e0900bc247946183118af552860ead2b65d665037ed8c0f0",
+      "default": "Hash Set Length",
+      "alternatives": [
+        "Brute Force",
+        "Sorting"
+      ]
+    },
+    {
+      "id": "valid-anagram",
+      "batch": "foundations",
+      "article": "articles/is-anagram.md",
+      "sha256": "829157948bc12bbb4de261f30b554d9b4274a3dfcb426179b58641ca7e3a9a62",
+      "default": "Hash Table (Using Array)",
+      "alternatives": [
+        "Sorting",
+        "Hash Map"
+      ]
+    },
+    {
+      "id": "two-sum",
+      "batch": "foundations",
+      "article": "articles/two-integer-sum.md",
+      "sha256": "c63c5d18645648d9ac5ae86eff7a2bce42f6eaab092bdcf84e4aa7a9609ceaf6",
+      "default": "Hash Map (One Pass)",
+      "alternatives": [
+        "Brute Force",
+        "Sorting"
+      ]
+    },
+    {
+      "id": "group-anagrams",
+      "batch": "foundations",
+      "article": "articles/anagram-groups.md",
+      "sha256": "3bc21bf31665cc19dc7bd6ca74c02508ddea0797ad2b596c7a1f8101ead0f5fe",
+      "default": "Hash Table",
+      "alternatives": [
+        "Sorting"
+      ]
+    },
+    {
+      "id": "top-k-frequent-elements",
+      "batch": "foundations",
+      "article": "articles/top-k-elements-in-list.md",
+      "sha256": "487038053dc4785808e6f7e6b608e144019a688b5182ef1fb61a17ea68237a87",
+      "default": "Bucket Sort",
+      "alternatives": [
+        "Sorting",
+        "Min-Heap"
+      ]
+    },
+    {
+      "id": "product-of-array-except-self",
+      "batch": "foundations",
+      "article": "articles/products-of-array-discluding-self.md",
+      "sha256": "d85b4bad79d8f566341048588bc6c43585cbaa33bc45290b3b80012fa65eabf6",
+      "default": "Prefix & Suffix (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Prefix & Suffix"
+      ]
+    },
+    {
+      "id": "valid-sudoku",
+      "batch": "foundations",
+      "article": "articles/valid-sudoku.md",
+      "sha256": "89e1eb54a3059fcb5c0055211b7f8fbc0eb8e1071746d7855c207df50a86d349",
+      "default": "Hash Set (One Pass)",
+      "alternatives": [
+        "Brute Force",
+        "Bitmask"
+      ]
+    },
+    {
+      "id": "encode-and-decode-strings",
+      "batch": "foundations",
+      "article": "articles/string-encode-and-decode.md",
+      "sha256": "c2f6dc827e9b39ceaad262eaf97be4d977e11684a9778124b0c8626a8a3fe46a",
+      "default": "Encoding & Decoding (Optimal)",
+      "alternatives": [
+        "Encoding & Decoding"
+      ]
+    },
+    {
+      "id": "longest-consecutive-sequence",
+      "batch": "foundations",
+      "article": "articles/longest-consecutive-sequence.md",
+      "sha256": "2a4070ec4f5bab51ce0f2ae9e974c6d04680476fb91d44a5f8538152584b780a",
+      "default": "Hash Map",
+      "alternatives": [
+        "Sorting",
+        "Hash Set"
+      ]
+    },
+    {
+      "id": "valid-palindrome",
+      "batch": "foundations",
+      "article": "articles/is-palindrome.md",
+      "sha256": "dd8c2c0a6f0da49dbe0bfae6ec817975b0951e6ed4e034ee6176dc54d53aa09b",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Reverse String"
+      ]
+    },
+    {
+      "id": "two-sum-ii-input-array-is-sorted",
+      "batch": "foundations",
+      "article": "articles/two-integer-sum-ii.md",
+      "sha256": "2a8611fa376570799a06841f52d41d8b019c5378ffc3252576bb655f917820ba",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "3sum",
+      "batch": "foundations",
+      "article": "articles/three-integer-sum.md",
+      "sha256": "eb8a12440940ee4d6285db7ad26023f745d7a45e7d95b89676eb560f9b77c019",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Hash Map"
+      ]
+    },
+    {
+      "id": "container-with-most-water",
+      "batch": "foundations",
+      "article": "articles/max-water-container.md",
+      "sha256": "8692b04aef26a9d1badf121ca9d284de010551eecbfb42205f546d358dd12a90",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "trapping-rain-water",
+      "batch": "foundations",
+      "article": "articles/trapping-rain-water.md",
+      "sha256": "617477888934458036c1da66430967fa896aeecaccdc140767a90f9c7385bc67",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Prefix & Suffix Arrays"
+      ]
+    },
+    {
+      "id": "best-time-to-buy-and-sell-stock",
+      "batch": "foundations",
+      "article": "articles/buy-and-sell-crypto.md",
+      "sha256": "84053ab586f33fb630ca38af35117ba1415524a7b1b9043f2342c7c4d93e447b",
+      "default": "Dynamic Programming",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "longest-substring-without-repeating-characters",
+      "batch": "foundations",
+      "article": "articles/longest-substring-without-duplicates.md",
+      "sha256": "3df23c058e6655485f2f6d4247f228c9fa6e3d3ee46f359ad948b203407b5ca2",
+      "default": "Sliding Window (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Sliding Window"
+      ]
+    },
+    {
+      "id": "longest-repeating-character-replacement",
+      "batch": "foundations",
+      "article": "articles/longest-repeating-substring-with-replacement.md",
+      "sha256": "9fe7f4d420933e1d946a1afad76906a1ecb1ba3fa49792931a260b76a7bb2592",
+      "default": "Sliding Window (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Sliding Window"
+      ]
+    },
+    {
+      "id": "permutation-in-string",
+      "batch": "foundations",
+      "article": "articles/permutation-string.md",
+      "sha256": "91ee7697e9627a73c7a511327b1b33c7ba8ebeaea9d189ec005b6ca842eee1a5",
+      "default": "Sliding Window",
+      "alternatives": [
+        "Brute Force",
+        "Hash Table"
+      ]
+    },
+    {
+      "id": "minimum-window-substring",
+      "batch": "foundations",
+      "article": "articles/minimum-window-with-characters.md",
+      "sha256": "7244a0e3e1596f8722a9a52676eaefb16358a2e3eb0e32ee7962f8779e386301",
+      "default": "Sliding Window",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "sliding-window-maximum",
+      "batch": "foundations",
+      "article": "articles/sliding-window-maximum.md",
+      "sha256": "0d42f2a00963653af90c1bc939512b91d0f1530c9c78fc26c104c1bd1c576e98",
+      "default": "Deque",
+      "alternatives": [
+        "Brute Force",
+        "Segment Tree"
+      ]
+    },
+    {
+      "id": "valid-parentheses",
+      "batch": "foundations",
+      "article": "articles/validate-parentheses.md",
+      "sha256": "705a7360330abe539a08d21018bf1ba34710248204063c1d4a20292d33ff7a86",
+      "default": "Stack",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "min-stack",
+      "batch": "foundations",
+      "article": "articles/minimum-stack.md",
+      "sha256": "602217b6f87750de81f3343f72bbe0ce58069bf73e5f55050791e6115f342cae",
+      "default": "One Stack",
+      "alternatives": [
+        "Brute Force",
+        "Two Stacks"
+      ]
+    },
+    {
+      "id": "evaluate-reverse-polish-notation",
+      "batch": "foundations",
+      "article": "articles/evaluate-reverse-polish-notation.md",
+      "sha256": "dcfa0146e89f5b6f60d21f7c2ead36ee696c3fe9c30379a6e26f4a90194fb9c1",
+      "default": "Stack",
+      "alternatives": [
+        "Brute Force",
+        "Recursion"
+      ]
+    },
+    {
+      "id": "generate-parentheses",
+      "batch": "foundations",
+      "article": "articles/generate-parentheses.md",
+      "sha256": "51c1f36d1c62206d3bbb75bb69b75a961afdf95ba9fde119182dd9fd0757c59b",
+      "default": "Dynamic Programming",
+      "alternatives": [
+        "Brute Force",
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "daily-temperatures",
+      "batch": "foundations",
+      "article": "articles/daily-temperatures.md",
+      "sha256": "e0d2ff154ccf3e0d4babdd53fd42f10c4cdf2ae3c794acc1ea9ed7310357b133",
+      "default": "Dynamic Programming",
+      "alternatives": [
+        "Brute Force",
+        "Stack"
+      ]
+    },
+    {
+      "id": "car-fleet",
+      "batch": "foundations",
+      "article": "articles/car-fleet.md",
+      "sha256": "3c5335d01d2d2a57a5ae4ab2dea659c62098d9e5e4ea1333335923d96bd5b79a",
+      "default": "Iteration",
+      "alternatives": [
+        "Stack"
+      ]
+    },
+    {
+      "id": "largest-rectangle-in-histogram",
+      "batch": "foundations",
+      "article": "articles/largest-rectangle-in-histogram.md",
+      "sha256": "39c91a67cbe494ce856af9141ce16b20ec5b8711fbaa033dad461be739a5b089",
+      "default": "Stack (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Stack (One Pass)"
+      ]
+    },
+    {
+      "id": "binary-search",
+      "batch": "foundations",
+      "article": "articles/binary-search.md",
+      "sha256": "b959fb41a46e1f83f9263d60e6949a35ed199190ae1f3cf51898de0f5b5fabf8",
+      "default": "Lower Bound",
+      "alternatives": [
+        "Recursive Binary Search",
+        "Iterative Binary Search"
+      ]
+    },
+    {
+      "id": "search-a-2d-matrix",
+      "batch": "foundations",
+      "article": "articles/search-2d-matrix.md",
+      "sha256": "3c43cae3e3e3d589f6a5122b3af716acb0b0e91293cbc6cc29348c59cd2cddd7",
+      "default": "Binary Search (One Pass)",
+      "alternatives": [
+        "Brute Force",
+        "Staircase Search"
+      ]
+    },
+    {
+      "id": "koko-eating-bananas",
+      "batch": "foundations",
+      "article": "articles/eating-bananas.md",
+      "sha256": "cb5da2e5a886e0a3b2d4bc0e77343a98bec86257cdfc4c08bb63d18ecb4a5ded",
+      "default": "Binary Search",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "find-minimum-in-rotated-sorted-array",
+      "batch": "foundations",
+      "article": "articles/find-minimum-in-rotated-sorted-array.md",
+      "sha256": "f1bb9723b93bb9e7b7fb7d5a21d2ea0071072a07ae0003e422be82fe66e96b68",
+      "default": "Binary Search (Lower Bound)",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "search-in-rotated-sorted-array",
+      "batch": "foundations",
+      "article": "articles/find-target-in-rotated-sorted-array.md",
+      "sha256": "b8d408434adf668a2ca6c79eb72c4109c8c925f4c69ee03c8d2d3c89f7df0cc5",
+      "default": "Binary Search (Two Pass)",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "time-based-key-value-store",
+      "batch": "foundations",
+      "article": "articles/time-based-key-value-store.md",
+      "sha256": "e68186f5afecb1742982a75c7c9578ddf2876d326360a2d8df531f1fae52166d",
+      "default": "Binary Search (Array)",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "median-of-two-sorted-arrays",
+      "batch": "foundations",
+      "article": "articles/median-of-two-sorted-arrays.md",
+      "sha256": "31a01f80b4a3af13794869a95c3a5207f676f6603a95fd288316f286946c66d7",
+      "default": "Binary Search (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "reverse-linked-list",
+      "batch": "structures",
+      "article": "articles/reverse-a-linked-list.md",
+      "sha256": "e1250aaba26ba0168c48ca892684c68653f5ed814528f8b934c675c6045c2de1",
+      "default": "Iteration",
+      "alternatives": [
+        "Recursion"
+      ]
+    },
+    {
+      "id": "merge-two-sorted-lists",
+      "batch": "structures",
+      "article": "articles/merge-two-sorted-linked-lists.md",
+      "sha256": "cb2f269f6f4e4b34d67ad2a0d57bbca9f104cb9bc7b3298dce91a38e1d9d83f5",
+      "default": "Iteration",
+      "alternatives": [
+        "Recursion"
+      ]
+    },
+    {
+      "id": "reorder-list",
+      "batch": "structures",
+      "article": "articles/reorder-linked-list.md",
+      "sha256": "0c325ed45d903f5a177fd3a6cebe97711417351977347f027ac2ff55c7e012ca",
+      "default": "Reverse And Merge",
+      "alternatives": [
+        "Brute Force",
+        "Recursion"
+      ]
+    },
+    {
+      "id": "remove-nth-node-from-end-of-list",
+      "batch": "structures",
+      "article": "articles/remove-node-from-end-of-linked-list.md",
+      "sha256": "c85308745a7e8048bf75ad6b3826a7b615a5796235e276c04d2a0f124efd7ce7",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Iteration (Two Pass)"
+      ]
+    },
+    {
+      "id": "copy-list-with-random-pointer",
+      "batch": "structures",
+      "article": "articles/copy-linked-list-with-random-pointer.md",
+      "sha256": "eeb965a0e4a1ad627ede2780bbccf73b6a52db7ba58fea191d35765691ad9cf8",
+      "default": "Space Optimized - II",
+      "alternatives": [
+        "Hash Map (Two Pass)",
+        "Recursion + Hash Map"
+      ]
+    },
+    {
+      "id": "add-two-numbers",
+      "batch": "structures",
+      "article": "articles/add-two-numbers.md",
+      "sha256": "32905ed2b82e3a94a95c44fd8f9cf40bb1d588bf17aed9afa50396715b173e83",
+      "default": "Iteration",
+      "alternatives": [
+        "Recursion"
+      ]
+    },
+    {
+      "id": "linked-list-cycle",
+      "batch": "structures",
+      "article": "articles/linked-list-cycle-detection.md",
+      "sha256": "4507cdc0d971bd4d33fe292f08178c2f067dfafd64569240e2e0a26ff9c04881",
+      "default": "Fast And Slow Pointers",
+      "alternatives": [
+        "Hash Set"
+      ]
+    },
+    {
+      "id": "find-the-duplicate-number",
+      "batch": "structures",
+      "article": "articles/find-duplicate-integer.md",
+      "sha256": "4f5ee1e262465016377ba0ef7b1e1a622a37c094f52bfcb1dff491ad8056587b",
+      "default": "Fast And Slow Pointers",
+      "alternatives": [
+        "Binary Search",
+        "Bit Manipulation"
+      ]
+    },
+    {
+      "id": "lru-cache",
+      "batch": "structures",
+      "article": "articles/lru-cache.md",
+      "sha256": "a6da814c23a679056a079bd5feb2ed3677f9d43b5aaea6e9d8825b22408a53c0",
+      "default": "Built-In Data Structure",
+      "alternatives": [
+        "Brute Force",
+        "Doubly Linked List"
+      ]
+    },
+    {
+      "id": "merge-k-sorted-lists",
+      "batch": "structures",
+      "article": "articles/merge-k-sorted-linked-lists.md",
+      "sha256": "6606898eca811b8b3909c07eac8e208bdcec43df755ccf8889482d6d07ce03e4",
+      "default": "Divide And Conquer (Iteration)",
+      "alternatives": [
+        "Brute Force",
+        "Heap"
+      ]
+    },
+    {
+      "id": "reverse-nodes-in-k-group",
+      "batch": "structures",
+      "article": "articles/reverse-nodes-in-k-group.md",
+      "sha256": "dbbf9ceb661193dd1c4024fd76163d999d8812346fccce451e129009dc4f4012",
+      "default": "Iteration",
+      "alternatives": [
+        "Recursion"
+      ]
+    },
+    {
+      "id": "invert-binary-tree",
+      "batch": "structures",
+      "article": "articles/invert-a-binary-tree.md",
+      "sha256": "bf903fc9fe67aa7f624b3adcec779eff1a503ef90db4fa07ab5ed630fcca8410",
+      "default": "Iterative DFS",
+      "alternatives": [
+        "Breadth First Search",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "maximum-depth-of-binary-tree",
+      "batch": "structures",
+      "article": "articles/depth-of-binary-tree.md",
+      "sha256": "10d7c4ab4d52d1fd9b5324d18185d2856898be735b3f90b6059a693b69f073c5",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Recursive DFS",
+        "Iterative DFS (Stack)"
+      ]
+    },
+    {
+      "id": "diameter-of-binary-tree",
+      "batch": "structures",
+      "article": "articles/binary-tree-diameter.md",
+      "sha256": "5ddf404405e461a20601d505a55f4e5c03432f084a796edb523f8dcbad0dba05",
+      "default": "Iterative DFS",
+      "alternatives": [
+        "Brute Force",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "balanced-binary-tree",
+      "batch": "structures",
+      "article": "articles/balanced-binary-tree.md",
+      "sha256": "72f46263a780d18f9d180aa72eca8448fb24c7d0c850becc275b52f5c860b2e5",
+      "default": "Iterative DFS",
+      "alternatives": [
+        "Brute Force",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "same-tree",
+      "batch": "structures",
+      "article": "articles/same-binary-tree.md",
+      "sha256": "a3c60e045ae802f4ce5e27dd14c61ff1ade113f7fd866f6f285eb6efe75e46b1",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search",
+        "Iterative DFS"
+      ]
+    },
+    {
+      "id": "subtree-of-another-tree",
+      "batch": "structures",
+      "article": "articles/subtree-of-a-binary-tree.md",
+      "sha256": "2e106ec722d732859681a543c1eeedd3b88f0bbf904cd6bb7a9cfac1b5f4c06e",
+      "default": "Depth First Search (DFS)",
+      "alternatives": [
+        "Serialization And Pattern Matching"
+      ]
+    },
+    {
+      "id": "lowest-common-ancestor-of-a-binary-search-tree",
+      "batch": "structures",
+      "article": "articles/lowest-common-ancestor-in-binary-search-tree.md",
+      "sha256": "9e4fd9cd1f42fbe8af215e1f933d793c6975689fac2e169489d948cdd94819dc",
+      "default": "Iteration",
+      "alternatives": [
+        "Recursion"
+      ]
+    },
+    {
+      "id": "binary-tree-level-order-traversal",
+      "batch": "structures",
+      "article": "articles/level-order-traversal-of-binary-tree.md",
+      "sha256": "0ba0d1399e927ddd798582ac6b5332cde1f1f0a5fc502153b932fd7adee2e2c3",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "binary-tree-right-side-view",
+      "batch": "structures",
+      "article": "articles/binary-tree-right-side-view.md",
+      "sha256": "463cfad11bd6ab339196fba1f6ceed656cf44f49c0afca87a750bd9bfe42202e",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "count-good-nodes-in-binary-tree",
+      "batch": "structures",
+      "article": "articles/count-good-nodes-in-binary-tree.md",
+      "sha256": "e63065f67fbf9c99af68f14fe005bea93c00ad4005eb9eb039ebb47e02df7b08",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "validate-binary-search-tree",
+      "batch": "structures",
+      "article": "articles/valid-binary-search-tree.md",
+      "sha256": "076284d98a12c40a51aaeff6e681c065cb732f37d11befbde5839c28471e91e4",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Brute Force",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "kth-smallest-element-in-a-bst",
+      "batch": "structures",
+      "article": "articles/kth-smallest-integer-in-bst.md",
+      "sha256": "e6743fc6c063f56dbfc53ec864e6424cf0eb3ca004ac6bd545a50a95443265a1",
+      "default": "Morris Traversal",
+      "alternatives": [
+        "Inorder Traversal",
+        "Iterative DFS (Optimal)"
+      ]
+    },
+    {
+      "id": "construct-binary-tree-from-preorder-and-inorder-traversal",
+      "batch": "structures",
+      "article": "articles/binary-tree-from-preorder-and-inorder-traversal.md",
+      "sha256": "8ad811b3dc4f45bac84eaa7ecec1c997732ab7d27f3ed8278bc1bc33463093fb",
+      "default": "Morris Traversal",
+      "alternatives": [
+        "Depth First Search",
+        "Hash Map + Depth First Search"
+      ]
+    },
+    {
+      "id": "binary-tree-maximum-path-sum",
+      "batch": "structures",
+      "article": "articles/binary-tree-maximum-path-sum.md",
+      "sha256": "1b5f396ab52f5a8c2626b2584b31e2cc4dea7969b0fd3e074d2d8f74cf1e1e17",
+      "default": "Depth First Search (Optimal)",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "serialize-and-deserialize-binary-tree",
+      "batch": "structures",
+      "article": "articles/serialize-and-deserialize-binary-tree.md",
+      "sha256": "fd87ffcbd66921f14e861aea4b1dafdca231253273218408ba50c1cd9ec31d84",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "implement-trie-prefix-tree",
+      "batch": "structures",
+      "article": "articles/implement-prefix-tree.md",
+      "sha256": "0a480b8d968e79d40e79b363f50edc3bcf6b9744105428cbae702bf0c144cce4",
+      "default": "Prefix Tree (Array)",
+      "alternatives": [
+        "Prefix Tree (Hash Map)"
+      ]
+    },
+    {
+      "id": "design-add-and-search-words-data-structure",
+      "batch": "structures",
+      "article": "articles/design-word-search-data-structure.md",
+      "sha256": "bf9e76f73855c2b04c8891916376399f9e8dcc6718a199b8de96ca1e296c7450",
+      "default": "Brute Force",
+      "alternatives": [
+        "Depth First Search (Trie)"
+      ]
+    },
+    {
+      "id": "word-search-ii",
+      "batch": "structures",
+      "article": "articles/search-for-word-ii.md",
+      "sha256": "eed3625fd35378b02620ed5021a08f32487dc7bf9e06ef8e516393dc4b31aa59",
+      "default": "Backtracking (Trie)",
+      "alternatives": [
+        "Backtracking",
+        "Backtracking (Trie + Hash Set)"
+      ]
+    },
+    {
+      "id": "kth-largest-element-in-a-stream",
+      "batch": "structures",
+      "article": "articles/kth-largest-integer-in-a-stream.md",
+      "sha256": "4d81e6ff68ff12c872ded8d14638e9ed09edba94ea4897f6a4ae0b0f2f9ed05e",
+      "default": "Min-Heap",
+      "alternatives": [
+        "Sorting"
+      ]
+    },
+    {
+      "id": "last-stone-weight",
+      "batch": "structures",
+      "article": "articles/last-stone-weight.md",
+      "sha256": "3bbb83677a46e63b1069809adc0434a6fcdd776f89d212fcc1cc351b9bb578ff",
+      "default": "Bucket Sort",
+      "alternatives": [
+        "Sorting",
+        "Heap"
+      ]
+    },
+    {
+      "id": "k-closest-points-to-origin",
+      "batch": "structures",
+      "article": "articles/k-closest-points-to-origin.md",
+      "sha256": "5e76c9343fa3b43cd63a6cebf2f2388540f7a874253b0f835a2ae8f9989571e5",
+      "default": "Quick Select",
+      "alternatives": [
+        "Sorting",
+        "Max Heap"
+      ]
+    },
+    {
+      "id": "kth-largest-element-in-an-array",
+      "batch": "structures",
+      "article": "articles/kth-largest-element-in-an-array.md",
+      "sha256": "c972a9859f4d23f0713185859b3ad0b28cdc11592e9c3c7f32a2a9c72b1d898b",
+      "default": "Min-Heap",
+      "alternatives": [
+        "Sorting",
+        "Quick Select"
+      ]
+    },
+    {
+      "id": "task-scheduler",
+      "batch": "structures",
+      "article": "articles/task-scheduling.md",
+      "sha256": "d2612438c9154172e10d045d52775275c294ac86cd6c5fc55ede11e90b2d4a3b",
+      "default": "Math",
+      "alternatives": [
+        "Brute Force",
+        "Max-Heap"
+      ]
+    },
+    {
+      "id": "design-twitter",
+      "batch": "structures",
+      "article": "articles/design-twitter-feed.md",
+      "sha256": "3b843446be8da2390e7dd2f8fcf02210e6ebd5f9abca77f121b95e3f4a13863b",
+      "default": "Heap (Optimal)",
+      "alternatives": [
+        "Sorting",
+        "Heap"
+      ]
+    },
+    {
+      "id": "find-median-from-data-stream",
+      "batch": "structures",
+      "article": "articles/find-median-in-a-data-stream.md",
+      "sha256": "d2f37453fbb9d991b663d1ca7db957978a441b150b9086a22184d914e1181324",
+      "default": "Heap",
+      "alternatives": [
+        "Sorting"
+      ]
+    },
+    {
+      "id": "subsets",
+      "batch": "graphs",
+      "article": "articles/subsets.md",
+      "sha256": "296b3b993dd19f79c52531754349c8b12d8eb2da8dcd879d5f5c420b89b3d4ba",
+      "default": "Iteration",
+      "alternatives": [
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "combination-sum",
+      "batch": "graphs",
+      "article": "articles/combination-target-sum.md",
+      "sha256": "de003647ccca88c3f98db62de58d88c39e8ba918a32d8f51b1fd71a4815805b5",
+      "default": "Backtracking (Optimal)",
+      "alternatives": [
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "permutations",
+      "batch": "graphs",
+      "article": "articles/permutations.md",
+      "sha256": "037df4800d7d28c4979416299aea31b52ee3f61a5fc12025096bffae8234d5e0",
+      "default": "Backtracking (Optimal)",
+      "alternatives": [
+        "Recursion",
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "subsets-ii",
+      "batch": "graphs",
+      "article": "articles/subsets-ii.md",
+      "sha256": "affd6bdaba96d4dcdba0e15c2e139066934601e2d56ab60f611014aba7797294",
+      "default": "Iteration",
+      "alternatives": [
+        "Brute Force",
+        "Backtracking - I"
+      ]
+    },
+    {
+      "id": "combination-sum-ii",
+      "batch": "graphs",
+      "article": "articles/combination-target-sum-ii.md",
+      "sha256": "f191e33c61028a49f321f17f00bed903d7cb44943534553f1ac0995576b4c783",
+      "default": "Backtracking (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "word-search",
+      "batch": "graphs",
+      "article": "articles/search-for-word.md",
+      "sha256": "dfb8eaaf83dfe4cf24bc2270cebbb26d5d1a500eed524627b26cee379f03bbaa",
+      "default": "Backtracking (Optimal)",
+      "alternatives": [
+        "Backtracking (Hash Set)",
+        "Backtracking (Visited Array)"
+      ]
+    },
+    {
+      "id": "palindrome-partitioning",
+      "batch": "graphs",
+      "article": "articles/palindrome-partitioning.md",
+      "sha256": "197ab29eda1a4476dc92824353c165a65775fbed4daa3cff2e34dc219b12e984",
+      "default": "Recursion",
+      "alternatives": [
+        "Backtracking - I",
+        "Backtracking (DP)"
+      ]
+    },
+    {
+      "id": "letter-combinations-of-a-phone-number",
+      "batch": "graphs",
+      "article": "articles/combinations-of-a-phone-number.md",
+      "sha256": "e2f7d38ef335f6d9cf10b81aebba055a23794edadee3314f3ee10e310639e14a",
+      "default": "Iteration",
+      "alternatives": [
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "n-queens",
+      "batch": "graphs",
+      "article": "articles/n-queens.md",
+      "sha256": "16270918b6f92988514053f3d57ecee7fdcdf33a34d41c81b61f3adae74b3dd7",
+      "default": "Backtracking (Bit Mask)",
+      "alternatives": [
+        "Backtracking",
+        "Backtracking (Hash Set)"
+      ]
+    },
+    {
+      "id": "number-of-islands",
+      "batch": "graphs",
+      "article": "articles/count-number-of-islands.md",
+      "sha256": "8f8108d45cb5d539022fbdde56fe9bb95f6e8268f3d046e1b118db53e348b90a",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "clone-graph",
+      "batch": "graphs",
+      "article": "articles/clone-graph.md",
+      "sha256": "c22d1f156ef7e10639d685f4123e77f40901e9306ab8db6f8f1a26cc01102997",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Seacrh"
+      ]
+    },
+    {
+      "id": "max-area-of-island",
+      "batch": "graphs",
+      "article": "articles/max-area-of-island.md",
+      "sha256": "3b6dfae76806f54f0e926c81ae1a90c0d2049da9fa24b4e1c47b5f2753203c55",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "pacific-atlantic-water-flow",
+      "batch": "graphs",
+      "article": "articles/pacific-atlantic-water-flow.md",
+      "sha256": "08a3b4b1321757e721c92a4c6f5b7e8bf0099eccb7aae5bcb0a9dfe3313ef410",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Brute Force (Backtracking)",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "surrounded-regions",
+      "batch": "graphs",
+      "article": "articles/surrounded-regions.md",
+      "sha256": "6646fe7bbf7c62c31128cba9f7f5992959ed27322a331b2643d67b17d60c6f0d",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "rotting-oranges",
+      "batch": "graphs",
+      "article": "articles/rotting-fruit.md",
+      "sha256": "7c5d927031c4c7f83499dd1cd149694fe9fae261015ac9346da4d149e183305e",
+      "default": "Breadth First Search (No Queue)",
+      "alternatives": [
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "walls-and-gates",
+      "batch": "graphs",
+      "article": "articles/islands-and-treasure.md",
+      "sha256": "d71ba742d85975f6727b0cd6acb924d9025b68cea6446d998bbe449dd222fe3f",
+      "default": "Multi Source BFS",
+      "alternatives": [
+        "Brute Force (Backtracking)",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "course-schedule",
+      "batch": "graphs",
+      "article": "articles/course-schedule.md",
+      "sha256": "e2de2920d6c0b27e9ed629fe7425a6026630016992a81b413f8dbc73d8ff2993",
+      "default": "Topological Sort (Kahn's Algorithm)",
+      "alternatives": [
+        "Cycle Detection (DFS)"
+      ]
+    },
+    {
+      "id": "course-schedule-ii",
+      "batch": "graphs",
+      "article": "articles/course-schedule-ii.md",
+      "sha256": "0fd7ea68560de9fe1424331ae3e08f777a4bbb6812f88501109b89f315171cda",
+      "default": "Topological Sort (DFS)",
+      "alternatives": [
+        "Cycle Detection (DFS)",
+        "Topological Sort (Kahn's Algorithm)"
+      ]
+    },
+    {
+      "id": "redundant-connection",
+      "batch": "graphs",
+      "article": "articles/redundant-connection.md",
+      "sha256": "240a8fb325a232f13207f2500563f374a6b9ed0ec14933dc316a21d9c086b3a6",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Cycle Detection (DFS)",
+        "Depth First Search (Optimal)"
+      ]
+    },
+    {
+      "id": "number-of-connected-components-in-an-undirected-graph",
+      "batch": "graphs",
+      "article": "articles/count-connected-components.md",
+      "sha256": "fb0c267ab09746e2da611b455d99cf4d10eed9d4c95262d18a8f694241d66364",
+      "default": "Disjoint Set Union (Rank | Size)",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "graph-valid-tree",
+      "batch": "graphs",
+      "article": "articles/valid-tree.md",
+      "sha256": "29cf6131e45b4b26f2cd5d557c59ef99be216f498506232fdc671270696d80f1",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Cycle Detection (DFS)",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "word-ladder",
+      "batch": "graphs",
+      "article": "articles/word-ladder.md",
+      "sha256": "66a3164a88b460eb6d19cdd580154f8ff428135b4cd1657f7cccfe1211937767",
+      "default": "Meet In The Middle (BFS)",
+      "alternatives": [
+        "Breadth First Search - I",
+        "Breadth First Search - II"
+      ]
+    },
+    {
+      "id": "reconstruct-itinerary",
+      "batch": "graphs",
+      "article": "articles/reconstruct-flight-path.md",
+      "sha256": "74303919d6f1069ef48432fe58afba2bbc0d780b788e0c0ae75c0b643d42909d",
+      "default": "Hierholzer's Algorithm (Iteration)",
+      "alternatives": [
+        "Depth First Search",
+        "Hierholzer's Algorithm (Recursion)"
+      ]
+    },
+    {
+      "id": "min-cost-to-connect-all-points",
+      "batch": "graphs",
+      "article": "articles/min-cost-to-connect-points.md",
+      "sha256": "02381b6fc0e749e72842841bc75d02462ceeb3e1a287e2cc6571e34db4dacad3",
+      "default": "Prim's Algorithm (Optimal)",
+      "alternatives": [
+        "Kruskal's Algorithm",
+        "Prim's Algorithm"
+      ]
+    },
+    {
+      "id": "network-delay-time",
+      "batch": "graphs",
+      "article": "articles/network-delay-time.md",
+      "sha256": "fab96a032a3370a15f7b802833c7e45cd471caebe7a75f52f5fd90f93839a364",
+      "default": "Dijkstra's Algorithm",
+      "alternatives": [
+        "Bellman Ford Algorithm",
+        "Floyd Warshall Algorithm"
+      ]
+    },
+    {
+      "id": "swim-in-rising-water",
+      "batch": "graphs",
+      "article": "articles/swim-in-rising-water.md",
+      "sha256": "55f67dc4a6332d4c91e8f6c101806179d472daa6d424465dbc5137ad066d506c",
+      "default": "Kruskal's Algorithm",
+      "alternatives": [
+        "Binary Search + DFS",
+        "Dijkstra's Algorithm"
+      ]
+    },
+    {
+      "id": "alien-dictionary",
+      "batch": "graphs",
+      "article": "articles/foreign-dictionary.md",
+      "sha256": "7e66535550ff9e5f894d87537ab62347e7fb9a87eab3d58e3f19300ace8edfb4",
+      "default": "Topological Sort (Kahn's Algorithm)",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "cheapest-flights-within-k-stops",
+      "batch": "graphs",
+      "article": "articles/cheapest-flight-path.md",
+      "sha256": "1819200113cf85c20486a07ccdf1c95de9c605a917b88fe88d2a4629627d617a",
+      "default": "Shortest Path Faster Algorithm",
+      "alternatives": [
+        "Dijkstra's Algorithm",
+        "Bellman Ford Algorithm"
+      ]
+    },
+    {
+      "id": "climbing-stairs",
+      "batch": "dynamic",
+      "article": "articles/climbing-stairs.md",
+      "sha256": "1095b75122131a1aa98a00cd8e4cc52b026e117ff6a96f71f89d4058740426a6",
+      "default": "Math",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Space Optimized)"
+      ]
+    },
+    {
+      "id": "min-cost-climbing-stairs",
+      "batch": "dynamic",
+      "article": "articles/min-cost-climbing-stairs.md",
+      "sha256": "247307e36aab619f27cc07c50660739fb3d380b4d3829ef8a77def09358b057a",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "house-robber",
+      "batch": "dynamic",
+      "article": "articles/house-robber.md",
+      "sha256": "c60076a91852552a31f970232af99e9c818e0ac956f0b1c2fcecc7fe290bfe4b",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "house-robber-ii",
+      "batch": "dynamic",
+      "article": "articles/house-robber-ii.md",
+      "sha256": "00bca914faf95abb289b7d9fec5301bc1cf3ae48f40191063e7c47e780d06e65",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "longest-palindromic-substring",
+      "batch": "dynamic",
+      "article": "articles/longest-palindromic-substring.md",
+      "sha256": "9b78cfbca7b82890e624674b9cb339ee8538ccebebd30741a77bc27765832f9f",
+      "default": "Manacher's Algorithm",
+      "alternatives": [
+        "Dynamic Programming",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "palindromic-substrings",
+      "batch": "dynamic",
+      "article": "articles/palindromic-substrings.md",
+      "sha256": "f87c61a88d459b987e8635982d837df45e57c0ab2ef2a5fbcb4ce9ddda102731",
+      "default": "Manacher's Algorithm",
+      "alternatives": [
+        "Dynamic Programming",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "decode-ways",
+      "batch": "dynamic",
+      "article": "articles/decode-ways.md",
+      "sha256": "f009a607a656109e25b009e01378cc63ca2409197b83a1f1f3482d3bee395c43",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "coin-change",
+      "batch": "dynamic",
+      "article": "articles/coin-change.md",
+      "sha256": "ac91211eb96f32e7be87d0788b8dd976d90a9570c79a4dfe33577d454ee0d97d",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "maximum-product-subarray",
+      "batch": "dynamic",
+      "article": "articles/maximum-product-subarray.md",
+      "sha256": "518a9dd61be3d6dc13964cc11fc1850509f24570e4d2b8d95dc6e061bd5b88de",
+      "default": "Prefix & Suffix",
+      "alternatives": [
+        "Brute Force",
+        "Kadane's Algorithm"
+      ]
+    },
+    {
+      "id": "word-break",
+      "batch": "dynamic",
+      "article": "articles/word-break.md",
+      "sha256": "17c770a94b7a5aeb2682fe0b629d381d4cafef53a8923afbc0eed4eb6730a1e2",
+      "default": "Dynamic Programming (Trie)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "longest-increasing-subsequence",
+      "batch": "dynamic",
+      "article": "articles/longest-increasing-subsequence.md",
+      "sha256": "3f560dcfee546645885013b7d87f62ad8d10ad698373dfbfb94da20a43999080",
+      "default": "Dynamic Programming + Binary Search",
+      "alternatives": [
+        "Dynamic Programming (Top-Down) - I",
+        "Dynamic Programming (Bottom-Up) - I"
+      ]
+    },
+    {
+      "id": "partition-equal-subset-sum",
+      "batch": "dynamic",
+      "article": "articles/partition-equal-subset-sum.md",
+      "sha256": "fe64bf7eba74be013f8959b14e860a44bb647d8f8a9ed37bf15a3530c13c20e4",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "unique-paths",
+      "batch": "dynamic",
+      "article": "articles/count-paths.md",
+      "sha256": "13229c5065ab558903b80cad3fe328d7adcd0fa3698a9553646e46a287775842",
+      "default": "Math",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "longest-common-subsequence",
+      "batch": "dynamic",
+      "article": "articles/longest-common-subsequence.md",
+      "sha256": "5b045177d32446402fe1ee3731291424f343ec1d3b93d63d3cefd3855bce636e",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "best-time-to-buy-and-sell-stock-with-cooldown",
+      "batch": "dynamic",
+      "article": "articles/buy-and-sell-crypto-with-cooldown.md",
+      "sha256": "5381344548bbb9b2a2bbf90df1fe3729045cb8632beb539a38758aad40db440f",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "coin-change-ii",
+      "batch": "dynamic",
+      "article": "articles/coin-change-ii.md",
+      "sha256": "df9eefec68c5076dd38b5ac0d9b3075650dbd249639058f9200c482bf09d4eaa",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "target-sum",
+      "batch": "dynamic",
+      "article": "articles/target-sum.md",
+      "sha256": "67100a914035abb19ec477edeffdf3a2006aad344ad5eef30628b3fc560cf60b",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "interleaving-string",
+      "batch": "dynamic",
+      "article": "articles/interleaving-string.md",
+      "sha256": "acc0a084467c1cbe2de8638b944e96ad0e1163bb5e461f360fe2b95280cb5d59",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "longest-increasing-path-in-a-matrix",
+      "batch": "dynamic",
+      "article": "articles/longest-increasing-path-in-matrix.md",
+      "sha256": "a73293cbd0cd03d1aa929270a44564b5d4fa669414c4fcb2795eed5d2921e8d0",
+      "default": "Topological Sort (Kahn's Algorithm)",
+      "alternatives": [
+        "Recursion",
+        "Dynamic Programming (Top-Down)"
+      ]
+    },
+    {
+      "id": "distinct-subsequences",
+      "batch": "dynamic",
+      "article": "articles/count-subsequences.md",
+      "sha256": "0ca944d1762d713152c2e64e9b6256baf7c4ca3413f5faac3ea0d1a4c6352061",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "edit-distance",
+      "batch": "dynamic",
+      "article": "articles/edit-distance.md",
+      "sha256": "3604a1f10edbf9321a300ae75d52f3e4ba05a8e2ac616547fdeaefd1ce4b9f58",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "burst-balloons",
+      "batch": "dynamic",
+      "article": "articles/burst-balloons.md",
+      "sha256": "d7bc72d919c43ac1b89fb25b161e3889fa84e883b324ece3c2b340755e2ec0c1",
+      "default": "Dynamic Programming (Bottom-Up)",
+      "alternatives": [
+        "Brute Force (Recursion)",
+        "Dynamic Programming (Top-Down)"
+      ]
+    },
+    {
+      "id": "regular-expression-matching",
+      "batch": "dynamic",
+      "article": "articles/regular-expression-matching.md",
+      "sha256": "30d19da8cb927b6a1dc3d37362fd2f47fe24d95cc96058abe26e41fc8b65259f",
+      "default": "Dynamic Programming (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "maximum-subarray",
+      "batch": "dynamic",
+      "article": "articles/maximum-subarray.md",
+      "sha256": "cc7b67a4f1e36e70df0ca84e4f457279bddbaafe298dd64779dc59058437d552",
+      "default": "Divide & Conquer",
+      "alternatives": [
+        "Brute Force",
+        "Kadane's Algorithm"
+      ]
+    },
+    {
+      "id": "jump-game",
+      "batch": "dynamic",
+      "article": "articles/jump-game.md",
+      "sha256": "e92903e44b89a2477dfc8996beec1b86e7d6f5fb5d57f8877793e37b81c8b8d4",
+      "default": "Greedy",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "jump-game-ii",
+      "batch": "dynamic",
+      "article": "articles/jump-game-ii.md",
+      "sha256": "6ca0b71eb0281badc2935f0a4161b233ba1fd6bc04752b83fdb6d77697b2a620",
+      "default": "Breadth First Search (Greedy)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "gas-station",
+      "batch": "dynamic",
+      "article": "articles/gas-station.md",
+      "sha256": "2bd2c4f66ec04ca15ed6aef1f02abbec4269b4dcd523ead575a6f7e33cb13dc4",
+      "default": "Greedy",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "hand-of-straights",
+      "batch": "dynamic",
+      "article": "articles/hand-of-straights.md",
+      "sha256": "32c7b406ef16dd1d075dc901146d40853ecb822d061f9d555e8ca92653011587",
+      "default": "Hash Map",
+      "alternatives": [
+        "Sorting",
+        "Heap"
+      ]
+    },
+    {
+      "id": "merge-triplets-to-form-target-triplet",
+      "batch": "dynamic",
+      "article": "articles/merge-triplets-to-form-target.md",
+      "sha256": "2cd2c9df0a4221c4da602634f29a79d9f7fd800fb094e82efce62f6359430636",
+      "default": "Greedy (Optimal)",
+      "alternatives": [
+        "Greedy"
+      ]
+    },
+    {
+      "id": "partition-labels",
+      "batch": "dynamic",
+      "article": "articles/partition-labels.md",
+      "sha256": "47e10605ea0c03d54710cf6ada10087c7ca4b8db4de2c99c07e8b8608d7243ea",
+      "default": "Two Pointers (Greedy)",
+      "alternatives": [
+        "Merge Character Intervals"
+      ]
+    },
+    {
+      "id": "valid-parenthesis-string",
+      "batch": "dynamic",
+      "article": "articles/valid-parenthesis-string.md",
+      "sha256": "6a33b6b2d6a48f429bfb434b05b83583523ea77ac50874aeec801657dd97f82b",
+      "default": "Greedy",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Stack"
+      ]
+    },
+    {
+      "id": "insert-interval",
+      "batch": "remaining",
+      "article": "articles/insert-new-interval.md",
+      "sha256": "c317609bdda8902b1ec4bfd9e34ec2fa80251e594776e5fd35798364c6ea2bf7",
+      "default": "Greedy",
+      "alternatives": [
+        "Linear Search",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "merge-intervals",
+      "batch": "remaining",
+      "article": "articles/merge-intervals.md",
+      "sha256": "024215ed043a90bcfdd49b5270f53401b6d5e0fd2acca8ef64de631b4b91f36f",
+      "default": "Greedy",
+      "alternatives": [
+        "Sorting",
+        "Sweep Line Algorithm"
+      ]
+    },
+    {
+      "id": "non-overlapping-intervals",
+      "batch": "remaining",
+      "article": "articles/non-overlapping-intervals.md",
+      "sha256": "3edeb015932e9fd9d6f56abd6035605b0cf3218c5e1f1c873a2c54da33513874",
+      "default": "Greedy (Sort By End)",
+      "alternatives": [
+        "Dynamic Programming (Binary Search)",
+        "Greedy (Sort By Start)"
+      ]
+    },
+    {
+      "id": "meeting-rooms",
+      "batch": "remaining",
+      "article": "articles/meeting-schedule.md",
+      "sha256": "9f9216990b6089834955005b7718509e0beba68187412eecc98e068fcc86e962",
+      "default": "Sorting",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "meeting-rooms-ii",
+      "batch": "remaining",
+      "article": "articles/meeting-schedule-ii.md",
+      "sha256": "3d583a15bb3fd721f2b4f0d6603aead40df851c867e42f6a5553182060fb01e4",
+      "default": "Greedy",
+      "alternatives": [
+        "Min Heap",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "minimum-interval-to-include-each-query",
+      "batch": "remaining",
+      "article": "articles/minimum-interval-including-query.md",
+      "sha256": "9a7bae28ac12823af1666cc0463c3bfd04fe167608b2a8291a693366930ecb70",
+      "default": "Min Segment Tree (Lazy Propagation)",
+      "alternatives": [
+        "Brute Force",
+        "Min Heap"
+      ]
+    },
+    {
+      "id": "rotate-image",
+      "batch": "remaining",
+      "article": "articles/rotate-matrix.md",
+      "sha256": "67e0e0fd2536d352c1e573e735c17e57c40d8f40b79b691d7c143621a60c41c4",
+      "default": "Reverse And Transpose",
+      "alternatives": [
+        "Brute Force",
+        "Rotate By Four Cells"
+      ]
+    },
+    {
+      "id": "spiral-matrix",
+      "batch": "remaining",
+      "article": "articles/spiral-matrix.md",
+      "sha256": "4af2e76d1519dd4e5f1354bf0f8d12ba85a284dfea60c9a64e1d724ab736221f",
+      "default": "Iteration (Optimal)",
+      "alternatives": [
+        "Recursion",
+        "Iteration"
+      ]
+    },
+    {
+      "id": "set-matrix-zeroes",
+      "batch": "remaining",
+      "article": "articles/set-zeroes-in-matrix.md",
+      "sha256": "fabe2b8017bc154a18c63101e96251335ee43aa314e78aae4bd2b9e0e3fe69e5",
+      "default": "Iteration (Space Optimized)",
+      "alternatives": [
+        "Brute Force",
+        "Iteration"
+      ]
+    },
+    {
+      "id": "happy-number",
+      "batch": "remaining",
+      "article": "articles/non-cyclical-number.md",
+      "sha256": "a98b112ef9742bb4e13de372fbb7d50f7549502798d9b7e22ad288a8506aa878",
+      "default": "Fast And Slow Pointers - II",
+      "alternatives": [
+        "Hash Set",
+        "Fast And Slow Pointers - I"
+      ]
+    },
+    {
+      "id": "plus-one",
+      "batch": "remaining",
+      "article": "articles/plus-one.md",
+      "sha256": "b5f110b8f083fbfbb344a77ee18555113f057e0609ee466fe0af8151f019ac6a",
+      "default": "Iteration - II",
+      "alternatives": [
+        "Recursion",
+        "Iteration - I"
+      ]
+    },
+    {
+      "id": "powx-n",
+      "batch": "remaining",
+      "article": "articles/pow-x-n.md",
+      "sha256": "29cdc23b1b99e6c8d63eb723b0964e535bf4e687e93345bb1e89a1b67b3eee37",
+      "default": "Binary Exponentiation (Iterative)",
+      "alternatives": [
+        "Brute Force",
+        "Binary Exponentiation (Recursive)"
+      ]
+    },
+    {
+      "id": "multiply-strings",
+      "batch": "remaining",
+      "article": "articles/multiply-strings.md",
+      "sha256": "ce127a8e921e2467a77645bba98cc2d222f2bf513364f37dcda08f2d8601689d",
+      "default": "Multiplication",
+      "alternatives": [
+        "Multiplication & Addition"
+      ]
+    },
+    {
+      "id": "detect-squares",
+      "batch": "remaining",
+      "article": "articles/count-squares.md",
+      "sha256": "55f2eaedd3079685f504b5a468d3892da5ca34cf0344f264fd83a10068faed66",
+      "default": "Hash Map - II",
+      "alternatives": [
+        "Hash Map - I"
+      ]
+    },
+    {
+      "id": "single-number",
+      "batch": "remaining",
+      "article": "articles/single-number.md",
+      "sha256": "1522a2a84b98704481cde6530c7af3471d9faa39c2fe7919ebf1fd3f64d855fd",
+      "default": "Bit Manipulation",
+      "alternatives": [
+        "Brute Force",
+        "Hash Set"
+      ]
+    },
+    {
+      "id": "number-of-1-bits",
+      "batch": "remaining",
+      "article": "articles/number-of-one-bits.md",
+      "sha256": "6ed9f7512e0a9c0a6c186974f7d8f20ecb0b5ea8beb4ba49601e38e743f71812",
+      "default": "Built-In Function",
+      "alternatives": [
+        "Bit Mask - I",
+        "Bit Mask (Optimal)"
+      ]
+    },
+    {
+      "id": "counting-bits",
+      "batch": "remaining",
+      "article": "articles/counting-bits.md",
+      "sha256": "6fa65c0a261df8a2a454b8d2830427d98ba49795386b55e67b171caf4d0b74b3",
+      "default": "Bit Manipulation (Optimal)",
+      "alternatives": [
+        "Bit Manipulation - I",
+        "Bit Manipulation (DP)"
+      ]
+    },
+    {
+      "id": "reverse-bits",
+      "batch": "remaining",
+      "article": "articles/reverse-bits.md",
+      "sha256": "9e6d03d3c62698b6a760ad8cc3c526cf4a648b05138bd2c83e313aea1c63a417",
+      "default": "Bit Manipulation (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Bit Manipulation"
+      ]
+    },
+    {
+      "id": "missing-number",
+      "batch": "remaining",
+      "article": "articles/missing-number.md",
+      "sha256": "bbb489a46f9a996cc7070975934c0867b2cfe06a2f366b2725273df9a9206920",
+      "default": "Math",
+      "alternatives": [
+        "Hash Set",
+        "Bitwise XOR"
+      ]
+    },
+    {
+      "id": "sum-of-two-integers",
+      "batch": "remaining",
+      "article": "articles/sum-of-two-integers.md",
+      "sha256": "dcecac7bc0e1bbb081e5338c8a49c5aa123ae6b652ca48b93d71066a25506f4c",
+      "default": "Bit Manipulation (Optimal)",
+      "alternatives": [
+        "Bit Manipulation"
+      ],
+      "selectionNote": "The source Brute Force uses addition, which the problem forbids. The retained bit-by-bit full adder also computes carry without + or -."
+    },
+    {
+      "id": "reverse-integer",
+      "batch": "remaining",
+      "article": "articles/reverse-integer.md",
+      "sha256": "76dbb5cfb90835cd16ef208dfc4ff00886b7fa801d20db9089417262c9436dfd",
+      "default": "Iteration",
+      "alternatives": [
+        "Brute Force",
+        "Recursion"
+      ]
+    },
+    {
+      "id": "longest-common-prefix",
+      "batch": "foundations",
+      "article": "articles/longest-common-prefix.md",
+      "sha256": "eca4d1421f81d9d4421fe09e968cb75f54be35b76932f08b31d34eab6a13023b",
+      "default": "Trie",
+      "alternatives": [
+        "Horizontal Scanning",
+        "Vertical Scanning"
+      ]
+    },
+    {
+      "id": "remove-element",
+      "batch": "foundations",
+      "article": "articles/remove-element.md",
+      "sha256": "5824384e026cb00607c98677314e562b5549da6f44c13f1101c3d69c21d8857e",
+      "default": "Two Pointers - II",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers - I"
+      ]
+    },
+    {
+      "id": "find-the-index-of-the-first-occurrence-in-a-string",
+      "batch": "foundations",
+      "article": "articles/find-the-index-of-the-first-occurrence-in-a-string.md",
+      "sha256": "dc5789c4f709e910e05726f6b0826927d25d10080f54ef6dda9937191cc844d1",
+      "default": "Rabin-Karp Algorithm (Rolling Hash)",
+      "alternatives": [
+        "Brute Force",
+        "Knuth-Morris-Pratt (KMP) Algorithm"
+      ]
+    },
+    {
+      "id": "first-missing-positive",
+      "batch": "foundations",
+      "article": "articles/first-missing-positive.md",
+      "sha256": "6efaf6ed5d50795610a95810776752191e82fe7b1cca2bc9e33ee1db034a8f63",
+      "default": "Cycle Sort",
+      "alternatives": [
+        "Boolean Array",
+        "Negative Marking"
+      ]
+    },
+    {
+      "id": "length-of-last-word",
+      "batch": "foundations",
+      "article": "articles/length-of-last-word.md",
+      "sha256": "2596926f239f672a1f0edeefb71edcf765746b4197a671ec723476fb4128cb7e",
+      "default": "Built-In Function",
+      "alternatives": [
+        "Iteration - I",
+        "Iteration - II"
+      ]
+    },
+    {
+      "id": "text-justification",
+      "batch": "foundations",
+      "article": "articles/text-justification.md",
+      "sha256": "0b211c46f7df1c47e26a443ae76c427386e2a39c93c07969637ea3ff51199843",
+      "default": "Iteration",
+      "alternatives": [
+        "Greedy (Round-Robin Spacing)"
+      ]
+    },
+    {
+      "id": "sort-colors",
+      "batch": "foundations",
+      "article": "articles/sort-colors.md",
+      "sha256": "bce5e0518a0e3bf1f6222b6b22633e9efd0049be8b5501de027c28610aa5c529",
+      "default": "Three Pointers - III",
+      "alternatives": [
+        "Counting Sort",
+        "Three Pointers - I"
+      ]
+    },
+    {
+      "id": "pascals-triangle",
+      "batch": "foundations",
+      "article": "articles/pascals-triangle.md",
+      "sha256": "43b1cf8876f29a21034bd49e02757649e36e6fb89911fd15c3541082ab03568c",
+      "default": "Dynamic Programming - II",
+      "alternatives": [
+        "Combinatorics",
+        "Dynamic Programming - I"
+      ]
+    },
+    {
+      "id": "best-time-to-buy-and-sell-stock-ii",
+      "batch": "foundations",
+      "article": "articles/best-time-to-buy-and-sell-stock-ii.md",
+      "sha256": "30497afa05deb01b3526497cd6f7513c169b1bfd2ec29ba1e035d672a6ed3b5b",
+      "default": "Greedy",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "majority-element",
+      "batch": "foundations",
+      "article": "articles/majority-element.md",
+      "sha256": "790668a762d3af5f5b90f9f50033f0059c4a2706d66868c95ad706c4ce584ac8",
+      "default": "Randomization",
+      "alternatives": [
+        "Hash Map",
+        "Boyer-Moore Voting Algorithm"
+      ]
+    },
+    {
+      "id": "largest-number",
+      "batch": "foundations",
+      "article": "articles/largest-number.md",
+      "sha256": "9a46fbec953d6f30a00ec2bf7cc132351f2b1e18a4214a3f011e59ee16db1b1b",
+      "default": "Sorting",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "repeated-dna-sequences",
+      "batch": "foundations",
+      "article": "articles/repeated-dna-sequences.md",
+      "sha256": "128283ecf4b714d5fd06efae83577b1fffa510d78a7266eb0020925e9f4b1f65",
+      "default": "Bit Mask",
+      "alternatives": [
+        "Hash Set",
+        "Rabin-Karp Algorithm (Double Hashing)"
+      ]
+    },
+    {
+      "id": "isomorphic-strings",
+      "batch": "foundations",
+      "article": "articles/isomorphic-strings.md",
+      "sha256": "5dc3c78d66f414a1457593e385a11165f53f717d984b7adc7835c84ad4e3c24c",
+      "default": "Hash Map (One Pass)",
+      "alternatives": [
+        "Hash Map (Two Pass)"
+      ]
+    },
+    {
+      "id": "4sum",
+      "batch": "foundations",
+      "article": "articles/4sum.md",
+      "sha256": "d12b25b25c455e089a8923a2d534e014a6ab3cb8dbaa7da6b0878f582ece669f",
+      "default": "K-Sum + Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "remove-duplicates-from-sorted-array",
+      "batch": "foundations",
+      "article": "articles/remove-duplicates-from-sorted-array.md",
+      "sha256": "bae54fe7373bc9ec490cd6975380cd15941386f80f4705bb9887279496e37ca0",
+      "default": "Two Pointers - II",
+      "alternatives": [
+        "Sorted Set",
+        "Two Pointers - I"
+      ]
+    },
+    {
+      "id": "remove-duplicates-from-sorted-array-ii",
+      "batch": "foundations",
+      "article": "articles/remove-duplicates-from-sorted-array-ii.md",
+      "sha256": "a6c5c705bd3a322f67a52ab3f7ea96c89e30a38e06bd26e022cf225443d9ec3f",
+      "default": "Two Pointers (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "merge-sorted-array",
+      "batch": "foundations",
+      "article": "articles/merge-sorted-array.md",
+      "sha256": "eac528beba9a39f2a040ed01784a34a59a38b1030d3b943378aed1de0285e312",
+      "default": "Three Pointers Without Extra Space - II",
+      "alternatives": [
+        "Sorting",
+        "Three Pointers With Extra Space"
+      ]
+    },
+    {
+      "id": "rotate-array",
+      "batch": "foundations",
+      "article": "articles/rotate-array.md",
+      "sha256": "8d0b195baea7cf21a0a92acecb247c6954d466bad94cfbd4b45724a773a59934",
+      "default": "One Liner",
+      "alternatives": [
+        "Extra Space",
+        "Using Reverse"
+      ]
+    },
+    {
+      "id": "move-zeroes",
+      "batch": "foundations",
+      "article": "articles/move-zeroes.md",
+      "sha256": "a711eb214a8225e85f5a4ca520474d85662b3563be532fb6be60fbc4c0f22378",
+      "default": "Two Pointers (One Pass)",
+      "alternatives": [
+        "Extra Space",
+        "Two Pointers (Two Pass)"
+      ]
+    },
+    {
+      "id": "reverse-string",
+      "batch": "foundations",
+      "article": "articles/reverse-string.md",
+      "sha256": "d1fe62b306d09db1d6704141e0fb6300b4e8d904c1632572bd50758371f0d47f",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Recursion",
+        "Built-In Function"
+      ]
+    },
+    {
+      "id": "valid-palindrome-ii",
+      "batch": "foundations",
+      "article": "articles/valid-palindrome-ii.md",
+      "sha256": "eda8a271ccc8cc4d92d3eeec916b16776eabacf995579c15a3e3a5cdae69687c",
+      "default": "Two Pointers (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Two Pointers"
+      ]
+    },
+    {
+      "id": "minimum-size-subarray-sum",
+      "batch": "foundations",
+      "article": "articles/minimum-size-subarray-sum.md",
+      "sha256": "e5de4aad6055168b212140275fcfb4dddecb5000203d9de8cba728a19c203283",
+      "default": "Prefix Sum + Binary Search",
+      "alternatives": [
+        "Brute Force",
+        "Sliding Window"
+      ]
+    },
+    {
+      "id": "contains-duplicate-ii",
+      "batch": "foundations",
+      "article": "articles/contains-duplicate-ii.md",
+      "sha256": "c35100072f80ab76a80679264f7179d824d983413d8a0cc8469e8ad46836c2d3",
+      "default": "Hash Set",
+      "alternatives": [
+        "Brute Force",
+        "Hash Map"
+      ]
+    },
+    {
+      "id": "find-k-closest-elements",
+      "batch": "foundations",
+      "article": "articles/find-k-closest-elements.md",
+      "sha256": "b15d0e741436ddd3df4b27e48cf639ce3e0b8ed49062637b4b1657f616c9a664",
+      "default": "Binary Search",
+      "alternatives": [
+        "Sorting (Custom Comparator)",
+        "Binary Search + Two Pointers"
+      ]
+    },
+    {
+      "id": "simplify-path",
+      "batch": "foundations",
+      "article": "articles/simplify-path.md",
+      "sha256": "0b858be9bc023a65c3c7c03b19f05943f897ede26a4b5eac8f63501f189f8dd4",
+      "default": "Stack - II",
+      "alternatives": [
+        "Stack - I"
+      ]
+    },
+    {
+      "id": "implement-stack-using-queues",
+      "batch": "foundations",
+      "article": "articles/implement-stack-using-queues.md",
+      "sha256": "562d5eea0f00e630e7d2c6ea524c339a56ad71f048bd9c8ddc91d7e9f4ee6abc",
+      "default": "Queue Of Queues",
+      "alternatives": [
+        "Using Two Queues",
+        "Using One Queue"
+      ]
+    },
+    {
+      "id": "decode-string",
+      "batch": "foundations",
+      "article": "articles/decode-string.md",
+      "sha256": "84124bed0598974bdc1b4bf00e1fdb5f67c18f7077168986ea2cee5166c5dabd",
+      "default": "Two Stacks",
+      "alternatives": [
+        "Recursion",
+        "One Stack"
+      ]
+    },
+    {
+      "id": "remove-k-digits",
+      "batch": "foundations",
+      "article": "articles/remove-k-digits.md",
+      "sha256": "1340d6ad2f76b9efed035e9915bc82524515ea3060fe8076199169eae3833015",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Greedy + Stack"
+      ]
+    },
+    {
+      "id": "132-pattern",
+      "batch": "foundations",
+      "article": "articles/132-pattern.md",
+      "sha256": "1d523206b90a8101bf2bb1019702fa8e79de2803cd992d85718be0625ee1c5e9",
+      "default": "Two Pointers",
+      "alternatives": [
+        "Brute Force",
+        "Stack"
+      ]
+    },
+    {
+      "id": "baseball-game",
+      "batch": "foundations",
+      "article": "articles/baseball-game.md",
+      "sha256": "42969787640096660314f11dc779d021cf5ff771478e7805765749b04c506a2a",
+      "default": "Stack - II",
+      "alternatives": [
+        "Stack - I"
+      ]
+    },
+    {
+      "id": "asteroid-collision",
+      "batch": "foundations",
+      "article": "articles/asteroid-collision.md",
+      "sha256": "ac65a4402c514a648ea11a67d98dd946e3d10c9b1b71cd1cee05990e212328ee",
+      "default": "Without Stack",
+      "alternatives": [
+        "Stack"
+      ]
+    },
+    {
+      "id": "find-first-and-last-position-of-element-in-sorted-array",
+      "batch": "foundations",
+      "article": "articles/find-first-and-last-position-of-element-in-sorted-array.md",
+      "sha256": "59e4892853892151e0b84f3cc7ae64cdfc3895a2e5472f4e921937211da7fa0c",
+      "default": "In-Built Function",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search - II"
+      ]
+    },
+    {
+      "id": "search-insert-position",
+      "batch": "foundations",
+      "article": "articles/search-insert-position.md",
+      "sha256": "eeac34e5f049c32811cb5c0ec600be6591e759485740ba01957a0e3044d23c2e",
+      "default": "Built-In Binary Search Function",
+      "alternatives": [
+        "Linear Search",
+        "Binary Search (Lower Bound)"
+      ]
+    },
+    {
+      "id": "sqrtx",
+      "batch": "foundations",
+      "article": "articles/sqrtx.md",
+      "sha256": "d5570ee569d507650b1651029b2b41da59237566ff1a81b30bdedea13a32b86b",
+      "default": "Newton's Method",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "search-in-rotated-sorted-array-ii",
+      "batch": "foundations",
+      "article": "articles/search-in-rotated-sorted-array-ii.md",
+      "sha256": "4e89c5567462165a2848760c80600deef8886c0134f847f1b0e76fe9a24ff693",
+      "default": "Binary Search",
+      "alternatives": [
+        "Brute Force"
+      ]
+    },
+    {
+      "id": "populating-next-right-pointers-in-each-node",
+      "batch": "foundations",
+      "article": "articles/populating-next-right-pointers-in-each-node.md",
+      "sha256": "4f5e02dff69d3925da014aa6169ebec411ad5b0e0adf7b88c0564757dac912cc",
+      "default": "Breadth First Search (Optimal)",
+      "alternatives": [
+        "Breadth First Search",
+        "Depth First Search (Optimal)"
+      ]
+    },
+    {
+      "id": "find-peak-element",
+      "batch": "foundations",
+      "article": "articles/find-peak-element.md",
+      "sha256": "015a33b547e28d830d15630c9e16b5d9306056d67d7252911bebfb15b4b745eb",
+      "default": "Binary Search (Optimal)",
+      "alternatives": [
+        "Brute Force",
+        "Binary Search"
+      ]
+    },
+    {
+      "id": "valid-perfect-square",
+      "batch": "foundations",
+      "article": "articles/valid-perfect-square.md",
+      "sha256": "499d29c6e19ac05f2d2502b809d2ebe6866e84d7d32d0833cbe9656132acf853",
+      "default": "Bit Manipulation",
+      "alternatives": [
+        "Binary Search",
+        "Newton's Method"
+      ]
+    },
+    {
+      "id": "swap-nodes-in-pairs",
+      "batch": "structures",
+      "article": "articles/swap-nodes-in-pairs.md",
+      "sha256": "8d6831dff2fd91a2dd9029b476a94b4454412b43fda0b9c75da4c00ab584fe6e",
+      "default": "Iteration",
+      "alternatives": [
+        "Convert To Array",
+        "Recursion"
+      ]
+    },
+    {
+      "id": "rotate-list",
+      "batch": "structures",
+      "article": "articles/rotate-list.md",
+      "sha256": "45a24d8c8b89202b2014fd7cbeb31371f0c47651155d4c15a41a6daff30edd28",
+      "default": "Iteration (Using One Pointer)",
+      "alternatives": [
+        "Convert To Array",
+        "Iteration"
+      ]
+    },
+    {
+      "id": "remove-duplicates-from-sorted-list",
+      "batch": "structures",
+      "article": "articles/remove-duplicates-from-sorted-list.md",
+      "sha256": "3dc34f302820fb7095a64281e0340f1c55c5d0a3c8a5b509b9bcbbdf3425368e",
+      "default": "Iteration - II",
+      "alternatives": [
+        "Recursion",
+        "Iteration - I"
+      ]
+    },
+    {
+      "id": "binary-tree-inorder-traversal",
+      "batch": "structures",
+      "article": "articles/binary-tree-inorder-traversal.md",
+      "sha256": "8c2e309ffd59738f2b049d5f76ad235b24356f3d62205f1f0e0209676da18e08",
+      "default": "Morris Traversal",
+      "alternatives": [
+        "Depth First Search",
+        "Iterative Depth First Search"
+      ]
+    },
+    {
+      "id": "unique-binary-search-trees-ii",
+      "batch": "structures",
+      "article": "articles/unique-binary-search-trees-ii.md",
+      "sha256": "132b5733abb0883529396be3689b9e02fb497d061cd597dc4b683e792654c3a2",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "unique-binary-search-trees",
+      "batch": "structures",
+      "article": "articles/unique-binary-search-trees.md",
+      "sha256": "9e811886c9d710f078418e44a49c39da486113b473a518cffd0796841bcdf5f6",
+      "default": "Catalan Numbers - II",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "symmetric-tree",
+      "batch": "structures",
+      "article": "articles/symmetric-tree.md",
+      "sha256": "ab7bacf53e84cd307ad539ac95a6129e89bc5e85ee1e43e7760c03fc9471e16e",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search",
+        "Iterative DFS"
+      ]
+    },
+    {
+      "id": "binary-tree-zigzag-level-order-traversal",
+      "batch": "structures",
+      "article": "articles/binary-tree-zigzag-level-order-traversal.md",
+      "sha256": "aea94bb55171c5cb9419e8d0984d36077c389e8da83ed6de1b9161061af79ac9",
+      "default": "Iterative DFS",
+      "alternatives": [
+        "Breadth First Search",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "construct-binary-tree-from-inorder-and-postorder-traversal",
+      "batch": "structures",
+      "article": "articles/construct-binary-tree-from-inorder-and-postorder-traversal.md",
+      "sha256": "49dd7ba08d8632bff321856fb9f23923a8d369ecf343006ee41f8727e6e06f93",
+      "default": "Depth First Search (Optimal)",
+      "alternatives": [
+        "Depth First Search",
+        "Hash Map + Depth First Search"
+      ]
+    },
+    {
+      "id": "convert-sorted-array-to-binary-search-tree",
+      "batch": "structures",
+      "article": "articles/convert-sorted-array-to-binary-search-tree.md",
+      "sha256": "0017e206438761029816774375ec69af44b691775dc0e2861b5c0c68cf7e7cba",
+      "default": "Iterative DFS",
+      "alternatives": [
+        "Depth First Search",
+        "Depth First Search (Optimal)"
+      ]
+    },
+    {
+      "id": "path-sum",
+      "batch": "structures",
+      "article": "articles/path-sum.md",
+      "sha256": "07ba8516bd922fbba04f916b7d3526dff34a9991bc578e58255027bc941c7a7b",
+      "default": "Breadth First Search",
+      "alternatives": [
+        "Depth First Search - I",
+        "Iterative DFS"
+      ]
+    },
+    {
+      "id": "ipo",
+      "batch": "structures",
+      "article": "articles/ipo.md",
+      "sha256": "a8fadc7a66cc310f8416807637afdd03734e881e0f1b559a92ced875865ea32b",
+      "default": "Sorting + Max-Heap",
+      "alternatives": [
+        "Two Heaps",
+        "Two Heaps (Optimal)"
+      ]
+    },
+    {
+      "id": "reorganize-string",
+      "batch": "structures",
+      "article": "articles/reorganize-string.md",
+      "sha256": "03c084f505fc9b4c8d082c8aaa8130d7238c20662c47394ad8c9baa0e17fa9fb",
+      "default": "Frequency Count (Greedy)",
+      "alternatives": [
+        "Frequency Count",
+        "Frequency Count (Max-Heap)"
+      ]
+    },
+    {
+      "id": "car-pooling",
+      "batch": "structures",
+      "article": "articles/car-pooling.md",
+      "sha256": "c9fc0ec828584eb4413dca44c28e0d8f9bd1b8309da24947cfbf2c6cb8018667",
+      "default": "Line Sweep - II",
+      "alternatives": [
+        "Brute Force",
+        "Min-Heap"
+      ]
+    },
+    {
+      "id": "maximum-performance-of-a-team",
+      "batch": "structures",
+      "article": "articles/maximum-performance-of-a-team.md",
+      "sha256": "425468b42954f1c75c83e42f9d13d3d229ee67ad69a98760c36f38d8a877768d",
+      "default": "Sorting + Min-Heap",
+      "alternatives": [
+        "Brute Force (Recursion)"
+      ]
+    },
+    {
+      "id": "longest-happy-string",
+      "batch": "structures",
+      "article": "articles/longest-happy-string.md",
+      "sha256": "274380331b007d18639c6391e6f960bcfb7ee05647d4d4dc66e43c8019f10a47",
+      "default": "Greedy (Recursion)",
+      "alternatives": [
+        "Greedy",
+        "Greedy (Max-Heap)"
+      ]
+    },
+    {
+      "id": "permutations-ii",
+      "batch": "graphs",
+      "article": "articles/permutations-ii.md",
+      "sha256": "2167695db869fc5e20b6a5fca99af6f626e1e3c596823ca3e7f9bfe0612656d4",
+      "default": "Iteration",
+      "alternatives": [
+        "Backtracking (Hash Set)",
+        "Backtracking (Optimal)"
+      ]
+    },
+    {
+      "id": "n-queens-ii",
+      "batch": "graphs",
+      "article": "articles/n-queens-ii.md",
+      "sha256": "f9dc0df04e264fce809c02e5e9527ed858050976bd5e2e21eabf10995839f654",
+      "default": "Backtracking (Bit Mask)",
+      "alternatives": [
+        "Backtracking",
+        "Backtracking (Hash Set)"
+      ]
+    },
+    {
+      "id": "combinations",
+      "batch": "graphs",
+      "article": "articles/combinations.md",
+      "sha256": "30b02037bbf9aaf4550ab543bc8794dce7bd2f3437dd4cb59234644888ad0a95",
+      "default": "Bit Manipulation",
+      "alternatives": [
+        "Backtracking - II",
+        "Iteration"
+      ]
+    },
+    {
+      "id": "restore-ip-addresses",
+      "batch": "graphs",
+      "article": "articles/restore-ip-addresses.md",
+      "sha256": "a232d41399bfe25436f85d9c289b4a50004ee1eb3aa3616bd1449fd3418b80cc",
+      "default": "Iteration",
+      "alternatives": [
+        "Backtracking"
+      ]
+    },
+    {
+      "id": "matchsticks-to-square",
+      "batch": "graphs",
+      "article": "articles/matchsticks-to-square.md",
+      "sha256": "94266e5e73dbeb07155a2b44eee690fb3d8fca33ebe1710cf4287e9406f20a09",
+      "default": "Dynamic Programming (Bit Mask)",
+      "alternatives": [
+        "Backtracking (Brute Force)",
+        "Backtracking (Pruning)"
+      ]
+    },
+    {
+      "id": "partition-to-k-equal-sum-subsets",
+      "batch": "graphs",
+      "article": "articles/partition-to-k-equal-sum-subsets.md",
+      "sha256": "bc8d72c716cf07cfabc709bdc9945f13dfb5aaf7e340152c9692654147e3be24",
+      "default": "Dynamic Programming (Bottom-Up) + Bit Mask",
+      "alternatives": [
+        "Backtracking (Pruning)",
+        "Dynamic Programming (Top-Down) + Bit Mask"
+      ]
+    },
+    {
+      "id": "maximum-length-of-a-concatenated-string-with-unique-characters",
+      "batch": "graphs",
+      "article": "articles/maximum-length-of-a-concatenated-string-with-unique-characters.md",
+      "sha256": "7e0d5f02235ed2d4c014dfdbc2e62b87dd07f9f59761dab1a99c0d125b6d0640",
+      "default": "Dynamic Programming",
+      "alternatives": [
+        "Backtracking (Hash Set)",
+        "Recursion (Bit Mask) - I"
+      ]
+    },
+    {
+      "id": "splitting-a-string-into-descending-consecutive-values",
+      "batch": "graphs",
+      "article": "articles/splitting-a-string-into-descending-consecutive-values.md",
+      "sha256": "0941ee79c4a097756cb18bc4dc3431ca81400426b607530e958bedfb6925fe47",
+      "default": "Stack",
+      "alternatives": [
+        "Backtracking",
+        "Recursion - II"
+      ]
+    },
+    {
+      "id": "extra-characters-in-a-string",
+      "batch": "structures",
+      "article": "articles/extra-characters-in-a-string.md",
+      "sha256": "322069501fef15c95a4fe271262a000858e7e25c1d325c7345d670a33aca5796",
+      "default": "Dynamic Programming (Bottom-Up) Using Trie",
+      "alternatives": [
+        "Dynamic Programming (Top-Down) Using Hash Set",
+        "Dynamic Programming (Bottom-Up) Using Hash Set"
+      ]
+    },
+    {
+      "id": "evaluate-division",
+      "batch": "graphs",
+      "article": "articles/evaluate-division.md",
+      "sha256": "11c7611a0758d2ae0140ff36c2e15468b7b1f960cf619e61f5345d56f6ebb24f",
+      "default": "Floyd Warshall",
+      "alternatives": [
+        "Breadth First Search",
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "island-perimeter",
+      "batch": "graphs",
+      "article": "articles/island-perimeter.md",
+      "sha256": "814d1f7d09a59eb6f6aa4ab99dd5064c0ed34daf5c30d52c0de0aaa798942d3a",
+      "default": "Iteration - II",
+      "alternatives": [
+        "Depth First Search",
+        "Iteration - I"
+      ]
+    },
+    {
+      "id": "accounts-merge",
+      "batch": "graphs",
+      "article": "articles/accounts-merge.md",
+      "sha256": "a5de929d8ec1f38d24b020c428105b7d1143591dc7fc49ac2eaba65a040ce253",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "open-the-lock",
+      "batch": "graphs",
+      "article": "articles/open-the-lock.md",
+      "sha256": "b982b2ba9cdcab6ae9fb47a03282b19c751a789585a051f7810b405042406f56",
+      "default": "Bidirectional Breadth First Search",
+      "alternatives": [
+        "Breadth First Search - I",
+        "Breadth First Search - II"
+      ]
+    },
+    {
+      "id": "is-graph-bipartite",
+      "batch": "graphs",
+      "article": "articles/is-graph-bipartite.md",
+      "sha256": "93ea8e819df27f8abe574422fd45abfa678dd937ded9cb91d3d8e857f55179fc",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Depth First Search",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "find-eventual-safe-states",
+      "batch": "graphs",
+      "article": "articles/find-eventual-safe-states.md",
+      "sha256": "92629d2b777d90dcadba8e9eefef1d4d03e1732232db8beb2fd066be4f3bddb6",
+      "default": "Topological Sort (Kahn's Algorithm)",
+      "alternatives": [
+        "Depth First Search"
+      ]
+    },
+    {
+      "id": "snakes-and-ladders",
+      "batch": "graphs",
+      "article": "articles/snakes-and-ladders.md",
+      "sha256": "d8415a71ad9103e6f3cb278b3a0d1a64e1aebe7df7f3f421d3a71216cc20c6f8",
+      "default": "Breadth First Search - III",
+      "alternatives": [
+        "Breadth First Search - I",
+        "Breadth First Search - II"
+      ]
+    },
+    {
+      "id": "shortest-bridge",
+      "batch": "graphs",
+      "article": "articles/shortest-bridge.md",
+      "sha256": "f56705add7b179e8d611aa0de20bab23039ebe4c3c0ccaa23e1f479b298410da",
+      "default": "Disjoint Set Union + Breadth First Search",
+      "alternatives": [
+        "Depth First Search + Breadth First Search - I",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree",
+      "batch": "graphs",
+      "article": "articles/find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree.md",
+      "sha256": "176036b0be3f4557b78ebc60406f3c735a6a5ea473b220a57e09e5880fa1681f",
+      "default": "Kruskal's Algorithm + DFS",
+      "alternatives": [
+        "Kruskal's Algorithm - I",
+        "Kruskal's Algorithm - II"
+      ]
+    },
+    {
+      "id": "path-with-maximum-probability",
+      "batch": "graphs",
+      "article": "articles/path-with-maximum-probability.md",
+      "sha256": "b784936d6339f25491e9eff062764ae584fc12d07ab1cba9ebd1f25f8d8f5a85",
+      "default": "Shortest Path Faster Algorithm",
+      "alternatives": [
+        "Dijkstra's Algorithm - II",
+        "Bellman Ford Algorithm"
+      ]
+    },
+    {
+      "id": "remove-max-number-of-edges-to-keep-graph-fully-traversable",
+      "batch": "graphs",
+      "article": "articles/remove-max-number-of-edges-to-keep-graph-fully-traversable.md",
+      "sha256": "a10eec30ba55828f537ae3438b5aebf38b77e8a7c9fafc22df2a58038bbbde1a",
+      "default": "Disjoint Set Union",
+      "alternatives": [
+        "Brute Force (Edge Subsets)"
+      ]
+    },
+    {
+      "id": "path-with-minimum-effort",
+      "batch": "graphs",
+      "article": "articles/path-with-minimum-effort.md",
+      "sha256": "47ad3e078ae466e0e6fb5fd9874f4b20ad7e1392675250fad3824c8d5f15489b",
+      "default": "Shortest Path Faster Algorithm",
+      "alternatives": [
+        "Dijkstra's Algorithm",
+        "Binary Search + DFS"
+      ]
+    },
+    {
+      "id": "triangle",
+      "batch": "dynamic",
+      "article": "articles/triangle.md",
+      "sha256": "760b270a86c23ed4566cc7204ddf7f71745450b882c3a312bb71ddbe613d0e77",
+      "default": "Dynamic Programming (In-Place)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "perfect-squares",
+      "batch": "dynamic",
+      "article": "articles/perfect-squares.md",
+      "sha256": "8fedbd447f8f6f189114a3412d5cb9fc996b31b3d3ff2ffc86693a055897af5d",
+      "default": "Math",
+      "alternatives": [
+        "Dynamic Programming (Bottom-Up)",
+        "Breadth First Search"
+      ]
+    },
+    {
+      "id": "integer-break",
+      "batch": "dynamic",
+      "article": "articles/integer-break.md",
+      "sha256": "2c15f6eb4dc7619838291dfcc1315e29b5391ab0332f4fdff06b7637137a1fe5",
+      "default": "Math (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down) - I",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "combination-sum-iv",
+      "batch": "dynamic",
+      "article": "articles/combination-sum-iv.md",
+      "sha256": "5f968167fed68eede51729edbd1e498fc3a19a7e9bc757a87e7c3c8c75d89669",
+      "default": "Dynamic Programming (Bottom-Up) - II",
+      "alternatives": [
+        "Recursion",
+        "Dynamic Programming (Top-Down)"
+      ]
+    },
+    {
+      "id": "concatenated-words",
+      "batch": "dynamic",
+      "article": "articles/concatenated-words.md",
+      "sha256": "e52afbed04e53ed0fa8895dd751549adf5614c26b4f7b1fad73dcaa1cf4587b4",
+      "default": "Dynamic Programming (Bottom-Up)",
+      "alternatives": [
+        "Brute Force (Backtracking)",
+        "Dynamic Programming (Top-Down)"
+      ]
+    },
+    {
+      "id": "unique-paths-ii",
+      "batch": "dynamic",
+      "article": "articles/unique-paths-ii.md",
+      "sha256": "78c33dcbc51c3a671818b1eb0ea122d78a47754c7d8eeca413af0bd1849c1b54",
+      "default": "Dynamic Programming (In-Place)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "minimum-path-sum",
+      "batch": "dynamic",
+      "article": "articles/minimum-path-sum.md",
+      "sha256": "5dd68be975640749bcf2c38ee39e55d4ce6368f5fe88771f4f45b0d8f2dcef5d",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "maximal-square",
+      "batch": "dynamic",
+      "article": "articles/maximal-square.md",
+      "sha256": "0ab099922f343da31675191ed5e2c51c8340171c2344775cf427c51af767049b",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "ones-and-zeroes",
+      "batch": "dynamic",
+      "article": "articles/ones-and-zeroes.md",
+      "sha256": "7f1d28f7a4c3e2003cbb36814ae77cfc84bc76999c6ae3929b836bc939981cf4",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "longest-palindromic-subsequence",
+      "batch": "dynamic",
+      "article": "articles/longest-palindromic-subsequence.md",
+      "sha256": "84019c02af546af17b6480e530c162f9ebd7fd245381b2f95c9bd1c48d6fd210",
+      "default": "Dynamic Programming (Space Optimized)",
+      "alternatives": [
+        "Dynamic Programming (Top Down)",
+        "Dynamic Programming (Using LCS Idea)"
+      ]
+    },
+    {
+      "id": "maximum-length-of-pair-chain",
+      "batch": "dynamic",
+      "article": "articles/maximum-length-of-pair-chain.md",
+      "sha256": "1d2dd0580c2f36396f8b7114d44c95bf8e1269e4e5d93112b4179933017a87c0",
+      "default": "Greedy",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "dota2-senate",
+      "batch": "dynamic",
+      "article": "articles/dota2-senate.md",
+      "sha256": "c2ea9ccf0a7bfe56d4f0bcfffca9b83cb812237d0c33eab98903468ae008d079",
+      "default": "Greedy",
+      "alternatives": [
+        "Brute Force",
+        "Greedy (Two Queues)"
+      ]
+    },
+    {
+      "id": "maximum-sum-circular-subarray",
+      "batch": "dynamic",
+      "article": "articles/maximum-sum-circular-subarray.md",
+      "sha256": "71c2a021850f6dcc67d49fe983fb34d3d2af961d9fe9a3b373f7c6ddb6dbc6ce",
+      "default": "Kadane's Algorithm",
+      "alternatives": [
+        "Brute Force",
+        "Prefix & Suffix Sums"
+      ]
+    },
+    {
+      "id": "longest-turbulent-subarray",
+      "batch": "dynamic",
+      "article": "articles/longest-turbulent-subarray.md",
+      "sha256": "e47a2d15a06bf64fcfb12594a37982b0294a1d30106dba34929ea99a0ba0ac78",
+      "default": "Iteration",
+      "alternatives": [
+        "Brute Force",
+        "Sliding Window"
+      ]
+    },
+    {
+      "id": "two-city-scheduling",
+      "batch": "dynamic",
+      "article": "articles/two-city-scheduling.md",
+      "sha256": "82dd4529b2a1f4bc9a9e70b3026dfea6d688bf1c9b18709b1d914279c593a465",
+      "default": "Greedy (Optimal)",
+      "alternatives": [
+        "Dynamic Programming (Top-Down)",
+        "Dynamic Programming (Bottom-Up)"
+      ]
+    },
+    {
+      "id": "candy",
+      "batch": "dynamic",
+      "article": "articles/candy.md",
+      "sha256": "ad5e190113147cfe52b01fc294e92d9980c8b3023ab65adb4ad97fa0a6e4fea1",
+      "default": "Greedy (One Pass)",
+      "alternatives": [
+        "Brute Force",
+        "Greedy (Two Pass)"
+      ]
+    },
+    {
+      "id": "data-stream-as-disjoint-intervals",
+      "batch": "remaining",
+      "article": "articles/data-stream-as-disjoint-intervals.md",
+      "sha256": "3a5e4f074d62e2ef14eace41e87cf2a0e1056493b9eb70d37e67ef5145a253b1",
+      "default": "Hash Set + Sorting",
+      "alternatives": [
+        "Brute Force (Sorting)"
+      ]
+    },
+    {
+      "id": "zigzag-conversion",
+      "batch": "remaining",
+      "article": "articles/zigzag-conversion.md",
+      "sha256": "9424e396be233c67410577b3b9471492121d6aa0820af5866d82b7fc96695074",
+      "default": "Iteration - II",
+      "alternatives": [
+        "Iteration - I"
+      ]
+    },
+    {
+      "id": "palindrome-number",
+      "batch": "remaining",
+      "article": "articles/palindrome-number.md",
+      "sha256": "eaf5f8982bdd8b4a3a6585ed3d75182b6750bd581d4fa2110423704a1b512679",
+      "default": "Reverse Half of the Number",
+      "alternatives": [
+        "Convert to String",
+        "Reverse the Integer"
+      ]
+    },
+    {
+      "id": "integer-to-roman",
+      "batch": "remaining",
+      "article": "articles/integer-to-roman.md",
+      "sha256": "5a3d1310648be4eb4ed8c23d945864cecad955f7027127f6e174b78c72bbe6fa",
+      "default": "Math - II",
+      "alternatives": [
+        "Math - I"
+      ]
+    },
+    {
+      "id": "roman-to-integer",
+      "batch": "remaining",
+      "article": "articles/roman-to-integer.md",
+      "sha256": "3e0cbff883118dc3682119ce073c929d5d5035c7d0f0546b07cb7fcb26c5503f",
+      "default": "Hash Map",
+      "alternatives": [
+        "Right-to-Left Scan"
+      ]
+    },
+    {
+      "id": "spiral-matrix-ii",
+      "batch": "remaining",
+      "article": "articles/spiral-matrix-ii.md",
+      "sha256": "9ee70fbba32f86c3372ec4a3df7d694f2d5514d96e6c18b1139c3e682795ff48",
+      "default": "Iteration (Optimal)",
+      "alternatives": [
+        "Iteration",
+        "Recursion"
+      ]
+    },
+    {
+      "id": "add-binary",
+      "batch": "remaining",
+      "article": "articles/add-binary.md",
+      "sha256": "c09b9e6084c01196a49e71f5d990feed98c039d0a905fb113f8f027b8159641e",
+      "default": "Iteration (Optimal)",
+      "alternatives": [
+        "Iteration"
+      ]
+    },
+    {
+      "id": "add-to-array-form-of-integer",
+      "batch": "remaining",
+      "article": "articles/add-to-array-form-of-integer.md",
+      "sha256": "11aeda2813e0f23156f4d50bcd04316e296e088fcc848ff77369f2c2eeb203a2",
+      "default": "Without Reverse()",
+      "alternatives": [
+        "Reverse and Add"
+      ]
+    },
+    {
+      "id": "shuffle-the-array",
+      "batch": "remaining",
+      "article": "articles/shuffle-the-array.md",
+      "sha256": "31d0bb82ba9e53b3b733e294ece99ef21708fbbb0e0a53228180f46a70ae9f6b",
+      "default": "Bit Manipulation",
+      "alternatives": [
+        "Iteration (Extra Space)",
+        "Multiplication And Modulo"
+      ]
+    }
+  ]
+}

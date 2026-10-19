@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        int l = 0, r = nums.size() - 1;\n\n        while (l < r) {\n            int m = (l + r) >> 1;\n            if (nums[m] > nums[m + 1]) {\n                r = m;\n            } else {\n                l = m + 1;\n            }\n        }\n\n        return l;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=kMzJy9es7Hc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-peak-element.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-peak-element.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA peak element is greater than its neighbors. Since adjacent elements are guaranteed to be different and elements outside the array are treated as negative infinity, we can scan from left to right. The first time we find an element greater than its next neighbor, we have found a peak. If no such element exists before the last index, the last element itself must be a peak (since the array keeps increasing).\n\n### Steps\n\n1. Iterate through the array from index `0` to `n-2`.\n2. If the current element is greater than the next element, return the current index as a peak.\n3. If the loop completes without finding a peak, return `n-1` (the last element is the peak).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findPeakElement(self, nums: List[int]) -> int:\n        for i in range(len(nums) - 1):\n            if nums[i] > nums[i + 1]:\n                return i\n\n        return len(nums) - 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-peak-element.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nBinary search works here because a peak must exist in any subarray. At each midpoint, if the element is smaller than its left neighbor, a peak exists on the left side. If it is smaller than its right neighbor, a peak exists on the right side. Otherwise, the midpoint itself is a peak. This property allows us to eliminate half the search space each iteration.\n\n### Steps\n\n1. Initialize two pointers `l = 0` and `r = n - 1`.\n2. While `l <= r`:\n    - Compute the midpoint `m`.\n    - If `m > 0` and `nums[m] < nums[m - 1]`, move the right pointer to `m - 1`.\n    - Else if `m < n - 1` and `nums[m] < nums[m + 1]`, move the left pointer to `m + 1`.\n    - Otherwise, `m` is a peak; return `m`.\n3. Return the result.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findPeakElement(self, nums: List[int]) -> int:\n        l, r = 0, len(nums) - 1\n\n        while l <= r:\n            m = l + (r - l) // 2\n            if m > 0 and nums[m] < nums[m - 1]:\n                r = m - 1\n            elif m < len(nums) - 1 and nums[m] < nums[m + 1]:\n                l = m + 1\n            else:\n                return m\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-peak-element.md",
+      "id": "binary-search"
+    }
+  ]
 }

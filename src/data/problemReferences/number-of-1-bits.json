@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int hammingWeight(uint32_t n) {\n        return __builtin_popcount(n);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=5Km3utixwZs",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-one-bits.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-one-bits.md",
+  "alternatives": [
+    {
+      "approach": "Bit Mask - I",
+      "explanation": "### How it works\n\nWe are asked to count how many **`1` bits** are present in the binary representation of an integer `n`.  \nThis value is also known as the **Hamming Weight** or **population count**.\n\nA straightforward way to do this is to:\n\n- check each bit position one by one\n- see whether that bit is set (`1`) or not (`0`)\n\nSince integers are typically represented using **32 bits**, we can safely check all 32 bit positions.\n\nAt each position:\n\n- create a mask with a single `1` at that position using `1 << i`\n- use bitwise AND (`&`) to test whether that bit is set in `n`\n\n### Steps\n\n1. Initialize a counter `res = 0`.\n2. For each bit position `i` from `0` to `31`:\n3. Create a mask with only the `i`-th bit set:\n    - `mask = 1 << i`\n4. Check if this bit is set in `n`:\n    - If `(mask & n) != 0`, increment `res`\n5. After checking all 32 bits, return `res`.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        res = 0\n        for i in range(32):\n            if (1 << i) & n:\n                res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-one-bits.md",
+      "id": "bit-mask-i"
+    },
+    {
+      "approach": "Bit Mask (Optimal)",
+      "explanation": "### How it works\n\nWe want to count the number of `1` bits in the binary representation of an integer `n` (Hamming Weight).\n\nA very efficient trick comes from this key observation:\n\n- Subtracting `1` from a number **flips the rightmost `1` bit to `0`** and turns all bits to its right into `1`\n- Performing `n & (n - 1)` **removes the rightmost `1` bit** from `n`\n\nSo every time we do:\n`n = n & (n - 1)` we eliminate exactly **one `1` bit**.\n\nThis means:\n\n- the number of iterations equals the number of `1` bits\n- we don’t waste time checking bits that are `0`\n\nThat’s why this approach is considered optimal.\n\n### Steps\n\n1. Initialize a counter `res = 0`.\n2. While `n` is not zero:\n    - Update `n = n & (n - 1)` to remove the rightmost `1` bit\n    - Increment `res` by `1`\n3. When `n` becomes `0`, all `1` bits have been removed.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        res = 0\n        while n:\n            n &= n - 1\n            res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-one-bits.md",
+      "id": "bit-mask-optimal"
+    }
+  ]
 }

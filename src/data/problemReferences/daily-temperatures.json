@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        int n = temperatures.size();\n        vector<int> res(n, 0);\n\n        for (int i = n - 2; i >= 0; i--) {\n            int j = i + 1;\n            while (j < n && temperatures[j] <= temperatures[i]) {\n                if (res[j] == 0) {\n                    j = n;\n                    break;\n                }\n                j += res[j];\n            }\n\n            if (j < n) {\n                res[i] = j - i;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cTBiBSnjO3c",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/daily-temperatures.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/daily-temperatures.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each day, we simply look forward to find the next day with a higher temperature.  \nWe compare the current day with every future day until we either find a warmer one or reach the end.  \nIf we find a warmer day, we record how many days it took.  \nIf not, the answer is `0`.  \nThis method is easy to understand but slow because every day may scan many days ahead.\n\n### Steps\n\n1. Let `res` store the number of days until a warmer temperature.\n2. For each index `i`:\n    - Start checking from the next day `j = i + 1` and count how many steps it takes to find a warmer day.\n    - If a warmer day is found, store the count.\n    - Otherwise, store `0`.\n3. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        n = len(temperatures)\n        res = []\n\n        for i in range(n):\n            count = 1\n            j = i + 1\n            while j < n:\n                if temperatures[j] > temperatures[i]:\n                    break\n                j += 1\n                count += 1\n            count = 0 if j == n else count\n            res.append(count)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/daily-temperatures.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nWe want to know how long it takes until a warmer day for each temperature.  \nA **stack** helps because it keeps track of days that are still waiting for a warmer temperature.  \nAs we scan forward, whenever we find a temperature higher than the one on top of the stack, it means we just discovered the “next warmer day” for that earlier day.  \nWe pop it, compute the difference in days, and continue.  \nThis way, each day is pushed and popped at most once, making the process efficient.\n\n### Steps\n\n1. Create a result list filled with zeros.\n2. Use a stack to store pairs of (temperature, index) for days that haven't found a warmer day yet.\n3. Iterate through the temperature list:\n    - While the stack is not empty **and** the current temperature is warmer than the top of the stack:\n        - Pop the top element.\n        - Compute how many days passed and update the result.\n    - Push the current day onto the stack.\n4. Return the filled result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        res = [0] * len(temperatures)\n        stack = []  # pair: [temp, index]\n\n        for i, t in enumerate(temperatures):\n            while stack and t > stack[-1][0]:\n                stackT, stackInd = stack.pop()\n                res[stackInd] = i - stackInd\n            stack.append((t, i))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/daily-temperatures.md",
+      "id": "stack"
+    }
+  ]
 }

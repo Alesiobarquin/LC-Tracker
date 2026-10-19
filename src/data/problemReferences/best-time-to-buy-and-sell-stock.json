@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int maxP = 0;\n        int minBuy = prices[0];\n\n        for (int& sell : prices) {\n            maxP = max(maxP, sell - minBuy);\n            minBuy = min(minBuy, sell);\n        }\n        return maxP;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=1pkOgXD63yU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-and-sell-crypto.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-and-sell-crypto.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe brute-force approach checks every possible buy–sell pair.  \nFor each day, we pretend to buy the stock, and then we look at all the future days to see what the best selling price would be.  \nAmong all these profits, we keep the highest one.\n\n### Steps\n\n1. Initialize `res = 0` to store the maximum profit.\n2. Loop through each day `i` as the buy day.\n3. For each buy day, loop through each day `j > i` as the sell day.\n4. Calculate the profit `prices[j] - prices[i]` and update `res`.\n5. Return `res` after checking all pairs.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        res = 0\n        for i in range(len(prices)):\n            buy = prices[i]\n            for j in range(i + 1, len(prices)):\n                sell  = prices[j]\n                res = max(res, sell - buy)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-and-sell-crypto.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Pointers",
+      "explanation": "### How it works\n\nWe want to buy at a low price and sell at a higher price that comes **after** it.  \nUsing two pointers helps us track this efficiently:\n\n- `l` is the **buy day** (looking for the lowest price)\n- `r` is the **sell day** (looking for a higher price)\n\nIf the price at `r` is higher than at `l`, we can make a profit — so we update the maximum.\nIf the price at `r` is lower, then `r` becomes the new `l` because a cheaper buying price is always better.\n\nBy moving the pointers this way, we scan the list once and always keep the best buying opportunity.\n\n### Steps\n\n1. Set two pointers:\n    - `l = 0` (buy day)\n    - `r = 1` (sell day)\n    - `maxP = 0` to track maximum profit\n2. While `r` is within the array:\n    - If `prices[r] > prices[l]`, compute the profit and update `maxP`.\n    - Otherwise, move `l` to `r` (we found a cheaper buy price).\n    - Move `r` to the next day.\n3. Return `maxP` at the end.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        l, r = 0, 1\n        maxP = 0\n\n        while r < len(prices):\n            if prices[l] < prices[r]:\n                profit = prices[r] - prices[l]\n                maxP = max(maxP, profit)\n            else:\n                l = r\n            r += 1\n        return maxP\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-and-sell-crypto.md",
+      "id": "two-pointers"
+    }
+  ]
 }

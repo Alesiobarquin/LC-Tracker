@@ -7,5 +7,16 @@
     "cpp": "class KthLargest {\nprivate:\n    priority_queue<int, vector<int>, greater<int>> minHeap;\n    int k;\n\npublic:\n    KthLargest(int k, vector<int>& nums) {\n        this->k = k;\n        for (int num : nums) {\n            minHeap.push(num);\n            if (minHeap.size() > k) {\n                minHeap.pop();\n            }\n        }\n    }\n\n    int add(int val) {\n        minHeap.push(val);\n        if (minHeap.size() > k) {\n            minHeap.pop();\n        }\n        return minHeap.top();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=hOjcdrqMoQ8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-integer-in-a-stream.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-integer-in-a-stream.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nWe want the **k-th largest number** in a stream of values.\nThe simplest approach:\nEvery time a new value comes in, **insert it**, sort the list, and then pick the element at position `len(arr) - k`.\n\nSorting keeps the numbers in increasing order, so the k-th largest element will always sit at the same index.  \nThis method is easy to understand but slow because sorting happens every time `add()` is called.\n\n### Steps\n\n#### Initialization\n\n- Store `k`.\n- Store the initial numbers in an array.\n\n#### add(val)\n\n1. Append `val` to the array.\n2. Sort the array.\n3. Return the element at index `len(arr) - k` (the k-th largest).\n\n### Complexity\n\n- Time complexity: `O(m * nlog n)`\n- Space complexity:\n    - `O(m)` extra space.\n    - `O(n)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `m` is the number of calls made to `add()` and `n` is the current size of the array.",
+      "code": {
+        "python": "from typing import List\n\nclass KthLargest:\n\n    def __init__(self, k: int, nums: List[int]):\n        self.k = k\n        self.arr = nums\n\n    def add(self, val: int) -> int:\n        self.arr.append(val)\n        self.arr.sort()\n        return self.arr[len(self.arr) - self.k]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-integer-in-a-stream.md",
+      "id": "sorting"
+    }
+  ]
 }

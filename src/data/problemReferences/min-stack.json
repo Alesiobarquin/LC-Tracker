@@ -7,5 +7,25 @@
     "cpp": "class MinStack {\nprivate:\n    long min;\n    std::stack<long> stack;\n\npublic:\n    MinStack() {}\n\n    void push(int val) {\n        if (stack.empty()) {\n            stack.push(0);\n            min = val;\n        } else {\n            stack.push(val - min);\n            if (val < min) min = val;\n        }\n    }\n\n    void pop() {\n        if (stack.empty()) return;\n\n        long pop = stack.top();\n        stack.pop();\n\n        if (pop < 0) min = min - pop;\n    }\n\n    int top() {\n        long top = stack.top();\n        return (top > 0) ? (top + min) : (int)min;\n    }\n\n    int getMin() {\n        return (int)min;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=qkLl7nAwDPo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-stack.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-stack.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo get the minimum value, this approach simply looks through **all elements** in the stack.\nSince a normal stack does not store any extra information about the minimum, the only way to find it is to temporarily remove every element, track the smallest one, and then put everything back.\nIt's easy to understand but slow because each `getMin` call scans the entire stack.\n\n### Steps\n\n1. To `push` a value, append it to the stack.\n2. To `pop`, remove the top element of the stack.\n3. To `top`, return the last element.\n4. To `getMin`:\n    - Create a temporary list.\n    - Pop all elements from the stack while tracking the smallest value.\n    - Push all elements back from the temporary list to restore the stack.\n    - Return the smallest value found.\n\n### Complexity\n\n- Time complexity: `O(n)` for `getMin()` and `O(1)` for other operations.\n- Space complexity: `O(n)` for `getMin()` and `O(1)` for other operations.",
+      "code": {
+        "python": "class MinStack:\n\n    def __init__(self):\n        self.stack = []\n\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n\n    def pop(self) -> None:\n        self.stack.pop()\n\n    def top(self) -> int:\n        return self.stack[-1]\n\n    def getMin(self) -> int:\n        tmp = []\n        mini = self.stack[-1]\n\n        while len(self.stack):\n            mini = min(mini, self.stack[-1])\n            tmp.append(self.stack.pop())\n\n        while len(tmp):\n            self.stack.append(tmp.pop())\n\n        return mini\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-stack.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Stacks",
+      "explanation": "### How it works\n\nInstead of searching the whole stack to find the minimum every time, we can keep a **second stack** that always stores the minimum value _up to that point_.\nSo whenever we push a new value, we compare it with the current minimum and store the smaller one on the `minStack`.\nThis guarantees that the top of `minStack` is always the minimum of the entire stack — allowing `getMin()` to work in constant time.\n\n### Steps\n\n1. Maintain two stacks:\n    - `stack` → stores all pushed values.\n    - `minStack` → stores the minimum so far at each level.\n2. On `push(val)`:\n    - Push `val` onto `stack`.\n    - Compute the new minimum (between `val` and the current minimum on `minStack`).\n    - Push this minimum onto `minStack`.\n3. On `pop()`:\n    - Pop from both `stack` and `minStack` to keep them aligned.\n4. On `top()`:\n    - Return the top of `stack`.\n5. On `getMin()`:\n    - Return the top of `minStack`, which is the current minimum.\n\n### Complexity\n\n- Time complexity: `O(1)` for all operations.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class MinStack:\n    def __init__(self):\n        self.stack = []\n        self.minStack = []\n\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n        val = min(val, self.minStack[-1] if self.minStack else val)\n        self.minStack.append(val)\n\n    def pop(self) -> None:\n        self.stack.pop()\n        self.minStack.pop()\n\n    def top(self) -> int:\n        return self.stack[-1]\n\n    def getMin(self) -> int:\n        return self.minStack[-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-stack.md",
+      "id": "two-stacks"
+    }
+  ]
 }

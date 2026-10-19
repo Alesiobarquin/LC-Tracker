@@ -20,7 +20,6 @@ import {
 import {
   ProblemExplanation,
   ExplanationLinks,
-  ProblemExplanationFootnote,
 } from "./ProblemExplanation";
 import { ReferenceCode } from "./ReferenceCode";
 import { RecallEditor } from "./RecallEditor";
@@ -702,9 +701,6 @@ export function RecallPage() {
             Recall success never counts as an independent coding pass.
           </p>
         </section>
-      )}
-      {draft.revealed && comparisonReference === "solution" && (
-        <ProblemExplanationFootnote problem={problem} />
       )}
     </div>
   );

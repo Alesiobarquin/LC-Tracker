@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int l = 0, r = nums.size();\n\n        while (l < r) {\n            int m = l + (r - l) / 2;\n            if (nums[m] >= target) {\n                r = m;\n            } else {\n                l = m + 1;\n            }\n        }\n        return (l < nums.size() && nums[l] == target) ? l : -1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=s4DPM8ct1pI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search.md",
+  "alternatives": [
+    {
+      "approach": "Recursive Binary Search",
+      "explanation": "### How it works\n\nBinary search works by repeatedly cutting the search space in half.  \nInstead of scanning the entire array, we check the **middle element**:\n\n- If it’s the target → return the index.\n- If the target is larger → search only in the right half.\n- If the target is smaller → search only in the left half.\n\nThe recursive version simply expresses this idea as a function that keeps calling itself on the appropriate half until the target is found or the range becomes invalid.\n\n### Steps\n\n1. Define a recursive function that takes the current search range `[l, r]`.\n2. If `l > r`, the range is empty, return `-1`.\n3. Compute the middle index `m = (l + r) // 2`.\n4. Compare `nums[m]` with `target`:\n    - If equal, return `m`.\n    - If `nums[m] < target`, recursively search `[m + 1, r]`.\n    - If `nums[m] > target`, recursively search `[l, m - 1]`.\n5. Start the recursion with the full range `[0, n - 1]`.\n6. Return the final result.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def binary_search(self, l: int, r: int, nums: List[int], target: int) -> int:\n        if l > r:\n            return -1\n        m = l + (r - l) // 2\n\n        if nums[m] == target:\n            return m\n        if nums[m] < target:\n            return self.binary_search(m + 1, r, nums, target)\n        return self.binary_search(l, m - 1, nums, target)\n\n    def search(self, nums: List[int], target: int) -> int:\n        return self.binary_search(0, len(nums) - 1, nums, target)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search.md",
+      "id": "recursive-binary-search"
+    },
+    {
+      "approach": "Iterative Binary Search",
+      "explanation": "### How it works\n\nBinary search checks the middle element of a sorted array and decides which half to discard.  \nInstead of using recursion, the iterative approach keeps shrinking the search range using a loop.  \nWe adjust the left and right pointers until we either find the target or the pointers cross, meaning the target isn’t present.\n\n### Steps\n\n1. Initialize two pointers:\n    - `l = 0` (start of array)\n    - `r = len(nums) - 1` (end of array)\n2. While `l <= r`:\n    - Compute `m = l + (r - l) // 2` (safe midpoint).\n    - If `nums[m] == target`, return `m`.\n    - If `nums[m] < target`, move search to the right half: update `l = m + 1`.\n    - If `nums[m] > target`, move search to the left half: update `r = m - 1`.\n3. If the loop ends without finding the target, return `-1`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        l, r = 0, len(nums) - 1\n\n        while l <= r:\n            # (l + r) // 2 can lead to overflow\n            m = l + ((r - l) // 2)\n\n            if nums[m] > target:\n                r = m - 1\n            elif nums[m] < target:\n                l = m + 1\n            else:\n                return m\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search.md",
+      "id": "iterative-binary-search"
+    }
+  ]
 }

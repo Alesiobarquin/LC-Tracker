@@ -7,5 +7,17 @@
     "cpp": "class Solution {\npublic:\n    int getSum(int a, int b) {\n        while (b != 0) {\n            int carry = (a & b) << 1;\n            a ^= b;\n            b = carry;\n        }\n        return a;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=gVUrDV4tZfY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-two-integers.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-two-integers.md",
+  "alternatives": [
+    {
+      "approach": "Bit Manipulation",
+      "explanation": "### How it works\n\nSimulate a 32-bit full adder one bit at a time. XOR of the two input bits and the incoming carry gives the result bit. The next carry is set when at least two of those three bits are set: `(a_bit & b_bit) | (a_bit & carry) | (b_bit & carry)`. This computes the sum without addition or subtraction operators.\n\nPython integers have arbitrary precision, so this algorithm deliberately builds a 32-bit result and then interprets its sign bit as two's complement. The problem's input bounds keep the required sum within this signed range.\n\n### Steps\n\n1. Start with a zero result and zero carry.\n2. For bit positions 0 through 31, extract one bit from each input using shifts and a mask.\n3. XOR the input bits with the incoming carry to obtain the current result bit.\n4. Compute the next carry using the three pairwise AND operations, then set the result bit when needed.\n5. If the unsigned result exceeds `0x7FFFFFFF`, convert it to a negative Python integer with `~(result ^ 0xFFFFFFFF)`.\n\n### Complexity\n\n- Time complexity: `O(1)` for the fixed 32-bit loop; `O(w)` for a generalized width `w`.\n- Space complexity: `O(1)` for the fixed-width problem.\n\n### Things to watch for\n\n- Use bitwise operations for carry as well as for the result; adding the three bits would violate the operator restriction.\n- Include the incoming carry in both calculations.\n- Convert the completed unsigned value back to signed form for negative answers.",
+      "code": {
+        "python": "class Solution:\n    def getSum(self, a: int, b: int) -> int:\n        carry = 0\n        res = 0\n        mask = 0xFFFFFFFF\n\n        for i in range(32):\n            a_bit = (a >> i) & 1\n            b_bit = (b >> i) & 1\n            cur_bit = a_bit ^ b_bit ^ carry\n            carry = (a_bit & b_bit) | (a_bit & carry) | (b_bit & carry)\n            if cur_bit:\n                res |= (1 << i)\n\n        if res > 0x7FFFFFFF:\n            res = ~(res ^ mask)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-two-integers.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "bit-manipulation"
+    }
+  ]
 }

@@ -7,5 +7,18 @@
     "cpp": "class Solution {\npublic:\n    int romanToInt(string s) {\n        unordered_map<char, int> roman = {\n            {'I', 1}, {'V', 5}, {'X', 10},\n            {'L', 50}, {'C', 100}, {'D', 500}, {'M', 1000}\n        };\n\n        int res = 0;\n        for (int i = 0; i < s.size(); i++) {\n            if (i + 1 < s.size() && roman[s[i]] < roman[s[i + 1]]) {\n                res -= roman[s[i]];\n            } else {\n                res += roman[s[i]];\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=3jdxYj3DD98",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/roman-to-integer.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/roman-to-integer.md",
+  "alternatives": [
+    {
+      "explanation": "### How it works\n\nRead a valid Roman numeral from right to left while remembering the greatest symbol value seen. A smaller symbol to its left is subtractive; otherwise add it. For example, in `MCM`, the first `M` encountered contributes 1000, `C` subtracts 100, and the remaining `M` adds 1000.\n\n### Steps\n\n1. Store the seven Roman symbol values.\n2. Initialize the total and largest value seen to zero.\n3. Scan the characters from right to left.\n4. Subtract a value smaller than the largest seen; otherwise add it and update the largest value.\n5. Return the total.\n\n### Complexity\n\nTime is `O(n)` for `n` characters. Auxiliary space is `O(1)` because the value table is fixed and `reversed` does not copy the string.\n\n### Things to watch for\n\n- This interprets valid Roman numerals as required by the problem; it does not validate arbitrary numeral strings.\n- Equal symbols add rather than subtract.\n- Use a reverse iterator to avoid allocating a reversed string.",
+      "code": {
+        "python": "class Solution:\n    def romanToInt(self, s: str) -> int:\n        values = {\"I\": 1, \"V\": 5, \"X\": 10, \"L\": 50,\n                  \"C\": 100, \"D\": 500, \"M\": 1000}\n        total = largest = 0\n        for char in reversed(s):\n            value = values[char]\n            if value < largest:\n                total -= value\n            else:\n                total += value\n                largest = value\n        return total\n"
+      },
+      "approach": "Right-to-Left Scan",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/roman-to-integer.md",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "id": "right-to-left-scan"
+    }
+  ]
 }

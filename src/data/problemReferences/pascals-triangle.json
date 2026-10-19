@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> generate(int numRows) {\n        vector<vector<int>> res(numRows);\n\n        for (int i = 0; i < numRows; i++) {\n            res[i].resize(i + 1);\n            res[i][0] = res[i][i] = 1;\n            for (int j = 1; j < i; j++){\n                res[i][j] = res[i - 1][j - 1] + res[i - 1][j];\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nPVEaB3AjUM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pascals-triangle.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pascals-triangle.md",
+  "alternatives": [
+    {
+      "approach": "Combinatorics",
+      "explanation": "### How it works\n\nEach element in Pascal's Triangle corresponds to a binomial coefficient. The value at row `n` and position `k` is `C(n, k)`. Rather than computing each coefficient from scratch using factorials, we can compute them incrementally. Starting from `1`, each subsequent value in a row can be derived by multiplying by `(n - k + 1) / k`.\n\n### Steps\n\n1. Initialize an empty result list.\n2. For each row `n` from `0` to `numRows - 1`:\n    - Start the row with `[1]`.\n    - Set `val = 1`.\n    - For each position `k` from `1` to `n`:\n        - Compute `val = val * (n - k + 1) / k`.\n        - Append `val` to the `row`.\n    - Add the completed `row` to the result.\n3. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def generate(self, numRows: int) -> List[List[int]]:\n        res = []\n        for n in range(numRows):\n            row = [1]\n            val = 1\n            for k in range(1, n + 1):\n                val = val * (n - k + 1) // k\n                row.append(val)\n            res.append(row)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pascals-triangle.md",
+      "id": "combinatorics"
+    },
+    {
+      "approach": "Dynamic Programming - I",
+      "explanation": "### How it works\n\nEach element in Pascal's Triangle (except the edges) is the sum of the two elements directly above it. We can simulate this by padding the previous row with zeros on both ends, then summing adjacent pairs to generate the next row.\n\n### Steps\n\n1. Start with the first row `[[1]]`.\n2. For each subsequent row:\n    - Take the last row and pad it with zeros: `[0] + row + [0]`.\n    - Create a new row by summing adjacent elements: `temp[j] + temp[j + 1]`.\n    - Append the new `row` to the result.\n3. Return the result after generating `numRows` rows.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def generate(self, numRows: int) -> List[List[int]]:\n        res = [[1]]\n\n        for i in range(numRows - 1):\n            temp = [0] + res[-1] + [0]\n            row = []\n            for j in range(len(res[-1]) + 1):\n                row.append(temp[j] + temp[j + 1])\n            res.append(row)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pascals-triangle.md",
+      "id": "dynamic-programming-i"
+    }
+  ]
 }

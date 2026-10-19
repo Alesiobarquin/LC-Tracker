@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        int n = nums.size();\n        int i = 0;\n\n        while (i < n) {\n            if (nums[i] <= 0 || nums[i] > n) {\n                i++;\n                continue;\n            }\n            int index = nums[i] - 1;\n            if (nums[i] != nums[index]) {\n                swap(nums[i], nums[index]);\n            } else {\n                i++;\n            }\n        }\n\n        for (i = 0; i < n; i++) {\n            if (nums[i] != i + 1) {\n                return i + 1;\n            }\n        }\n\n        return n + 1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=8g78yfzMlao",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-missing-positive.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-missing-positive.md",
+  "alternatives": [
+    {
+      "approach": "Boolean Array",
+      "explanation": "### How it works\n\nHere's a key observation: if the array has `n` elements, the answer must be in the range `[1, n + 1]`.\nWhy? Because even if the array contains `n` distinct positive integers, they can at most cover `1` through `n`, making `n + 1` the answer.\n\nSo we only care about numbers from `1` to `n`. We can create a boolean array of size `n` where `seen[i]` tells us whether `i + 1` exists in the input. Then we just find the first index that's still `false`.\n\n### Steps\n\n1. Create a boolean array `seen` of size `n`, initialized to `false`.\n2. For each number in the input:\n    - If it's between `1` and `n`, mark `seen[num - 1] = true`.\n3. Scan `seen` from index `0` to `n - 1`:\n    - Return `i + 1` for the first `false` entry.\n4. If all entries are `true`, return `n + 1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def firstMissingPositive(self, nums: list[int]) -> int:\n        n = len(nums)\n        seen = [False] * n\n        for num in nums:\n            if num > 0 and num <= n:\n                seen[num - 1] = True\n\n        for num in range(1, n + 1):\n            if not seen[num - 1]:\n                return num\n\n        return n + 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-missing-positive.md",
+      "id": "boolean-array"
+    },
+    {
+      "approach": "Negative Marking",
+      "explanation": "### How it works\n\nCan we achieve O(1) space without sorting? Yes, by using the input array itself as our hash map.\n\nThe idea is to use the sign of each element as a flag. If the value at index `i` is negative, it means `i + 1` exists in the array. But there's a catch: the array might already contain negative numbers or zeros, which would interfere with our marking scheme.\n\nSo we first convert all non-positive numbers to `0`. Then for each value `v` in the range `[1, n]`, we mark the element at index `v - 1` as negative. If it's already `0`, we use a special marker `-(n + 1)` to indicate presence while keeping it distinguishable.\n\nFinally, the first non-negative index tells us which number is missing.\n\n### Steps\n\n1. Replace all negative numbers with `0`.\n2. For each number `val` (using absolute value to handle already-marked cells):\n    - If `1 <= val <= n`:\n        - If `nums[val - 1] > 0`, negate it.\n        - If `nums[val - 1] == 0`, set it to `-(n + 1)`.\n3. Find the first index where `nums[i] >= 0` and return `i + 1`.\n4. If no such index exists, return `n + 1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "class Solution:\n    def firstMissingPositive(self, nums: list[int]) -> int:\n        for i in range(len(nums)):\n            if nums[i] < 0:\n                nums[i] = 0\n\n        for i in range(len(nums)):\n            val = abs(nums[i])\n            if 1 <= val <= len(nums):\n                if nums[val - 1] > 0:\n                    nums[val - 1] *= -1\n                elif nums[val - 1] == 0:\n                    nums[val - 1] = -1 * (len(nums) + 1)\n\n        for i in range(1, len(nums) + 1):\n            if nums[i - 1] >= 0:\n                return i\n\n        return len(nums) + 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-missing-positive.md",
+      "id": "negative-marking"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int removeElement(vector<int>& nums, int val) {\n        int i = 0, n = nums.size();\n        while (i < n) {\n            if (nums[i] == val) {\n                nums[i] = nums[--n];\n            } else {\n                i++;\n            }\n        }\n        return n;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Pcd1ii9P9ZI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-element.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-element.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest way to remove elements is to collect all the values we want to keep into a separate list.\nWe iterate through the array, skip any element that matches the target value, and store the rest.\nThen we copy everything back into the original array.\nThis works but uses extra space proportional to the input size.\n\n### Steps\n\n1. Create a temporary list `tmp` to store elements that are not equal to `val`.\n2. Iterate through `nums` and add each element to `tmp` if it does not equal `val`.\n3. Copy all elements from `tmp` back into the beginning of `nums`.\n4. Return the length of `tmp`, which represents how many valid elements remain.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeElement(self, nums: list[int], val: int) -> int:\n        tmp = []\n        for num in nums:\n            if num == val:\n                continue\n            tmp.append(num)\n        for i in range(len(tmp)):\n            nums[i] = tmp[i]\n        return len(tmp)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-element.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nInstead of using extra space, we can overwrite unwanted elements in place.\nWe use a write pointer `k` that tracks where the next valid element should go.\nAs we scan through the array, whenever we find an element that is not equal to `val`, we write it at position `k` and move `k` forward.\nAt the end, everything before index `k` contains valid elements.\n\n### Steps\n\n1. Initialize a pointer `k = 0` to track the position for the next valid element.\n2. Iterate through the array with index `i`:\n    - If `nums[i]` is not equal to `val`, copy it to `nums[k]` and increment `k`.\n3. Return `k` as the count of valid elements.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def removeElement(self, nums: list[int], val: int) -> int:\n        k = 0\n        for i in range(len(nums)):\n            if nums[i] != val:\n                nums[k] = nums[i]\n                k += 1\n        return k\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-element.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        int zero = 0, one = 0;\n        for (int two = 0; two < nums.size(); two++) {\n            int tmp = nums[two];\n            nums[two] = 2;\n            if (tmp < 2) {\n                nums[one++] = 1;\n            }\n            if (tmp < 1) {\n                nums[zero++] = 0;\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4xbWSRZHqac",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-colors.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-colors.md",
+  "alternatives": [
+    {
+      "approach": "Counting Sort",
+      "explanation": "### How it works\n\nSince there are only three possible values (0, 1, 2), we can count how many times each appears in a single pass. Then we overwrite the array in a second pass, placing the correct number of 0s, followed by 1s, followed by 2s. This is a classic application of counting sort.\n\n### Steps\n\n1. Count the occurrences of `0`, `1`, and `2` in the array.\n2. Overwrite the array:\n    - Fill the first `count[0]` positions with `0`.\n    - Fill the next `count[1]` positions with `1`.\n    - Fill the remaining `count[2]` positions with `2`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        \"\"\"\n        Do not return anything, modify nums in-place instead.\n        \"\"\"\n        count = [0] * 3\n        for num in nums:\n            count[num] += 1\n\n        index = 0\n        for i in range(3):\n            while count[i]:\n                count[i] -= 1\n                nums[index] = i\n                index += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-colors.md",
+      "id": "counting-sort"
+    },
+    {
+      "approach": "Three Pointers - I",
+      "explanation": "### How it works\n\nThe Dutch National Flag algorithm partitions the array into three sections in a single pass. We maintain pointers for the boundary of 0s (left), the boundary of 2s (right), and the current element being examined. When we see a 0, we swap it to the left section. When we see a 2, we swap it to the right section. 1s naturally end up in the middle.\n\n### Steps\n\n1. Initialize three pointers: `l` (boundary for `0`s), `i` (current element), and `r` (boundary for `2`s).\n2. While `i <= r`:\n    - If `nums[i]` is `0`, swap with `nums[l]`, increment both `l` and `i`.\n    - If `nums[i]` is `2`, swap with `nums[r]`, decrement `r` (do not increment `i` since the swapped element needs to be checked).\n    - If `nums[i]` is `1`, just increment `i`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        \"\"\"\n        Do not return anything, modify nums in-place instead.\n        \"\"\"\n        l, r = 0, len(nums) - 1\n        i = 0\n\n        def swap(i, j):\n            temp = nums[i]\n            nums[i] = nums[j]\n            nums[j] = temp\n\n        while i <= r:\n            if nums[i] == 0:\n                swap(l, i)\n                l += 1\n            elif nums[i] == 2:\n                swap(i, r)\n                r -= 1\n                i -= 1\n            i += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-colors.md",
+      "id": "three-pointers-i"
+    }
+  ]
 }

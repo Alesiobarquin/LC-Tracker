@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> res;\n        for (const auto& s : strs) {\n            vector<int> count(26, 0);\n            for (char c : s) {\n                count[c - 'a']++;\n            }\n            string key = to_string(count[0]);\n            for (int i = 1; i < 26; ++i) {\n                key += ',' + to_string(count[i]);\n            }\n            res[key].push_back(s);\n        }\n        vector<vector<string>> result;\n        for (const auto& pair : res) {\n            result.push_back(pair.second);\n        }\n        return result;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=vzdNOK2oB2E",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/anagram-groups.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/anagram-groups.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nAnagrams become identical when their characters are sorted.  \nFor example, `\"eat\"`, `\"tea\"`, and `\"ate\"` all become `\"aet\"` after sorting.  \nBy using the sorted version of each string as a key, we can group all anagrams together.  \nStrings that share the same sorted form must be anagrams, so placing them in the same group is both natural and efficient.\n\n### Steps\n\n1. Create a hash map where each key is the sorted version of a string, and the value is a list of strings belonging to that anagram group.\n2. Iterate through each string in the input list:\n    - Sort the characters of the string to form a key.\n    - Append the original string to the list corresponding to this key.\n3. After processing all strings, return all values from the hash map, which represent the grouped anagrams.\n\n### Complexity\n\n- Time complexity: `O(m * n log n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of strings and `n` is the length of the longest string.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        res = defaultdict(list)\n        for s in strs:\n            sortedS = ''.join(sorted(s))\n            res[sortedS].append(s)\n        return list(res.values())\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/anagram-groups.md",
+      "id": "sorting"
+    }
+  ]
 }

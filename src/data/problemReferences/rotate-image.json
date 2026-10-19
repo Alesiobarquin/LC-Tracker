@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        // Reverse the matrix vertically\n        reverse(matrix.begin(), matrix.end());\n\n        // Transpose the matrix\n        for (int i = 0; i < matrix.size(); ++i) {\n            for (int j = i + 1; j < matrix[i].size(); ++j)\n                swap(matrix[i][j], matrix[j][i]);\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=fMSJSS7eO1w",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-matrix.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-matrix.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe are given an `n x n` matrix and need to rotate it **90 degrees clockwise**.\n\nA direct and beginner-friendly way to think about this is:\n\n- create a **new matrix** where each element from the original matrix is placed in its rotated position\n- after building this rotated version, copy it back into the original matrix\n\nThe key observation for a 90° clockwise rotation is:\n\n- an element at position `(i, j)` in the original `matrix`\n- moves to position `(j, n - 1 - i)` in the rotated `matrix`\n\nBy applying this rule to every cell, we can construct the rotated matrix easily.\n\n### Steps\n\n1. Let `n` be the size of the `matrix`.\n2. Create a new `n x n` `matrix` called `rotated`, initially filled with zeros.\n3. Traverse each cell `(i, j)` of the original `matrix`:\n    - place its value into the rotated position:\n        - `rotated[j][n - 1 - i] = matrix[i][j]`\n4. After filling the `rotated` `matrix`, copy all values back into the original `matrix`.\n5. The original `matrix` is now rotated 90 degrees clockwise.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rotate(self, matrix: List[List[int]]) -> None:\n        n = len(matrix)\n        rotated = [[0] * n for _ in range(n)]\n\n        for i in range(n):\n            for j in range(n):\n                rotated[j][n - 1 - i] = matrix[i][j]\n\n        for i in range(n):\n            for j in range(n):\n                matrix[i][j] = rotated[i][j]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-matrix.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Rotate By Four Cells",
+      "explanation": "### How it works\n\nWe want to rotate an `n x n` matrix **90 degrees clockwise**, but this time **in-place**, without using extra space.\n\nA useful way to visualize this is to rotate the matrix **layer by layer**, starting from the outermost layer and moving inward.\n\nFor each square layer:\n\n- elements move in groups of **four**\n- each element in the group shifts to its new rotated position\n\nSpecifically, for a given layer:\n\n- **`top-left` → `top-right`**\n- **`top-right` → `bottom-right`**\n- **`bottom-right` → `bottom-left`**\n- **`bottom-left` → `top-left`**\n\nBy rotating these four cells at a time, we complete the rotation without needing an extra `matrix`.\n\n### Steps\n\n1. Initialize two pointers:\n    - `l = 0` → left boundary of the current layer\n    - `r = n - 1` → right boundary of the current layer\n2. While `l < r` (process each layer):\n3. For each position `i` in the current layer (from `0` to `r - l - 1`):\n    - Identify:\n        - `top = l`\n        - `bottom = r`\n    - Save the **`top-left`** value temporarily\n    - Move **`bottom-left` → `top-left`**\n    - Move **`bottom-right` → `bottom-left`**\n    - Move **`top-right` → `bottom-right`**\n    - Move saved **`top-left` → `top-right`**\n4. After finishing one layer:\n    - increment `l`\n    - decrement `r`\n5. Continue until all layers are rotated.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rotate(self, matrix: List[List[int]]) -> None:\n        l, r = 0, len(matrix) - 1\n        while l < r:\n            for i in range(r - l):\n                top, bottom = l, r\n\n                # save the topleft\n                topLeft = matrix[top][l + i]\n\n                # move bottom left into top left\n                matrix[top][l + i] = matrix[bottom - i][l]\n\n                # move bottom right into bottom left\n                matrix[bottom - i][l] = matrix[bottom][r - i]\n\n                # move top right into bottom right\n                matrix[bottom][r - i] = matrix[top + i][r]\n\n                # move top left into top right\n                matrix[top + i][r] = topLeft\n            r -= 1\n            l += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-matrix.md",
+      "id": "rotate-by-four-cells"
+    }
+  ]
 }

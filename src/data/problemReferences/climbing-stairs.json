@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        double sqrt5 = sqrt(5);\n        double phi = (1 + sqrt5) / 2;\n        double psi = (1 - sqrt5) / 2;\n        n++;\n        return round((pow(phi, n) - pow(psi, n)) / sqrt5);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Y0lT9Fck7qI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/climbing-stairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/climbing-stairs.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis is the **optimized version of the recursive solution**.\n\nThe key observation is:\n- While exploring choices (1 step or 2 steps), the same subproblems repeat many times.\n- For example, the number of ways from step `i` is always the same whenever we reach `i`.\n\nSo instead of recomputing, we **store the result** the first time we compute it and reuse it later.\nThis is exactly what **Top-Down Dynamic Programming (Memoization)** does.\n\nWe still think recursively, but we avoid redundant work.\n\n### Steps\n\n1. Create a cache array `cache` of size `n` initialized with `-1`.\n2. Define a recursive function `dfs(i)`:\n   - If `i == n`, return `1` (valid way).\n   - If `i > n`, return `0` (invalid path).\n   - If `cache[i] != -1`, return the cached value.\n3. Otherwise:\n   - Compute `dfs(i + 1) + dfs(i + 2)`\n   - Store the result in `cache[i]`\n4. Return `dfs(0)` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def climbStairs(self, n: int) -> int:\n        cache = [-1] * n\n        def dfs(i):\n            if i >= n:\n                return i == n\n            if cache[i] != -1:\n                return cache[i]\n            cache[i] = dfs(i + 1) + dfs(i + 2)\n            return cache[i]\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/climbing-stairs.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Space Optimized)",
+      "explanation": "### How it works\n\nAt any step, the number of ways depends only on the **previous two steps**.  \nSo instead of storing all values in a DP array, we can just keep **two variables** that represent:\n- ways to reach the previous step\n- ways to reach the step before that\n\nThis is the same Fibonacci idea, but optimized to use constant space.\n\n### Steps\n\n1. Initialize two variables:\n   - `one` -> ways to reach the current step\n   - `two` -> ways to reach the previous step\n2. Start both as `1` (base case).\n3. Repeat `n - 1` times:\n   - New ways = `one + two`\n   - Shift variables forward.\n4. Return `one`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        one, two = 1, 1\n\n        for i in range(n - 1):\n            temp = one\n            one = one + two\n            two = temp\n\n        return one\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/climbing-stairs.md",
+      "id": "dynamic-programming-space-optimized"
+    }
+  ]
 }

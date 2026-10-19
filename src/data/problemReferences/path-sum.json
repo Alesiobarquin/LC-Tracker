@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool hasPathSum(TreeNode* root, int targetSum) {\n        if (!root) return false;\n\n        queue<pair<TreeNode*, int>> q;\n        q.push({root, targetSum - root->val});\n\n        while (!q.empty()) {\n            auto [node, currSum] = q.front();\n            q.pop();\n\n            if (!node->left && !node->right && currSum == 0) {\n                return true;\n            }\n\n            if (node->left) {\n                q.push({node->left, currSum - node->left->val});\n            }\n\n            if (node->right) {\n                q.push({node->right, currSum - node->right->val});\n            }\n        }\n\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=LSKQyOz_P8I",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-sum.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search - I",
+      "explanation": "### How it works\n\nWe traverse the tree from root to leaves, accumulating the sum along the way. When we reach a leaf node, we check if the accumulated sum equals the target. `dfs` naturally explores all root-to-leaf paths, making it ideal for this problem.\n\n### Steps\n\n1. Define `dfs(node, curSum)` that returns whether a valid path exists from this node.\n2. If `node` is `null`, return `false`.\n3. Add `node.val` to `curSum`.\n4. If `node` is a leaf (no children), return whether `curSum == targetSum`.\n5. Otherwise, recursively check the left and right subtrees, returning `true` if either has a valid path.\n6. Call `dfs(root, 0)` to start the search.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:\n        def dfs(node, curSum):\n            if not node:\n                return False\n\n            curSum += node.val\n            if not node.left and not node.right:\n                return curSum == targetSum\n\n            return dfs(node.left, curSum) or dfs(node.right, curSum)\n\n        return dfs(root, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-sum.md",
+      "id": "depth-first-search-i"
+    },
+    {
+      "approach": "Iterative DFS",
+      "explanation": "### How it works\n\nWe can simulate the recursive `dfs` using an explicit stack. Each stack entry stores a node and the remaining sum needed to reach the target from that node. This approach avoids recursion depth issues for very deep trees.\n\n### Steps\n\n1. If `root` is `null`, return `false`.\n2. Initialize a stack with `(root, targetSum - root.val)`.\n3. While the stack is not empty:\n    - Pop a node and its remaining sum.\n    - If it's a leaf and the remaining sum is zero, return `true`.\n    - Push the right child (if exists) with its updated remaining sum.\n    - Push the left child (if exists) with its updated remaining sum.\n4. If the stack empties without finding a valid path, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:\n        if not root:\n            return False\n\n        stack = [(root, targetSum - root.val)]\n        while stack:\n            node, curr_sum = stack.pop()\n            if not node.left and not node.right and curr_sum == 0:\n                return True\n            if node.right:\n                stack.append((node.right, curr_sum - node.right.val))\n            if node.left:\n                stack.append((node.left, curr_sum - node.left.val))\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-sum.md",
+      "id": "iterative-dfs"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int islandPerimeter(vector<vector<int>>& grid) {\n        int m = grid.size(), n = grid[0].size();\n        int res = 0;\n        for (int r = 0; r < m; r++) {\n            for (int c = 0; c < n; c++) {\n                if (grid[r][c]) {\n                    res += 4;\n                    if (r && grid[r - 1][c]) {\n                        res -= 2;\n                    }\n                    if (c && grid[r][c - 1]) {\n                        res -= 2;\n                    }\n                }\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=fISIuAFRM2s",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/island-perimeter.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/island-perimeter.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nThe perimeter of an island comes from the edges of land cells that touch either water or the grid boundary. Using DFS, we can traverse all connected land cells starting from any land cell. Each time we step outside the grid or hit water, we've found one edge of the perimeter. By recursively exploring in all four directions and counting these boundary crossings, we accumulate the total perimeter.\n\n### Steps\n\n1. Traverse the grid to find the first land cell.\n2. Start `dfs` from that cell, marking cells as visited.\n3. For each cell in the `dfs`:\n    - If out of bounds or water, return `1` (found a perimeter edge).\n    - If already visited, return `0`.\n    - Otherwise, mark as visited and recursively call `dfs` on all four neighbors.\n4. Sum up the returned values to get the total perimeter.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns in the grid.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def islandPerimeter(self, grid: List[List[int]]) -> int:\n        rows, cols = len(grid), len(grid[0])\n        visit = set()\n\n        def dfs(i, j):\n            if i < 0 or j < 0 or i >= rows or j >= cols or grid[i][j] == 0:\n                return 1\n            if (i, j) in visit:\n                return 0\n\n            visit.add((i, j))\n            perim = dfs(i, j + 1) + dfs(i + 1, j) + dfs(i, j - 1) + dfs(i - 1, j)\n            return perim\n\n        for i in range(rows):\n            for j in range(cols):\n                if grid[i][j]:\n                    return dfs(i, j)\n        return 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/island-perimeter.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Iteration - I",
+      "explanation": "### How it works\n\nInstead of graph traversal, we can directly iterate through every cell. For each land cell, we check all four directions. If a neighbor is water or out of bounds, that direction contributes to the perimeter. This approach processes each cell independently, making it straightforward and efficient.\n\n### Steps\n\n1. Initialize a perimeter counter to `0`.\n2. Iterate through every cell in the grid.\n3. For each land cell, check all four directions:\n    - Add `1` to the perimeter if the neighbor is out of bounds or water.\n4. Return the total perimeter.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)` extra space.\n\n> Where `m` is the number of rows and `n` is the number of columns in the grid.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def islandPerimeter(self, grid: List[List[int]]) -> int:\n        m, n, res = len(grid), len(grid[0]), 0\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] == 1:\n                    res += (i + 1 >= m or grid[i + 1][j] == 0)\n                    res += (j + 1 >= n or grid[i][j + 1] == 0)\n                    res += (i - 1 < 0 or grid[i - 1][j] == 0)\n                    res += (j - 1 < 0 or grid[i][j - 1] == 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/island-perimeter.md",
+      "id": "iteration-i"
+    }
+  ]
 }

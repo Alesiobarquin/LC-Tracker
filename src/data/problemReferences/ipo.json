@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {\n        int n = profits.size();\n        vector<int> indices(n);\n        for (int i = 0; i < n; i++) {\n            indices[i] = i;\n        }\n        sort(indices.begin(), indices.end(), [&](int a, int b) {\n            return capital[a] < capital[b];\n        });\n\n        priority_queue<int> maxProfit;\n        int idx = 0;\n        for (int i = 0; i < k; i++) {\n            while (idx < n && capital[indices[idx]] <= w) {\n                maxProfit.push(profits[indices[idx]]);\n                idx++;\n            }\n            if (maxProfit.empty()) {\n                break;\n            }\n            w += maxProfit.top();\n            maxProfit.pop();\n        }\n\n        return w;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=1IUzNJ6TPEM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ipo.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ipo.md",
+  "alternatives": [
+    {
+      "approach": "Two Heaps",
+      "explanation": "### How it works\n\nTo maximize capital after completing at most `k` projects, we should always pick the project with the highest profit among those we can currently afford. A min-heap ordered by capital lets us efficiently find all affordable projects as our capital grows. A max-heap ordered by profit then lets us pick the most profitable one. After completing a project, our capital increases, potentially unlocking more projects from the min-heap to consider.\n\n### Steps\n\n1. Build a min-heap of all projects ordered by their capital requirement.\n2. Initialize a max-heap for profits (empty at start).\n3. Repeat up to `k` times:\n    - Move all projects from the min-heap whose capital requirement is at most `w` into the max-heap.\n    - If the max-heap is empty, no more projects can be started, so `break`.\n    - Pop the top of the max-heap (highest profit) and add it to `w`.\n4. Return the final capital `w`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def findMaximizedCapital(self, k: int, w: int, profits: List[int], capital: List[int]) -> int:\n        maxProfit = []  # Max heap\n        minCapital = [(c, p) for c, p in zip(capital, profits)]  # Min heap\n        heapq.heapify(minCapital)\n\n        for _ in range(k):\n            while minCapital and minCapital[0][0] <= w:\n                c, p = heapq.heappop(minCapital)\n                heapq.heappush(maxProfit, -p)\n\n            if not maxProfit:\n                break\n\n            w += -heapq.heappop(maxProfit)\n\n        return w\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ipo.md",
+      "id": "two-heaps"
+    },
+    {
+      "approach": "Two Heaps (Optimal)",
+      "explanation": "### How it works\n\nThis approach improves on the previous one by storing only indices in the heaps rather than copying the actual capital and profit values. The heaps use custom comparators that reference the original arrays. This reduces memory overhead while maintaining the same greedy strategy: always select the most profitable project among those currently affordable.\n\n### Steps\n\n1. Build a min-heap of project indices, ordered by `capital[index]`.\n2. Initialize an empty max-heap of indices, to be ordered by `profits[index]`.\n3. Repeat up to `k` times:\n    - Transfer all indices from the min-heap where `capital[index] <= w` into the max-heap.\n    - If the max-heap is empty, `break`.\n    - Pop the `index` with maximum profit, add `profits[index]` to `w`.\n4. Return `w`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def findMaximizedCapital(self, k: int, w: int, profits: List[int], capital: List[int]) -> int:\n        class Node:\n            def __init__(self, idx):\n                self.idx = idx\n\n            def __lt__(self, other):\n                if capital[self.idx] != capital[other.idx]:\n                    return capital[self.idx] < capital[other.idx]\n                return self.idx < other.idx\n\n        minCapital = []\n        maxProfit = []\n        for i in range(len(capital)):\n            heapq.heappush(minCapital, Node(i))\n\n        for _ in range(k):\n            while minCapital and capital[minCapital[0].idx] <= w:\n                idx = heapq.heappop(minCapital).idx\n                heapq.heappush(maxProfit, -profits[idx])\n\n            if not maxProfit:\n                break\n            w += -heapq.heappop(maxProfit)\n\n        return w\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ipo.md",
+      "id": "two-heaps-optimal"
+    }
+  ]
 }

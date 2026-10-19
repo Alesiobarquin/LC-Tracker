@@ -7,5 +7,16 @@
     "cpp": "class MedianFinder {\n    priority_queue<int, vector<int>, less<int>> smallHeap;\n    priority_queue<int, vector<int>, greater<int>> largeHeap;\n\npublic:\n    MedianFinder() {}\n\n    void addNum(int num) {\n        smallHeap.push(num);\n        if (!largeHeap.empty() && smallHeap.top() > largeHeap.top()) {\n            largeHeap.push(smallHeap.top());\n            smallHeap.pop();\n        }\n        if (smallHeap.size() > largeHeap.size() + 1) {\n            largeHeap.push(smallHeap.top());\n            smallHeap.pop();\n        }\n        if (largeHeap.size() > smallHeap.size() + 1) {\n            smallHeap.push(largeHeap.top());\n            largeHeap.pop();\n        }\n    }\n\n    double findMedian() {\n        if (smallHeap.size() == largeHeap.size()) {\n            return (largeHeap.top() + smallHeap.top()) / 2.0;\n        } else if (smallHeap.size() > largeHeap.size()) {\n            return smallHeap.top();\n        } else {\n            return largeHeap.top();\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=itmhHWaHupI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-median-in-a-data-stream.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-median-in-a-data-stream.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nThe simplest way to find the median is to keep all numbers in a list and\nsort them whenever we need the median. After sorting, the numbers are in\nincreasing order, making it easy to pick the \"middle\" value(s).\n\n- If we have an **odd** number of elements, the median is the **middle** element.\n- If we have an **even** number of elements, the median is the **average**\n  of the two middle elements.\n\nThis approach is slow because sorting happens every time we query the median,\nbut it is the easiest to understand and implement.\n\n### Steps\n\n1. **Initialize**\n    - Create an empty list `data`.\n\n2. **addNum(x)**\n    - Append `x` to the list.\n\n3. **findMedian()**\n    - Sort the list.\n    - Let `n = length of data`.\n    - If `n` is odd:\n        - Return `data[n // 2]`.\n    - Else:\n        - Return `(data[n // 2] + data[n // 2 - 1]) / 2`.\n\n### Complexity\n\n- Time complexity: `O(m)` for `addNum()`, `O(m * n log n)` for `findMedian()`.\n- Space complexity: `O(n)`\n\n> Where `m` is the number of function calls and `n` is the length of the array.",
+      "code": {
+        "python": "class MedianFinder:\n\n    def __init__(self):\n        self.data = []\n\n    def addNum(self, num: int) -> None:\n        self.data.append(num)\n\n    def findMedian(self) -> float:\n        self.data.sort()\n        n = len(self.data)\n        return (self.data[n // 2] if (n & 1) else\n                (self.data[n // 2] + self.data[n // 2 - 1]) / 2)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-median-in-a-data-stream.md",
+      "id": "sorting"
+    }
+  ]
 }

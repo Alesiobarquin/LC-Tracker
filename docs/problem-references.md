@@ -1,7 +1,10 @@
 # Built-in problem references
 
-The 250 core library problems share one reference each across Pareto, NeetCode
-75, 150, and 250. Another 586 extended-catalog problems have built-in references,
+The 250 core library problems share their references across Pareto, NeetCode
+75, 150, and 250. Each core problem has two or three selectable approaches:
+195 have three and 55 have two. The existing default remains first, with its
+Python/C++ code preserved. The 445 additional examples are Python only.
+Another 586 extended-catalog problems have built-in references,
 for 836 total. This includes String Compression (#443) and Reverse Words in a
 String (#151), II (#186), and III (#557). Remaining catalog problems use external
 references or personal notes; no general pattern lesson is labeled as their
@@ -92,6 +95,63 @@ past spaces. LeetCode provides node types and problem-specific APIs (such as
 for those interfaces and standard C++ headers. The Python checks load every
 example and exercise selected normal
 and edge cases; they are not an exhaustive correctness proof for every solution.
+
+## Alternate approaches
+
+The NeetCode 250 expansion is the first part of the
+[solution expansion plan](solution-expansion.md). Options are curated teaching
+comparisons, not a measured popularity ranking. Useful brute-force approaches
+are labeled as baselines that may exceed the full problem limits. Approaches
+that directly violate a problem's operator restrictions are excluded; Product
+of Array Except Self also excludes division. Problems with two useful options
+do not gain an artificial third one.
+
+`scripts/approach-reference-manifest.json` records the default, alternate names,
+topic batch, pinned source path, and article SHA-256 for every core problem.
+The generator checks all selected article hashes and defaults before writing:
+
+```sh
+python3 scripts/build-approach-references.py /path/to/neetcode-gh/leetcode
+npm run verify:approaches
+```
+
+An extracted archive of the pinned revision also works. `--batch foundations`,
+`structures`, `graphs`, `dynamic`, or `remaining` rebuilds one topic batch.
+Refreshing the original default importer preserves alternate entries and rejects
+an unexpected default change for a problem that already has alternatives.
+
+Each alternate contains its own explanation, complexity, Python code, and source.
+The pinned articles supply 441 examples. Four Python examples are authored for
+LC Tracker: merging character intervals for Partition Labels, a reverse scan for
+Roman to Integer, round-robin gap allocation for Text Justification, and exhaustive
+edge subsets for Remove Max Number of Edges to Keep Graph Fully Traversable.
+The latter is explicitly an exponential teaching baseline. The attribution
+distinguishes authored code from adapted code and links the related source
+without assigning its MIT license to LC Tracker's authored examples.
+
+`scripts/approach-reference-notes.py` also supplies explanations for the
+hash-map trie, wildcard-search trie, original indices in sorted Two Sum, and
+Python's fixed-width full-adder simulation. It adapts judge class names and repairs
+the bit-by-bit full adder's carry calculation to avoid addition/subtraction
+operators. Explanatory pseudocode and the following algorithm steps survive
+import; implementation tabs are not embedded in the explanation.
+Sorting workspace notes use Python's worst-case bound, and the hash-set
+permutation example materializes a list of lists for its declared return type.
+
+The offline verifier loads all 445 added Python snippets and executes 845 finite
+example/boundary checks covering every added approach. Checks include
+stateful API operations, list/tree structure, in-place changes, multiple valid
+output orders, wildcard searches, zeroes, negative values, and impossible cases.
+GitHub's required `verify` job runs it. These checks do not prove correctness
+for every input or that a teaching baseline meets the maximum time limits.
+
+The approach title buttons change explanation, complexity, code, and attribution together in
+both the library and revealed recall comparison. Python-only approaches cannot
+display the default's C++ code. Approach selection is local to the view; reloads
+start at the default. Original answers, corrections, personal notes, frozen
+completions, and the historical `solution` reference type retain their existing
+behavior. References remain lazy-loaded by problem, and no database migration
+or user-data mutation is involved.
 
 During recall, the pre-reference answer stays in `RecallAttempt.answer`.
 Edits made after revealing a reference are stored separately as optional

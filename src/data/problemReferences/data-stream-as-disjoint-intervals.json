@@ -7,5 +7,16 @@
     "cpp": "class SummaryRanges {\nprivate:\n    set<int> arr;\n\npublic:\n    SummaryRanges() {}\n\n    void addNum(int value) {\n        arr.insert(value);\n    }\n\n    vector<vector<int>> getIntervals() {\n        vector<vector<int>> res;\n        if (arr.empty()) return res;\n\n        vector<int> lst(arr.begin(), arr.end());\n        int start = lst[0];\n\n        for (int i = 1; i < lst.size(); i++) {\n            if (lst[i] - lst[i - 1] > 1) {\n                res.push_back({start, lst[i - 1]});\n                start = lst[i];\n            }\n        }\n        res.push_back({start, lst.back()});\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=FavoZjPIWpo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/data-stream-as-disjoint-intervals.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/data-stream-as-disjoint-intervals.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Sorting)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to store all incoming numbers in a list and compute the intervals on demand. When `getIntervals()` is called, we sort the list and scan through it to identify consecutive sequences. Two numbers belong to the same interval if they differ by exactly `1`.\n\n### Steps\n\n1. Initialize an empty list to store all added numbers.\n2. For `addNum(value)`, append the value to the list.\n3. For `getIntervals()`:\n    - If the list is empty, return an empty result.\n    - Sort the list.\n    - Initialize `start` with the first element.\n    - Iterate through the sorted list. When the current number differs from the previous by more than `1`, close the current interval and start a new one.\n    - After the loop, add the final interval.\n4. Return the list of intervals.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` time for initialization.\n    - `O(1)` time for each `addNum()` function call.\n    - `O(n log n)` time for each `getIntervals()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass SummaryRanges:\n\n    def __init__(self):\n        self.arr = []\n\n    def addNum(self, value: int) -> None:\n        self.arr.append(value)\n\n    def getIntervals(self) -> List[List[int]]:\n        if not self.arr:\n            return []\n\n        self.arr.sort()\n        n = len(self.arr)\n        start = self.arr[0]\n        res = []\n        for i in range(1, n):\n            if self.arr[i] - self.arr[i - 1] > 1:\n                res.append([start, self.arr[i - 1]])\n                start = self.arr[i]\n\n        res.append([start, self.arr[n - 1]])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/data-stream-as-disjoint-intervals.md",
+      "id": "brute-force-sorting"
+    }
+  ]
 }

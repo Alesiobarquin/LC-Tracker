@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool isPerfectSquare(int num) {\n        int r = 0, mask = 1 << 15;\n\n        while (mask > 0) {\n            r |= mask;\n            if (r > (num / r)) {\n                r ^= mask;\n            }\n            mask >>= 1;\n        }\n\n        return r * r == num;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Cg_wWPHJ2Sk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-perfect-square.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-perfect-square.md",
+  "alternatives": [
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nInstead of checking every number sequentially, we can use binary search to find the square root more efficiently. The search space is from 1 to num. For each midpoint, we compute its square: if it is too large, search the left half; if too small, search the right half; if equal, we found a perfect square. This reduces the number of checks from O(sqrt(n)) to O(log n).\n\n### Steps\n\n1. Initialize `l = 1` and `r = num`.\n2. While `l <= r`:\n    - Compute the midpoint `m = l + (r - l) / 2`.\n    - Compute `sq = m * m`.\n    - If `sq > num`, search left: `r = m - 1`.\n    - If `sq < num`, search right: `l = m + 1`.\n    - If `sq == num`, return `true`.\n3. If the loop ends without finding a match, return `false`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def isPerfectSquare(self, num: int) -> bool:\n        l, r = 1, num\n\n        while l <= r:\n            m = l + (r - l) // 2\n            sq = m * m\n            if sq > num:\n                r = m - 1\n            elif sq < num:\n                l = m + 1\n            else:\n                return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-perfect-square.md",
+      "id": "binary-search"
+    },
+    {
+      "approach": "Newton's Method",
+      "explanation": "### How it works\n\nNewton's method is a fast iterative technique for finding roots of equations. To find the square root of num, we want to solve x^2 = num, or equivalently find the root of f(x) = x^2 - num. Newton's method gives us the iteration formula: x_new = (x + num/x) / 2. Starting from an initial guess (the number itself), each iteration brings us closer to the actual square root. Once converged, we check if the result squared equals the input.\n\n### Steps\n\n1. Initialize `r = num` as the initial guess.\n2. While `r * r > num`:\n    - Update `r = (r + num / r) / 2`.\n3. After convergence, check if `r * r == num`.\n4. Return `true` if equal, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def isPerfectSquare(self, num: int) -> bool:\n        r = num\n        while r * r > num:\n            r = (r + (num // r)) // 2\n        return r * r == num\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-perfect-square.md",
+      "id": "newton-s-method"
+    }
+  ]
 }

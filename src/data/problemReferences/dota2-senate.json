@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string predictPartyVictory(string senate) {\n        int cnt = 0, i = 0;\n\n        while (i < senate.size()) {\n            char c = senate[i];\n            if (c == 'R') {\n                if (cnt < 0) {\n                    senate.push_back('D');\n                }\n                cnt++;\n            } else {\n                if (cnt > 0) {\n                    senate.push_back('R');\n                }\n                cnt--;\n            }\n            i++;\n        }\n\n        return cnt > 0 ? \"Radiant\" : \"Dire\";\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=zZA5KskfMuQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/dota2-senate.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/dota2-senate.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can simulate the voting process directly. Each senator, when it's their turn, will ban the next opposing senator in the circular order. We keep iterating through the remaining senators until only one party remains. This approach mirrors the problem's rules exactly but requires repeatedly scanning the list to find and remove opponents.\n\n### Steps\n\n1. Convert the senate string to a list for easy modification.\n2. Iterate through the list repeatedly in rounds.\n3. For each senator at position `i`:\n    - Check if the game is over (only one party left).\n    - Find the next senator of the opposing party (wrapping around circularly).\n    - Remove that opponent from the list.\n    - Adjust the current index if the removed senator was before `i`.\n4. Return the winning party once one side is eliminated.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def predictPartyVictory(self, senate: str) -> str:\n        s = list(senate)\n        while True:\n            i = 0\n            while i < len(s):\n                if 'R' not in s:\n                    return \"Dire\"\n                if 'D' not in s:\n                    return \"Radiant\"\n                if s[i] == 'R':\n                    j = (i + 1) % len(s)\n                    while s[j] == 'R':\n                        j = (j + 1) % len(s)\n                    s.pop(j)\n                    if j < i:\n                        i -= 1\n                else:\n                    j = (i + 1) % len(s)\n                    while s[j] == 'D':\n                        j = (j + 1) % len(s)\n                    s.pop(j)\n                    if j < i:\n                        i -= 1\n                i += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/dota2-senate.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Greedy (Two Queues)",
+      "explanation": "### How it works\n\nThe key insight is that a senator should always ban the nearest opposing senator who would otherwise act before them. We use two queues to track the positions of Radiant and Dire senators. When comparing the front of both queues, the senator with the smaller index acts first and bans the other. The surviving senator then re-enters at the end of the queue with an updated index (adding `n` to represent the next round).\n\n### Steps\n\n1. Create two queues `R` and `D` to store indices of Radiant and Dire senators.\n2. Populate the queues by scanning through the senate string.\n3. While both queues are non-empty:\n    - Compare the front indices from both queues.\n    - The senator with the smaller index survives and gets re-added with index `+ n`.\n    - The other senator is banned (removed permanently).\n4. Return \"Radiant\" if the `R` queue is non-empty, otherwise \"Dire\".\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def predictPartyVictory(self, senate: str) -> str:\n        D, R = deque(), deque()\n        n = len(senate)\n\n        for i, c in enumerate(senate):\n            if c == 'R':\n                R.append(i)\n            else:\n                D.append(i)\n\n        while D and R:\n            dTurn = D.popleft()\n            rTurn = R.popleft()\n\n            if rTurn < dTurn:\n                R.append(rTurn + n)\n            else:\n                D.append(dTurn + n)\n\n        return \"Radiant\" if R else \"Dire\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/dota2-senate.md",
+      "id": "greedy-two-queues"
+    }
+  ]
 }

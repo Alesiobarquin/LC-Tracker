@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        vector<int> dp;\n        dp.push_back(nums[0]);\n\n        int LIS = 1;\n        for (int i = 1; i < nums.size(); i++) {\n            if (dp.back() < nums[i]) {\n                dp.push_back(nums[i]);\n                LIS++;\n                continue;\n            }\n\n            int idx = lower_bound(dp.begin(),\n                                  dp.end(), nums[i]) - dp.begin();\n            dp[idx] = nums[i];\n        }\n\n        return LIS;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cjWnW0hdF1Y",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-increasing-subsequence.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-increasing-subsequence.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down) - I",
+      "explanation": "### How it works\n\nThe recursive solution revisits the same `(i, j)` pairs multiple times. We can memoize results using a 2D table indexed by current position and the last included index. Since `j` can range from `-1` to `n-1`, we offset by 1 when indexing the memo table.\n\n### Steps\n\n1. Create a memo table of size `n x (n + 1)`.\n2. Before computing `dfs(i, j)`, check `memo[i][j + 1]`.\n3. If cached, return the stored value.\n4. Otherwise, compute using the recursive logic, store in memo, and return.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLIS(self, nums):\n        n = len(nums)\n        memo = [[-1] * (n + 1) for _ in range(n)]\n\n        def dfs(i, j):\n            if i == n:\n                return 0\n            if memo[i][j + 1] != -1:\n                return memo[i][j + 1]\n\n            LIS = dfs(i + 1, j)\n\n            if j == -1 or nums[j] < nums[i]:\n                LIS = max(LIS, 1 + dfs(i + 1, i))\n\n            memo[i][j + 1] = LIS\n            return LIS\n\n        return dfs(0, -1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-increasing-subsequence.md",
+      "id": "dynamic-programming-top-down-i"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up) - I",
+      "explanation": "### How it works\n\nThis is the iterative version of the two-dimensional memoization approach. We fill a 2D table `dp[i][j]` from right to left. The value represents the longest increasing subsequence considering elements from index `i` onward, given that the last included element was at index `j` (or no element if `j == -1`).\n\n### Steps\n\n1. Create a 2D array `dp` of size `(n + 1) x (n + 1)`.\n2. Iterate `i` from `n - 1` down to `0`.\n3. For each `j` from `i - 1` down to `-1`:\n    - Start with `LIS = dp[i + 1][j + 1]` (skipping `nums[i]`).\n    - If `j == -1` or `nums[j] < nums[i]`, also consider `1 + dp[i + 1][i + 1]`.\n    - Set `dp[i][j + 1]` to the maximum.\n4. Return `dp[0][0]`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLIS(self, nums):\n        n = len(nums)\n        dp = [[0] * (n + 1) for _ in range(n + 1)]\n\n        for i in range(n - 1, -1, -1):\n            for j in range(i - 1, -2, -1):\n                LIS = dp[i + 1][j + 1]  # Not including nums[i]\n\n                if j == -1 or nums[j] < nums[i]:\n                    LIS = max(LIS, 1 + dp[i + 1][i + 1])  # Including nums[i]\n\n                dp[i][j + 1] = LIS\n\n        return dp[0][0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-increasing-subsequence.md",
+      "id": "dynamic-programming-bottom-up-i"
+    }
+  ]
 }

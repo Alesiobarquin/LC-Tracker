@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    int goodNodes(TreeNode* root) {\n        int res = 0;\n        queue<pair<TreeNode*, int>> q;\n        q.push({root, -INT_MAX});\n\n        while (!q.empty()) {\n            auto [node, maxval] = q.front();\n            q.pop();\n            if (node->val >= maxval) {\n                res++;\n            }\n            if (node->left) {\n                q.push({node->left, max(maxval, node->val)});\n            }\n            if (node->right) {\n                q.push({node->right, max(maxval, node->val)});\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=7cp5imvDzl4",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-good-nodes-in-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-good-nodes-in-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA node is “good” if on the path from the root to that node, **no earlier node has a value greater than it**.  \nSo while traversing the tree, we just need to carry the **maximum value seen so far** on the current path.\n\nIf the current node’s value ≥ that maximum → it is a good node.\n\n### Steps\n\n1. Start DFS from the root and store the root's value as the current `maxSoFar`.\n2. At each node:\n    - If `node.val >= maxSoFar`, count it as a good node.\n    - Update `maxSoFar = max(maxSoFar, node.val)`.\n3. Recursively explore:\n    - Left child with updated `maxSoFar`\n    - Right child with updated `maxSoFar`\n4. Sum the counts from left and right and return the total.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def goodNodes(self, root: TreeNode) -> int:\n\n        def dfs(node, maxVal):\n            if not node:\n                return 0\n\n            res = 1 if node.val >= maxVal else 0\n            maxVal = max(maxVal, node.val)\n            res += dfs(node.left, maxVal)\n            res += dfs(node.right, maxVal)\n            return res\n\n        return dfs(root, root.val)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-good-nodes-in-binary-tree.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

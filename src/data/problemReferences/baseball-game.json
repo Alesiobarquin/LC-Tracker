@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int calPoints(vector<string>& ops) {\n        stack<int> stack;\n        int res = 0;\n        for (const string& op : ops) {\n            if (op == \"+\") {\n                int top = stack.top(); stack.pop();\n                int newTop = top + stack.top();\n                stack.push(top);\n                stack.push(newTop);\n                res += newTop;\n            } else if (op == \"D\") {\n                stack.push(2 * stack.top());\n                res += stack.top();\n            } else if (op == \"C\") {\n                res -= stack.top();\n                stack.pop();\n            } else {\n                stack.push(stoi(op));\n                res += stack.top();\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Id_tqGdsZQI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/baseball-game.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/baseball-game.md",
+  "alternatives": [
+    {
+      "approach": "Stack - I",
+      "explanation": "### How it works\n\nA stack is perfect for this problem because each operation depends on the most recent scores. When we see `+`, we need the last two scores. When we see `D`, we need the last score. When we see `C`, we need to remove the last score. A stack gives us efficient access to these recent elements.\n\n### Steps\n\n1. Initialize an empty stack to store valid scores.\n2. For each operation:\n    - If it's `+`, add the sum of the top two elements to the stack.\n    - If it's `D`, add double the top element to the stack.\n    - If it's `C`, pop the top element.\n    - Otherwise, it's a number, so push it onto the stack.\n3. Return the sum of all elements in the stack.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def calPoints(self, operations: List[str]) -> int:\n        stack = []\n        for op in operations:\n            if op == \"+\":\n                stack.append(stack[-1] + stack[-2])\n            elif op == \"D\":\n                stack.append(2 * stack[-1])\n            elif op == \"C\":\n                stack.pop()\n            else:\n                stack.append(int(op))\n        return sum(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/baseball-game.md",
+      "id": "stack-i"
+    }
+  ]
 }

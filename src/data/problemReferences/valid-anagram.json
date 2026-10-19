@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool isAnagram(string s, string t) {\n        if (s.length() != t.length()) {\n            return false;\n        }\n\n        vector<int> count(26, 0);\n        for (int i = 0; i < s.length(); i++) {\n            count[s[i] - 'a']++;\n            count[t[i] - 'a']--;\n        }\n\n        for (int val : count) {\n            if (val != 0) {\n                return false;\n            }\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=9UtInBqnCgA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-anagram.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-anagram.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nIf two strings are anagrams, they must contain exactly the same characters with the same frequencies.  \nBy sorting both strings, all characters will be arranged in a consistent order.  \nIf the two sorted strings are identical, then every character and its count match, which means the strings are anagrams.\n\n### Steps\n\n1. If the lengths of the two strings differ, return `false` immediately because they cannot be anagrams.\n2. Sort both strings.\n3. Compare the sorted versions of the strings:\n    - If they are equal, return `true`.\n    - Otherwise, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n log n + m log m)`\n- Space complexity: `O(n + m)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `n` is the length of string `s` and `m` is the length of string `t`.",
+      "code": {
+        "python": "class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        if len(s) != len(t):\n            return False\n\n        return sorted(s) == sorted(t)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-anagram.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nIf two strings are anagrams, they must use the same characters with the same frequencies.  \nInstead of sorting, we can count how many times each character appears in both strings.  \nBy using two hash maps (or dictionaries), we track the frequency of every character in each string.  \nIf both frequency maps match exactly, then the strings contain the same characters with same frequencies, meaning they are anagrams.\n\n### Steps\n\n1. If the two strings have different lengths, return `false` immediately.\n2. Create two hash maps to store character frequencies for each string.\n3. Iterate through both strings at the same time:\n    - Increase the character count for `s[i]` in the first map.\n    - Increase the character count for `t[i]` in the second map.\n4. After building both maps, compare them:\n    - If the maps are equal, return `true`.\n    - Otherwise, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(1)` since we have at most `26` different characters.\n\n> Where `n` is the length of string `s` and `m` is the length of string `t`.",
+      "code": {
+        "python": "class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        if len(s) != len(t):\n            return False\n\n        countS, countT = {}, {}\n\n        for i in range(len(s)):\n            countS[s[i]] = 1 + countS.get(s[i], 0)\n            countT[t[i]] = 1 + countT.get(t[i], 0)\n        return countS == countT\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-anagram.md",
+      "id": "hash-map"
+    }
+  ]
 }

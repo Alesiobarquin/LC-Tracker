@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        int n = digits.size();\n        for (int i = n - 1; i >= 0; i--) {\n            if (digits[i] < 9) {\n                digits[i]++;\n                return digits;\n            }\n            digits[i] = 0;\n        }\n        vector<int> result(n + 1);\n        result[0] = 1;\n        return result;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=jIaA8boiG1s",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nWe are given a number represented as an array of digits, and we need to **add one** to this number.\n\nThe challenge comes from handling the **carry**:\n\n- If the last digit is less than `9`, we can simply increment it.\n- If the last digit is `9`, it becomes `0` and we need to carry `+1` to the remaining digits.\n\nThis recursive solution mirrors how addition works by hand:\n\n- handle the **last digit**\n- if there is a carry, recursively solve the smaller subproblem (all digits except the last)\n- build the final result while returning from recursion\n\n### Steps\n\n1. If the digit list is empty:\n    - it means we had a carry beyond the most significant digit\n    - return `[1]`\n2. If the last digit is less than `9`:\n    - increment the last digit by `1`\n    - return the updated list\n3. Otherwise (last digit is `9`):\n    - the last digit becomes `0`\n    - recursively call `plusOne` on all digits except the last\n    - append `0` to the result\n4. Return the final list of digits\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        if not digits:\n            return [1]\n\n        if digits[-1] < 9:\n            digits[-1] += 1\n            return digits\n        else:\n            return self.plusOne(digits[:-1]) + [0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Iteration - I",
+      "explanation": "### How it works\n\nWe are given a number as an array of digits and need to **add one** to it.\n\nThe main idea is to simulate manual addition starting from the **least significant digit** (the last digit).\nSince addition naturally moves from right to left, this solution:\n\n- reverses the array so we can process digits from left to right\n- keeps a variable `one` to represent the **carry** (initially `1`)\n- continues updating digits until the carry becomes `0`\n\nThis avoids recursion and handles all carry cases, including when the number consists entirely of `9`s (like `[9,9,9]`).\n\n### Steps\n\n1. Initialize:\n    - `one = 1` (this represents the `+1` we want to add)\n    - `i = 0` (index to traverse digits)\n2. Reverse the `digits` array so the least significant digit comes first.\n3. While there is still a carry (`one == 1`):\n    - If `i` is within the array:\n        - If `digits[i] == 9`:\n            - set `digits[i] = 0` (carry continues)\n        - Else:\n            - increment `digits[i]` by `1`\n            - set `one = 0` (carry resolved)\n    - Else (we ran out of digits):\n        - append `1` to the array\n        - set `one = 0`\n    - increment `i`\n4. Reverse the array back to its original order.\n5. Return the updated `digits`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` or `O(n)` depending on the language.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        one = 1\n        i = 0\n        digits.reverse()\n\n        while one:\n            if i < len(digits):\n                if digits[i] == 9:\n                    digits[i] = 0\n                else:\n                    digits[i] += 1\n                    one = 0\n            else:\n                digits.append(one)\n                one = 0\n            i += 1\n\n        digits.reverse()\n        return digits\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one.md",
+      "id": "iteration-i"
+    }
+  ]
 }

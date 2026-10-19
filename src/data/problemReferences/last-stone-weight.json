@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lastStoneWeight(vector<int>& stones) {\n        int maxStone = 0;\n        for (int stone : stones) {\n            maxStone = max(maxStone, stone);\n        }\n\n        vector<int> bucket(maxStone + 1, 0);\n        for (int stone : stones) {\n            bucket[stone]++;\n        }\n\n        int first = maxStone, second = maxStone;\n        while (first > 0) {\n            if (bucket[first] % 2 == 0) {\n                first--;\n                continue;\n            }\n\n            int j = min(first - 1, second);\n            while (j > 0 && bucket[j] == 0) {\n                j--;\n            }\n\n            if (j == 0) {\n                return first;\n            }\n\n            second = j;\n            bucket[first]--;\n            bucket[second]--;\n            bucket[first - second]++;\n            first = max(first - second, second);\n        }\n\n        return first;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=B-QCq79-Vfw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nYou always need to smash the **two heaviest stones** together.  \nA simple way to ensure this is:\n\n1. **Sort the list of stones** so the heaviest stones are at the end.\n2. Remove the last two stones (the largest values).\n3. Smash them:\n    - If they are equal → both disappear.\n    - If they are different → the difference becomes a new stone.\n4. Insert the new stone (if any) back into the list.\n5. Repeat until at most one stone remains.\n\nSorting each time is not the most efficient approach, but it is straightforward and easy to implement.\n\n### Steps\n\n1. **While** the number of stones is greater than `1`:\n    - Sort the stones in increasing order.\n    - Remove the two largest stones:\n        - Let `a` = largest stone\n        - Let `b` = second largest stone\n    - Compute `difference = a - b`\n    - If `difference > 0`, insert the new stone back into the list.\n\n2. **If** the list is empty, return `0`\n   **Else** return the remaining stone.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def lastStoneWeight(self, stones: List[int]) -> int:\n\n        while len(stones) > 1:\n            stones.sort()\n            cur = stones.pop() - stones.pop()\n            if cur:\n                stones.append(cur)\n\n        return stones[0] if stones else 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Heap",
+      "explanation": "### How it works\n\nWe always need to repeatedly remove the **two heaviest stones**.  \nA **max-heap** is perfect for this because it lets us efficiently extract the largest values.\n\nMost languages provide **min-heaps**, so a common trick is to **store negative values**.  \nThis makes the smallest (most negative) value represent the _largest_ stone.\n\nProcess:\n\n1. Convert all stones to negative and build a heap.\n2. Repeatedly pop the two smallest (i.e., the two heaviest stones).\n3. Smash them:\n    - If equal → both are destroyed.\n    - If different → push the negative of their difference back into the heap.\n4. When one or zero stones remain, return the remaining weight or `0`.\n\n### Steps\n\n1. Convert every stone weight `x` into `-x` and build a min-heap.\n2. While the heap contains more than one stone:\n    - Pop two values `a` and `b` (these represent the two heaviest stones).\n    - If `a != b`, compute the remaining stone weight:\n        - `diff = a - b` (still negative)\n        - Push `diff` back into the heap.\n3. After the loop:\n    - If the heap is empty, return `0`.\n    - Otherwise return the absolute value of the remaining stone.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def lastStoneWeight(self, stones: List[int]) -> int:\n        stones = [-s for s in stones]\n        heapq.heapify(stones)\n\n        while len(stones) > 1:\n            first = heapq.heappop(stones)\n            second = heapq.heappop(stones)\n            if second > first:\n                heapq.heappush(stones, first - second)\n\n        stones.append(0)\n        return abs(stones[0])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight.md",
+      "id": "heap"
+    }
+  ]
 }

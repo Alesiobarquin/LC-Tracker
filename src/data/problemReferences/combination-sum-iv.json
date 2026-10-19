@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int combinationSum4(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        unordered_map<int, int> dp;\n        dp[target] = 1;\n\n        for (int total = target; total > 0; total--) {\n            if (dp[total] == -1) continue;\n            for (auto& num : nums) {\n                if (total < num) break;\n                if (dp[total - num] + 0LL + dp[total] > INT_MAX) {\n                    dp[total - num] = -1;\n                    break;\n                }\n                dp[total - num] += dp[total];\n            }\n        }\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=dw2nMCxG0ik",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-sum-iv.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-sum-iv.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to count all possible combinations (with different orderings counted separately) that sum to the target. At each step, we can pick any number from the array and subtract it from our remaining sum. This naturally leads to a recursive approach where we try every number at each position.\n\n### Steps\n\n1. Sort the array to enable early termination when a number exceeds the remaining sum.\n2. Define a recursive function that takes the current remaining total.\n3. Base case: if total equals `0`, we found a valid combination, return `1`.\n4. For each number in the array, if it does not exceed the current total, recursively count combinations with the reduced total.\n5. Sum up all recursive results and return the count.\n\n### Complexity\n\n- Time complexity: `O(n ^ t)`\n- Space complexity: `O(t)`\n\n> Where `n` is the size of the array `nums` and `t` is the given target.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def combinationSum4(self, nums: List[int], target: int) -> int:\n        nums.sort()\n\n        def dfs(total):\n            if total == 0:\n                return 1\n\n            res = 0\n            for i in range(len(nums)):\n                if total < nums[i]:\n                    break\n                res += dfs(total - nums[i])\n            return res\n\n        return dfs(target)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-sum-iv.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems since the same remaining total can be reached through different paths. By caching results for each total value, we avoid redundant computations. This memoization transforms exponential time complexity into polynomial.\n\n### Steps\n\n1. Sort the array and initialize a memoization map with base case: `memo[0] = 1`.\n2. Define a recursive function that checks the memo before computing.\n3. For each number that does not exceed the current total, add the result of the recursive call with the reduced total.\n4. Store the computed result in the memo before returning.\n5. Return the result for the target value.\n\n### Complexity\n\n- Time complexity: `O(n * t)`\n- Space complexity: `O(t)`\n\n> Where `n` is the size of the array `nums` and `t` is the given target.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def combinationSum4(self, nums: List[int], target: int) -> int:\n        nums.sort()\n        memo = { 0 : 1 }\n\n        def dfs(total):\n            if total in memo:\n                return memo[total]\n\n            res = 0\n            for num in nums:\n                if total < num:\n                    break\n                res += dfs(total - num)\n            memo[total] = res\n            return res\n\n        return dfs(target)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-sum-iv.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

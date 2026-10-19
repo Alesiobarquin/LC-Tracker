@@ -1126,14 +1126,139 @@ for (const theme of ["light", "dark"]) {
       await page.goto('/library/valid-sudoku/explanation');
       await expect(page.getByRole('heading', { name: 'How it works', exact: true })).toBeVisible();
       await expect(page.locator('.reference-code .cm-content')).toContainText('collections.defaultdict(set)');
-      await expect(page.getByText('Hash Set (One Pass)', { exact: true })).toBeVisible();
-      await expect(page.getByText('Bitmask', { exact: true })).toHaveCount(0);
+      await expect(page.getByRole('heading', { name: 'Hash Set (One Pass)', exact: true })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Bitmask', exact: true })).toHaveCount(0);
       await page.getByLabel('Example language').selectOption('cpp');
       await expect(page.locator('.reference-code .cm-content')).toContainText('unordered_set<char>');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     });
   }
 }
+
+for (const theme of ['light', 'dark']) {
+  for (const width of [1440, 390]) {
+    test(`solution approaches switch explanation and code together at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      await fixture(page, []);
+      await page.addInitScript(theme => localStorage.setItem('lc-tracker-theme', theme), theme);
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/library/two-sum/explanation');
+      const approaches = page.getByRole('group', { name: 'Solution approach', exact: true });
+      const defaultApproach = approaches.getByRole('button', { name: 'Hash Map (One Pass)', exact: true });
+      const bruteForce = approaches.getByRole('button', { name: 'Brute Force', exact: true });
+      const sorting = approaches.getByRole('button', { name: 'Sorting', exact: true });
+      await expect(approaches.getByRole('button')).toHaveText([
+        'Hash Map (One Pass)', 'Brute Force', 'Sorting',
+      ]);
+      await expect(defaultApproach).toHaveAttribute('aria-pressed', 'true');
+      await expect(bruteForce).toHaveAttribute('aria-pressed', 'false');
+      await expect(sorting).toHaveAttribute('aria-pressed', 'false');
+      await page.getByLabel('Example language').selectOption('cpp');
+      await expect(page.locator('.reference-code .cm-content')).toContainText('unordered_map');
+      await bruteForce.click();
+      await expect(bruteForce).toHaveAttribute('aria-pressed', 'true');
+      await expect(defaultApproach).toHaveAttribute('aria-pressed', 'false');
+      await expect(page.getByRole('heading', { name: 'Brute Force', exact: true })).toBeVisible();
+      await expect(page.getByLabel('Example language')).toHaveValue('python');
+      await expect(page.getByLabel('Example language')).toBeDisabled();
+      await expect(page.locator('.reference-code .cm-content')).toContainText('for j in range');
+      await expect(page.locator('.explanation-complexity')).toContainText(/O\(n\s*\^\s*2\)/);
+      await sorting.click();
+      await expect(sorting).toHaveAttribute('aria-pressed', 'true');
+      await expect(bruteForce).toHaveAttribute('aria-pressed', 'false');
+      await expect(page.getByRole('heading', { name: 'Sorting', exact: true })).toBeVisible();
+      await expect(page.locator('.reference-code .cm-content')).toContainText('A.sort()');
+      await expect(page.locator('.explanation-complexity')).toContainText('log');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath('approach-options.png'), fullPage: true, animations: 'disabled' });
+      await defaultApproach.click();
+      await expect(defaultApproach).toHaveAttribute('aria-pressed', 'true');
+      await expect(sorting).toHaveAttribute('aria-pressed', 'false');
+      await expect(page.getByRole('heading', { name: 'Hash Map (One Pass)', exact: true })).toBeVisible();
+      await expect(page.getByLabel('Example language')).toHaveValue('cpp');
+      await expect(page.locator('.reference-code .cm-content')).toContainText('unordered_map');
+    });
+  }
+}
+
+test('solution approach buttons support Enter and Space without moving focus', async ({ page }) => {
+  await fixture(page, []);
+  await page.goto('/library/two-sum/explanation');
+  const approaches = page.getByRole('group', { name: 'Solution approach', exact: true });
+  const sorting = approaches.getByRole('button', { name: 'Sorting', exact: true });
+  const bruteForce = approaches.getByRole('button', { name: 'Brute Force', exact: true });
+  await sorting.focus();
+  await sorting.press('Enter');
+  await expect(sorting).toBeFocused();
+  await expect(sorting).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('heading', { name: 'Sorting', exact: true })).toBeVisible();
+  await expect(page.locator('.reference-code .cm-content')).toContainText('A.sort()');
+  await bruteForce.focus();
+  await bruteForce.press('Space');
+  await expect(bruteForce).toBeFocused();
+  await expect(bruteForce).toHaveAttribute('aria-pressed', 'true');
+  await expect(sorting).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('heading', { name: 'Brute Force', exact: true })).toBeVisible();
+  await expect(page.locator('.reference-code .cm-content')).toContainText('for j in range');
+});
+
+test('approach comparison preserves the original recall answer and personal notes', async ({ page }) => {
+  await fixture(page);
+  await page.goto('/recall/two-sum');
+  const approaches = page.getByRole('group', { name: 'Solution approach', exact: true });
+  await expect(approaches).toHaveCount(0);
+  const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+  await answer.fill('Compare every distinct pair.');
+  await page.getByRole('button', { name: 'Compare with a reference' }).click();
+  await approaches.getByRole('button', { name: 'Brute Force', exact: true }).click();
+  await expect(answer).toHaveText('Compare every distinct pair.');
+  await answer.fill('Use the complement lookup to reduce the work.');
+  await approaches.getByRole('button', { name: 'Sorting', exact: true }).click();
+  await expect(answer).toHaveText('Use the complement lookup to reduce the work.');
+  await page.getByText('View original answer from memory', { exact: true }).click();
+  await expect(page.getByText('Compare every distinct pair.', { exact: true })).toBeVisible();
+  await page.getByLabel('Reference used').selectOption('notes');
+  await expect(page.getByLabel('Personal explanation')).toHaveValue(/Saved reference:/);
+  await page.getByLabel('Reference used').selectOption('solution');
+  await expect(approaches.getByRole('button', { name: 'Hash Map (One Pass)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await expect(answer).toHaveText('Use the complement lookup to reduce the work.');
+  await expect(approaches.getByRole('button', { name: 'Hash Map (One Pass)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('authored alternatives show their own attribution and preserve the original source', async ({ page }) => {
+  await fixture(page, []);
+  await page.goto('/library/roman-to-integer/explanation');
+  const approaches = page.getByRole('group', { name: 'Solution approach', exact: true });
+  await approaches.getByRole('button', { name: 'Right-to-Left Scan', exact: true }).click();
+  await page.getByText('Source and license', { exact: true }).click();
+  await expect(page.locator('.explanation-footnote')).toContainText('Explanation and code by LC Tracker.');
+  await expect(page.getByRole('link', { name: 'Related source’s MIT license', exact: true })).toHaveAttribute('href', '/neetcode-license.txt');
+  await approaches.getByRole('button', { name: 'Hash Map', exact: true }).click();
+  await expect(page.locator('.explanation-footnote')).toContainText('Adapted from');
+  await expect(page.getByRole('link', { name: 'MIT license', exact: true })).toHaveAttribute('href', '/neetcode-license.txt');
+});
+
+test('two-option and long-name solutions stay usable on a narrow screen', async ({ page }, testInfo) => {
+  await fixture(page, []);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const [id, count, approach] of [
+    ['implement-trie-prefix-tree', 2, 'Prefix Tree (Hash Map)'],
+    ['design-add-and-search-words-data-structure', 2, 'Depth First Search (Trie)'],
+    ['sum-of-two-integers', 2, 'Bit Manipulation'],
+    ['minimum-interval-to-include-each-query', 3, 'Min Heap'],
+  ] as const) {
+    await page.goto(`/library/${id}/explanation`);
+    const approaches = page.getByRole('group', { name: 'Solution approach', exact: true });
+    await expect(approaches.getByRole('button').first()).toHaveAttribute('aria-pressed', 'true');
+    await expect(approaches.getByRole('button')).toHaveCount(count);
+    const selectedApproach = approaches.getByRole('button', { name: approach, exact: true });
+    await selectedApproach.click();
+    await expect(selectedApproach).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.reference-code .cm-content')).not.toBeEmpty();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.screenshot({ path: testInfo.outputPath('long-approach-mobile.png'), fullPage: true, animations: 'disabled' });
+});
 
 for (const theme of ["light", "dark"]) {
   for (const width of [1280, 390]) {

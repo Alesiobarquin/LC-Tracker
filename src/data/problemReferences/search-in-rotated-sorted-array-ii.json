@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool search(vector<int>& nums, int target) {\n        int l = 0, r = nums.size() - 1;\n\n        while (l <= r) {\n            int m = l + (r - l) / 2;\n\n            if (nums[m] == target) {\n                return true;\n            }\n\n            if (nums[l] < nums[m]) { // Left portion\n                if (nums[l] <= target && target < nums[m]) {\n                    r = m - 1;\n                } else {\n                    l = m + 1;\n                }\n            } else if (nums[l] > nums[m]) { // Right portion\n                if (nums[m] < target && target <= nums[r]) {\n                    l = m + 1;\n                } else {\n                    r = m - 1;\n                }\n            } else {\n                l++;\n            }\n        }\n\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=oUnF7o88_Xc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-rotated-sorted-array-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-rotated-sorted-array-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to scan every element until we find the target. This ignores the sorted structure but guarantees correctness. Since we only need to know if the target exists, we return immediately upon finding it.\n\n### Steps\n\n1. Iterate through each element in the array.\n2. If the current element equals the target, return `true`.\n3. If no match is found after checking all elements, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def search(self, nums: List[int], target: int) -> bool:\n        return target in nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-rotated-sorted-array-ii.md",
+      "id": "brute-force"
+    }
+  ]
 }

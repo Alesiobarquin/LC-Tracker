@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        long long r = x;\n        while (r * r > x) {\n            r = (r + x / r) >> 1;\n        }\n        return r;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=zdMhGxRWutQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sqrtx.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sqrtx.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe square root of a number `x` is the largest integer `i` such that `i * i <= x`. We can find this by simply checking each integer starting from `1` until squaring it exceeds `x`. The answer is the last integer whose square did not exceed `x`.\n\n### Steps\n\n1. Handle the edge case where `x` is `0` by returning `0`.\n2. Initialize `res` to `1` to track the potential answer.\n3. Iterate from `1` to `x`. For each integer `i`, check if `i * i > x`.\n4. If `i * i > x`, return the previous valid result `res`.\n5. Otherwise, update `res = i` and continue.\n6. Return `res` after the loop.\n\n### Complexity\n\n- Time complexity: `O(sqrt {n})`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        if x == 0:\n            return 0\n\n        res = 1\n        for i in range(1, x + 1):\n            if i * i > x:\n                return res\n            res = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sqrtx.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nSince we are looking for the largest integer whose square is at most `x`, and the squares of integers are monotonically increasing, we can use binary search. The search space is `[0, x]`, and we narrow it down by checking if the middle value squared is less than, greater than, or equal to `x`.\n\n### Steps\n\n1. Initialize `l = 0`, `r = x`, and `res = 0` to store the answer.\n2. While `l <= r`:\n    - Compute middle `m = l + (r - l) / 2`.\n    - If `m * m > x`, the answer must be smaller, so set `r = m - 1`.\n    - If `m * m < x`, `m` is a valid candidate. Store it in `res` and search for a larger value by setting `l = m + 1`.\n    - If `m * m == x`, we found the exact square root, so return `m`.\n3. Return `res` after the loop.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        l, r = 0, x\n        res = 0\n\n        while l <= r:\n            m = l + (r - l) // 2\n            if m * m > x:\n                r = m - 1\n            elif m * m < x:\n                l = m + 1\n                res = m\n            else:\n                return m\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sqrtx.md",
+      "id": "binary-search"
+    }
+  ]
 }

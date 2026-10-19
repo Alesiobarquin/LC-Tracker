@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> countBits(int n) {\n        vector<int> dp(n + 1);\n        for (int i = 1; i <= n; i++) {\n            dp[i] = dp[i >> 1] + (i & 1);\n        }\n        return dp;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=RyBM56RIWrM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-bits.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-bits.md",
+  "alternatives": [
+    {
+      "approach": "Bit Manipulation - I",
+      "explanation": "### How it works\n\nFor every number from `0` to `n`, we want to compute how many `1` bits appear in its binary representation.\n\nThis **bit manipulation** approach checks each bit position individually:\n\n- Integers are typically represented using **32 bits**\n- For each number, we test whether the bit at position `i` is set using a bit mask\n\nAlthough this solution is not optimal, it clearly demonstrates how bitwise operations work at a low level.\n\n### Steps\n\n1. Initialize an empty list `res` to store results.\n2. For every number `num` from `0` to `n`:\n    - Initialize a counter `one = 0`\n    - For each bit position `i` from `0` to `31`:\n        - Check if the `i`-th bit is set using `(1 << i) & num`\n        - If yes, increment `one`\n    - Append `one` to `res`\n3. Return the list `res`\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countBits(self, n: int) -> List[int]:\n        res = []\n        for num in range(n + 1):\n            one = 0\n            for i in range(32):\n                if num & (1 << i):\n                    one += 1\n            res.append(one)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-bits.md",
+      "id": "bit-manipulation-i"
+    },
+    {
+      "approach": "Bit Manipulation (DP)",
+      "explanation": "### How it works\n\nWe want to compute the number of set bits (`1`s) for **all numbers from `0` to `n`** efficiently.\n\nA key observation from binary representation is:\n\n- Numbers repeat their bit patterns every time we reach a **power of two**\n- When a number is a power of two, it has **exactly one `1` bit**\n- Any number `i` can be written as:\n  **`i = highestPowerOfTwo ≤ i + remainder`**\n\nSo, the number of set bits in `i` is:\n\n> **1 (for the highest power of two) + number of set bits in the remainder**\n\nThis allows us to build the solution incrementally using **Dynamic Programming**, reusing results we have already computed.\n\n### Steps\n\n1. Create a DP array `dp` of size `n + 1`\n    - `dp[i]` will store the number of set bits in `i`\n2. Initialize:\n    - `dp[0] = 0`\n    - `offset = 1` (tracks the most recent power of two)\n3. For each number `i` from `1` to `n`:\n    - If `i` reaches the next power of two (`i == 2 * offset`):\n        - Update `offset = i`\n    - Compute:\n        ```\n        dp[i] = 1 + dp[i - offset]\n        ```\n4. Return the DP array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countBits(self, n: int) -> List[int]:\n        dp = [0] * (n + 1)\n        offset = 1\n\n        for i in range(1, n + 1):\n            if offset * 2 == i:\n                offset = i\n            dp[i] = 1 + dp[i - offset]\n        return dp\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-bits.md",
+      "id": "bit-manipulation-dp"
+    }
+  ]
 }

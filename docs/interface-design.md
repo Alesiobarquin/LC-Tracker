@@ -51,6 +51,11 @@ theme script and React theme controller use the same canvas colors. The SVG mark
 and favicon variants share a source; `node scripts/render-brand-assets.mjs`
 renders the raster variants with Playwright.
 
+Problem explanations show each available approach as a title button in a
+wrapping row. Copper identifies the selected option, and `aria-pressed` exposes
+that state to assistive technology. Titles wrap inside their boxes on narrow
+screens; the explanation and code change together when a button is activated.
+
 At 1024px, navigation changes from a horizontal workspace bar to a menu and
 primary destination dock. Below 768px, the daily budget moves above the primary
 work, the evidence rail follows the sequence, and library difficulty moves below

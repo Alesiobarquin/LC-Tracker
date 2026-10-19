@@ -7,5 +7,16 @@
     "cpp": "class TimeMap {\nprivate:\n    unordered_map<string, vector<pair<int, string>>> keyStore;\n\npublic:\n    TimeMap() {}\n\n    void set(string key, string value, int timestamp) {\n        keyStore[key].emplace_back(timestamp, value);\n    }\n\n    string get(string key, int timestamp) {\n        auto& values = keyStore[key];\n        int left = 0, right = values.size() - 1;\n        string result = \"\";\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (values[mid].first <= timestamp) {\n                result = values[mid].second;\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        return result;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=fu2cD_6E8Hw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-based-key-value-store.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-based-key-value-store.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe want to store values for a key along with timestamps, and when someone asks for a value at a given time, we must return the **latest value set at or before that timestamp**.\n\nThe brute-force idea is:\nstore everything as-is, and while retrieving, **look through all timestamps** for that key and pick the best match.\nIt's easy to implement, but slow because we scan all timestamps every time we call `get()`.\n\n### Steps\n\n1. Use a dictionary to map each key to another dictionary of timestamps → list of values.\n2. When setting a value:\n    - Insert the value under the corresponding timestamp.\n3. When getting a value:\n    - If the key does not exist, return an empty string.\n    - Otherwise, loop through all timestamps for that key.\n    - Track the **largest timestamp ≤ given timestamp**.\n    - Return the value stored at that timestamp.\n4. If no such timestamp exists, return an empty string.\n\n### Complexity\n\n- Time complexity: `O(1)` for `set()` and `O(n)` for `get()`.\n- Space complexity: `O(m * n)`\n\n> Where `n` is the total number of unique timestamps associated with a key and `m` is the total number of keys.",
+      "code": {
+        "python": "class TimeMap:\n\n    def __init__(self):\n        self.keyStore = {}\n\n    def set(self, key: str, value: str, timestamp: int) -> None:\n        if key not in self.keyStore:\n            self.keyStore[key] = {}\n        if timestamp not in self.keyStore[key]:\n            self.keyStore[key][timestamp] = []\n        self.keyStore[key][timestamp].append(value)\n\n    def get(self, key: str, timestamp: int) -> str:\n        if key not in self.keyStore:\n            return \"\"\n        seen = -1\n\n        for time in self.keyStore[key]:\n            if time <= timestamp:\n                seen = max(seen, time)\n        return \"\" if seen == -1 else self.keyStore[key][seen][-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-based-key-value-store.md",
+      "id": "brute-force"
+    }
+  ]
 }

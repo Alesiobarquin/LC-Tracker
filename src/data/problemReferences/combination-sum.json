@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> res;\n    vector<vector<int>> combinationSum(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        dfs(0, {}, 0, nums, target);\n        return res;\n    }\n\n    void dfs(int i, vector<int> cur, int total, vector<int>& nums, int target) {\n        if (total == target) {\n            res.push_back(cur);\n            return;\n        }\n\n        for (int j = i; j < nums.size(); j++) {\n            if (total + nums[j] > target) {\n                return;\n            }\n            cur.push_back(nums[j]);\n            dfs(j, cur, total + nums[j], nums, target);\n            cur.pop_back();\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=GBKI9VSKdGg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-target-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-target-sum.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking",
+      "explanation": "### How it works\n\nWe want to build all combinations of numbers that add up to the target.  \nEach number can be used multiple times, so at every index we have two choices:\n\n1. **Include the current number** - stay at the same index (because we can reuse it).\n2. **Skip the current number** - move to the next index.\n\nWe explore all possible choices using backtracking.  \nWhenever the running total equals the target, we store that combination.  \nIf the total becomes greater than the target or we run out of numbers, we stop exploring that path.\n\n### Steps\n\n1. Define a recursive function `dfs(i, currentList, total)` where:\n    - `i` is the current index in `nums`\n    - `currentList` is the current combination being built\n    - `total` is the sum of numbers in `currentList`\n\n2. If `total == target`, add a copy of `currentList` to the result and return.\n3. If `i` goes out of bounds or `total` exceeds the target, return (stop exploring).\n4. **Choose to include `nums[i]`:**\n    - Add `nums[i]` to `currentList`\n    - Call `dfs(i, currentList, total + nums[i])` (stay at same index)\n    - Remove `nums[i]` (backtrack)\n\n5. **Choose to skip `nums[i]`:**\n    - Call `dfs(i + 1, currentList, total)`\n\n6. Start with `dfs(0, [], 0)` and return the result list.\n\n### Complexity\n\n- Time complexity: `O(2 ^ frac{t}{m})`\n- Space complexity: `O(frac{t}{m})`\n\n> Where `t` is the given `target` and `m` is the minimum value in `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def combinationSum(self, nums: List[int], target: int) -> List[List[int]]:\n        res = []\n\n        def dfs(i, cur, total):\n            if total == target:\n                res.append(cur.copy())\n                return\n            if i >= len(nums) or total > target:\n                return\n\n            cur.append(nums[i])\n            dfs(i, cur, total + nums[i])\n            cur.pop()\n            dfs(i + 1, cur, total)\n\n        dfs(0, [], 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combination-target-sum.md",
+      "id": "backtracking"
+    }
+  ]
 }

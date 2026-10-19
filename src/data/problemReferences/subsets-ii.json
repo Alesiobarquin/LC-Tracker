@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsetsWithDup(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> res = {{}};\n        int prevIdx = 0;\n        int idx = 0;\n\n        for (int i = 0; i < nums.size(); i++) {\n            idx = (i >= 1 && nums[i] == nums[i - 1]) ? prevIdx : 0;\n            prevIdx = res.size();\n            for (int j = idx; j < prevIdx; j++) {\n                std::vector<int> tmp = res[j];\n                tmp.push_back(nums[i]);\n                res.push_back(tmp);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Vn2v6ajA7U0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis brute-force method generates **every possible subset** by making a binary choice at each index:\n\n- **Include** the current number, or\n- **Skip** the current number.\n\nSince duplicates exist, many generated subsets may look identical.  \nTo avoid returning duplicates, we:\n\n1. **Sort the array first**, so duplicates are next to each other.\n2. **Store each subset as a tuple inside a set**, because:\n    - Sets automatically remove duplicates.\n    - Tuples are hashable (lists are not).\n\nIn the end, we convert the set of tuples back to a list of lists.\n\n### Steps\n\n1. Sort the input list.\n2. Use a recursive function:\n    - If we processed all numbers → add the subset (as a tuple) to a set.\n    - Otherwise:\n        - Include the current number → recurse.\n        - Exclude the current number → recurse.\n3. After exploring all possibilities, convert the set of tuples into lists.\n4. Return the final list of unique subsets.\n\n### Complexity\n\n- Time complexity: `O(n * 2 ^n)`\n- Space complexity: `O(2 ^ n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:\n        res = set()\n\n        def backtrack(i, subset):\n            if i == len(nums):\n                res.add(tuple(subset))\n                return\n\n            subset.append(nums[i])\n            backtrack(i + 1, subset)\n            subset.pop()\n            backtrack(i + 1, subset)\n\n        nums.sort()\n        backtrack(0, [])\n        return [list(s) for s in res]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Backtracking - I",
+      "explanation": "### How it works\n\nWe want all subsets, but the array may contain duplicates.\nIf we blindly generate all subsets, we will produce repeated ones.\nSo we must **avoid picking the same value in the same decision level** more than once.\n\nKey idea:\n\n- At each index `i`, we make two choices:\n    1. **Include** `nums[i]`\n    2. **Exclude** `nums[i]`\n\nBut when excluding, if the next number is the same (`nums[i] == nums[i+1]`), then skipping it now and skipping it later produce the same subset.\nSo after exploring the \"exclude\" branch, we **skip over all duplicate values** to avoid generating duplicate subsets.\n\nWe also **sort the array first**, so duplicates become consecutive and easy to skip.\n\n### Steps\n\n1. Sort the input list.\n2. Use a recursive `backtrack(i, subset)`:\n    - If `i` reaches the end → add a copy of `subset` to the result.\n    - Otherwise:\n        - **Include** `nums[i]` → recurse on `i+1`.\n        - **Exclude** `nums[i]`:\n            - Move `i` forward while the next value is the same (skip duplicates).\n            - Recurse on the next unique index.\n3. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n * 2 ^ n)`\n- Space complexity:\n    - `O(n)` extra space.\n    - `O(2 ^ n)` space for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:\n        res = []\n        nums.sort()\n\n        def backtrack(i, subset):\n            if i == len(nums):\n                res.append(subset[::])\n                return\n\n            subset.append(nums[i])\n            backtrack(i + 1, subset)\n            subset.pop()\n\n            while i + 1 < len(nums) and nums[i] == nums[i + 1]:\n                i += 1\n            backtrack(i + 1, subset)\n\n        backtrack(0, [])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subsets-ii.md",
+      "id": "backtracking-i"
+    }
+  ]
 }

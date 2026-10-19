@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        int goal = nums.size() - 1;\n\n        for (int i = nums.size() - 2; i >= 0; i--) {\n            if (i + nums[i] >= goal) {\n                goal = i;\n            }\n        }\n\n        return goal == 0;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Yan0cv2cLy8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis problem asks whether we can reach the **last index** of the array starting from index `0`.\n\nAt each index `i`, the value `nums[i]` tells us how far we can jump. From there, we can choose **any next index within that jump range**.\n\nThe plain recursive approach explores all possible jumps, but it repeats the same work many times.\nTo avoid this, we use **top-down dynamic programming (memoization)**.\n\nThe recursive function represents:\n**\"Can we reach the last index starting from index `i`?\"**\n\nOnce we know the answer for an index, we store it so we never recompute it.\n\n### Steps\n\n1. Create a memo map `memo`:\n    - `memo[i]` stores whether the last index is reachable from index `i`\n2. Define a recursive function `dfs(i)`:\n    - `i` is the current index\n3. If `i` is already in `memo`:\n    - Return the stored result\n4. If `i` is the last index:\n    - Return `true`\n5. If `nums[i] == 0`:\n    - No jumps are possible, so return `false`\n6. Compute the farthest index we can jump to from `i`\n7. Try all next indices within the jump range:\n    - If any recursive call returns `true`, store `true` in `memo[i]` and return it\n8. If none of the jumps work:\n    - Store `false` in `memo[i]` and return it\n9. Start the recursion from index `0`\n10. Return the final result\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        memo = {}\n\n        def dfs(i):\n            if i in memo:\n                return memo[i]\n            if i == len(nums) - 1:\n                return True\n            if nums[i] == 0:\n                return False\n\n            end = min(len(nums), i + nums[i] + 1)\n            for j in range(i + 1, end):\n                if dfs(j):\n                    memo[i] = True\n                    return True\n            memo[i] = False\n            return False\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nWe want to know if we can reach the **last index** starting from index `0`.\n\nInstead of using recursion, we can solve this using **bottom-up dynamic programming** by working backwards from the end of the array.\n\nThe idea is simple:\n\n- mark positions that can reach the end\n- then check earlier positions to see if they can jump to any of those “good” positions\n\nIf index `i` can jump to **any index `j` that is already reachable**, then `i` is also reachable.\n\n### Steps\n\n1. Let `n` be the length of the array.\n2. Create a boolean array `dp` of size `n`:\n    - `dp[i] = true` means the last index is reachable from index `i`\n3. Set the base case:\n    - `dp[n - 1] = true` since the last index can trivially reach itself\n4. Iterate `i` from `n - 2` down to `0`:\n5. For each index `i`:\n    - Compute the farthest index we can jump to: `end = min(n, i + nums[i] + 1)`\n    - Check all reachable positions from `i`:\n        - if any `dp[j]` is `true`, then set `dp[i] = true`\n6. After filling the array, return `dp[0]`\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        n = len(nums)\n        dp = [False] * n\n        dp[-1] = True\n\n        for i in range(n - 2, -1, -1):\n            end = min(n, i + nums[i] + 1)\n            for j in range(i + 1, end):\n                if dp[j]:\n                    dp[i] = True\n                    break\n        return dp[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

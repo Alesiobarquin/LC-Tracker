@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        int res = nums.size();\n\n        for (int i = 0; i < nums.size(); i++) {\n            res += i - nums[i];\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=WnPLSRLSANE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number.md",
+  "alternatives": [
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nWe are given `n` distinct numbers taken from the range `[0, n]`, with **exactly one number missing**.\n\nA natural way to approach this is to ask:\n\n> “Can we quickly check whether a number exists in the array?”\n\nUsing a **hash-based data structure** (like a hash set) allows us to:\n\n- Store all given numbers\n- Check the presence of any number in **constant time**\n\nOnce all numbers are stored, we simply look for the number in the range `[0, n]` that does **not** appear in the set.\n\nThis approach trades a little extra space for very clear and simple logic.\n\n### Steps\n\n1. Insert all elements of the array into a hash set.\n2. Iterate through all numbers from `0` to `n`:\n    - If a number is **not present** in the set, return it as the missing number.\n3. Since exactly one number is missing, this process will always find the answer.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def missingNumber(self, nums: List[int]) -> int:\n        num_set = set(nums)\n        n = len(nums)\n        for i in range(n + 1):\n            if i not in num_set:\n                return i\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number.md",
+      "id": "hash-set"
+    },
+    {
+      "approach": "Bitwise XOR",
+      "explanation": "### How it works\n\nWe are given `n` distinct numbers from the range `[0, n]`, with **exactly one number missing**.\n\nA very powerful observation comes from the properties of **XOR (⊕)**:\n\n- `a ⊕ a = 0` (a number cancels itself)\n- `a ⊕ 0 = a`\n- XOR is **commutative and associative** (order does not matter)\n\nIf we XOR:\n\n- all numbers from `0` to `n`\n- and all numbers present in the array\n\nEvery number that appears in both places will cancel out, leaving **only the missing number**.\n\nThis allows us to find the answer in **linear time** and **constant space**, without sorting or extra data structures.\n\n### Steps\n\n1. Let `n` be the length of the array.\n2. Initialize a variable `xorr` with `n`.\n3. For each index `i` from `0` to `n - 1`:\n    - XOR `xorr` with `i`\n    - XOR `xorr` with `nums[i]`\n4. After the loop, `xorr` will contain the missing number.\n5. Return `xorr`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def missingNumber(self, nums: List[int]) -> int:\n        n = len(nums)\n        xorr = n\n        for i in range(n):\n            xorr ^= i ^ nums[i]\n        return xorr\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number.md",
+      "id": "bitwise-xor"
+    }
+  ]
 }

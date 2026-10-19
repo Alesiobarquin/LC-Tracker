@@ -7,5 +7,16 @@
     "cpp": "/*\n// Definition for a Node.\nclass Node {\npublic:\n    int val;\n    vector<Node*> neighbors;\n    Node() {\n        val = 0;\n        neighbors = vector<Node*>();\n    }\n    Node(int _val) {\n        val = _val;\n        neighbors = vector<Node*>();\n    }\n    Node(int _val, vector<Node*> _neighbors) {\n        val = _val;\n        neighbors = _neighbors;\n    }\n};\n*/\n\nclass Solution {\npublic:\n    Node* cloneGraph(Node* node) {\n        if (!node) return nullptr;\n        unordered_map<Node*, Node*> oldToNew;\n        queue<Node*> q;\n        oldToNew[node] = new Node(node->val);\n        q.push(node);\n\n        while (!q.empty()) {\n            Node* cur = q.front();\n            q.pop();\n            for (Node* nei : cur->neighbors) {\n                if (oldToNew.find(nei) == oldToNew.end()) {\n                    oldToNew[nei] = new Node(nei->val);\n                    q.push(nei);\n                }\n                oldToNew[cur]->neighbors.push_back(oldToNew[nei]);\n            }\n        }\n        return oldToNew[node];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=mQeF6bN8hMk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-graph.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-graph.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Seacrh",
+      "explanation": "### How it works\n\nThe graph may contain **cycles**, so we cannot simply copy nodes recursively without remembering what we've already copied.  \nTo handle this, we use a **map (old → new)**:\n\n- When we first see a node, we create its copy.\n- If we see the same node again, we reuse the already-created copy.\n- This avoids infinite loops and ensures each node is cloned exactly once.\n\nDepth First Search (DFS) helps us explore and clone all connected nodes.\n\n### Steps\n\n1. If the input node is `null`, return `null`.\n2. Create a map to store original nodes -> cloned nodes.\n3. Start DFS from the given node:\n   - If the node is already in the map, return its clone.\n   - Create a new node with the same value.\n   - Store it in the map.\n   - Recursively clone all neighbors and add them to the clone’s neighbor list.\n4. Return the cloned node corresponding to the starting node.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from typing import Optional\n\n\"\"\"\n# Definition for a Node.\nclass Node:\n    def __init__(self, val = 0, neighbors = None):\n        self.val = val\n        self.neighbors = neighbors if neighbors is not None else []\n\"\"\"\n\nclass Solution:\n    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:\n        oldToNew = {}\n\n        def dfs(node):\n            if node in oldToNew:\n                return oldToNew[node]\n\n            copy = Node(node.val)\n            oldToNew[node] = copy\n            for nei in node.neighbors:\n                copy.neighbors.append(dfs(nei))\n            return copy\n\n        return dfs(node) if node else None\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-graph.md",
+      "id": "depth-first-seacrh"
+    }
+  ]
 }

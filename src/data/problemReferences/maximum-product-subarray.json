@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        int n = nums.size(), res = nums[0];\n        int prefix = 0, suffix = 0;\n\n        for (int i = 0; i < n; i++) {\n            prefix = nums[i] * (prefix == 0 ? 1 : prefix);\n            suffix = nums[n - 1 - i] * (suffix == 0 ? 1 : suffix);\n            res = max(res, max(prefix, suffix));\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=lXVy6YWFcRM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-subarray.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-subarray.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA **subarray product** can change drastically because of:\n\n- **Negative numbers** → can flip max to min and vice-versa\n- **Zero** → resets the product\n\nIn brute force, we:\n\n- Fix a starting index\n- Keep multiplying elements to the right\n- Track the maximum product seen\n\nThis works because every possible contiguous subarray is explicitly evaluated.\n\n### Steps\n\n1. Initialize `res` with the first element.\n2. For each starting index `i`:\n    - Set `cur = nums[i]`.\n    - Update `res`.\n    - For every `j > i`:\n        - Multiply `cur *= nums[j]`.\n        - Update `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        res = nums[0]\n\n        for i in range(len(nums)):\n            cur = nums[i]\n            res = max(res, cur)\n            for j in range(i + 1, len(nums)):\n                cur *= nums[j]\n                res = max(res, cur)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-subarray.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Kadane's Algorithm",
+      "explanation": "### How it works\n\nThis is the **Kadane-style solution adapted for products**.\n\nIn the classic maximum-sum subarray, we only track one value (current max sum).  \nFor products, that’s **not enough** because:\n\n- A **negative × negative = positive**\n- A very small (negative) product can suddenly become the **maximum** after multiplying by another negative.\n\nSo at every index, we must track **two values**:\n\n- `curMax`: maximum product ending at this index.\n- `curMin`: minimum product ending at this index.\n\nWhy `curMin` matters:\n\n- If the current number is negative, multiplying it with `curMin` might produce a new maximum.\n\nZeros are naturally handled because choosing `num` alone can reset the product.\n\n### Steps\n\n1. Initialize:\n    - `res` = first element (answer so far).\n    - `curMax = 1`, `curMin = 1`.\n2. For each number `num` in the array:\n    - Temporarily store `curMax * num` (because `curMax` will be updated).\n    - Update `curMax` as the **maximum** of:\n        - `num` (start new subarray).\n        - `num * curMax` (extend previous max).\n        - `num * curMin` (negative flip case).\n    - Update `curMin` as the **minimum** of:\n        - `num`.\n        - previous `curMax * num`.\n        - `num * curMin`.\n    - Update `res = max(res, curMax)`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        res = nums[0]\n        curMin, curMax = 1, 1\n\n        for num in nums:\n            tmp = curMax * num\n            curMax = max(num * curMax, num * curMin, num)\n            curMin = min(tmp, num * curMin, num)\n            res = max(res, curMax)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-subarray.md",
+      "id": "kadane-s-algorithm"
+    }
+  ]
 }

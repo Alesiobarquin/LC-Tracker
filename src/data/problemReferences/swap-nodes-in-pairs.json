@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* swapPairs(ListNode* head) {\n        ListNode dummy(0, head);\n        ListNode* prev = &dummy, *curr = head;\n\n        while (curr && curr->next) {\n            ListNode* nxtPair = curr->next->next;\n            ListNode* second = curr->next;\n\n            // Reverse this pair\n            second->next = curr;\n            curr->next = nxtPair;\n            prev->next = second;\n\n            // Update pointers\n            prev = curr;\n            curr = nxtPair;\n        }\n\n        return dummy.next;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=o811TZLAWOo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swap-nodes-in-pairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swap-nodes-in-pairs.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nThe simplest approach is to convert the linked list to an array, where swapping elements is straightforward using index-based access. Once we swap adjacent elements in the array, we rebuild the linked list connections. This trades space efficiency for implementation simplicity.\n\n### Steps\n\n1. Traverse the linked list and store all nodes in an array.\n2. Iterate through the array in steps of `2`, swapping adjacent elements.\n3. Reconnect all nodes by setting each node's `next` pointer to the following node in the array.\n4. Set the last node's `next` to `null` and return the first element as the new head.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if not head:\n            return None\n        arr = []\n        cur = head\n\n        while cur:\n            arr.append(cur)\n            cur = cur.next\n\n        for i in range(0, len(arr) - 1, 2):\n            arr[i], arr[i + 1] = arr[i + 1], arr[i]\n\n        for i in range(len(arr) - 1):\n            arr[i].next = arr[i + 1]\n\n        arr[-1].next = None\n        return arr[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swap-nodes-in-pairs.md",
+      "id": "convert-to-array"
+    },
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nWe can think of the problem recursively: swap the first two nodes, then let recursion handle the rest. The first node should point to the result of swapping the remaining list (starting from the third node). The second node becomes the new head of this pair and points to the first node. This recursive structure naturally handles lists of any length.\n\n### Steps\n\n1. Base case: if the list is empty or has only one node, return the head as-is.\n2. Save references to the first node (`cur`) and second node (`nxt`).\n3. Recursively swap the sublist starting from the third node and connect it to `cur`.\n4. Point `nxt` to `cur`.\n5. Return `nxt` as the new head of this swapped pair.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if not head or not head.next:\n            return head\n\n        cur = head\n        nxt = head.next\n        cur.next = self.swapPairs(nxt.next)\n        nxt.next = cur\n        return nxt\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swap-nodes-in-pairs.md",
+      "id": "recursion"
+    }
+  ]
 }

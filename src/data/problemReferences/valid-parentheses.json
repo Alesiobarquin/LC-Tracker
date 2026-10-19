@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        std::stack<char> stack;\n        std::unordered_map<char, char> closeToOpen = {\n            {')', '('},\n            {']', '['},\n            {'}', '{'}\n        };\n\n        for (char c : s) {\n            if (closeToOpen.count(c)) {\n                if (!stack.empty() && stack.top() == closeToOpen[c]) {\n                    stack.pop();\n                } else {\n                    return false;\n                }\n            } else {\n                stack.push(c);\n            }\n        }\n        return stack.empty();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=WTzjTskDFMg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-parentheses.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-parentheses.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe idea is simple:\nvalid parentheses must always appear in matching pairs like `\"()\"`, `\"{}\"`, or `\"[]\"`.\nSo if the string is valid, we can repeatedly remove these matching pairs until nothing is left.\nIf, after removing all possible pairs, the string becomes empty, then the parentheses were properly matched.\nOtherwise, some unmatched characters remain, meaning the string is invalid.\n\n### Steps\n\n1. While the string still contains `\"()\"`, `\"{}\"`, or `\"[]\"`:\n    - Remove all occurrences of those pairs.\n2. After no more pairs can be removed:\n    - If the string is empty, return `true`.\n    - Otherwise, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        while '()' in s or '{}' in s or '[]' in s:\n            s = s.replace('()', '')\n            s = s.replace('{}', '')\n            s = s.replace('[]', '')\n        return s == ''\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-parentheses.md",
+      "id": "brute-force"
+    }
+  ]
 }

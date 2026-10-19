@@ -1,14 +1,24 @@
 export type ReferenceLanguage = "python" | "cpp";
-export interface ProblemReference {
-  problemId: string;
+export interface ProblemApproach {
+  id: string;
   approach: string;
   explanation: string;
-  code: Record<ReferenceLanguage, string>;
-  videoUrl: string;
+  code: { python: string; cpp?: string };
   sourceUrl: string;
   sourceName?: string;
   licenseUrl?: string;
   explanationAuthor?: string;
+  codeAuthor?: string;
+}
+export interface ProblemReference extends Omit<ProblemApproach, "id" | "code"> {
+  problemId: string;
+  code: Record<ReferenceLanguage, string>;
+  videoUrl: string;
+  alternatives?: ProblemApproach[];
+}
+
+export function getProblemApproaches(reference: ProblemReference): ProblemApproach[] {
+  return [{ ...reference, id: "default" }, ...(reference.alternatives ?? [])];
 }
 
 // Load only the requested solution, after retrieval or an explicit library visit.

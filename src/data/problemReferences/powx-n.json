@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        if (x == 0) return 0;\n        if (n == 0) return 1;\n\n        double res = 1;\n        long power = abs((long)n);\n\n        while (power) {\n            if (power & 1) {\n                res *= x;\n            }\n            x *= x;\n            power >>= 1;\n        }\n\n        return n >= 0 ? res : 1 / res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=g9YQyYi4IQQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pow-x-n.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pow-x-n.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe are asked to compute \\( x^n \\), where:\n\n- `x` is a floating-point number\n- `n` can be **positive, zero, or negative**\n\nThe most straightforward way to think about exponentiation is:\n\n- multiplying `x` by itself `n` times\n\nThis brute force approach directly follows the mathematical definition of power:\n\n- if `n` is positive → multiply `x` repeatedly\n- if `n` is zero → the result is always `1`\n- if `n` is negative → compute \\( x^{|n|} \\) and take its reciprocal\n\nAlthough this method is not efficient for large `n`, it is very easy to understand and is a good starting point.\n\n### Steps\n\n1. Handle edge cases:\n    - If `x == 0`, return `0`\n    - If `n == 0`, return `1`\n2. Initialize `res = 1` to store the result.\n3. Repeat `abs(n)` times:\n    - multiply `res` by `x`\n4. If `n` is positive:\n    - return `res`\n5. If `n` is negative:\n    - return `1 / res`\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def myPow(self, x: float, n: int) -> float:\n        if x == 0:\n            return 0\n        if n == 0:\n            return 1\n\n        res = 1\n        for i in range(abs(n)):\n            res *= x\n        return res if n >= 0 else 1 / res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pow-x-n.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Exponentiation (Recursive)",
+      "explanation": "### How it works\n\nComputing \\( x^n \\) by multiplying `x` repeatedly works, but it becomes very slow when `n` is large.\n\nA much better idea is to use **binary exponentiation**, which is based on these observations:\n\n- If `n` is even:\n    - \\( x^n = (x^2)^{n/2} \\)\n- If `n` is odd:\n    - \\( x^n = x \\times (x^2)^{(n-1)/2} \\)\n\nThis means we can:\n\n- **halve the exponent** at each step\n- **square the base** accordingly\n\nBy doing this recursively, the number of multiplications reduces from `O(n)` to `O(log n)`.\n\nWe also handle negative powers by:\n\n- computing \\( x^{|n|} \\)\n- taking the reciprocal if `n` is negative\n\n### Steps\n\n1. Define a recursive helper function `helper(x, n)`:\n    - If `x == 0`, return `0`\n    - If `n == 0`, return `1`\n2. Recursively compute:\n    - `res = helper(x * x, n // 2)`\n3. If `n` is odd:\n    - return `x * res`\n4. If `n` is even:\n    - return `res`\n5. Call `helper(x, abs(n))` to compute the magnitude.\n6. If `n` is negative:\n    - return `1 / result`\n7. Otherwise:\n    - return `result`\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)` for recursion stack.",
+      "code": {
+        "python": "class Solution:\n    def myPow(self, x: float, n: int) -> float:\n        def helper(x, n):\n            if x == 0:\n                return 0\n            if n == 0:\n                return 1\n\n            res = helper(x * x, n // 2)\n            return x * res if n % 2 else res\n\n        res = helper(x, abs(n))\n        return res if n >= 0 else 1 / res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/pow-x-n.md",
+      "id": "binary-exponentiation-recursive"
+    }
+  ]
 }

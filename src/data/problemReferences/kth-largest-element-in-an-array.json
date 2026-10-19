@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        for (int num : nums) {\n            minHeap.push(num);\n            if (minHeap.size() > k) {\n                minHeap.pop();\n            }\n        }\n        return minHeap.top();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=XEmy13g1Qxc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-element-in-an-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-element-in-an-array.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nIf you sort the entire array, all elements will be arranged from smallest to largest.  \nOnce sorted:\n\n- The **largest element** is at the last position.\n- The **2nd largest** is one position before that.\n- The **k-th largest** is simply at index `n - k`.\n\nSo the problem becomes:  \n→ _Sort the array and pick the element that is k steps from the end._\n\nThis is simple but not the most efficient, because sorting takes `O(n log n)`.\n\n### Steps\n\n1. Sort the array in non-decreasing order.\n2. Compute the index of the k-th largest element: `index = n - k`.\n3. Return the element at that position.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findKthLargest(self, nums: List[int], k: int) -> int:\n        nums.sort()\n        return nums[len(nums) - k]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-element-in-an-array.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Quick Select",
+      "explanation": "### How it works\n\nQuick Select is a selection algorithm that works like QuickSort but only explores the side of the array that contains the answer.\n\nKey idea:\n\n- Pick a pivot.\n- Rearrange elements so that:\n    - all numbers **smaller than or equal to** the pivot go to the left,\n    - all numbers **greater** go to the right.\n- After partitioning, the pivot ends up in its correct sorted position.\n- Instead of sorting the whole array, we check:\n    - If the pivot’s final position is the index we want → answer found.\n    - Otherwise, recurse only into the side where the target index lies.\n\nBecause we eliminate half the array each time, this approach is much faster on average than full sorting.\n\nFor the k-th largest:\n\n- Convert it to the corresponding index in sorted order:\n    - index = n − k\n- Then use Quick Select to find the value that would appear at that index.\n\n### Steps\n\n1. Convert k-th largest to its zero-based sorted index: `target = n - k`.\n2. Use Quick Select between indices `l` and `r`:\n    - Choose a pivot (commonly the rightmost element).\n    - Partition the array around the pivot.\n    - Let the pivot's final index be `p`.\n3. If `p == target`, return the pivot value.\n4. If `p > target`, repeat Quick Select on the **left** half.\n5. If `p < target`, repeat on the **right** half.\n6. Continue until the target index is found.\n\n### Complexity\n\n- Time complexity: `O(n)` in average case, `O(n ^ 2)` in worst case.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n\n    def findKthLargest(self, nums: List[int], k: int) -> int:\n        k = len(nums) - k\n\n        def quickSelect(l, r):\n            pivot, p = nums[r], l\n            for i in range(l, r):\n                if nums[i] <= pivot:\n                    nums[p], nums[i] = nums[i], nums[p]\n                    p += 1\n            nums[p], nums[r] = nums[r], nums[p]\n\n            if p > k:\n                return quickSelect(l, p - 1)\n            elif p < k:\n                return quickSelect(p + 1, r)\n            else:\n                return nums[p]\n\n        return quickSelect(0, len(nums) - 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-largest-element-in-an-array.md",
+      "id": "quick-select"
+    }
+  ]
 }

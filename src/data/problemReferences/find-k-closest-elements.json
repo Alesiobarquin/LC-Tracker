@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findClosestElements(vector<int>& arr, int k, int x) {\n        int l = 0, r = arr.size() - k;\n        while (l < r) {\n            int m = (l + r) / 2;\n            if (x - arr[m] > arr[m + k] - x) {\n                l = m + 1;\n            } else {\n                r = m;\n            }\n        }\n        return vector<int>(arr.begin() + l, arr.begin() + l + k);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=o-YDQzHoaKM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-k-closest-elements.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-k-closest-elements.md",
+  "alternatives": [
+    {
+      "approach": "Sorting (Custom Comparator)",
+      "explanation": "### How it works\n\nThe problem asks for the `k` elements closest to `x`. A straightforward approach is to sort all elements by their distance to `x`. If two elements have the same distance, we prefer the smaller one. After sorting, we simply take the first `k` elements and return them in sorted order.\n\n### Steps\n\n1. Sort the array using a custom comparator that compares elements by their absolute difference from `x`. If two elements have the same distance, the smaller element comes first.\n2. Take the first `k` elements from the sorted array.\n3. Sort these `k` elements in ascending order (since the output must be sorted).\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n log n + k log k)`\n- Space complexity:\n    - `O(n)` worst-case auxiliary space for Python\\'s sort.\n    - `O(k)` space for the output array.\n\n> Where `n` is the size of the input array and `k` is the number of closest elements to find.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:\n        arr.sort(key=lambda num: (abs(num - x), num))\n        return sorted(arr[:k])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-k-closest-elements.md",
+      "id": "sorting-custom-comparator"
+    },
+    {
+      "approach": "Binary Search + Two Pointers",
+      "explanation": "### How it works\n\nInstead of scanning linearly to find the starting point, we can use binary search to quickly locate where `x` would fit in the sorted array. From that position, we expand outward with two pointers to collect `k` closest elements.\n\n### Steps\n\n1. Use binary search to find the leftmost position where `arr[mid] >= x`.\n2. Initialize two pointers: `l` pointing one position to the left of this index, and `r` at this index.\n3. While we have fewer than `k` elements (i.e., `r - l - 1 < k`):\n    - If `l < 0`, expand right.\n    - If `r >= n`, expand left.\n    - Otherwise, compare distances and expand toward the closer element.\n4. Return the subarray from index `l + 1` to `r - 1` (exclusive bounds).\n\n### Complexity\n\n- Time complexity: `O(log n + k)`\n- Space complexity: `O(k)` for the output array.\n\n> Where `n` is the size of the input array and `k` is the number of closest elements to find.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:\n        l, r = 0, len(arr) - 1\n        while l < r:\n            mid = (l + r) // 2\n            if arr[mid] < x:\n                l = mid + 1\n            else:\n                r = mid\n\n        l, r = l - 1, l\n        while r - l - 1 < k:\n            if l < 0:\n                r += 1\n            elif r >= len(arr):\n                l -= 1\n            elif abs(arr[l] - x) <= abs(arr[r] - x):\n                l -= 1\n            else:\n                r += 1\n\n        return arr[l + 1:r]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-k-closest-elements.md",
+      "id": "binary-search-two-pointers"
+    }
+  ]
 }

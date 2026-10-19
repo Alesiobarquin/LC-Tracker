@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        std::rotate(nums.begin(), nums.end() - (k % nums.size()), nums.end());\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=BHr381Guz3Y",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-array.md",
+  "alternatives": [
+    {
+      "approach": "Extra Space",
+      "explanation": "### How it works\n\nInstead of repeatedly shifting elements, we can directly compute the final position of each element. If an element is at index `i`, after rotation it will be at index `(i + k) % n`. By using a temporary array to store the rotated result, we can place each element in its correct position in a single pass, then copy everything back.\n\n### Steps\n\n1. Create a temporary array `tmp` of the same size as `nums`.\n2. For each index `i`, place `nums[i]` at position `(i + k) % n` in `tmp`.\n3. Copy all elements from `tmp` back into `nums`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        \"\"\"\n        Do not return anything, modify nums in-place instead.\n        \"\"\"\n        n = len(nums)\n        tmp = [0] * n\n        for i in range(n):\n            tmp[(i + k) % n] = nums[i]\n\n        nums[:] = tmp\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-array.md",
+      "id": "extra-space"
+    },
+    {
+      "approach": "Using Reverse",
+      "explanation": "### How it works\n\nA clever observation: rotating an array by `k` is equivalent to moving the last `k` elements to the front. We can achieve this with three reversals. First, reverse the entire array. Now the last `k` elements are at the front, but in reverse order. Reverse the first `k` elements to fix their order. Finally, reverse the remaining elements to restore their original order.\n\n### Steps\n\n1. Compute `k = k % n`.\n2. Reverse the entire array from index `0` to `n - 1`.\n3. Reverse the first `k` elements (from index `0` to `k - 1`).\n4. Reverse the remaining elements (from index `k` to `n - 1`).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        \"\"\"\n        Do not return anything, modify nums in-place instead.\n        \"\"\"\n        n = len(nums)\n        k %= n\n\n        def reverse(l: int, r: int) -> None:\n            while l < r:\n                nums[l], nums[r] = nums[r], nums[l]\n                l, r = l + 1, r - 1\n\n        reverse(0, n - 1)\n        reverse(0, k - 1)\n        reverse(k, n - 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rotate-array.md",
+      "id": "using-reverse"
+    }
+  ]
 }

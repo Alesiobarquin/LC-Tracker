@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int rob(vector<int>& nums) {\n        int rob1 = 0, rob2 = 0;\n\n        for (int num : nums) {\n            int temp = max(num + rob1, rob2);\n            rob1 = rob2;\n            rob2 = temp;\n        }\n        return rob2;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=73r3KWiEvyk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes the same subproblems many times.\nTo optimize this, we **store the result for each index** once it’s computed.\n\nAt every house `i`, you still have **two choices**:\n\n- Skip the house → go to `i + 1`\n- Rob the house → take `nums[i]` and go to `i + 2`\n\nUsing **memoization**, each index is solved only once.\n\n### Steps\n\n1. Create a memo array where `memo[i]` stores the maximum money from house `i`.\n2. Define a recursive function `dfs(i)`:\n    - If `i` is out of bounds, return `0`.\n    - If `memo[i]` is already computed, return it.\n    - Compute:\n        - `skip = dfs(i + 1)`\n        - `rob = nums[i] + dfs(i + 2)`\n    - Store and return `max(skip, rob)` in `memo[i]`.\n3. Start recursion from index `0`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rob(self, nums: List[int]) -> int:\n        memo = [-1] * len(nums)\n\n        def dfs(i):\n            if i >= len(nums):\n                return 0\n            if memo[i] != -1:\n                return memo[i]\n            memo[i] = max(dfs(i + 1), nums[i] + dfs(i + 2))\n            return memo[i]\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of deciding recursively, we **build the answer step by step**.\n\nFor each house `i`, the maximum money we can have depends on:\n\n- **Not robbing it** → same money as `i - 1`\n- **Robbing it** → money at `i` + best up to `i - 2`\n\nWe choose the **better of the two** at every step.\n\n### Steps\n\n1. Handle edge cases:\n    - No houses → return `0`\n    - One house → return its value\n2. Create a DP array where `dp[i]` = max money up to house `i`.\n3. Initialize:\n    - `dp[0] = nums[0]`\n    - `dp[1] = max(nums[0], nums[1])`\n4. For each house `i` from `2` to `n - 1`:\n    - `dp[i] = max(dp[i - 1], nums[i] + dp[i - 2])`\n5. Return `dp[n - 1]`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rob(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        if len(nums) == 1:\n            return nums[0]\n\n        dp = [0] * len(nums)\n        dp[0] = nums[0]\n        dp[1] = max(nums[0], nums[1])\n\n        for i in range(2, len(nums)):\n            dp[i] = max(dp[i - 1], nums[i] + dp[i - 2])\n\n        return dp[-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

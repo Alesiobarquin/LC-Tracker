@@ -7,5 +7,25 @@
     "cpp": "class DSU {\npublic:\n    vector<int> parent;\n    vector<int> rank;\n\n    DSU(int n) {\n        parent.resize(n);\n        rank.resize(n, 1);\n        for (int i = 0; i < n; i++) {\n            parent[i] = i;\n        }\n    }\n\n    int find(int node) {\n        int cur = node;\n        while (cur != parent[cur]) {\n            parent[cur] = parent[parent[cur]];\n            cur = parent[cur];\n        }\n        return cur;\n    }\n\n    bool unionSets(int u, int v) {\n        int pu = find(u);\n        int pv = find(v);\n        if (pu == pv) {\n            return false;\n        }\n        if (rank[pv] > rank[pu]) {\n            swap(pu, pv);\n        }\n        parent[pv] = pu;\n        rank[pu] += rank[pv];\n        return true;\n    }\n};\n\nclass Solution {\npublic:\n    int countComponents(int n, vector<vector<int>>& edges) {\n        DSU dsu(n);\n        int res = n;\n        for (auto& edge : edges) {\n            if (dsu.unionSets(edge[0], edge[1])) {\n                res--;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=8f1XPm4WOUc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-connected-components.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-connected-components.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA **connected component** is a group of nodes where every node is reachable from any other node in that group.\n\nUsing **DFS**:\n\n- If we start DFS from an unvisited node, we will visit **all nodes in its connected component**\n- Every time we start DFS from a new unvisited node, we’ve found **one new component**\n\n### Steps\n\n1. Build an **adjacency list** from the edges.\n2. Maintain a **visited array** to track visited nodes.\n3. Initialize `components = 0`.\n4. For each node from `0` to `n-1`:\n    - If the node is not visited:\n        - Run DFS from this node (mark all reachable nodes as visited)\n        - Increment `components` by `1`\n5. Return `components`.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges in the graph.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countComponents(self, n: int, edges: List[List[int]]) -> int:\n        adj = [[] for _ in range(n)]\n        visit = [False] * n\n        for u, v in edges:\n            adj[u].append(v)\n            adj[v].append(u)\n\n        def dfs(node):\n            for nei in adj[node]:\n                if not visit[nei]:\n                    visit[nei] = True\n                    dfs(nei)\n\n        res = 0\n        for node in range(n):\n            if not visit[node]:\n                visit[node] = True\n                dfs(node)\n                res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-connected-components.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nA **connected component** is a set of nodes where each node can reach the others.\n\nUsing **BFS**:\n\n- Starting BFS from an unvisited node will visit **all nodes in that component**\n- Each time we start BFS from a new unvisited node, we discover **one new connected component**\n\n### Steps\n\n1. Build an **adjacency list** from the given edges.\n2. Create a **visited array** to mark nodes that are already seen.\n3. Initialize `components = 0`.\n4. For every node from `0` to `n-1`:\n    - If the node is not visited:\n        - Start **BFS** from this node\n        - Mark all reachable nodes as visited\n        - Increment `components` by `1`\n5. Return `components`.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges in the graph.",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def countComponents(self, n: int, edges: List[List[int]]) -> int:\n        adj = [[] for _ in range(n)]\n        visit = [False] * n\n        for u, v in edges:\n            adj[u].append(v)\n            adj[v].append(u)\n\n        def bfs(node):\n            q = deque([node])\n            visit[node] = True\n            while q:\n                cur = q.popleft()\n                for nei in adj[cur]:\n                    if not visit[nei]:\n                        visit[nei] = True\n                        q.append(nei)\n\n        res = 0\n        for node in range(n):\n            if not visit[node]:\n                bfs(node)\n                res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-connected-components.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

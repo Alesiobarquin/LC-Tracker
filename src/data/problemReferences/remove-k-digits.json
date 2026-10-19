@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string removeKdigits(string num, int k) {\n        int l = 0;\n        for (int r = 0; r < num.size(); r++) {\n            while (l > 0 && k > 0 && num[l - 1] > num[r]) {\n                l--;\n                k--;\n            }\n            num[l++] = num[r];\n        }\n\n        l -= k;\n        int i = 0;\n        while (i < l && num[i] == '0') {\n            i++;\n        }\n        if (i == l) return \"0\";\n        return num.substr(i, l - i);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cFabMOnJaq0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-k-digits.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-k-digits.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo make the smallest possible number, we want smaller digits to appear earlier.\nIf a digit is followed by a smaller digit, removing the larger one produces a smaller result.\nWe repeatedly find the first position where a digit is greater than its successor and remove it.\nAfter `k` removals, we strip leading zeros and return the result.\n\n### Steps\n\n1. Repeat the following `k` times:\n    - Scan from left to right to find the first digit that is greater than the next digit.\n    - Remove that digit from the string.\n2. Strip any leading zeros from the result.\n3. Return the remaining string, or `\"0\"` if it becomes empty.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(1)` or `O(n)` depending on the language.",
+      "code": {
+        "python": "class Solution:\n    def removeKdigits(self, num: str, k: int) -> str:\n        num = list(num)\n        while k:\n            i = 1\n            while i < len(num) and num[i] >= num[i - 1]:\n                i += 1\n            num.pop(i - 1)\n            k -= 1\n\n        i = 0\n        while i < len(num) and num[i] == '0':\n            i += 1\n\n        num = num[i:]\n        return ''.join(num) if num else '0'\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-k-digits.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Greedy + Stack",
+      "explanation": "### How it works\n\nThe brute force approach rescans the string after each removal, which is inefficient.\nA stack lets us make decisions in a single pass.\nAs we process each digit, we pop from the stack whenever the top is larger than the current digit and we still have removals left.\nThis greedily ensures that smaller digits bubble up to the front.\n\n### Steps\n\n1. Initialize an empty stack.\n2. For each character `c` in `num`:\n    - While `k > 0`, the stack is not empty, and the top of the stack is greater than `c`, pop from the stack and decrement `k`.\n    - Push `c` onto the stack.\n3. If `k` is still greater than `0`, remove `k` digits from the end of the stack.\n4. Strip leading zeros from the result.\n5. Return the final string, or `\"0\"` if empty.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeKdigits(self, num: str, k: int) -> str:\n        stack = []\n        for c in num:\n            while k > 0 and stack and stack[-1] > c:\n                k -= 1\n                stack.pop()\n            stack.append(c)\n\n        while stack and k:\n            stack.pop()\n            k -= 1\n\n        i = 0\n        while i < len(stack) and stack[i] == '0':\n            i += 1\n\n        res = stack[i:]\n        return ''.join(res) if res else \"0\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-k-digits.md",
+      "id": "greedy-stack"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool validPalindrome(string s) {\n        int l = 0, r = s.size() - 1;\n\n        while (l < r) {\n            if (s[l] != s[r]) {\n                return isPalindrome(s, l + 1, r) ||\n                       isPalindrome(s, l, r - 1);\n            }\n            l++;\n            r--;\n        }\n\n        return true;\n    }\n\nprivate:\n    bool isPalindrome(const string& s, int l, int r) {\n        while (l < r) {\n            if (s[l] != s[r]) {\n                return false;\n            }\n            l++;\n            r--;\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=JrxRYBwG6EI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-palindrome-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-palindrome-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to check every possibility. First, check if the string is already a palindrome. If not, try removing each character one at a time and check if the resulting string becomes a palindrome. If any removal produces a palindrome, return `true`. This guarantees we find a solution if one exists, but it requires checking up to `n` different strings.\n\n### Steps\n\n1. First check if the original string is a palindrome by comparing it to its reverse. If yes, return `true`.\n2. For each index `i` from `0` to `n-1`:\n    - Create a new string by removing the character at index `i`.\n    - Check if this new string is a palindrome.\n    - If it is, return `true`.\n3. If no single removal produces a palindrome, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def validPalindrome(self, s: str) -> bool:\n        if s == s[::-1]:\n            return True\n\n        for i in range(len(s)):\n            newS = s[:i] + s[i + 1:]\n            if newS == newS[::-1]:\n                return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-palindrome-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Pointers",
+      "explanation": "### How it works\n\nInstead of blindly trying every removal, we can be smarter. Use two pointers starting from both ends of the string and move them inward. As long as characters match, keep going. When we find a mismatch, we know exactly where the problem is. At this point, we have only two choices: remove the left character or remove the right character. We check if either choice results in a palindrome for the remaining substring.\n\n### Steps\n\n1. Initialize two pointers: `l` at the start and `r` at the end of the string.\n2. While `l < r`:\n    - If `s[l] == s[r]`, move both pointers inward (`l++`, `r--`).\n    - If they differ, we found the mismatch. Check two possibilities:\n        - Skip the left character and check if `s[l+1...r]` is a palindrome.\n        - Skip the right character and check if `s[l...r-1]` is a palindrome.\n    - Return `true` if either substring is a palindrome.\n3. If the loop completes without mismatches, the string is already a palindrome. Return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def validPalindrome(self, s: str) -> bool:\n        l, r = 0, len(s) - 1\n\n        while l < r:\n            if s[l] != s[r]:\n                skipL = s[l + 1 : r + 1]\n                skipR = s[l : r]\n                return skipL == skipL[::-1] or skipR == skipR[::-1]\n            l, r = l + 1, r - 1\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-palindrome-ii.md",
+      "id": "two-pointers"
+    }
+  ]
 }

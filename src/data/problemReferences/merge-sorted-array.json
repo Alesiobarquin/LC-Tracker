@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        int last = m + n - 1;\n        int i = m - 1, j = n - 1;\n\n        while (j >= 0) {\n            if (i >= 0 && nums1[i] > nums2[j]) {\n                nums1[last--] = nums1[i--];\n            } else {\n                nums1[last--] = nums2[j--];\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=P1Ic85RarKY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nThe simplest approach is to copy all elements from `nums2` into the empty slots at the end of `nums1`, then sort the entire array. Since `nums1` has enough space allocated for both arrays, we can place `nums2`'s elements starting at index `m`. After sorting, the merged result is in sorted order.\n\n### Steps\n\n1. Copy all `n` elements from `nums2` into `nums1` starting at index `m`.\n2. Sort `nums1` in place.\n\n### Complexity\n\n- Time complexity: `O((m + n) log (m + n))`\n- Space complexity: `O(m + n)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `m` and `n` represent the number of elements in the arrays `nums1` and `nums2`, respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        \"\"\"\n        Do not return anything, modify nums1 in-place instead.\n        \"\"\"\n        nums1[m:] = nums2[:n]\n        nums1.sort()\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-sorted-array.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Three Pointers With Extra Space",
+      "explanation": "### How it works\n\nSince both arrays are already sorted, we can merge them in linear time using the standard merge technique from merge sort. However, if we write directly into `nums1` from the front, we risk overwriting elements we still need. To avoid this, we first copy the original elements of `nums1` to a temporary array, then merge from both sources into `nums1`.\n\n### Steps\n\n1. Create a copy of the first `m` elements of `nums1`.\n2. Use three pointers: `i` for the copy of `nums1`, `j` for `nums2`, and `idx` for the write position in `nums1`.\n3. Compare elements from both sources and write the smaller one to `nums1[idx]`.\n4. Increment the corresponding pointer and `idx`.\n5. Continue until all elements from both sources are placed.\n\n### Complexity\n\n- Time complexity: `O(m + n)`\n- Space complexity: `O(m)`\n\n> Where `m` and `n` represent the number of elements in the arrays `nums1` and `nums2`, respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        \"\"\"\n        Do not return anything, modify nums1 in-place instead.\n        \"\"\"\n        nums1_copy = nums1[:m]\n        idx = 0\n        i = j = 0\n        while idx < m + n:\n            if j >= n or (i < m and nums1_copy[i] <= nums2[j]):\n                nums1[idx] = nums1_copy[i]\n                i += 1\n            else:\n                nums1[idx] = nums2[j]\n                j += 1\n            idx += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/merge-sorted-array.md",
+      "id": "three-pointers-with-extra-space"
+    }
+  ]
 }

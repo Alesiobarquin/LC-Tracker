@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> searchRange(vector<int>& nums, int target) {\n        int left = lower_bound(nums.begin(), nums.end(), target) - nums.begin();\n        if (left == nums.size() || nums[left] != target) {\n            return {-1, -1};\n        }\n\n        int right = upper_bound(nums.begin(), nums.end(), target) - nums.begin() - 1;\n        return {left, right};\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4sQL7R5ySUU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-and-last-position-of-element-in-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-and-last-position-of-element-in-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nSince the array is sorted, all occurrences of the target will be consecutive. We can scan through the array once, recording the first and last positions where we encounter the target. The first time we see the target, we set both the start and end to that index. For subsequent matches, we only update the end position.\n\n### Steps\n\n1. Initialize result array `res = [-1, -1]`.\n2. Iterate through the array with index `i`:\n    - If `nums[i]` equals the target:\n        - If `res[0]` is still `-1`, set both `res[0]` and `res[1]` to `i`.\n        - Otherwise, update `res[1]` to `i`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        res = [-1, -1]\n\n        for i, num in enumerate(nums):\n            if num == target:\n                if res[0] == -1:\n                    res[0] = res[1] = i\n                else:\n                    res[1] = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-and-last-position-of-element-in-sorted-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search - II",
+      "explanation": "### How it works\n\nWe can use a single style of binary search that finds the insertion point for a value. The insertion point for `target` gives us the first occurrence (if it exists). The insertion point for `target + 1` gives us one past the last occurrence. This approach uses the standard lower-bound binary search pattern, which finds the smallest index where `nums[index] >= target`.\n\n### Steps\n\n1. Implement a binary search that finds the leftmost position where `nums[m] >= target`.\n2. Find `start = binarySearch(target)`.\n3. If `start` equals the array length or `nums[start] != target`, return `[-1, -1]`.\n4. Find `end = binarySearch(target + 1) - 1`.\n5. Return `[start, end]`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        n = len(nums)\n\n        def binarySearch(target):\n            l, r = 0, n\n            while l < r:\n                m = l + (r - l) // 2\n                if nums[m] >= target:\n                    r = m\n                else:\n                    l = m + 1\n            return l\n\n        start = binarySearch(target)\n        if start == n or nums[start] != target:\n            return [-1, -1]\n\n        return [start, binarySearch(target + 1) - 1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-and-last-position-of-element-in-sorted-array.md",
+      "id": "binary-search-ii"
+    }
+  ]
 }

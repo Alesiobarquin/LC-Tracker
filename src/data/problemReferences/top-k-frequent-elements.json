@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int, int> count;\n        vector<vector<int>> freq(nums.size() + 1);\n\n        for (int n : nums) {\n            count[n] = 1 + count[n];\n        }\n        for (const auto& entry : count) {\n            freq[entry.second].push_back(entry.first);\n        }\n\n        vector<int> res;\n        for (int i = freq.size() - 1; i > 0; --i) {\n            for (int n : freq[i]) {\n                res.push_back(n);\n                if (res.size() == k) {\n                    return res;\n                }\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=YPTqKIgVk-k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/top-k-elements-in-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/top-k-elements-in-list.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo find the `k` most frequent elements, we first need to know how often each number appears.\nOnce we count the frequencies, we can sort the unique numbers based on how many times they occur.\nAfter sorting, the numbers with the highest frequencies will naturally appear at the end of the list.\nBy taking the last `k` entries, we get the `k` most frequent elements.\n\nThis approach is easy to reason about:\n**count the frequencies → sort by frequency → take the top `k`.**\n\n### Steps\n\n1. Create a hash map to store the frequency of each number.\n2. Build a list of `[frequency, number]` pairs from the map.\n3. Sort this list in ascending order based on frequency.\n4. Create an empty result list.\n5. Repeatedly pop from the end of the sorted list (highest frequency) and append the number to the result.\n6. Stop when the result contains `k` elements.\n7. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        count = {}\n        for num in nums:\n            count[num] = 1 + count.get(num, 0)\n\n        arr = []\n        for num, cnt in count.items():\n            arr.append([cnt, num])\n        arr.sort()\n\n        res = []\n        while len(res) < k:\n            res.append(arr.pop()[1])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/top-k-elements-in-list.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Min-Heap",
+      "explanation": "### How it works\n\nAfter counting how often each number appears, we want to efficiently keep track of only the `k` most frequent elements.\nA **min-heap** is perfect for this because it always keeps the smallest element at the top.\nBy pushing `(frequency, value)` pairs into the heap and removing the smallest whenever the heap grows beyond size `k`, we ensure that the heap always contains the top `k` most frequent elements.\nIn the end, the heap holds exactly the `k` values with the highest frequencies.\n\n### Steps\n\n1. Build a frequency map that counts how many times each number appears.\n2. Create an empty min-heap.\n3. For each number in the frequency map:\n    - Push `(frequency, number)` into the heap.\n    - If the heap size becomes greater than `k`, pop once to remove the smallest frequency.\n4. After processing all numbers, the heap contains the `k` most frequent elements.\n5. Pop all elements from the heap and collect their numbers into the result list.\n6. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n log k)`\n- Space complexity: `O(n + k)`\n\n> Where `n` is the length of the array and `k` is the number of top frequent elements.",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        count = {}\n        for num in nums:\n            count[num] = 1 + count.get(num, 0)\n\n        heap = []\n        for num in count.keys():\n            heapq.heappush(heap, (count[num], num))\n            if len(heap) > k:\n                heapq.heappop(heap)\n\n        res = []\n        for i in range(k):\n            res.append(heapq.heappop(heap)[1])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/top-k-elements-in-list.md",
+      "id": "min-heap"
+    }
+  ]
 }

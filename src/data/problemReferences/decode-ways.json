@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numDecodings(string s) {\n        int dp = 0, dp2 = 0;\n        int dp1 = 1;\n        for (int i = s.size() - 1; i >= 0; i--) {\n            if (s[i] == '0') {\n                dp = 0;\n            } else {\n                dp = dp1;\n                if (i + 1 < s.size() && (s[i] == '1' ||\n                    s[i] == '2' && s[i + 1] < '7')) {\n                    dp += dp2;\n                }\n            }\n            dp2 = dp1;\n            dp1 = dp;\n            dp = 0;\n        }\n        return dp1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=6aEyTjOwlJU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/decode-ways.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/decode-ways.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis is the same decoding logic as the recursive approach, but with **memoization** to avoid recomputing the same subproblems.\n\nObservation:\n\n- While decoding, the same index `i` is reached multiple times.\n- The number of ways to decode `s[i:]` **never changes**, so we can store it once and reuse it.\n\nSo instead of recalculating:\n\n> “How many ways can I decode from index `i`?”\n\nwe **cache the answer** the first time we compute it.\n\nThis converts the exponential recursion into linear time.\n\n### Steps\n\n1. Use a dictionary `dp` where `dp[i]` = number of ways to decode `s[i:]`.\n2. Initialize base case:\n    - `dp[len(s)] = 1` (empty string has one valid decoding).\n3. Define recursive function `dfs(i)`:\n    - If `i` already in `dp`, return `dp[i]`.\n    - If `s[i] == '0'`, return `0` (invalid).\n4. Compute:\n    - Take **one digit** → `dfs(i + 1)`\n    - Take **two digits** if valid (`10`-`26`) → `dfs(i + 2)`\n5. Store result in `dp[i]` and return it.\n6. Call `dfs(0)`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def numDecodings(self, s: str) -> int:\n        dp = {len(s) : 1}\n\n        def dfs(i):\n            if i in dp:\n                return dp[i]\n            if s[i] == \"0\":\n                return 0\n\n            res = dfs(i + 1)\n            if i + 1 < len(s) and (\n                s[i] == \"1\" or s[i] == \"2\" and\n                s[i + 1] in \"0123456\"\n            ):\n                res += dfs(i + 2)\n            dp[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/decode-ways.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nThis is the **iterative version** of the decoding logic.\n\nInstead of asking:\n\n> “How many ways can I decode starting at index `i`?”\n\nrecursively, we **build the answer from the back**.\n\nKey idea:\n\n- Let `dp[i]` = number of ways to decode the substring `s[i:]`\n- The answer we want is `dp[0]`\n- Each position depends only on the next **one** or **two** positions → perfect for bottom-up DP\n\n### Steps\n\n1. Create a DP table (or map) where:\n    - `dp[i]` = number of ways to decode `s[i:]`\n2. Base case:\n    - `dp[len(s)] = 1` (empty string has one valid decoding)\n3. Iterate `i` from right to left:\n    - If `s[i] == '0'` → `dp[i] = 0` (invalid start)\n    - Else:\n        - Take **one digit** → `dp[i] = dp[i + 1]`\n        - Take **two digits** if valid (`10`-`26`) → add `dp[i + 2]`\n4. Return `dp[0]`\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def numDecodings(self, s: str) -> int:\n        dp = {len(s): 1}\n        for i in range(len(s) - 1, -1, -1):\n            if s[i] == \"0\":\n                dp[i] = 0\n            else:\n                dp[i] = dp[i + 1]\n\n            if i + 1 < len(s) and (s[i] == \"1\" or\n               s[i] == \"2\" and s[i + 1] in \"0123456\"\n            ):\n                dp[i] += dp[i + 2]\n        return dp[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/decode-ways.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

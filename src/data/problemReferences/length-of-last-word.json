@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        s.erase(s.find_last_not_of(' ') + 1);\n        return s.substr(s.find_last_of(' ') + 1).length();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=KT9rltZTybQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-last-word.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-last-word.md",
+  "alternatives": [
+    {
+      "approach": "Iteration - I",
+      "explanation": "### How it works\n\nWe need to find the length of the last word, where words are separated by spaces. Trailing spaces complicate matters since the last word might not be at the very end of the string. By scanning forward, we track the current word's length and reset it when we encounter a new word after spaces.\n\n### Steps\n\n1. Initialize `length` to `0` and start at index `0`.\n2. Iterate through the string:\n    - If we hit a space, skip all consecutive spaces.\n    - If we've reached the end after skipping spaces, return the current `length`.\n    - Otherwise, reset `length` to `0` (we're starting a new word).\n    - For non-space characters, increment `length`.\n3. Return `length` after the loop completes.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        length = i = 0\n        while i < len(s):\n            if s[i] == ' ':\n                while i < len(s) and s[i] == ' ':\n                    i += 1\n                if i == len(s):\n                    return length\n                length = 0\n            else:\n                length += 1\n                i += 1\n        return length\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-last-word.md",
+      "id": "iteration-i"
+    },
+    {
+      "approach": "Iteration - II",
+      "explanation": "### How it works\n\nScanning from the end is more direct since we only care about the last word. First skip any trailing spaces, then count characters until we hit a space or the beginning of the string. This avoids processing earlier parts of the string entirely.\n\n### Steps\n\n1. Start from the last index of the string.\n2. Skip all trailing spaces by decrementing the index.\n3. Count non-space characters by decrementing the index and incrementing `length` until a space is found or we reach the start.\n4. Return `length`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        i, length = len(s) - 1, 0\n        while s[i] == ' ':\n            i -= 1\n        while i >= 0 and s[i] != ' ':\n            i -= 1\n            length += 1\n        return length\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-last-word.md",
+      "id": "iteration-ii"
+    }
+  ]
 }

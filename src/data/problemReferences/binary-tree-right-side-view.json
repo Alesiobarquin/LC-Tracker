@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    vector<int> rightSideView(TreeNode* root) {\n        vector<int> res;\n        queue<TreeNode*> q;\n        q.push(root);\n\n        while (!q.empty()) {\n            TreeNode* rightSide = nullptr;\n            int qLen = q.size();\n\n            for (int i = 0; i < qLen; i++) {\n                TreeNode* node = q.front();\n                q.pop();\n                if (node) {\n                    rightSide = node;\n                    q.push(node->left);\n                    q.push(node->right);\n                }\n            }\n            if (rightSide) {\n                res.push_back(rightSide->val);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=d4zLyf32e3I",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-right-side-view.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-right-side-view.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nTo see the **right side** of a tree, at each depth we only care about the **first node we encounter when looking from the right**.\n\nIf we perform DFS by visiting:\n\n1. **Right child first**, then\n2. Left child\n\n…then the **first node we reach at every depth** is the visible right-side node.\n\nWe store that node the moment we first reach that depth.\n\n### Steps\n\n1. Create an empty list `res` to store the right-side values.\n2. Define a `dfs` function that takes a `node` and its `depth`.\n3. In the `dfs`:\n    - If the `node` is `null` → return.\n    - If `depth == len(res)` → this is the first node at this depth → append its value.\n    - Recursively visit the right child first.\n    - Then recursively visit the left child.\n4. Start `dfs` from the root at depth `0`.\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:\n        res = []\n\n        def dfs(node, depth):\n            if not node:\n                return None\n            if depth == len(res):\n                res.append(node.val)\n\n            dfs(node.right, depth + 1)\n            dfs(node.left, depth + 1)\n\n        dfs(root, 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-right-side-view.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

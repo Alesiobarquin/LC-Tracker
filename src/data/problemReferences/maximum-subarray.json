@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        return dfs(nums, 0, nums.size() - 1);\n    }\n\nprivate:\n    int dfs(vector<int>& nums, int l, int r) {\n        if (l > r) {\n            return INT_MIN;\n        }\n        int m = (l + r) >> 1;\n        int leftSum = 0, rightSum = 0, curSum = 0;\n        for (int i = m - 1; i >= l; --i) {\n            curSum += nums[i];\n            leftSum = max(leftSum, curSum);\n        }\n        curSum = 0;\n        for (int i = m + 1; i <= r; ++i) {\n            curSum += nums[i];\n            rightSum = max(rightSum, curSum);\n        }\n        return max(dfs(nums, l, m - 1),\n                   max(dfs(nums, m + 1, r),\n                       leftSum + nums[m] + rightSum));\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=5WZl3MMT0Eg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis problem asks us to find the **maximum sum of any contiguous subarray**.\n\nThe most straightforward way to think about this is:\n\n- try **every possible subarray**\n- calculate its sum\n- keep track of the maximum sum we see\n\nA subarray is defined by a start index `i` and an end index `j`.\nBy fixing `i` and expanding `j` to the right, we can compute the sum of all subarrays that start at `i`.\n\nThis approach is easy to understand and works well for learning, but it is not efficient for large inputs.\n\n### Steps\n\n1. Let `n` be the length of the array.\n2. Initialize the result `res` with the first element of the array.\n3. Iterate over all possible starting indices `i` from `0` to `n - 1`:\n4. For each starting index `i`:\n    - Initialize a running sum `cur = 0`\n    - Iterate over ending indices `j` from `i` to `n - 1`:\n        - Add `nums[j]` to `cur`\n        - Update `res` with the maximum of `res` and `cur`\n5. After all subarrays are checked, return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        n, res = len(nums), nums[0]\n        for i in range(n):\n            cur = 0\n            for j in range(i, n):\n                cur += nums[j]\n                res = max(res, cur)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Kadane's Algorithm",
+      "explanation": "### How it works\n\nWe want the **maximum sum of a contiguous subarray**.\n\nKadane’s Algorithm is based on one simple observation:\n\n- if the running sum becomes negative, keeping it will only reduce the sum of any future subarray\n\nSo whenever the current sum drops below zero, we **reset** it and start a new subarray from the next element.\n\nAs we scan the array once, we keep track of:\n\n- the best subarray sum ending at the current position\n- the best subarray sum seen overall\n\n### Steps\n\n1. Initialize:\n    - `curSum = 0` to track the running subarray sum\n    - `maxSub` as the first element (handles all-negative arrays).\n2. Iterate through each number in the array:\n3. If `curSum` becomes negative:\n    - reset it to `0` (start a new subarray).\n4. Add the current number to `curSum`.\n5. Update `maxSub` with the maximum of `maxSub` and `curSum`.\n6. After processing all elements, return `maxSub`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        maxSub, curSum = nums[0], 0\n        for num in nums:\n            if curSum < 0:\n                curSum = 0\n            curSum += num\n            maxSub = max(maxSub, curSum)\n        return maxSub\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray.md",
+      "id": "kadane-s-algorithm"
+    }
+  ]
 }

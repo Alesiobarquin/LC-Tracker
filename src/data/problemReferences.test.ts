@@ -1,9 +1,37 @@
 import manifest from "../../scripts/additional-reference-manifest.json";
+import approachManifest from "../../scripts/approach-reference-manifest.json";
 import { describe, expect, it } from "vitest";
 import { ensureExtendedCatalogLoaded, problems } from "./problems";
-import { hasProblemReference, loadProblemReference } from "./problemReferences";
+import { getProblemApproaches, hasProblemReference, loadProblemReference } from "./problemReferences";
 
 describe("problem references", () => {
+  it("offers two or three distinct approaches for every NeetCode 250 problem, preserving the default", async () => {
+    expect(approachManifest.problems.map((entry) => entry.id).sort()).toEqual(problems.map((problem) => problem.id).sort());
+    let added = 0;
+    for (const entry of approachManifest.problems) {
+      const reference = (await loadProblemReference(entry.id))!;
+      const approaches = getProblemApproaches(reference);
+      expect(approaches[0].id, entry.id).toBe("default");
+      expect(approaches[0].approach, entry.id).toBe(entry.default);
+      expect(approaches[0].code.cpp, entry.id).toBeTruthy();
+      expect(approaches.slice(1).map((approach) => approach.approach), entry.id).toEqual(entry.alternatives);
+      expect(approaches.length, entry.id).toBeGreaterThanOrEqual(2);
+      expect(approaches.length, entry.id).toBeLessThanOrEqual(3);
+      expect(new Set(approaches.map((approach) => approach.id)).size, entry.id).toBe(approaches.length);
+      expect(new Set(approaches.map((approach) => approach.code.python)).size, entry.id).toBe(approaches.length);
+      for (const approach of approaches.slice(1)) {
+        for (const section of ["How it works", "Steps", "Complexity"]) {
+          expect(approach.explanation, `${entry.id}: ${approach.id}`).toContain(`### ${section}`);
+        }
+        expect(approach.code.python).toContain("class ");
+        expect(approach.code.cpp).toBeUndefined();
+        expect(approach.sourceUrl).toContain(approachManifest.revision);
+        expect(approach.code.python).not.toContain("sortedcontainers");
+        added++;
+      }
+    }
+    expect(added).toBe(445);
+  });
   it("provides a matching explanation, two code examples, and a NeetCode video for every core library item", async () => {
     expect(problems).toHaveLength(250);
     for (const problem of problems) {

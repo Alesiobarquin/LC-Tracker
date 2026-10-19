@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool containsNearbyDuplicate(vector<int>& nums, int k) {\n        unordered_set<int> window;\n        int L = 0;\n\n        for (int R = 0; R < nums.size(); R++) {\n            if (R - L > k) {\n                window.erase(nums[L]);\n                L++;\n            }\n            if (window.find(nums[R]) != window.end()) {\n                return true;\n            }\n            window.insert(nums[R]);\n        }\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ypn0aZ0nrL4",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contains-duplicate-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contains-duplicate-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to check every pair of elements. For each element, we look at all elements within distance `k` and check if any of them are equal. This guarantees finding a duplicate if one exists within the required distance.\n\n### Steps\n\n1. Iterate through each index `L` from `0` to `n-1`.\n2. For each `L`, iterate through index `R` from `L+1` to `min(n-1, L+k)`.\n3. If `nums[L] == nums[R]`, return `true`.\n4. If no such pair is found, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n * min(n, k))`\n- Space complexity: `O(1)`\n\n> Where `n` is the size of the array `nums` and `k` is the maximum distance between two equal numbers.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:\n        for L in range(len(nums)):\n            for R in range(L + 1, min(len(nums), L + k + 1)):\n                if nums[L] == nums[R]:\n                    return True\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contains-duplicate-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of checking all pairs, we can store the most recent index of each value in a hash map. When we encounter a value, we check if it appeared before and if the distance to its last occurrence is within `k`. This gives us O(1) lookup time for duplicates.\n\n### Steps\n\n1. Create a hash map to store each value's most recent index.\n2. Iterate through the array with index `i`.\n3. If `nums[i]` exists in the map and `i - map[nums[i]] <= k`, return `true`.\n4. Update `map[nums[i]] = i` (store the current index).\n5. If no valid pair is found, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the array `nums` and `k` is the maximum distance between two equal numbers.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:\n        mp = {}\n\n        for i in range(len(nums)):\n            if nums[i] in mp and i - mp[nums[i]] <= k:\n                return True\n            mp[nums[i]] = i\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contains-duplicate-ii.md",
+      "id": "hash-map"
+    }
+  ]
 }

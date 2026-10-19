@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        TreeNode* cur = root;\n\n        while (cur) {\n            if (p->val > cur->val && q->val > cur->val) {\n                cur = cur->right;\n            } else if (p->val < cur->val && q->val < cur->val) {\n                cur = cur->left;\n            } else {\n                return cur;\n            }\n        }\n        return nullptr;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=gs2LMfuOR9k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-in-binary-search-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-in-binary-search-tree.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nWe are working with a **Binary Search Tree (BST)**, so:\n\n- All values in the **left subtree** of a node are **smaller** than the node’s value.\n- All values in the **right subtree** are **greater** than the node’s value.\n\nFor two nodes `p` and `q`:\n\n- If **both** values are smaller than the current node -> both must lie in the **left subtree**.\n- If **both** values are greater than the current node -> both must lie in the **right subtree**.\n- Otherwise, the current node is the **split point** where one node is on the left and the other is on the right (or one is equal to the current node).\n  That split point is the **Lowest Common Ancestor (LCA)**.\n\n### Steps\n\n1. Start from the `root`.\n2. While at a node:\n    - If both `p` and `q` have values **less than** the current node's value:\n        - Move to the **left child**.\n    - Else if both `p` and `q` have values **greater than** the current node's value:\n        - Move to the **right child**.\n    - Otherwise:\n        - The current node is the **LCA** -> return it.\n3. If the tree is empty, return `null`.\n\n### Complexity\n\n- Time complexity: `O(h)`\n- Space complexity: `O(h)`\n\n> Where `h` is the height of the tree.",
+      "code": {
+        "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:\n        if not root or not p or not q:\n            return None\n        if (max(p.val, q.val) < root.val):\n            return self.lowestCommonAncestor(root.left, p, q)\n        elif (min(p.val, q.val) > root.val):\n            return self.lowestCommonAncestor(root.right, p, q)\n        else:\n            return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-in-binary-search-tree.md",
+      "id": "recursion"
+    }
+  ]
 }

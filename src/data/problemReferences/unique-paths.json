@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        if (m == 1 || n == 1) {\n            return 1;\n        }\n        if (m < n) {\n            swap(m, n);\n        }\n\n        long long res = 1;\n        int j = 1;\n        for (int i = m; i < m + n - 1; i++) {\n            res *= i;\n            res /= j;\n            j++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=IlEsdxuD4lY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-paths.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-paths.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis is the **optimized version of recursion** using **memoization**.\n\nIn the brute-force approach, the same cell `(i, j)` is solved many times.  \nBut the number of paths from a cell **never changes**, so we can **store it once and reuse it**.\n\nThink of it this way:\n\n- Every cell `(i, j)` asks:  \n  **“How many ways can I reach the destination from here?”**\n- Once answered, we **cache** it so we never recompute it.\n\nThis turns an exponential recursion into a polynomial-time solution.\n\n### Steps\n\n1. Create a 2D memo table `memo[m][n]`, initialized to `-1`.\n2. Define a recursive function `dfs(i, j)`:\n    - If `(i, j)` is the destination `(m-1, n-1)`, return `1`.\n    - If `(i, j)` is out of bounds, return `0`.\n    - If `memo[i][j]` is already computed, return it.\n3. Otherwise:\n    - Compute paths by moving **right** and **down**:\n      `memo[i][j] = dfs(i, j+1) + dfs(i+1, j)`\n4. Return `memo[i][j]`.\n5. Start recursion from `(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        memo = [[-1] * n for _ in range(m)]\n        def dfs(i, j):\n            if i == (m - 1) and j == (n - 1):\n                return 1\n            if i >= m or j >= n:\n                return 0\n            if memo[i][j] != -1:\n                return memo[i][j]\n\n            memo[i][j] =  dfs(i, j + 1) + dfs(i + 1, j)\n            return memo[i][j]\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-paths.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up)",
+      "explanation": "### How it works\n\nInstead of starting from the top and recursing, we **build the answer from the destination backward**.\n\nFrom any cell `(i, j)`, the number of unique paths to the destination is:\n\n- paths from the **cell below** `(i+1, j)`\n- plus paths from the **cell to the right** `(i, j+1)`\n\nIf we already know these values, we can compute the current cell directly.\n\nSo we:\n\n- Set the destination cell to `1`\n- Fill the grid **bottom-up**, **right-to-left**\n\n### Steps\n\n1. Create a `(m+1) x (n+1)` DP table initialized with `0`.\n2. Set `dp[m-1][n-1] = 1` (only one way to stay at destination).\n3. Traverse rows from `m-1` to `0` and columns from `n-1` to `0`.\n4. For each cell `(i, j)`: `dp[i][j] = dp[i+1][j] + dp[i][j+1]`\n5. Return `dp[0][0]`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        dp = [[0] * (n + 1) for _ in range(m + 1)]\n        dp[m - 1][n - 1] = 1\n\n        for i in range(m - 1, -1, -1):\n            for j in range(n - 1, -1, -1):\n                dp[i][j] += dp[i + 1][j] + dp[i][j + 1]\n\n        return dp[0][0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-paths.md",
+      "id": "dynamic-programming-bottom-up"
+    }
+  ]
 }

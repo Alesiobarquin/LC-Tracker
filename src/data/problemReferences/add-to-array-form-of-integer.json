@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> addToArrayForm(vector<int>& num, int k) {\n        list<int> result;\n        int carry = 0, i = num.size() - 1;\n\n        while (i >= 0 || k > 0 || carry > 0) {\n            int digit = k % 10;\n            int sum = carry + (i >= 0 ? num[i] : 0) + digit;\n\n            result.push_front(sum % 10);\n            carry = sum / 10;\n\n            k /= 10;\n            i--;\n        }\n\n        return vector<int>(result.begin(), result.end());\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=eBTZQt1TWfk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-to-array-form-of-integer.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-to-array-form-of-integer.md",
+  "alternatives": [
+    {
+      "approach": "Reverse and Add",
+      "explanation": "### How it works\n\nAdding two numbers digit by digit is straightforward when we start from the least significant digit. Since the array represents a number with the most significant digit first, we can either reverse the array or process it from the end.\n\nThe trick here is to treat `k` as a running sum that absorbs both the addition and the carry. At each step, we add the current digit to `k`, extract the last digit of `k` as our result digit, and divide `k` by `10` to prepare for the next iteration. This elegantly combines the carry propagation into a single variable.\n\n### Steps\n\n1. Process the array from right to left (or reverse it first).\n2. For each position `i`:\n   - Add `num[i]` to `k`.\n   - The result digit at this position is `k % 10`.\n   - Update `k = k / 10` to carry over any excess.\n3. After processing all digits, if `k > 0`, continue extracting digits from `k`.\n4. Reverse the result (if built in reverse order) and return.\n\n### Complexity\n\n- Time complexity: `O(max(n, m))`\n- Space complexity: `O(n)`.\n\n> Where `n` is the size of the array `num` and `m` is the number of digits in `k`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def addToArrayForm(self, num: List[int], k: int) -> List[int]:\n        num.reverse()\n        i = 0\n        while k:\n            digit = k % 10\n            if i < len(num):\n                num[i] += digit\n            else:\n                num.append(digit)\n            carry = num[i] // 10\n            num[i] %= 10\n            k //= 10\n            k += carry\n            i += 1\n        num.reverse()\n        return num\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-to-array-form-of-integer.md",
+      "id": "reverse-and-add"
+    }
+  ]
 }

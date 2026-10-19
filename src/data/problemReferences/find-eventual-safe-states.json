@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {\n        int n = graph.size();\n        vector<int> outdegree(n, 0);\n        vector<vector<int>> parents(n);\n        queue<int> q;\n\n        for (int node = 0; node < n; node++) {\n            outdegree[node] = graph[node].size();\n            if (outdegree[node] == 0) {\n                q.push(node);\n            }\n            for (int nei : graph[node]) {\n                parents[nei].push_back(node);\n            }\n        }\n\n        while (!q.empty()) {\n            int node = q.front();\n            q.pop();\n            for (int parent : parents[node]) {\n                outdegree[parent]--;\n                if (outdegree[parent] == 0) {\n                    q.push(parent);\n                }\n            }\n        }\n\n        vector<int> res;\n        for (int node = 0; node < n; node++) {\n            if (outdegree[node] <= 0) {\n                res.push_back(node);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Re_v0j0CRsg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-eventual-safe-states.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-eventual-safe-states.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA node is safe if every path starting from it eventually leads to a terminal node (a node with no outgoing edges). Conversely, a node is unsafe if it can reach a cycle. We can use DFS with memoization to determine safety: initially mark a node as unsafe when we start exploring it (to detect cycles), then mark it safe only if all its neighbors are safe. If we revisit a node marked unsafe during exploration, we have found a cycle.\n\n### Steps\n\n1. Create a hash map `safe` to track each node's safety status.\n2. For each node, run DFS:\n    - If the node's status is already known, return it.\n    - Mark the node as `false` (unsafe) initially to detect cycles.\n    - Recursively check all neighbors. If any neighbor is unsafe, return `false`.\n    - If all neighbors are safe, mark the current node as `true` (safe).\n3. Collect all nodes where `dfs(node)` returns `true` and return them in order.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges in the given graph.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:\n        n = len(graph)\n        safe = {}\n\n        def dfs(node):\n            if node in safe:\n                return safe[node]\n            safe[node] = False\n            for nei in graph[node]:\n                if not dfs(nei):\n                    return safe[node]\n            safe[node] = True\n            return safe[node]\n\n        res = []\n        for node in range(n):\n            if dfs(node):\n                res.append(node)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-eventual-safe-states.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

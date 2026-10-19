@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int postIdx;\n    int inIdx;\n\n    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {\n        postIdx = postorder.size() - 1;\n        inIdx = inorder.size() - 1;\n\n        return dfs(postorder, inorder, numeric_limits<int>::max());\n    }\n\nprivate:\n    TreeNode* dfs(vector<int>& postorder, vector<int>& inorder, int limit) {\n        if (postIdx < 0) {\n            return nullptr;\n        }\n\n        if (inorder[inIdx] == limit) {\n            inIdx--;\n            return nullptr;\n        }\n\n        TreeNode* root = new TreeNode(postorder[postIdx--]);\n        root->right = dfs(postorder, inorder, root->val);\n        root->left = dfs(postorder, inorder, limit);\n        return root;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=vm63HuIU7kw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/construct-binary-tree-from-inorder-and-postorder-traversal.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/construct-binary-tree-from-inorder-and-postorder-traversal.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nThe last element of postorder is always the root. Once we identify the root, we find it in the inorder array. Everything to the left of the root in inorder belongs to the left subtree, and everything to the right belongs to the right subtree. We recursively apply this logic, slicing the arrays accordingly.\n\n### Steps\n\n1. If `postorder` or `inorder` is empty, return `null`.\n2. Create the root node using the last element of `postorder`.\n3. Find the index `mid` of the root value in `inorder`.\n4. Recursively build the left subtree using `inorder[0:mid]` and `postorder[0:mid]`.\n5. Recursively build the right subtree using `inorder[mid+1:]` and `postorder[mid:-1]`.\n6. Return the root node.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:\n        if not postorder or not inorder:\n            return None\n\n        root = TreeNode(postorder[-1])\n        mid = inorder.index(postorder[-1])\n        root.left = self.buildTree(inorder[:mid], postorder[:mid])\n        root.right = self.buildTree(inorder[mid + 1:], postorder[mid:-1])\n        return root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/construct-binary-tree-from-inorder-and-postorder-traversal.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Hash Map + Depth First Search",
+      "explanation": "### How it works\n\nThe previous approach has O(n) lookup time when finding the root in `inorder`. By precomputing a hash map that stores each value's index in `inorder`, we achieve O(1) lookups. We also avoid creating new arrays by using index boundaries instead.\n\n### Steps\n\n1. Build a hash map mapping each value in `inorder` to its index.\n2. Maintain a pointer `postIdx` starting at the end of `postorder`.\n3. Define `dfs(l, r)` that builds the tree for the `inorder` range `[l, r]`:\n    - If `l > r`, return `null`.\n    - Pop the current root from `postorder` (decrement `postIdx`), create a node.\n    - Find the root's index in `inorder` using the hash map.\n    - Build the right subtree first (since we're processing `postorder` from the end), then the left subtree.\n4. Return the result of `dfs(0, n-1)`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:\n        inorderIdx = {v: i for i, v in enumerate(inorder)}\n\n        def dfs(l, r):\n            if l > r:\n                return None\n\n            root = TreeNode(postorder.pop())\n            idx = inorderIdx[root.val]\n            root.right = dfs(idx + 1, r)\n            root.left = dfs(l, idx - 1)\n            return root\n\n        return dfs(0, len(inorder) - 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/construct-binary-tree-from-inorder-and-postorder-traversal.md",
+      "id": "hash-map-depth-first-search"
+    }
+  ]
 }

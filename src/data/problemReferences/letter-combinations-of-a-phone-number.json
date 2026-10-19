@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n\n        vector<string> res = {\"\"};\n        vector<string> digitToChar = {\n            \"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\",\n            \"mno\", \"qprs\", \"tuv\", \"wxyz\"\n        };\n\n        for (char digit : digits) {\n            vector<string> tmp;\n            for (string &curStr : res) {\n                for (char c : digitToChar[digit - '0']) {\n                    tmp.push_back(curStr + c);\n                }\n            }\n            res = tmp;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=0snEunUacZY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations-of-a-phone-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations-of-a-phone-number.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking",
+      "explanation": "### How it works\n\nEach digit maps to a set of characters (like on a phone keypad).  \nThe task is to **choose one character per digit**, in order, and generate **all possible combinations**.\n\nThink of it as building a string **step by step**:\n\n- At index `i`, pick **one character** from the mapping of `digits[i]`\n- Move to the next digit\n- When the length of the built string equals the number of digits, we have formed **one valid combination**\n\nThis is a classic **decision tree** problem:\n\n- Each level - one digit\n- Each branch - one possible character for that digit\n\nBacktracking lets us explore all branches efficiently.\n\n### Steps\n\n1. If the input string is empty, return an empty list.\n2. Create a mapping from digits (`2-9`) to their corresponding letters.\n3. Use a recursive function `backtrack(index, currentString)`:\n    - If `currentString` length equals the number of digits:\n        - Add it to the result.\n        - Return.\n    - Otherwise:\n        - For each character mapped from `digits[index]`:\n            - Append the character to `currentString`\n            - Recurse to the next index.\n4. Start backtracking from index `0` with an empty string.\n5. Return all collected combinations.\n\n### Complexity\n\n- Time complexity: `O(n * 4 ^ n)`\n- Space complexity:\n    - `O(n)` extra space.\n    - `O(n * 4 ^ n)` space for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def letterCombinations(self, digits: str) -> List[str]:\n        res = []\n        digitToChar = {\n            \"2\": \"abc\",\n            \"3\": \"def\",\n            \"4\": \"ghi\",\n            \"5\": \"jkl\",\n            \"6\": \"mno\",\n            \"7\": \"qprs\",\n            \"8\": \"tuv\",\n            \"9\": \"wxyz\",\n        }\n\n        def backtrack(i, curStr):\n            if len(curStr) == len(digits):\n                res.append(curStr)\n                return\n            for c in digitToChar[digits[i]]:\n                backtrack(i + 1, curStr + c)\n\n        if digits:\n            backtrack(0, \"\")\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/combinations-of-a-phone-number.md",
+      "id": "backtracking"
+    }
+  ]
 }

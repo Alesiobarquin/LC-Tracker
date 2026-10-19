@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int carFleet(int target, vector<int>& position, vector<int>& speed) {\n        int n = position.size();\n        vector<pair<int, int>> pair;\n        for (int i = 0; i < n; i++) {\n            pair.push_back({position[i], speed[i]});\n        }\n        sort(pair.rbegin(), pair.rend());\n\n        int fleets = 1;\n        double prevTime = (double)(target - pair[0].first) / pair[0].second;\n        for (int i = 1; i < n; i++) {\n            double currTime = (double)(target - pair[i].first) / pair[i].second;\n            if (currTime > prevTime) {\n                fleets++;\n                prevTime = currTime;\n            }\n        }\n        return fleets;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Pr6T-3yB9RM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-fleet.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-fleet.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nCars that start closer to the target are processed first.  \nFor each car, we compute the **time** it will take to reach the target.  \nIf a car behind reaches the target **no faster** than the car in front, it will eventually catch up and join the same fleet.  \nSo we only keep the car’s time if it forms a **new** fleet; otherwise, it merges with the previous one.  \nUsing a stack helps us easily compare each car’s time with the fleet ahead of it.\n\n### Steps\n\n1. Pair each car's position with its speed.\n2. Sort the cars in descending order of position (closest to target first).\n3. For each car:\n    - Compute the time it takes to reach the target.\n    - Push this time onto a stack.\n    - If the new car’s time is **less than or equal** to the time before it,  \n      it catches up and merges with that fleet → pop it from the stack.\n4. The number of remaining times in the stack equals the number of fleets.\n5. Return the stack size.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:\n        pair = [(p, s) for p, s in zip(position, speed)]\n        pair.sort(reverse=True)\n        stack = []\n        for p, s in pair:  # Reverse Sorted Order\n            stack.append((target - p) / s)\n            if len(stack) >= 2 and stack[-1] <= stack[-2]:\n                stack.pop()\n        return len(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-fleet.md",
+      "id": "stack"
+    }
+  ]
 }

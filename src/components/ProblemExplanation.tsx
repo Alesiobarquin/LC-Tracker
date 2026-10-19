@@ -3,11 +3,15 @@ import ReactMarkdown from "react-markdown";
 import { ExternalLink, Play } from "lucide-react";
 import {
   loadProblemReference,
+  getProblemApproaches,
+  type ProblemApproach,
   type ProblemReference,
   type ReferenceLanguage,
 } from "../data/problemReferences";
 import type { Problem } from "../data/problems";
 import { ReferenceCode } from "./ReferenceCode";
+import { Select } from "./ui/Field";
+import { Button } from "./ui/Button";
 
 export function ExplanationText({ children }: { children: string }) {
   return (
@@ -41,28 +45,14 @@ export function ExplanationLinks({ problem }: { problem: Problem }) {
   );
 }
 
-export function ProblemExplanationFootnote({ problem }: { problem: Problem }) {
-  const [reference, setReference] = useState<ProblemReference | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    setReference(null);
-    void loadProblemReference(problem.id)
-      .then((reference) => {
-        if (!cancelled) setReference(reference);
-      })
-      .catch(() => {
-        if (!cancelled) setReference(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [problem.id]);
-  if (!reference?.sourceUrl) return null;
+function ProblemExplanationFootnote({ reference }: { reference: ProblemApproach }) {
   return (
     <details className="explanation-footnote">
       <summary>Source and license</summary>
       <p>
-        {reference.explanationAuthor
+        {reference.codeAuthor
+          ? `Explanation and code by ${reference.codeAuthor}. Related reference: `
+          : reference.explanationAuthor
           ? `Explanation by ${reference.explanationAuthor}. Code adapted from `
           : "Adapted from "}
         <a href={reference.sourceUrl} target="_blank" rel="noopener noreferrer">
@@ -70,7 +60,7 @@ export function ProblemExplanationFootnote({ problem }: { problem: Problem }) {
         </a>{" "}
         ·{" "}
         <a href={reference.licenseUrl ?? "/neetcode-license.txt"} target="_blank" rel="noopener noreferrer">
-          MIT license
+          {reference.codeAuthor ? "Related source’s MIT license" : "MIT license"}
         </a>
         . Node types are supplied by LeetCode where needed.
       </p>
@@ -84,11 +74,13 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [language, setLanguage] = useState<ReferenceLanguage>("python");
+  const [approachId, setApproachId] = useState("default");
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(false);
     setReference(null);
+    setApproachId("default");
     void loadProblemReference(problem.id)
       .then((data) => {
         if (!cancelled) setReference(data);
@@ -125,7 +117,10 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
         yet. Use the LeetCode explanation or your own notes.
       </p>
     );
-  const [reasoning, pitfalls] = reference.explanation.split(
+  const approaches = getProblemApproaches(reference);
+  const selected = approaches.find((approach) => approach.id === approachId) ?? approaches[0];
+  const selectedLanguage = selected.code[language] ? language : "python";
+  const [reasoning, pitfalls] = selected.explanation.split(
     "\n\n### Things to watch for\n\n",
   );
   const sections = reasoning.split(/(?=^### )/m).filter((text) => text.trim());
@@ -133,7 +128,24 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
     <div className="problem-explanation space-y-5">
       <div>
         <p className="register-label">Built-in explanation</p>
-        <h3 className="explanation-approach">{reference.approach}</h3>
+        {approaches.length > 1 && (
+          <div className="explanation-approaches" role="group" aria-label="Solution approach">
+            <p className="text-sm text-body">Solution approach</p>
+            <div className="explanation-approach-options">
+              {approaches.map((approach) => (
+                <Button
+                  key={approach.id}
+                  className="explanation-approach-option"
+                  aria-pressed={selected.id === approach.id}
+                  onClick={() => setApproachId(approach.id)}
+                >
+                  {approach.approach}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        <h3 className="explanation-approach" aria-live="polite">{selected.approach}</h3>
       </div>
       <div className="explanation-sections">
         {sections.map((text, index) => (
@@ -149,20 +161,25 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
         <h3 className="text-sm font-semibold text-foreground">Code example</h3>
         <label className="text-sm text-muted flex items-center gap-2">
           Example language
-          <select
+          <Select
             aria-label="Example language"
-            value={language}
+            value={selectedLanguage}
+            disabled={!selected.code.cpp}
             onChange={(e) => setLanguage(e.target.value as ReferenceLanguage)}
-            className="rounded-md border border-line-strong bg-surface text-foreground p-2"
+            className="w-auto appearance-auto rounded-md border border-line-strong bg-surface text-foreground p-2"
           >
             <option value="python">Python</option>
-            <option value="cpp">C++</option>
-          </select>
+            {selected.code.cpp && <option value="cpp">C++</option>}
+          </Select>
         </label>
       </div>
-      <ReferenceCode code={reference.code[language]} language={language} />
+      <ReferenceCode
+        key={`${problem.id}:${selected.id}:${selectedLanguage}`}
+        code={selected.code[selectedLanguage]!}
+        language={selectedLanguage}
+      />
       {pitfalls && (
-        <details className="recall-pattern-reference">
+        <details key={selected.id} className="recall-pattern-reference">
           <summary className="cursor-pointer text-sm text-accent">
             Edge cases and common mistakes
           </summary>
@@ -171,6 +188,7 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
           </div>
         </details>
       )}
+      <ProblemExplanationFootnote reference={selected} />
     </div>
   );
 }

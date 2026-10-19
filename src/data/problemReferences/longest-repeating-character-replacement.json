@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int characterReplacement(std::string s, int k) {\n        unordered_map<char, int> count;\n        int res = 0;\n\n        int l = 0, maxf = 0;\n        for (int r = 0; r < s.size(); r++) {\n            count[s[r]]++;\n            maxf = max(maxf, count[s[r]]);\n\n            while ((r - l + 1) - maxf > k) {\n                count[s[l]]--;\n                l++;\n            }\n            res = max(res, r - l + 1);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=gqXU1UyA8pk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-repeating-substring-with-replacement.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-repeating-substring-with-replacement.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe brute-force idea is to try every possible substring starting at every index.\nFor each start point, we expand the substring and keep track of how many times each character appears.\nA substring is valid if we can make all its characters the same by replacing at most `k` of them.\nTo check this, we track the **most frequent character** inside the substring — everything else would need to be replaced.\nIf the number of replacements needed is within `k`, we update the answer.\nThis works but is slow because it checks many overlapping substrings.\n\n### Steps\n\n1. Initialize `res = 0` to store the longest valid window.\n2. For each starting index `i`:\n    - Create an empty frequency map and set `maxf = 0`.\n    - Extend the substring by increasing `j` from `i` to the end:\n        - Update the frequency of `s[j]`.\n        - Update `maxf` (most frequent character in the current window).\n        - If the window size minus `maxf` is `<= k`, it is valid.\n            - Update `res` with the window size.\n3. Return `res` after testing all starting positions.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string and `m` is the total number of unique characters in the string.",
+      "code": {
+        "python": "class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        res = 0\n        for i in range(len(s)):\n            count, maxf = {}, 0\n            for j in range(i, len(s)):\n                count[s[j]] = 1 + count.get(s[j], 0)\n                maxf = max(maxf, count[s[j]])\n                if (j - i + 1) - maxf <= k:\n                    res = max(res, j - i + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-repeating-substring-with-replacement.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nWe try to make a valid window where **all characters become the same**, but instead of checking every substring, we fix a target character `c` and ask:\n\n\"How long can the window be if we want the entire window to become `c` using at most `k` replacements?\"\n\nWe slide a window across the string and count how many characters inside it already match `c`.\nIf the number of characters that **don't** match `c` is more than `k`, the window is invalid, so we shrink it from the left.\nBy doing this for every possible character, we find the longest valid window.\n\nThis idea is simple and beginner-friendly because we only track:\n\n- how many characters match `c`\n- how many replacements are needed\n\n### Steps\n\n1. Put all unique characters of the string into a set `charSet`.\n2. For each character `c` in `charSet`:\n    - Set `l = 0` and `count = 0` (count of `c` inside the window).\n    - Slide the right pointer `r` across the string:\n        - Increase `count` when `s[r] == c`.\n        - If the window needs more than `k` replacements, move `l` forward and adjust `count`.\n        - Update `res` with the current valid window size.\n3. Return the maximum window size found.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string and `m` is the total number of unique characters in the string.",
+      "code": {
+        "python": "class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        res = 0\n        charSet = set(s)\n\n        for c in charSet:\n            count = l = 0\n            for r in range(len(s)):\n                if s[r] == c:\n                    count += 1\n\n                while (r - l + 1) - count > k:\n                    if s[l] == c:\n                        count -= 1\n                    l += 1\n\n                res = max(res, r - l + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-repeating-substring-with-replacement.md",
+      "id": "sliding-window"
+    }
+  ]
 }

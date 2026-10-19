@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxTurbulenceSize(vector<int>& arr) {\n        int n = arr.size();\n        int res = 0, cnt = 0, sign = -1;\n\n        for (int i = 0; i < n - 1; i++) {\n            if (arr[i] > arr[i + 1]) {\n                cnt = (sign == 0) ? cnt + 1 : 1;\n                sign = 1;\n            } else if (arr[i] < arr[i + 1]) {\n                cnt = (sign == 1) ? cnt + 1 : 1;\n                sign = 0;\n            } else {\n                cnt = 0;\n                sign = -1;\n            }\n\n            res = max(res, cnt);\n        }\n\n        return res + 1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=V_iHUhR8Dek",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-turbulent-subarray.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-turbulent-subarray.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA turbulent subarray alternates between increasing and decreasing comparisons. For each starting index, we extend as far as possible while the comparison sign keeps flipping. If two adjacent elements are equal, the turbulent pattern breaks immediately. We track the maximum length found across all starting positions.\n\n### Steps\n\n1. Initialize `res = 1` to store the maximum turbulent subarray length.\n2. For each starting index `i`:\n    - Skip if the next element equals the current one (no valid turbulent pair).\n    - Determine the initial comparison sign (greater or less).\n    - Extend `j` forward while the sign alternates and elements are not equal.\n    - Update `res` with the length `j - i + 1`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxTurbulenceSize(self, arr: List[int]) -> int:\n        n = len(arr)\n        res = 1\n\n        for i in range(n - 1):\n            if arr[i] == arr[i + 1]:\n                continue\n\n            sign = 1 if arr[i] > arr[i + 1] else 0\n            j = i + 1\n            while j < n - 1:\n                if arr[j] == arr[j + 1]:\n                    break\n                curSign = 1 if arr[j] > arr[j + 1] else 0\n                if sign == curSign:\n                    break\n                sign = curSign\n                j += 1\n\n            res = max(res, j - i + 1)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-turbulent-subarray.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nWe maintain a window that represents a valid turbulent subarray. As we move the `right` pointer, we check if the current comparison alternates from the previous one. If it does, we extend the window. If not (or if elements are equal), we shrink the window by moving the `left` pointer to start fresh from the breaking point.\n\n### Steps\n\n1. Initialize two pointers `l = 0` and `r = 1`, result `res = 1`, and a variable `prev` to track the previous comparison direction.\n2. While `r < n`:\n    - If `arr[r-1] > arr[r]` and `prev != \">\"`, extend the window, update result, increment `r`, and set `prev = \">\"`.\n    - Else if `arr[r-1] < arr[r]` and `prev != \"<\"`, extend the window, update result, increment `r`, and set `prev = \"<\"`.\n    - Otherwise, reset: move `l` to `r - 1` (or `r` if elements are equal), clear `prev`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxTurbulenceSize(self, arr: List[int]) -> int:\n        l, r, res, prev = 0, 1, 1, \"\"\n\n        while r < len(arr):\n            if arr[r - 1] > arr[r] and prev != \">\":\n                res = max(res, r - l + 1)\n                r += 1\n                prev = \">\"\n            elif arr[r - 1] < arr[r] and prev != \"<\":\n                res = max(res, r - l + 1)\n                r += 1\n                prev = \"<\"\n            else:\n                r = r + 1 if arr[r] == arr[r - 1] else r\n                l = r - 1\n                prev = \"\"\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-turbulent-subarray.md",
+      "id": "sliding-window"
+    }
+  ]
 }

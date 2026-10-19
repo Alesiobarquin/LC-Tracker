@@ -7,5 +7,18 @@
     "cpp": "class Solution {\npublic:\n    vector<int> partitionLabels(string s) {\n        unordered_map<char, int> lastIndex;\n        for (int i = 0; i < s.size(); i++) {\n            lastIndex[s[i]] = i;\n        }\n\n        vector<int> res;\n        int size = 0, end = 0;\n        for (int i = 0; i < s.size(); i++) {\n            size++;\n            end = max(end, lastIndex[s[i]]);\n\n            if (i == end) {\n                res.push_back(size);\n                size = 0;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=B7m8UmZE-vw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-labels.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-labels.md",
+  "alternatives": [
+    {
+      "explanation": "### How it works\n\nEach character must belong to one partition, so its first and last occurrences define an interval that cannot be split. Sort these intervals and merge overlapping ones. The merged intervals are the smallest independent partitions and therefore produce the maximum number of parts.\n\n### Steps\n\n1. Record the first and last occurrence of each character.\n2. Sort the intervals by their start position.\n3. Merge an interval when its start is at or before the current interval's end.\n4. When the next interval is disjoint, emit the current length and begin a new partition.\n5. Emit the final length.\n\n### Complexity\n\nTime is `O(n + k log k)` and auxiliary space is `O(k)` for `n` characters and `k` distinct characters. With the problem's 26-letter alphabet, this is `O(n)` time and `O(1)` auxiliary space, excluding output.\n\n### Things to watch for\n\n- Intervals are inclusive, so the length is `end - start + 1`.\n- Adjacent but nonoverlapping intervals are separate partitions.\n- Extend the end with the maximum, since nested intervals must not shrink it.",
+      "code": {
+        "python": "class Solution:\n    def partitionLabels(self, s: str) -> list[int]:\n        bounds = {}\n        for i, char in enumerate(s):\n            if char not in bounds:\n                bounds[char] = [i, i]\n            bounds[char][1] = i\n        intervals = sorted(bounds.values())\n        result = []\n        start, end = intervals[0]\n        for left, right in intervals[1:]:\n            if left <= end:\n                end = max(end, right)\n            else:\n                result.append(end - start + 1)\n                start, end = left, right\n        result.append(end - start + 1)\n        return result\n"
+      },
+      "approach": "Merge Character Intervals",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-labels.md",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "id": "merge-character-intervals"
+    }
+  ]
 }

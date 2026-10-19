@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        if (x < 0 || (x != 0 && x % 10 == 0)) {\n            return false;\n        }\n\n        int rev = 0;\n        while (x > rev) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n\n        return x == rev || x == rev / 10;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=yubRKwixN-U",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-number.md",
+  "alternatives": [
+    {
+      "approach": "Convert to String",
+      "explanation": "### How it works\n\nThe most straightforward approach is to convert the integer to a string and check if the string is a palindrome by reversing it.\n\nIf the original string equals its reversed version, the number is a palindrome.\n\n### Steps\n\n1. Convert the integer to its string representation.\n2. Reverse the string.\n3. Compare the original string with the reversed string.\n4. Return `true` if they are equal, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the number of digits in the given integer.",
+      "code": {
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        s = str(x)\n        return s == s[::-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-number.md",
+      "id": "convert-to-string"
+    },
+    {
+      "approach": "Reverse the Integer",
+      "explanation": "### How it works\n\nWithout using string conversion, we can reverse the entire integer mathematically and compare it to the original. If they are equal, the number is a palindrome.\n\nNegative numbers cannot be palindromes because of the negative sign. We build the reversed number digit by digit using modulo and division operations.\n\n### Steps\n\n1. If the number is negative, return `false` immediately.\n2. Initialize `rev = 0` and `num = x`.\n3. While `num > 0`:\n    - Extract the last digit using `num % 10`.\n    - Append it to `rev` by computing `rev = rev * 10 + digit`.\n    - Remove the last digit from `num` using integer division.\n4. Compare `rev` with the original `x` and return `true` if equal.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n> Where `n` is the number of digits in the given integer.",
+      "code": {
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        if x < 0:\n            return False\n\n        rev = 0\n        num = x\n        while num:\n            rev = (rev * 10) + (num % 10)\n            num //= 10\n\n        return rev == x\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-number.md",
+      "id": "reverse-the-integer"
+    }
+  ]
 }

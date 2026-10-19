@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    uint32_t reverseBits(uint32_t n) {\n        uint32_t ret = n;\n        ret = (ret >> 16) | (ret << 16);\n        ret = ((ret & 0xff00ff00) >> 8) | ((ret & 0x00ff00ff) << 8);\n        ret = ((ret & 0xf0f0f0f0) >> 4) | ((ret & 0x0f0f0f0f) << 4);\n        ret = ((ret & 0xcccccccc) >> 2) | ((ret & 0x33333333) << 2);\n        ret = ((ret & 0xaaaaaaaa) >> 1) | ((ret & 0x55555555) << 1);\n        return ret;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=UcoN6UjAI64",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-bits.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-bits.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe are given a **32-bit unsigned integer**, and we need to **reverse its bits**.\n\nThe most straightforward way to think about this problem is:\n\n- Read the bits of the number from **right to left**\n- Build a new number by placing those bits from **left to right**\n\nIn simpler terms:\n\n- Extract each bit one by one\n- Reverse their order\n- Reconstruct the number from the reversed bits\n\nThis brute force approach closely follows how humans would solve the problem manually, making it **easy to understand**, though not the most optimal.\n\n### Steps\n\n1. Initialize an empty sequence `binary` to store bits.\n2. For each position `i` from `0` to `31` (since the number is 32-bit):\n    - Check if the bit at that position is `1` or `0`\n    - Append the bit to the sequence\n3. Reverse the sequence of bits.\n4. Initialize a result number `res` as `0`.\n5. For each bit in the reversed sequence:\n    - If the bit is `1`, set the corresponding bit in `res` using bit shifting.\n6. Return the result.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def reverseBits(self, n: int) -> int:\n        binary = \"\"\n        for i in range(32):\n            if n & (1 << i):\n                binary += \"1\"\n            else:\n                binary += \"0\"\n\n        res = 0\n        for i, bit in enumerate(binary[::-1]):\n            if bit == \"1\":\n                res |= (1 << i)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-bits.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Bit Manipulation",
+      "explanation": "### How it works\n\nWe are given a **32-bit unsigned integer** and need to **reverse all its bits**.\n\nInstead of storing bits in a string or array, we can do this directly using **bit manipulation**:\n\n- Extract each bit from the original number starting from the least significant bit\n- Place that bit into the correct reversed position in the result\n- Repeat this for all 32 bits\n\nThis approach avoids extra memory and works directly at the **bit level**, making it both clean and efficient.\n\n### Steps\n\n1. Initialize a variable `res = 0` to store the reversed number.\n2. For each bit position `i` from `0` to `31`:\n    - Extract the `i`-th `bit` of `n`\n    - Shift this `bit` to position `(31 - i)`\n    - Add it to `res`\n3. After processing all 32 bits, return `res`.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def reverseBits(self, n: int) -> int:\n        res = 0\n        for i in range(32):\n            bit = (n >> i) & 1\n            res += (bit << (31 - i))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-bits.md",
+      "id": "bit-manipulation"
+    }
+  ]
 }

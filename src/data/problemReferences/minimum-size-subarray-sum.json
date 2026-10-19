@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minSubArrayLen(int target, vector<int>& nums) {\n        int n = nums.size();\n        vector<int> prefixSum(n + 1, 0);\n        for (int i = 0; i < n; i++) {\n            prefixSum[i + 1] = prefixSum[i] + nums[i];\n        }\n\n        int res = n + 1;\n        for (int i = 0; i < n; i++) {\n            int l = i, r = n;\n            while (l < r) {\n                int mid = (l + r) / 2;\n                int curSum = prefixSum[mid + 1] - prefixSum[i];\n                if (curSum >= target) {\n                    r = mid;\n                } else {\n                    l = mid + 1;\n                }\n            }\n            if (l != n) {\n                res = min(res, l - i + 1);\n            }\n        }\n\n        return res % (n + 1);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=aYqYMIqZx5s",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-size-subarray-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-size-subarray-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible subarray. For each starting index, we expand the subarray until the sum reaches or exceeds the target, then record the length. Since all numbers are positive, once we hit the target we can stop expanding from that starting point.\n\n### Steps\n\n1. Initialize `res` to infinity.\n2. For each starting index `i` from `0` to `n-1`:\n    - Initialize `curSum = 0`.\n    - Expand `j` from `i` to `n-1`, adding `nums[j]` to `curSum`.\n    - When `curSum >= target`, update `res` with `j - i + 1` and break.\n3. Return `0` if `res` is still infinity, otherwise return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minSubArrayLen(self, target: int, nums: List[int]) -> int:\n        n = len(nums)\n        res = float(\"inf\")\n\n        for i in range(n):\n            curSum = 0\n            for j in range(i, n):\n                curSum += nums[j]\n                if curSum >= target:\n                    res = min(res, j - i + 1)\n                    break\n\n        return 0 if  res == float(\"inf\") else res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-size-subarray-sum.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nSince all elements are positive, we can use a sliding window approach. We expand the window by moving the right pointer to increase the sum. Once the sum meets or exceeds the target, we try to shrink the window from the left to find the minimum length. This works because removing elements from the left will only decrease the sum, and we want the smallest window that still satisfies the condition.\n\n### Steps\n\n1. Initialize `l = 0`, `total = 0`, and `res = infinity`.\n2. Iterate `r` from `0` to `n-1`:\n    - Add `nums[r]` to `total`.\n    - While `total >= target`:\n        - Update `res` with the minimum of `res` and `r - l + 1`.\n        - Subtract `nums[l]` from `total` and increment `l`.\n3. Return `0` if `res` is infinity, otherwise return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minSubArrayLen(self, target: int, nums: List[int]) -> int:\n        l, total = 0, 0\n        res = float(\"inf\")\n\n        for r in range(len(nums)):\n            total += nums[r]\n            while total >= target:\n                res = min(r - l + 1, res)\n                total -= nums[l]\n                l += 1\n\n        return 0 if res == float(\"inf\") else res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-size-subarray-sum.md",
+      "id": "sliding-window"
+    }
+  ]
 }

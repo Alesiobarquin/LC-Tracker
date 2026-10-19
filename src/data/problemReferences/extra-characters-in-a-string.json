@@ -7,5 +7,25 @@
     "cpp": "class TrieNode {\npublic:\n    TrieNode* children[26];\n    bool isWord;\n\n    TrieNode() {\n        for (int i = 0; i < 26; ++i) children[i] = nullptr;\n        isWord = false;\n    }\n};\n\nclass Trie {\npublic:\n    TrieNode* root;\n\n    Trie() {\n        root = new TrieNode();\n    }\n\n    void addWord(const string& word) {\n        TrieNode* curr = root;\n        for (char c : word) {\n            if (!curr->children[c - 'a']) {\n                curr->children[c - 'a'] = new TrieNode();\n            }\n            curr = curr->children[c - 'a'];\n        }\n        curr->isWord = true;\n    }\n};\n\nclass Solution {\npublic:\n    int minExtraChar(string s, vector<string>& dictionary) {\n        Trie trie;\n        for (const string& word : dictionary) {\n            trie.addWord(word);\n        }\n\n        int n = s.size();\n        vector<int> dp(n + 1);\n        for (int i = n - 1; i >= 0; --i) {\n            dp[i] = 1 + dp[i + 1];\n            TrieNode* curr = trie.root;\n\n            for (int j = i; j < n; ++j) {\n                if (!curr->children[s[j] - 'a']) break;\n                curr = curr->children[s[j] - 'a'];\n                if (curr->isWord) {\n                    dp[i] = min(dp[i], dp[j + 1]);\n                }\n            }\n        }\n\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ONstwO1cD7c",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/extra-characters-in-a-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/extra-characters-in-a-string.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down) Using Hash Set",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems since we may compute the answer for the same index multiple times. Memoization stores results so each subproblem is solved only once.\n\nUsing a hash set for the dictionary allows efficient substring lookups. The memoization table `dp[i]` stores the minimum extra characters from index `i` onward.\n\n### Steps\n\n1. Convert the dictionary to a set for O(1) lookups.\n2. Initialize `dp` with `dp[len(s)] = 0` as the base case.\n3. Define `dfs(i)`:\n    - If `i` is already in `dp`, return `dp[i]`.\n    - Start with `res = 1 + dfs(i + 1)`.\n    - For each `j` from `i` to `len(s) - 1`, if `s[i:j+1]` is in the set, update `res = min(res, dfs(j + 1))`.\n    - Store and return `dp[i] = res`.\n4. Return `dfs(0)`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3 + m * k)`\n- Space complexity: `O(n + m * k)`\n\n> Where `n` is the length of the string `s`, `m` is the number of words in the dictionary, and `k` is the average length of a word in the dictionary.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minExtraChar(self, s: str, dictionary: List[str]) -> int:\n        words = set(dictionary)\n        dp = {len(s): 0}\n\n        def dfs(i):\n            if i in dp:\n                return dp[i]\n            res = 1 + dfs(i + 1)\n            for j in range(i, len(s)):\n                if s[i:j + 1] in words:\n                    res = min(res, dfs(j + 1))\n            dp[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/extra-characters-in-a-string.md",
+      "id": "dynamic-programming-top-down-using-hash-set"
+    },
+    {
+      "approach": "Dynamic Programming (Bottom-Up) Using Hash Set",
+      "explanation": "### How it works\n\nInstead of recursion with memoization, we can fill the DP table iteratively from right to left. `dp[i]` represents the minimum extra characters when starting from index `i`. Since `dp[i]` depends on `dp[j+1]` for `j >= i`, processing from right to left ensures all dependencies are resolved.\n\n### Steps\n\n1. Convert the dictionary to a set.\n2. Create an array `dp` of size `n + 1`, initialized to `0`.\n3. For `i` from `n - 1` down to `0`:\n    - Set `dp[i] = 1 + dp[i + 1]` (skip current character).\n    - For each `j` from `i` to `n - 1`, if `s[i:j+1]` is in the set, update `dp[i] = min(dp[i], dp[j + 1])`.\n4. Return `dp[0]`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3 + m * k)`\n- Space complexity: `O(n + m * k)`\n\n> Where `n` is the length of the string `s`, `m` is the number of words in the dictionary, and `k` is the average length of a word in the dictionary.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minExtraChar(self, s: str, dictionary: List[str]) -> int:\n        words = set(dictionary)\n        n = len(s)\n        dp = [0] * (n + 1)\n\n        for i in range(n - 1, -1, -1):\n            dp[i] = 1 + dp[i + 1]\n            for j in range(i, n):\n                if s[i:j + 1] in words:\n                    dp[i] = min(dp[i], dp[j + 1])\n        return dp[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/extra-characters-in-a-string.md",
+      "id": "dynamic-programming-bottom-up-using-hash-set"
+    }
+  ]
 }

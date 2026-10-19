@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool canAttendMeetings(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end(), [](auto& x, auto& y) {\n            return x[0] < y[0];\n        });\n        for (int i = 1; i < intervals.size(); ++i) {\n            if (intervals[i][0] < intervals[i - 1][1]) {\n                return false;\n            }\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=PaJxqZVPhbg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/meeting-schedule.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/meeting-schedule.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe want to check whether a person can attend **all meetings without any overlap**.\n\nTwo meetings overlap if they share **any common time**.\nFor two intervals `A` and `B`, this happens when:\n\n- the earlier ending time is **greater** than the later starting time\n\nIn a brute force approach, we simply:\n\n- compare **every pair of meetings**\n- if **any pair overlaps**, it is impossible to attend all meetings\n\nThis approach is very straightforward and easy to understand, making it ideal as a starting solution.\n\n### Steps\n\n1. Let `n` be the number of meetings.\n2. For each meeting `i` from `0` to `n - 1`:\n3. Compare it with every meeting `j` where `j > i`:\n4. For meetings `A` and `B`:\n    - Check if they overlap using:\n        - `min(A[1], B[1]) > max(A[0], B[0])`\n5. If an overlap is found:\n    - return `false` immediately\n6. If no overlapping pair is found after checking all pairs:\n    - return `true`\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def canAttendMeetings(self, intervals: List[List[int]]) -> bool:\n        n = len(intervals)\n        for i in range(n):\n            A = intervals[i]\n            for j in range(i + 1, n):\n                B = intervals[j]\n                if min(A[1], B[1]) > max(A[0], B[0]):\n                    return False\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/meeting-schedule.md",
+      "id": "brute-force"
+    }
+  ]
 }

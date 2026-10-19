@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        return lower_bound(nums.begin(), nums.end(), target) - nums.begin();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=K-RYzDZkzCI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-insert-position.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-insert-position.md",
+  "alternatives": [
+    {
+      "approach": "Linear Search",
+      "explanation": "### How it works\n\nWe scan the array from left to right looking for the first element that is greater than or equal to the target. If we find such an element, that index is where the target either exists or should be inserted. If no element qualifies, the target belongs at the end.\n\n### Steps\n\n1. Iterate through each index `i` in the array.\n2. If `nums[i] >= target`, return `i`.\n3. If the loop completes without returning, return `n` (the length of the array to insert at the end).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchInsert(self, nums: List[int], target: int) -> int:\n        for i in range(len(nums)):\n            if nums[i] >= target:\n                return i\n        return len(nums)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-insert-position.md",
+      "id": "linear-search"
+    },
+    {
+      "approach": "Binary Search (Lower Bound)",
+      "explanation": "### How it works\n\nThis is the classic lower bound algorithm. We find the smallest index where the element is greater than or equal to the target. By using `l < r` as the condition and setting `r = m` when `nums[m] >= target`, we converge on the lower bound without needing a separate result variable.\n\n### Steps\n\n1. Initialize pointers `l = 0` and `r = n` (note: `r` starts at `n`, not `n - 1`).\n2. While `l < r`:\n    - Compute `m = l + (r - l) / 2`.\n    - If `nums[m] >= target`, set `r = m`.\n    - Otherwise, set `l = m + 1`.\n3. Return `l` (the lower bound position).\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def searchInsert(self, nums: List[int], target: int) -> int:\n        l, r = 0, len(nums)\n        while l < r:\n            m = l + ((r - l) // 2)\n            if nums[m] >= target:\n                r = m\n            elif nums[m] < target:\n                l = m + 1\n        return l\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-insert-position.md",
+      "id": "binary-search-lower-bound"
+    }
+  ]
 }

@@ -7,5 +7,26 @@
     "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        int n = nums.size();\n        unordered_map<int, int> prevMap;\n\n        for (int i = 0; i < n; i++) {\n            int diff = target - nums[i];\n            if (prevMap.find(diff) != prevMap.end()) {\n                return {prevMap[diff], i};\n            }\n            prevMap.insert({nums[i], i});\n        }\n        return {};\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=KLlXCFG5TnA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can check every pair of different elements in the array and return the first pair that sums up to the target. This is the most intuitive approach but it's not the most efficient.\n\n### Steps\n\n1. Iterate through the array with two nested loops using indices `i` and `j` to check every pair of different elements.\n2. If the sum of the pair equals the target, return the indices of the pair.\n3. If no such pair is found, return an empty array.\n4. There is guaranteed to be exactly one solution, so we will never return an empty array.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        for i in range(len(nums)):\n            for j in range(i + 1, len(nums)):\n                if nums[i] + nums[j] == target:\n                    return [i, j]\n        return []\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nSort `(value, original index)` pairs, then move two pointers toward each other. If their sum is too small, advance the left pointer; if it is too large, move the right pointer left. Keeping the original index beside each value lets the answer refer to the input's positions after sorting.\n\n### Steps\n\n1. Build a list of value/index pairs and sort it by value. The input array stays unchanged.\n2. Put a pointer at each end of the sorted list.\n3. If the two values sum to the target, return their original indices.\n4. If the sum is below the target, advance the left pointer; otherwise move the right pointer left.\n5. Stop before the pointers meet so the same element is never used twice. The problem guarantees one valid pair.\n\n### Complexity\n\n- Time complexity: `O(n log n)` for sorting plus a linear scan.\n- Space complexity: `O(n)` for value/index pairs and Python's sorting workspace.\n\n### Things to watch for\n\n- Return original indices, not sorted positions or the values themselves.\n- Equal values at different indices can form a valid pair.\n- Sorting the original values alone would lose the index mapping.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        A = []\n        for i, num in enumerate(nums):\n            A.append([num, i])\n\n        A.sort()\n        i, j = 0, len(nums) - 1\n        while i < j:\n            cur = A[i][0] + A[j][0]\n            if cur == target:\n                return [min(A[i][1], A[j][1]),\n                        max(A[i][1], A[j][1])]\n            elif cur < target:\n                i += 1\n            else:\n                j -= 1\n        return []\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/two-integer-sum.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "sorting"
+    }
+  ]
 }

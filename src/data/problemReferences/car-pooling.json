@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool carPooling(vector<vector<int>>& trips, int capacity) {\n        int L = INT_MAX, R = INT_MIN;\n        for (const auto& trip : trips) {\n            L = min(L, trip[1]);\n            R = max(R, trip[2]);\n        }\n\n        int N = R - L + 1;\n        vector<int> passChange(N + 1, 0);\n        for (const auto& trip : trips) {\n            passChange[trip[1] - L] += trip[0];\n            passChange[trip[2] - L] -= trip[0];\n        }\n\n        int curPass = 0;\n        for (int change : passChange) {\n            curPass += change;\n            if (curPass > capacity) {\n                return false;\n            }\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=08sn_w4LWEE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-pooling.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-pooling.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAt each pickup location, we need to know how many passengers are currently in the car. We can sort trips by their start location and for each trip, check all previous trips that have not yet dropped off their passengers. If the total exceeds capacity at any point, carpooling is not possible.\n\n### Steps\n\n1. Sort all trips by their pickup location (start time).\n2. For each trip at index `i`:\n    - Start with the number of passengers from the current trip.\n    - Check all previous trips (`j` < `i`) and add their passengers if their drop-off location is after the current pickup location.\n    - If the total passengers exceed capacity, return `false`.\n3. If all trips pass the capacity check, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def carPooling(self, trips: List[List[int]], capacity: int) -> bool:\n        trips.sort(key=lambda x: x[1])\n\n        for i in range(len(trips)):\n            curPass = trips[i][0]\n            for j in range(i):\n                if trips[j][2] > trips[i][1]:\n                    curPass += trips[j][0]\n            if curPass > capacity:\n                return False\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-pooling.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Min-Heap",
+      "explanation": "### How it works\n\nWhen we process trips in order of pickup time, we only care about trips whose passengers are still in the car. A min-heap ordered by drop-off time lets us efficiently remove all trips whose passengers have already been dropped off before the current pickup. This way, we maintain a running count of current passengers.\n\n### Steps\n\n1. Sort trips by their pickup location.\n2. Use a min-heap to track active trips, ordered by their drop-off location.\n3. For each trip:\n    - Pop all trips from the heap whose drop-off location is at or before the current pickup, subtracting their passengers from the count.\n    - Add the current trip's passengers to the count.\n    - If the count exceeds capacity, return `false`.\n    - Push the current trip (drop-off time, passenger count) onto the heap.\n4. Return `true` if all trips are processed without exceeding capacity.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def carPooling(self, trips: List[List[int]], capacity: int) -> bool:\n        trips.sort(key=lambda t: t[1])\n\n        minHeap = []  # pair of [end, numPassengers]\n        curPass = 0\n\n        for numPass, start, end in trips:\n            while minHeap and minHeap[0][0] <= start:\n                curPass -= heapq.heappop(minHeap)[1]\n\n            curPass += numPass\n            if curPass > capacity:\n                return False\n\n            heapq.heappush(minHeap, [end, numPass])\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/car-pooling.md",
+      "id": "min-heap"
+    }
+  ]
 }

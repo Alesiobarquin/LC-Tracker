@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\n\nclass Solution {\npublic:\n    int kthSmallest(TreeNode* root, int k) {\n        TreeNode* curr = root;\n\n        while (curr) {\n            if (!curr->left) {\n                k--;\n                if (k == 0) return curr->val;\n                curr = curr->right;\n            } else {\n                TreeNode* pred = curr->left;\n                while (pred->right && pred->right != curr)\n                    pred = pred->right;\n\n                if (!pred->right) {\n                    pred->right = curr;\n                    curr = curr->left;\n                } else {\n                    pred->right = nullptr;\n                    k--;\n                    if (k == 0) return curr->val;\n                    curr = curr->right;\n                }\n            }\n        }\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=5LUXSvjmGCw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-smallest-integer-in-bst.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-smallest-integer-in-bst.md",
+  "alternatives": [
+    {
+      "approach": "Inorder Traversal",
+      "explanation": "### How it works\n\nA Binary Search Tree (BST) has an important property:\n\n**Inorder Traversal (Left → Node → Right) always gives values in sorted order.**\n\nSo instead of collecting all values and sorting them manually, we can:\n\n1. Do an inorder traversal.\n2. This automatically produces values in ascending order.\n3. The k-th element in this inorder list is the answer.\n\nThis makes the solution more efficient and uses the BST’s inherent structure.\n\n### Steps\n\n1. Create an empty list `arr`.\n2. Perform **inorder DFS**:\n    - Visit the left subtree.\n    - Add the current node's value to `arr`.\n    - Visit the right subtree.\n3. After traversal, `arr` will be sorted.\n4. Return `arr[k-1]`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:\n        arr = []\n\n        def dfs(node):\n            if not node:\n                return\n\n            dfs(node.left)\n            arr.append(node.val)\n            dfs(node.right)\n\n        dfs(root)\n        return arr[k - 1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-smallest-integer-in-bst.md",
+      "id": "inorder-traversal"
+    },
+    {
+      "approach": "Iterative DFS (Optimal)",
+      "explanation": "### How it works\n\nIn a BST, an **inorder traversal** (left -> node -> right) gives nodes in **sorted order**.\nInstead of recursion, we simulate this traversal with a **stack**:\n\n- Push all left nodes (go as deep as possible).\n- Pop the top node - this is the next smallest value.\n- Move to its right subtree and repeat.\n- When we pop the k-th node, that's our answer.\n\nThis way, we only visit nodes until we reach the k-th smallest — no need to traverse the whole tree.\n\n### Steps\n\n1. Initialize an empty stack and set `curr = root`.\n2. While either stack is not empty or `curr` is not null:\n    - Push all left nodes into the stack (`curr = curr.left`).\n    - Pop from the stack - this is the next smallest node.\n    - Decrement `k`. If `k == 0`, return that node's value.\n    - Move to the right subtree (`curr = curr.right`).\n3. The popped k-th node is the answer.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:\n        stack = []\n        curr = root\n\n        while stack or curr:\n            while curr:\n                stack.append(curr)\n                curr = curr.left\n            curr = stack.pop()\n            k -= 1\n            if k == 0:\n                return curr.val\n            curr = curr.right\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-smallest-integer-in-bst.md",
+      "id": "iterative-dfs-optimal"
+    }
+  ]
 }

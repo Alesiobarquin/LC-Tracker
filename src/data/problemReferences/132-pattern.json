@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool find132pattern(vector<int>& nums) {\n        int n = nums.size();\n        int stkTop = n;\n        int k = INT_MIN;\n\n        for (int i = n - 1; i >= 0; i--) {\n            if (nums[i] < k) {\n                return true;\n            }\n\n            while (stkTop < n && nums[i] > nums[stkTop]) {\n                k = nums[stkTop++];\n            }\n\n            nums[--stkTop] = nums[i];\n        }\n\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=q5ANAl8Z458",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/132-pattern.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/132-pattern.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward way to find a 132 pattern is to check every possible triplet. We need indices `i < j < k` where `nums[i] < nums[k] < nums[j]`. For each position `k`, we look backward to find a valid `j` (where `nums[j] > nums[k]`), and then look further back to find a valid `i` (where `nums[i] < nums[k]`). If all three conditions are met, we found the pattern.\n\n### Steps\n\n1. Iterate `k` from index 2 to the end of the array.\n2. For each `k`, iterate `j` backward from `k - 1` to 1.\n   - Skip if `nums[j] <= nums[k]` since we need `nums[j] > nums[k]`.\n3. For each valid `j`, iterate `i` backward from `j - 1` to 0.\n   - If `nums[i] < nums[k]`, return `true`.\n4. If no valid triplet is found, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def find132pattern(self, nums: List[int]) -> bool:\n        n = len(nums)\n\n        for k in range(2, n):\n            for j in range(k - 1, 0, -1):\n                if nums[j] <= nums[k]:\n                    continue\n\n                for i in range(j - 1, -1, -1):\n                    if nums[i] < nums[k]:\n                        return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/132-pattern.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nInstead of checking every triplet, we can use a monotonic decreasing stack to efficiently track potential `j` candidates along with their corresponding minimum values to the left (potential `i` values). As we scan from left to right, we maintain a stack of pairs `[nums[j], minLeft]` where `minLeft` is the smallest element seen before index `j`. When we encounter a new element, if it's greater than the `minLeft` of any stack entry but less than that entry's value, we found a valid 132 pattern.\n\n### Steps\n\n1. Initialize a stack to store pairs `[num, minLeft]` and track `curMin` as the running minimum.\n2. For each element starting from index 1:\n   - Pop elements from the stack while the current element is greater than or equal to the top.\n   - If the stack is not empty and the current element is greater than `stack.top().minLeft`, return `true`.\n   - Push the current element with `curMin` onto the stack.\n   - Update `curMin` to be the minimum of itself and the current element.\n3. Return `false` if no pattern is found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def find132pattern(self, nums: List[int]) -> bool:\n        stack = []  # pair [num, minLeft], mono decreasing\n        curMin = nums[0]\n\n        for i in range(1, len(nums)):\n            while stack and nums[i] >= stack[-1][0]:\n                stack.pop()\n            if stack and nums[i] > stack[-1][1]:\n                return True\n\n            stack.append([nums[i], curMin])\n            curMin = min(curMin, nums[i])\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/132-pattern.md",
+      "id": "stack"
+    }
+  ]
 }

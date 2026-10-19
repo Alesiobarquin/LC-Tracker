@@ -1,6 +1,7 @@
 <svg width="512" height="512" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>LC Tracker</title>
   <rect width="40" height="40" rx="6" fill="#20221f"/>
-  <g transform="translate(4 4)" stroke="#e99575">
+  <g transform="translate(.8 .8) scale(1.2)" stroke="#e99575">
     <path d="M9 5H5v22h4M23 5h4v22h-4" stroke-width="2"/>
     <path d="M10 21h5V11h7" stroke-width="2"/>
     <path d="M10 26h10V16h2" stroke-width="1.5" opacity=".45"/>

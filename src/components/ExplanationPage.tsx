@@ -84,6 +84,9 @@ export function ExplanationPage() {
         title={problem.title}
         description="Explanation and code example"
       />
+      <Link to="/library/explanations" className="inline-flex text-sm text-accent hover:underline">
+        Browse all problem explanations
+      </Link>
       {notes && (
         <div className="reference-switch" aria-label="Explanation source">
           <button

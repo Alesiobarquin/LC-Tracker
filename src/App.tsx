@@ -14,7 +14,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { useStore } from './store/useStore';
 import { queryClient } from './lib/queryClient';
 import { userDataQueryKeys } from './lib/userDataQueryKeys';
+import { PublicPageFallback } from './components/PublicPageFallback';
+import { NotFound } from './components/NotFound';
 
+const ExplanationDirectory = lazy(() => import('./components/ExplanationDirectory').then(m => ({ default: m.ExplanationDirectory })));
 const StudyPlanGuide = lazy(() => import('./components/StudyPlanGuide').then(m => ({ default: m.StudyPlanGuide })));
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
 const ProblemLibrary = lazy(() => import('./components/ProblemLibrary').then((m) => ({ default: m.ProblemLibrary })));
@@ -39,26 +42,6 @@ function RouteFallback() {
 function RealtimeSyncHost({ userId }: { userId: string | null }) {
   useRealtimeSync(userId);
   return null;
-}
-
-function updateMeta(attribute: 'name' | 'property', value: string, content: string) {
-  let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${value}"]`);
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.setAttribute(attribute, value);
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute('content', content);
-}
-
-function updateCanonical(href: string) {
-  let tag = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!tag) {
-    tag = document.createElement('link');
-    tag.setAttribute('rel', 'canonical');
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute('href', href);
 }
 
 export default function App() {
@@ -95,90 +78,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const origin = window.location.origin;
-    const pageConfig = {
-      '/': {
-        title: 'LC Tracker | Know what LeetCode problem to solve next',
-        description: 'Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.',
-        canonical: `${origin}/`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/library': {
-        title: 'Problem Library | LC Tracker',
-        description: 'Browse the LC Tracker problem library by category, difficulty, and curated sets to plan your interview prep.',
-        canonical: `${origin}/library`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/patterns': {
-        title: 'Pattern Foundations | LC Tracker',
-        description: 'Explore algorithm patterns, templates, and mapped LeetCode problems in the LC Tracker pattern roadmap.',
-        canonical: `${origin}/patterns`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/syntax': {
-        title: 'Syntax Reference | LC Tracker',
-        description: 'Review Python interview syntax flashcards and weak areas in the LC Tracker syntax reference.',
-        canonical: `${origin}/syntax`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/login': {
-        title: 'Sign In | LC Tracker',
-        description: 'Sign in to LC Tracker to continue tracking LeetCode sessions, review scheduling, and interview prep workflows.',
-        canonical: `${origin}/login`,
-        robots: 'noindex,nofollow',
-      },
-      '/privacy': {
-        title: 'Privacy Policy | LC Tracker',
-        description: 'Read the LC Tracker privacy policy and learn how user data is collected, stored, and protected.',
-        canonical: `${origin}/privacy`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/terms': {
-        title: 'Terms of Service | LC Tracker',
-        description: 'Review the LC Tracker terms of service and usage guidelines for the LeetCode tracker web app.',
-        canonical: `${origin}/terms`,
-        robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
-      },
-      '/sso-callback': {
-        title: 'Signing In | LC Tracker',
-        description: 'Completing LC Tracker sign in and authentication.',
-        canonical: `${origin}/sso-callback`,
-        robots: 'noindex,nofollow',
-      },
-      '/admin': {
-        title: 'Admin | LC Tracker',
-        description: 'LC Tracker admin dashboard.',
-        canonical: `${origin}/admin`,
-        robots: 'noindex,nofollow',
-      },
-    } as const;
-
-    const config = path.startsWith('/patterns/')
-      ? {
-          ...pageConfig['/patterns'],
-          canonical: `${origin}${path}`,
-        }
-      : path.startsWith('/library/')
-        ? { ...pageConfig['/library'], title: 'Problem explanation | LC Tracker',
-            description: 'Problem-specific reasoning and Python or C++ reference code.', canonical: `${origin}${path}` }
-        : (pageConfig[path as keyof typeof pageConfig] ?? pageConfig['/']);
-
-    document.title = config.title;
-    updateMeta('name', 'description', config.description);
-    updateMeta('name', 'robots', config.robots);
-    updateMeta('name', 'application-name', 'LC Tracker');
-    updateMeta('property', 'og:title', config.title);
-    updateMeta('property', 'og:description', config.description);
-    updateMeta('property', 'og:url', config.canonical);
-    updateMeta('property', 'og:image', `${origin}/og-image.svg`);
-    updateMeta('property', 'og:image:width', '1200');
-    updateMeta('property', 'og:image:height', '630');
-    updateMeta('property', 'og:image:type', 'image/svg+xml');
-    updateMeta('name', 'twitter:card', 'summary_large_image');
-    updateMeta('name', 'twitter:title', config.title);
-    updateMeta('name', 'twitter:description', config.description);
-    updateMeta('name', 'twitter:image', `${origin}/og-image.svg`);
-    updateCanonical(config.canonical);
+    let cancelled = false;
+    void import('./seo/metadata').then(async ({ getPageMetadata, applyMetadata }) => {
+      const metadata = await getPageMetadata(path);
+      if (!cancelled) applyMetadata(metadata);
+    });
+    return () => { cancelled = true; };
   }, [path]);
 
   // Public routes — no auth needed
@@ -200,6 +105,8 @@ export default function App() {
   const showLoading =
     !bootTimedOut &&
     (!authLoaded || (user && settingsLoading && !settingsError && !isPublicAppRoute));
+
+  if (showLoading && isPublicAppRoute) return <PublicPageFallback />;
 
   if (showLoading) {
     return (
@@ -225,7 +132,10 @@ export default function App() {
   // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
     if (path === '/login') return <Login />;
-    if (!isPublicAppRoute) return <Navigate to="/" replace />;
+    if (!isPublicAppRoute) {
+      const isPrivateRoute = /^\/(dashboard|study-plan|analytics|settings|onboarding|admin|timer|recall)(\/|$)/.test(path);
+      return isPrivateRoute ? <Navigate to="/" replace /> : <NotFound />;
+    }
   }
 
   if (path === '/admin') {
@@ -283,10 +193,11 @@ export default function App() {
             {/* Publicly indexable/previewable paths */}
             <Route path="/patterns/*" element={<PatternFoundations />} />
             <Route path="/library" element={<ProblemLibrary />} />
+            <Route path="/library/explanations" element={<ExplanationDirectory />} />
             <Route path="/library/:problemId/explanation" element={<ExplanationPage />} />
             <Route path="/syntax" element={<SyntaxReference />} />
 
-            <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+            <Route path="*" element={<NotFound embedded />} />
           </Routes>
         </Suspense>
       </Layout>

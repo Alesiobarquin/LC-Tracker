@@ -8,10 +8,10 @@
   </g>
   <g font-family="Arial, sans-serif" fill="#efeee8">
     <text x="112" y="74" font-size="24" font-weight="600">LC Tracker</text>
-    <text x="64" y="244" font-size="56" letter-spacing="-2">Know what to</text>
-    <text x="64" y="311" font-size="56" letter-spacing="-2" fill="#a3a79b">solve next.</text>
-    <text x="64" y="379" font-size="21" fill="#a3a79b">Your interview goal and recorded practice</text>
-    <text x="64" y="411" font-size="21" fill="#a3a79b">shape the next problem in your daily plan.</text>
+    <text x="64" y="244" font-size="56" letter-spacing="-2">LeetCode practice.</text>
+    <text x="64" y="311" font-size="56" letter-spacing="-2" fill="#a3a79b">A clear next step.</text>
+    <text x="64" y="379" font-size="21" fill="#a3a79b">Spaced repetition, recall checks,</text>
+    <text x="64" y="411" font-size="21" fill="#a3a79b">and independent coding sessions.</text>
     <text x="842" y="217" font-size="23">Your goal</text>
     <text x="842" y="332" font-size="23">Your history</text>
     <text x="842" y="447" font-size="23">Today's plan</text>

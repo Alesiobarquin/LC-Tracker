@@ -90,7 +90,7 @@ export function LandingPage() {
                 <span>solve next.</span>
               </h1>
               <p className="landing-lede">
-                Set your interview goal and study time. LC Tracker turns your
+                Set your LeetCode interview goal and study time. LC Tracker turns your
                 recorded practice into a daily plan: what to review, what to
                 solve, and why.
               </p>
@@ -239,6 +239,9 @@ export function LandingPage() {
           <p>Goal-aware LeetCode practice, shaped by what you record.</p>
           <nav aria-label="Footer">
             <a href="/library">Library</a>
+            <a href="/library/explanations">Explanations</a>
+            <a href="/patterns">Patterns</a>
+            <a href="/syntax">Syntax</a>
             <a href="/privacy">Privacy</a>
             <a href="/terms">Terms</a>
           </nav>

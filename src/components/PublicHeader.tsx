@@ -1,9 +1,10 @@
 import { Logo } from './Logo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { BRAND } from '../constants/brand';
+import { useLocation } from 'react-router-dom';
 
 export function PublicHeader({ fixed = false, showSignIn = true }: { fixed?: boolean; showSignIn?: boolean }) {
-  const howItWorksHref = window.location.pathname === '/' ? '#how-it-works' : '/#how-it-works';
+  const howItWorksHref = useLocation().pathname === '/' ? '#how-it-works' : '/#how-it-works';
 
   return (
     <header className={`landing-header ${fixed ? 'fixed' : 'sticky'} top-0 inset-x-0 z-50 border-b border-line bg-canvas`}>

@@ -45,7 +45,7 @@ export function ExplanationLinks({ problem }: { problem: Problem }) {
   );
 }
 
-function ProblemExplanationFootnote({ reference }: { reference: ProblemApproach }) {
+export function ProblemExplanationFootnote({ reference }: { reference: Omit<ProblemApproach, 'id'> }) {
   return (
     <details className="explanation-footnote">
       <summary>Source and license</summary>

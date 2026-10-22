@@ -9,6 +9,7 @@ import { OperationErrorBanner } from './components/OperationErrorBanner';
 import { queryClient } from './lib/queryClient';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './components/ThemeProvider';
+import { PublicPageFallback } from './components/PublicPageFallback';
 import './index.css';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -72,7 +73,7 @@ createRoot(document.getElementById('root')!).render(
                 appearance={clerkAppearance}
               >
                 <ErrorBoundary>
-                  <Suspense fallback={<div role="status" className="min-h-screen bg-canvas text-muted flex items-center justify-center">Loading LC Tracker…</div>}>
+                  <Suspense fallback={<PublicPageFallback />}>
                     <App />
                   </Suspense>
                   <OperationErrorBanner />

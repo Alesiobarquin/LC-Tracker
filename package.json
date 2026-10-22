@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/verify-seo.mjs",
+    "verify:seo": "node scripts/verify-seo.mjs",
+    "test:seo:built": "node scripts/test-built-seo.mjs",
+    "build:brand": "node scripts/render-brand-assets.mjs",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",

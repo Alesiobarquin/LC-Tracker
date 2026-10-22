@@ -6,11 +6,11 @@ test('landing explains the planner and updates its sample from the goal', async 
   await expect(page.getByRole('heading', { name: 'Know what to solve next.' })).toBeVisible();
   await expect(page.getByText('Personalized LeetCode practice')).toHaveCount(0);
   await expect(page.locator('#landing-title span')).toHaveCSS('font-style', 'normal');
-  const landingDescription = 'Set your interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.';
+  const landingDescription = 'Set your LeetCode interview goal and study time. LC Tracker turns your recorded practice into a daily plan: what to review, what to solve, and why.';
   await expect(page.getByText(landingDescription)).toBeVisible();
-  await expect(page).toHaveTitle('LC Tracker | Know what LeetCode problem to solve next');
+  await expect(page).toHaveTitle('LC Tracker | LeetCode Practice & Spaced Repetition');
   for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) {
-    await expect(page.locator(selector)).toHaveAttribute('content', landingDescription);
+    await expect(page.locator(selector)).toHaveAttribute('content', 'Plan LeetCode practice with spaced repetition, recall checks, and coding sessions. Browse problem explanations, algorithm patterns, and Python or C++ syntax.');
   }
   await expect(page.getByRole('heading', { name: 'A clear next step. A reason behind it.' })).toBeVisible();
   await expect(page.getByText(/Example practice history/)).toBeVisible();

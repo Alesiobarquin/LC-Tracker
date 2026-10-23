@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countCharacters(vector<string>& words, string chars) {\n        vector<int> count(26, 0);\n        for (char c : chars) {\n            count[c - 'a']++;\n        }\n\n        vector<int> org = count;\n        int res = 0;\n\n        for (string& w : words) {\n            bool good = true;\n            for (char& c : w) {\n                int i = c - 'a';\n                count[i]--;\n                if (count[i] < 0) {\n                    good = false;\n                    break;\n                }\n            }\n            if (good) {\n                res += w.length();\n            }\n            for (int i = 0; i < 26; i++) {\n                count[i] = org[i];\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-words-that-can-be-formed-by-characters.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-words-that-can-be-formed-by-characters.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map (Two Pass)",
+      "explanation": "### How it works\n\nA word can be formed from `chars` if every character in the word appears in `chars` with at least the same frequency. We first count character frequencies in `chars`, then for each word, count its character frequencies and verify that `chars` has enough of each character.\n\n### Steps\n\n1. Build a frequency map `count` for all characters in `chars`.\n2. For each word:\n    - Build a frequency map `cur_word` for the word.\n    - Check if every character in `cur_word` has a count less than or equal to its count in `count`.\n    - If valid, add the word's length to `res`.\n3. Return the total length.\n\n### Complexity\n\n- Time complexity: `O(n + (m * k))`\n- Space complexity: `O(1)` since we have at most `26` different characters.\n\n> Where `n` is the length of `chars`, `m` is the number of words and `k` is the average length of each word.",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def countCharacters(self, words: List[str], chars: str) -> int:\n        count = Counter(chars)\n        res = 0\n\n        for w in words:\n            cur_word = Counter(w)\n            good = True\n            for c in cur_word:\n                if cur_word[c] > count[c]:\n                    good = False\n                    break\n            if good:\n                res += len(w)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-words-that-can-be-formed-by-characters.md",
+      "id": "hash-map-two-pass"
+    },
+    {
+      "approach": "Hash Map (One Pass)",
+      "explanation": "### How it works\n\nInstead of building the complete frequency map for each word first, we can check character availability on the fly. As we iterate through each character of a word, we increment its count in a temporary map and immediately check if it exceeds the available count in `chars`. This allows early termination if a word is invalid.\n\n### Steps\n\n1. Build a frequency map `count` for all characters in `chars`.\n2. For each word:\n    - Initialize an empty frequency map `cur_word`.\n    - For each character in the word:\n        - Increment its count in `cur_word`.\n        - If it exceeds the count in `count`, mark the word as invalid and break.\n    - If the word is valid, add its length to `res`.\n3. Return the total length.\n\n### Complexity\n\n- Time complexity: `O(n + (m * k))`\n- Space complexity: `O(1)` since we have at most `26` different characters.\n\n> Where `n` is the length of `chars`, `m` is the number of words and `k` is the average length of each word.",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter, defaultdict\n\nclass Solution:\n    def countCharacters(self, words: List[str], chars: str) -> int:\n        count = Counter(chars)\n        res = 0\n\n        for w in words:\n            cur_word = defaultdict(int)\n            good = True\n            for c in w:\n                cur_word[c] += 1\n                if cur_word[c] > count[c]:\n                    good = False\n                    break\n            if good:\n                res += len(w)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-words-that-can-be-formed-by-characters.md",
+      "id": "hash-map-one-pass"
+    }
+  ]
 }

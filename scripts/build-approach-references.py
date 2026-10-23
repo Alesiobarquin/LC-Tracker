@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Add reviewed Python approaches to the NeetCode 250, keeping existing defaults.
+"""Add reviewed Python approaches from a manifest, keeping existing defaults.
 
 Sources are local articles from the revision in approach-reference-manifest.json.
-Article hashes are checked before any writes. No network or user data is used.
+Article hashes and recorded defaults are checked before any writes. No network
+or user data is used. The core manifest remains the default; --manifest selects
+the separately reviewed extended-catalog batch.
 """
 import argparse
 import ast
@@ -15,6 +17,7 @@ import runpy
 ROOT = Path(__file__).resolve().parents[1]
 IMPORTER = runpy.run_path(str(ROOT / 'scripts/build-problem-references.py'))
 NOTES = runpy.run_path(str(ROOT / 'scripts/approach-reference-notes.py'))
+EXTENDED_NOTES = runpy.run_path(str(ROOT / 'scripts/extended-approach-reference-notes.py'))
 
 
 def sections(article):
@@ -80,9 +83,17 @@ def make_approach(problem_id, name, article, source_url):
         r'`O(\1)` worst-case auxiliary space for Python\'s sort.', explanation)
     if 'Brute Force' in name or (name == 'Recursion' and 'Dynamic Programming' in article):
         explanation = 'This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n' + explanation
+    key = (problem_id, name)
+    complexity = EXTENDED_NOTES['COMPLEXITY'].get(key)
+    if complexity:
+        explanation = re.sub(r'### Complexity\n.*?(?=\n\n### |\Z)', '### Complexity\n\n' + complexity, explanation, flags=re.S)
+    for before, after in EXTENDED_NOTES['REPLACEMENTS'].get(key, []):
+        explanation = explanation.replace(before, after)
+    if key in EXTENDED_NOTES['PREAMBLES']:
+        explanation = EXTENDED_NOTES['PREAMBLES'][key] + '\n\n' + explanation
     result = {'approach': name, 'explanation': explanation,
               'code': {'python': IMPORTER['python_imports'](code)}, 'sourceUrl': source_url}
-    if notes:
+    if notes or complexity or key in EXTENDED_NOTES['REPLACEMENTS'] or key in EXTENDED_NOTES['PREAMBLES']:
         result['explanationAuthor'] = 'LC Tracker'
     return result
 
@@ -91,8 +102,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path, help='Local pinned NeetCode checkout or extracted archive')
     parser.add_argument('--batch', choices=['foundations', 'structures', 'graphs', 'dynamic', 'remaining'])
+    parser.add_argument('--manifest', type=Path, default=ROOT / 'scripts/approach-reference-manifest.json')
     args = parser.parse_args()
-    manifest = json.loads((ROOT / 'scripts/approach-reference-manifest.json').read_text())
+    manifest = json.loads(args.manifest.read_text())
     if manifest['revision'] != IMPORTER['REVISION']:
         raise ValueError('The default and alternate importers must use the same reviewed revision')
     pending = []
@@ -106,6 +118,10 @@ def main():
         reference = json.loads(path.read_text())
         if reference['approach'] != entry['default']:
             raise ValueError(f"Default changed for {entry['id']}; review the manifest first")
+        default = {key: value for key, value in reference.items() if key != 'alternatives'}
+        digest = hashlib.sha256(json.dumps(default, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        if entry.get('defaultSha256', digest) != digest:
+            raise ValueError(f"Default content changed for {entry['id']}; review the manifest first")
         alternatives = []
         for name in entry['alternatives']:
             approach = make_approach(entry['id'], name, raw.decode(), reference['sourceUrl'])
@@ -114,6 +130,10 @@ def main():
             alternatives.append(approach)
         if not 1 <= len(alternatives) <= 2:
             raise ValueError(f"Expected one or two alternatives for {entry['id']}")
+        if len({a['id'] for a in alternatives}) != len(alternatives):
+            raise ValueError(f"Duplicate approach IDs for {entry['id']}")
+        if len({reference['code']['python'].strip(), *(a['code']['python'].strip() for a in alternatives)}) != len(alternatives) + 1:
+            raise ValueError(f"Duplicate code for {entry['id']}")
         reference['alternatives'] = alternatives
         pending.append((path, reference))
     for path, reference in pending:

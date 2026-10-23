@@ -1,0 +1,29 @@
+{
+  "problemId": "count-binary-substrings",
+  "approach": "Two Consecutive Run Lengths",
+  "explanation": "### How it works\n\nA valid substring spans exactly two adjacent runs of different bits. The number contributed by such a pair is the smaller run length, so only the current and previous run lengths are needed.\n\n### Steps\n\n1. Count the current equal-bit run.\n2. On a bit change, add the minimum of the two completed neighboring run lengths.\n3. Shift the run counters.\n4. Add the last neighboring-run contribution.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def countBinarySubstrings(self, s: str) -> int:\n    ans = 0\n    prevCount = 0\n    equals = 1\n\n    for i in range(len(s) - 1):\n      if s[i] == s[i + 1]:\n        equals += 1\n      else:\n        ans += min(prevCount, equals)\n        prevCount = equals\n        equals = 1\n\n    return ans + min(prevCount, equals)\n",
+    "cpp": "class Solution {\n public:\n  int countBinarySubstrings(string s) {\n    int ans = 0;\n    int prevEquals = 0;\n    int currEquals = 1;\n\n    for (int i = 0; i + 1 < s.length(); ++i)\n      if (s[i] == s[i + 1])\n        ++currEquals;\n      else {\n        ans += min(prevEquals, currEquals);\n        prevEquals = currEquals;\n        currEquals = 1;\n      }\n\n    return ans + min(prevEquals, currEquals);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/696.%20Count%20Binary%20Substrings",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "run-length-encoding-then-pairing",
+      "approach": "Run-Length Encoding Then Pairing",
+      "explanation": "### How it works\n\nMaterialize all equal-bit run lengths, then sum the minimum of each adjacent pair. This separates identifying runs from counting valid substrings.\n\n### Steps\n\n1. Group consecutive equal bits.\n2. Record each group length.\n3. Sum minima of adjacent group lengths.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) run lengths in the alternating worst case.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/696.%20Count%20Binary%20Substrings",
+      "code": {
+        "python": "from itertools import groupby\n\nclass Solution:\n    def countBinarySubstrings(self, s: str) -> int:\n        lengths = [sum(1 for _ in group) for _, group in groupby(s)]\n        return sum(min(a, b) for a, b in zip(lengths, lengths[1:]))\n"
+      }
+    }
+  ]
+}

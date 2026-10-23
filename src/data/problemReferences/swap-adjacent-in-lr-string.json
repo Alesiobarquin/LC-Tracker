@@ -1,0 +1,29 @@
+{
+  "problemId": "swap-adjacent-in-lr-string",
+  "approach": "Ordered Pieces with Direction Constraints",
+  "explanation": "### How it works\n\nDeleting X must leave the same L/R sequence because pieces never cross. Then each L may move only left and each R only right, which paired indices can verify.\n\n### Steps\n\n1. Compare both strings after removing X.\n2. Advance two pointers to the next non-X piece.\n3. Reject L moving right or R moving left.\n4. Accept when all ordered pieces satisfy their direction constraints.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for strings with X removed.",
+  "code": {
+    "python": "class Solution:\n  def canTransform(self, start: str, end: str) -> bool:\n    if start.replace('X', '') != end.replace('X', ''):\n      return False\n\n    i = 0  # start's index\n    j = 0  # end's index\n\n    while i < len(start) and j < len(end):\n      while i < len(start) and start[i] == 'X':\n        i += 1\n      while j < len(end) and end[j] == 'X':\n        j += 1\n      if i == len(start) and j == len(end):\n        return True\n      if i == len(start) or j == len(end):\n        return False\n      # L can only move to left.\n      if start[i] == 'L' and i < j:\n        return False\n      # R can only move to right.\n      if start[i] == 'R' and i > j:\n        return False\n      i += 1\n      j += 1\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool canTransform(string start, string end) {\n    if (removeX(start) != removeX(end))\n      return false;\n\n    int i = 0;  // start's index\n    int j = 0;  // end's index\n\n    while (i < start.length() && j < end.length()) {\n      while (i < start.length() && start[i] == 'X')\n        ++i;\n      while (j < end.length() && end[j] == 'X')\n        ++j;\n      if (i == start.length() && j == end.length())\n        return true;\n      if (i == start.length() || j == end.length())\n        return false;\n      // L can only move to left.\n      if (start[i] == 'L' && i < j)\n        return false;\n      // R can only move to right.\n      if (start[i] == 'R' && i > j)\n        return false;\n      ++i;\n      ++j;\n    }\n\n    return true;\n  }\n\n private:\n  string removeX(const string& s) {\n    string t = s;\n    std::erase(t, 'X');\n    return t;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/777.%20Swap%20Adjacent%20in%20LR%20String",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "materialized-piece-positions",
+      "approach": "Materialized Piece Positions",
+      "explanation": "### How it works\n\nCollect each nonempty piece and its position in both strings. Compare these aligned records directly for matching order and permitted movement.\n\n### Steps\n\n1. Build lists of character/index pairs excluding X.\n2. Require the same number of pieces.\n3. Compare each paired character.\n4. Require a target L index no larger than its start, or a target R index no smaller.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) piece records.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/777.%20Swap%20Adjacent%20in%20LR%20String",
+      "code": {
+        "python": "class Solution:\n    def canTransform(self, start: str, end: str) -> bool:\n        original = [(char, i) for i, char in enumerate(start) if char != 'X']\n        target = [(char, i) for i, char in enumerate(end) if char != 'X']\n        if len(original) != len(target):\n            return False\n        for (char, i), (other, j) in zip(original, target):\n            if char != other or (char == 'L' and j > i) or (char == 'R' and j < i):\n                return False\n        return True\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int treeHgt = 0;\n    bool nullSeen = false;\n\n    bool dfs(TreeNode* node, int hgt) {\n        if (!node) {\n            if (treeHgt == 0) {\n                treeHgt = hgt;\n            } else if (hgt == treeHgt - 1) {\n                nullSeen = true;\n            } else if (hgt != treeHgt) {\n                return false;\n            }\n            return !(hgt == treeHgt && nullSeen);\n        }\n\n        return dfs(node->left, hgt + 1) && dfs(node->right, hgt + 1);\n    }\n\n    bool isCompleteTree(TreeNode* root) {\n        return dfs(root, 0);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=olbiZ-EOSig",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-completeness-of-a-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-completeness-of-a-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nIn a complete binary tree, all nodes are as far left as possible, with no gaps. If we traverse level by level and encounter a null node, all subsequent nodes in the traversal must also be null. If we find any non-null node after a null, the tree is not complete.\n\n### Steps\n\n1. Initialize a queue with the root node.\n2. Process nodes in BFS order:\n    - Dequeue a node and add its left and right children (even if null) to the queue.\n    - If the dequeued node is `null`, drain the remaining queue.\n    - If any non-null node appears after a `null`, return `false`.\n3. Return `true` if the entire queue is processed without finding a non-null after `null`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\nfrom collections import deque\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isCompleteTree(self, root: Optional[TreeNode]) -> bool:\n        q = deque([root])\n        while q:\n            node = q.popleft()\n            if node:\n                q.append(node.left)\n                q.append(node.right)\n            else:\n                while q:\n                    if q.popleft():\n                        return False\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-completeness-of-a-binary-tree.md",
+      "id": "breadth-first-search"
+    },
+    {
+      "approach": "Depth First Search (Two Pass)",
+      "explanation": "### How it works\n\nA complete binary tree with `n` nodes has a specific property: if we number nodes starting from 0 (root) where a node at index `i` has children at 2`i`+1 and 2`i`+2, then every node's index must be less than `n`. First count all nodes, then verify that no node has an index >= `n`.\n\n### Steps\n\n1. First pass: Count the total number of nodes in the tree using DFS.\n2. Second pass: Perform DFS with indices, starting from (root, 0).\n    - If a node is `null`, return `true`.\n    - If a node's index >= total count, return `false` (gap exists).\n    - Recursively check left child (index 2`i`+1) and right child (index 2`i`+2).\n3. Return `true` if all nodes pass the index check.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isCompleteTree(self, root: Optional[TreeNode]) -> bool:\n        def dfs(node, index, n):\n            if not node:\n                return True\n            if index >= n:\n                return False\n\n            left = dfs(node.left, 2 * index + 1, n)\n            right = dfs(node.right, 2 * index + 2, n)\n            return left and right\n\n        def countNodes(node):\n            if not node:\n                return 0\n            return 1 + countNodes(node.left) + countNodes(node.right)\n\n        n = countNodes(root)\n        return dfs(root, 0, n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-completeness-of-a-binary-tree.md",
+      "id": "depth-first-search-two-pass"
+    }
+  ]
 }

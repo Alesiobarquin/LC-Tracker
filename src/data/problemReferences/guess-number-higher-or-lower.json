@@ -7,5 +7,25 @@
     "cpp": "/**\n * Forward declaration of guess API.\n * @param  num   your guess\n * @return \t     -1 if num is higher than the picked number\n *\t\t\t      1 if num is lower than the picked number\n *               otherwise return 0\n * int guess(int num);\n */\n\nclass Solution {\npublic:\n    int guessNumber(int n) {\n        int l = 1, r = n;\n        while (true) {\n            int m1 = l + (r - l) / 3;\n            int m2 = r - (r - l) / 3;\n            if (guess(m1) == 0) return m1;\n            if (guess(m2) == 0) return m2;\n            if (guess(m1) + guess(m2) == 0) {\n                l = m1 + 1;\n                r = m2 - 1;\n            } else if (guess(m1) == -1) {\n                r = m1 - 1;\n            } else {\n                l = m2 + 1;\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=xW4QsTtaCa4",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/guess-number-higher-or-lower.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/guess-number-higher-or-lower.md",
+  "alternatives": [
+    {
+      "approach": "Linear Search",
+      "explanation": "### How it works\n\nThe simplest approach is to try every number from `1` to `n` until we find the correct one. Each guess tells us whether we hit the target. While guaranteed to work, this method is slow for large `n` since we might need to check every single number.\n\n### Steps\n\n1. Iterate through numbers from `1` to `n`.\n2. For each number, call the `guess` API.\n3. If `guess` returns `0`, the current number is correct; return it.\n4. Continue until the answer is found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "# The guess API is already defined for you.\n# @param num, your guess\n# @return -1 if num is higher than the picked number\n#          1 if num is lower than the picked number\n#          otherwise return 0\n# def guess(num: int) -> int:\n\nclass Solution:\n    def guessNumber(self, n: int) -> int:\n        for num in range(1, n + 1):\n            if guess(num) == 0:\n                return num\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/guess-number-higher-or-lower.md",
+      "id": "linear-search"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nSince the numbers from `1` to `n` are sorted, we can use binary search to find the target efficiently. The `guess` API tells us whether to search higher or lower, which is exactly the feedback binary search needs to halve the search space with each guess.\n\n### Steps\n\n1. Initialize two pointers: `l = 1` and `r = n`.\n2. Calculate the middle value `m = (l + r) / 2`.\n3. Call `guess(m)`:\n    - If it returns `0`, we found the number; return `m`.\n    - If it returns `1` (number is higher), set `l = m + 1`.\n    - If it returns `-1` (number is lower), set `r = m - 1`.\n4. Repeat until the number is found.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "# The guess API is already defined for you.\n# @param num, your guess\n# @return -1 if num is higher than the picked number\n#          1 if num is lower than the picked number\n#          otherwise return 0\n# def guess(num: int) -> int:\n\nclass Solution:\n    def guessNumber(self, n: int) -> int:\n        l, r = 1, n\n        while True:\n            m = (l + r) // 2\n            res = guess(m)\n            if res > 0:\n                l = m + 1\n            elif res < 0:\n                r = m - 1\n            else:\n                return m\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/guess-number-higher-or-lower.md",
+      "id": "binary-search"
+    }
+  ]
 }

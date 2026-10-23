@@ -1,0 +1,28 @@
+{
+  "problemId": "implement-magic-dictionary",
+  "approach": "Wildcard-Position Signatures",
+  "explanation": "### How it works\n\nReplace one position of each dictionary word with a wildcard. Store its original character, or an ambiguity marker if multiple words share that signature. A query succeeds when one matching signature permits a different character.\n\n### Steps\n\n1. Generate one wildcard signature per dictionary position.\n2. Record the removed character, marking shared signatures ambiguous.\n3. Generate the query's signatures.\n4. Accept when the stored character differs or the signature is ambiguous.\n\n### Complexity\n\n- Time: O(sum of dictionary word-length²) build; O(L²) query, including string copies and hashes.\n- Space: O(sum of dictionary word-length²) signature characters.\n\n### Things to watch for\n\n- Exactly one substitution is required; an unchanged dictionary match alone is insufficient.",
+  "code": {
+    "python": "class MagicDictionary:\n  def __init__(self):\n    self.dict = {}\n\n  def buildDict(self, dictionary: list[str]) -> None:\n    for word in dictionary:\n      for i, c in enumerate(word):\n        replaced = self._getReplaced(word, i)\n        self.dict[replaced] = '*' if replaced in self.dict else c\n\n  def search(self, searchWord: str) -> bool:\n    for i, c in enumerate(searchWord):\n      replaced = self._getReplaced(searchWord, i)\n      if self.dict.get(replaced, c) != c:\n        return True\n    return False\n\n  def _getReplaced(self, s: str, i: int) -> str:\n    return s[:i] + '*' + s[i + 1:]\n",
+    "cpp": "class MagicDictionary {\n public:\n  void buildDict(vector<string> dictionary) {\n    for (const string& word : dictionary)\n      for (int i = 0; i < word.length(); ++i) {\n        const string replaced = getReplaced(word, i);\n        dict[replaced] = dict.contains(replaced) ? '*' : word[i];\n      }\n  }\n\n  bool search(string searchWord) {\n    for (int i = 0; i < searchWord.length(); ++i) {\n      const string replaced = getReplaced(searchWord, i);\n      if (const auto it = dict.find(replaced);\n          it != dict.cend() && it->second != searchWord[i])\n        return true;\n    }\n    return false;\n  }\n\n private:\n  unordered_map<string, char> dict;\n\n  string getReplaced(const string& s, int i) {\n    return s.substr(0, i) + '*' + s.substr(i + 1);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/676.%20Implement%20Magic%20Dictionary",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "trie-with-one-substitution",
+      "approach": "Trie with One Substitution",
+      "explanation": "### How it works\n\nWalk along the query's unchanged prefix. At each position, try another letter branch and require the rest of the query to match that branch exactly.\n\n### Steps\n\n1. Build a terminal-marked dictionary trie.\n2. At each query position, try each different available letter.\n3. Check the remaining suffix without further substitutions.\n4. Continue along the unchanged branch to consider a later substitution.\n\n### Complexity\n\n- Time: O(D) build; O(26 × L²) upper bound per query.\n- Space: O(D) trie plus O(L) temporary suffix storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/676.%20Implement%20Magic%20Dictionary/676-2.py",
+      "code": {
+        "python": "import string\nclass TrieNode:\n  def __init__(self):\n    self.children: dict[str, TrieNode] = {}\n    self.isWord = False\n\n\nclass MagicDictionary:\n  def __init__(self):\n    self.root = TrieNode()\n\n  def buildDict(self, dictionary: list[str]) -> None:\n    for word in dictionary:\n      self._insert(word)\n\n  def search(self, searchWord: str) -> bool:\n    node: TrieNode = self.root\n    for i, c in enumerate(searchWord):\n      for letter in string.ascii_lowercase:\n        if letter == c:\n          continue\n        if letter not in node.children:\n          continue\n        child = node.children[letter]\n        # Replace the searchWord[i] with `letter`, then check if\n        # searchWord[i + 1..n) matches `child`.\n        if self._find(child, searchWord, i + 1):\n          return True\n      if c not in node.children:\n        return False\n      node = node.children[c]\n    return False\n\n  def _insert(self, word: str) -> None:\n    node: TrieNode = self.root\n    for c in word:\n      node = node.children.setdefault(c, TrieNode())\n    node.isWord = True\n\n  def _find(self, node: TrieNode, word: str, i: int) -> bool:\n    for c in word[i:]:\n      if c not in node.children:\n        return False\n      node = node.children[c]\n    return node.isWord\n"
+      }
+    }
+  ]
+}

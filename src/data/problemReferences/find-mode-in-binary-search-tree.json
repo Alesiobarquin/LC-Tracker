@@ -1,0 +1,29 @@
+{
+  "problemId": "find-mode-in-binary-search-tree",
+  "approach": "Inorder Equal-Value Runs",
+  "explanation": "### How it works\n\nBST inorder traversal groups equal values consecutively. Track the current run length and the largest run, replacing or extending the mode list as needed.\n\n### Steps\n\n1. Traverse left subtree, node, then right subtree.\n2. Increment the run when the previous value matches; otherwise reset it.\n3. Replace the mode list on a new maximum.\n4. Append on a tied maximum.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion space, excluding returned modes.",
+  "code": {
+    "python": "class Solution:\n  def findMode(self, root: TreeNode | None) -> list[int]:\n    self.ans = []\n    self.pred = None\n    self.count = 0\n    self.maxCount = 0\n\n    def updateCount(root: TreeNode | None) -> None:\n      if self.pred and self.pred.val == root.val:\n        self.count += 1\n      else:\n        self.count = 1\n\n      if self.count > self.maxCount:\n        self.maxCount = self.count\n        self.ans = [root.val]\n      elif self.count == self.maxCount:\n        self.ans.append(root.val)\n\n      self.pred = root\n\n    def inorder(root: TreeNode | None) -> None:\n      if not root:\n        return\n\n      inorder(root.left)\n      updateCount(root)\n      inorder(root.right)\n\n    inorder(root)\n    return self.ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> findMode(TreeNode* root) {\n    vector<int> ans;\n    int count = 0;\n    int maxCount = 0;\n\n    inorder(root, count, maxCount, ans);\n    return ans;\n  }\n\n private:\n  TreeNode* pred = nullptr;\n\n  void inorder(TreeNode* root, int& count, int& maxCount, vector<int>& ans) {\n    if (root == nullptr)\n      return;\n\n    inorder(root->left, count, maxCount, ans);\n    updateCount(root, count, maxCount, ans);\n    inorder(root->right, count, maxCount, ans);\n  }\n\n  void updateCount(TreeNode* root, int& count, int& maxCount,\n                   vector<int>& ans) {\n    if (pred && pred->val == root->val)\n      ++count;\n    else\n      count = 1;\n\n    if (count > maxCount) {\n      maxCount = count;\n      ans = {root->val};\n    } else if (count == maxCount) {\n      ans.push_back(root->val);\n    }\n\n    pred = root;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/501.%20Find%20Mode%20in%20Binary%20Search%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "value-frequency-counting",
+      "approach": "Value Frequency Counting",
+      "explanation": "### How it works\n\nCount values during a general tree traversal and return every value attaining the maximum count. This also works without the BST ordering property.\n\n### Steps\n\n1. Traverse with an explicit stack.\n2. Count every visited value.\n3. Find the largest frequency.\n4. Return all values with that frequency.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(n) for counts and traversal stack.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/501.%20Find%20Mode%20in%20Binary%20Search%20Tree",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def findMode(self, root: 'TreeNode') -> list[int]:\n        counts = Counter()\n        stack = [root] if root else []\n        while stack:\n            node = stack.pop()\n            counts[node.val] += 1\n            if node.left:\n                stack.append(node.left)\n            if node.right:\n                stack.append(node.right)\n        highest = max(counts.values(), default=0)\n        return [value for value, count in counts.items() if count == highest]\n"
+      }
+    }
+  ]
+}

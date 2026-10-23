@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int calculate(string s) {\n        int total = 0, prev = 0, num = 0;\n        char op = '+';\n        int n = s.size(), i = 0;\n        while (i <= n) {\n            char ch = i < n ? s[i] : '+';\n            if (ch == ' ') {\n                i++;\n                continue;\n            }\n            if (isdigit(ch)) {\n                num = num * 10 + (ch - '0');\n            } else {\n                if (op == '+') {\n                    total += prev;\n                    prev = num;\n                } else if (op == '-') {\n                    total += prev;\n                    prev = -num;\n                } else if (op == '*') {\n                    prev = prev * num;\n                } else {\n                    prev = prev / num;\n                }\n                op = ch;\n                num = 0;\n            }\n            i++;\n        }\n        total += prev;\n        return total;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/basic-calculator-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/basic-calculator-ii.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nThe challenge with evaluating expressions is handling operator precedence. Multiplication and division must be done before addition and subtraction. We can use a `stack` to defer the addition and subtraction while immediately computing multiplication and division. For `+` and `-`, we push numbers onto the `stack` (negative for subtraction). For `*` and `/`, we pop the previous number, compute the result, and push it back. At the end, summing the `stack` gives us the answer.\n\n### Steps\n\n1. Remove all spaces from the string and initialize an empty `stack`.\n2. Track the current `num` and the previous `op` (start with `+`).\n3. For each character:\n    - If it's a digit, build up the current `num`.\n    - If it's an operator or the last character:\n        - Apply the previous `op`: push for `+`, push negative for `-`, multiply top for `*`, divide top for `/`.\n        - Reset the current `num` and update the previous `op`.\n4. Return the sum of all elements in the `stack`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def calculate(self, s: str) -> int:\n        stack = []\n        num = 0\n        op = '+'\n        s = s.replace(' ', '')\n\n        for i, ch in enumerate(s):\n            if ch.isdigit():\n                num = num * 10 + int(ch)\n            if (not ch.isdigit()) or i == len(s) - 1:\n                if op == '+':\n                    stack.append(num)\n                elif op == '-':\n                    stack.append(-num)\n                elif op == '*':\n                    stack.append(stack.pop() * num)\n                else:\n                    prev = stack.pop()\n                    stack.append(int(prev / num))\n                op = ch\n                num = 0\n\n        return sum(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/basic-calculator-ii.md",
+      "id": "stack"
+    }
+  ]
 }

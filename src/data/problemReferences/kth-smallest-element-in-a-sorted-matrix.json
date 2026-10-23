@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/378.%20Kth%20Smallest%20Element%20in%20a%20Sorted%20Matrix",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "binary-search-the-value-range",
+      "approach": "Binary Search the Value Range",
+      "explanation": "### How it works\n\nCount entries at most a candidate value with a staircase scan. Binary-search the first value whose count reaches k. Duplicates contribute separately to the count.\n\n### Steps\n\n1. Search between the smallest and largest values.\n2. Count qualifying entries using a nonincreasing column pointer across rows.\n3. Move the value bounds according to whether the count reaches k.\n\n### Complexity\n\n- Time: `O(n log(R + 1))` for an n-by-n matrix and value span R.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/378.%20Kth%20Smallest%20Element%20in%20a%20Sorted%20Matrix/378-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from bisect import bisect\nimport bisect\n\nclass Solution:\n  def kthSmallest(self, matrix: list[list[int]], k: int) -> int:\n    def numsNoGreaterThan(m: int) -> int:\n      count = 0\n      j = len(matrix[0]) - 1\n      # For each row, find the first index j s.t. row[j] <= m s.t. the number of\n      # numbers <= m for this row will be j + 1.\n      for row in matrix:\n        while j >= 0 and row[j] > m:\n          j -= 1\n        count += j + 1\n      return count\n\n    l = matrix[0][0]\n    r = matrix[-1][-1]\n    return bisect.bisect_left(range(l, r), k, key=numsNoGreaterThan) + l\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class RandomizedSet {\nprivate:\n    unordered_map<int, int> numMap;\n    vector<int> nums;\n\npublic:\n    RandomizedSet() {}\n\n    bool insert(int val) {\n        if (numMap.count(val)) return false;\n        numMap[val] = nums.size();\n        nums.push_back(val);\n        return true;\n    }\n\n    bool remove(int val) {\n        if (!numMap.count(val)) return false;\n        int idx = numMap[val];\n        int last = nums.back();\n        nums[idx] = last;\n        numMap[last] = idx;\n        nums.pop_back();\n        numMap.erase(val);\n        return true;\n    }\n\n    int getRandom() {\n        return nums[rand() % nums.size()];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=j4KwhBziOpg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insert-delete-getrandom-o1.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insert-delete-getrandom-o1.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nA hash map provides O(1) average time for insert and delete operations, making it a natural choice for the first two requirements. However, hash maps don't support random access by index.\nFor `getRandom()`, we need to pick a random element, but iterating to a random position takes O(n) time. We convert the keys to a list and pick a random index.\nThis approach sacrifices `getRandom()` performance to keep the implementation simple.\n\n### Steps\n\n1. Initialize a hash map `numMap` and a size counter.\n2. **insert(val)**: If `val` exists in the map, return `false`. Otherwise, add it to the map with any value and increment size. Return `true`.\n3. **remove(val)**: If `val` doesn't exist in the map, return `false`. Otherwise, delete it from the map and decrement size. Return `true`.\n4. **getRandom()**: Generate a random index from `0` to `size - 1`. Convert the map's keys to a list and return the element at that index.\n\n### Complexity\n\n- Time complexity: `O(n)` for `getRandom()`, `O(1)` for other function calls.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "import random\n\nclass RandomizedSet:\n\n    def __init__(self):\n        self.numMap = {}\n        self.size = 0\n\n    def insert(self, val: int) -> bool:\n        if val in self.numMap:\n            return False\n        self.numMap[val] = 1\n        self.size += 1\n        return True\n\n    def remove(self, val: int) -> bool:\n        if val not in self.numMap:\n            return False\n        del self.numMap[val]\n        self.size -= 1\n        return True\n\n    def getRandom(self) -> int:\n        idx = random.randint(0, self.size - 1)\n        return list(self.numMap.keys())[idx]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insert-delete-getrandom-o1.md",
+      "id": "hash-map"
+    }
+  ]
 }

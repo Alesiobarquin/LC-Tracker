@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool stoneGame(vector<int>& piles) {\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=uhgdXOlGYqE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/stone-game.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/stone-game.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis is a two-player game where Alice and Bob take turns picking from either end of the piles array. Both play optimally, meaning each player maximizes their own score. We can simulate this using recursion where we track the current range `[l, r]` and determine whose turn it is based on the range length. Alice wants to maximize her score, while Bob's moves affect what Alice can collect later.\n\n### Steps\n\n1. Define a recursive function `dfs(l, r)` that returns Alice's maximum score for the subarray `[l, r]`.\n2. If `l > r`, return `0` (no piles left).\n3. Determine if it is Alice's turn: it is Alice's turn when the number of remaining piles `(r - l + 1)` is even.\n4. If it is Alice's turn, she can take from either end and we add her choice to the score. Recurse and take the maximum of taking left or right.\n5. If it is Bob's turn, he takes optimally but we only track Alice's score (add `0` for his pick).\n6. Compare Alice's final score against Bob's (total minus Alice's score) to determine the winner.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def stoneGame(self, piles: List[int]) -> bool:\n        def dfs(l, r):\n            if l > r:\n                return 0\n            even = (r - l) % 2 == 0\n            left = piles[l] if even else 0\n            right = piles[r] if even else 0\n            return max(dfs(l + 1, r) + left, dfs(l, r - 1) + right)\n\n        total = sum(piles)\n        alice_score = dfs(0, len(piles) - 1)\n        return alice_score > total - alice_score\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/stone-game.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems since the same `(l, r)` range can be reached through different sequences of moves. By memoizing results for each `(l, r)` pair, we avoid recomputing the same states and achieve polynomial time complexity.\n\n### Steps\n\n1. Create a 2D memoization table `dp` initialized to `-1` (or use a hash map).\n2. In the recursive function, first check if `dp[l][r]` has been computed. If so, return the cached value.\n3. Compute the result as in the plain recursion approach.\n4. Store the result in `dp[l][r]` before returning.\n5. The final answer is whether `dp[0][n-1]` (Alice's score) is greater than `total - dp[0][n-1]` (Bob's score).\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def stoneGame(self, piles: List[int]) -> bool:\n        dp = {}\n\n        def dfs(l, r):\n            if l > r:\n                return 0\n            if (l, r) in dp:\n                return dp[(l, r)]\n            even = (r - l) % 2 == 0\n            left = piles[l] if even else 0\n            right = piles[r] if even else 0\n            dp[(l, r)] = max(dfs(l + 1, r) + left, dfs(l, r - 1) + right)\n            return dp[(l, r)]\n\n        total = sum(piles)\n        alice_score = dfs(0, len(piles) - 1)\n        return alice_score > total - alice_score\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/stone-game.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

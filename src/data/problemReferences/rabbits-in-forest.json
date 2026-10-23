@@ -1,0 +1,29 @@
+{
+  "problemId": "rabbits-in-forest",
+  "approach": "Allocate Answer-Sized Groups Online",
+  "explanation": "### How it works\n\nA rabbit answering x belongs to a color group of x + 1 rabbits. Every first observed member of a fresh group forces that entire group into the minimum total.\n\n### Steps\n\n1. Count observations for each answer.\n2. Before adding a new observation, detect whether its current group is full.\n3. Allocate x + 1 rabbits when a new group begins.\n4. Increment the observed count.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(u) distinct answers.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def numRabbits(self, answers: list[int]) -> int:\n    ans = 0\n    count = collections.Counter()\n\n    for answer in answers:\n      if count[answer] % (answer + 1) == 0:\n        ans += answer + 1\n      count[answer] += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int numRabbits(vector<int>& answers) {\n    int ans = 0;\n    vector<int> count(1000);\n\n    for (const int answer : answers) {\n      if (count[answer] % (answer + 1) == 0)\n        ans += answer + 1;\n      ++count[answer];\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/781.%20Rabbits%20in%20Forest",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "round-frequencies-up-to-whole-groups",
+      "approach": "Round Frequencies Up to Whole Groups",
+      "explanation": "### How it works\n\nFor each answer x appearing f times, at least ceiling(f/(x + 1)) color groups are required. Multiply that group count by x + 1 and sum.\n\n### Steps\n\n1. Count each answer frequency.\n2. Compute its group size x + 1.\n3. Round the frequency up to a multiple of that group size.\n4. Add all rounded counts.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(u) counts.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/781.%20Rabbits%20in%20Forest",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def numRabbits(self, answers: list[int]) -> int:\n        return sum((count + answer) // (answer + 1) * (answer + 1)\n                   for answer, count in Counter(answers).items())\n"
+      }
+    }
+  ]
+}

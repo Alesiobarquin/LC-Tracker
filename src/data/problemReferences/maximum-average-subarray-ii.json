@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    double findMaxAverage(vector<int>& nums, int k) {\n        double max_val = INT_MIN;\n        double min_val = INT_MAX;\n\n        for (int n : nums) {\n            max_val = max(max_val, (double)n);\n            min_val = min(min_val, (double)n);\n        }\n\n        double prev_mid = max_val;\n        double error = INT_MAX;\n\n        while (error > 0.00001) {\n            double mid = (max_val + min_val) * 0.5;\n            if (check(nums, mid, k))\n                min_val = mid;\n            else\n                max_val = mid;\n            error = abs(prev_mid - mid);\n            prev_mid = mid;\n        }\n\n        return min_val;\n    }\n\nprivate:\n    bool check(vector<int>& nums, double mid, int k) {\n        double sum = 0, prev = 0, min_sum = 0;\n\n        for (int i = 0; i < k; i++)\n            sum += nums[i] - mid;\n\n        if (sum >= 0)\n            return true;\n\n        for (int i = k; i < nums.size(); i++) {\n            sum += nums[i] - mid;\n            prev += nums[i - k] - mid;\n            min_sum = min(prev, min_sum);\n            if (sum >= min_sum)\n                return true;\n        }\n\n        return false;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-average-subarray-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-average-subarray-ii.md",
+  "alternatives": [
+    {
+      "approach": "Iterative",
+      "explanation": "### How it works\n\nWe need to find a contiguous subarray of length at least `k` with the maximum average. The brute force approach checks every possible subarray by trying all starting positions and all valid ending positions.\n\nFor each starting index, we extend the subarray one element at a time, maintaining a running sum. Once the length reaches `k` or more, we compute the average and update our result if it is larger.\n\n### Steps\n\n1. Initialize `res` to negative infinity.\n2. For each starting index `s` from `0` to `n - k`:\n    - Initialize `sum_val = 0`.\n    - For each ending index `i` from `s` to `n - 1`:\n        - Add `nums[i]` to `sum_val`.\n        - If the subarray length `i - s + 1 >= k`:\n            - Compute average and update `res` if larger.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n^2)`\n- Space complexity: `O(1)` constant space\n\n> Where `n` is the number of elements in the array `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMaxAverage(self, nums: List[int], k: int) -> float:\n        res = float('-inf')\n\n        for s in range(len(nums) - k + 1):\n            sum_val = 0\n            for i in range(s, len(nums)):\n                sum_val += nums[i]\n                if i - s + 1 >= k:\n                    res = max(res, sum_val / (i - s + 1))\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-average-subarray-ii.md",
+      "id": "iterative"
+    }
+  ]
 }

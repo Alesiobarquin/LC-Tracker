@@ -7,5 +7,25 @@
     "cpp": "class TrieNode {\npublic:\n    TrieNode* children[26];\n    int cnt;\n\n    TrieNode() {\n        for (int i = 0; i < 26; i++) children[i] = nullptr;\n        cnt = 0;\n    }\n};\n\nclass Trie {\npublic:\n    TrieNode* root;\n\n    Trie() {\n        root = new TrieNode();\n    }\n\n    void insertSuffixes(const string& word) {\n        for (int i = 0; i < word.size(); i++) {\n            TrieNode* node = root;\n            for (int j = i; j < word.size(); j++) {\n                int idx = word[j] - 'a';\n                if (!node->children[idx]) {\n                    node->children[idx] = new TrieNode();\n                }\n\n                node = node->children[idx];\n                node->cnt++;\n            }\n        }\n    }\n\n    bool search(const string& word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            int idx = c - 'a';\n            node = node->children[idx];\n        }\n        return node->cnt > 1;\n    }\n};\n\nclass Solution {\npublic:\n    vector<string> stringMatching(vector<string>& words) {\n        vector<string> res;\n        Trie trie;\n\n        for (const string& word : words) {\n            trie.insertSuffixes(word);\n        }\n\n        for (const string& word : words) {\n            if (trie.search(word)) {\n                res.push_back(word);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-matching-in-an-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-matching-in-an-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each word, we check if it appears as a substring in any other word. If it does, we add it to our result. Since we need to check every word against every other word, we use two nested loops. Once we find that a word is a substring of another, we can stop checking and move to the next word.\n\n### Steps\n\n1. Initialize an empty result list.\n2. For each word at index `i`, iterate through all words at index `j` where `j != i`.\n3. Check if `words[i]` is a substring of `words[j]` using the built-in substring check.\n4. If found, add `words[i]` to the result and `break` the inner loop.\n5. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 * m ^ 2)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n * m)` space for the output list.\n\n> Where `n` is the number of words, and `m` is the length of the longest word.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def stringMatching(self, words: List[str]) -> List[str]:\n        res = []\n\n        for i in range(len(words)):\n            for j in range(len(words)):\n                if i == j:\n                    continue\n\n                if words[i] in words[j]:\n                    res.append(words[i])\n                    break\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-matching-in-an-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nA shorter word can only be a substring of a longer word, never the other way around. By sorting words by length, we only need to check each word against longer words that come after it. This gives a minor optimization by reducing unnecessary comparisons, though the worst-case complexity remains the same.\n\n### Steps\n\n1. Sort the words array by length in ascending order.\n2. For each word at index `i`, check if it's a substring of any word at index `j` where `j > i`.\n3. If found, add the word to the result and `break` the inner loop.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 * m ^ 2)`\n- Space complexity:\n    - `O(n)` worst-case auxiliary space for Python\\'s sort.\n    - `O(n * m)` space for the output list.\n\n> Where `n` is the number of words, and `m` is the length of the longest word.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def stringMatching(self, words: List[str]) -> List[str]:\n        res = []\n        words.sort(key=len)\n\n        for i in range(len(words)):\n            for j in range(i + 1, len(words)):\n                if words[i] in words[j]:\n                    res.append(words[i])\n                    break\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-matching-in-an-array.md",
+      "id": "sorting"
+    }
+  ]
 }

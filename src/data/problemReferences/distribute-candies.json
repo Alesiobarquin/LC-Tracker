@@ -1,0 +1,29 @@
+{
+  "problemId": "distribute-candies",
+  "approach": "Distinct Types Versus Eating Limit",
+  "explanation": "### How it works\n\nThe sister can eat half the candies and cannot receive more distinct types than exist. Giving one candy of each available type reaches the smaller of those two bounds.\n\n### Steps\n\n1. Count distinct candy types.\n2. Compute half the number of candies.\n3. Return the smaller value.\n\n### Complexity\n\n- Time: Expected O(n) in Python; O(n + U) bitset work in C++ for fixed U = 200001.\n- Space: Python: O(u) for u distinct types. C++: a fixed 200001-bit domain array.",
+  "code": {
+    "python": "class Solution:\n  def distributeCandies(self, candies: list[int]) -> int:\n    return min(len(candies) // 2, len(set(candies)))\n",
+    "cpp": "class Solution {\n public:\n  int distributeCandies(vector<int>& candies) {\n    bitset<200001> bitset;\n\n    for (const int candy : candies)\n      bitset.set(candy + 100000);\n\n    return min(candies.size() / 2, bitset.count());\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/575.%20Distribute%20Candies",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sorted-type-transitions",
+      "approach": "Sorted Type Transitions",
+      "explanation": "### How it works\n\nAfter sorting, a new type appears exactly when the value changes. Count those transitions and cap the count by the number of candies she may receive.\n\n### Steps\n\n1. Sort a copy of the candy types.\n2. Count the first value and each change from its predecessor.\n3. Cap the distinct count at n/2.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) sorted copy.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/575.%20Distribute%20Candies",
+      "code": {
+        "python": "class Solution:\n    def distributeCandies(self, candyType: list[int]) -> int:\n        ordered = sorted(candyType)\n        types = sum(i == 0 or value != ordered[i - 1] for i, value in enumerate(ordered))\n        return min(types, len(ordered) // 2)\n"
+      }
+    }
+  ]
+}

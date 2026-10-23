@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/319.%20Bulb%20Switcher",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "simulate-every-round",
+      "approach": "Simulate Every Round",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nModel the toggling rounds directly. Round i flips every i-th bulb. Counting the final states supplies a small-input comparison with the perfect-square observation.\n\n### Steps\n\n1. Start all bulbs off.\n2. For each round i, toggle positions i, 2i, 3i, and so on.\n3. Count bulbs left on.\n\n### Complexity\n\n- Time: `O(n log n)` from the harmonic sum of toggles.\n- Space: `O(n)` for bulb states.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/319.%20Bulb%20Switcher",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def bulbSwitch(self, n: int) -> int:\n        bulbs = [False] * n\n        for step in range(1, n + 1):\n            for index in range(step - 1, n, step):\n                bulbs[index] = not bulbs[index]\n        return sum(bulbs)\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool isOneEditDistance(string s, string t) {\n        int ns = s.size();\n        int nt = t.size();\n\n        // Ensure that s is shorter than t.\n        if (ns > nt) return isOneEditDistance(t, s);\n\n        // The strings are NOT one edit away distance\n        // if the length diff is more than 1.\n        if (nt - ns > 1) return false;\n\n        for (int i = 0; i < ns; i++)\n            if (s[i] != t[i])\n                // if strings have the same length\n                if (ns == nt) return s.substr(i + 1) == t.substr(i + 1);\n                // If strings have different lengths\n                else\n                    return s.substr(i) == t.substr(i + 1);\n\n        // If there are no diffs in ns distance\n        // The strings are one edit away only if\n        // t has one more character.\n        return (ns + 1 == nt);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/one-edit-distance.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/one-edit-distance.md",
+  "alternatives": [
+    {
+      "id": "levenshtein-distance-dp",
+      "approach": "Levenshtein Distance DP",
+      "explanation": "### How it works\n\nCompute the full insertion/deletion/replacement distance with dynamic programming, then require it to equal exactly one. Equal strings have distance zero and must be rejected.\n\n### Steps\n\n1. Initialize distances to an empty prefix.\n2. For equal characters, carry the diagonal value.\n3. Otherwise add one to the best insertion, deletion, or replacement.\n4. Accept only a final distance of one.\n\n### Complexity\n\n- Time: `O(nm)` time.\n- Space: `O(m)` for rolling rows.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/one-edit-distance.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def isOneEditDistance(self, s: str, t: str) -> bool:\n        previous = list(range(len(t) + 1))\n        for i, a in enumerate(s, 1):\n            current = [i]\n            for j, b in enumerate(t, 1):\n                current.append(previous[j - 1] if a == b else 1 + min(previous[j], current[-1], previous[j - 1]))\n            previous = current\n        return previous[-1] == 1\n"
+      }
+    }
+  ]
 }

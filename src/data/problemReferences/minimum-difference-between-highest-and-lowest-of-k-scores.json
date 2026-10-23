@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int minimumDifference(vector<int>& nums, int k) {\n        sort(nums.begin(), nums.end());\n        int l = 0, r = k - 1, res = INT_MAX;\n        while (r < nums.size()) {\n            res = min(res, nums[r] - nums[l]);\n            l++;\n            r++;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=JU5XdBZZtlk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-difference-between-highest-and-lowest-of-k-scores.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-difference-between-highest-and-lowest-of-k-scores.md",
+  "alternatives": [
+    {
+      "id": "enumerate-student-groups",
+      "approach": "Enumerate Student Groups",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nChoose every group of k scores and calculate its range. This supplies a direct comparison with the sorted-window argument.\n\n### Steps\n\n1. Enumerate k-score combinations.\n2. Subtract each group's minimum from its maximum.\n3. Return the smallest range.\n\n### Complexity\n\n- Time: `O(k × C(n, k))` time.\n- Space: `O(k)` for a candidate group.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-difference-between-highest-and-lowest-of-k-scores.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from itertools import combinations\n\nclass Solution:\n    def minimumDifference(self, nums: list[int], k: int) -> int:\n        return min(max(group) - min(group) for group in combinations(nums, k))\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "divide-two-integers",
+  "approach": "Repeated Doubling",
+  "explanation": "### How it works\n\nSubtract the largest doubled divisor that fits in the remaining dividend. Each subtraction contributes the matching power of two to the quotient. Work with positive magnitudes and apply the sign at the end.\n\n### Steps\n\n1. Handle the signed 32-bit overflow case.\n2. Double the divisor and its quotient contribution until another doubling would be too large.\n3. Subtract that chunk and repeat.\n4. Apply the sign, truncating toward zero.\n\n### Complexity\n\n- Time: O(log² A) for dividend magnitude A, with a fresh doubling search per chunk.\n- Space: O(1) auxiliary space under 32-bit input bounds.\n\n### Things to watch for\n\n- Use shifts rather than multiplication, division, or modulo.\n- Widen C++ magnitudes before negating INT_MIN.",
+  "code": {
+    "python": "class Solution:\n  def divide(self, dividend: int, divisor: int) -> int:\n    # -2^{31} / -1 = 2^31 will overflow, so return 2^31 - 1.\n    if dividend == -2**31 and divisor == -1:\n      return 2**31 - 1\n\n    sign = -1 if (dividend > 0) ^ (divisor > 0) else 1\n    ans = 0\n    dvd = abs(dividend)\n    dvs = abs(divisor)\n\n    while dvd >= dvs:\n      k = 1\n      chunk = dvs\n      while chunk << 1 <= dvd:\n        chunk <<= 1\n        k <<= 1\n      dvd -= chunk\n      ans += k\n\n    return -ans if sign < 0 else ans\n",
+    "cpp": "class Solution {\n public:\n  int divide(int dividend, int divisor) {\n    // -2^{31} / -1 = 2^31 will overflow, so return 2^31 - 1.\n    if (dividend == INT_MIN && divisor == -1)\n      return INT_MAX;\n\n    const int sign = dividend > 0 ^ divisor > 0 ? -1 : 1;\n    long long ans = 0;\n    long long dvd = dividend;\n    long long dvs = divisor;\n    if (dvd < 0) dvd = -dvd;\n    if (dvs < 0) dvs = -dvs;\n\n    while (dvd >= dvs) {\n      long long k = 1;\n      long long chunk = dvs;\n      while ((chunk << 1) <= dvd) {\n        chunk <<= 1;\n        k <<= 1;\n      }\n      dvd -= chunk;\n      ans += k;\n    }\n\n    return sign < 0 ? -ans : ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/29.%20Divide%20Two%20Integers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "descending-bit-scan",
+      "approach": "Descending Bit Scan",
+      "explanation": "### How it works\n\nTry quotient bits from most significant to least significant. A shifted divisor either fits in the remaining magnitude, setting that quotient bit, or is skipped.\n\n### Steps\n\n1. Take absolute magnitudes and determine the result sign.\n2. Scan shifts 31 down to zero.\n3. Subtract a shifted divisor whenever it fits and set the corresponding quotient bit.\n4. Apply the sign and clamp the one positive overflow case.\n\n### Complexity\n\n- Time: O(32) shifted-divisor comparisons.\n- Space: O(1) under the signed 32-bit bounds.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/29.%20Divide%20Two%20Integers",
+      "code": {
+        "python": "class Solution:\n    def divide(self, dividend: int, divisor: int) -> int:\n        negative = (dividend < 0) != (divisor < 0)\n        remaining, base = abs(dividend), abs(divisor)\n        quotient = 0\n        for bit in range(31, -1, -1):\n            if base << bit <= remaining:\n                remaining -= base << bit\n                quotient |= 1 << bit\n        if negative:\n            quotient = -quotient\n        return min(quotient, (1 << 31) - 1)\n"
+      }
+    }
+  ]
+}

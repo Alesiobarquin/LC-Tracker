@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int connectSticks(vector<int>& sticks) {\n        int totalCost = 0;\n\n        priority_queue<int, vector<int>, greater<int>> pq;\n\n        for (int i = 0; i < sticks.size(); i++) {\n            pq.push(sticks[i]);\n        }\n\n        // combine two of the smallest sticks until we are left with just one.\n        while (pq.size() > 1) {\n            int stick1 = pq.top();\n            pq.pop();\n            int stick2 = pq.top();\n            pq.pop();\n\n            int cost = stick1 + stick2;\n            totalCost += cost;\n\n            pq.push(stick1+stick2);\n        }\n\n        return totalCost;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-connect-sticks.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-connect-sticks.md",
+  "alternatives": [
+    {
+      "id": "explore-every-merge-order",
+      "approach": "Explore Every Merge Order",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nTry every pair as the next merge and recursively solve the smaller multiset. Add the immediate merge cost to the best remaining cost. This checks the greedy choice by exhaustive search on small examples.\n\n### Steps\n\n1. Return zero when at most one stick remains.\n2. Choose every pair of sticks.\n3. Replace it with its sum and solve recursively.\n4. Return the minimum total cost across choices.\n\n### Complexity\n\n- Time: `O(n × (n!)²)` as a conservative upper bound on pair-choice recursion and copying.\n- Space: `O(n²)` for live lists across recursion levels.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-connect-sticks.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def connectSticks(self, sticks: list[int]) -> int:\n        def solve(values):\n            if len(values) < 2:\n                return 0\n            best = float('inf')\n            for i in range(len(values)):\n                for j in range(i + 1, len(values)):\n                    merged = values[i] + values[j]\n                    rest = [value for k, value in enumerate(values) if k != i and k != j]\n                    best = min(best, merged + solve(rest + [merged]))\n            return best\n        return solve(sticks)\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "toeplitz-matrix",
+  "approach": "Adjacent Diagonal Comparisons",
+  "explanation": "### How it works\n\nEvery diagonal is constant exactly when each cell agrees with its lower-right neighbor wherever both exist.\n\n### Steps\n\n1. Visit cells outside the final row and column.\n2. Compare each with its lower-right neighbor.\n3. Reject a mismatch and otherwise accept.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def isToeplitzMatrix(self, matrix: list[list[int]]) -> bool:\n    for i in range(len(matrix) - 1):\n      for j in range(len(matrix[0]) - 1):\n        if matrix[i][j] != matrix[i + 1][j + 1]:\n          return False\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool isToeplitzMatrix(vector<vector<int>>& matrix) {\n    for (int i = 0; i + 1 < matrix.size(); ++i)\n      for (int j = 0; j + 1 < matrix[0].size(); ++j)\n        if (matrix[i][j] != matrix[i + 1][j + 1])\n          return false;\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/766.%20Toeplitz%20Matrix",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "diagonal-id-map",
+      "approach": "Diagonal-ID Map",
+      "explanation": "### How it works\n\nCells on the same top-left to bottom-right diagonal share row − column. Store the first value for each diagonal ID and compare later cells against it.\n\n### Steps\n\n1. Compute row − column for every cell.\n2. Record the first value for a new ID.\n3. Reject a differing value under an existing ID.\n\n### Complexity\n\n- Time: Expected O(mn).\n- Space: O(m + n) diagonal values.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/766.%20Toeplitz%20Matrix",
+      "code": {
+        "python": "class Solution:\n    def isToeplitzMatrix(self, matrix: list[list[int]]) -> bool:\n        diagonals = {}\n        for row, values in enumerate(matrix):\n            for column, value in enumerate(values):\n                key = row - column\n                if key in diagonals and diagonals[key] != value:\n                    return False\n                diagonals[key] = value\n        return True\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool hasAllCodes(string s, int k) {\n        int n = s.size();\n        if (n < (1 << k)) {\n            return false;\n        }\n\n        vector<bool> codeSet(1 << k, false);\n        int cur = 0, have = 0;\n\n        for (int i = 0; i < n; i++) {\n            cur = ((cur << 1) & ((1 << k) - 1)) | (s[i] - '0');\n\n            if (i >= k - 1) {\n                if (!codeSet[cur]) {\n                    codeSet[cur] = true;\n                    have++;\n                }\n            }\n        }\n\n        return have == (1 << k);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=qU32rTy_kOM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-string-contains-all-binary-codes-of-size-k.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-string-contains-all-binary-codes-of-size-k.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to generate all possible binary codes of length `k` and check if each one exists as a substring in the given string `s`. There are exactly `2^k` such binary codes (from 0 to `2^k - 1`), and we need to verify that every single one appears somewhere in `s`.\n\n### Steps\n\n1. If the length of `s` is less than `2^k`, return `false` immediately since there cannot be enough substrings.\n2. Iterate through all numbers from `0` to `2^k - 1`.\n3. For each number, convert it to its binary representation with exactly `k` digits (padding with leading zeros if needed).\n4. Check if this binary string exists as a substring in `s`.\n5. If any binary code is not found, return `false`.\n6. If all binary codes are found, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n * 2 ^ k)`\n- Space complexity: `O(k)`\n\n> Where `n` is the length of the string `s` and `k` is the length of the binary code.",
+      "code": {
+        "python": "class Solution:\n    def hasAllCodes(self, s: str, k: int) -> bool:\n        n = len(s)\n        if n < (1 << k):\n            return False\n\n        for num in range(1 << k):\n            binaryCode = format(num, f'0{k}b')\n            if binaryCode not in s:\n                return False\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-string-contains-all-binary-codes-of-size-k.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nInstead of checking each possible binary code one by one, we can flip the approach: extract all substrings of length `k` from `s` and store them in a set. If the set contains exactly `2^k` unique substrings, then all binary codes are present. This is more efficient because we process each substring only once.\n\n### Steps\n\n1. If the length of `s` is less than `2^k`, return `false` immediately.\n2. Create an empty hash set to store unique substrings.\n3. Iterate through `s` and extract every substring of length `k`.\n4. Add each substring to the hash set.\n5. After processing all substrings, check if the set size equals `2^k`.\n6. Return `true` if the count matches, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(2 ^ k)`\n\n> Where `n` is the length of the string `s` and `k` is the length of the binary code.",
+      "code": {
+        "python": "class Solution:\n    def hasAllCodes(self, s: str, k: int) -> bool:\n        if len(s) < 2 ** k:\n            return False\n\n        codeSet = set()\n        for i in range(len(s) - k + 1):\n            codeSet.add(s[i:i + k])\n\n        return len(codeSet) == 2 ** k\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-string-contains-all-binary-codes-of-size-k.md",
+      "id": "hash-set"
+    }
+  ]
 }

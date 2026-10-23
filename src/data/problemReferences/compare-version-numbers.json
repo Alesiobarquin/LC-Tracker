@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/165.%20Compare%20Version%20Numbers",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "normalized-string-revisions",
+      "approach": "Normalized String Revisions",
+      "explanation": "### How it works\n\nRevision numbers can be compared as decimal strings after removing leading zeros. A longer normalized revision is larger; equal lengths can be compared lexicographically. Missing revisions behave as zero.\n\n### Steps\n\n1. Split both versions into revisions and pair them, filling missing revisions with zero.\n2. Strip leading zeros, retaining one zero for an empty result.\n3. Compare revision lengths and then their text.\n4. Return zero when every revision agrees.\n\n### Complexity\n\n- Time: `O(n + m)` over both version strings.\n- Space: `O(n + m)` for split and normalized strings.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/165.%20Compare%20Version%20Numbers",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from itertools import zip_longest\n\nclass Solution:\n    def compareVersion(self, version1: str, version2: str) -> int:\n        for a, b in zip_longest(version1.split('.'), version2.split('.'), fillvalue='0'):\n            a = a.lstrip('0') or '0'\n            b = b.lstrip('0') or '0'\n            if len(a) != len(b):\n                return 1 if len(a) > len(b) else -1\n            if a != b:\n                return 1 if a > b else -1\n        return 0\n"
+      }
+    }
+  ]
 }

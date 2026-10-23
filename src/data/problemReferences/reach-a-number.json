@@ -1,0 +1,29 @@
+{
+  "problemId": "reach-a-number",
+  "approach": "Grow the Triangular Sum Until Parity Matches",
+  "explanation": "### How it works\n\nAfter k moves, the maximum positive reach is k(k + 1)/2. Reversing chosen moves changes that sum by an even amount, so the first sufficiently large triangular sum with the target's parity is optimal.\n\n### Steps\n\n1. Use the absolute target by symmetry.\n2. Increase the move count until its triangular sum reaches the target.\n3. Continue until their difference is even.\n4. Return the move count.\n\n### Complexity\n\n- Time: O(sqrt(abs(target))) bounded-integer steps.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def reachNumber(self, target: int) -> int:\n    ans = 0\n    pos = 0\n    target = abs(target)\n\n    while pos < target:\n      ans += 1\n      pos += ans\n\n    while (pos - target) % 2 == 1:\n      ans += 1\n      pos += ans\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int reachNumber(int target) {\n    const int newTarget = abs(target);\n    int ans = 0;\n    int pos = 0;\n\n    while (pos < newTarget)\n      pos += ++ans;\n    while ((pos - newTarget) % 2 == 1)\n      pos += ++ans;\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/754.%20Reach%20a%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "integer-root-starting-point",
+      "approach": "Integer-Root Starting Point",
+      "explanation": "### How it works\n\nSolve the triangular inequality with an integer square root to jump near the minimum move count, then adjust only until both reach and parity conditions hold.\n\n### Steps\n\n1. Take the absolute target.\n2. Estimate k from integer sqrt(8 × target + 1).\n3. Increment k until k(k + 1)/2 is large enough and differs by an even amount.\n4. Return k.\n\n### Complexity\n\n- Time: O(1) bounded-domain root operation and at most a constant number of corrections.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/754.%20Reach%20a%20Number",
+      "code": {
+        "python": "from math import isqrt\n\nclass Solution:\n    def reachNumber(self, target: int) -> int:\n        target = abs(target)\n        steps = (isqrt(8 * target + 1) - 1) // 2\n        while steps * (steps + 1) // 2 < target or (steps * (steps + 1) // 2 - target) % 2:\n            steps += 1\n        return steps\n"
+      }
+    }
+  ]
+}

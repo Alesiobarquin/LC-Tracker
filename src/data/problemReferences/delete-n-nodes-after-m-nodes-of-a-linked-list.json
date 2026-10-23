@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    ListNode* deleteNodes(ListNode* head, int m, int n) {\n        ListNode* currentNode = head;\n        ListNode* lastMNode = head;\n\n        while (currentNode != nullptr) {\n            // initialize mCount to m and nCount to n\n            int mCount = m, nCount = n;\n\n            // traverse m nodes\n            while (currentNode != nullptr && mCount != 0) {\n                lastMNode = currentNode;\n                currentNode = currentNode->next;\n                mCount--;\n            }\n\n            // traverse n nodes\n            while (currentNode != nullptr && nCount != 0) {\n                currentNode = currentNode->next;\n                nCount--;\n            }\n\n            // delete n nodes\n            lastMNode->next = currentNode;\n        }\n\n        return head;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-n-nodes-after-m-nodes-of-a-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-n-nodes-after-m-nodes-of-a-linked-list.md",
+  "alternatives": [
+    {
+      "id": "collect-and-filter-node-positions",
+      "approach": "Collect and Filter Node Positions",
+      "explanation": "### How it works\n\nThe keep/delete pattern repeats every m + n original positions. Collect retained node objects according to that pattern, then reconnect them.\n\n### Steps\n\n1. Walk the original list with a zero-based position.\n2. Keep nodes whose position modulo m + n is less than m.\n3. Reconnect retained nodes and terminate the final link.\n\n### Complexity\n\n- Time: `O(L)` for L list nodes.\n- Space: `O(L)` for retained node references.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-n-nodes-after-m-nodes-of-a-linked-list.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def deleteNodes(self, head: ListNode, m: int, n: int) -> Optional[ListNode]:\n        kept, position = [], 0\n        while head:\n            if position % (m + n) < m:\n                kept.append(head)\n            position += 1\n            head = head.next\n        for i, node in enumerate(kept):\n            node.next = kept[i + 1] if i + 1 < len(kept) else None\n        return kept[0] if kept else None\n"
+      }
+    }
+  ]
 }

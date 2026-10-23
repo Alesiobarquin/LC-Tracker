@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string kthDistinct(vector<string>& arr, int k) {\n        unordered_set<string> distinct, seen;\n\n        for (const string& s : arr) {\n            if (distinct.count(s)) {\n                distinct.erase(s);\n                seen.insert(s);\n            } else if (!seen.count(s)) {\n                distinct.insert(s);\n            }\n        }\n\n        for (const string& s : arr) {\n            if (distinct.count(s)) {\n                k--;\n                if (k == 0) {\n                    return s;\n                }\n            }\n        }\n\n        return \"\";\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-distinct-string-in-an-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-distinct-string-in-an-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA string is distinct if it appears exactly once in the array. The simplest approach is to check each string against all other strings. For each position, we scan the entire array to see if that string appears anywhere else. If not, it's distinct, and we decrement our counter until we find the k-th one.\n\n### Steps\n\n1. Iterate through each string at index `i`.\n2. For each string, check all other positions `j` to see if there's a duplicate.\n3. If no duplicate is found, the string is distinct; decrement `k`.\n4. When `k` reaches `0`, return the current string.\n5. If we exhaust all strings without finding `k` distinct ones, return an empty string.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def kthDistinct(self, arr: List[str], k: int) -> str:\n        for i in range(len(arr)):\n            flag = True\n            for j in range(len(arr)):\n                if i == j:\n                    continue\n\n                if arr[i] == arr[j]:\n                    flag = False\n                    break\n\n            if flag:\n                k -= 1\n                if k == 0:\n                    return arr[i]\n        return \"\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-distinct-string-in-an-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of repeatedly scanning the array, we can count occurrences upfront using a hash map. In the first pass, we count how many times each string appears. In the second pass, we iterate in order and check if each string has a count of exactly `1`. This reduces time complexity from `O(n^2)` to `O(n)`.\n\n### Steps\n\n1. Create a hash map to count occurrences of each string.\n2. Iterate through the array, incrementing the count for each string.\n3. Iterate through the array again in order.\n4. For each string with count equal to `1`, decrement `k`.\n5. Return the string when `k` becomes `0`, or return an empty string if not found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def kthDistinct(self, arr: List[str], k: int) -> str:\n        count = {}\n\n        for s in arr:\n            if s not in count:\n                count[s] = 0\n            count[s] += 1\n\n        for s in arr:\n            if count[s] == 1:\n                k -= 1\n                if k == 0:\n                    return s\n\n        return \"\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kth-distinct-string-in-an-array.md",
+      "id": "hash-map"
+    }
+  ]
 }

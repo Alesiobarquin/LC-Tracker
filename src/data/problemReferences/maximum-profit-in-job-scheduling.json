@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        int n = startTime.size();\n        vector<int> index(n), dp(n + 1, 0);\n        for (int i = 0; i < n; i++) index[i] = i;\n        sort(index.begin(), index.end(), [&](int i, int j) {\n            return startTime[i] < startTime[j];\n        });\n\n        for (int i = n - 1; i >= 0; i--) {\n            int left = i + 1, right = n, j = n;\n            while (left < right) {\n                int mid = left + (right - left) / 2;\n                if (startTime[index[mid]] >= endTime[index[i]]) {\n                    j = mid;\n                    right = mid;\n                } else {\n                    left = mid + 1;\n                }\n            }\n            dp[i] = max(dp[i + 1], profit[index[i]] + dp[j]);\n        }\n\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-profit-in-job-scheduling.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-profit-in-job-scheduling.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis is a classic interval scheduling problem. For each job, we have two choices: skip it or take it. If we take a job, we earn its profit but must skip all overlapping jobs. By sorting jobs by start time and using memoization, we can efficiently explore all valid schedules.\n\n### Steps\n\n1. Combine start times, end times, and profits into intervals and sort by start time.\n2. Use recursion with memoization starting from index `0`.\n3. At each index `i`, either skip the job or take it.\n4. If taking the job, find the next non-overlapping job by scanning forward.\n5. Return the maximum profit achievable.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\n\nclass Solution:\n    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:\n        intervals = sorted(zip(startTime, endTime, profit))\n        cache = {}\n\n        def dfs(i):\n            if i == len(intervals):\n                return 0\n            if i in cache:\n                return cache[i]\n\n            # don't include\n            res = dfs(i + 1)\n\n            # include\n            j = i + 1\n            while j < len(intervals):\n                if intervals[i][1] <= intervals[j][0]:\n                    break\n                j += 1\n\n            cache[i] = res = max(res, intervals[i][2] + dfs(j))\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-profit-in-job-scheduling.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down) + Binary Search",
+      "explanation": "### How it works\n\nThe linear scan to find the next non-overlapping job can be optimized using binary search. Since jobs are sorted by start time, we can binary search for the first job whose start time is at least the current job's end time.\n\n### Steps\n\n1. Sort intervals by start time.\n2. Use recursion with memoization.\n3. At each index, either skip the job or take it.\n4. When taking a job, use binary search to find the next non-overlapping job.\n5. Return the maximum profit.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\nfrom bisect import bisect\nimport bisect\n\nclass Solution:\n    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:\n        intervals = sorted(zip(startTime, endTime, profit))\n        cache = {}\n\n        def dfs(i):\n            if i == len(intervals):\n                return 0\n            if i in cache:\n                return cache[i]\n\n            # don't include\n            res = dfs(i + 1)\n\n            # include\n            j = bisect.bisect(intervals, (intervals[i][1], -1, -1))\n            cache[i] = res = max(res, intervals[i][2] + dfs(j))\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-profit-in-job-scheduling.md",
+      "id": "dynamic-programming-top-down-binary-search"
+    }
+  ]
 }

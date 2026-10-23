@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> killProcess(vector<int>& pid, vector<int>& ppid, int kill) {\n        unordered_map<int, vector<int>> map;\n        for (int i = 0; i < ppid.size(); i++) {\n            if (ppid[i] > 0) {\n                map[ppid[i]].push_back(pid[i]);\n            }\n        }\n\n        queue<int> q;\n        vector<int> result;\n        q.push(kill);\n        while (!q.empty()) {\n            int r = q.front();\n            q.pop();\n            result.push_back(r);\n            if (map.find(r) != map.end()) {\n                for (int child_id : map[r]) {\n                    q.push(child_id);\n                }\n            }\n        }\n\n        return result;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kill-process.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kill-process.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nWhen we kill a process, all its descendants must also be killed. This is naturally a tree traversal problem. The brute force approach scans through all processes for each recursive call to find children of the current process. While this works, it repeatedly searches the entire list, making it inefficient for large inputs.\n\n### Steps\n\n1. Start with the process to kill and add it to the result list.\n2. Scan through the `ppid` array to find all children of the current process.\n3. For each child found, recursively call the function to kill that process and its descendants.\n4. Return the accumulated list of all killed processes.\n\n### Complexity\n\n- Time complexity: `O(n^2)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the `pid` and `ppid`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def killProcess(self, pid: List[int], ppid: List[int], kill: int) -> List[int]:\n        if kill == 0:\n            return []\n\n        result = [kill]\n        for i in range(len(ppid)):\n            if ppid[i] == kill:\n                result.extend(self.killProcess(pid, ppid, pid[i]))\n\n        return result\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kill-process.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Tree Simulation",
+      "explanation": "### How it works\n\nInstead of repeatedly scanning arrays, we can build an actual tree structure upfront. By creating node objects with parent-child relationships, we transform the implicit tree (represented by parallel arrays) into an explicit one. Once built, collecting all descendants becomes a simple tree traversal.\n\n### Steps\n\n1. Create a `Node` object for each process ID and store them in a hash map.\n2. Iterate through the `ppid` array to establish parent-child relationships.\n3. Starting from the node to kill, perform a DFS to collect all descendant nodes.\n4. Add each visited node's value to the result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the `pid` and `ppid`.",
+      "code": {
+        "python": "from typing import List\n\nclass Node:\n    def __init__(self, val):\n        self.val = val\n        self.children = []\n\nclass Solution:\n    def killProcess(self, pid: List[int], ppid: List[int], kill: int) -> List[int]:\n        mp = {}\n        for id in pid:\n            mp[id] = Node(id)\n\n        for i in range(len(ppid)):\n            if ppid[i] > 0:\n                mp[ppid[i]].children.append(mp[pid[i]])\n\n        result = [kill]\n        self.getAllChildren(mp[kill], result)\n        return result\n\n    def getAllChildren(self, node, result):\n        for child in node.children:\n            result.append(child.val)\n            self.getAllChildren(child, result)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/kill-process.md",
+      "id": "tree-simulation"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/240.%20Search%20a%202D%20Matrix%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "binary-search-each-row",
+      "approach": "Binary Search Each Row",
+      "explanation": "### How it works\n\nEach row is sorted, so binary-search the target independently in every row. This does not use the column ordering that makes the staircase default faster for many matrix shapes.\n\n### Steps\n\n1. Binary-search the insertion position in each row.\n2. Return true if a row contains the target at that position.\n3. Return false after all rows fail.\n\n### Complexity\n\n- Time: `O(r log c)` for r rows and c columns.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/240.%20Search%20a%202D%20Matrix%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from bisect import bisect_left\n\nclass Solution:\n    def searchMatrix(self, matrix: list[list[int]], target: int) -> bool:\n        for row in matrix:\n            index = bisect_left(row, target)\n            if index < len(row) and row[index] == target:\n                return True\n        return False\n"
+      }
+    }
+  ]
 }

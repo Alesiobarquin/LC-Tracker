@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> singleNumber(vector<int>& nums) {\n        uint xor_all = 0;\n        for (int& num : nums) {\n            xor_all ^= num;\n        }\n\n        int diff_bit = xor_all & (-xor_all);\n\n        int a = 0, b = 0;\n        for (int& num : nums) {\n            if (num & diff_bit) {\n                a ^= num;\n            } else {\n                b ^= num;\n            }\n        }\n        return {a, b};\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number-iii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number-iii.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nWe can count occurrences of each number using a hash map. Numbers that appear exactly once are our two unique elements. This trades space for time, reducing the time complexity from quadratic to linear.\n\n### Steps\n\n1. Create a hash map to count occurrences of each number.\n2. Iterate through the array and update counts.\n3. Collect all keys with a count of `1` into the result.\n4. Return the result containing the two unique numbers.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> List[int]:\n        count = {}\n        for num in nums:\n            count[num] = 1 + count.get(num, 0)\n\n        return [k for k in count if count[k] == 1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number-iii.md",
+      "id": "hash-map"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nSorting the array groups duplicate numbers together. After sorting, each element should equal either its left or right neighbor if it has a duplicate. Elements that differ from both neighbors are the unique numbers we seek.\n\n### Steps\n\n1. Sort the array.\n2. Iterate through each index `i`.\n3. If `nums[i]` differs from both `nums[i-1]` (if exists) and `nums[i+1]` (if exists), it is unique.\n4. Collect all unique elements and return them.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> List[int]:\n        res, n = [], len(nums)\n        nums.sort()\n\n        for i in range(n):\n            if ((i > 0 and nums[i] == nums[i - 1]) or\n                (i + 1 < n and nums[i] == nums[i + 1])):\n                continue\n            res.append(nums[i])\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-number-iii.md",
+      "id": "sorting"
+    }
+  ]
 }

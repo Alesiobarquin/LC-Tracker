@@ -1,0 +1,29 @@
+{
+  "problemId": "design-phone-directory",
+  "approach": "Array-Backed Free List",
+  "explanation": "### How it works\n\nThe array stores the next available number, while −1 marks an allocated number. Allocation removes the head of the free list and release inserts a number back at its head.\n\n### Steps\n\n1. Initialize a circular chain of available numbers.\n2. On get, remove the current free head and mark it allocated.\n3. Check availability using the marker.\n4. Release an allocated number by linking it before the current head.\n\n### Complexity\n\n- Time: O(N) construction; O(1) per operation for N phone numbers.\n- Space: O(N) for the free-list array.",
+  "code": {
+    "python": "class PhoneDirectory:\n  def __init__(self, maxNumbers: int):\n    # the next available numbers\n    self.next = [i + 1 for i in range(maxNumbers - 1)] + [0]\n    # the current possible available number\n    self.number = 0\n\n  def get(self) -> int:\n    if self.next[self.number] == -1:\n      return -1\n    ans = self.number\n    self.number = self.next[self.number]\n    self.next[ans] = -1  # Mark as used.\n    return ans\n\n  def check(self, number: int) -> bool:\n    return self.next[number] != -1\n\n  def release(self, number: int) -> None:\n    if self.next[number] != -1:\n      return\n    self.next[number] = self.number\n    self.number = number\n",
+    "cpp": "class PhoneDirectory {\n public:\n  PhoneDirectory(int maxNumbers) : next(maxNumbers) {\n    for (int i = 0; i < maxNumbers - 1; ++i)\n      next[i] = i + 1;\n    next.back() = 0;\n  }\n\n  int get() {\n    if (next[number] == -1)\n      return -1;\n    const int ans = number;\n    number = next[number];\n    next[ans] = -1;  // Mark as used.\n    return ans;\n  }\n\n  bool check(int number) {\n    return next[number] != -1;\n  }\n\n  void release(int number) {\n    if (next[number] != -1)\n      return;\n    next[number] = this->number;\n    this->number = number;\n  }\n\n private:\n  int number = 0;    // the current possible available number\n  vector<int> next;  // the next available numbers\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/379.%20Design%20Phone%20Directory",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "available-number-set",
+      "approach": "Available-Number Set",
+      "explanation": "### How it works\n\nKeep the available numbers directly in a set. Any available number may be returned, so set removal is enough for allocation.\n\n### Steps\n\n1. Initialize the set with all valid numbers.\n2. Pop an arbitrary number on get, or return −1 when empty.\n3. Check set membership.\n4. Release by adding the number back.\n\n### Complexity\n\n- Time: O(N) construction; expected O(1) per operation.\n- Space: O(N) for available numbers.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/379.%20Design%20Phone%20Directory",
+      "code": {
+        "python": "class PhoneDirectory:\n    def __init__(self, maxNumbers: int):\n        self.available = set(range(maxNumbers))\n\n    def get(self) -> int:\n        return self.available.pop() if self.available else -1\n\n    def check(self, number: int) -> bool:\n        return number in self.available\n\n    def release(self, number: int) -> None:\n        self.available.add(number)\n"
+      }
+    }
+  ]
+}

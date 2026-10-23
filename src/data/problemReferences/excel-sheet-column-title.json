@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string convertToTitle(int columnNumber) {\n        string res;\n        while (columnNumber > 0) {\n            columnNumber--;\n            int offset = columnNumber % 26;\n            res += ('A' + offset);\n            columnNumber /= 26;\n        }\n        reverse(res.begin(), res.end());\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=X_vJDpCCuoA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/excel-sheet-column-title.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/excel-sheet-column-title.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nExcel columns use a bijective base-26 system where A=1, B=2, ..., Z=26. Unlike standard base conversion where digits range from 0 to base-1, here digits range from 1 to 26. This means we need to adjust by subtracting 1 before finding each digit.\n\nAfter subtracting 1, we can use modulo 26 to find the rightmost character and divide by 26 to get the remaining prefix. Recursion handles this naturally: first solve for the prefix (if any), then append the current character.\n\n### Steps\n\n1. Base case: if `columnNumber` is `0`, return an empty string.\n2. Subtract `1` from `columnNumber` to convert to 0-indexed.\n3. Recursively call for `n // 26` to get the prefix string.\n4. Compute the current character as `chr('A' + n % 26)`.\n5. Return the prefix concatenated with the current character.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)` for recursion stack.\n\n> Where `n` is the given column number.",
+      "code": {
+        "python": "class Solution:\n    def convertToTitle(self, columnNumber: int) -> str:\n        if columnNumber == 0:\n            return \"\"\n\n        n = columnNumber - 1\n        return self.convertToTitle(n // 26) + chr(n % 26 + ord('A'))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/excel-sheet-column-title.md",
+      "id": "recursion"
+    }
+  ]
 }

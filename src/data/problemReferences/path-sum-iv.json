@@ -1,0 +1,29 @@
+{
+  "problemId": "path-sum-iv",
+  "approach": "Decode and Traverse the Small Tree",
+  "explanation": "### How it works\n\nEach three-digit value gives a depth, a position within that depth, and a node value. Decode these into the bounded four-level tree, then accumulate root-to-leaf path sums.\n\n### Steps\n\n1. Decode each value into a zero-based depth and position.\n2. Store node values in the four-level layout.\n3. Traverse children at positions 2p and 2p + 1.\n4. Add the accumulated sum at each leaf.\n\n### Complexity\n\n- Time: O(n) input decoding and bounded traversal.\n- Space: O(1) for the fixed four-level domain.",
+  "code": {
+    "python": "class Solution:\n  def pathSum(self, nums: list[int]) -> int:\n    ans = 0\n    tree = [[-1] * 8 for _ in range(4)]\n\n    for num in nums:\n      d = num // 100 - 1\n      p = (num % 100) // 10 - 1\n      v = num % 10\n      tree[d][p] = v\n\n    def dfs(i: int, j: int, path: int) -> None:\n      nonlocal ans\n      if tree[i][j] == -1:\n        return\n      if i == 3 or max(tree[i + 1][j * 2], tree[i + 1][j * 2 + 1]) == -1:\n        ans += path + tree[i][j]\n        return\n\n      dfs(i + 1, j * 2, path + tree[i][j])\n      dfs(i + 1, j * 2 + 1, path + tree[i][j])\n\n    dfs(0, 0, 0)\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int pathSum(vector<int>& nums) {\n    int ans = 0;\n    vector<vector<int>> tree(4, vector<int>(8, -1));\n\n    for (const int num : nums) {\n      const int d = num / 100 - 1;\n      const int p = (num % 100) / 10 - 1;\n      const int v = num % 10;\n      tree[d][p] = v;\n    }\n\n    dfs(tree, 0, 0, 0, ans);\n    return ans;\n  }\n\n private:\n  void dfs(const vector<vector<int>>& tree, int i, int j, int path, int& ans) {\n    if (tree[i][j] == -1)\n      return;\n    if (i == 3 || max(tree[i + 1][j * 2], tree[i + 1][j * 2 + 1]) == -1) {\n      ans += path + tree[i][j];\n      return;\n    }\n\n    dfs(tree, i + 1, j * 2, path + tree[i][j], ans);\n    dfs(tree, i + 1, j * 2 + 1, path + tree[i][j], ans);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/666.%20Path%20Sum%20IV",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "forward-encoded-node-path-sums",
+      "approach": "Forward Encoded-Node Path Sums",
+      "explanation": "### How it works\n\nThe sorted encodings visit parents before children. Store each encoded node's root-path sum directly, then add values belonging to nodes without encoded children.\n\n### Steps\n\n1. Decode each node's depth and one-based position.\n2. Look up its parent at the preceding depth and ceiling(position/2).\n3. Store parent path sum plus node value.\n4. Sum stored paths whose nodes have no children.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(n), bounded by the four-level tree.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/666.%20Path%20Sum%20IV",
+      "code": {
+        "python": "class Solution:\n    def pathSum(self, nums: list[int]) -> int:\n        paths = {}\n        for code in nums:\n            depth, position, value = code // 100, code // 10 % 10, code % 10\n            parent = (depth - 1, (position + 1) // 2)\n            paths[(depth, position)] = paths.get(parent, 0) + value\n        return sum(total for (depth, position), total in paths.items()\n                   if (depth + 1, 2 * position - 1) not in paths\n                   and (depth + 1, 2 * position) not in paths)\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,25 @@
     "cpp": "class FreqStack {\npublic:\n    unordered_map<int, int> cnt;\n    vector<stack<int>> stacks;\n\n    FreqStack() {\n        stacks.push_back(stack<int>());\n    }\n\n    void push(int val) {\n        int valCnt = ++cnt[val];\n        if (valCnt == stacks.size()) {\n            stacks.push_back(stack<int>());\n        }\n        stacks[valCnt].push(val);\n    }\n\n    int pop() {\n        stack<int>& topStack = stacks.back();\n        int res = topStack.top();\n        topStack.pop();\n        if (topStack.empty()) {\n            stacks.pop_back();\n        }\n        cnt[res]--;\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Z6idIicFDOE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-stack.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-stack.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to maintain a regular stack along with a frequency count for each element. When we need to pop, we find the maximum frequency among all elements, then scan backwards through the stack to find the most recent element with that frequency. While simple to understand, this requires scanning the entire stack on every pop operation.\n\n### Steps\n\n1. Initialize a hash map `cnt` to track the frequency of each element and a list `stack` to store pushed elements.\n2. For `push(val)`: append the value to the stack and increment its count in the hash map.\n3. For `pop()`: find the maximum frequency across all elements, then iterate from the end of the stack to find the first element with that frequency. Remove it from the stack, decrement its count, and return it.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` time for each `push()` function call.\n    - `O(n)` time for each `pop()` function call.\n- Space complexity: `O(n)`\n\n> Where `n` is the number of elements in the stack.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass FreqStack:\n\n    def __init__(self):\n        self.cnt = defaultdict(int)\n        self.stack = []\n\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n        self.cnt[val] += 1\n\n    def pop(self) -> int:\n        maxCnt = max(self.cnt.values())\n        i = len(self.stack) - 1\n        while self.cnt[self.stack[i]] != maxCnt:\n            i -= 1\n        self.cnt[self.stack[i]] -= 1\n        return self.stack.pop(i)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-stack.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Heap",
+      "explanation": "### How it works\n\nWe can use a max-heap to efficiently retrieve the element that should be popped next. Each heap entry stores three pieces of information: the element's frequency, its insertion order (index), and the value itself. By prioritizing higher frequencies and then more recent insertions, the heap always gives us the correct element to pop in logarithmic time.\n\n### Steps\n\n1. Initialize a max-heap, a frequency hash map `cnt`, and an `index` counter starting at `0`.\n2. For `push(val)`: increment the value's frequency, then push a tuple of `(frequency, index, val)` onto the heap. Increment the index counter.\n3. For `pop()`: pop the top element from the heap (which has the highest frequency and most recent index among ties), decrement that value's frequency, and return the value.\n\n### Complexity\n\n- Time complexity:\n    - `O(log n)` time for each `push()` function call.\n    - `O(log n)` time for each `pop()` function call.\n- Space complexity: `O(n)`\n\n> Where `n` is the number of elements in the stack.",
+      "code": {
+        "python": "from collections import defaultdict\nimport heapq\n\nclass FreqStack:\n\n    def __init__(self):\n        self.heap = []\n        self.cnt = defaultdict(int)\n        self.index = 0\n\n    def push(self, val: int) -> None:\n        self.cnt[val] += 1\n        heapq.heappush(self.heap, (-self.cnt[val], -self.index, val))\n        self.index += 1\n\n    def pop(self) -> int:\n        _, _, val = heapq.heappop(self.heap)\n        self.cnt[val] -= 1\n        return val\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-stack.md",
+      "id": "heap"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "license-key-formatting",
+  "approach": "Build Groups from the Right",
+  "explanation": "### How it works\n\nEvery group except the first must have exactly k characters. Scanning backward makes each full group immediate while naturally leaving a shorter initial group.\n\n### Steps\n\n1. Skip existing dashes while scanning backward.\n2. Insert a new dash before each next group of k characters.\n3. Uppercase letters as they are collected.\n4. Reverse the completed characters.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for output characters.",
+  "code": {
+    "python": "class Solution:\n  def licenseKeyFormatting(self, s: str, k: int) -> str:\n    ans = []\n    length = 0\n\n    for i in reversed(range(len(s))):\n      if s[i] == '-':\n        continue\n      if length > 0 and length % k == 0:\n        ans += '-'\n      ans += s[i].upper()\n      length += 1\n\n    return ''.join(reversed(ans))\n",
+    "cpp": "class Solution {\n public:\n  string licenseKeyFormatting(string s, int k) {\n    string ans;\n    int length = 0;\n\n    for (int i = s.length() - 1; i >= 0; --i) {\n      if (s[i] == '-')\n        continue;\n      if (length > 0 && length % k == 0)\n        ans += \"-\";\n      ans += toupper(s[i]);\n      ++length;\n    }\n\n    ranges::reverse(ans);\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/482.%20License%20Key%20Formatting",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "clean-then-slice-groups",
+      "approach": "Clean Then Slice Groups",
+      "explanation": "### How it works\n\nRemove dashes first and compute the first group length from the cleaned length modulo k. Every later group is a fixed-width slice.\n\n### Steps\n\n1. Remove dashes and uppercase the text.\n2. Calculate the first group width, using k when divisible.\n3. Slice the remaining groups in widths of k.\n4. Join groups with dashes.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) cleaned text and group slices.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/482.%20License%20Key%20Formatting",
+      "code": {
+        "python": "class Solution:\n    def licenseKeyFormatting(self, s: str, k: int) -> str:\n        text = s.replace('-', '').upper()\n        if not text:\n            return ''\n        first = len(text) % k or k\n        groups = [text[:first]]\n        groups.extend(text[i:i + k] for i in range(first, len(text), k))\n        return '-'.join(groups)\n"
+      }
+    }
+  ]
+}

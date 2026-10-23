@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int findMinArrowShots(vector<vector<int>>& points) {\n        sort(points.begin(), points.end(), [](const auto& a, const auto& b) {\n            return a[1] < b[1];\n        });\n        int res = 1, prevEnd = points[0][1];\n\n        for (int i = 1; i < points.size(); i++) {\n            if (points[i][0] > prevEnd) {\n                prevEnd = points[i][1];\n                res++;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-arrows-to-burst-balloons.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-arrows-to-burst-balloons.md",
+  "alternatives": [
+    {
+      "approach": "Greedy (Sort By Start Value)",
+      "explanation": "### How it works\n\nThink of each balloon as a horizontal range on a number line. If two balloons overlap, a single arrow can pop both. The key insight is that by sorting balloons by their starting position, we can process them left to right and greedily merge overlapping intervals.\n\nWhen we encounter a new balloon, we check if it overlaps with the previous group. If it does, we shrink the overlap region by taking the minimum of the end values. If not, we need a new arrow. We start by assuming each balloon needs its own arrow, then subtract one for each overlap we find.\n\n### Steps\n\n1. Sort the intervals by their starting position.\n2. Initialize `res` as the total number of balloons and track the previous interval's end.\n3. For each subsequent balloon:\n    - If it overlaps with the previous group (its start is at or before the tracked end), decrement `res` and update the tracked end to be the minimum of both ends.\n    - Otherwise, start a new group by updating the tracked end to this balloon's end.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMinArrowShots(self, points: List[List[int]]) -> int:\n        points.sort()\n        res, prevEnd = len(points), points[0][1]\n\n        for i in range(1, len(points)):\n            curr = points[i]\n            if curr[0] <= prevEnd:\n                res -= 1\n                prevEnd = min(curr[1], prevEnd)\n            else:\n                prevEnd = curr[1]\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-arrows-to-burst-balloons.md",
+      "id": "greedy-sort-by-start-value"
+    }
+  ]
 }

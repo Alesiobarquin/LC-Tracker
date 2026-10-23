@@ -7,5 +7,26 @@
     "cpp": "class Solution {\npublic:\n    vector<int> successfulPairs(vector<int>& spells, vector<int>& potions, long long success) {\n        int n = spells.size(), m = potions.size();\n        vector<int> sIdx(n);\n        for (int i = 0; i < n; i++) sIdx[i] = i;\n\n        sort(sIdx.begin(), sIdx.end(), [&](int a, int b) {\n            return spells[a] < spells[b];\n        });\n\n        sort(potions.begin(), potions.end());\n\n        int j = m - 1;\n        vector<int> res(n);\n        for (int i = 0; i < n; i++) {\n            while (j >= 0 && (long long) spells[sIdx[i]] * potions[j] >= success) {\n                j--;\n            }\n            res[sIdx[i]] = m - j - 1;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OKnm5oyAhWg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/successful-pairs-of-spells-and-potions.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/successful-pairs-of-spells-and-potions.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each spell, we need to count how many potions form a successful pair. A pair is successful when `spell * potion >= success`. The simplest approach is to check every spell against every potion and count the valid combinations.\n\n### Steps\n\n1. Create a `result` array `res` to store the count for each spell.\n2. For each spell `s` in `spells`:\n    - Initialize a counter `cnt = 0`.\n    - For each potion `p` in `potions`:\n        - If `s * p >= success`, increment `cnt`.\n    - Append `cnt` to `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(1)`\n\n> The output array is not counted towards space complexity, as the [standard convention](https://en.wikipedia.org/wiki/DSPACE) measures only auxiliary working space.\n\n> Where `n` and `m` are the sizes of the arrays `spells` and `potions` respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:\n        res = []\n\n        for s in spells:\n            cnt = 0\n            for p in potions:\n                if s * p >= success:\n                    cnt += 1\n            res.append(cnt)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/successful-pairs-of-spells-and-potions.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting + Binary Search",
+      "explanation": "### How it works\n\nIf we sort the potions array, all successful potions for a given spell will be contiguous at the end. For a spell `s`, we need the minimum potion strength `p` such that `s * p >= success`, which means `p >= success / s`. Binary search can efficiently find this threshold index, and all potions from that index onward form successful pairs.\n\n### Steps\n\n1. Sort the `potions` array in ascending order.\n2. For each spell `s` in `spells`:\n    - Use binary search to find the smallest index `idx` where `s * potions[idx] >= success`.\n    - The count of successful pairs is `len(potions) - idx`.\n    - Store this count in the `result`.\n3. Return the `result` array.\n\n### Complexity\n\nFor `n` spells and `m` potions, time is `O(m log m + n log m)`. Python sorting uses `O(m)` worst-case auxiliary space, and the returned counts use `O(n)` output space. The potion list is sorted in place.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:\n        potions.sort()\n        res = []\n\n        for s in spells:\n            l, r = 0, len(potions) - 1\n            idx = len(potions)\n\n            while l <= r:\n                m = (l + r) // 2\n                if s * potions[m] >= success:\n                    r = m - 1\n                    idx = m\n                else:\n                    l = m + 1\n\n            res.append(len(potions) - idx)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/successful-pairs-of-spells-and-potions.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "sorting-binary-search"
+    }
+  ]
 }

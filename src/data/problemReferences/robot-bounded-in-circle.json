@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool isRobotBounded(string instructions) {\n        int dirX = 0, dirY = 1;\n        int x = 0, y = 0;\n\n        for (char d : instructions) {\n            if (d == 'G') {\n                x += dirX;\n                y += dirY;\n            } else if (d == 'L') {\n                int temp = dirX;\n                dirX = -dirY;\n                dirY = temp;\n            } else {\n                int temp = dirX;\n                dirX = dirY;\n                dirY = -temp;\n            }\n        }\n\n        return (x == 0 && y == 0) || (dirX != 0 || dirY != 1);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nKv2LnC_g6E",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/robot-bounded-in-circle.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/robot-bounded-in-circle.md",
+  "alternatives": [
+    {
+      "id": "four-cycle-simulation",
+      "approach": "Four-Cycle Simulation",
+      "explanation": "### How it works\n\nA bounded instruction cycle returns to its original position and direction within four repetitions: a changed direction completes a full orientation cycle in at most four runs. Simulate those runs directly.\n\n### Steps\n\n1. Start at the origin facing north.\n2. Execute the instructions four times.\n3. Update direction for turns and position for moves.\n4. Accept exactly when the final position is the origin.\n\n### Complexity\n\n- Time: `O(n)` for four repetitions of n instructions.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/robot-bounded-in-circle.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def isRobotBounded(self, instructions: str) -> bool:\n        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]\n        x = y = direction = 0\n        for _ in range(4):\n            for instruction in instructions:\n                if instruction == 'L':\n                    direction = (direction - 1) % 4\n                elif instruction == 'R':\n                    direction = (direction + 1) % 4\n                else:\n                    dx, dy = directions[direction]\n                    x, y = x + dx, y + dy\n        return x == 0 and y == 0\n"
+      }
+    }
+  ]
 }

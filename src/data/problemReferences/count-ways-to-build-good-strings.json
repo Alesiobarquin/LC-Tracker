@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countGoodStrings(int low, int high, int zero, int one) {\n        vector<int> dp(high + 1);\n        int mod = 1e9 + 7, res = 0;\n        dp[0] = 1;\n\n        for (int i = 1; i <= high; i++) {\n            if (i >= zero) dp[i] = (dp[i] + dp[i - zero]) % mod;\n            if (i >= one) dp[i] = (dp[i] + dp[i - one]) % mod;\n            if (i >= low) res = (res + dp[i]) % mod;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=JKpVHG2mhbk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-ways-to-build-good-strings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-ways-to-build-good-strings.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can think of building a string as making a series of choices. At each step, we either append `zero` number of `'0'`s or `one` number of `'1'`s. The recursion naturally explores all possible combinations by branching at each decision point. A string is \"good\" when its length falls within the range `[low, high]`, so we count it whenever we reach a valid length.\n\n### Steps\n\n1. Start with an empty string (length `0`).\n2. At each recursive call, if the current length exceeds `high`, stop and return `0`.\n3. If the current length is at least `low`, count this as one valid string.\n4. Recursively explore two branches: one where we add `zero` characters and one where we add `one` characters.\n5. Sum up the counts from both branches and return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.\n\n> Where `n` is equal to the given `high` value.",
+      "code": {
+        "python": "class Solution:\n    def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:\n        mod = 10**9 + 7\n\n        def dfs(length):\n            if length > high:\n                return 0\n            res = 1 if length >= low else 0\n            res += dfs(length + zero) + dfs(length + one)\n            return res % mod\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-ways-to-build-good-strings.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems because we may reach the same string length through different paths. For example, adding `zero` then `one` might give the same length as adding `one` then `zero`. Memoization stores the result for each length we have already computed, avoiding redundant calculations.\n\n### Steps\n\n1. Create a memoization structure (hash map or array) to store results for each length.\n2. Use the same recursive approach as before, but before computing, check if the result for the current length is already cached.\n3. If cached, return the stored value immediately.\n4. Otherwise, compute the result by exploring both branches, store it in the cache, and return.\n5. Return the final count modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is equal to the given `high` value.",
+      "code": {
+        "python": "class Solution:\n    def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:\n        mod = 10**9 + 7\n        dp = {}\n\n        def dfs(length):\n            if length > high:\n                return 0\n            if length in dp:\n                return dp[length]\n\n            dp[length] = 1 if length >= low else 0\n            dp[length] += dfs(length + zero) + dfs(length + one)\n            return dp[length] % mod\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-ways-to-build-good-strings.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

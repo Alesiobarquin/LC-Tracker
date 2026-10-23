@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    vector<string> mostVisitedPattern(vector<string>& username, vector<int>& timestamp, vector<string>& website) {\n        int n = timestamp.size();\n        vector<pair<int,int>> arr;\n        for (int i = 0; i < n; ++i) arr.push_back({timestamp[i], i});\n        sort(arr.begin(), arr.end(),\n             [](auto& a, auto& b){ return a.first < b.first; });\n\n        unordered_map<string, vector<string>> mp;\n        for (auto& p : arr) mp[username[p.second]].push_back(website[p.second]);\n\n        unordered_map<string,int> count;\n        for (auto& kv : mp) {\n            auto& cur = kv.second;\n            unordered_set<string> patterns;\n            for (int i = 0; i < (int)cur.size(); ++i)\n                for (int j = i + 1; j < (int)cur.size(); ++j)\n                    for (int k = j + 1; k < (int)cur.size(); ++k)\n                        patterns.insert(cur[i] + \"#\" + cur[j] + \"#\" + cur[k]);\n            for (auto& p : patterns) ++count[p];\n        }\n\n        int maxCnt = 0;\n        string res;\n        for (auto& kv : count)\n            if (kv.second > maxCnt ||\n               (kv.second == maxCnt && (res.empty() || kv.first < res))) {\n                maxCnt = kv.second;\n                res = kv.first;\n            }\n\n        vector<string> ans;\n        string tmp;\n        for (char ch : res) {\n            if (ch == '#') {\n                ans.push_back(tmp);\n                tmp.clear();\n            } else {\n                tmp += ch;\n            }\n        }\n        ans.push_back(tmp);\n        return ans;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/analyze-user-website-visit-pattern.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/analyze-user-website-visit-pattern.md",
+  "alternatives": [
+    {
+      "id": "enumerate-global-visit-triples",
+      "approach": "Enumerate Global Visit Triples",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nSort all visits by time and enumerate triples belonging to one user. Associate each three-site sequence with the set of users who followed it; a user counts once even after repeated occurrences.\n\n### Steps\n\n1. Sort visit events by timestamp.\n2. Enumerate triples of increasing event positions.\n3. Keep triples belonging to the same user and add that user to the sequence's set.\n4. Choose the most-user sequence, breaking ties lexicographically.\n\n### Complexity\n\n- Time: `O(N³ + N log N)` time for N visits, with fixed-size website triples.\n- Space: `O(N³)` as an upper bound for sequence/user memberships.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/analyze-user-website-visit-pattern.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import defaultdict\nfrom itertools import combinations\n\nclass Solution:\n    def mostVisitedPattern(self, username: list[str], timestamp: list[int], website: list[str]) -> list[str]:\n        events = sorted(zip(timestamp, username, website))\n        users = defaultdict(set)\n        for a, b, c in combinations(events, 3):\n            if a[1] == b[1] == c[1]:\n                users[(a[2], b[2], c[2])].add(a[1])\n        best = min(users, key=lambda pattern: (-len(users[pattern]), pattern))\n        return list(best)\n"
+      }
+    }
+  ]
 }

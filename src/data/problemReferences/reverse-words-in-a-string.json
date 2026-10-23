@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        istringstream input(s);\n        vector<string> words;\n        string word;\n        while (input >> word) words.push_back(word);\n        reverse(words.begin(), words.end());\n        string result;\n        for (const string& current : words) {\n            if (!result.empty()) result += \" \";\n            result += current;\n        }\n        return result;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/python/0151-reverse-words-in-a-string.py"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/python/0151-reverse-words-in-a-string.py",
+  "alternatives": [
+    {
+      "id": "scan-and-prepend-words",
+      "approach": "Scan and Prepend Words",
+      "explanation": "### How it works\n\nParse words manually and prepend each completed word to the result. This reverses word order while normalizing spaces, and illustrates the copying avoided by split/reverse/join.\n\n### Steps\n\n1. Skip spaces and scan each maximal word.\n2. Prepend the word, adding one separator only when needed.\n3. Return the accumulated result.\n\n### Complexity\n\n- Time: `O(n²)` worst-case time from repeated string copying.\n- Space: `O(n)` output and temporary strings.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/python/0151-reverse-words-in-a-string.py",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        result, index = '', 0\n        while index < len(s):\n            while index < len(s) and s[index] == ' ':\n                index += 1\n            start = index\n            while index < len(s) and s[index] != ' ':\n                index += 1\n            if start < index:\n                result = s[start:index] + (' ' + result if result else '')\n        return result\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "two-sum-iii-data-structure-design",
+  "approach": "Frequency Map",
+  "explanation": "### How it works\n\nStore the frequency of each inserted number. A query looks for a complementary value; pairing a value with itself requires two occurrences.\n\n### Steps\n\n1. Increment the inserted number's count.\n2. For each distinct value during find, calculate its complement.\n3. Accept distinct complementary values or a repeated value with count at least two.\n\n### Complexity\n\n- Time: Expected O(1) per add and O(u) per find for u distinct numbers.\n- Space: O(u) stored counts.",
+  "code": {
+    "python": "import collections\n\nclass TwoSum:\n  def __init__(self):\n    self.count = collections.Counter()\n\n  def add(self, number: int) -> None:\n    self.count[number] += 1\n\n  def find(self, value: int) -> bool:\n    for key, freq in self.count.items():\n      remain = value - key\n      if key == remain and freq > 1:\n        return True\n      if key != remain and remain in self.count:\n        return True\n\n    return False\n",
+    "cpp": "class TwoSum {\n public:\n  void add(int number) {\n    ++count[number];\n  }\n\n  bool find(int value) {\n    for (const auto& [key, freq] : count) {\n      const int remain = value - key;\n      if (key == remain && freq > 1)\n        return true;\n      if (key != remain && count.contains(remain))\n        return true;\n    }\n\n    return false;\n  }\n\n private:\n  unordered_map<int, int> count;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/170.%20Two%20Sum%20III%20-%20Data%20structure%20design",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "precomputed-pair-sums",
+      "approach": "Precomputed Pair Sums",
+      "explanation": "### How it works\n\nPay for pair formation during insertion so queries become set lookups. Form sums with previously inserted values before adding the new value, preserving the requirement for two insertions.\n\n### Steps\n\n1. Keep a set of inserted values and a set of achievable sums.\n2. On add, combine the new value with every previously seen value.\n3. Insert the value after forming sums.\n4. Answer find by membership in the sum set.\n\n### Complexity\n\n- Time: Expected O(u) per add and O(1) per find.\n- Space: O(u²) possible pair sums.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/170.%20Two%20Sum%20III%20-%20Data%20structure%20design",
+      "code": {
+        "python": "class TwoSum:\n    def __init__(self):\n        self.values = set()\n        self.sums = set()\n\n    def add(self, number: int) -> None:\n        for value in self.values:\n            self.sums.add(number + value)\n        self.values.add(number)\n\n    def find(self, value: int) -> bool:\n        return value in self.sums\n"
+      }
+    }
+  ]
+}

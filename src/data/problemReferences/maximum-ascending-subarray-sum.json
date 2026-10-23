@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int maxAscendingSum(vector<int>& nums) {\n        int res = nums[0], curSum = nums[0];\n\n        for (int i = 1; i < nums.size(); i++) {\n            if (nums[i] <= nums[i - 1]) {\n                curSum = 0;\n            }\n            curSum += nums[i];\n            res = max(res, curSum);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-ascending-subarray-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-ascending-subarray-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAn ascending subarray is a contiguous sequence where each element is strictly greater than the previous. We want the maximum sum among all such subarrays.\n\nThe brute force approach considers every possible starting position. From each start, we extend the subarray as long as elements keep increasing, accumulating the sum. We track the maximum sum seen across all starting positions.\n\n### Steps\n\n1. Initialize `res = 0` to store the maximum sum found.\n2. For each starting index `i`:\n    - Initialize `curSum = nums[i]`.\n    - Extend from `j = i + 1` while `nums[j] > nums[j-1]`:\n        - Add `nums[j]` to `curSum`.\n    - Update `res = max(res, curSum)`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxAscendingSum(self, nums: List[int]) -> int:\n        res = 0\n        for i in range(len(nums)):\n            curSum = nums[i]\n            for j in range(i + 1, len(nums)):\n                if nums[j] <= nums[j - 1]:\n                    break\n                curSum += nums[j]\n            res = max(res, curSum)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-ascending-subarray-sum.md",
+      "id": "brute-force"
+    }
+  ]
 }

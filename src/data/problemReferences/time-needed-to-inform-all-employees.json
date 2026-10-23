@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numOfMinutes(int n, int headID, vector<int>& manager, vector<int>& informTime) {\n        function<int(int)> dfs = [&](int node) {\n            if (manager[node] != -1) {\n                informTime[node] += dfs(manager[node]);\n                manager[node] = -1;\n            }\n            return informTime[node];\n        };\n\n        int res = 0;\n        for (int node = 0; node < n; ++node) {\n            res = max(res, dfs(node));\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=zdBYi0p4L5Q",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-inform-all-employees.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-inform-all-employees.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nThe company structure forms a tree with the head of the company as the root. Each manager must inform their direct subordinates, who then inform their subordinates, and so on. The total time to inform everyone equals the longest path from the root to any leaf, where each edge weight is the manager's inform time.\n\nWe can traverse this tree using `dfs`, tracking the accumulated time as we go deeper. At each node, we add that manager's inform time before visiting their subordinates. The answer is the maximum time across all leaf nodes.\n\n### Steps\n\n1. Build an adjacency list representing the manager-subordinate relationships.\n2. Start `dfs` from the head of the company.\n3. For each node, recursively compute the time to inform all employees in its subtree.\n4. The time at each node is `informTime[node]` plus the maximum time from all its children.\n5. Return the maximum time found from the root.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:\n        adj = [[] for _ in range(n)]\n        for i in range(n):\n            if i != headID:\n                adj[manager[i]].append(i)\n\n        def dfs(node):\n            res = 0\n            for child in adj[node]:\n                res = max(res, informTime[node] + dfs(child))\n            return res\n\n        return dfs(headID)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-inform-all-employees.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nInstead of using recursion, we can traverse the tree level by level using `bfs`. We process nodes in waves, tracking the time at which each employee receives the news. The maximum time across all employees gives us the answer.\n\nEach node in the queue stores both the employee ID and the time at which they were informed. When we process a node, we inform all their direct reports, adding the manager's inform time to compute when each subordinate receives the news.\n\n### Steps\n\n1. Build an adjacency list from the manager array.\n2. Initialize a queue with the head employee and time `0`.\n3. Track the maximum time seen so far.\n4. For each node dequeued, update the maximum time and enqueue all subordinates with their accumulated time.\n5. A subordinate's time equals their manager's time plus the manager's inform time.\n6. Return the maximum time after processing all employees.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict, deque\n\nclass Solution:\n    def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:\n        adj = defaultdict(list)\n        for i in range(n):\n            adj[manager[i]].append(i)\n\n        q = deque([(headID, 0)])  # (id, time)\n        res = 0\n\n        while q:\n            node, time = q.popleft()\n            res = max(res, time)\n            for emp in adj[node]:\n                q.append((emp, time + informTime[node]))\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-inform-all-employees.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

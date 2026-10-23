@@ -1,0 +1,29 @@
+{
+  "problemId": "beautiful-arrangement-ii",
+  "approach": "Increasing Prefix and Alternating Tail",
+  "explanation": "### How it works\n\nAn increasing prefix contributes difference one. Alternating high and low values in the last k positions creates the additional differences k down to two while preserving a permutation.\n\n### Steps\n\n1. Write the increasing prefix from one through n − k.\n2. Append alternating largest and smallest unused tail values.\n3. Continue until all n values are used.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) output; O(1) extra state.",
+  "code": {
+    "python": "class Solution:\n  def constructArray(self, n: int, k: int) -> list[int]:\n    ans = list(range(1, n - k + 1))\n\n    for i in range(k):\n      if i % 2 == 0:\n        ans.append(n - i // 2)\n      else:\n        ans.append(n - k + (i + 1) // 2)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<int> constructArray(int n, int k) {\n    vector<int> ans;\n\n    for (int i = 0; i < n - k; ++i)\n      ans.push_back(i + 1);\n\n    for (int i = 0; i < k; ++i)\n      if (i % 2 == 0)\n        ans.push_back(n - i / 2);\n      else\n        ans.push_back(n - k + (i + 1) / 2);\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/667.%20Beautiful%20Arrangement%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "alternating-prefix-and-increasing-suffix",
+      "approach": "Alternating Prefix and Increasing Suffix",
+      "explanation": "### How it works\n\nConstruct the first k + 1 values by alternating endpoints of [1, k + 1], creating differences k, k − 1, …, 1. Append the remaining larger values in increasing order; they add no new difference value.\n\n### Steps\n\n1. Maintain low = 1 and high = k + 1.\n2. Alternate taking low and high until the interval is exhausted.\n3. Append values k + 2 through n.\n4. Return the permutation.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) output; O(1) extra state.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/667.%20Beautiful%20Arrangement%20II",
+      "code": {
+        "python": "class Solution:\n    def constructArray(self, n: int, k: int) -> list[int]:\n        result = []\n        low, high = 1, k + 1\n        while low <= high:\n            result.append(low)\n            low += 1\n            if low <= high:\n                result.append(high)\n                high -= 1\n        result.extend(range(k + 2, n + 1))\n        return result\n"
+      }
+    }
+  ]
+}

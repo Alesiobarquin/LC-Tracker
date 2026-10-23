@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/529.%20Minesweeper",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "breadth-first-reveal",
+      "approach": "Breadth-First Reveal",
+      "explanation": "### How it works\n\nReveal safe cells with a queue. A numbered cell stops expansion; an empty cell with no neighboring mines reveals its surrounding unrevealed cells.\n\n### Steps\n\n1. Turn a clicked mine into X and return.\n2. Queue the clicked safe cell.\n3. Count adjacent mines for each queued cell.\n4. Write a number when mines exist; otherwise write B and queue unseen safe neighbors.\n\n### Complexity\n\n- Time: `O(r × c)` time.\n- Space: `O(r × c)` for the queue and visited set.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/529.%20Minesweeper",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def updateBoard(self, board: list[list[str]], click: list[int]) -> list[list[str]]:\n        r, c = click\n        if board[r][c] == 'M':\n            board[r][c] = 'X'\n            return board\n        queue, seen = deque([(r, c)]), {(r, c)}\n        while queue:\n            r, c = queue.popleft()\n            neighbors = [(x, y) for x in range(max(0, r - 1), min(len(board), r + 2))\n                         for y in range(max(0, c - 1), min(len(board[0]), c + 2)) if (x, y) != (r, c)]\n            mines = sum(board[x][y] == 'M' for x, y in neighbors)\n            board[r][c] = str(mines) if mines else 'B'\n            if not mines:\n                for x, y in neighbors:\n                    if board[x][y] == 'E' and (x, y) not in seen:\n                        seen.add((x, y))\n                        queue.append((x, y))\n        return board\n"
+      }
+    }
+  ]
 }

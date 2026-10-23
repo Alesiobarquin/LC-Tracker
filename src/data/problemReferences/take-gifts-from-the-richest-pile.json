@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    long long pickGifts(vector<int>& gifts, int k) {\n        priority_queue<int> pq(gifts.begin(), gifts.end());\n\n        for (int t = 0; t < k; t++) {\n            int n = pq.top(); pq.pop();\n            pq.push((int)floor(sqrt(n)));\n        }\n\n        long long sum = 0;\n        while (!pq.empty()) {\n            sum += pq.top(); pq.pop();\n        }\n        return sum;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/take-gifts-from-the-richest-pile.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/take-gifts-from-the-richest-pile.md",
+  "alternatives": [
+    {
+      "approach": "Simulation",
+      "explanation": "### How it works\n\nThe most straightforward approach simulates the process exactly as described. Each second, we find the pile with the most gifts, take gifts from it, and leave behind the floor of its square root. After `k` seconds, we sum up all remaining gifts. Finding the maximum each time requires scanning all piles.\n\n### Steps\n\n1. Repeat `k` times:\n   - Find the index of the maximum element in the array.\n   - Replace that element with the floor of its square root.\n2. Return the sum of all elements.\n\n### Complexity\n\n* Time complexity: `O(n * k)`\n* Space complexity: `O(1)` extra space.\n\n> Where `n` is the size of input array, `k` is the number of seconds.",
+      "code": {
+        "python": "from typing import List\nfrom math import sqrt\n\nclass Solution:\n    def pickGifts(self, gifts: List[int], k: int) -> int:\n        for _ in range(k):\n            maxIdx = 0\n            for i in range(1, len(gifts)):\n                if gifts[i] > gifts[maxIdx]:\n                    maxIdx = i\n            gifts[maxIdx] = int(sqrt(gifts[maxIdx]))\n        return sum(gifts)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/take-gifts-from-the-richest-pile.md",
+      "id": "simulation"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "find-smallest-letter-greater-than-target",
+  "approach": "Upper-Bound Binary Search",
+  "explanation": "### How it works\n\nThe letters are sorted. Find the first index strictly greater than the target; if none exists, wrap to the first letter.\n\n### Steps\n\n1. Binary-search the upper bound of the target.\n2. Wrap the insertion index modulo the list length.\n3. Return that letter.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "from bisect import bisect\nimport bisect\n\nclass Solution:\n  def nextGreatestLetter(self, letters: list[str], target: str) -> str:\n    l = bisect.bisect_right(range(len(letters)), target,\n                            key=lambda m: letters[m])\n    return letters[l % len(letters)]\n",
+    "cpp": "class Solution {\n public:\n  char nextGreatestLetter(vector<char>& letters, char target) {\n    int l = 0;\n    int r = letters.size();\n\n    while (l < r) {\n      const int m = (l + r) / 2;\n      if (letters[m] > target)\n        r = m;\n      else\n        l = m + 1;\n    }\n\n    return letters[l % letters.size()];\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/744.%20Find%20Smallest%20Letter%20Greater%20Than%20Target",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "first-greater-linear-scan",
+      "approach": "First-Greater Linear Scan",
+      "explanation": "### How it works\n\nSorted order makes the first letter greater than the target the answer. Falling off the scan means the answer wraps around.\n\n### Steps\n\n1. Visit letters in order.\n2. Return the first letter greater than target.\n3. Return the first list element when none is greater.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/744.%20Find%20Smallest%20Letter%20Greater%20Than%20Target",
+      "code": {
+        "python": "class Solution:\n    def nextGreatestLetter(self, letters: list[str], target: str) -> str:\n        for letter in letters:\n            if letter > target:\n                return letter\n        return letters[0]\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int furthestBuilding(vector<int>& heights, int bricks, int ladders) {\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n\n        for (int i = 0; i < int(heights.size()) - 1; i++) {\n            int diff = heights[i + 1] - heights[i];\n            if (diff <= 0) continue;\n\n            minHeap.push(diff);\n            if (minHeap.size() > ladders) {\n                bricks -= minHeap.top(); minHeap.pop();\n                if (bricks < 0) return i;\n            }\n        }\n\n        return int(heights.size()) - 1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/furthest-building-you-can-reach.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/furthest-building-you-can-reach.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Greedy)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe key observation is that ladders are most valuable for the largest height differences, since a ladder covers any gap regardless of size while bricks are consumed proportionally. For each position we reach, we can check if it's achievable by sorting all the height jumps encountered so far and using ladders for the largest ones while using bricks for the rest.\n\n### Steps\n\n1. Iterate through each building index `i` from `1` to `n - 1`.\n2. If we have enough ladders to cover all jumps up to index `i`, we can definitely reach it.\n3. Otherwise, collect all positive height differences (jumps) from the start to index `i`.\n4. Sort the jumps in ascending order.\n5. Use bricks for the smallest jumps (all jumps except the largest `ladders` ones).\n6. If the total bricks needed exceeds what we have, return the previous index `i - 1`.\n7. If we successfully iterate through all buildings, return `n - 1`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:\n        n = len(heights)\n\n        for i in range(1, n):\n            if ladders >= i:\n                continue\n\n            diffs = []\n            for j in range(i):\n                if heights[j + 1] > heights[j]:\n                    diffs.append(heights[j + 1] - heights[j])\n\n            diffs.sort()\n            brickSum = 0\n            for j in range(len(diffs) - ladders):\n                brickSum += diffs[j]\n\n            if brickSum > bricks:\n                return i - 1\n\n        return n - 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/furthest-building-you-can-reach.md",
+      "id": "brute-force-greedy"
+    },
+    {
+      "approach": "Binary Search On Buildings",
+      "explanation": "### How it works\n\nInstead of checking each building sequentially, we can use binary search to find the furthest reachable building. The key insight is that reachability is monotonic: if we can reach building `i`, we can also reach all buildings before it. This lets us binary search on the answer.\n\n### Steps\n\n1. Binary search on the building index with range `[ladders - 1, n - 1]`.\n2. For each `mid` index, check if we can reach it using `canReach(mid)`.\n3. In `canReach`: collect all positive height differences up to index `mid`.\n4. Sort the differences and use bricks for the smallest ones (all except the largest `ladders`).\n5. If total bricks needed is within budget, we can reach that building.\n6. Adjust binary search bounds based on reachability.\n7. Return `l - 1` as the furthest reachable building.\n\n### Complexity\n\n- Time complexity: `O(n log ^ 2 n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:\n        def canReach(mid):\n            diffs = []\n            for i in range(mid):\n                if heights[i + 1] > heights[i]:\n                    diffs.append(heights[i + 1] - heights[i])\n\n            diffs.sort()\n            brickSum = 0\n            for j in range(len(diffs) - ladders):\n                brickSum += diffs[j]\n                if brickSum > bricks:\n                    return False\n\n            return True\n\n        l, r = ladders - 1, len(heights) - 1\n        while l <= r:\n            mid = (l + r) // 2\n            if canReach(mid):\n                l = mid + 1\n            else:\n                r = mid - 1\n\n        return l - 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/furthest-building-you-can-reach.md",
+      "id": "binary-search-on-buildings"
+    }
+  ]
 }

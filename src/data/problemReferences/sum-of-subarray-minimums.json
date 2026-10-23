@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int sumSubarrayMins(vector<int>& arr) {\n        const int MOD = 1e9 + 7;\n        int n = arr.size();\n        vector<int> dp(n, 0);\n        stack<int> stack;\n        long long res = 0;\n\n        for (int i = 0; i < n; i++) {\n            while (!stack.empty() && arr[stack.top()] > arr[i]) {\n                stack.pop();\n            }\n\n            int j = stack.empty() ? -1 : stack.top();\n            dp[i] = ((j != -1 ? dp[j] : 0) + arr[i] * (i - j)) % MOD;\n            res = (res + dp[i]) % MOD;\n            stack.push(i);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-subarray-minimums.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-subarray-minimums.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each subarray, we need to find its minimum element and add it to the total sum. The straightforward approach is to enumerate all possible subarrays by their start and end positions, tracking the running minimum as we extend each subarray.\n\n### Steps\n\n1. Initialize `res = 0` to store the sum of minimums.\n2. For each starting index `i`:\n    - Initialize `minVal = arr[i]`.\n    - For each ending index `j` from `i` to `n - 1`:\n        - Update `minVal = min(minVal, arr[j])`.\n        - Add `minVal` to `res` (modulo 10^9 + 7).\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sumSubarrayMins(self, arr: List[int]) -> int:\n        n, res = len(arr), 0\n        MOD = 1000000007\n\n        for i in range(n):\n            minVal = arr[i]\n            for j in range(i, n):\n                minVal = min(minVal, arr[j])\n                res = (res + minVal) % MOD\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-subarray-minimums.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Monotonically Increasing Stack (Two Pass)",
+      "explanation": "### How it works\n\nInstead of computing minimums for each subarray, we can ask: for each element, how many subarrays is it the minimum of? An element `arr[i]` is the minimum of all subarrays that start after the previous smaller element and end before the next smaller element. A monotonically increasing stack helps us efficiently find these boundaries.\n\n### Steps\n\n1. Use a stack to find `prevSmaller[i]`: the index of the previous smaller element (or -1 if none).\n2. Use another stack pass to find `nextSmaller[i]`: the index of the next smaller or equal element (or `n` if none). We use \"smaller or equal\" on one side to avoid double counting.\n3. For each element at index `i`:\n    - `left = i - prevSmaller[i]` is the count of valid starting positions.\n    - `right = nextSmaller[i] - i` is the count of valid ending positions.\n    - Add `arr[i] * left * right` to the result.\n4. Return `res` modulo 10^9 + 7.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sumSubarrayMins(self, arr: List[int]) -> int:\n        MOD = 10**9 + 7\n        n = len(arr)\n\n        # Compute previous smaller\n        prev_smaller = [-1] * n\n        stack = []\n        for i in range(n):\n            while stack and arr[stack[-1]] > arr[i]:\n                stack.pop()\n            prev_smaller[i] = stack[-1] if stack else -1\n            stack.append(i)\n\n        # Compute next smaller\n        next_smaller = [n] * n\n        stack = []\n        for i in range(n - 1, -1, -1):\n            while stack and arr[stack[-1]] >= arr[i]:\n                stack.pop()\n            next_smaller[i] = stack[-1] if stack else n\n            stack.append(i)\n\n        res = 0\n        for i in range(n):\n            left = i - prev_smaller[i]\n            right = next_smaller[i] - i\n            res = (res + arr[i] * left * right) % MOD\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sum-of-subarray-minimums.md",
+      "id": "monotonically-increasing-stack-two-pass"
+    }
+  ]
 }

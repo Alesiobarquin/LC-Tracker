@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool check(vector<int>& nums) {\n        int count = 0, N = nums.size();\n\n        for (int i = 0; i < N; i++) {\n            if (nums[i] > nums[(i + 1) % N] && ++count > 1) {\n                return false;\n            }\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-array-is-sorted-and-rotated.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-array-is-sorted-and-rotated.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA sorted and rotated array can be thought of as taking a sorted array and moving some elements from the end to the beginning. For example, `[3,4,5,1,2]` is `[1,2,3,4,5]` rotated. We can verify this by sorting the array and checking if our original array matches some rotation of the sorted version.\n\n### Steps\n\n1. Create a sorted copy of the input array.\n2. Try every possible rotation (`0` to `n-1` positions).\n3. For each rotation amount `i`, compare the original array with the sorted array rotated by `i` positions.\n4. To compare, check elements from position `n-i` to `n-1` of the sorted array against the beginning of the original, then elements from position `0` to `n-i-1` against the rest.\n5. If any rotation matches the original array, return `true`.\n6. If no rotation matches, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def check(self, nums: List[int]) -> bool:\n        sortedNums = sorted(nums)\n        arr = []\n\n        for i in range(len(nums)):\n            arr.insert(0, sortedNums.pop())\n            if nums == arr + sortedNums:\n                return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-array-is-sorted-and-rotated.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nIf we imagine the array as circular (the last element connects back to the first), a valid sorted-and-rotated array should have a contiguous segment of length `n` where elements are in non-decreasing order. We can simulate this circular behavior by conceptually doubling the array and looking for `n` consecutive non-decreasing elements.\n\n### Steps\n\n1. Iterate through indices `1` to `2n-1`, treating the array as circular using modulo operations.\n2. Maintain a count of consecutive non-decreasing pairs.\n3. If the current element (at index `i % n`) is greater than or equal to the previous element, increment the count.\n4. Otherwise, reset the count to `1`.\n5. If at any point the count reaches `n`, we found a valid sorted sequence, so return `true`.\n6. Handle the edge case where `n` equals `1` by returning `true` at the end.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def check(self, nums: List[int]) -> bool:\n        N = len(nums)\n        count = 1\n\n        for i in range(1, 2 * N):\n            if nums[(i - 1) % N] <= nums[i % N]:\n                count += 1\n            else:\n                count = 1\n            if count == N:\n                return True\n\n        return N == 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-array-is-sorted-and-rotated.md",
+      "id": "sliding-window"
+    }
+  ]
 }

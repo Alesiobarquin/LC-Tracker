@@ -1,0 +1,29 @@
+{
+  "problemId": "squirrel-simulation",
+  "approach": "Best First-Nut Saving",
+  "explanation": "### How it works\n\nEvery nut normally costs a round trip from the tree. Only the first nut starts at the squirrel, so choose the nut maximizing tree-to-nut distance minus squirrel-to-nut distance.\n\n### Steps\n\n1. Sum twice the tree distance for every nut.\n2. Compute the saving from starting with each nut.\n3. Subtract the largest saving, even if it is negative.\n\n### Complexity\n\n- Time: O(n) for n nuts.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def minDistance(\n      self,\n      height: int,\n      width: int,\n      tree: list[int],\n      squirrel: list[int],\n      nuts: list[list[int]],\n  ) -> int:\n    def dist(a: list[int], b: list[int]) -> int:\n      return abs(a[0] - b[0]) + abs(a[1] - b[1])\n\n    totDist = sum(dist(nut, tree) for nut in nuts) * 2\n    maxSave = max(dist(nut, tree) - dist(nut, squirrel) for nut in nuts)\n    return totDist - maxSave\n",
+    "cpp": "class Solution {\n public:\n  int minDistance(int height, int width, vector<int>& tree,\n                  vector<int>& squirrel, vector<vector<int>>& nuts) {\n    int totDist = 0;\n    int maxSave = INT_MIN;\n\n    for (const vector<int>& nut : nuts) {\n      totDist += dist(nut, tree) * 2;\n      maxSave = max(maxSave, dist(nut, tree) - dist(nut, squirrel));\n    }\n\n    return totDist - maxSave;\n  }\n\n private:\n  int dist(const vector<int>& a, const vector<int>& b) {\n    return abs(a[0] - b[0]) + abs(a[1] - b[1]);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/573.%20Squirrel%20Simulation",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "enumerate-the-first-route",
+      "approach": "Enumerate the First Route",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nExplicitly evaluate the full travel distance for each possible first nut. The first route starts at the squirrel and ends at the tree; every remaining nut requires a tree round trip.\n\n### Steps\n\n1. Choose each nut as the first.\n2. Add squirrel-to-first and first-to-tree distances.\n3. Add twice the tree distance for every other nut.\n4. Return the smallest route total.\n\n### Complexity\n\n- Time: O(n²).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/573.%20Squirrel%20Simulation",
+      "code": {
+        "python": "class Solution:\n    def minDistance(self, height: int, width: int, tree: list[int], squirrel: list[int], nuts: list[list[int]]) -> int:\n        def distance(a, b):\n            return abs(a[0] - b[0]) + abs(a[1] - b[1])\n        best = float('inf')\n        for first, nut in enumerate(nuts):\n            total = distance(squirrel, nut) + distance(nut, tree)\n            for i, other in enumerate(nuts):\n                if i != first:\n                    total += 2 * distance(tree, other)\n            best = min(best, total)\n        return best\n"
+      }
+    }
+  ]
+}

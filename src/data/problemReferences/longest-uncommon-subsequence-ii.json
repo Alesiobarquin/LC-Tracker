@@ -1,0 +1,29 @@
+{
+  "problemId": "longest-uncommon-subsequence-ii",
+  "approach": "Longest-First Subsequence Filtering",
+  "explanation": "### How it works\n\nA longest uncommon subsequence can be an entire input string. Try strings from longest to shortest, skipping duplicates and rejecting a candidate that is a subsequence of any earlier, at-least-as-long string.\n\n### Steps\n\n1. Identify duplicate input strings.\n2. Sort strings by decreasing length.\n3. Skip duplicate candidates.\n4. Return the first candidate not contained as a subsequence in a preceding string.\n\n### Complexity\n\n- Time: O(k² × L + k log k) for k strings of maximum length L.\n- Space: O(k × L) conservative bound for duplicate sets and sorting storage.",
+  "code": {
+    "python": "class Solution:\n  def findLUSlength(self, strs: list[str]) -> int:\n    def isSubsequence(a: str, b: str) -> bool:\n      i = 0\n      j = 0\n\n      while i < len(a) and j < len(b):\n        if a[i] == b[j]:\n          i += 1\n        j += 1\n\n      return i == len(a)\n\n    seen = set()\n    duplicates = set()\n\n    for s in strs:\n      if s in seen:\n        duplicates.add(s)\n      seen.add(s)\n\n    strs.sort(key=lambda x: -len(x))\n\n    for i in range(len(strs)):\n      if strs[i] in duplicates:\n        continue\n      isASubsequence = False\n      for j in range(i):\n        isASubsequence |= isSubsequence(strs[i], strs[j])\n      if not isASubsequence:\n        return len(strs[i])\n\n    return -1\n",
+    "cpp": "class Solution {\n public:\n  int findLUSlength(vector<string>& strs) {\n    unordered_set<string> seen;\n    unordered_set<string> duplicates;\n\n    for (const string& str : strs)\n      if (seen.contains(str))\n        duplicates.insert(str);\n      else\n        seen.insert(str);\n\n    ranges::sort(strs, ranges::greater{},\n                 [](const string& s) { return s.length(); });\n\n    for (int i = 0; i < strs.size(); ++i) {\n      if (duplicates.contains(strs[i]))\n        continue;\n      bool isASubsequence = false;\n      for (int j = 0; j < i; ++j)\n        isASubsequence |= isSubsequence(strs[i], strs[j]);\n      if (!isASubsequence)\n        return strs[i].length();\n    }\n\n    return -1;\n  }\n\n private:\n  // Returns true if a is a subsequence of b.\n  bool isSubsequence(const string& a, const string& b) {\n    int i = 0;\n    for (const char c : b)\n      if (i < a.length() && c == a[i])\n        ++i;\n    return i == a.length();\n  };\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/522.%20Longest%20Uncommon%20Subsequence%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "compare-every-whole-string-candidate",
+      "approach": "Compare Every Whole-String Candidate",
+      "explanation": "### How it works\n\nCheck each input string against every other string without sorting. A candidate is uncommon when it is not a subsequence of any other indexed string, including an equal duplicate.\n\n### Steps\n\n1. Choose each input index as a candidate.\n2. Scan each other string to test subsequence containment.\n3. Reject the candidate on the first containment.\n4. Keep the longest surviving length.\n\n### Complexity\n\n- Time: O(k² × L).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/522.%20Longest%20Uncommon%20Subsequence%20II",
+      "code": {
+        "python": "class Solution:\n    def findLUSlength(self, strs: list[str]) -> int:\n        def contained(a, b):\n            i = 0\n            for char in b:\n                if i < len(a) and a[i] == char:\n                    i += 1\n            return i == len(a)\n        best = -1\n        for i, word in enumerate(strs):\n            if all(i == j or not contained(word, other) for j, other in enumerate(strs)):\n                best = max(best, len(word))\n        return best\n"
+      }
+    }
+  ]
+}

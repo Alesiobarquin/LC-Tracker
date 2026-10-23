@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool validPartition(vector<int>& nums) {\n        bool dp[3] = {false, true, true};\n\n        for (int i = nums.size() - 2; i >= 0; --i) {\n            bool dp1 = dp[0];\n            if (nums[i] == nums[i + 1] && dp[1]) {\n                dp[0] = true;\n            } else if (i < nums.size() - 2 && dp[2] &&\n                      ((nums[i] == nums[i + 1] && nums[i] == nums[i + 2]) ||\n                      (nums[i] + 1 == nums[i + 1] && nums[i + 1] == nums[i + 2] - 1))) {\n                dp[0] = true;\n            } else {\n                dp[0] = false;\n            }\n            dp[2] = dp[1];\n            dp[1] = dp1;\n        }\n\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OxXPiwWFdTI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-there-is-a-valid-partition-for-the-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-there-is-a-valid-partition-for-the-array.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to partition the array into subarrays where each subarray is either two equal elements, three equal elements, or three consecutive increasing elements. At each position, we can try taking 2 or 3 elements if they form a valid pattern, then recursively check if the remainder can also be validly partitioned.\n\n### Steps\n\n1. Define a recursive function starting at index `0`.\n2. Base case: if we reach the end of the array, return `true` (valid partition found).\n3. At each position, try two options:\n   - If the next two elements are equal, recursively check from index `i+2`.\n   - If the next three elements are either all equal or form consecutive increasing values, recursively check from index `i+3`.\n4. Return `true` if any recursive path leads to a valid partition.\n5. Return `false` if no valid partition is possible from the current position.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def validPartition(self, nums: List[int]) -> bool:\n        def dfs(i):\n            if i == len(nums):\n                return True\n\n            res = False\n            if i < len(nums) - 1 and nums[i] == nums[i + 1]:\n                res = dfs(i + 2)\n            if i < len(nums) - 2:\n                if ((nums[i] == nums[i + 1] == nums[i + 2]) or\n                    (nums[i] + 1 == nums[i + 1] and nums[i + 1] + 1 == nums[i + 2])\n                ):\n                    res = res or dfs(i + 3)\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-there-is-a-valid-partition-for-the-array.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems because we might reach the same index through different partition choices. By memoizing results for each starting index, we avoid redundant computations. Once we compute whether a valid partition exists from index `i`, we store it and reuse it.\n\n### Steps\n\n1. Create a memoization map to store results for each starting index.\n2. Define a recursive function that first checks if the result for the current index is already computed.\n3. Base case: if we reach the end of the array, return `true`.\n4. Try forming a valid subarray of length `2` (two equal elements) and recurse.\n5. Try forming a valid subarray of length `3` (three equal or three consecutive) and recurse.\n6. Store the result in the memo before returning.\n7. Return the result for index `0`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def validPartition(self, nums: List[int]) -> bool:\n        dp = { len(nums) : True }\n        def dfs(i):\n            if i in dp:\n                return dp[i]\n\n            res = False\n            if i < len(nums) - 1 and nums[i] == nums[i + 1]:\n                res = dfs(i + 2)\n            if i < len(nums) - 2:\n                if ((nums[i] == nums[i + 1] == nums[i + 2]) or\n                    (nums[i] + 1 == nums[i + 1] and nums[i + 1] + 1 == nums[i + 2])\n                ):\n                    res = res or dfs(i + 3)\n\n            dp[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-there-is-a-valid-partition-for-the-array.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

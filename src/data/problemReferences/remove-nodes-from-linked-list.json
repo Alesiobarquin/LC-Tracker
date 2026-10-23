@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverse(ListNode* head) {\n        ListNode* prev = nullptr;\n        ListNode* cur = head;\n        while (cur) {\n            ListNode* tmp = cur->next;\n            cur->next = prev;\n            prev = cur;\n            cur = tmp;\n        }\n        return prev;\n    }\n\n    ListNode* removeNodes(ListNode* head) {\n        head = reverse(head);\n        ListNode* cur = head;\n        int cur_max = head->val;\n\n        while (cur && cur->next) {\n            if (cur->next->val < cur_max) {\n                cur->next = cur->next->next;\n            } else {\n                cur_max = cur->next->val;\n                cur = cur->next;\n            }\n        }\n        return reverse(head);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-nodes-from-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-nodes-from-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nA node should be removed if there exists a larger value somewhere to its right. To check this efficiently, we first convert the linked list into an array. Then we traverse the array from right to left, keeping track of the maximum value seen so far. Any node with a value smaller than this running maximum gets removed by adjusting the previous node's pointer.\n\n### Steps\n\n1. Create an array with a dummy node at the start, followed by all nodes from the linked list.\n2. Initialize `rightMaxi` to track the maximum node seen from the right.\n3. Traverse the array from right to left:\n    - If the current node's value is less than `rightMaxi.val`, update the previous node's `next` pointer to skip it.\n    - Otherwise, update `rightMaxi` to the current node.\n4. Return `arr[0].next` as the new head.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        cur, arr = head, [ListNode(0, head)]\n        while cur:\n            arr.append(cur)\n            cur = cur.next\n\n        rightMaxi = ListNode(0, None)\n        for i in range(len(arr) - 1, 0, -1):\n            if rightMaxi.val > arr[i].val:\n                arr[i - 1].next = rightMaxi\n            else:\n                rightMaxi = arr[i]\n\n        return arr[0].next\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-nodes-from-linked-list.md",
+      "id": "convert-to-array"
+    },
+    {
+      "approach": "Monotonic Decreasing Stack",
+      "explanation": "### How it works\n\nWe need to keep only nodes that have no larger value to their right. A monotonic decreasing stack naturally maintains this property. As we traverse the list, we pop any stack elements that are smaller than the current node's value. This ensures the stack always contains values in decreasing order from bottom to top, which are exactly the nodes that should remain.\n\n### Steps\n\n1. Initialize an empty stack to store node values.\n2. Traverse the linked list:\n    - While the stack is not empty and the current value is greater than the top of the stack, pop from the stack.\n    - Push the current value onto the stack.\n3. Build a new linked list from the stack values in order.\n4. Return the head of the new list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        stack = []\n        cur = head\n\n        while cur:\n            while stack and cur.val > stack[-1]:\n                stack.pop()\n            stack.append(cur.val)\n            cur = cur.next\n\n        dummy = ListNode()\n        cur = dummy\n\n        for num in stack:\n            cur.next = ListNode(num)\n            cur = cur.next\n\n        return dummy.next\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-nodes-from-linked-list.md",
+      "id": "monotonic-decreasing-stack"
+    }
+  ]
 }

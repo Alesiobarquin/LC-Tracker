@@ -1,0 +1,29 @@
+{
+  "problemId": "longest-absolute-file-path",
+  "approach": "Ancestor Length Stack",
+  "explanation": "### How it works\n\nTab depth identifies the current entry's parent. Maintain cumulative directory lengths on a stack, removing entries at the same or deeper depth before processing the next name.\n\n### Steps\n\n1. Split the input into entries and count leading tabs.\n2. Pop directories that cannot be the current parent.\n3. For a file, update the maximum parent-length plus filename-length.\n4. For a directory, push its cumulative length including a slash.\n\n### Complexity\n\n- Time: O(L) for input text length L.\n- Space: O(L) including split entries; O(d) stack for depth d.",
+  "code": {
+    "python": "class Solution:\n  def lengthLongestPath(self, input: str) -> int:\n    ans = 0\n    stack = [(-1, 0)]  # placeholder\n\n    for token in input.split('\\n'):\n      depth = token.count('\\t')\n      token = token.replace('\\t', '')\n      while depth <= stack[-1][0]:\n        stack.pop()\n      if '.' in token:  # `token` is file.\n        ans = max(ans, stack[-1][1] + len(token))\n      else:  # directory + '/'\n        stack.append((depth, stack[-1][1] + len(token) + 1))\n\n    return ans\n",
+    "cpp": "struct T {\n  int depth;\n  size_t length;\n};\n\nclass Solution {\n public:\n  int lengthLongestPath(string input) {\n    size_t ans = 0;\n    stack<T> stack{{{-1, 0}}};  // placeholder\n    istringstream iss(input);\n\n    for (string token; getline(iss, token, '\\n');) {\n      const int depth = ranges::count(token, '\\t');\n      std::erase(token, '\\t');\n      while (depth <= stack.top().depth)\n        stack.pop();\n      if (isFile(token))\n        ans = max(ans, stack.top().length + token.length());\n      else  // directory + '/'\n        stack.emplace(depth, stack.top().length + token.length() + 1);\n    }\n\n    return ans;\n  }\n\n private:\n  bool isFile(const string& token) {\n    return token.find('.') != string::npos;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/388.%20Longest%20Absolute%20File%20Path",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "depth-indexed-prefix-lengths",
+      "approach": "Depth-Indexed Prefix Lengths",
+      "explanation": "### How it works\n\nStore the cumulative directory length for each depth. Later entries overwrite obsolete values, so parent lookup needs no stack popping.\n\n### Steps\n\n1. Keep the empty root prefix at depth zero.\n2. Extract each entry's leading-tab depth.\n3. Use that depth's prefix to calculate the full path length.\n4. Update the next-depth directory prefix or the longest file path.\n\n### Complexity\n\n- Time: O(L).\n- Space: O(L) including split entries and depth prefixes.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/388.%20Longest%20Absolute%20File%20Path",
+      "code": {
+        "python": "class Solution:\n    def lengthLongestPath(self, input: str) -> int:\n        prefixes = {0: 0}\n        best = 0\n        for entry in input.split('\\n'):\n            name = entry.lstrip('\\t')\n            depth = len(entry) - len(name)\n            length = prefixes[depth] + len(name)\n            if '.' in name:\n                best = max(best, length)\n            else:\n                prefixes[depth + 1] = length + 1\n        return best\n"
+      }
+    }
+  ]
+}

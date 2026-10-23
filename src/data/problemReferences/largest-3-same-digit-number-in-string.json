@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string largestGoodInteger(string num) {\n        int res = -1;\n\n        for (int i = 0; i < num.length() - 2; i++) {\n            if (num[i] == num[i + 1] && num[i] == num[i + 2]) {\n                res = max(res, num[i] - '0');\n            }\n        }\n\n        return res != -1 ? string(3, res + '0') : \"\";\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-3-same-digit-number-in-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-3-same-digit-number-in-string.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to find the largest \"good integer\" in the string, where a good integer is a substring of length 3 consisting of the same digit repeated three times (like \"111\", \"222\", etc.). The straightforward approach is to scan through the string, check every window of size 3, and whenever we find three consecutive identical digits, we compare its numeric value to our current best and keep the larger one.\n\n### Steps\n\n1. Initialize `res` as an empty string and `val` as `0` to track the largest good integer found.\n2. Iterate through the string from index `0` to `len(num) - 2`:\n    - Check if the current character equals the next two characters.\n    - If so, extract the 3-character substring and convert it to an integer.\n    - If this value is greater than or equal to `val`, update both `val` and `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def largestGoodInteger(self, num: str) -> str:\n        res = \"\"\n        val = 0\n\n        for i in range(len(num) - 2):\n            if num[i] == num[i + 1] == num[i + 2]:\n                tmp = num[i : i + 3]\n                if val <= int(tmp):\n                    val = int(tmp)\n                    res = tmp\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-3-same-digit-number-in-string.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nInstead of tracking both the numeric value and the string separately, we can simplify by using string comparison. Since all good integers have the same length (3 characters), lexicographic comparison works correctly for finding the maximum. For example, \"999\" > \"888\" > \"777\" when compared as strings. We just need to handle the edge case where \"000\" is a valid result but we need to distinguish it from \"no good integer found.\"\n\n### Steps\n\n1. Initialize `res` to `\"0\"` as a baseline for comparison.\n2. Iterate through the string, checking each window of size 3:\n    - If three consecutive characters are the same, compare the substring with `res` and keep the larger one.\n3. If `res` is still `\"0\"` and `\"000\"` was never found, return an empty string. Otherwise, return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def largestGoodInteger(self, num: str) -> str:\n        res = \"0\"\n\n        for i in range(len(num) - 2):\n            if num[i] == num[i + 1] == num[i + 2]:\n                res = max(res, num[i : i + 3])\n\n        return \"\" if res == \"0\" else res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-3-same-digit-number-in-string.md",
+      "id": "iteration"
+    }
+  ]
 }

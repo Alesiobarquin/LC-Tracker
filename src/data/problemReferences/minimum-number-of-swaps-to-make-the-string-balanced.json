@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minSwaps(string s) {\n        int stackSize = 0;\n        for (auto& c : s) {\n            if (c == '[') stackSize++;\n            else if (stackSize > 0) stackSize--;\n        }\n        return (stackSize + 1) / 2;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=3YDBT9ZrfaU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-swaps-to-make-the-string-balanced.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-swaps-to-make-the-string-balanced.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nA balanced string has every `]` matched with a preceding `[`. We use a `stack` to track unmatched opening brackets. When we see `[`, we push it. When we see `]` and the `stack` is not empty, we pop (the bracket is matched). If the `stack` is empty when we see `]`, that closing bracket is unmatched.\n\nAfter processing, the `stack` contains only unmatched `[` brackets. Since the string has equal counts of `[` and `]`, the number of unmatched `[` equals the number of unmatched `]`. Each swap fixes two unmatched pairs, so we need `(unmatched + 1) / 2` swaps.\n\n### Steps\n\n1. Initialize an empty `stack`.\n2. Iterate through the string:\n    - If the character is `[`, push it onto the `stack`.\n    - If the character is `]` and the `stack` is not empty, pop the `stack`.\n3. The remaining `stack` size represents unmatched `[` brackets.\n4. Return `(stack_size + 1) / 2`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def minSwaps(self, s: str) -> int:\n        stack = []\n        for c in s:\n            if c == '[':\n                stack.append(c)\n            elif stack:\n                stack.pop()\n        return (len(stack) + 1) // 2\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-swaps-to-make-the-string-balanced.md",
+      "id": "stack"
+    },
+    {
+      "approach": "Greedy - I",
+      "explanation": "### How it works\n\nInstead of tracking opening brackets, we can track the imbalance directly. We maintain a `close` counter that increases for `]` and decreases for `[`. The `max` value this counter reaches tells us the worst-case imbalance, meaning the maximum number of unmatched closing brackets at any point.\n\nSince each swap can fix at most `2` unmatched brackets, the number of swaps needed is `(max_imbalance + 1) / 2`.\n\n### Steps\n\n1. Initialize `close = 0` and `maxClose = 0`.\n2. Iterate through the string:\n    - If the character is `[`, decrement `close`.\n    - If the character is `]`, increment `close`.\n    - Update `maxClose = max(maxClose, close)`.\n3. Return `(maxClose + 1) / 2`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def minSwaps(self, s: str) -> int:\n        close = maxClose = 0\n\n        for c in s:\n            if c == '[':\n                close -= 1\n            else:\n                close += 1\n            maxClose = max(maxClose, close)\n\n        return (maxClose + 1) // 2\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-swaps-to-make-the-string-balanced.md",
+      "id": "greedy-i"
+    }
+  ]
 }

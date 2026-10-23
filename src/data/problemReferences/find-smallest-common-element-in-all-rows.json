@@ -7,5 +7,27 @@
     "cpp": "class Solution {\npublic:\n    int smallestCommonElement(vector<vector<int>>& mat) {\n        int n = mat.size(), m = mat[0].size();\n        int cur_max = 0, cnt = 0;\n        vector<int> pos(n);\n        while (true) {\n            for (int i = 0; i < n; ++i) {\n                while (pos[i] < m && mat[i][pos[i]] < cur_max) {\n                    ++pos[i];\n                }\n                if (pos[i] >= m) {\n                    return -1;\n                }\n                if (cur_max != mat[i][pos[i]]) {\n                    cnt = 1;\n                    cur_max = mat[i][pos[i]];\n                } else if (++cnt == n) {\n                    return cur_max;\n                }\n            }\n        }\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-smallest-common-element-in-all-rows.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-smallest-common-element-in-all-rows.md",
+  "alternatives": [
+    {
+      "approach": "Count Elements (Improved)",
+      "explanation": "### How it works\n\nWe can improve the average time complexity if we count elements column-by-column. This way, smaller elements will be counted first, and we can exit as soon as we get to an element that repeats `n` times.\n\n### Steps\n\n1. Create a count array of size `10001`.\n2. Iterate column by column (outer loop), then row by row (inner loop).\n3. For each element, increment its count.\n4. If the count reaches `n`, return that element immediately.\n5. If no common element is found after processing all elements, return `-1`.\n\n### Complexity\n\nFor `r` rows and `c` columns, time is `O(r × c)`. The frequency array has 10,001 slots, so auxiliary space is `O(U)` for value bound `U = 10000`, a fixed constant in this problem. Rows contain strictly increasing values, so one value cannot be counted twice in the same row.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def smallestCommonElement(self, mat: List[List[int]]) -> int:\n        count = [0] * 10001\n        n, m = len(mat), len(mat[0])\n\n        for j in range(m):\n            for i in range(n):\n                count[mat[i][j]] += 1\n                if count[mat[i][j]] == n:\n                    return mat[i][j]\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-smallest-common-element-in-all-rows.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "count-elements-improved"
+    },
+    {
+      "approach": "Binary Search (Improved)",
+      "explanation": "### How it works\n\nIn the solution above, we always search the entire row. We can improve the average time complexity if we start the next search from the position returned by the previous search. We can also return `-1` if all elements in the row are smaller than value we searched for.\n\n### Steps\n\n1. Maintain a `pos` array to track search starting points for each row.\n2. For each element in the first row:\n    - Binary search in each other row, starting from the stored position.\n    - If not found, update the position to where it would be inserted.\n    - If the position exceeds row length, return `-1` (no common element possible).\n3. If an element is found in all rows, return it.\n4. If no common element is found, return `-1`.\n\n### Complexity\n\nFor `r` rows and `c` columns, worst-case time is `O(r × c × log c)`: test each candidate in the first row against the other rows. Auxiliary space is `O(r)` for the remembered search positions.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def smallestCommonElement(self, mat: List[List[int]]) -> int:\n        n, m = len(mat), len(mat[0])\n        pos = [0] * n\n\n        for j in range(m):\n            found = True\n            i = 1\n            while i < n and found:\n                pos[i] = self.binarySearch(mat[i], pos[i], m, mat[0][j])\n                if pos[i] < 0:\n                    found = False\n                    pos[i] = -pos[i] - 1\n                    if pos[i] >= m:\n                        return -1\n                i += 1\n\n            if found:\n                return mat[0][j]\n\n        return -1\n\n\n    def binarySearch(self, arr, fromIndex, toIndex, target):\n        left, right = fromIndex, toIndex - 1\n        while left <= right:\n            mid = (left + right) // 2\n            if arr[mid] == target:\n                return mid\n            elif arr[mid] < target:\n                left = mid + 1\n            else:\n                right = mid - 1\n        return -(left + 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-smallest-common-element-in-all-rows.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "binary-search-improved"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool wordPattern(string pattern, string s) {\n        vector<string> words;\n        string word;\n        stringstream ss(s);\n        while (ss >> word) {\n            words.push_back(word);\n        }\n\n        if (pattern.size() != words.size()) {\n            return false;\n        }\n\n        unordered_map<char, int> charToWord;\n        for (int i = 0; i < pattern.size(); ++i) {\n            char c = pattern[i];\n            const string& w = words[i];\n\n            if (charToWord.count(c)) {\n                if (words[charToWord[c]] != w) {\n                    return false;\n                }\n            } else {\n                for (const auto& [key, val] : charToWord) {\n                    if (words[val] == w) {\n                        return false;\n                    }\n                }\n                charToWord[c] = i;\n            }\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=W_akoecmCbM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-pattern.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-pattern.md",
+  "alternatives": [
+    {
+      "approach": "Two Hash Maps",
+      "explanation": "### How it works\n\nA valid pattern match requires a bijection (one-to-one correspondence) between pattern characters and words. Each character must map to exactly one word, and each word must map to exactly one character. Using two hash maps allows us to verify both directions of this mapping simultaneously as we iterate through the `pattern` and `words`.\n\n### Steps\n\n1. Split the string s into an array of words.\n2. If the pattern length does not equal the number of words, return false.\n3. Create two maps: one mapping characters to words, another mapping words to characters.\n4. For each character-word pair, check if existing mappings are consistent with the current pair.\n5. If a conflict is found in either direction, return false. Otherwise, update both mappings.\n6. Return true if all pairs are processed without conflicts.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `pattern` and `m` is the length of the string `s`.",
+      "code": {
+        "python": "class Solution:\n    def wordPattern(self, pattern: str, s: str) -> bool:\n        words = s.split(\" \")\n        if len(pattern) != len(words):\n            return False\n\n        charToWord = {}\n        wordToChar = {}\n\n        for c, w in zip(pattern, words):\n            if c in charToWord and charToWord[c] != w:\n                return False\n            if w in wordToChar and wordToChar[w] != c:\n                return False\n            charToWord[c] = w\n            wordToChar[w] = c\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-pattern.md",
+      "id": "two-hash-maps"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nWe can use a hash map to track character to word mappings and a hash set to track which words have already been assigned to some character. When we encounter a new `character`, we check if its corresponding `word` is already used by another character. This ensures the bijection property using less memory than two full maps.\n\n### Steps\n\n1. Split the string and verify the pattern and word counts match.\n2. Create a map for character to index and a set for used words.\n3. For each character-word pair, if the character was seen before, verify it maps to the same word.\n4. If the character is new, check if the word is already in the used set (which would indicate a duplicate mapping).\n5. If the word is already used by another character, return false. Otherwise, add the mapping and mark the word as used.\n6. Return true if all pairs pass validation.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `pattern` and `m` is the length of the string `s`.",
+      "code": {
+        "python": "class Solution:\n    def wordPattern(self, pattern: str, s: str) -> bool:\n        words = s.split()\n        if len(pattern) != len(words):\n            return False\n\n        charToWord = {}\n        store = set()\n\n        for i, (c, w) in enumerate(zip(pattern, words)):\n            if c in charToWord:\n                if words[charToWord[c]] != w:\n                    return False\n            else:\n                if w in store:\n                    return False\n                charToWord[c] = i\n                store.add(w)\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-pattern.md",
+      "id": "hash-set"
+    }
+  ]
 }

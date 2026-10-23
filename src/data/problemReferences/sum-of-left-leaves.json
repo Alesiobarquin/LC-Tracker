@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/404.%20Sum%20of%20Left%20Leaves",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "iterative-tree-stack",
+      "approach": "Iterative Tree Stack",
+      "explanation": "### How it works\n\nTraverse with a stack. A left child contributes only when it has no children; right leaves never contribute.\n\n### Steps\n\n1. Push the root when present.\n2. Add a left child's value if it is a leaf.\n3. Push non-leaf left children and existing right children.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(h)` stack space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/404.%20Sum%20of%20Left%20Leaves/404-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n  def sumOfLeftLeaves(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n\n    ans = 0\n    stack = [root]\n\n    while stack:\n      root = stack.pop()\n      if root.left:\n        if not root.left.left and not root.left.right:\n          ans += root.left.val\n        else:\n          stack.append(root.left)\n      if root.right:\n        stack.append(root.right)\n\n    return ans\n"
+      }
+    }
+  ]
 }

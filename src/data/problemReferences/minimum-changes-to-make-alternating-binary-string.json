@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minOperations(string s) {\n        int count = 0;\n\n        for (int i = 0; i < s.size(); i++) {\n            if (i % 2 == 0) {\n                if (s[i] == '0') {\n                    count++;\n                }\n            } else {\n                if (s[i] == '1') {\n                    count++;\n                }\n            }\n        }\n\n        return min(count, (int)s.size() - count);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-changes-to-make-alternating-binary-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-changes-to-make-alternating-binary-string.md",
+  "alternatives": [
+    {
+      "approach": "Start with Zero and One",
+      "explanation": "### How it works\n\nAn alternating binary string must follow one of two patterns: starting with '0' (like \"010101...\") or starting with '1' (like \"101010...\"). We simply count how many characters differ from each pattern and return the smaller count.\n\nWe use XOR to toggle the expected character at each position. Starting with 0, we XOR with 1 after each character to alternate between expecting 0 and 1.\n\n### Steps\n\n1. Initialize `cnt1 = 0` and expected character `cur = 0` (pattern starting with '0').\n2. For each character in the string:\n    - If the character does not match `cur`, increment `cnt1`.\n    - Toggle `cur` using XOR with `1`.\n3. Repeat with `cur = 1` (pattern starting with '1') to get `cnt2`.\n4. Return the `min` of `cnt1` and `cnt2`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def minOperations(self, s: str) -> int:\n        cur = cnt1 = 0\n        for c in s:\n            if int(c) != cur:\n                cnt1 += 1\n            cur ^= 1\n\n        cur = 1\n        cnt2 = 0\n        for c in s:\n            if int(c) != cur:\n                cnt2 += 1\n            cur ^= 1\n\n        return min(cnt1, cnt2)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-changes-to-make-alternating-binary-string.md",
+      "id": "start-with-zero-and-one"
+    }
+  ]
 }

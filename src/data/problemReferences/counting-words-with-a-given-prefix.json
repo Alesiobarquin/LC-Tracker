@@ -7,5 +7,25 @@
     "cpp": "struct PrefixNode {\n    PrefixNode* children[26];\n    int count;\n    PrefixNode() {\n        for (int i = 0; i < 26; i++) children[i] = nullptr;\n        count = 0;\n    }\n};\n\nclass PrefixTree {\npublic:\n    PrefixNode* root;\n    PrefixTree() {\n        root = new PrefixNode();\n    }\n\n    void add(const string& w, int length) {\n        PrefixNode* cur = root;\n        for (int i = 0; i < length; i++) {\n            int idx = w[i] - 'a';\n            if (!cur->children[idx]) {\n                cur->children[idx] = new PrefixNode();\n            }\n            cur = cur->children[idx];\n            cur->count++;\n        }\n    }\n\n    int count(const string& pref) {\n        PrefixNode* cur = root;\n        for (char c : pref) {\n            int idx = c - 'a';\n            if (!cur->children[idx]) return 0;\n            cur = cur->children[idx];\n        }\n        return cur->count;\n    }\n};\n\nclass Solution {\npublic:\n    int prefixCount(vector<string>& words, string pref) {\n        PrefixTree prefixTree;\n        for (string& w : words) {\n            if ((int)w.size() >= (int)pref.size()) {\n                prefixTree.add(w, pref.size());\n            }\n        }\n        return prefixTree.count(pref);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-words-with-a-given-prefix.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-words-with-a-given-prefix.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo check if a word has a given prefix, we compare the first few characters of the word with the prefix string. If the word is shorter than the prefix, it cannot have that prefix. Otherwise, we check character by character until we either find a mismatch or confirm all prefix characters match.\n\n### Steps\n\n1. Initialize a counter to `0`.\n2. For each word in the array:\n    - Skip if the word is shorter than the prefix length.\n    - Compare each character of the word with the corresponding character of the prefix.\n    - If all characters match, increment the counter.\n3. Return the final count.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)`\n\n> Where `m` is the number of words and `n` is the length of the string `pref`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def prefixCount(self, words: List[str], pref: str) -> int:\n        N, res = len(pref), 0\n\n        for w in words:\n            if len(w) < len(pref):\n                continue\n            inc = 1\n            for i in range(N):\n                if w[i] != pref[i]:\n                    inc = 0\n                    break\n            res += inc\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-words-with-a-given-prefix.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Built-In Method",
+      "explanation": "### How it works\n\nMost programming languages provide built-in methods to check if a string starts with a given prefix. These methods handle the character comparison internally and are optimized for the task, making the code cleaner and less error-prone.\n\n### Steps\n\n1. Initialize a counter to `0`.\n2. For each word in the array, use the language's built-in prefix checking method (like `startsWith` or `hasPrefix`).\n3. If the word starts with the prefix, increment the counter.\n4. Return the final count.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)`\n\n> Where `m` is the number of words and `n` is the length of the string `pref`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def prefixCount(self, words: List[str], pref: str) -> int:\n        res = 0\n        for w in words:\n            res += w.startswith(pref)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-words-with-a-given-prefix.md",
+      "id": "built-in-method"
+    }
+  ]
 }

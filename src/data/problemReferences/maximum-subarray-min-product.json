@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxSumMinProduct(vector<int>& nums) {\n        int n = nums.size();\n        vector<long long> prefixSum(n + 1, 0);\n        for (int i = 0; i < n; i++) {\n            prefixSum[i + 1] = prefixSum[i] + nums[i];\n        }\n\n        long long res = 0;\n        const int mod = 1e9 + 7;\n        stack<int> st;\n        for (int i = 0; i <= n; i++) {\n            while (!st.empty() && (i == n || nums[i] < nums[st.top()])) {\n                int j = st.top();\n                st.pop();\n                int start = st.empty() ? 0 : st.top() + 1;\n                res = max(res, (long long) nums[j] * (prefixSum[i] - prefixSum[start]));\n            }\n            st.push(i);\n        }\n\n        return res % mod;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=YLesLbNkyjA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray-min-product.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray-min-product.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe min-product of a subarray is defined as the minimum element multiplied by the sum of all elements. For each possible subarray, we need to track both the running minimum and the running sum. By trying all subarrays starting from each index, we can compute every possible min-product and find the maximum.\n\n### Steps\n\n1. For each starting index `i` from `0` to `n-1`:\n    - Initialize `total_sum = 0` and `mini = infinity`.\n    - Extend the subarray rightward from `i` to `n-1`.\n    - Update `mini` with each new element.\n    - Add each element to `total_sum`.\n    - Calculate `mini * total_sum` and update the result.\n2. Return the maximum min-product modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSumMinProduct(self, nums: List[int]) -> int:\n        res, MOD = 0, 1000000007\n        for i in range(len(nums)):\n            total_sum = 0\n            mini = float(\"inf\")\n            for j in range(i, len(nums)):\n                mini = min(mini, nums[j])\n                total_sum += nums[j]\n                cur = (mini * total_sum) % MOD\n                res = max(res, cur)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray-min-product.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Divide And Conquer (Brute Force)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor any subarray, the minimum element defines the \"bottleneck.\" If we know the minimum element's position, the optimal subarray with that element as minimum spans as far as possible in both directions. This leads to a divide and conquer approach: find the minimum in the current range, calculate the score for the entire range using that minimum, then recursively solve for the left and right portions (excluding the minimum).\n\n### Steps\n\n1. Define a recursive function for range `[l, r]`:\n    - Base case: if `l > r`, return `0`.\n    - Find the index of the minimum element in `[l, r]` and compute the total sum.\n    - Calculate the current score as `sum * min_element`.\n    - Recursively solve for `[l, min_idx - 1]` and `[min_idx + 1, r]`.\n    - Return the maximum of the three values.\n2. Call the recursive function on `[0, n-1]` and return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSumMinProduct(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n\n        def rec(l, r):\n            if l > r:\n                return 0\n\n            min_idx = l\n            total_sum = 0\n            for i in range(l, r + 1):\n                total_sum += nums[i]\n                if nums[i] < nums[min_idx]:\n                    min_idx = i\n\n            cur = total_sum * nums[min_idx]\n            left = rec(l, min_idx - 1)\n            right = rec(min_idx + 1, r)\n\n            return max(cur, left, right)\n\n        return rec(0, len(nums) - 1) % MOD\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subarray-min-product.md",
+      "id": "divide-and-conquer-brute-force"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "number-of-subarrays-with-bounded-maximum",
+  "approach": "Last Forbidden and Last Required Positions",
+  "explanation": "### How it works\n\nFor each right endpoint, valid starts lie after the latest value above right and at or before the latest value at least left. Their index difference counts valid subarrays ending here.\n\n### Steps\n\n1. Track the last index exceeding right.\n2. Track the last index at least left.\n3. Update both markers as values arrive.\n4. Add the second marker minus the first.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def numSubarrayBoundedMax(\n      self,\n      nums: list[int],\n      left: int,\n      right: int,\n  ) -> int:\n    ans = 0\n    l = -1\n    r = -1\n\n    for i, num in enumerate(nums):\n      if num > right:  # Handle the reset value.\n        l = i\n      if num >= left:  # Handle the reset and the needed value.\n        r = i\n      ans += r - l\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int numSubarrayBoundedMax(vector<int>& nums, int left, int right) {\n    int ans = 0;\n    int l = -1;\n    int r = -1;\n\n    for (int i = 0; i < nums.size(); ++i) {\n      if (nums[i] > right)  // Handle the reset value.\n        l = i;\n      if (nums[i] >= left)  // Handle the reset and the needed value.\n        r = i;\n      ans += r - l;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/795.%20Number%20of%20Subarrays%20with%20Bounded%20Maximum",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "difference-of-at-most-counts",
+      "approach": "Difference of At-Most Counts",
+      "explanation": "### How it works\n\nSubarrays whose maximum lies in [left, right] equal those with maximum at most right minus those with maximum at most left − 1. Count each at-most class using runs of allowed values.\n\n### Steps\n\n1. Count subarrays entirely formed by values at most right.\n2. Count those entirely formed by values below left.\n3. For each bound, extend or reset an allowed-value run and add its length.\n4. Subtract the two counts.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/795.%20Number%20of%20Subarrays%20with%20Bounded%20Maximum",
+      "code": {
+        "python": "class Solution:\n    def numSubarrayBoundedMax(self, nums: list[int], left: int, right: int) -> int:\n        def at_most(limit):\n            run = total = 0\n            for value in nums:\n                run = run + 1 if value <= limit else 0\n                total += run\n            return total\n        return at_most(right) - at_most(left - 1)\n"
+      }
+    }
+  ]
+}

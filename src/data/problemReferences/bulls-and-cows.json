@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/299.%20Bulls%20and%20Cows",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "one-pass-balance-counts",
+      "approach": "One-Pass Balance Counts",
+      "explanation": "### How it works\n\nFor mismatched digits, maintain how many copies have appeared on each side but have not yet been paired. A new secret digit pairs with an earlier unmatched guess, and a new guess digit pairs with an earlier unmatched secret.\n\n### Steps\n\n1. Count equal-position digits as bulls and skip their balance updates.\n2. For mismatches, count a cow when the opposite side has an unmatched copy.\n3. Update the digit balances in opposite directions.\n4. Format the two counts.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(1)` for ten digit balances.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/299.%20Bulls%20and%20Cows",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def getHint(self, secret: str, guess: str) -> str:\n        balance = [0] * 10\n        bulls = cows = 0\n        for a, b in zip(secret, guess):\n            if a == b:\n                bulls += 1\n                continue\n            x, y = int(a), int(b)\n            cows += (balance[x] < 0) + (balance[y] > 0)\n            balance[x] += 1\n            balance[y] -= 1\n        return f'{bulls}A{cows}B'\n"
+      }
+    }
+  ]
 }

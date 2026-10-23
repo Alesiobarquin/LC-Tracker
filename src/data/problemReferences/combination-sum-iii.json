@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/216.%20Combination%20Sum%20III",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "enumerate-digit-masks",
+      "approach": "Enumerate Digit Masks",
+      "explanation": "### How it works\n\nA nine-bit mask selects a subset of the digits one through nine. Each digit can appear once, so filtering masks by selected count and sum gives every valid combination exactly once.\n\n### Steps\n\n1. Enumerate the 512 masks over digits one through nine.\n2. Keep masks with exactly k set bits.\n3. Collect the selected digits and return those whose sum is n.\n\n### Complexity\n\n- Time: `O(9 × 2^9)` fixed-domain work.\n- Space: `O(k)` temporary space, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/216.%20Combination%20Sum%20III",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def combinationSum3(self, k: int, n: int) -> list[list[int]]:\n        result = []\n        for mask in range(1 << 9):\n            if mask.bit_count() == k:\n                digits = [i + 1 for i in range(9) if mask & (1 << i)]\n                if sum(digits) == n:\n                    result.append(digits)\n        return result\n"
+      }
+    }
+  ]
 }

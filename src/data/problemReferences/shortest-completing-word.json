@@ -1,0 +1,29 @@
+{
+  "problemId": "shortest-completing-word",
+  "approach": "Required-Letter Frequency Checks",
+  "explanation": "### How it works\n\nIgnore digits and spaces in the plate, count its lowercase letters, and require each candidate word to supply those multiplicities. Replace the answer only with a shorter match to preserve the first tie.\n\n### Steps\n\n1. Count case-normalized plate letters.\n2. Count each candidate's letters.\n3. Check that every required multiplicity is available.\n4. Keep the shortest qualifying word, preserving input order on ties.\n\n### Complexity\n\n- Time: O(P + W) for plate length P and total candidate characters W, with a fixed alphabet.\n- Space: O(1) alphabet counts, excluding input and returned word.",
+  "code": {
+    "python": "import string\nimport collections\n\nclass Solution:\n  def shortestCompletingWord(self, licensePlate: str, words: list[str]) -> str:\n    def isMatch(word: str) -> bool:\n      wordCount = collections.Counter(word)\n      return False if any(\n          wordCount[i] < count[i] for i in string.ascii_letters) else True\n\n    ans = '*' * 16\n    count = collections.defaultdict(int)\n\n    for c in licensePlate:\n      if c.isalpha():\n        count[c.lower()] += 1\n\n    for word in words:\n      if len(word) < len(ans) and isMatch(word):\n        ans = word\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  string shortestCompletingWord(string licensePlate, vector<string>& words) {\n    string ans(16, '.');\n    vector<int> count(26);\n\n    for (const char c : licensePlate)\n      if (isalpha(c))\n        ++count[tolower(c) - 'a'];\n\n    for (const string& word : words)\n      if (word.length() < ans.length() && isComplete(count, getCount(word)))\n        ans = word;\n\n    return ans;\n  }\n\n private:\n  // Returns true if c1 is a subset of c2.\n  bool isComplete(const vector<int>& c1, const vector<int> c2) {\n    for (int i = 0; i < 26; ++i)\n      if (c1[i] > c2[i])\n        return false;\n    return true;\n  }\n\n  vector<int> getCount(const string& word) {\n    vector<int> count(26);\n    for (const char c : word)\n      ++count[c - 'a'];\n    return count;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/748.%20Shortest%20Completing%20Word",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "length-ordered-character-consumption",
+      "approach": "Length-Ordered Character Consumption",
+      "explanation": "### How it works\n\nVisit candidates in stable increasing-length order. For each, remove one matching character for every required plate letter; the first fully consumed requirement is the answer.\n\n### Steps\n\n1. Collect lowercase plate letters, retaining repeats.\n2. Stable-sort candidates by length.\n3. Copy a candidate's character list and remove each required letter once.\n4. Return the first candidate satisfying every removal.\n\n### Complexity\n\n- Time: O(k log k + P × W) conservative bound for k candidates.\n- Space: O(k + P + L) temporary storage for maximum candidate length L.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/748.%20Shortest%20Completing%20Word",
+      "code": {
+        "python": "class Solution:\n    def shortestCompletingWord(self, licensePlate: str, words: list[str]) -> str:\n        required = [char.lower() for char in licensePlate if char.isalpha()]\n        for word in sorted(words, key=len):\n            available = list(word)\n            for char in required:\n                if char not in available:\n                    break\n                available.remove(char)\n            else:\n                return word\n        return ''\n"
+      }
+    }
+  ]
+}

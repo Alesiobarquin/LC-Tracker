@@ -1,0 +1,29 @@
+{
+  "problemId": "design-log-storage-system",
+  "approach": "Timestamp-Prefix Scan",
+  "explanation": "### How it works\n\nFixed-width timestamps sort chronologically as text. Truncating both query bounds and stored timestamps to the requested granularity turns retrieval into inclusive prefix comparisons.\n\n### Steps\n\n1. Append each log ID and timestamp.\n2. Map granularity to a timestamp-prefix length.\n3. Truncate the query bounds.\n4. Return IDs whose timestamp prefixes fall inside the inclusive range.\n\n### Complexity\n\n- Time: O(1) per put; O(q) per retrieve for q logs, with fixed-width timestamps.\n- Space: O(q) stored logs, excluding query output.",
+  "code": {
+    "python": "class LogSystem:\n  def __init__(self):\n    self.granularityToIndices = {'Year': 4, 'Month': 7, 'Day': 10,\n                                 'Hour': 13, 'Minute': 16, 'Second': 19}\n    self.idAndTimestamps = []\n\n  def put(self, id: int, timestamp: str) -> None:\n    self.idAndTimestamps.append((id, timestamp))\n\n  def retrieve(self, start: str, end: str, granularity: str) -> list[int]:\n    index = self.granularityToIndices[granularity]\n    s = start[:index]\n    e = end[:index]\n    return [id for id, timestamp in self.idAndTimestamps\n            if s <= timestamp[:index] <= e]\n",
+    "cpp": "class LogSystem {\n public:\n  void put(int id, string timestamp) {\n    idAndTimestamps.emplace_back(id, timestamp);\n  }\n\n  vector<int> retrieve(string start, string end, string granularity) {\n    vector<int> ans;\n    const int index = granularityToIndices.at(granularity);\n    const string s = start.substr(0, index);\n    const string e = end.substr(0, index);\n\n    for (const auto& [id, timestamp] : idAndTimestamps) {\n      const string& t = timestamp.substr(0, index);\n      if (s <= t && t <= e)\n        ans.push_back(id);\n    }\n\n    return ans;\n  }\n\n private:\n  const unordered_map<string, int> granularityToIndices{\n      {\"Year\", 4},  {\"Month\", 7},   {\"Day\", 10},\n      {\"Hour\", 13}, {\"Minute\", 16}, {\"Second\", 19}};\n  vector<pair<int, string>> idAndTimestamps;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/635.%20Design%20Log%20Storage%20System",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sorted-timestamps-and-binary-search",
+      "approach": "Sorted Timestamps and Binary Search",
+      "explanation": "### How it works\n\nKeep logs ordered by full timestamp. Prefix bounds can be converted to a contiguous lexicographic interval, found with two binary searches.\n\n### Steps\n\n1. Insert timestamp/ID pairs into a sorted list.\n2. Use the truncated start prefix as the lower bound.\n3. Append a high ASCII sentinel to the end prefix for an inclusive upper bound.\n4. Return IDs from the located slice.\n\n### Complexity\n\n- Time: O(q) per put due to list shifts; O(log q + k) per retrieve returning k logs.\n- Space: O(q) stored logs and O(k) query slice.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/635.%20Design%20Log%20Storage%20System",
+      "code": {
+        "python": "from bisect import bisect_left, insort\n\nclass LogSystem:\n    def __init__(self):\n        self.logs = []\n        self.width = {'Year': 4, 'Month': 7, 'Day': 10, 'Hour': 13, 'Minute': 16, 'Second': 19}\n\n    def put(self, id: int, timestamp: str) -> None:\n        insort(self.logs, (timestamp, id))\n\n    def retrieve(self, start: str, end: str, granularity: str) -> list[int]:\n        width = self.width[granularity]\n        left = bisect_left(self.logs, (start[:width], -1))\n        right = bisect_left(self.logs, (end[:width] + '~', -1))\n        return [identifier for _, identifier in self.logs[left:right]]\n"
+      }
+    }
+  ]
+}

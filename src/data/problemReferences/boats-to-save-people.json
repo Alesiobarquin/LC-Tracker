@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int numRescueBoats(vector<int>& people, int limit) {\n        int m = *max_element(people.begin(), people.end());\n        vector<int> count(m + 1, 0);\n        for (int p : people) {\n            count[p]++;\n        }\n\n        int idx = 0, i = 1;\n        while (idx < people.size()) {\n            while (count[i] == 0) {\n                i++;\n            }\n            people[idx++] = i;\n            count[i]--;\n        }\n\n        int res = 0, l = 0, r = people.size() - 1;\n        while (l <= r) {\n            int remain = limit - people[r--];\n            res++;\n            if (l <= r && remain >= people[l]) {\n                l++;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=XbaxWuHIWUs",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/boats-to-save-people.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/boats-to-save-people.md",
+  "alternatives": [
+    {
+      "approach": "Sorting + Two Pointers",
+      "explanation": "### How it works\n\nSince each boat can carry at most two people and has a weight limit, we want to pair the heaviest person with the lightest person when possible. By sorting the weights, we can use two pointers: one at the heaviest person and one at the lightest. If they can share a boat, we move both pointers; otherwise, the heaviest person takes a boat alone.\n\n### Steps\n\n1. Sort the `people` array in ascending order.\n2. Initialize two pointers: `left` at index `0`, `right` at the last index.\n3. Initialize a boat counter to `0`.\n4. While `left` is less than or equal to `right`:\n    - Calculate the remaining capacity after placing the heaviest person (at `right`).\n    - Decrement `right` and increment the boat count.\n    - If the lightest person (at `left`) fits in the remaining capacity and `left` is still valid, increment `left`.\n5. Return the boat count.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numRescueBoats(self, people: List[int], limit: int) -> int:\n        people.sort()\n        res, l, r = 0, 0, len(people) - 1\n        while l <= r:\n            remain = limit - people[r]\n            r -= 1\n            res += 1\n            if l <= r and remain >= people[l]:\n                l += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/boats-to-save-people.md",
+      "id": "sorting-two-pointers"
+    }
+  ]
 }

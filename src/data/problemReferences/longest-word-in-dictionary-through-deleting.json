@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/524.%20Longest%20Word%20in%20Dictionary%20through%20Deleting",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-candidates-before-matching",
+      "approach": "Sort Candidates Before Matching",
+      "explanation": "### How it works\n\nOrder dictionary words by descending length and then ascending lexicographical order. The first word that is a subsequence already satisfies both answer priorities.\n\n### Steps\n\n1. Sort words by negative length and then text.\n2. Check each candidate with one forward scan through s.\n3. Return the first subsequence match, or an empty string.\n\n### Complexity\n\n- Time: `O(W × L × log W + W × (S + L))` as an upper bound for W words, maximum length L, and source length S.\n- Space: `O(W)` sorting workspace, excluding input strings.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/524.%20Longest%20Word%20in%20Dictionary%20through%20Deleting",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findLongestWord(self, s: str, dictionary: list[str]) -> str:\n        for word in sorted(dictionary, key=lambda word: (-len(word), word)):\n            index = 0\n            for char in s:\n                if index < len(word) and char == word[index]:\n                    index += 1\n            if index == len(word):\n                return word\n        return ''\n"
+      }
+    }
+  ]
 }

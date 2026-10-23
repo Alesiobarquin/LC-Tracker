@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool checkPossibility(vector<int>& nums) {\n        bool changed = false;\n\n        for (int i = 0; i < nums.size() - 1; i++) {\n            if (nums[i] <= nums[i + 1]) {\n                continue;\n            }\n            if (changed) {\n                return false;\n            }\n            if (i == 0 || nums[i + 1] >= nums[i - 1]) {\n                nums[i] = nums[i + 1];\n            } else {\n                nums[i + 1] = nums[i];\n            }\n            changed = true;\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=RegQckCegDk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/non-decreasing-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/non-decreasing-array.md",
+  "alternatives": [
+    {
+      "id": "try-one-neighbor-replacement",
+      "approach": "Try One Neighbor Replacement",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nIf one value can be repaired, it can be moved to a neighboring boundary value. Try those replacements independently and check the full array rather than committing greedily during the scan.\n\n### Steps\n\n1. Accept an already nondecreasing array.\n2. For each index, try replacing it by either existing neighbor's value.\n3. Check whether that copy is nondecreasing.\n4. Return true on any valid copy.\n\n### Complexity\n\n- Time: `O(n²)` time.\n- Space: `O(n)` for each candidate copy.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/non-decreasing-array.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def checkPossibility(self, nums: list[int]) -> bool:\n        def ordered(values):\n            return all(a <= b for a, b in zip(values, values[1:]))\n        if ordered(nums):\n            return True\n        for i in range(len(nums)):\n            for neighbor in [i - 1, i + 1]:\n                if 0 <= neighbor < len(nums):\n                    candidate = nums[:]\n                    candidate[i] = nums[neighbor]\n                    if ordered(candidate):\n                        return True\n        return False\n"
+      }
+    }
+  ]
 }

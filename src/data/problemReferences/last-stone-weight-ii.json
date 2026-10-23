@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lastStoneWeightII(vector<int>& stones) {\n        int stoneSum = accumulate(stones.begin(), stones.end(), 0);\n        int target = stoneSum / 2;\n        bitset<3001> dp;\n        dp[0] = true;\n\n        for (int stone : stones) {\n            dp |= (dp << stone);\n        }\n\n        for (int t = target; t >= 0; --t) {\n            if (dp[t]) {\n                return stoneSum - 2 * t;\n            }\n        }\n        return 0;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=gdXkkmzvR3c",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight-ii.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe key insight is that smashing stones is equivalent to partitioning them into two groups and finding the minimum difference between their sums. When two stones collide, the result is the absolute difference of their weights. If we think of assigning a positive or negative sign to each stone, the final result is the absolute value of the sum. This transforms the problem into finding a subset with sum as close to half the total as possible.\n\n### Steps\n\n1. Compute the total sum of all stones and set a target of half this sum.\n2. Use recursion to explore two choices for each stone: include it in the current subset or skip it.\n3. If the running total reaches or exceeds the target, or we've processed all stones, return the absolute difference between the two groups.\n4. Return the minimum result across all recursive paths.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(min(n, m))` for recursion stack.\n\n> Where `n` is the number of stones and `m` is the sum of the weights of the stones.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def lastStoneWeightII(self, stones: List[int]) -> int:\n        stoneSum = sum(stones)\n        target = (stoneSum + 1) // 2\n\n        def dfs(i, total):\n            if total >= target or i == len(stones):\n                return abs(total - (stoneSum - total))\n            return min(dfs(i + 1, total), dfs(i + 1, total + stones[i]))\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight-ii.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes the same subproblems many times. For example, reaching a total of `10` using stones at different indices might happen through multiple paths. By caching results based on the current index and running total, we avoid redundant work and speed up the solution significantly.\n\n### Steps\n\n1. Compute the total sum and `target` as in the recursive approach.\n2. Create a memoization dictionary keyed by `(index, total)`.\n3. Before recursing, check if the result is already cached. If so, return it.\n4. Otherwise, compute the result by trying both choices (skip or include the stone), cache it, and return.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the number of stones and `m` is the sum of the weights of the stones.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def lastStoneWeightII(self, stones: List[int]) -> int:\n        stoneSum = sum(stones)\n        target = (stoneSum + 1) // 2\n        dp = {}\n\n        def dfs(i, total):\n            if total >= target or i == len(stones):\n                return abs(total - (stoneSum - total))\n            if (i, total) in dp:\n                return dp[(i, total)]\n\n            dp[(i, total)] = min(dfs(i + 1, total), dfs(i + 1, total + stones[i]))\n            return dp[(i, total)]\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/last-stone-weight-ii.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

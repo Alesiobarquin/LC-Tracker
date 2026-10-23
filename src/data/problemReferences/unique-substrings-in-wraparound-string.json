@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/467.%20Unique%20Substrings%20in%20Wraparound%20String",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "store-valid-substrings",
+      "approach": "Store Valid Substrings",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nExtend a substring while adjacent letters advance cyclically through the alphabet. Store every valid substring in a set to count distinct values directly.\n\n### Steps\n\n1. Start a candidate at each index.\n2. Extend only when consecutive letters differ by one modulo 26.\n3. Add every valid substring to a set.\n4. Return the set size.\n\n### Complexity\n\n- Time: `O(n³)` worst-case work including substring copying and hashing.\n- Space: `O(n³)` worst-case character storage across distinct substrings.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/467.%20Unique%20Substrings%20in%20Wraparound%20String",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findSubstringInWraproundString(self, s: str) -> int:\n        seen = set()\n        for left in range(len(s)):\n            for right in range(left, len(s)):\n                if right > left and (ord(s[right]) - ord(s[right - 1])) % 26 != 1:\n                    break\n                seen.add(s[left:right + 1])\n        return len(seen)\n"
+      }
+    }
+  ]
 }

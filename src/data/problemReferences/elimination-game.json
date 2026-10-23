@@ -1,0 +1,29 @@
+{
+  "problemId": "elimination-game",
+  "approach": "Reflected Elimination Recurrence",
+  "explanation": "### How it works\n\nThe first left-to-right pass keeps the even numbers. The next reversed pass corresponds to reflecting the smaller problem's survivor, then scaling it by two.\n\n### Steps\n\n1. Return one for a single remaining number.\n2. Solve the half-sized elimination problem recursively.\n3. Reflect that survivor within the half-size sequence.\n4. Multiply by two to restore the original even-number positions.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(log n) recursion space.",
+  "code": {
+    "python": "class Solution:\n  def lastRemaining(self, n: int) -> int:\n    return 1 if n == 1 else 2 * (1 + n // 2 - self.lastRemaining(n // 2))\n",
+    "cpp": "class Solution {\n public:\n  int lastRemaining(int n) {\n    return n == 1 ? 1 : 2 * (1 + n / 2 - lastRemaining(n / 2));\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/390.%20Elimination%20Game",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "track-head-step-and-direction",
+      "approach": "Track Head, Step, and Direction",
+      "explanation": "### How it works\n\nThe remaining numbers always form an arithmetic progression. Track its first value and spacing; a left-to-right pass always changes the first value, while a right-to-left pass does so only for an odd remaining count.\n\n### Steps\n\n1. Start with head one, spacing one, and left-to-right direction.\n2. Advance the head for a left pass or an odd-sized right pass.\n3. Halve the count and double the spacing.\n4. Reverse direction until one value remains.\n\n### Complexity\n\n- Time: O(log n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/390.%20Elimination%20Game",
+      "code": {
+        "python": "class Solution:\n    def lastRemaining(self, n: int) -> int:\n        head, step, left = 1, 1, True\n        while n > 1:\n            if left or n % 2:\n                head += step\n            n //= 2\n            step *= 2\n            left = not left\n        return head\n"
+      }
+    }
+  ]
+}

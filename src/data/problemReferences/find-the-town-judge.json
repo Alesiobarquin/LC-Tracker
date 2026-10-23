@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int findJudge(int n, vector<vector<int>>& trust) {\n        vector<int> delta(n + 1, 0);\n\n        for (auto& t : trust) {\n            delta[t[0]]--;\n            delta[t[1]]++;\n        }\n\n        for (int i = 1; i <= n; i++) {\n            if (delta[i] == n - 1) {\n                return i;\n            }\n        }\n\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-town-judge.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-town-judge.md",
+  "alternatives": [
+    {
+      "approach": "Indegree & Outdegree",
+      "explanation": "### How it works\n\nThe town judge is trusted by everyone else but trusts nobody. In graph terms, if we model trust relationships as directed edges, the judge has an indegree of `n - 1` (everyone trusts them) and an outdegree of 0 (they trust nobody). We simply count incoming and outgoing edges for each person and find the one matching these criteria.\n\n### Steps\n\n1. Create two arrays: `incoming` and `outgoing`, both of size `n + 1`.\n2. For each trust pair `[a, b]`:\n    - Increment `outgoing[a]` (person `a` trusts someone).\n    - Increment `incoming[b]` (person `b` is trusted by someone).\n3. Iterate through persons `1` to `n`:\n    - If `outgoing[i] == 0` and `incoming[i] == n - 1`, return `i`.\n4. Return `-1` if no judge found.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def findJudge(self, n: int, trust: List[List[int]]) -> int:\n        incoming = defaultdict(int)\n        outgoing = defaultdict(int)\n\n        for src, dst in trust:\n            outgoing[src] += 1\n            incoming[dst] += 1\n\n        for i in range(1, n + 1):\n            if outgoing[i] == 0 and incoming[i] == n - 1:\n                return i\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-town-judge.md",
+      "id": "indegree-outdegree"
+    }
+  ]
 }

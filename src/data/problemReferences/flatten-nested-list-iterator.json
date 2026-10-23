@@ -7,5 +7,25 @@
     "cpp": "class NestedIterator {\nprivate:\n    vector<NestedInteger> stack;\n\npublic:\n    NestedIterator(vector<NestedInteger> &nestedList) {\n        stack = nestedList;\n        reverse(stack.begin(), stack.end());\n    }\n\n    int next() {\n        int val = stack.back().getInteger();\n        stack.pop_back();\n        return val;\n    }\n\n    bool hasNext() {\n        while (!stack.empty()) {\n            NestedInteger top = stack.back();\n            if (top.isInteger()) {\n                return true;\n            }\n            stack.pop_back();\n            vector<NestedInteger> nestedList = top.getList();\n            for (auto it = nestedList.rbegin(); it != nestedList.rend(); ++it) {\n                stack.push_back(*it);\n            }\n        }\n        return false;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flatten-nested-list-iterator.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flatten-nested-list-iterator.md",
+  "alternatives": [
+    {
+      "approach": "Recursion (Flatten And Store Into Global List)",
+      "explanation": "### How it works\n\nThe nested list can contain integers or other nested lists at any depth. We can flatten the entire structure upfront using depth-first traversal. By storing all integers in a flat array during construction, subsequent `next()` and `hasNext()` calls become simple array operations.\n\n### Steps\n\n1. **Constructor**: Initialize an empty array and a pointer at `0`. Call `dfs()` on the nested list to populate the array.\n2. **dfs(nestedArr)**: For each element in the nested array:\n    - If it's an integer, append it to the array.\n    - If it's a list, recursively call `dfs()` on that list.\n3. **next()**: Return the element at the current pointer and increment the pointer.\n4. **hasNext()**: Return `true` if the pointer is less than the array length.\n\n### Complexity\n\n- Time complexity: `O(n + d)`\n- Space complexity: `O(n + d)`\n\n> Where `n` is the number of integers and `d` is the nesting depth.",
+      "code": {
+        "python": "class NestedIterator:\n    def __init__(self, nestedList):\n        self.arr = []\n        self.ptr = 0\n        self.dfs(nestedList)\n\n    def next(self):\n        val = self.arr[self.ptr]\n        self.ptr += 1\n        return val\n\n    def hasNext(self):\n        return self.ptr < len(self.arr)\n\n    def dfs(self, nestedArr):\n        for num in nestedArr:\n            if num.isInteger():\n                self.arr.append(num.getInteger())\n            else:\n                self.dfs(num.getList())\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flatten-nested-list-iterator.md",
+      "id": "recursion-flatten-and-store-into-global-list"
+    },
+    {
+      "approach": "Recursion + Stack",
+      "explanation": "### How it works\n\nWe can use recursion to flatten the list and store the integers in a stack. By reversing the stack after flattening, we can pop elements in the correct order. This combines recursive traversal with stack-based iteration.\n\n### Steps\n\n1. **Constructor**: Initialize an empty stack. Call `dfs()` on the nested list, then reverse the stack.\n2. **dfs(nested)**: For each element:\n    - If it's an integer, push it onto the stack.\n    - If it's a list, recursively call `dfs()` on it.\n3. **next()**: Pop and return the top element from the stack.\n4. **hasNext()**: Return `true` if the stack is not empty.\n\n### Complexity\n\n- Time complexity: `O(n + d)`\n- Space complexity: `O(n + d)`\n\n> Where `n` is the number of integers and `d` is the nesting depth.",
+      "code": {
+        "python": "class NestedIterator:\n    def __init__(self, nestedList: [NestedInteger]):\n        self.stack = []\n        self.dfs(nestedList)\n        self.stack.reverse()\n\n    def next(self) -> int:\n        return self.stack.pop()\n\n    def hasNext(self) -> bool:\n        return len(self.stack) > 0\n\n    def dfs(self, nested):\n        for num in nested:\n            if num.isInteger():\n                self.stack.append(num.getInteger())\n            else:\n                self.dfs(num.getList())\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flatten-nested-list-iterator.md",
+      "id": "recursion-stack"
+    }
+  ]
 }

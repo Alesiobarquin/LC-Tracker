@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/395.%20Longest%20Substring%20with%20At%20Least%20K%20Repeating%20Characters",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "split-on-ineligible-characters",
+      "approach": "Split on Ineligible Characters",
+      "explanation": "### How it works\n\nA character occurring fewer than k times cannot belong to a valid substring of the current segment. Split around it and solve the remaining segments independently.\n\n### Steps\n\n1. Count characters in the segment.\n2. Split around a character occurring fewer than k times and solve each piece.\n3. When all present characters meet the threshold, return the whole segment length.\n\n### Complexity\n\n- Time: `O(a × n)` for alphabet size a, at most 26.\n- Space: `O(a × n)` as a conservative bound for recursive slices and counts.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/395.%20Longest%20Substring%20with%20At%20Least%20K%20Repeating%20Characters",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def longestSubstring(self, s: str, k: int) -> int:\n        if len(s) < k:\n            return 0\n        for char, count in Counter(s).items():\n            if count < k:\n                return max(self.longestSubstring(piece, k) for piece in s.split(char))\n        return len(s)\n"
+      }
+    }
+  ]
 }

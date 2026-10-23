@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numIdenticalPairs(vector<int>& nums) {\n        unordered_map<int, int> count;\n        int res = 0;\n        for (int num : nums) {\n            res += count[num];\n            count[num]++;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-good-pairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-good-pairs.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA good pair is defined as a pair `(i, j)` where `i < j` and `nums[i] == nums[j]`. The simplest approach is to check every possible pair of indices and count those that satisfy both conditions.\n\n### Steps\n\n1. Initialize a counter `res` to zero.\n2. Use two nested loops: the outer loop picks index `i`, and the inner loop picks index `j` where `j > i`.\n3. For each pair, if `nums[i] == nums[j]`, increment `res`.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numIdenticalPairs(self, nums: List[int]) -> int:\n        res = 0\n        for i in range(len(nums)):\n            for j in range(i + 1, len(nums)):\n                if nums[i] == nums[j]:\n                    res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-good-pairs.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map (Math)",
+      "explanation": "### How it works\n\nIf a value appears `c` times, the number of good pairs using that value equals the number of ways to choose 2 indices from `c` positions, which is `c * (c - 1) / 2`. We can count frequencies first, then sum up the pairs for each value.\n\n### Steps\n\n1. Count the frequency of each number using a hash map.\n2. For each frequency `c`, add `c * (c - 1) / 2` to the `res`.\n3. Return the total sum.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def numIdenticalPairs(self, nums: List[int]) -> int:\n        count = Counter(nums)\n        res = 0\n        for num, c in count.items():\n            res += c * (c - 1) // 2\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-good-pairs.md",
+      "id": "hash-map-math"
+    }
+  ]
 }

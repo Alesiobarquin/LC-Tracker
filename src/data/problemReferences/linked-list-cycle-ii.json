@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode(int x) : val(x), next(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* detectCycle(ListNode* head) {\n        if (!head || !head->next) {\n            return nullptr;\n        }\n\n        ListNode* slow = head;\n        ListNode* fast = head;\n\n        while (fast && fast->next) {\n            slow = slow->next;\n            fast = fast->next->next;\n\n            if (slow == fast) {\n                slow = head;\n                while (slow != fast) {\n                    slow = slow->next;\n                    fast = fast->next;\n                }\n                return slow;\n            }\n        }\n        return nullptr;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/linked-list-cycle-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/linked-list-cycle-ii.md",
+  "alternatives": [
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nIf we visit the same node twice, that node must be the start of the cycle. We can track all visited nodes in a set. The first node we encounter that's already in the set is the cycle's entry point. If we reach the end of the list without revisiting any node, there's no cycle.\n\n### Steps\n\n1. Create a hash set to store visited nodes.\n2. Traverse the linked list starting from the head.\n3. For each node, check if it's already in the set. If so, return that node as the cycle start.\n4. Otherwise, add the node to the set and move to the next node.\n5. If we reach a `null` node, return `null` (no cycle exists).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\n\nclass Solution:\n    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        seen = set()\n        cur = head\n        while cur:\n            if cur in seen:\n                return cur\n            seen.add(cur)\n            cur = cur.next\n        return None\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/linked-list-cycle-ii.md",
+      "id": "hash-set"
+    }
+  ]
 }

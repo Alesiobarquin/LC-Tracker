@@ -1,0 +1,29 @@
+{
+  "problemId": "degree-of-an-array",
+  "approach": "Streaming Frequency and First Index",
+  "explanation": "### How it works\n\nA value determines a candidate span from its first occurrence to the current occurrence. Update the array degree as counts grow and minimize spans tied at that degree.\n\n### Steps\n\n1. Remember each value's first index.\n2. Increment its frequency as the array is scanned.\n3. Replace the answer when a new degree is reached.\n4. Minimize the span for counts tying the degree.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(u) distinct-value state.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def findShortestSubArray(self, nums: list[int]) -> int:\n    ans = 0\n    degree = 0\n    debut = {}\n    count = collections.Counter()\n\n    for i, num in enumerate(nums):\n      debut.setdefault(num, i)\n      count[num] += 1\n      if count[num] > degree:\n        degree = count[num]\n        ans = i - debut[num] + 1\n      elif count[num] == degree:\n        ans = min(ans, i - debut[num] + 1)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findShortestSubArray(vector<int>& nums) {\n    int ans = 0;\n    int degree = 0;\n    unordered_map<int, int> debut;\n    unordered_map<int, int> count;\n\n    for (int i = 0; i < nums.size(); ++i) {\n      const int num = nums[i];\n      if (!debut.contains(num))\n        debut[num] = i;\n      if (++count[num] > degree) {\n        degree = count[num];\n        ans = i - debut[num] + 1;\n      } else if (count[num] == degree) {\n        ans = min(ans, i - debut[num] + 1);\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/697.%20Degree%20of%20an%20Array",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "grouped-occurrence-positions",
+      "approach": "Grouped Occurrence Positions",
+      "explanation": "### How it works\n\nGroup all positions by value. Only values reaching the global degree matter, and their shortest covering span runs from their first to last occurrence.\n\n### Steps\n\n1. Collect each value's positions.\n2. Find the largest occurrence-list length.\n3. For all lists of that length, calculate last − first + 1.\n4. Return the smallest span.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(n) stored positions.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/697.%20Degree%20of%20an%20Array",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def findShortestSubArray(self, nums: list[int]) -> int:\n        positions = defaultdict(list)\n        for i, value in enumerate(nums):\n            positions[value].append(i)\n        degree = max(map(len, positions.values()))\n        return min(indices[-1] - indices[0] + 1 for indices in positions.values() if len(indices) == degree)\n"
+      }
+    }
+  ]
+}

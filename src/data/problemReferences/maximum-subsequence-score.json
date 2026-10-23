@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long maxScore(vector<int>& nums1, vector<int>& nums2, int k) {\n        int n = nums1.size();\n        vector<long long> arr(n);\n        for (int i = 0; i < n; i++) {\n            arr[i] = ((long long) nums2[i] << 30) | nums1[i];\n        }\n\n        sort(arr.rbegin(), arr.rend());\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        long long n1Sum = 0, res = 0;\n\n        for (long long& num : arr) {\n            int n1 = num & ((1LL << 30) - 1);\n            int n2 = num >> 30;\n            n1Sum += n1;\n            minHeap.push(n1);\n\n            if (minHeap.size() > k) {\n                n1Sum -= minHeap.top();\n                minHeap.pop();\n            }\n            if (minHeap.size() == k) {\n                res = max(res, n1Sum * (long long)n2);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ax1DKi5lJwk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subsequence-score.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subsequence-score.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Recursion)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to select exactly `k` indices. The score is the sum of selected elements from `nums1` multiplied by the minimum of selected elements from `nums2`. Since we must choose exactly `k` elements, we can use recursion to try all combinations: for each index, either include it or skip it. When we include an element, we update the running sum and track the minimum from `nums2`.\n\n### Steps\n\n1. Define a recursive function with parameters: current index, remaining count `k`, current minimum from `nums2`, and current sum from `nums1`.\n2. Base case: if `k == 0`, return `sum * minVal`.\n3. If we cannot select `k` more elements, return negative infinity.\n4. If `minVal` is `0`, the result is `0` (any selection will have score `0`).\n5. Try both options:\n    - Skip the current index.\n    - Include the current index (update min and sum).\n6. Return the maximum of both choices.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:\n        n = len(nums1)\n\n        def dfs(i, k, minVal, curSum):\n            if k == 0:\n                return curSum * minVal\n            if i == n or (n - i) < k:\n                return float(\"-inf\")\n            if minVal == 0:\n                return 0\n\n            res = dfs(i + 1, k, minVal, curSum)\n            res = max(res, dfs(i + 1, k - 1, min(minVal, nums2[i]), curSum + nums1[i]))\n            return res\n\n        return dfs(0, k, float(\"inf\"), 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subsequence-score.md",
+      "id": "brute-force-recursion"
+    },
+    {
+      "approach": "Min-Heap - I",
+      "explanation": "### How it works\n\nThe key insight is that if we fix which element provides the minimum from `nums2`, we want the `k` largest corresponding values from `nums1` (among elements with `nums2` values >= our minimum). By sorting pairs by `nums2` in descending order and processing them one by one, each new element becomes the new minimum. We maintain the `k` largest `nums1` values seen so far using a min-heap.\n\n### Steps\n\n1. Create pairs of `(nums1[i], nums2[i])` and sort by `nums2` in descending order.\n2. Use a min-heap to track the `k` largest `nums1` values seen so far.\n3. Maintain a running sum of elements in the heap.\n4. For each pair in sorted order:\n    - Add the `nums1` value to the heap and update the sum.\n    - If heap size exceeds `k`, remove the smallest and subtract from sum.\n    - If heap size equals `k`, calculate score (`sum * current nums2`) and update result.\n5. Return the maximum score.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:\n        pairs = sorted(zip(nums1, nums2), key=lambda p: p[1], reverse=True)\n\n        minHeap = []\n        n1Sum = 0\n        res = 0\n\n        for n1, n2 in pairs:\n            n1Sum += n1\n            heapq.heappush(minHeap, n1)\n\n            if len(minHeap) > k:\n                n1Sum -= heapq.heappop(minHeap)\n\n            if len(minHeap) == k:\n                res = max(res, n1Sum * n2)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-subsequence-score.md",
+      "id": "min-heap-i"
+    }
+  ]
 }

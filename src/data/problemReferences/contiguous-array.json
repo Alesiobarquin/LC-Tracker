@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findMaxLength(vector<int>& nums) {\n        int zero = 0, one = 0, res = 0;\n        unordered_map<int, int> diffIndex;\n\n        for (int i = 0; i < nums.size(); i++) {\n            if (nums[i] == 0) {\n                zero++;\n            } else {\n                one++;\n            }\n\n            int diff = one - zero;\n            if (diffIndex.find(diff) == diffIndex.end()) {\n                diffIndex[diff] = i;\n            }\n\n            if (one == zero) {\n                res = one + zero;\n            } else {\n                res = max(res, i - diffIndex[diff]);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contiguous-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contiguous-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to check every possible subarray and count the number of zeros and ones in each. When we find a subarray where the count of zeros equals the count of ones, we have found a valid contiguous array. We keep track of the maximum length among all valid subarrays.\n\n### Steps\n\n1. Iterate through all possible starting indices `i` from `0` to `n-1`.\n2. For each starting index, iterate through all possible ending indices `j` from `i` to `n-1`.\n3. Maintain counts of zeros and ones as we extend the subarray.\n4. Whenever the count of zeros equals the count of ones, update the result if this subarray is longer than the current maximum.\n5. Return the maximum length found.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMaxLength(self, nums: List[int]) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            zeros = ones = 0\n            for j in range(i, n):\n                if nums[j] == 1:\n                    ones += 1\n                else:\n                    zeros += 1\n\n                if ones == zeros and res < (j - i + 1):\n                    res = j - i + 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contiguous-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Array",
+      "explanation": "### How it works\n\nInstead of counting zeros and ones separately, we can treat zeros as `-1` and ones as `+1`. When we compute a running sum, any subarray with equal zeros and ones will have a sum of `0`. More importantly, if the running sum at index `i` equals the running sum at index `j`, then the subarray from `i+1` to `j` has equal zeros and ones. We use an array to store the first occurrence of each possible running sum value.\n\n### Steps\n\n1. Create an array `diffIndex` of size `2n+1` to store indices (the sum can range from `-n` to `+n`).\n2. Initialize a running count starting at `0`.\n3. For each element, add `+1` if it's `1`, or `-1` if it's `0`.\n4. If count equals `0`, the entire subarray from the start to the current index is valid.\n5. If we've seen this count value before, the subarray between the first occurrence and the current index has equal zeros and ones. Update the result accordingly.\n6. If this is the first time seeing this count, store the current index.\n7. Return the maximum length found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMaxLength(self, nums: List[int]) -> int:\n        n = len(nums)\n        res = 0\n        diff_index = [None] * (2 * n + 1)\n        count = 0\n\n        for i in range(n):\n            count += 1 if nums[i] == 1 else -1\n            if count == 0:\n                res = i + 1\n            if diff_index[count + n] is not None:\n                res = max(res, i - diff_index[count + n])\n            else:\n                diff_index[count + n] = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/contiguous-array.md",
+      "id": "array"
+    }
+  ]
 }

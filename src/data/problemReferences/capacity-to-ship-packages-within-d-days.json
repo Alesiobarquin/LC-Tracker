@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int shipWithinDays(vector<int>& weights, int days) {\n        int l = *max_element(weights.begin(), weights.end());\n        int r = accumulate(weights.begin(), weights.end(), 0);\n        int res = r;\n\n        while (l <= r) {\n            int cap = (l + r) / 2;\n            if (canShip(weights, days, cap)) {\n                res = min(res, cap);\n                r = cap - 1;\n            } else {\n                l = cap + 1;\n            }\n        }\n        return res;\n    }\n\nprivate:\n    bool canShip(const vector<int>& weights, int days, int cap) {\n        int ships = 1, currCap = cap;\n        for (int w : weights) {\n            if (currCap - w < 0) {\n                ships++;\n                if (ships > days) {\n                    return false;\n                }\n                currCap = cap;\n            }\n            currCap -= w;\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ER_oLmdc-nw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/capacity-to-ship-packages-within-d-days.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/capacity-to-ship-packages-within-d-days.md",
+  "alternatives": [
+    {
+      "approach": "Linear Search",
+      "explanation": "### How it works\n\nThe minimum possible ship capacity must be at least as large as the heaviest package (otherwise that package could never be shipped). Starting from this minimum value, we can try each capacity one by one, simulating the shipping process to see if all packages can be delivered within the given number of days. The first capacity that works is our answer.\n\n### Steps\n\n1. Initialize the result to the maximum weight in the array (the minimum possible capacity).\n2. For the current capacity, simulate shipping by iterating through packages:\n    - Keep a running total of the current ship's load.\n    - When adding a package would exceed capacity, start a new ship.\n3. If the number of ships used is within the allowed days, return the current capacity.\n4. Otherwise, increment the capacity by 1 and repeat.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def shipWithinDays(self, weights: List[int], days: int) -> int:\n        res = max(weights)\n        while True:\n            ships = 1\n            cap = res\n            for w in weights:\n                if cap - w < 0:\n                    ships += 1\n                    cap = res\n                cap -= w\n\n            if ships <= days:\n                return res\n\n            res += 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/capacity-to-ship-packages-within-d-days.md",
+      "id": "linear-search"
+    }
+  ]
 }

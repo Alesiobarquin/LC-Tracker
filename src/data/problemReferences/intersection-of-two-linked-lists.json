@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode(int x) : val(x), next(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* getIntersectionNode(ListNode* headA, ListNode* headB) {\n        ListNode* l1 = headA;\n        ListNode* l2 = headB;\n        while (l1 != l2) {\n            l1 = l1 ? l1->next : headB;\n            l2 = l2 ? l2->next : headA;\n        }\n        return l1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=D0X0BONOQhI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-linked-lists.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-linked-lists.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every node in the first list against every node in the second list. If two nodes are the same object (not just equal values), we found the intersection point. This works because intersection means the lists share actual node references, not just duplicate values.\n\n### Steps\n\n1. Start with `headA` and traverse the first list.\n2. For each node in the first list, traverse the entire second list.\n3. If any node in the second list matches the current node from the first list (by reference), return it.\n4. If no intersection is found after checking all nodes, return `null`.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(1)` extra space.\n\n> Where `m` is the length of the first list and `n` is the length of the second list.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\nclass Solution:\n    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:\n        while headA:\n            cur = headB\n            while cur:\n                if headA == cur:\n                    return headA\n                cur = cur.next\n            headA = headA.next\n        return None\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-linked-lists.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nWe can use a hash set to store all nodes from the first list. Then, as we traverse the second list, we check if each node exists in the set. The first node found in the set is the intersection point since it is the earliest shared node.\n\n### Steps\n\n1. Traverse the first list and add every node to a hash set.\n2. Traverse the second list.\n3. For each node in the second list, check if it exists in the set.\n4. Return the first matching node, or `null` if no intersection exists.\n\n### Complexity\n\n- Time complexity: `O(m + n)`\n- Space complexity: `O(m)`\n\n> Where `m` is the length of the first list and `n` is the length of the second list.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\nclass Solution:\n    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:\n        nodeSet = set()\n        cur = headA\n        while cur:\n            nodeSet.add(cur)\n            cur = cur.next\n\n        cur = headB\n        while cur:\n            if cur in nodeSet:\n                return cur\n            cur = cur.next\n\n        return None\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-linked-lists.md",
+      "id": "hash-set"
+    }
+  ]
 }

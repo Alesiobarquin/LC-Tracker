@@ -1,0 +1,29 @@
+{
+  "problemId": "minimum-index-sum-of-two-lists",
+  "approach": "Restaurant-to-Index Map",
+  "explanation": "### How it works\n\nMap one list's restaurants to indices and scan the other list. Shared names compete by the sum of their two indices, preserving every tie.\n\n### Steps\n\n1. Build a name-to-index map for list1.\n2. Scan list2 and skip names absent from the map.\n3. Replace results on a smaller index sum.\n4. Append on an equal index sum.\n\n### Complexity\n\n- Time: Expected O(n + m) name lookups, plus string hashing.\n- Space: O(n) map, excluding output.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def findRestaurant(self, list1: list[str], list2: list[str]) -> list[str]:\n    ans = []\n    restaurantToIndex = {restaurant: i for i,\n                         restaurant in enumerate(list1)}\n    minSum = math.inf\n\n    for i, restaurant in enumerate(list2):\n      if restaurant in restaurantToIndex:\n        summ = restaurantToIndex[restaurant] + i\n        if summ < minSum:\n          ans.clear()\n        if summ <= minSum:\n          ans.append(restaurant)\n          minSum = summ\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> findRestaurant(vector<string>& list1, vector<string>& list2) {\n    vector<string> ans;\n    unordered_map<string, int> restaurantToIndex;\n    int minSum = INT_MAX;\n\n    for (int i = 0; i < list1.size(); ++i)\n      restaurantToIndex[list1[i]] = i;\n\n    for (int i = 0; i < list2.size(); ++i) {\n      const string& restaurant = list2[i];\n      if (const auto it = restaurantToIndex.find(restaurant);\n          it != restaurantToIndex.cend()) {\n        const int sum = it->second + i;\n        if (sum < minSum) {\n          minSum = sum;\n          ans = {restaurant};\n        } else if (sum == minSum) {\n          ans.push_back(restaurant);\n        }\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/599.%20Minimum%20Index%20Sum%20of%20Two%20Lists",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "search-by-increasing-index-sum",
+      "approach": "Search by Increasing Index Sum",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nConsider possible index sums from smallest to largest. Once any matches exist at a sum, those matches are exactly the answers and larger sums can be skipped.\n\n### Steps\n\n1. Enumerate each possible index sum.\n2. Visit valid index pairs with that sum.\n3. Collect equal restaurant names.\n4. Return the first nonempty match group.\n\n### Complexity\n\n- Time: O(nm) name comparisons in the worst case.\n- Space: O(1) auxiliary space, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/599.%20Minimum%20Index%20Sum%20of%20Two%20Lists",
+      "code": {
+        "python": "class Solution:\n    def findRestaurant(self, list1: list[str], list2: list[str]) -> list[str]:\n        for total in range(len(list1) + len(list2) - 1):\n            matches = []\n            for i in range(max(0, total - len(list2) + 1), min(len(list1) - 1, total) + 1):\n                if list1[i] == list2[total - i]:\n                    matches.append(list1[i])\n            if matches:\n                return matches\n        return []\n"
+      }
+    }
+  ]
+}

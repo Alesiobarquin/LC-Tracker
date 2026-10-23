@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/365.%20Water%20and%20Jug%20Problem",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "breadth-first-jug-states",
+      "approach": "Breadth-First Jug States",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nRepresent a state by the current volume in each jug. Explore fill, empty, and pour operations directly; reaching the requested total proves feasibility.\n\n### Steps\n\n1. Start with both jugs empty.\n2. Generate fill, empty, and pour-in-either-direction states.\n3. Visit each volume pair once.\n4. Accept when the current volumes sum to targetCapacity.\n\n### Complexity\n\n- Time: `O((x + 1) × (y + 1))` as an upper bound for capacities x and y.\n- Space: `O((x + 1) × (y + 1))` for visited states and queue.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/365.%20Water%20and%20Jug%20Problem",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def canMeasureWater(self, x: int, y: int, targetCapacity: int) -> bool:\n        queue, seen = deque([(0, 0)]), {(0, 0)}\n        while queue:\n            a, b = queue.popleft()\n            if a + b == targetCapacity:\n                return True\n            ab, ba = min(a, y - b), min(b, x - a)\n            for state in [(x, b), (a, y), (0, b), (a, 0), (a - ab, b + ab), (a + ba, b - ba)]:\n                if state not in seen:\n                    seen.add(state)\n                    queue.append(state)\n        return False\n"
+      }
+    }
+  ]
 }

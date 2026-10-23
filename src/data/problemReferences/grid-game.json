@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long gridGame(vector<vector<int>>& grid) {\n        long long res = LLONG_MAX;\n        long long topSum = accumulate(grid[0].begin(), grid[0].end(), 0LL);\n        long long bottomSum = 0;\n\n        for (int i = 0; i < grid[0].size(); i++) {\n            topSum -= grid[0][i];\n            res = min(res, max(topSum, bottomSum));\n            bottomSum += grid[1][i];\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=N4wDSOw65hI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/grid-game.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/grid-game.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nRobot 1 must go right along row `0`, drop down to row `1` at some column, then continue right. After Robot 1 collects its points (setting those cells to `0`), Robot 2 follows optimally. Robot 1 wants to minimize Robot 2's maximum possible score. We try every possible column where Robot 1 drops down and simulate Robot 2's best response.\n\n### Steps\n\n1. For each column `i` where Robot 1 drops down:\n    - Calculate the points Robot 1 collects along the top row until column `i`, then the bottom row from column `i` onward.\n    - Simulate Robot 2's optimal path through the remaining grid (top row after `i`, bottom row before `i`).\n    - Track Robot 2's maximum score for this configuration.\n2. Return the minimum of Robot 2's maximum scores across all choices of `i`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def gridGame(self, grid: List[List[int]]) -> int:\n        cols = len(grid[0])\n        res = float('inf')\n\n        top1 = 0\n        for i in range(cols):\n            top1 += grid[0][i]\n            bottom1 = 0\n            for j in range(i, cols):\n                bottom1 += grid[1][j]\n\n            top2 = robot2 = 0\n            for j in range(cols):\n                if j > i:\n                    top2 += grid[0][j]\n\n                bottom2 = 0\n                for k in range(j, i):\n                    bottom2 += grid[1][k]\n                robot2 = max(robot2, top2 + bottom2)\n\n            res = min(res, robot2)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/grid-game.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum",
+      "explanation": "### How it works\n\nAfter Robot 1 drops at column `i`, Robot 2 can only collect from two disjoint regions: the top row after column `i`, or the bottom row before column `i`. Robot 2 will choose whichever region has more points. Using prefix sums, we can compute these region totals in O(1) per column.\n\n### Steps\n\n1. Build prefix sums for both rows.\n2. For each column `i` where Robot 1 drops:\n    - `top = preRow1[N-1] - preRow1[i]` (sum of top row after column `i`).\n    - `bottom = preRow2[i-1]` if `i > 0`, else `0` (sum of bottom row before column `i`).\n    - Robot 2's score is `max(top, bottom)`.\n3. Return the minimum of these scores across all `i`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def gridGame(self, grid: List[List[int]]) -> int:\n        N = len(grid[0])\n        preRow1, preRow2 = grid[0].copy(), grid[1].copy()\n\n        for i in range(1, N):\n            preRow1[i] += preRow1[i - 1]\n            preRow2[i] += preRow2[i - 1]\n\n        res = float(\"inf\")\n        for i in range(N):\n            top = preRow1[-1] - preRow1[i]\n            bottom = preRow2[i - 1] if i > 0 else 0\n            secondRobot = max(top, bottom)\n            res = min(res, secondRobot)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/grid-game.md",
+      "id": "prefix-sum"
+    }
+  ]
 }

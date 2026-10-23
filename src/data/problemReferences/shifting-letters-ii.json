@@ -7,5 +7,25 @@
     "cpp": "class BIT {\n    vector<int> tree;\n    int n;\npublic:\n    BIT(int size) {\n        n = size + 2;\n        tree.assign(n, 0);\n    }\n\n    void update(int index, int delta) {\n        index++;\n        while (index < n) {\n            tree[index] += delta;\n            index += index & -index;\n        }\n    }\n\n    int prefixSum(int index) {\n        index++;\n        int sum = 0;\n        while (index > 0) {\n            sum += tree[index];\n            index -= index & -index;\n        }\n        return sum;\n    }\n\n    void rangeUpdate(int left, int right, int delta) {\n        update(left, delta);\n        update(right + 1, -delta);\n    }\n};\n\nclass Solution {\npublic:\n    string shiftingLetters(string s, vector<vector<int>>& shifts) {\n        int n = s.size();\n        BIT bit(n);\n\n        for (auto& shift : shifts) {\n            int left = shift[0], right = shift[1], d = shift[2];\n            int delta = d == 1 ? 1 : -1;\n            bit.rangeUpdate(left, right, delta);\n        }\n\n        string res;\n        for (int i = 0; i < n; i++) {\n            int shift = bit.prefixSum(i) % 26;\n            int code = (s[i] - 'a' + shift + 26) % 26;\n            res += char('a' + code);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shifting-letters-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shifting-letters-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe straightforward approach is to apply each shift operation directly. For each shift, we iterate through the specified range and increment or decrement each character. Since characters wrap around the alphabet, we use modulo 26 arithmetic.\n\nThis approach is simple but slow because we might repeatedly process the same characters across multiple overlapping shifts.\n\n### Steps\n\n1. Convert the string to an array of integers (0-25 representing 'a'-'z').\n2. For each shift `[l, r, d]`:\n    - Iterate through indices from `l` to `r`.\n    - Add `1` if direction is forward, subtract `1` if backward.\n    - Apply modulo `26` to handle wraparound.\n3. Convert the integer array back to characters.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the string `s` and `m` is the size of the array `shifts`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def shiftingLetters(self, s: str, shifts: List[List[int]]) -> str:\n        s = [ord(c) - ord('a') for c in s]\n\n        for l, r, d in shifts:\n            for i in range(l, r + 1):\n                s[i] += 1 if d else -1\n                s[i] %= 26\n\n        s = [chr(ord('a') + c) for c in s]\n        return \"\".join(s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shifting-letters-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sweep Line Algorithm",
+      "explanation": "### How it works\n\nInstead of applying each shift individually, we can use a difference array technique. The idea is to mark where shifts begin and end, then compute the cumulative effect as we scan through the string.\n\nFor a shift affecting range `[l, r]`, we add the shift value at index `l` and subtract it at index `r + 1`. When we compute the running sum (prefix sum) of this difference array, each position automatically accumulates the total shift from all overlapping operations.\n\n### Steps\n\n1. Create a difference array `prefix_diff` of size `n + 1`, initialized to zeros.\n2. For each shift `[l, r, d]`:\n    - Add `+1` or `-1` (based on direction) at index `l`.\n    - Subtract the same value at index `r + 1`.\n3. Compute the running sum while traversing the string:\n    - Maintain a cumulative `diff` variable.\n    - For each index, add the net shift to the character.\n    - Apply modulo `26` arithmetic for wraparound.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the string `s` and `m` is the size of the array `shifts`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def shiftingLetters(self, s: str, shifts: List[List[int]]) -> str:\n        prefix_diff = [0] * (len(s) + 1)\n\n        for left, right, d in shifts:\n            val = 1 if d == 1 else -1\n            prefix_diff[left] += val\n            prefix_diff[right + 1] -= val\n\n        diff = 0\n        res = [ord(c) - ord(\"a\") for c in s]\n\n        for i in range(len(s)):\n            diff += prefix_diff[i]\n            res[i] = (diff + res[i] + 26) % 26\n\n        s = [chr(ord(\"a\") + n) for n in res]\n        return \"\".join(s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shifting-letters-ii.md",
+      "id": "sweep-line-algorithm"
+    }
+  ]
 }

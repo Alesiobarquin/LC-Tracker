@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int rangeBitwiseAnd(int left, int right) {\n        while (left < right) {\n            right &= (right - 1);\n        }\n        return right;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/bitwise-and-of-numbers-range.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/bitwise-and-of-numbers-range.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to AND all numbers in the range together. Starting with the left boundary, we iterate through each number up to the right boundary, accumulating the AND result. While simple, this is inefficient for large ranges.\n\n### Steps\n\n1. Initialize the result with the `left` boundary value.\n2. Iterate from `left + 1` to `right` (inclusive).\n3. For each number, perform a bitwise AND with the current result.\n4. Return the final result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def rangeBitwiseAnd(self, left: int, right: int) -> int:\n        res = left\n        for i in range(left + 1, right + 1):\n            res &= i\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/bitwise-and-of-numbers-range.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Bit Manipulation - I",
+      "explanation": "### How it works\n\nFor any bit position in the result to be `1`, that bit must be `1` in all numbers from `left` to `right`. If a bit is `1` in `left`, we need to check if it will flip to `0` at some point in the range. A bit at position `i` flips when we reach the next multiple of `2^(i+1)`. So we calculate how far `left` is from that flip point and check if `right` is still before it.\n\n### Steps\n\n1. Initialize result to `0`.\n2. For each bit position `i` from `0` to `31`:\n    - Check if bit `i` is set in `left`. If not, skip (result bit stays `0`).\n    - Calculate the remainder of `left` when divided by `2^(i+1)`.\n    - Calculate the distance to the next flip: `2^(i+1)` minus the remainder.\n    - If `(right - left)` is less than this distance, the bit survives in all numbers, so set bit `i` in the result.\n3. Return the result.\n\n### Complexity\n\n- Time complexity: `O(1)` since we iterate `32` times.\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def rangeBitwiseAnd(self, left: int, right: int) -> int:\n        res = 0\n        for i in range(32):\n            bit = (left >> i) & 1\n            if not bit:\n                continue\n\n            remain = left % (1 << (i + 1))\n            diff = (1 << (i + 1)) - remain\n            if right - left < diff:\n                res |= (1 << i)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/bitwise-and-of-numbers-range.md",
+      "id": "bit-manipulation-i"
+    }
+  ]
 }

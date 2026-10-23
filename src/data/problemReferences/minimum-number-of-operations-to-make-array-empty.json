@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minOperations(vector<int>& nums) {\n        unordered_map<int, int> count;\n        for (int num : nums) {\n            count[num]++;\n        }\n\n        int res = 0;\n        for (auto& [num, cnt] : count) {\n            if (cnt == 1) {\n                return -1;\n            }\n            res += (cnt + 2) / 3;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-make-array-empty.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-make-array-empty.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can only delete elements in groups of 2 or 3, and all elements in a group must be identical. This means we need to count the frequency of each element and figure out how to reduce each frequency to zero using the minimum number of deletions.\n\nFor any `count`, we try both options: subtract 2 or subtract 3, and recursively solve for the remaining `count`. If we reach exactly `0`, we are done. If we go negative, that path is invalid. The `min` of both branches gives us the answer.\n\n### Steps\n\n1. Count the frequency of each element in the array.\n2. For each unique element's `count`, use recursion to find the minimum operations:\n    - Base case: if `count` is `0`, return `0`. If `count` is negative, return infinity.\n    - Try both `dfs(count - 2)` and `dfs(count - 3)`, take the `min`, and add `1`.\n3. If any `count` returns infinity, return `-1` (impossible to empty).\n4. Sum up the minimum operations for all frequencies.\n\n### Complexity\n\n- Time complexity: `O(n * 2 ^ m)`\n- Space complexity: `O(n + m)`\n\n> Where `n` is the size of the array `nums` and `m` is the average frequency of the array elements.",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def minOperations(self, nums: List[int]) -> int:\n        def dfs(cur):\n            if cur < 0:\n                return float('inf')\n            if cur == 0:\n                return 0\n\n            ops = min(dfs(cur - 2), dfs(cur - 3))\n            return 1 + ops\n\n        count = Counter(nums)\n        res = 0\n        for num, cnt in count.items():\n            op = dfs(cnt)\n            if op == float(\"inf\"):\n                return -1\n            res += op\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-make-array-empty.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems. When computing the minimum operations for a `count`, we may revisit the same `count` multiple times. By caching results, we avoid redundant computation and make the solution efficient.\n\n### Steps\n\n1. Count the frequency of each element.\n2. Use memoization (`cache`) to cache results for each `count` value.\n3. For each `count`, if it equals `2` or `3`, return `1` (one operation suffices).\n4. Otherwise, recursively compute `min(dfs(count - 2), dfs(count - 3)) + 1` and cache it.\n5. Sum the results for all frequencies. Return `-1` if any frequency is impossible.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n + m)`\n\n> Where `n` is the size of the array `nums` and `m` is the average frequency of the array elements.",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\nfrom functools import cache\n\nclass Solution:\n    def minOperations(self, nums: List[int]) -> int:\n        cache = {}\n\n        def dfs(num):\n            if num < 0:\n                return float(\"inf\")\n            if num in [2, 3]:\n                return 1\n            if num in cache:\n                return cache[num]\n\n            res = min(dfs(num - 2), dfs(num - 3))\n            cache[num] = res + 1\n            return cache[num]\n\n        count = Counter(nums)\n        res = 0\n        for num, cnt in count.items():\n            op = dfs(cnt)\n            if op == float(\"inf\"):\n                return -1\n            res += op\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-make-array-empty.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

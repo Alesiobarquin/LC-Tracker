@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long mostPoints(vector<vector<int>>& questions) {\n        int n = questions.size();\n        vector<long long> dp(n + 1, 0);\n\n        for (int i = n - 1; i >= 0; i--) {\n            dp[i] = max(\n                (long long)questions[i][0] + (i + 1 + questions[i][1] < n ? dp[i + 1 + questions[i][1]] : 0),\n                dp[i + 1]\n            );\n        }\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=D7TD_ArkfkA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/solving-questions-with-brainpower.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/solving-questions-with-brainpower.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAt each question, we have two choices: solve it and skip the next few questions based on its brainpower requirement, or skip it entirely and move to the next question. This creates a decision tree where we want to maximize points. We recursively explore both choices at each position and return the maximum.\n\n### Steps\n\n1. Define a recursive function starting at index `0`.\n2. Base case: if the index exceeds the array length, return `0`.\n3. At each index, compute two options:\n    - Skip: recursively call for `index + 1`.\n    - Solve: add the current question's points and recursively call for `index + 1 + brainpower`.\n4. Return the maximum of the two options.\n5. The answer is the result of calling the function from index `0`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def mostPoints(self, questions: List[List[int]]) -> int:\n        def dfs(i):\n            if i >= len(questions):\n                return 0\n            return max(dfs(i + 1), questions[i][0] + dfs(i + 1 + questions[i][1]))\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/solving-questions-with-brainpower.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe plain recursion has overlapping subproblems since we may compute the maximum points from the same index multiple times. By storing results in a memoization table, we avoid redundant calculations. Each index is computed at most once, giving us linear time complexity.\n\n### Steps\n\n1. Create a memoization dictionary or array to cache results.\n2. Define a recursive function that first checks if the result for the current index is already cached.\n3. If cached, return the stored value.\n4. Otherwise, compute the maximum of skipping versus solving the current question.\n5. Store the result in the cache before returning.\n6. Return the value computed from index `0`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def mostPoints(self, questions: List[List[int]]) -> int:\n        dp = {}\n        def dfs(i):\n            if i >= len(questions):\n                return 0\n            if i in dp:\n                return dp[i]\n            dp[i] = max(dfs(i + 1), questions[i][0] + dfs(i + 1 + questions[i][1]))\n            return dp[i]\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/solving-questions-with-brainpower.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

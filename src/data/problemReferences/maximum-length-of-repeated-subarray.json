@@ -1,0 +1,28 @@
+{
+  "problemId": "maximum-length-of-repeated-subarray",
+  "approach": "Common-Suffix Table",
+  "explanation": "### How it works\n\nFor each pair of starting indices, store the length of the equal contiguous run starting there. Equal values extend the diagonal successor state; unequal values give zero.\n\n### Steps\n\n1. Allocate a zero-bordered table.\n2. Visit both arrays backward.\n3. On equal values, set one plus the next diagonal entry.\n4. Track the largest entry.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(mn) for the table.",
+  "code": {
+    "python": "class Solution:\n  def findLength(self, nums1: list[int], nums2: list[int]) -> int:\n    m = len(nums1)\n    n = len(nums2)\n    ans = 0\n    # dp[i][j] := the maximum length of a subarray that appears in both\n    # nums1[i..m) and nums2[j..n)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n\n    for i in reversed(range(m)):\n      for j in reversed(range(n)):\n        if nums1[i] == nums2[j]:\n          dp[i][j] = dp[i + 1][j + 1] + 1\n          ans = max(ans, dp[i][j])\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findLength(vector<int>& nums1, vector<int>& nums2) {\n    const int m = nums1.size();\n    const int n = nums2.size();\n    int ans = 0;\n    // dp[i][j] := the maximum length of a subarray that appears in both\n    // nums1[i..m) and nums2[j..n)\n    vector<vector<int>> dp(m + 1, vector<int>(n + 1));\n\n    for (int i = m - 1; i >= 0; --i)\n      for (int j = n - 1; j >= 0; --j)\n        if (nums1[i] == nums2[j]) {\n          dp[i][j] = dp[i + 1][j + 1] + 1;\n          ans = max(ans, dp[i][j]);\n        }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/718.%20Maximum%20Length%20of%20Repeated%20Subarray",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "one-row-common-run-states",
+      "approach": "One-Row Common-Run States",
+      "explanation": "### How it works\n\nOnly the next outer row is needed. Scan the first array backward and the second array forward so dp[j + 1] still contains the previous outer row's diagonal value.\n\n### Steps\n\n1. Allocate one zero-bordered row.\n2. Visit the first array backward.\n3. Visit the second array forward, extending dp[j + 1] on equality and resetting on mismatch.\n4. Keep the largest state.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(n) for one row.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/718.%20Maximum%20Length%20of%20Repeated%20Subarray/718-2.py",
+      "code": {
+        "python": "class Solution:\n  def findLength(self, nums1: list[int], nums2: list[int]) -> int:\n    ans = 0\n    dp = [0] * (len(nums2) + 1)\n\n    for a in reversed(nums1):\n      for j, b in enumerate(nums2):  # The order is important.\n        dp[j] = dp[j + 1] + 1 if a == b else 0\n        ans = max(ans, dp[j])\n\n    return ans\n"
+      }
+    }
+  ]
+}

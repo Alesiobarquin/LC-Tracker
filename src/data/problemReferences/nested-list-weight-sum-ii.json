@@ -1,0 +1,29 @@
+{
+  "problemId": "nested-list-weight-sum-ii",
+  "approach": "Cumulative Breadth-First Sums",
+  "explanation": "### How it works\n\nAdd the sum of all integers seen so far after every level. An integer at depth d is added once for each remaining level, giving weight maxDepth − d + 1 without knowing the maximum depth in advance.\n\n### Steps\n\n1. Enqueue the top-level values.\n2. Accumulate integers into a running unweighted sum.\n3. Enqueue child contents.\n4. After each level, add the running sum to the answer.\n\n### Complexity\n\n- Time: O(N) for nested entries.\n- Space: O(w) for maximum level width.\n\n### Things to watch for\n\n- Empty nested lists are excluded by this problem's input constraints.",
+  "code": {
+    "python": "from __future__ import annotations\n\nimport collections\n\nclass Solution:\n  def depthSumInverse(self, nestedList: list[NestedInteger]) -> int:\n    ans = 0\n    prevSum = 0\n    q = collections.deque(nestedList)\n\n    while q:\n      for _ in range(len(q)):\n        ni = q.popleft()\n        if ni.isInteger():\n          prevSum += ni.getInteger()\n        else:\n          for nextNi in ni.getList():\n            q.append(nextNi)\n      ans += prevSum\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int depthSumInverse(vector<NestedInteger>& nestedList) {\n    int ans = 0;\n    int prevSum = 0;\n    queue<NestedInteger> q{{nestedList.begin(), nestedList.end()}};\n\n    while (!q.empty()) {\n      for (int sz = q.size(); sz > 0; --sz) {\n        const NestedInteger ni = q.front();\n        q.pop();\n        if (ni.isInteger())\n          prevSum += ni.getInteger();\n        else {\n          for (const NestedInteger nextNi : ni.getList())\n            q.push(nextNi);\n        }\n      }\n      ans += prevSum;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/364.%20Nested%20List%20Weight%20Sum%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "depth-records-and-final-reweighting",
+      "approach": "Depth Records and Final Reweighting",
+      "explanation": "### How it works\n\nRecord each integer with its depth and find the deepest integer. A final pass applies the inverse depth weight directly.\n\n### Steps\n\n1. Traverse nested values with explicit depth records.\n2. Store each integer and update the maximum depth.\n3. Sum value × (maxDepth − depth + 1).\n\n### Complexity\n\n- Time: O(N).\n- Space: O(N) for pending values and integer records.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/364.%20Nested%20List%20Weight%20Sum%20II",
+      "code": {
+        "python": "class Solution:\n    def depthSumInverse(self, nestedList: list['NestedInteger']) -> int:\n        stack = [(item, 1) for item in nestedList]\n        integers = []\n        deepest = 1\n        while stack:\n            item, depth = stack.pop()\n            if item.isInteger():\n                integers.append((item.getInteger(), depth))\n                deepest = max(deepest, depth)\n            else:\n                stack.extend((child, depth + 1) for child in item.getList())\n        return sum(value * (deepest - depth + 1) for value, depth in integers)\n"
+      }
+    }
+  ]
+}

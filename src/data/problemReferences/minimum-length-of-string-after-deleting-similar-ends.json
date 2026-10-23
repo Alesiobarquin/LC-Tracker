@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int minimumLength(string s) {\n        int l = 0, r = s.length() - 1;\n\n        while (l < r && s[l] == s[r]) {\n            char tmp = s[l];\n            while (l <= r && s[l] == tmp) {\n                l++;\n            }\n            while (l <= r && s[r] == tmp) {\n                r--;\n            }\n        }\n        return r - l + 1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-length-of-string-after-deleting-similar-ends.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-length-of-string-after-deleting-similar-ends.md",
+  "alternatives": [
+    {
+      "id": "run-length-deque",
+      "approach": "Run-Length Deque",
+      "explanation": "### How it works\n\nCompress the string into character runs. Matching first and last runs can be removed entirely. If only one run remains, it can be removed when it contains at least two characters; a single remaining character cannot be split into disjoint ends.\n\n### Steps\n\n1. Build a deque of character/count runs.\n2. While distinct end runs share a character, remove both.\n3. Handle one remaining run by its length.\n4. Otherwise sum the remaining run lengths.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(n)` for character runs.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-length-of-string-after-deleting-similar-ends.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import deque\nfrom itertools import groupby\n\nclass Solution:\n    def minimumLength(self, s: str) -> int:\n        runs = deque((char, sum(1 for _ in group)) for char, group in groupby(s))\n        while len(runs) > 1 and runs[0][0] == runs[-1][0]:\n            runs.popleft()\n            runs.pop()\n        if len(runs) == 1:\n            return 1 if runs[0][1] == 1 else 0\n        return sum(count for _, count in runs)\n"
+      }
+    }
+  ]
 }

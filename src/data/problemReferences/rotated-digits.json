@@ -1,0 +1,29 @@
+{
+  "problemId": "rotated-digits",
+  "approach": "Validate Each Rotated Number",
+  "explanation": "### How it works\n\nDigits 0, 1, and 8 remain unchanged; 2, 5, 6, and 9 change; 3, 4, and 7 are invalid. A good number uses only valid digits and contains at least one changing digit.\n\n### Steps\n\n1. Enumerate numbers one through n.\n2. Reject a number containing 3, 4, or 7.\n3. Track whether any digit changes under rotation.\n4. Count numbers that remain valid and change.\n\n### Complexity\n\n- Time: O(n log n) decimal-digit checks.\n- Space: O(log n) temporary text.",
+  "code": {
+    "python": "class Solution:\n  def rotatedDigits(self, n: int) -> int:\n    def isGoodNumber(i: int) -> bool:\n      isRotated = False\n\n      for c in str(i):\n        if c == '0' or c == '1' or c == '8':\n          continue\n        if c == '2' or c == '5' or c == '6' or c == '9':\n          isRotated = True\n        else:\n          return False\n\n      return isRotated\n\n    return sum(isGoodNumber(i) for i in range(1, n + 1))\n",
+    "cpp": "class Solution {\n public:\n  int rotatedDigits(int n) {\n    int ans = 0;\n\n    for (int i = 1; i <= n; ++i)\n      if (isGoodNumber(i))\n        ++ans;\n\n    return ans;\n  }\n\n private:\n  bool isGoodNumber(int i) {\n    bool isRotated = false;\n\n    for (const char c : to_string(i)) {\n      if (c == '0' || c == '1' || c == '8')\n        continue;\n      if (c == '2' || c == '5' || c == '6' || c == '9')\n        isRotated = true;\n      else\n        return false;\n    }\n\n    return isRotated;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/788.%20Rotated%20Digits",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "digit-dynamic-programming",
+      "approach": "Digit Dynamic Programming",
+      "explanation": "### How it works\n\nCount valid digit prefixes under n while tracking whether the number has started and whether a changing digit has appeared. Tight prefixes obey n's current digit; smaller prefixes can use any digit.\n\n### Steps\n\n1. Read n's decimal digits.\n2. Memoize position, tightness, started status, and changed status.\n3. Try valid rotational digits, allowing leading zeros without starting a number.\n4. Count completed positive numbers with at least one changed digit.\n\n### Complexity\n\n- Time: O(log n) states up to fixed digit and flag factors.\n- Space: O(log n) memo and recursion.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/788.%20Rotated%20Digits",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def rotatedDigits(self, n: int) -> int:\n        digits = tuple(map(int, str(n)))\n        @cache\n        def count(position, tight, started, changed):\n            if position == len(digits):\n                return int(started and changed)\n            limit = digits[position] if tight else 9\n            total = 0\n            for digit in [0, 1, 2, 5, 6, 8, 9]:\n                if digit <= limit:\n                    total += count(position + 1, tight and digit == limit,\n                                   started or digit != 0,\n                                   changed or digit in (2, 5, 6, 9))\n            return total\n        return count(0, True, False, False)\n"
+      }
+    }
+  ]
+}

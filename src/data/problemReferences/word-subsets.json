@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<string> wordSubsets(vector<string>& words1, vector<string>& words2) {\n        vector<int> count2(26, 0);\n        for (string& w : words2) {\n            vector<int> countW(26, 0);\n            for (char c : w) countW[c - 'a']++;\n            for (int i = 0; i < 26; ++i)\n                count2[i] = max(count2[i], countW[i]);\n        }\n\n        vector<string> res;\n        for (string& w : words1) {\n            vector<int> countW(26, 0);\n            for (char c : w) countW[c - 'a']++;\n\n            bool flag = true;\n            for (int i = 0; i < 26; ++i) {\n                if (countW[i] < count2[i]) {\n                    flag = false;\n                    break;\n                }\n            }\n\n            if (flag) res.push_back(w);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-subsets.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-subsets.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA word from `words1` is \"universal\" if every word in `words2` is a subset of it. For a word to be a subset of another, every character must appear at least as many times in the target word. The straightforward approach is to check each word in `words1` against all words in `words2`, comparing character frequencies to determine if all `words2` words are subsets of `words1`.\n\n### Steps\n\n1. Iterate through each word `w1` in `words1`.\n2. Count the frequency of each character in `w1`.\n3. For each word `w2` in `words2`, count its character frequencies.\n4. Compare the counts: if any character in `w2` appears more times than in `w1`, mark `w1` as not universal and `break`.\n5. If `w1` passes all subset checks, add it to the `res` list.\n6. Return the list of universal words.\n\n### Complexity\n\n- Time complexity: `O(N * n + N * M * m)`\n- Space complexity:\n    - `O(1)` extra space, since we have at most `26` different characters.\n    - `O(N * n)` space for the output list.\n\n> Where `N` is the size of the array `words1`, `n` is the length of the longest word in `words1`, `M` is the size of the array `words2`, and `m` is the length of the longest word in `words2`.",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def wordSubsets(self, words1: List[str], words2: List[str]) -> List[str]:\n        res = []\n        for w1 in words1:\n            count1 = Counter(w1)\n            is_subset = True\n\n            for w2 in words2:\n                count2 = Counter(w2)\n                for c in count2:\n                    if count2[c] > count1[c]:\n                        is_subset = False\n                        break\n\n                if not is_subset: break\n\n            if is_subset:\n                res.append(w1)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/word-subsets.md",
+      "id": "brute-force"
+    }
+  ]
 }

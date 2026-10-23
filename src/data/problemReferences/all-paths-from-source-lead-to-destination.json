@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    static const int GRAY = 1;\n    static const int BLACK = 2;\n    \n    bool leadsToDestination(int n, vector<vector<int>>& edges, int source, int destination) {\n        vector<vector<int>> graph = buildDigraph(n, edges);\n        vector<int> states(n, 0);\n        return leadsToDest(graph, source, destination, states);\n    }\n    \nprivate:\n    bool leadsToDest(vector<vector<int>>& graph, int node, int dest, vector<int>& states) {\n        if (states[node] != 0) {\n            return states[node] == BLACK;\n        }\n        if (graph[node].size() == 0) {\n            return node == dest;\n        }\n        states[node] = GRAY;\n        for (int next_node : graph[node]) {\n            if (!leadsToDest(graph, next_node, dest, states)) {\n                return false;\n            }\n        }\n        states[node] = BLACK;\n        return true;\n    }\n    \n    vector<vector<int>> buildDigraph(int n, vector<vector<int>>& edges) {\n        vector<vector<int>> graph(n);\n        for (auto& edge : edges) {\n            graph[edge[0]].push_back(edge[1]);\n        }\n        return graph;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/all-paths-from-source-lead-to-destination.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/all-paths-from-source-lead-to-destination.md",
+  "alternatives": [
+    {
+      "id": "reverse-topological-elimination",
+      "approach": "Reverse Topological Elimination",
+      "explanation": "### How it works\n\nStart from the required terminal destination and mark a predecessor safe only after all its outgoing edges lead to already-safe nodes. A reachable bad terminal or cycle prevents the source from becoming safe.\n\n### Steps\n\n1. Reject a destination with outgoing edges.\n2. Build reverse edges and outgoing-edge counts.\n3. Queue the terminal destination.\n4. When a safe node is removed, decrement its predecessors' remaining outgoing counts.\n5. Accept if the source becomes safe.\n\n### Complexity\n\n- Time: `O(n + e)` time.\n- Space: `O(n + e)` for reverse edges, counts, and queue.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/all-paths-from-source-lead-to-destination.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def leadsToDestination(self, n: int, edges: list[list[int]], source: int, destination: int) -> bool:\n        reverse, degree = [[] for _ in range(n)], [0] * n\n        for a, b in edges:\n            reverse[b].append(a)\n            degree[a] += 1\n        if degree[destination]:\n            return False\n        queue, safe = deque([destination]), set()\n        while queue:\n            node = queue.popleft()\n            safe.add(node)\n            for parent in reverse[node]:\n                degree[parent] -= 1\n                if degree[parent] == 0:\n                    queue.append(parent)\n        return source in safe\n"
+      }
+    }
+  ]
 }

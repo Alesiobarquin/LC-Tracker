@@ -7,5 +7,20 @@
     "cpp": "class Solution {\n    void backtracking(vector<int>& factors, vector<vector<int>>& ans) {\n        // Got a solution,\n        if (factors.size() > 1) {\n            ans.push_back(factors);\n        }\n\n        const int lastFactor = factors.back();\n        factors.pop_back();\n\n        for (int i = factors.empty() ? 2 : factors.back(); i <= lastFactor / i; ++i) {\n            if (lastFactor % i == 0) {\n                // Add i and lastFactor / i.\n                factors.push_back(i);\n                factors.push_back(lastFactor / i);\n                backtracking(factors, ans);\n                // Remove the last 2 elements in factors to restore it after the recursion returns\n                factors.pop_back();\n                factors.pop_back();\n            }\n        }\n\n        // Add lastFactor back to factors to restore it.\n        factors.push_back(lastFactor);\n    }\n\npublic:\n    vector<vector<int>> getFactors(int n) {\n        vector<int> factors = {n};\n        vector<vector<int>> ans;\n        backtracking(factors, ans);\n\n        return ans;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/factor-combinations.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/factor-combinations.md",
+  "alternatives": [
+    {
+      "id": "breadth-first-factor-splitting",
+      "approach": "Breadth-First Factor Splitting",
+      "explanation": "### How it works\n\nA queue stores a chosen nondecreasing prefix and a remaining quotient. Splitting that quotient by a factor no smaller than the prefix's last factor emits a combination and a new state without duplicate factor orders.\n\n### Steps\n\n1. Start with an empty prefix and quotient n.\n2. Try divisors from the minimum allowed factor through the square root.\n3. Emit prefix, divisor, and quotient/divisor.\n4. Queue the extended prefix with the smaller remaining quotient.\n\n### Complexity\n\n- Time: `O(S × sqrt(n) × log n)` as a conservative bound for S visited states including list copies.\n- Space: `O(S × log n)` as a conservative bound for queued prefixes and output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/factor-combinations.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import deque\nfrom math import isqrt\n\nclass Solution:\n    def getFactors(self, n: int) -> list[list[int]]:\n        result = []\n        queue = deque([(n, 2, [])])\n        while queue:\n            remaining, minimum, prefix = queue.popleft()\n            for factor in range(minimum, isqrt(remaining) + 1):\n                if remaining % factor == 0:\n                    quotient = remaining // factor\n                    result.append(prefix + [factor, quotient])\n                    queue.append((quotient, factor, prefix + [factor]))\n        return result\n"
+      }
+    }
+  ]
 }

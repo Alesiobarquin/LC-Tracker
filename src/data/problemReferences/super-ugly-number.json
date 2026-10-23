@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/313.%20Super%20Ugly%20Number",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "heap-merge-prime-streams",
+      "approach": "Heap-Merge Prime Streams",
+      "explanation": "### How it works\n\nEach prime supplies a sorted stream of multiples of previously emitted ugly numbers. Keep the smallest pending value from each stream in a heap, advancing every stream tied at the emitted value to avoid duplicates.\n\n### Steps\n\n1. Start the ugly-number sequence with one.\n2. Put one candidate per prime into the heap.\n3. Append the smallest candidate once.\n4. Advance all prime streams tied at that candidate.\n5. Stop at n values.\n\n### Complexity\n\n- Time: `O(n × k × log(k + 1))` as a conservative bound when up to k prime streams tie at each emission.\n- Space: `O(n + k)` for the sequence and heap.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/313.%20Super%20Ugly%20Number/313-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "import heapq\n\nclass UglyNum:\n  def __init__(self, prime: int, index: int, value: int):\n    self.prime = prime\n    self.index = index  # Point the next index of uglyNums.\n    self.value = value  # prime * uglyNums[index]\n\n\nclass Solution:\n  def nthSuperUglyNumber(self, n: int, primes: list[int]) -> int:\n    minHeap = []  # (value, prime, index)\n    uglyNums = [1]\n\n    for prime in primes:\n      heapq.heappush(minHeap, (prime * uglyNums[0], prime, 1))\n\n    while len(uglyNums) < n:\n      uglyNums.append(minHeap[0][0])\n      while minHeap[0][0] == uglyNums[-1]:\n        _, prime, index = heapq.heappop(minHeap)\n        heapq.heappush(minHeap, (prime * uglyNums[index], prime, index + 1))\n\n    return uglyNums[-1]\n"
+      }
+    }
+  ]
 }

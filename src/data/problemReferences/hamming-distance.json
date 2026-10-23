@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/461.%20Hamming%20Distance",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "clear-differing-set-bits",
+      "approach": "Clear Differing Set Bits",
+      "explanation": "### How it works\n\nXOR marks exactly the bit positions where inputs differ. Repeatedly clearing its lowest set bit counts those differences without visiting zero bits.\n\n### Steps\n\n1. XOR the inputs.\n2. Clear the lowest set bit using value & (value - 1).\n3. Count clearing operations.\n\n### Complexity\n\n- Time: `O(b)` for b differing bits, at most 31 under the input bounds.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/461.%20Hamming%20Distance",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def hammingDistance(self, x: int, y: int) -> int:\n        value, count = x ^ y, 0\n        while value:\n            value &= value - 1\n            count += 1\n        return count\n"
+      }
+    }
+  ]
 }

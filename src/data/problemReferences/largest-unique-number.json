@@ -7,5 +7,26 @@
     "cpp": "class Solution {\npublic:\n    int largestUniqueNumber(vector<int>& nums) {\n        // Create an unordered_map to store the frequency of each number\n        unordered_map<int, int> frequencyMap;\n\n        // Populate the frequencyMap\n        for (int num : nums) {\n            frequencyMap[num]++;\n        }\n\n        // Initialize the result to -1 (default if no unique number is found)\n        int largestUnique = -1;\n\n        for (auto& pair : frequencyMap) {\n            // Check if the number appears only once and is larger than the\n            // current largestUnique\n            if (pair.second == 1 && pair.first > largestUnique) {\n                largestUnique = pair.first;\n            }\n        }\n\n        return largestUnique;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-unique-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-unique-number.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nAfter sorting in descending order, we can scan from largest to smallest. A number is unique if it differs from its neighbors. We skip over groups of duplicates and return the first number that appears exactly once.\n\n### Steps\n\n1. Handle the edge case: if there is only one element, return it.\n2. Sort the array in descending order.\n3. Iterate through the sorted array:\n    - If the current element differs from the next (or is the last element), it is unique. Return it.\n    - Otherwise, skip all consecutive duplicates.\n4. If no unique number is found, return `-1`.\n\n### Complexity\n\nTime is `O(n log n)` and worst-case auxiliary space is `O(n)` for Python's sort, where `n` is the number of input values. Sorting changes the input order.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def largestUniqueNumber(self, nums: List[int]) -> int:\n        n = len(nums)\n\n        # If there's only one element, it's unique by default\n        if n == 1:\n            return nums[0]\n\n        nums.sort(reverse=True)\n\n        # Start from the beginning (largest numbers)\n        currentIndex = 0\n\n        while currentIndex < n:\n            # If it's the first element or different from the next one, it's unique\n            if (\n                currentIndex == n - 1\n                or nums[currentIndex] != nums[currentIndex + 1]\n            ):\n                return nums[currentIndex]\n            # Skip duplicates\n            while (\n                currentIndex < n - 1\n                and nums[currentIndex] == nums[currentIndex + 1]\n            ):\n                currentIndex += 1\n            # Move to the next unique number\n            currentIndex += 1\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-unique-number.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "sorting"
+    },
+    {
+      "approach": "Sorted Map",
+      "explanation": "### How it works\n\nWe can count the frequency of each number using a sorted map (tree map). Since the map maintains keys in sorted order, we iterate from the largest key downward and return the first key with frequency `1`.\n\n### Steps\n\n1. Build a frequency map counting occurrences of each number.\n2. Use a sorted map structure that keeps keys in order.\n3. Iterate through the keys in descending order.\n4. Return the first key with a frequency of `1`, or `-1` if none exists.\n\n### Complexity\n\n- Time complexity: `O(n  ×  log n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the `nums` array.",
+      "code": {
+        "python": "from typing import List\nfrom collections import OrderedDict\n\nclass Solution:\n    def largestUniqueNumber(self, nums: List[int]) -> int:\n        # Create a frequency map\n        frequency_map = {}\n        for num in nums:\n            frequency_map[num] = frequency_map.get(num, 0) + 1\n\n        # Create a sorted OrderedDict\n        sorted_map = OrderedDict(sorted(frequency_map.items(), reverse=True))\n\n        # Find the largest unique number\n        for num, freq in sorted_map.items():\n            if freq == 1:\n                return num\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-unique-number.md",
+      "id": "sorted-map"
+    }
+  ]
 }

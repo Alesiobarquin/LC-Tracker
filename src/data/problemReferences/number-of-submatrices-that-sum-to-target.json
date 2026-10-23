@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numSubmatrixSumTarget(vector<vector<int>>& matrix, int target) {\n        int ROWS = matrix.size(), COLS = matrix[0].size(), res = 0;\n\n        for (int c1 = 0; c1 < COLS; c1++) {\n            vector<int> rowPrefix(ROWS, 0);\n            for (int c2 = c1; c2 < COLS; c2++) {\n                for (int r = 0; r < ROWS; r++) {\n                    rowPrefix[r] += matrix[r][c2];\n                }\n\n                unordered_map<int, int> count;\n                count[0] = 1;\n                int curSum = 0;\n                for (int r = 0; r < ROWS; r++) {\n                    curSum += rowPrefix[r];\n                    res += count[curSum - target];\n                    count[curSum]++;\n                }\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-submatrices-that-sum-to-target.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-submatrices-that-sum-to-target.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe consider every possible submatrix by fixing all four corners (top-left and bottom-right). For each submatrix, we sum all its elements and check if it equals the target. This is the most straightforward approach but very slow.\n\n### Steps\n\n1. Iterate over all pairs of rows `(r1, r2)` defining vertical bounds.\n2. For each row pair, iterate over all pairs of columns `(c1, c2)` defining horizontal bounds.\n3. Compute the sum of all elements within the submatrix bounds.\n4. If the sum equals the target, increment `res`.\n5. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(m ^ 3 * n ^ 3)`\n- Space complexity: `O(1)` extra space.\n\n> Where `m` is the number of rows and `n` is the number of columns of the given matrix.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:\n        ROWS, COLS = len(matrix), len(matrix[0])\n        res = 0\n\n        for r1 in range(ROWS):\n            for r2 in range(r1, ROWS):\n                for c1 in range(COLS):\n                    for c2 in range(c1, COLS):\n                        subSum = 0\n                        for r in range(r1, r2 + 1):\n                            for c in range(c1, c2 + 1):\n                                subSum += matrix[r][c]\n\n                        if subSum == target:\n                            res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-submatrices-that-sum-to-target.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Dimensional Prefix Sum",
+      "explanation": "### How it works\n\nBy precomputing a 2D prefix sum, any submatrix sum can be calculated in `O(1)` using inclusion-exclusion. We still enumerate all submatrix boundaries, but computing each sum is now constant time instead of proportional to the submatrix size.\n\n### Steps\n\n1. Build a 2D prefix sum array where `subSum[r][c]` represents the sum of all elements from `(0,0)` to `(r,c)`.\n2. For each submatrix defined by corners `(r1, c1)` and `(r2, c2)`:\n    - Compute its sum using: `subSum[r2][c2] - subSum[r1-1][c2] - subSum[r2][c1-1] + subSum[r1-1][c1-1]`.\n3. If the sum equals the target, increment the count.\n4. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(m ^ 2 * n ^ 2)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns of the given matrix.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:\n        ROWS, COLS = len(matrix), len(matrix[0])\n        sub_sum = [[0] * COLS for _ in range(ROWS)]\n\n        for r in range(ROWS):\n            for c in range(COLS):\n                top = sub_sum[r - 1][c] if r > 0 else 0\n                left = sub_sum[r][c - 1] if c > 0 else 0\n                top_left = sub_sum[r - 1][c - 1] if min(r, c) > 0 else 0\n                sub_sum[r][c] = matrix[r][c] + top + left - top_left\n\n        res = 0\n        for r1 in range(ROWS):\n            for r2 in range(r1, ROWS):\n                for c1 in range(COLS):\n                    for c2 in range(c1, COLS):\n                        top = sub_sum[r1 - 1][c2] if r1 > 0 else 0\n                        left = sub_sum[r2][c1 - 1] if c1 > 0 else 0\n                        top_left = sub_sum[r1 - 1][c1 - 1] if min(r1, c1) > 0 else 0\n                        cur_sum = sub_sum[r2][c2] - top - left + top_left\n                        if cur_sum == target:\n                            res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-submatrices-that-sum-to-target.md",
+      "id": "two-dimensional-prefix-sum"
+    }
+  ]
 }

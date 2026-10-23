@@ -1,0 +1,29 @@
+{
+  "problemId": "next-closest-time",
+  "approach": "Greedy Digit Carry",
+  "explanation": "### How it works\n\nTry to increase the least significant time digit using only available digits. If that position cannot increase within its valid limit, reset it to the smallest digit and carry into the next position.\n\n### Steps\n\n1. Sort the available digits.\n2. Try minute ones, then minute tens, respecting their limits.\n3. Carry into hour ones with a limit depending on hour tens.\n4. Finally update hour tens or wrap to the next day.\n\n### Complexity\n\n- Time: O(1) for four time digits.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "from bisect import bisect_right\n\nclass Solution:\n  def nextClosestTime(self, time: str) -> str:\n    ans = list(time)\n    digits = sorted(time.replace(':', ''))\n\n    def nextClosest(digit: str, limit: str) -> str:\n      next = bisect_right(digits, digit)\n      return digits[0] if next == 4 or digits[next] > limit else digits[next]\n\n    ans[4] = nextClosest(ans[4], '9')\n    if time[4] < ans[4]:\n      return ''.join(ans)\n\n    ans[3] = nextClosest(ans[3], '5')\n    if time[3] < ans[3]:\n      return ''.join(ans)\n\n    ans[1] = nextClosest(ans[1], '3' if ans[0] == '2' else '9')\n    if time[1] < ans[1]:\n      return ''.join(ans)\n\n    ans[0] = nextClosest(ans[0], '2')\n    return ''.join(ans)\n",
+    "cpp": "class Solution {\n public:\n  string nextClosestTime(string time) {\n    const set<char> digitsSet{time[0], time[1], time[3], time[4]};\n    string ans = time;\n\n    ans[4] = nextClosest(digitsSet, ans[4], '9');\n    if (time[4] < ans[4])\n      return ans;\n\n    ans[3] = nextClosest(digitsSet, ans[3], '5');\n    if (time[3] < ans[3])\n      return ans;\n\n    ans[1] = nextClosest(digitsSet, ans[1], ans[0] == '2' ? '3' : '9');\n    if (time[1] < ans[1])\n      return ans;\n\n    ans[0] = nextClosest(digitsSet, ans[0], '2');\n    return ans;\n  }\n\n private:\n  char nextClosest(const set<char>& digitsSet, char digit, char limit) {\n    auto it = digitsSet.upper_bound(digit);\n    return it == digitsSet.end() || *it > limit ? *digitsSet.begin() : *it;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/681.%20Next%20Closest%20Time",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "scan-the-next-day-of-minutes",
+      "approach": "Scan the Next Day of Minutes",
+      "explanation": "### How it works\n\nThere are only 1440 possible future minutes before the same time repeats. Check them chronologically and return the first time whose digits all come from the input.\n\n### Steps\n\n1. Convert the input to minutes after midnight.\n2. Try offsets one through 1440, wrapping at midnight.\n3. Format each candidate as HH:MM.\n4. Accept the first candidate using only available digits.\n\n### Complexity\n\n- Time: O(1440), a fixed bound.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/681.%20Next%20Closest%20Time",
+      "code": {
+        "python": "class Solution:\n    def nextClosestTime(self, time: str) -> str:\n        allowed = set(time.replace(':', ''))\n        start = int(time[:2]) * 60 + int(time[3:])\n        for offset in range(1, 1441):\n            hour, minute = divmod((start + offset) % 1440, 60)\n            candidate = f'{hour:02d}:{minute:02d}'\n            if set(candidate.replace(':', '')) <= allowed:\n                return candidate\n"
+      }
+    }
+  ]
+}

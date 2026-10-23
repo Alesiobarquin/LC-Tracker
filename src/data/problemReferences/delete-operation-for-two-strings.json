@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/583.%20Delete%20Operation%20for%20Two%20Strings",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "deletion-cost-dp",
+      "approach": "Deletion-Cost DP",
+      "explanation": "### How it works\n\nStore the minimum deletions needed for every pair of prefixes directly. Matching characters are kept together; differing characters require deleting from one side.\n\n### Steps\n\n1. Initialize deletion costs against an empty prefix.\n2. On equal characters, reuse the diagonal cost.\n3. Otherwise add one to the smaller cost of deleting from either side.\n4. Return the full-prefix cost.\n\n### Complexity\n\n- Time: `O(nm)` time.\n- Space: `O(m)` for rolling prefix costs.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/583.%20Delete%20Operation%20for%20Two%20Strings",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        previous = list(range(len(word2) + 1))\n        for i, a in enumerate(word1, 1):\n            current = [i]\n            for j, b in enumerate(word2, 1):\n                current.append(previous[j - 1] if a == b else 1 + min(previous[j], current[-1]))\n            previous = current\n        return previous[-1]\n"
+      }
+    }
+  ]
 }

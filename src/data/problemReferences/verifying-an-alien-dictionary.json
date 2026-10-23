@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool isAlienSorted(vector<string>& words, string order) {\n        int orderIndex[26] = {0};\n        for (int i = 0; i < order.size(); ++i)\n            orderIndex[order[i] - 'a'] = i;\n\n        for (int i = 0; i < words.size() - 1; ++i) {\n            string w1 = words[i], w2 = words[i + 1];\n            int j = 0;\n\n            for (; j < w1.size(); ++j) {\n                if (j == w2.size()) return false;\n                if (w1[j] != w2[j]) {\n                    if (orderIndex[w1[j] - 'a'] > orderIndex[w2[j] - 'a'])\n                        return false;\n                    break;\n                }\n            }\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OVgPAJIyX6o",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verifying-an-alien-dictionary.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verifying-an-alien-dictionary.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nIf the words are sorted according to the alien dictionary order, they should remain in the same order after sorting. The key insight is that we can create a mapping from each character to its position in the alien alphabet, then use this mapping to define a custom comparator for sorting.\n\n### Steps\n\n1. Create a mapping from each character to its index position in the `order` string.\n2. Define a comparison function that compares two words character by character using the alien order indices.\n3. For characters that differ, the word with the smaller index character comes first.\n4. If all compared characters are equal, the shorter word comes first.\n5. Sort a copy of the `words` array using this custom comparator.\n6. Compare the sorted array with the original array and return `true` if they are identical.\n\n### Complexity\n\n- Time complexity: `O(n * mlog n)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the number of words and `m` is the average length of a word.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def isAlienSorted(self, words: List[str], order: str) -> bool:\n        order_index = {c: i for i, c in enumerate(order)}\n\n        def compare(word):\n            return [order_index[c] for c in word]\n\n        return words == sorted(words, key=compare)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verifying-an-alien-dictionary.md",
+      "id": "sorting"
+    }
+  ]
 }

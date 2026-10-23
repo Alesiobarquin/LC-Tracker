@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numSubarrayProductLessThanK(vector<int>& nums, int k) {\n        int res = 0, l = 0;\n        long long product = 1;\n        for (int r = 0; r < nums.size(); r++) {\n            product *= nums[r];\n            while (l <= r && product >= k) {\n                product /= nums[l++];\n            }\n            res += (r - l + 1);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-product-less-than-k.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-product-less-than-k.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible subarray. For each starting index, extend the subarray one element at a time while tracking the running product. If the product stays below `k`, count it. Once the product reaches or exceeds `k`, no further extensions from this starting point will work (since all elements are positive, the product only grows).\n\n### Steps\n\n1. Initialize a counter `res = 0`.\n2. For each starting index `i` from `0` to `n - 1`:\n    - Set `curProd = 1`.\n    - For each ending index `j` from `i` to `n - 1`:\n        - Multiply `curProd` by `nums[j]`.\n        - If `curProd >= k`, `break` out of the inner loop.\n        - Otherwise, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            curProd = 1\n            for j in range(i, n):\n                curProd *= nums[j]\n                if curProd >= k:\n                    break\n                res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-product-less-than-k.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nProducts grow multiplicatively, which makes binary search tricky with raw values. However, taking logarithms converts products into sums: `log(a * b) = log(a) + log(b)`. This means we can build a prefix sum of logarithms and binary search for the rightmost position where the prefix sum difference is less than `log(k)`. For each starting index, we find how many valid ending positions exist.\n\n### Steps\n\n1. Handle the edge case: if `k <= 1`, return `0` (no positive product can be less than `1` or less).\n2. Build a prefix sum array of logarithms: `logs[i+1] = logs[i] + log(nums[i])`.\n3. For each starting index `i`:\n    - Binary search for the smallest index `j` where `logs[j] >= logs[i] + log(k)`.\n    - The count of valid subarrays starting at `i` is `j - (i + 1)`.\n4. Sum all counts and return.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom math import log\n\nclass Solution:\n    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:\n        if k <= 1:\n            return 0\n\n        n = len(nums)\n        res = 0\n        logs = [0] * (n + 1)\n        logK = log(k)\n        for i in range(n):\n            logs[i + 1] = logs[i] + log(nums[i])\n\n        for i in range(n):\n            l, r = i + 1, n + 1\n            while l < r:\n                mid = (l + r) >> 1\n                if logs[mid] < logs[i] + logK - 1e-9:\n                    l = mid + 1\n                else:\n                    r = mid\n            res += l - (i + 1)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-product-less-than-k.md",
+      "id": "binary-search"
+    }
+  ]
 }

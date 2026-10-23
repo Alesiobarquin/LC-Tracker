@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxFrequency(vector<int>& nums, int k) {\n        unordered_map<int,int> cnt;\n        int res = 0;\n        for (int num : nums) {\n            int prev = max(cnt[num], cnt[k]);\n            cnt[num] = prev + 1;\n            res = max(res, cnt[num] - cnt[k]);\n        }\n        return cnt[k] + res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-after-subarray-operation.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-after-subarray-operation.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe operation lets us pick a subarray and add a constant to every element in it. Our goal is to maximize how often some value `k` appears. The key insight is that we want to convert elements of some value `num` into `k` by choosing the right constant. For each candidate `num`, we try every possible subarray, count how many `num` values we convert to `k`, and subtract any `k` values that get changed to something else within the subarray.\n\n### Steps\n\n1. Count how many times `k` appears in the array (call it `cntK`).\n2. For each possible value `num` from `1` to `50` (excluding `k`):\n    - For each starting index `i`:\n        - Reset the count and iterate through all ending indices `j`.\n        - Increment count when we see `num` (it becomes `k` after the operation).\n        - Decrement `cntK` when we see `k` (it changes to something else).\n        - Track the maximum of `cntK + count`.\n3. Return the maximum frequency found.\n\n### Complexity\n\n- Time complexity: `O(50 * n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxFrequency(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        cntK = nums.count(k)\n        res = cntK\n\n        for num in range(1, 51):\n            if num == k: continue\n            for i in range(n):\n                tmp, cnt = cntK, 0\n                for j in range(i, n):\n                    if nums[j] == num:\n                        cnt += 1\n                    elif nums[j] == k:\n                        cntK -= 1\n                    res = max(res, cnt + cntK)\n\n                cntK = tmp\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-after-subarray-operation.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Kadane's Algorithm - I",
+      "explanation": "### How it works\n\nThe brute force tries all subarrays, but we can use Kadane's algorithm to find the best subarray in linear time. For a fixed target value `num`, we want to find a subarray where converting `num` to `k` gives the maximum net gain. Treat each `num` as `+1` (we gain a `k`) and each `k` as `-1` (we lose a `k`). Kadane's algorithm finds the maximum sum subarray, giving us the best gain for that target.\n\n### Steps\n\n1. Count how many times `k` appears in the array (call it `cntK`).\n2. For each possible value `i` from `1` to `50` (excluding `k`):\n    - Initialize `cnt = 0`.\n    - For each element in the array:\n        - Add `1` if the element equals `i`.\n        - Subtract `1` if the element equals `k`.\n        - Reset `cnt` to `0` if it goes negative (Kadane's reset).\n        - Track the maximum of `cntK + cnt`.\n3. Return the maximum frequency found.\n\n### Complexity\n\n- Time complexity: `O(50 * n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxFrequency(self, nums: List[int], k: int) -> int:\n        cntK = nums.count(k)\n        res = 0\n\n        for i in range(1, 51):\n            if i == k:\n                continue\n            cnt = 0\n            for num in nums:\n                if num == i:\n                    cnt += 1\n                if num == k:\n                    cnt -= 1\n                cnt = max(cnt, 0)\n                res = max(res, cntK + cnt)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-frequency-after-subarray-operation.md",
+      "id": "kadane-s-algorithm-i"
+    }
+  ]
 }

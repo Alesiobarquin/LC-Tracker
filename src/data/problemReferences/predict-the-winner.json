@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/486.%20Predict%20the%20Winner",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "memoized-score-difference",
+      "approach": "Memoized Score Difference",
+      "explanation": "### How it works\n\nFor a remaining interval, the current player maximizes their final score difference. Taking an endpoint gains that value and gives the opponent the role represented by the smaller interval.\n\n### Steps\n\n1. Return a single value for a one-element interval.\n2. Try taking either endpoint and subtract the opponent's best difference.\n3. Memoize interval results.\n4. Accept a nonnegative initial difference, including a tie.\n\n### Complexity\n\n- Time: `O(n²)` states and time.\n- Space: `O(n²)` memoization plus `O(n)` recursion depth.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/486.%20Predict%20the%20Winner",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def predictTheWinner(self, nums: list[int]) -> bool:\n        @cache\n        def difference(left, right):\n            if left == right:\n                return nums[left]\n            return max(nums[left] - difference(left + 1, right),\n                       nums[right] - difference(left, right - 1))\n        return difference(0, len(nums) - 1) >= 0\n"
+      }
+    }
+  ]
 }

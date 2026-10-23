@@ -1,0 +1,29 @@
+{
+  "problemId": "student-attendance-record-i",
+  "approach": "Absence Count and Late-Run Search",
+  "explanation": "### How it works\n\nA record is eligible when it contains fewer than two absences and no run of three late days. Counting A and searching for LLL express both rules.\n\n### Steps\n\n1. Count absences.\n2. Check for the substring LLL.\n3. Accept only at most one absence and no forbidden late run.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def checkRecord(self, s: str) -> bool:\n    return s.count('A') <= 1 and 'LLL' not in s\n",
+    "cpp": "class Solution {\n public:\n  bool checkRecord(string s) {\n    int countA = 0;\n    int countL = 0;\n\n    for (const char c : s) {\n      if (c == 'A' && ++countA > 1)\n        return false;\n      if (c != 'L')\n        countL = 0;\n      else if (++countL > 2)\n        return false;\n    }\n\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/551.%20Student%20Attendance%20Record%20I",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "streaming-attendance-state",
+      "approach": "Streaming Attendance State",
+      "explanation": "### How it works\n\nTrack total absences and the current consecutive-late run while scanning once. Reject as soon as either eligibility threshold is exceeded.\n\n### Steps\n\n1. Increment absences on A.\n2. Increment the late run on L and reset it on every other character.\n3. Reject two absences or a late run of three.\n4. Accept when the scan finishes.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/551.%20Student%20Attendance%20Record%20I",
+      "code": {
+        "python": "class Solution:\n    def checkRecord(self, s: str) -> bool:\n        absences = late = 0\n        for char in s:\n            absences += char == 'A'\n            late = late + 1 if char == 'L' else 0\n            if absences > 1 or late >= 3:\n                return False\n        return True\n"
+      }
+    }
+  ]
+}

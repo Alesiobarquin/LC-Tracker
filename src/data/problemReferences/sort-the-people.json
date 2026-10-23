@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<string> sortPeople(vector<string>& names, vector<int>& heights) {\n        int n = names.size();\n        vector<int> indices(n);\n        iota(indices.begin(), indices.end(), 0);\n\n        sort(indices.begin(), indices.end(), [&](int a, int b) {\n            return heights[a] > heights[b];\n        });\n\n        vector<string> res;\n        for (int i : indices) {\n            res.push_back(names[i]);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-the-people.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-the-people.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nSince all heights are distinct, we can use each height as a unique key to look up the corresponding person's name. By building a hash map from height to name, we can then sort the heights in descending order and retrieve names in the correct sequence.\n\n### Steps\n\n1. Create a hash map that maps each height to its corresponding name.\n2. Sort the `heights` array in ascending order.\n3. Iterate through the sorted heights in reverse order (descending).\n4. For each height, look up the name in the hash map and add it to the `res`.\n5. Return the `res` array containing names sorted by height in descending order.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortPeople(self, names: List[str], heights: List[int]) -> List[str]:\n        height_to_name = {}\n        for h, n in zip(heights, names):\n            height_to_name[h] = n\n\n        res = []\n        for h in reversed(sorted(heights)):\n            res.append(height_to_name[h])\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-the-people.md",
+      "id": "hash-map"
+    },
+    {
+      "approach": "Sorting the Pairs",
+      "explanation": "### How it works\n\nInstead of using a hash map, we can pair each height with its corresponding name directly. By creating an array of (height, name) pairs and sorting them by height in descending order, we keep the relationship intact throughout the sorting process.\n\n### Steps\n\n1. Create an array of pairs where each pair contains `(height, name)`.\n2. Sort the array of pairs by height in descending order.\n3. Extract the names from the sorted pairs to form the result array.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortPeople(self, names: List[str], heights: List[int]) -> List[str]:\n        arr = list(zip(heights, names))\n        arr.sort(reverse=True)\n        return [name for _, name in arr]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-the-people.md",
+      "id": "sorting-the-pairs"
+    }
+  ]
 }

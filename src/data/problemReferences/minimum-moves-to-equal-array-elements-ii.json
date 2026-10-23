@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/462.%20Minimum%20Moves%20to%20Equal%20Array%20Elements%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "try-every-input-target",
+      "approach": "Try Every Input Target",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nFor a chosen final value, each element needs its absolute distance in moves. At least one optimal target is an input value, so testing every input value gives a baseline for selecting the median.\n\n### Steps\n\n1. Treat each input value as a candidate target.\n2. Sum distances from all values to that target.\n3. Return the smallest sum.\n\n### Complexity\n\n- Time: `O(n²)` time.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/462.%20Minimum%20Moves%20to%20Equal%20Array%20Elements%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def minMoves2(self, nums: list[int]) -> int:\n        return min(sum(abs(value - target) for value in nums) for target in nums)\n"
+      }
+    }
+  ]
 }

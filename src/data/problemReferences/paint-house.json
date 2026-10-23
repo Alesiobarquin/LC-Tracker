@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minCost(vector<vector<int>>& costs) {\n        int dp0 = 0, dp1 = 0, dp2 = 0;\n\n        for (const auto& cost : costs) {\n            int newDp0 = cost[0] + min(dp1, dp2);\n            int newDp1 = cost[1] + min(dp0, dp2);\n            int newDp2 = cost[2] + min(dp0, dp1);\n            dp0 = newDp0;\n            dp1 = newDp1;\n            dp2 = newDp2;\n        }\n\n        return min({dp0, dp1, dp2});\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=-w67-4tnH5U",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/paint-house.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/paint-house.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to paint each house with one of three colors such that no two adjacent houses have the same color. The most natural way to approach this is to consider each house in order and try all valid color choices.\n\nFor each house, we pick a color different from the previous house, add its cost, and recurse to the next house. By exploring all possible valid combinations, we can find the minimum total cost. This brute force approach considers every valid painting configuration.\n\n### Steps\n\n1. Define a recursive function `dfs(i, prevColor)` where `i` is the current house index and `prevColor` is the color used on the previous house.\n2. Base case: If `i` equals the number of houses, return `0` (no more houses to paint).\n3. For each of the three colors (`0`, `1`, `2`), if the color is different from `prevColor`, recursively compute the cost of painting the remaining houses.\n4. Return the minimum cost among all valid color choices.\n5. Start the recursion from house `0` with `prevColor = -1` (indicating no previous color constraint).\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCost(self, costs: List[List[int]]) -> int:\n        n = len(costs)\n\n        def dfs(i, prevColor):\n            if i == n:\n                return 0\n\n            res = float(\"inf\")\n            for c in range(3):\n                if c == prevColor:\n                    continue\n                res = min(res, costs[i][c] + dfs(i + 1, c))\n            return res\n\n        return dfs(0, -1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/paint-house.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes the same subproblems many times. For example, computing the minimum cost to paint houses 2 through n starting with color 0 might be calculated multiple times from different paths.\n\nWe can use memoization to store results for each unique state `(house index, previous color)`. When we encounter the same state again, we simply return the cached result instead of recomputing it.\n\n### Steps\n\n1. Create a 2D memoization table `dp` where `dp[i][c]` stores the minimum cost to paint houses from index `i` to the end, given that the previous house was painted with color `c`.\n2. In the recursive function, first check if the result is already cached. If so, return it.\n3. Otherwise, compute the result by trying all valid colors and store it in the cache before returning.\n4. The state needs to account for the previous color, so we offset by `1` to handle the initial case where `prevColor = -1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCost(self, costs: List[List[int]]) -> int:\n        n = len(costs)\n        dp = [[-1] * 4 for _ in range(n)]\n\n        def dfs(i, prevColor):\n            if i == n:\n                return 0\n            if dp[i][prevColor + 1] != -1:\n                return dp[i][prevColor + 1]\n\n            res = float(\"inf\")\n            for c in range(3):\n                if c == prevColor:\n                    continue\n                res = min(res, costs[i][c] + dfs(i + 1, c))\n\n            dp[i][prevColor + 1] = res\n            return res\n\n        return dfs(0, -1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/paint-house.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string frequencySort(string s) {\n        unordered_map<char, int> count;\n        for (char c : s) {\n            count[c]++;\n        }\n\n        vector<vector<char>> buckets(s.size() + 1);\n        for (auto& entry : count) {\n            buckets[entry.second].push_back(entry.first);\n        }\n\n        string res;\n        for (int i = s.size(); i > 0; i--) {\n            for (char c : buckets[i]) {\n                res += string(i, c);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-characters-by-frequency.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-characters-by-frequency.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo sort characters by frequency, we first need to know how often each character appears. Once we have the frequencies, we can sort the entire string using a custom comparator that prioritizes higher frequencies. Characters with the same frequency are sorted alphabetically for consistency.\n\n### Steps\n\n1. Count the frequency of each character in the string.\n2. Sort all characters using a custom comparator:\n    - Higher frequency comes first.\n    - If frequencies are equal, sort by character value for consistency.\n3. Join the sorted characters into a string and return it.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def frequencySort(self, s: str) -> str:\n        count = Counter(s)\n        sorted_chars = sorted(s, key=lambda x: (-count[x], x))\n        return ''.join(sorted_chars)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-characters-by-frequency.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Frequency Sort",
+      "explanation": "### How it works\n\nInstead of sorting all characters individually, we can sort the unique characters by their frequencies. This is more efficient because the number of unique characters is bounded (at most 62 for alphanumeric). After sorting the unique characters, we build the result by repeating each character according to its frequency.\n\n### Steps\n\n1. Count the frequency of each character.\n2. Create a list of (character, frequency) pairs for characters that appear at least once.\n3. Sort this list by frequency in descending order (with alphabetical tiebreaker).\n4. Build the result string by repeating each character by its frequency count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for the output string.",
+      "code": {
+        "python": "class Solution:\n    def frequencySort(self, s: str) -> str:\n        count = [0] * 123\n        for c in s:\n            count[ord(c)] += 1\n\n        freq = [(chr(i), count[i]) for i in range(123) if count[i] > 0]\n        freq.sort(key=lambda x: (-x[1], x[0]))\n\n        return ''.join(char * freq for char, freq in freq)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-characters-by-frequency.md",
+      "id": "frequency-sort"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool divideArray(vector<int>& nums) {\n        unordered_set<int> oddSet;\n\n        for (int num : nums) {\n            if (oddSet.count(num)) {\n                oddSet.erase(num);\n            } else {\n                oddSet.insert(num);\n            }\n        }\n\n        return oddSet.empty();\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-array-into-equal-pairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-array-into-equal-pairs.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nFor an array to be divisible into pairs of equal elements, every distinct value must appear an even number of times. By sorting the array, identical elements become adjacent. We can then scan through and count consecutive runs of equal values. If any run has an odd length, we cannot form valid pairs.\n\n### Steps\n\n1. Sort the array.\n2. Iterate through the sorted array, tracking runs of consecutive equal elements.\n3. For each run, check if its length is odd.\n4. If any run has odd length, return `false`.\n5. If all runs have even length, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def divideArray(self, nums: List[int]) -> bool:\n        N = len(nums)\n        nums.sort()\n\n        i = 0\n        while i < N:\n            j = i\n            while j < N and nums[i] == nums[j]:\n                j += 1\n\n            if (j - i) % 2 != 0:\n                return False\n\n            i = j\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-array-into-equal-pairs.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nWe can count the frequency of each element using a hash map. After counting, we check if every element appears an even number of times. If any element has an odd count, it cannot be fully paired, so we return `false`.\n\n### Steps\n\n1. Create a hash map to store the count of each element.\n2. Iterate through the array and increment the count for each element.\n3. Iterate through all counts in the hash map.\n4. If any count is odd, return `false`.\n5. Otherwise, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def divideArray(self, nums: List[int]) -> bool:\n        count = {}\n        for num in nums:\n            if num not in count:\n                count[num] = 0\n            count[num] += 1\n\n        for cnt in count.values():\n            if cnt % 2 == 1:\n                return False\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-array-into-equal-pairs.md",
+      "id": "hash-map"
+    }
+  ]
 }

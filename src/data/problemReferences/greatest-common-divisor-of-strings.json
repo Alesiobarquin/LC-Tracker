@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string gcdOfStrings(string str1, string str2) {\n        int g = std::gcd((int)str1.size(), (int)str2.size());\n\n        for (int i = 0; i < str1.size(); i++) {\n            if (str1[i] != str1[i % g]) {\n                return \"\";\n            }\n        }\n\n        for (int i = 0; i < str2.size(); i++) {\n            if (str2[i] != str1[i % g]) {\n                return \"\";\n            }\n        }\n\n        return str1.substr(0, g);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=i5I_wrbUdzM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/greatest-common-divisor-of-strings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/greatest-common-divisor-of-strings.md",
+  "alternatives": [
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nA string `t` divides both `str1` and `str2` only if its length divides both string lengths and repeating `t` the appropriate number of times reconstructs each string. We search for the longest such divisor by checking all possible lengths from the minimum length down to `1`.\n\n### Steps\n\n1. For each possible length `l` from `min(len1, len2)` down to `1`:\n    - Check if `l` divides both `len1` and `len2`.\n    - Extract the prefix `str1[:l]` as the candidate divisor.\n    - Check if repeating this prefix `len1/l` times equals `str1` and `len2/l` times equals `str2`.\n2. Return the first valid prefix found.\n3. If no valid divisor exists, return an empty string.\n\n### Complexity\n\n- Time complexity: `O(min(m, n) * (m + n))`\n- Space complexity: `O(m + n)`\n\n> Where `m` and `n` are the lengths of the strings `str1` and `str2` respectively.",
+      "code": {
+        "python": "class Solution:\n    def gcdOfStrings(self, str1: str, str2: str) -> str:\n        len1, len2 = len(str1), len(str2)\n\n        def isDivisor(l):\n            if len1 % l != 0 or len2 % l != 0:\n                return False\n            f1, f2 = len1 // l, len2 // l\n            return str1[:l] * f1 == str1 and str1[:l] * f2 == str2\n\n        for l in range(min(len1, len2), 0, -1):\n            if isDivisor(l):\n                return str1[:l]\n\n        return \"\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/greatest-common-divisor-of-strings.md",
+      "id": "iteration"
+    }
+  ]
 }

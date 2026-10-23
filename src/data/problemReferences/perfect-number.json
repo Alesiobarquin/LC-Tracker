@@ -1,0 +1,29 @@
+{
+  "problemId": "perfect-number",
+  "approach": "Perfect Numbers Within the Input Bound",
+  "explanation": "### How it works\n\nFor the stated positive input bound of 10^8, the only perfect numbers are 6, 28, 496, 8128, and 33550336. Membership in this fixed list answers the bounded problem.\n\n### Steps\n\n1. Use the five perfect numbers within the allowed range.\n2. Check whether the input belongs to that fixed set.\n\n### Complexity\n\n- Time: O(1) for the specified bound.\n- Space: O(1) fixed lookup.\n\n### Things to watch for\n\n- This lookup depends on the 10^8 input bound and is not a general perfect-number algorithm.",
+  "code": {
+    "python": "class Solution:\n  def checkPerfectNumber(self, num: int) -> bool:\n    return num in {6, 28, 496, 8128, 33550336}\n",
+    "cpp": "class Solution {\n public:\n  bool checkPerfectNumber(int num) {\n    if (num == 1)\n      return false;\n\n    int sum = 1;\n\n    for (int i = 2; i <= sqrt(num); ++i)\n      if (num % i == 0)\n        sum += i + num / i;\n\n    return sum == num;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/507.%20Perfect%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sum-proper-divisor-pairs",
+      "approach": "Sum Proper Divisor Pairs",
+      "explanation": "### How it works\n\nDivisors come in pairs around the square root. Add both members of each pair, counting a square root once, and compare the sum of proper divisors to the input.\n\n### Steps\n\n1. Reject one.\n2. Start the proper-divisor sum at one.\n3. Test divisors from two through the integer square root.\n4. Add each divisor and its distinct partner, then compare with num.\n\n### Complexity\n\n- Time: O(sqrt(num)).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/507.%20Perfect%20Number",
+      "code": {
+        "python": "from math import isqrt\n\nclass Solution:\n    def checkPerfectNumber(self, num: int) -> bool:\n        if num <= 1:\n            return False\n        total = 1\n        for divisor in range(2, isqrt(num) + 1):\n            if num % divisor == 0:\n                total += divisor\n                if divisor != num // divisor:\n                    total += num // divisor\n        return total == num\n"
+      }
+    }
+  ]
+}

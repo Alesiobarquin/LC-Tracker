@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/82.%20Remove%20Duplicates%20from%20Sorted%20List%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "recursive-run-removal",
+      "approach": "Recursive Run Removal",
+      "explanation": "### How it works\n\nTreat the first equal-valued run as one unit. A repeated run is removed completely; a singleton is linked to the recursively filtered suffix.\n\n### Steps\n\n1. Return immediately for an empty list.\n2. If the first two values match, skip the whole run and recurse on the remainder.\n3. Otherwise preserve the first node and attach the filtered suffix.\n\n### Complexity\n\n- Time: `O(n)` because every node belongs to one scanned run.\n- Space: `O(n)` recursion stack in the worst case.\n\n### Things to watch for\n\n- Remove every node in a repeated run, including its first node.\n- Long lists can exceed Python's recursion depth; the iterative default avoids that limit.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/82.%20Remove%20Duplicates%20from%20Sorted%20List%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def deleteDuplicates(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if not head:\n            return None\n        if head.next and head.val == head.next.val:\n            value = head.val\n            while head and head.val == value:\n                head = head.next\n            return self.deleteDuplicates(head)\n        head.next = self.deleteDuplicates(head.next)\n        return head\n"
+      }
+    }
+  ]
 }

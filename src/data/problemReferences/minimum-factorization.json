@@ -1,0 +1,29 @@
+{
+  "problemId": "minimum-factorization",
+  "approach": "Greedy Large-Digit Factorization",
+  "explanation": "### How it works\n\nUse factors from nine down to two to minimize the number of decimal digits, then place larger chosen factors in less significant positions. Any remaining prime factor above nine makes the construction impossible.\n\n### Steps\n\n1. Return one for input one.\n2. Repeatedly remove factors nine down to two.\n3. Prepend each removed digit to the numeric answer.\n4. Require no remaining factor and a signed 32-bit result.\n\n### Complexity\n\n- Time: O(log num) bounded-integer divisions.\n- Space: O(1) auxiliary space under the result bound.",
+  "code": {
+    "python": "class Solution:\n  def smallestFactorization(self, num: int) -> int:\n    if num == 1:\n      return 1\n\n    ans = 0\n    base = 1\n\n    for i in range(9, 1, -1):\n      while num % i == 0:\n        num //= i\n        ans = base * i + ans\n        base *= 10\n\n    return ans if num == 1 and ans <= 2**31 - 1 else 0\n",
+    "cpp": "class Solution {\n public:\n  int smallestFactorization(int num) {\n    if (num == 1)\n      return 1;\n\n    long ans = 0;\n    long base = 1;\n\n    for (int i = 9; i > 1; --i)\n      while (num % i == 0) {\n        num /= i;\n        ans = base * i + ans;\n        base *= 10;\n      }\n\n    return num == 1 && ans <= INT_MAX ? ans : 0;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/625.%20Minimum%20Factorization",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "memoized-divisor-search",
+      "approach": "Memoized Divisor Search",
+      "explanation": "### How it works\n\nSearch all single-digit factors of the remaining product. Memoization merges repeated divisor subproblems; sort each candidate digit multiset and prefer shorter, then lexicographically smaller, strings.\n\n### Steps\n\n1. Use an empty digit string for remaining product one.\n2. Try every dividing digit from two through nine.\n3. Recursively solve the quotient and insert the chosen digit in sorted order.\n4. Choose the smallest candidate and enforce the 32-bit result limit.\n\n### Complexity\n\n- Time: O(τ(num) × log² num) conservative character-work bound, where τ counts divisors.\n- Space: O(τ(num) × log num) stored characters.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/625.%20Minimum%20Factorization",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def smallestFactorization(self, num: int) -> int:\n        if num == 1:\n            return 1\n        @cache\n        def best(remaining):\n            if remaining == 1:\n                return ''\n            answer = None\n            for digit in range(2, 10):\n                if remaining % digit:\n                    continue\n                suffix = best(remaining // digit)\n                if suffix is not None:\n                    candidate = ''.join(sorted(suffix + str(digit)))\n                    if answer is None or (len(candidate), candidate) < (len(answer), answer):\n                        answer = candidate\n            return answer\n        digits = best(num)\n        value = int(digits) if digits else 0\n        return value if value <= 2**31 - 1 else 0\n"
+      }
+    }
+  ]
+}

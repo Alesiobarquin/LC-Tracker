@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool confusingNumber(int n) {\n        // Use 'invertMap' to invert each valid digit. Since we don't want to modify\n        // 'n', we create a copy of it as 'nCopy'.\n        map<int, int> invertMap = {{0, 0}, {1, 1}, {6, 9}, {8, 8}, {9, 6}};\n        int rotatedNumber = 0, nCopy = n;\n\n        // Get every digit of 'nCopy' by taking the remainder of it to 10.\n        while (nCopy > 0) {\n            int res = nCopy % 10;\n            if (invertMap.find(res) == invertMap.end()) {\n                return false;\n            }\n\n            // Append the inverted digit of 'res' to the end of 'rotatedNumber'.\n            rotatedNumber = rotatedNumber * 10 + invertMap[res];\n            nCopy /= 10;\n        }\n\n        // Check if 'rotatedNumber' equals 'n'.\n        return rotatedNumber != n;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/confusing-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/confusing-number.md",
+  "alternatives": [
+    {
+      "approach": "Invert and Reverse",
+      "explanation": "### How it works\n\nA confusing number looks different when rotated 180 degrees. Only digits `0`, `1`, `6`, `8`, and `9` remain valid after rotation (`6` becomes `9` and vice versa). We invert each digit, reverse the result, and check if it differs from the original.\n\n### Steps\n\n1. Create a mapping of valid digits to their rotated counterparts: `0->0`, `1->1`, `6->9`, `8->8`, `9->6`.\n2. Iterate through each digit of `n` as a string.\n3. If any digit is not in the map (`2`, `3`, `4`, `5`, `7`), return `false` immediately.\n4. Build the rotated number by appending the inverted digit for each character.\n5. Reverse the rotated number and compare it to the original. If different, return `true`.\n\n### Complexity\n\n- Time complexity: `O(L)`\n- Space complexity: `O(L)` extra space used\n\n> Where `L` is the maximum number of digits `n` can have (`L = log_{10} n`).",
+      "code": {
+        "python": "class Solution:\n    def confusingNumber(self, n: int) -> bool:\n        # Use 'invertMap' to invert each valid digit.\n        invert_map = {\"0\":\"0\", \"1\":\"1\", \"8\":\"8\", \"6\":\"9\", \"9\":\"6\"}\n        rotated_number = []\n\n        # Iterate over each digit of 'n'.\n        for ch in str(n):\n            if ch not in invert_map:\n                return False\n\n            # Append the inverted digit of 'ch' to the end of 'rotated_number'.\n            rotated_number.append(invert_map[ch])\n\n        rotated_number = \"\".join(rotated_number)\n\n        # Check if the reversed 'rotated_number' equals 'n'.\n        return int(rotated_number[::-1]) != n\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/confusing-number.md",
+      "id": "invert-and-reverse"
+    }
+  ]
 }

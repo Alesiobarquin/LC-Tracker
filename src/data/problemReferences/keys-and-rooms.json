@@ -1,0 +1,29 @@
+{
+  "problemId": "keys-and-rooms",
+  "approach": "Recursive Key Graph Traversal",
+  "explanation": "### How it works\n\nRooms form a directed graph and each key is an outgoing edge. Starting at room zero, mark every room reachable by recursively following its keys.\n\n### Steps\n\n1. Mark room zero visited.\n2. Recursively follow keys leading to unvisited rooms.\n3. Require every room to be marked at the end.\n\n### Complexity\n\n- Time: O(r + k) for r rooms and k listed keys.\n- Space: O(r) visited state and recursion.",
+  "code": {
+    "python": "class Solution:\n  def canVisitAllRooms(self, rooms: list[list[int]]) -> bool:\n    seen = [False] * len(rooms)\n\n    def dfs(node: int) -> None:\n      seen[node] = True\n      for child in rooms[node]:\n        if not seen[child]:\n          dfs(child)\n\n    dfs(0)\n    return all(seen)\n",
+    "cpp": "class Solution {\n public:\n  bool canVisitAllRooms(vector<vector<int>>& rooms) {\n    vector<bool> seen(rooms.size());\n    dfs(rooms, 0, seen);\n    return ranges::all_of(seen, [](int s) { return s == true; });\n  }\n\n private:\n  void dfs(const vector<vector<int>>& rooms, int node, vector<bool>& seen) {\n    seen[node] = true;\n    for (const int child : rooms[node])\n      if (!seen[child])\n        dfs(rooms, child, seen);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/841.%20Keys%20and%20Rooms",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "breadth-first-key-queue",
+      "approach": "Breadth-First Key Queue",
+      "explanation": "### How it works\n\nExplore reachable rooms with a queue. Mark a room when enqueuing it so duplicate keys cannot schedule repeated visits.\n\n### Steps\n\n1. Enqueue room zero and mark it visited.\n2. Pop a room and inspect all its keys.\n3. Enqueue newly discovered rooms.\n4. Compare the visited count with the room count.\n\n### Complexity\n\n- Time: O(r + k).\n- Space: O(r) visited set and queue.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/841.%20Keys%20and%20Rooms",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def canVisitAllRooms(self, rooms: list[list[int]]) -> bool:\n        queue, seen = deque([0]), {0}\n        while queue:\n            for key in rooms[queue.popleft()]:\n                if key not in seen:\n                    seen.add(key)\n                    queue.append(key)\n        return len(seen) == len(rooms)\n"
+      }
+    }
+  ]
+}

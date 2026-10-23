@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int arraySign(vector<int>& nums) {\n        int sign = 1;\n        for (int num : nums) {\n            if (num == 0) {\n                return 0;\n            }\n            if (num < 0) {\n                sign *= -1;\n            }\n        }\n        return sign;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ILDLM86jNow",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sign-of-the-product-of-an-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sign-of-the-product-of-an-array.md",
+  "alternatives": [
+    {
+      "approach": "Count Negative Numbers",
+      "explanation": "### How it works\n\nThe sign of a product depends on two things: whether any factor is zero, and whether the count of negative factors is odd or even. If any number is zero, the product is `0`. Otherwise, an even count of negatives gives a positive product (negatives cancel out), and an odd count gives a negative product. We do not need to compute the actual product; just counting negatives is enough.\n\n### Steps\n\n1. Initialize a counter `neg = 0` for negative numbers.\n2. Iterate through each number in the array:\n    - If the number is `0`, return `0` immediately.\n    - If the number is negative, increment `neg`.\n3. After the loop, if `neg` is even, return `1`; otherwise, return `-1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def arraySign(self, nums: list[int]) -> int:\n        neg = 0\n        for num in nums:\n            if num == 0:\n                return 0\n            neg += (1 if num < 0 else 0)\n        return -1 if neg % 2 else 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sign-of-the-product-of-an-array.md",
+      "id": "count-negative-numbers"
+    }
+  ]
 }

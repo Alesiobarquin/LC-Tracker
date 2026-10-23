@@ -1,0 +1,29 @@
+{
+  "problemId": "largest-number-at-least-twice-of-others",
+  "approach": "Largest and Second-Largest Values",
+  "explanation": "### How it works\n\nOnly the second-largest value can violate the largest-at-least-double rule. Track both extrema and the largest value's original index in one pass.\n\n### Steps\n\n1. Maintain the largest and second-largest values.\n2. Update the largest index whenever a new maximum appears.\n3. Compare the maximum with twice the second maximum.\n4. Return its index or −1.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def dominantIndex(self, nums: list[int]) -> int:\n    ans = 0\n    mx = 0\n    secondMax = 0\n\n    for i, num in enumerate(nums):\n      if num > mx:\n        secondMax = mx\n        mx = num\n        ans = i\n      elif num > secondMax:\n        secondMax = num\n\n    return ans if mx >= 2 * secondMax else -1\n",
+    "cpp": "class Solution {\n public:\n  int dominantIndex(vector<int>& nums) {\n    int ans = 0;\n    int mx = 0;\n    int secondMax = 0;\n\n    for (int i = 0; i < nums.size(); ++i)\n      if (nums[i] > mx) {\n        secondMax = mx;\n        mx = nums[i];\n        ans = i;\n      } else if (nums[i] > secondMax) {\n        secondMax = nums[i];\n      }\n\n    return mx >= 2 * secondMax ? ans : -1;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/747.%20Largest%20Number%20At%20Least%20Twice%20of%20Others",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sort-value-index-pairs",
+      "approach": "Sort Value-Index Pairs",
+      "explanation": "### How it works\n\nSort the values together with their original indices. Compare the top two values, then return the stored original index if the rule holds.\n\n### Steps\n\n1. Create value/index pairs.\n2. Sort them.\n3. Handle a single value directly.\n4. Compare the last value with twice the preceding value.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) pairs and sorting storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/747.%20Largest%20Number%20At%20Least%20Twice%20of%20Others",
+      "code": {
+        "python": "class Solution:\n    def dominantIndex(self, nums: list[int]) -> int:\n        ordered = sorted((value, i) for i, value in enumerate(nums))\n        if len(ordered) == 1 or ordered[-1][0] >= 2 * ordered[-2][0]:\n            return ordered[-1][1]\n        return -1\n"
+      }
+    }
+  ]
+}

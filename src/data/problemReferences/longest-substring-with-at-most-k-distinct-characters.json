@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstringKDistinct(string s, int k) {\n        int n = s.length();\n        int maxSize = 0;\n        unordered_map<char, int> counter;\n\n        for (int right = 0; right < n; right++) {\n            counter[s[right]]++;\n\n            if (counter.size() <= k) {\n                maxSize++;\n            } else {\n                counter[s[right - maxSize]]--;\n                if (counter[s[right - maxSize]] == 0) {\n                    counter.erase(s[right - maxSize]);\n                }\n            }\n        }\n        return maxSize;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-k-distinct-characters.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-k-distinct-characters.md",
+  "alternatives": [
+    {
+      "approach": "Binary Search + Fixed Size Sliding Window",
+      "explanation": "### How it works\n\nThe answer has a monotonic property: if we can find a valid substring of length `L`, then there must also exist valid substrings of all lengths less than `L`. This makes binary search applicable. We binary search on the answer length and for each candidate length, use a fixed-size sliding window to check if any window of that size has at most `k` distinct characters.\n\n### Steps\n\n1. If `k >= n`, return `n` (entire string is valid).\n2. Binary search on the answer with `left = k` and `right = n`.\n3. For each midpoint `mid`, check if a valid window of size `mid` exists:\n    - Use a hash map to count characters in the initial window.\n    - Slide the window across the string, adding the new character and removing the old one.\n    - If at any point the distinct count is at most `k`, return `true`.\n4. Based on the result, narrow the search range.\n5. Return `left` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(n  ×  log n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the input string `s` and `k` is the maximum number of distinct characters.",
+      "code": {
+        "python": "import collections\n\nclass Solution:\n    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:\n        n = len(s)\n        if k >= n:\n            return n\n        left, right = k, n\n\n        def isValid(size):\n            counter = collections.Counter(s[:size])\n            if len(counter) <= k:\n                return True\n            for i in range(size, n):\n                counter[s[i]] += 1\n                counter[s[i - size]] -= 1\n                if counter[s[i - size]] == 0:\n                    del counter[s[i - size]]\n                if len(counter) <= k:\n                    return True\n            return False\n\n        while left < right:\n            mid = (left + right + 1) // 2\n\n            if isValid(mid):\n                left = mid\n            else:\n                right = mid - 1\n\n        return left\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-k-distinct-characters.md",
+      "id": "binary-search-fixed-size-sliding-window"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nA variable-size sliding window is the natural fit for this problem. We expand the window by moving the right pointer and adding characters. When we exceed `k` distinct characters, we shrink the window from the left until we're back to at most `k` distinct characters. The maximum window size seen during this process is our answer.\n\n### Steps\n\n1. Initialize `left = 0`, `maxSize = 0`, and a hash map `counter` to track character frequencies.\n2. For each `right` from `0` to `n-1`:\n    - Add `s[right]` to the counter.\n    - While the number of distinct characters exceeds `k`:\n        - Decrement the count of `s[left]`.\n        - If the count becomes `0`, remove it from the map.\n        - Increment `left`.\n    - Update `maxSize = max(maxSize, right - left + 1)`.\n3. Return `maxSize`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(k)`\n\n> Where `n` is the length of the input string `s` and `k` is the maximum number of distinct characters.",
+      "code": {
+        "python": "import collections\n\nclass Solution:\n    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:\n        n = len(s)\n        max_size = 0\n        counter = collections.Counter()\n\n        left = 0\n        for right in range(n):\n            counter[s[right]] += 1\n\n            while len(counter) > k:\n                counter[s[left]] -= 1\n                if counter[s[left]] == 0:\n                    del counter[s[left]]\n                left += 1\n\n            max_size = max(max_size, right - left + 1)\n\n        return max_size\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-k-distinct-characters.md",
+      "id": "sliding-window"
+    }
+  ]
 }

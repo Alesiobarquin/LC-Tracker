@@ -7,5 +7,16 @@
     "cpp": "class StockSpanner {\n    stack<pair<int, int>> stack; // pair: (price, span)\n\npublic:\n    StockSpanner() {}\n\n    int next(int price) {\n        int span = 1;\n        while (!stack.empty() && stack.top().first <= price) {\n            span += stack.top().second;\n            stack.pop();\n        }\n        stack.push({price, span});\n        return span;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=slYh0ZNEqSw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/online-stock-span.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/online-stock-span.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe stock span is the number of consecutive days (including today) where the price was less than or equal to today's price. The simplest approach is to store all prices and, for each new price, look backward through the history counting days until we find a higher price.\n\n### Steps\n\n1. Maintain an array `arr` to store all prices seen so far.\n2. For each `next(price)` call:\n    - Append the new price to `arr`.\n    - Start from the second-to-last index and move backward.\n    - Count consecutive days where `arr[i] <= price`.\n    - Stop when we find a price greater than the current one or reach the beginning.\n    - Return the count (current position minus the stopping index).\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`\n\n> Where `n` is the number of function calls.",
+      "code": {
+        "python": "class StockSpanner:\n\n    def __init__(self):\n        self.arr = []\n\n    def next(self, price: int) -> int:\n        self.arr.append(price)\n        i = len(self.arr) - 2\n        while i >= 0 and self.arr[i] <= price:\n            i -= 1\n        return len(self.arr) - i - 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/online-stock-span.md",
+      "id": "brute-force"
+    }
+  ]
 }

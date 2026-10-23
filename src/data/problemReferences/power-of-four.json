@@ -7,5 +7,26 @@
     "cpp": "class Solution {\npublic:\n    bool isPowerOfFour(int n) {\n        return n > 0 && (n & (n - 1)) == 0 && (n % 3 == 1);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-four.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-four.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nA number is a power of four if we can repeatedly divide it by 4 until we reach 1. If at any point the number is not divisible by 4 (or becomes zero or negative), it cannot be a power of four.\n\nThis naturally leads to a recursive solution where we reduce the problem size by dividing by 4 at each step.\n\n### Steps\n\n1. If `n` equals `1`, return `true` (`4^0 = 1`).\n2. If `n` is less than or equal to `0`, or `n` is not divisible by `4`, return `false`.\n3. Recursively check if `n / 4` is a power of four.\n\n### Complexity\n\nTime and recursion space are `O(log n)` when generalized to arbitrary positive `n`: each call divides by four. Both are bounded constants for the problem's signed 32-bit range.",
+      "code": {
+        "python": "class Solution:\n    def isPowerOfFour(self, n: int) -> bool:\n        if n == 1:\n            return True\n        if n <= 0 or n % 4:\n            return False\n        return self.isPowerOfFour(n // 4)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-four.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "recursion"
+    },
+    {
+      "approach": "Math",
+      "explanation": "### How it works\n\nIf `n` is a power of 4, then `n = 4^k` for some integer `k`. Taking the logarithm base 4 of both sides gives `k = log4(n)`. If this result is an integer, then `n` is a power of four.\n\nWe check if the logarithm yields a whole number by verifying the remainder when divided by 1 is zero.\n\n### Steps\n\n1. If `n` is less than or equal to `0`, return `false`.\n2. Compute `log(n) / log(4)` to get the base-4 logarithm.\n3. Return `true` if this value has no fractional part (i.e., modulo 1 equals `0`).\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from math import log\n\nclass Solution:\n    def isPowerOfFour(self, n: int) -> bool:\n        return n > 0 and log(n, 4) % 1 == 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/power-of-four.md",
+      "id": "math"
+    }
+  ]
 }

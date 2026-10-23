@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minimumIndex(vector<int>& nums) {\n        int majority = 0, count = 0;\n        for (int num : nums) {\n            if (count == 0) majority = num;\n            count += (num == majority ? 1 : -1);\n        }\n\n        int leftCnt = 0, rightCnt = count_if(nums.begin(), nums.end(),\n                                             [&](int x) { return x == majority; });\n\n        int n = nums.size();\n        for (int i = 0; i < n; i++) {\n            if (nums[i] == majority) {\n                leftCnt++;\n                rightCnt--;\n            }\n\n            int leftLen = i + 1;\n            int rightLen = n - i - 1;\n\n            if (2 * leftCnt > leftLen && 2 * rightCnt > rightLen) {\n                return i;\n            }\n        }\n\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-index-of-a-valid-split.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-index-of-a-valid-split.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA valid split requires that the same element is dominant in both the left and right subarrays. The dominant element must appear more than half the time in each part.\n\nThe straightforward approach is to try every possible split point and, for each one, count element frequencies in both halves. We then check if any element satisfies the dominance condition on both sides.\n\n### Steps\n\n1. Iterate through each potential split index `i` from `0` to `n-2`.\n2. For each split, build frequency maps for the left portion (`0` to `i`) and right portion (`i+1` to `n-1`).\n3. For each element in the left map, check if its count exceeds half the left length AND its count in the right map exceeds half the right length.\n4. Return the first index where both conditions are met.\n5. If no valid split exists, return `-1`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def minimumIndex(self, nums: List[int]) -> int:\n        n = len(nums)\n\n        for i in range(n - 1):\n            left_cnt = defaultdict(int)\n            for l in range(i + 1):\n                left_cnt[nums[l]] += 1\n\n            right_cnt = defaultdict(int)\n            for r in range(i + 1, n):\n                right_cnt[nums[r]] += 1\n\n            for num in left_cnt:\n                if left_cnt[num] > (i + 1) // 2 and right_cnt[num] > (n - i - 1) // 2:\n                    return i\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-index-of-a-valid-split.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of recounting from scratch at each split, we can maintain running counts. Start with all elements in the \"right\" map, then slide through the array moving one element at a time from right to left.\n\nFor each position, we only need to check if the current element is dominant in both parts. This works because if a valid split exists, the overall dominant element must be dominant on both sides.\n\n### Steps\n\n1. Initialize a left frequency map (empty) and a right frequency map (containing all elements).\n2. Iterate through each index `i`:\n    - Move `nums[i]` from right to left (increment left count, decrement right count).\n    - Check if `nums[i]` appears more than half the time in both the left segment (length `i+1`) and right segment (length `n-i-1`).\n3. Return the first index where the condition holds.\n4. Return `-1` if no valid split is found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter, defaultdict\n\nclass Solution:\n    def minimumIndex(self, nums: List[int]) -> int:\n        left = defaultdict(int)\n        right = Counter(nums)\n\n        for i in range(len(nums)):\n            left[nums[i]] += 1\n            right[nums[i]] -= 1\n\n            left_len = i + 1\n            right_len = len(nums) - i - 1\n\n            if 2 * left[nums[i]] > left_len and 2 * right[nums[i]] > right_len:\n                return i\n\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-index-of-a-valid-split.md",
+      "id": "hash-map"
+    }
+  ]
 }

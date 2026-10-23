@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findErrorNums(vector<int>& nums) {\n        int N = nums.size();\n        // a ^ a = 0\n        // xorr = (1 ^ 2 ^ ... N) ^ (nums[0] ^ nums[1] ^ ... nums[N - 1])\n        // xorr = missing ^ duplicate\n        int xorr = 0;\n        for (int i = 1; i <= N; i++) {\n            xorr ^= i;\n            xorr ^= nums[i - 1];\n        }\n\n        // bit that is set in only one number among (duplicate, missing),\n        // will be set in (duplicate ^ missing)\n        // take rightMost set bit for simplicity\n        int rightMostBit = xorr & ~(xorr - 1);\n\n        // divide numbers (from nums, from [1, N]) into two sets w.r.t the rightMostBit\n        // xorr the numbers of these sets independently\n        int x = 0, y = 0;\n        for (int i = 1; i <= N; i++) {\n            if (i & rightMostBit) {\n                x ^= i;\n            } else {\n                y ^= i;\n            }\n\n            if (nums[i - 1] & rightMostBit) {\n                x ^= nums[i - 1];\n            } else {\n                y ^= nums[i - 1];\n            }\n        }\n\n        // identify the duplicate number from x and y\n        for (int num : nums) {\n            if (num == x) {\n                return {x, y};\n            }\n        }\n        return {y, x};\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/set-mismatch.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/set-mismatch.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe array should contain each number from 1 to n exactly once, but one number is duplicated and one is missing. The most direct approach is to count how many times each number from 1 to n appears in the array. A number appearing twice is the duplicate, and a number appearing zero times is the missing one.\n\n### Steps\n\n1. Initialize a result array to store `[duplicate, missing]`.\n2. For each number `i` from `1` to `n`:\n    - Count how many times `i` appears in the array.\n    - If the count is `0`, `i` is the missing number.\n    - If the count is `2`, `i` is the duplicate number.\n3. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findErrorNums(self, nums: List[int]) -> List[int]:\n        res = [0, 0]\n        n = len(nums)\n\n        for i in range(1, n + 1):\n            cnt = 0\n            for num in nums:\n                if num == i:\n                    cnt += 1\n\n            if cnt == 0:\n                res[1] = i\n            elif cnt == 2:\n                res[0] = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/set-mismatch.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nAfter sorting, consecutive elements should differ by exactly 1. If two adjacent elements are equal, we found the duplicate. If two adjacent elements differ by 2, the missing number lies between them. We also need to handle the edge case where the missing number is n (the last element after sorting is not n).\n\n### Steps\n\n1. Sort the array.\n2. Initialize the result with `missing = 1` (handles the case where `1` is missing).\n3. Iterate through adjacent pairs:\n    - If two elements are equal, record the duplicate.\n    - If two elements differ by `2`, the missing number is in between.\n4. If the last element is not `n`, then `n` is the missing number.\n5. Return `[duplicate, missing]`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findErrorNums(self, nums: List[int]) -> List[int]:\n        res = [0, 1]\n        nums.sort()\n\n        for i in range(1, len(nums)):\n            if nums[i] == nums[i - 1]:\n                res[0] = nums[i]\n            elif nums[i] - nums[i - 1] == 2:\n                res[1] = nums[i] - 1\n\n        if nums[-1] != len(nums):\n            res[1] = len(nums)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/set-mismatch.md",
+      "id": "sorting"
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool isPathCrossing(string path) {\n        unordered_set<pair<int, int>, pair_hash> visit;\n        int x = 0, y = 0;\n        visit.insert({x, y});\n\n        for (char c : path) {\n            if (c == 'N') y++;\n            else if (c == 'S') y--;\n            else if (c == 'E') x++;\n            else if (c == 'W') x--;\n\n            if (visit.count({x, y})) return true;\n            visit.insert({x, y});\n        }\n\n        return false;\n    }\n\nprivate:\n    struct pair_hash {\n        template <class T1, class T2>\n        size_t operator()(const pair<T1, T2>& p) const {\n            return (hash<T1>()(p.first) << 32) + hash<T2>()(p.second);\n        }\n    };\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-crossing.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-crossing.md",
+  "alternatives": [
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nWe start at the origin and follow the path character by character. At each step, we move in the indicated direction. The path crosses itself if we visit a position we've been to before. A hash set provides O(1) lookups to check if a coordinate has been visited.\n\n### Steps\n\n1. Initialize a set `visit` and add the starting position `(0, 0)`.\n2. Initialize coordinates `x = 0`, `y = 0`.\n3. For each character in the path:\n    - Update `x` or `y` based on the direction (N, S, E, W).\n    - If the new position exists in `visit`, return `true`.\n    - Otherwise, add the new position to `visit`.\n4. If we finish the path without revisiting any position, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def isPathCrossing(self, path: str) -> bool:\n        dir = {\n            'N': [0, 1],\n            'S': [0, -1],\n            'E': [1, 0],\n            'W': [-1, 0]\n        }\n\n        visit = set()\n        x, y = 0, 0\n\n        for c in path:\n            visit.add((x, y))\n            dx, dy = dir[c]\n            x, y = x + dx, y + dy\n            if (x, y) in visit:\n                return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/path-crossing.md",
+      "id": "hash-set"
+    }
+  ]
 }

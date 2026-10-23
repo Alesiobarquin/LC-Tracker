@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countOrders(int n) {\n        const int MOD = 1000000007;\n        long long res = 1;\n\n        for (int slot = 1; slot <= 2 * n; slot++) {\n            res *= slot;\n            if (slot % 2 == 0) {\n                res >>= 1;\n            }\n            res %= MOD;\n        }\n        return (int) res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OpgslsirW8s",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-all-valid-pickup-and-delivery-options.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-all-valid-pickup-and-delivery-options.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to count all valid orderings where each delivery happens after its corresponding pickup. At any point, we can either pick up a new order (if any remain) or deliver an order that has already been picked up. The number of choices at each step depends on how many orders are still available for pickup and how many are picked but not yet delivered.\n\n### Steps\n\n1. Use recursion with two state variables: the count of `picked` orders and `delivered` orders.\n2. At each step, if we can pick up more orders, branch with `(n - picked)` choices for which order to pick next.\n3. If there are orders picked but not delivered, branch with `(picked - delivered)` choices for which order to deliver.\n4. Return `1` when all orders are picked and delivered (base case).\n5. Multiply the count of choices at each branch and sum all paths.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "class Solution:\n    def countOrders(self, n: int) -> int:\n        MOD = 1000000007\n\n        def dfs(picked, delivered):\n            if picked == n and delivered == n:\n                return 1\n\n            res = 0\n            if picked < n:\n                res = (res + (n - picked) * dfs(picked + 1, delivered)) % MOD\n            if delivered < picked:\n                res = (res + (picked - delivered) * dfs(picked, delivered + 1)) % MOD\n\n            return res\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-all-valid-pickup-and-delivery-options.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recalculates the same states multiple times. For example, the state `(picked=2, delivered=1)` might be reached through different orderings. By caching these results, we avoid redundant computation.\n\n### Steps\n\n1. Create a 2D memoization table indexed by `(picked, delivered)`.\n2. Before computing a state, check if it exists in the cache and return it if found.\n3. Apply the same recursive logic as before: pick an unpicked order or deliver a picked order.\n4. Store the computed result in the cache before returning.\n5. Start the recursion from `(0, 0)` and return the cached result.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "class Solution:\n    def countOrders(self, n: int) -> int:\n        MOD = 1000000007\n        dp = [[-1] * (n + 1) for _ in range(n + 1)]\n        dp[n][n] = 1\n\n        def dfs(picked, delivered):\n            if dp[picked][delivered] != -1:\n                return dp[picked][delivered]\n\n            res = 0\n            if picked < n:\n                res = (res + (n - picked) * dfs(picked + 1, delivered)) % MOD\n            if delivered < picked:\n                res = (res + (picked - delivered) * dfs(picked, delivered + 1)) % MOD\n\n            dp[picked][delivered] = res\n            return res\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-all-valid-pickup-and-delivery-options.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

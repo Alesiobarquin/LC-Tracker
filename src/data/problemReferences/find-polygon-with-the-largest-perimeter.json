@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long largestPerimeter(vector<int>& nums) {\n        priority_queue<int> maxHeap(nums.begin(), nums.end());\n        long long total = accumulate(nums.begin(), nums.end(), 0LL);\n\n        while (maxHeap.size() > 2) {\n            int largest = maxHeap.top();\n            maxHeap.pop();\n            total -= largest;\n            if (largest < total) {\n                return total + largest;\n            }\n        }\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-polygon-with-the-largest-perimeter.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-polygon-with-the-largest-perimeter.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA valid polygon requires that the longest side be strictly smaller than the sum of all other sides. We can try each element as the largest side and check if this condition holds. For each candidate, we sum all elements that are less than or equal to it (excluding itself) and verify whether that sum exceeds the candidate. If it does, we have a valid polygon and can compute its perimeter.\n\n### Steps\n\n1. Initialize `res = -1` to track the maximum perimeter found.\n2. For each element `nums[i]`, treat it as the potential largest side.\n3. Sum all other elements `nums[j]` where `nums[j] <= nums[i]`.\n4. If the sum of smaller sides exceeds `nums[i]`, update `res` with the total perimeter.\n5. Return `res` after checking all possibilities.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def largestPerimeter(self, nums: List[int]) -> int:\n        n = len(nums)\n        res = -1\n\n        for i, large in enumerate(nums):\n            cur = 0\n            for j, side in enumerate(nums):\n                if i != j and side <= large:\n                    cur += side\n            if cur > large:\n                res = max(res, cur + large)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-polygon-with-the-largest-perimeter.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nIf we sort the array, we can efficiently check the polygon condition. After sorting, as we iterate through each element, all previous elements are smaller or equal. The key insight is that if the running sum of all previous elements exceeds the current element, we have a valid polygon. Since we want the largest perimeter, we keep updating our answer as we find valid configurations, and the last valid one will be the largest.\n\n### Steps\n\n1. Sort the array in ascending order.\n2. Initialize `res = -1` and `total = 0` for the running sum.\n3. Iterate through each number:\n    - If `total > num`, we have a valid polygon. Update `res = total + num`.\n    - Add `num` to `total`.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def largestPerimeter(self, nums: List[int]) -> int:\n        nums.sort()\n        res = -1\n        total = 0\n        for num in nums:\n            if total > num:\n                res = total + num\n            total += num\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-polygon-with-the-largest-perimeter.md",
+      "id": "sorting"
+    }
+  ]
 }

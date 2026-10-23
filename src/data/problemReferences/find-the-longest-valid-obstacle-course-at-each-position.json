@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> longestObstacleCourseAtEachPosition(vector<int>& obstacles) {\n        int n = obstacles.size();\n        vector<int> res(n);\n        vector<int> dp;\n\n        for (int i = 0; i < n; i++) {\n            int index = upper_bound(dp.begin(), dp.end(), obstacles[i]) - dp.begin();\n            res[i] = index + 1;\n\n            if (index == dp.size()) {\n                dp.push_back(obstacles[i]);\n            } else {\n                dp[index] = obstacles[i];\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Xq9VT7p0lic",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-longest-valid-obstacle-course-at-each-position.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-longest-valid-obstacle-course-at-each-position.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nFor each position, we want the longest increasing subsequence ending at that position where each element is less than or equal to the next. This is a variant of the classic LIS problem. We can use memoization: for each index and the previous element chosen, we either include the current element in our sequence (if valid) or skip it.\n\n### Steps\n\n1. Create a 2D memoization table `dp[i][prev]` representing the longest valid sequence considering elements from `0` to `i`, where `prev` is the index of the last chosen element.\n2. Define a recursive function `dfs(i, prev)`:\n   - Base case: if `i < 0`, return `0`.\n   - If already computed, return the cached value.\n   - Option 1: Skip the current element, recurse with `dfs(i - 1, prev)`.\n   - Option 2: If valid (no previous element or current element is less than or equal to previous), include it and recurse with `dfs(i - 1, i)`.\n   - Store and return the maximum.\n3. Call `dfs(n - 1, n)` to fill the table, then construct the result array from the memoized values.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def longestObstacleCourseAtEachPosition(self, obstacles: List[int]) -> List[int]:\n        n = len(obstacles)\n        dp = [[-1] * (n + 1) for _ in range(n)]\n\n        def dfs(i, prev):\n            if i < 0:\n                return 0\n            if dp[i][prev] != -1:\n                return dp[i][prev]\n\n            res = dfs(i - 1, prev)\n            if prev == n or obstacles[prev] >= obstacles[i]:\n                res = max(res, 1 + dfs(i - 1, i))\n            dp[i][prev] = res\n            return res\n\n        dfs(n - 1, n)\n        return [1] + [1 + dp[i - 1][i] for i in range(1, n)]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-longest-valid-obstacle-course-at-each-position.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Binary Search) - I",
+      "explanation": "### How it works\n\nWe can optimize the LIS approach using binary search. Maintain a `dp` array where `dp[i]` represents the smallest ending value of all increasing subsequences of length `i + 1`. For each new element, we find where it fits using binary search (finding the first element greater than it), which tells us the longest subsequence we can extend. We then update that position with the current value to keep subsequences as extensible as possible.\n\n### Steps\n\n1. Initialize a `dp` array of size `n + 1` filled with a large value (representing \"no sequence of this length yet\").\n2. For each obstacle:\n   - Use binary search to find the first index in `dp` where the value is greater than the current obstacle.\n   - This index represents the longest valid course ending at this position.\n   - Update `dp[index]` with the current obstacle value.\n   - Store `index + 1` as the result for this position.\n3. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom bisect import bisect\nimport bisect\n\nclass Solution:\n    def longestObstacleCourseAtEachPosition(self, obstacles: List[int]) -> List[int]:\n        res = []\n        dp = [10**8] * (len(obstacles) + 1)\n\n        for num in obstacles:\n            index = bisect.bisect(dp, num)\n            res.append(index + 1)\n            dp[index] = num\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-longest-valid-obstacle-course-at-each-position.md",
+      "id": "dynamic-programming-binary-search-i"
+    }
+  ]
 }

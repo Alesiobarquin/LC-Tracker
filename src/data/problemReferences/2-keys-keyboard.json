@@ -1,0 +1,29 @@
+{
+  "problemId": "2-keys-keyboard",
+  "approach": "Divisor-Based Dynamic Programming",
+  "explanation": "### How it works\n\nTo reach i characters, first construct a divisor j of i, then copy once and paste i/j − 1 times. The table reuses the cost of constructing that divisor.\n\n### Steps\n\n1. Initialize each count with the copy-one then repeated-paste cost.\n2. For each target size, look backward for a useful divisor.\n3. Combine the divisor's best cost with the required copy/paste group.\n4. Return the target entry.\n\n### Complexity\n\n- Time: O(n²) worst-case divisor search.\n- Space: O(n) table.",
+  "code": {
+    "python": "class Solution:\n  def minSteps(self, n: int) -> int:\n    if n <= 1:\n      return 0\n\n    # dp[i] := the minimum steps to get i 'A's\n    # Copy 'A', then paste 'A' i - 1 times.\n    dp = [i for i in range(n + 1)]\n\n    for i in range(2, n + 1):\n      for j in range(i // 2, 2, -1):\n        if i % j == 0:\n          dp[i] = dp[j] + i // j  # Paste dp[j] i / j times.\n          break\n\n    return dp[n]\n",
+    "cpp": "class Solution {\n public:\n  int minSteps(int n) {\n    if (n <= 1)\n      return 0;\n\n    // dp[i] := the minimum steps to get i 'A's\n    vector<int> dp(n + 1);\n\n    // Copy 'A', then paste 'A' i - 1 times.\n    iota(dp.begin(), dp.end(), 0);\n\n    for (int i = 2; i <= n; ++i)\n      for (int j = i / 2; j > 2; --j)\n        if (i % j == 0) {\n          dp[i] = dp[j] + i / j;  // Paste dp[j] i / j times.\n          break;\n        }\n\n    return dp[n];\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/650.%202%20Keys%20Keyboard",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "prime-factor-operation-groups",
+      "approach": "Prime Factor Operation Groups",
+      "explanation": "### How it works\n\nA copy followed by pastes multiplies the current count. Splitting a composite multiplier into smaller factors never increases total operations, so the optimum is the sum of the target's prime factors.\n\n### Steps\n\n1. Try divisors starting at two.\n2. For every successful division, add that factor to the cost.\n3. Continue until the remaining value has no smaller factors.\n4. Add the remaining prime factor when greater than one.\n\n### Complexity\n\n- Time: O(sqrt(n)) trial divisions.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/650.%202%20Keys%20Keyboard",
+      "code": {
+        "python": "class Solution:\n    def minSteps(self, n: int) -> int:\n        total, factor = 0, 2\n        while factor * factor <= n:\n            while n % factor == 0:\n                total += factor\n                n //= factor\n            factor += 1\n        return total + (n if n > 1 else 0)\n"
+      }
+    }
+  ]
+}

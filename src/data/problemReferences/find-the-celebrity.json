@@ -7,5 +7,25 @@
     "cpp": "class Solution {\nprivate:\n    int n;\n    \n    bool is_celebrity(int i) {\n        for (int j = 0; j < n; j++) {\n            if (i == j) continue;\n            if (knows(i, j) || !knows(j, i)) {\n                return false;\n            }\n        }\n        return true;\n    }\n    \npublic:\n    int findCelebrity(int n) {\n        this->n = n;\n        int celebrity_candidate = 0;\n        \n        for (int i = 1; i < n; i++) {\n            if (knows(celebrity_candidate, i)) {\n                celebrity_candidate = i;\n            }\n        }\n        \n        if (is_celebrity(celebrity_candidate)) {\n            return celebrity_candidate;\n        }\n        return -1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-celebrity.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-celebrity.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA celebrity is someone who is known by everyone but knows nobody. For each person, we can check if they satisfy both conditions: they don't know anyone else, and everyone else knows them. If both conditions hold, that person is the celebrity.\n\n### Steps\n\n1. For each person `i` from `0` to `n-1`:\n   - Check if `i` is a celebrity by verifying two conditions for every other person `j`:\n     - `i` does not know `j`.\n     - `j` knows `i`.\n   - If both conditions hold for all `j`, return `i`.\n2. If no celebrity is found, return `-1`.\n\n### Complexity\n\nWe don't know what time and space the `knows(...)` API uses. Because it's not our concern, we'll assume it's `O(1)` for the purpose of analysing our algorithm.\n\n- Time complexity: `O(n^2)`\n- Space complexity: `O(1)`\n\n>  Where `n` is the number of nodes in the graph.",
+      "code": {
+        "python": "class Solution:\n    def findCelebrity(self, n: int) -> int:\n        self.n = n\n        for i in range(n):\n            if self.is_celebrity(i):\n                return i\n        return -1\n    \n    def is_celebrity(self, i):\n        for j in range(self.n):\n            if i == j: continue # Don't ask if they know themselves.\n            if knows(i, j) or not knows(j, i):\n                return False\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-celebrity.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Logical Deduction with Caching",
+      "explanation": "### How it works\n\nThe logical deduction approach may call `knows(a, b)` multiple times with the same arguments during the verification phase. By caching the results of each call, we can avoid redundant API calls. This is particularly useful when the `knows` function is expensive to evaluate.\n\n### Steps\n\n1. Create a cache to store results of `knows(a, b)` calls.\n2. Use the same logical deduction approach to find the candidate.\n3. During verification, check the cache before calling `knows`.\n4. Return the candidate if valid, otherwise return `-1`.\n\n### Complexity\n\nWe don't know what time and space the `knows(...)` API uses. Because it's not our concern, we'll assume it's `O(1)` for the purpose of analysing our algorithm.\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n>  Where `n` is the number of nodes in the graph.",
+      "code": {
+        "python": "from functools import lru_cache\n\nclass Solution:\n    \n    @lru_cache(maxsize=None)\n    def cachedKnows(self, a, b):\n        return knows(a, b)\n    \n    def findCelebrity(self, n: int) -> int:\n        self.n = n\n        celebrity_candidate = 0\n        for i in range(1, n):\n            if self.cachedKnows(celebrity_candidate, i):\n                celebrity_candidate = i\n        if self.is_celebrity(celebrity_candidate):\n            return celebrity_candidate\n        return -1\n\n    def is_celebrity(self, i):\n        for j in range(self.n):\n            if i == j: continue\n            if self.cachedKnows(i, j) or not self.cachedKnows(j, i):\n                return False\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-celebrity.md",
+      "id": "logical-deduction-with-caching"
+    }
+  ]
 }

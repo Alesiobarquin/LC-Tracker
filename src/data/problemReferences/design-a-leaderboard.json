@@ -7,5 +7,16 @@
     "cpp": "class Leaderboard {\nprivate:\n    unordered_map<int, int> scores;\n    \npublic:\n    Leaderboard() {\n        \n    }\n    \n    void addScore(int playerId, int score) {\n        if (scores.find(playerId) == scores.end()) {\n            scores[playerId] = 0;\n        }\n        scores[playerId] += score;\n    }\n    \n    int top(int K) {\n        // By default, priority_queue is max-heap, so we use greater<int> for min-heap\n        priority_queue<int, vector<int>, greater<int>> heap;\n        \n        for (const auto& entry : scores) {\n            heap.push(entry.second);\n            if (heap.size() > K) {\n                heap.pop();\n            }\n        }\n        \n        int total = 0;\n        while (!heap.empty()) {\n            total += heap.top();\n            heap.pop();\n        }\n        return total;\n    }\n    \n    void reset(int playerId) {\n        scores[playerId] = 0;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-a-leaderboard.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-a-leaderboard.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach stores player scores in a hash map. Adding a score or resetting is straightforward with hash map operations. To find the sum of the top K scores, we extract all scores, sort them in descending order, and sum the first K values. While easy to implement, sorting all scores for every `top` query is inefficient when there are many players.\n\n### Steps\n\n1. Use a hash map `scores` to store the mapping from `playerId` to their score.\n2. For `addScore(playerId, score)`: if the player exists, add to their score; otherwise, initialize and add.\n3. For `top(K)`: extract all score values, sort them in descending order, and return the sum of the first `K` scores.\n4. For `reset(playerId)`: set the player's score to `0` in the hash map.\n\n### Complexity\n\n- Time complexity:\n    - `O(1)` for `addScore`\n    - `O(1)` for `reset`\n    - `O(N log N)` for `top`\n\n- Space complexity: `O(N)`\n\n>  Where `N` is the total number of players in the leaderboard.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Leaderboard:\n\n    def __init__(self):\n        self.scores = defaultdict()\n\n    def addScore(self, playerId: int, score: int) -> None:\n        if playerId not in self.scores:\n            self.scores[playerId] = 0\n        self.scores[playerId] += score\n\n    def top(self, K: int) -> int:\n        values = [v for _, v in sorted(self.scores.items(), key=lambda item: item[1])]\n        values.sort(reverse=True)\n        total, i = 0, 0\n        while i < K:\n            total += values[i]\n            i += 1\n        \n        return total\n\n    def reset(self, playerId: int) -> None:\n        self.scores[playerId] = 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-a-leaderboard.md",
+      "id": "brute-force"
+    }
+  ]
 }

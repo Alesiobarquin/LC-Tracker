@@ -1,0 +1,28 @@
+{
+  "problemId": "binary-watch",
+  "approach": "Choose Illuminated LEDs",
+  "explanation": "### How it works\n\nBacktrack over the ten LED positions, adding each chosen LED's hour or minute weight. Reject combinations as soon as hours or minutes exceed their valid ranges.\n\n### Steps\n\n1. Associate four LEDs with hour weights and six with minute weights.\n2. Choose remaining LEDs in increasing index order.\n3. Prune hours at least 12 and minutes at least 60.\n4. Format every valid completed selection with two minute digits.\n\n### Complexity\n\n- Time: O(10 × C(10, k)) upper bound for k illuminated LEDs; fixed domain.\n- Space: O(k) recursion space, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def readBinaryWatch(self, turnedOn: int) -> list[str]:\n    ans = []\n    hours = [1, 2, 4, 8]\n    minutes = [1, 2, 4, 8, 16, 32]\n\n    def dfs(turnedOn: int, s: int, h: int, m: int) -> None:\n      if turnedOn == 0:\n        time = str(h) + \":\" + (str(m).zfill(2))\n        ans.append(time)\n        return\n\n      for i in range(s, len(hours) + len(minutes)):\n        if i < 4 and h + hours[i] < 12:\n          dfs(turnedOn - 1, i + 1, h + hours[i], m)\n        elif i >= 4 and m + minutes[i - 4] < 60:\n          dfs(turnedOn - 1, i + 1, h, m + minutes[i - 4])\n\n    dfs(turnedOn, 0, 0, 0)\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> readBinaryWatch(int turnedOn) {\n    vector<string> ans;\n    dfs(turnedOn, 0, 0, 0, ans);\n    return ans;\n  }\n\n private:\n  static constexpr int hours[4] = {1, 2, 4, 8};\n  static constexpr int minutes[6] = {1, 2, 4, 8, 16, 32};\n\n  void dfs(int turnedOn, int s, int h, int m, vector<string>& ans) {\n    if (turnedOn == 0) {\n      string time = to_string(h) + \":\" + (m < 10 ? \"0\" : \"\") + to_string(m);\n      ans.push_back(time);\n      return;\n    }\n\n    for (int i = s; i < 4 + 6; ++i)\n      if (i < 4 && h + hours[i] < 12)\n        dfs(turnedOn - 1, i + 1, h + hours[i], m, ans);\n      else if (i >= 4 && m + minutes[i - 4] < 60)\n        dfs(turnedOn - 1, i + 1, h, m + minutes[i - 4], ans);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/401.%20Binary%20Watch",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "enumerate-valid-times",
+      "approach": "Enumerate Valid Times",
+      "explanation": "### How it works\n\nOnly 720 valid clock times exist. Count the set bits in each hour and minute and retain times using the requested number of LEDs.\n\n### Steps\n\n1. Enumerate hours 0 through 11 and minutes 0 through 59.\n2. Add their set-bit counts.\n3. Format matching times with a zero-padded minute.\n\n### Complexity\n\n- Time: O(12 × 60), a constant-sized search.\n- Space: O(1) workspace, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/401.%20Binary%20Watch/401-2.py",
+      "code": {
+        "python": "class Solution:\n  def readBinaryWatch(self, turnedOn: int) -> list[str]:\n    ans = []\n\n    for h in range(12):\n      for m in range(60):\n        if h.bit_count() + m.bit_count() == turnedOn:\n          ans.append(f'{h}:{m:02d}')\n\n    return ans\n"
+      }
+    }
+  ]
+}

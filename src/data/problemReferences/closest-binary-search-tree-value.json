@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int closestValue(TreeNode* root, double target) {\n        int val, closest = root->val;\n\n        while (root != nullptr) {\n            val = root->val;\n            closest = abs(val - target) < abs(closest - target)\n                || (abs(val - target) == abs(closest - target) && val < closest) ? val : closest;\n            root = target < root->val ? root->left : root->right;\n        }\n\n        return closest;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value.md",
+  "alternatives": [
+    {
+      "approach": "Recursive Inorder + Linear search, O(N) time",
+      "explanation": "### How it works\n\nAn inorder traversal of a BST produces values in sorted order. By collecting all values first, we can then find the one closest to the target using a simple linear search. While not the most efficient approach, it clearly demonstrates the relationship between inorder traversal and sorted order.\n\n### Steps\n\n1. Perform an inorder traversal of the BST, collecting all node values into a list.\n2. The inorder traversal visits left subtree, then current node, then right subtree.\n3. After collecting all values, iterate through the list to find the value with minimum absolute difference from the target.\n4. Return that closest value.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the total number of nodes in the binary tree",
+      "code": {
+        "python": "class Solution:\n    def closestValue(self, root: TreeNode, target: float) -> int:\n        def inorder(r: TreeNode):\n            if r:\n                inorder(r.left)\n                values.append(r.val)\n                inorder(r.right)\n\n        values = []\n        inorder(root)\n        return min(values, key = lambda x: abs(target - x))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value.md",
+      "id": "recursive-inorder-linear-search-o-n-time"
+    }
+  ]
 }

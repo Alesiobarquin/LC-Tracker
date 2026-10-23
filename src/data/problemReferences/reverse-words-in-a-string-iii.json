@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        int n = s.size();\n        for (int i = 0; i < n; i++) {\n            if (s[i] != ' ') {\n                int j = i;\n                while (j < n && s[j] != ' ') {\n                    j++;\n                }\n                reverse(s, i, j - 1);\n                i = j;\n            }\n        }\n        return s;\n    }\n\nprivate:\n    void reverse(string& s, int i, int j) {\n        while (i < j) {\n            swap(s[i], s[j]);\n            i++;\n            j--;\n        }\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-words-in-a-string-iii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-words-in-a-string-iii.md",
+  "alternatives": [
+    {
+      "approach": "Convert To String Array",
+      "explanation": "### How it works\n\nThe most straightforward approach splits the string into individual words, reverses each word separately, then joins them back together. By treating each word as an independent unit, we can use built-in string reversal methods on each one. This approach is simple to understand but requires extra space for the split words.\n\n### Steps\n\n1. Split the input string by spaces to get an array of words.\n2. For each word in the array, reverse its characters.\n3. Join the reversed words back together with spaces between them.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        return ' '.join([w[::-1] for w in s.split(' ')])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-words-in-a-string-iii.md",
+      "id": "convert-to-string-array"
+    },
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nWe can reverse each word in place by identifying word boundaries and using two pointers to swap characters within each word. As we scan through the string, we track where each word starts. When we encounter a space or reach the end, we know the word boundaries and can reverse that segment. This approach modifies a character array copy of the string directly.\n\n### Steps\n\n1. Convert the string to a character array.\n2. Use pointer `l` to track the start of the current word.\n3. Iterate with pointer `r` through the array:\n    - When `r` reaches a space or the end of the string, we have found a complete word.\n    - Use two temporary pointers to swap characters from both ends of this word toward the center.\n    - Update `l` to `r + 1` for the next word.\n4. Convert the character array back to a string and return.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        s = list(s)\n        l = 0\n        for r in range(len(s)):\n            if s[r] == \" \" or r == len(s) - 1:\n                temp_l, temp_r = l, r - 1 if s[r] == \" \" else r\n                while temp_l < temp_r:\n                    s[temp_l], s[temp_r] = s[temp_r], s[temp_l]\n                    temp_l += 1\n                    temp_r -= 1\n                l = r + 1\n        return \"\".join(s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reverse-words-in-a-string-iii.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

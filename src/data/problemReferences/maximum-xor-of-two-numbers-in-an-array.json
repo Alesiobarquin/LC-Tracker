@@ -1,0 +1,28 @@
+{
+  "problemId": "maximum-xor-of-two-numbers-in-an-array",
+  "approach": "Greedy XOR Prefixes",
+  "explanation": "### How it works\n\nBuild the maximum XOR from its highest bit downward. A candidate prefix is feasible when two masked input prefixes XOR to it; a set allows that partner check.\n\n### Steps\n\n1. Find the highest significant input bit.\n2. Extend the prefix mask one bit at a time.\n3. Tentatively set the corresponding result bit.\n4. Keep it when some pair of masked prefixes produces the candidate.\n\n### Complexity\n\n- Time: Expected O(n × b) for n values and b significant bits.\n- Space: O(n) masked prefixes.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def findMaximumXOR(self, nums: list[int]) -> int:\n    maxNum = max(nums)\n    if maxNum == 0:\n      return 0\n    maxBit = int(math.log2(maxNum))\n    ans = 0\n    prefixMask = 0  # `prefixMask` grows like: 10000 -> 11000 -> ... -> 11111.\n\n    # If ans is 11100 when i = 2, it means that before we reach the last two\n    # bits, 11100 is the maximum XOR we have, and we're going to explore if we\n    # can get another two 1s and put them into `ans`.\n    for i in range(maxBit, -1, -1):\n      prefixMask |= 1 << i\n      # We only care about the left parts,\n      # If i = 2, nums = [1110, 1011, 0111]\n      #    -> prefixes = [1100, 1000, 0100]\n      prefixes = set([num & prefixMask for num in nums])\n      # If i = 1 and before this iteration, the ans is 10100, it means that we\n      # want to grow the ans to 10100 | 1 << 1 = 10110 and we're looking for\n      # XOR of two prefixes = candidate.\n      candidate = ans | 1 << i\n      for prefix in prefixes:\n        if prefix ^ candidate in prefixes:\n          ans = candidate\n          break\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findMaximumXOR(vector<int>& nums) {\n    const int maxNum = ranges::max(nums);\n    if (maxNum == 0)\n      return 0;\n    const int maxBit = static_cast<int>(log2(maxNum));\n    int ans = 0;\n    int prefixMask = 0;  // Grows like: 10000 -> 11000 -> ... -> 11111.\n\n    // If ans is 11100 when i = 2, it means that before we reach the last two\n    // bits, 11100 is the maximum XOR we have, and we're going to explore if we\n    // can get another two 1s and put them into `ans`.\n    for (int i = maxBit; i >= 0; --i) {\n      prefixMask |= 1 << i;\n      unordered_set<int> prefixes;\n      // We only care about the left parts,\n      // If i = 2, nums = {1110, 1011, 0111}\n      //    -> prefixes = {1100, 1000, 0100}\n      for (const int num : nums)\n        prefixes.insert(num & prefixMask);\n      // If i = 1 and before this iteration, the ans is 10100, it means that we\n      // want to grow the ans to 10100 | 1 << 1 = 10110 and we're looking for\n      // XOR of two prefixes = candidate.\n      const int candidate = ans | 1 << i;\n      for (const int prefix : prefixes)\n        if (prefixes.contains(prefix ^ candidate)) {\n          ans = candidate;\n          break;\n        }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/421.%20Maximum%20XOR%20of%20Two%20Numbers%20in%20an%20Array",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "binary-trie",
+      "approach": "Binary Trie",
+      "explanation": "### How it works\n\nStore prior numbers as bit paths. When querying a number, prefer the opposite bit at each level to maximize the most significant remaining XOR bit.\n\n### Steps\n\n1. Create a trie spanning the maximum bit width.\n2. Query each number against the previously inserted paths.\n3. Prefer opposite-bit children, falling back to equal bits.\n4. Insert the number and update the best XOR.\n\n### Complexity\n\n- Time: O(n × b).\n- Space: O(n × b) trie nodes.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/421.%20Maximum%20XOR%20of%20Two%20Numbers%20in%20an%20Array/421-2.py",
+      "code": {
+        "python": "import math\n\nclass TrieNode:\n  def __init__(self):\n    self.children: list[TrieNode | None] = [None] * 2\n\n\nclass BitTrie:\n  def __init__(self, maxBit: int):\n    self.maxBit = maxBit\n    self.root = TrieNode()\n\n  def insert(self, num: int) -> None:\n    node = self.root\n    for i in range(self.maxBit, -1, -1):\n      bit = num >> i & 1\n      if not node.children[bit]:\n        node.children[bit] = TrieNode()\n      node = node.children[bit]\n\n  def getMaxXor(self, num: int) -> int:\n    maxXor = 0\n    node = self.root\n    for i in range(self.maxBit, -1, -1):\n      bit = num >> i & 1\n      toggleBit = bit ^ 1\n      if node.children[toggleBit]:\n        maxXor = maxXor | 1 << i\n        node = node.children[toggleBit]\n      elif node.children[bit]:\n        node = node.children[bit]\n      else:  # There's nothing in the Bit Trie.\n        return 0\n    return maxXor\n\n\nclass Solution:\n  def findMaximumXOR(self, nums: list[int]) -> int:\n    maxNum = max(nums)\n    if maxNum == 0:\n      return 0\n    maxBit = int(math.log2(maxNum))\n    ans = 0\n    bitTrie = BitTrie(maxBit)\n\n    for num in nums:\n      ans = max(ans, bitTrie.getMaxXor(num))\n      bitTrie.insert(num)\n\n    return ans\n"
+      }
+    }
+  ]
+}

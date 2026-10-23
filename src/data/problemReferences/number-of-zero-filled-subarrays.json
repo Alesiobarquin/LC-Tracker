@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long zeroFilledSubarray(vector<int>& nums) {\n        long long res = 0, count = 0;\n        for (int num : nums) {\n            if (num == 0) {\n                count++;\n            } else {\n                res += count * (count + 1) / 2;\n                count = 0;\n            }\n        }\n        res += count * (count + 1) / 2;\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=G-EWVGCcL_w",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-zero-filled-subarrays.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-zero-filled-subarrays.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible subarray and count those filled entirely with zeros. For each starting index, we extend the subarray as long as we keep seeing zeros, incrementing our count for each valid zero-filled subarray we find.\n\n### Steps\n\n1. Initialize a result counter `res = 0`.\n2. For each starting index `i` from `0` to `n-1`:\n    - For each ending index `j` from `i` to `n-1`:\n        - If `nums[j]` is not `0`, break out of the inner loop.\n        - Otherwise, increment `res` (we found another zero-filled subarray).\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def zeroFilledSubarray(self, nums: List[int]) -> int:\n        res = 0\n        for i in range(len(nums)):\n            for j in range(i, len(nums)):\n                if nums[j] != 0:\n                    break\n                res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-zero-filled-subarrays.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Count Consecutive Zeros - I",
+      "explanation": "### How it works\n\nInstead of checking every subarray, we can be smarter by processing consecutive groups of zeros. When we find a sequence of `k` consecutive zeros, the number of zero-filled subarrays within that sequence is `1 + 2 + ... + k`.\n\nWe can compute this incrementally: as we extend a run of zeros by one element, we add the current run length to our total. For example, if we have seen `3` zeros so far and see a `4`th, we add `4` to the count (representing the `4` new subarrays ending at this position).\n\n### Steps\n\n1. Initialize `res = 0` and index `i = 0`.\n2. While `i < n`:\n    - Initialize `count = 0` for the current run of zeros.\n    - While `nums[i] == 0`:\n        - Increment `count`.\n        - Add `count` to `res` (this counts all subarrays ending at the current zero).\n        - Increment `i`.\n    - Increment `i` to skip the non-zero element.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def zeroFilledSubarray(self, nums: List[int]) -> int:\n        res = i = 0\n        while i < len(nums):\n            count = 0\n            while i < len(nums) and nums[i] == 0:\n                count += 1\n                i += 1\n                res += count\n            i += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-zero-filled-subarrays.md",
+      "id": "count-consecutive-zeros-i"
+    }
+  ]
 }

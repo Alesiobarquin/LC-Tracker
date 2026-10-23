@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numSubarraysWithSum(vector<int>& nums, int goal) {\n        return helper(nums, goal) - helper(nums, goal - 1);\n    }\n\nprivate:\n    int helper(vector<int>& nums, int x) {\n        if (x < 0) return 0;\n        int res = 0, l = 0, cur = 0;\n        for (int r = 0; r < nums.size(); r++) {\n            cur += nums[r];\n            while (cur > x) {\n                cur -= nums[l];\n                l++;\n            }\n            res += (r - l + 1);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-subarrays-with-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-subarrays-with-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible subarray. For each starting index, we extend the subarray one element at a time, keeping track of the running sum. Whenever the sum equals the goal, we count it. Since the array contains only 0s and 1s, the sum can only increase as we extend the subarray.\n\n### Steps\n\n1. Initialize a result counter to 0.\n2. For each starting index `i` from `0` to `n-1`, initialize a running sum to `0`.\n3. For each ending index `j` from `i` to `n-1`, add `nums[j]` to the running sum.\n4. If the running sum equals the goal, increment the result counter.\n5. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numSubarraysWithSum(self, nums: List[int], goal: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            curSum = 0\n            for j in range(i, n):\n                curSum += nums[j]\n                if curSum == goal:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-subarrays-with-sum.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum + Hash Map",
+      "explanation": "### How it works\n\nFor a subarray from index `i+1` to `j` to have sum equal to `goal`, we need `prefixSum[j] - prefixSum[i] = goal`, which means `prefixSum[i] = prefixSum[j] - goal`. As we iterate through the array computing prefix sums, we can use a hash map to count how many times each prefix sum has occurred. For each position, we check how many previous positions had a prefix sum that would give us our target subarray sum.\n\n### Steps\n\n1. Initialize a hash map with `{0: 1}` to handle subarrays starting from index `0`.\n2. Initialize prefix sum and result counter to `0`.\n3. For each element, add it to the prefix sum.\n4. Look up `prefixSum - goal` in the hash map and add its count to the result.\n5. Increment the count of the current prefix sum in the hash map.\n6. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numSubarraysWithSum(self, nums: List[int], goal: int) -> int:\n        prefixSum = 0\n        count = { 0 : 1 } # prefixSum -> count\n        res = 0\n\n        for num in nums:\n            prefixSum += num\n            res += count.get(prefixSum - goal, 0)\n            count[prefixSum] = count.get(prefixSum, 0) + 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-subarrays-with-sum.md",
+      "id": "prefix-sum-hash-map"
+    }
+  ]
 }

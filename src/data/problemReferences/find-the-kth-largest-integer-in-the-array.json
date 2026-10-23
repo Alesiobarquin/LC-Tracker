@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string kthLargestNumber(vector<string>& nums, int k) {\n        return quickSelect(nums, k - 1);\n    }\n\nprivate:\n    bool greater(const string& x, const string& y) {\n        if (x.size() != y.size()) {\n            return x.size() > y.size();\n        }\n        return x > y;\n    }\n\n    bool less(const string& x, const string& y) {\n        if (x.size() != y.size()) {\n            return x.size() < y.size();\n        }\n        return x < y;\n    }\n\n    int partition(vector<string>& nums, int left, int right) {\n        int mid = (left + right) >> 1;\n        swap(nums[mid], nums[left + 1]);\n\n        if (less(nums[left], nums[right])) {\n            swap(nums[left], nums[right]);\n        }\n        if (less(nums[left + 1], nums[right])) {\n            swap(nums[left + 1], nums[right]);\n        }\n        if (less(nums[left], nums[left + 1])) {\n            swap(nums[left], nums[left + 1]);\n        }\n\n        string pivot = nums[left + 1];\n        int i = left + 1, j = right;\n\n        while (true) {\n            while (greater(nums[++i], pivot));\n            while (less(nums[--j], pivot));\n            if (i > j) break;\n            swap(nums[i], nums[j]);\n        }\n\n        swap(nums[left + 1], nums[j]);\n        return j;\n    }\n\n    string quickSelect(vector<string>& nums, int k) {\n        int left = 0, right = nums.size() - 1;\n\n        while (true) {\n            if (right <= left + 1) {\n                if (right == left + 1 && greater(nums[right], nums[left])) {\n                    swap(nums[left], nums[right]);\n                }\n                return nums[k];\n            }\n\n            int j = partition(nums, left, right);\n            if (j >= k) {\n                right = j - 1;\n            }\n            if (j <= k) {\n                left = j + 1;\n            }\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=lRCaNiqO3xI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-kth-largest-integer-in-the-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-kth-largest-integer-in-the-array.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nSince numbers are represented as strings and can be very large (up to 100 digits), we cannot convert them to integers directly. Instead, we compare strings by length first, then lexicographically. A longer string represents a larger number, and for equal lengths, lexicographic order matches numeric order. After sorting in descending order, the `k`th element is our answer.\n\n### Steps\n\n1. Sort the array of strings in descending order using a custom comparator:\n   - If two strings have different lengths, the longer one is larger.\n   - If they have the same length, compare them lexicographically.\n2. Return the element at index `k - 1` (since the array is 0-indexed).\n\n### Complexity\n\n- Time complexity: `O(m * n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `n` is the number of strings and `m` is the average length of a string.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def kthLargestNumber(self, nums: List[str], k: int) -> str:\n        return sorted(nums, key=lambda x: (len(x), x), reverse=True)[k - 1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-kth-largest-integer-in-the-array.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Max-Heap",
+      "explanation": "### How it works\n\nA max-heap keeps the largest element at the top. By inserting all elements into a max-heap and extracting the maximum `k` times, the `k`th extraction gives us the `k`th largest element. The custom comparator ensures proper ordering for string-represented numbers.\n\n### Steps\n\n1. Create a max-heap with a custom comparator that compares strings as numbers (length first, then lexicographically).\n2. Insert all elements from the array into the heap.\n3. Extract the maximum element `k - 1` times and discard them.\n4. Extract once more and return this element as the `k`th largest.\n\n### Complexity\n\n- Time complexity: `O(m * (n + k) * log n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the number of strings and `m` is the average length of a string.",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Num:\n    def __init__(self, s: str):\n        self.s = s\n\n    def __lt__(self, other: \"Num\") -> bool:\n        if len(self.s) != len(other.s):\n            return len(self.s) > len(other.s)\n        return self.s > other.s\n\nclass Solution:\n    def kthLargestNumber(self, nums: List[str], k: int) -> str:\n        maxHeap = [Num(s) for s in nums]\n        heapq.heapify(maxHeap)\n\n        for _ in range(k - 1):\n            heapq.heappop(maxHeap)\n\n        return heapq.heappop(maxHeap).s\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-kth-largest-integer-in-the-array.md",
+      "id": "max-heap"
+    }
+  ]
 }

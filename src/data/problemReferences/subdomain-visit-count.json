@@ -1,0 +1,29 @@
+{
+  "problemId": "subdomain-visit-count",
+  "approach": "Count Every Domain Suffix",
+  "explanation": "### How it works\n\nA visit to a domain also visits each parent suffix. Split the name into labels and add its count to every suffix name.\n\n### Steps\n\n1. Parse the count and domain.\n2. Split the domain labels.\n3. Join each suffix and increment its total.\n4. Format every accumulated domain count.\n\n### Complexity\n\n- Time: O(sum of domain-length²) conservative suffix-copy bound.\n- Space: O(T) stored suffix text, plus output.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def subdomainVisits(self, cpdomains: list[str]) -> list[str]:\n    ans = []\n    count = collections.Counter()\n\n    for cpdomain in cpdomains:\n      num, domains = cpdomain.split()\n      num, domains = int(num), domains.split('.')\n      for i in reversed(range(len(domains))):\n        count['.'.join(domains[i:])] += num\n\n    return [str(freq) + ' ' + domain for domain, freq in count.items()]\n",
+    "cpp": "class Solution {\n public:\n  vector<string> subdomainVisits(vector<string>& cpdomains) {\n    vector<string> ans;\n    unordered_map<string, int> count;\n\n    for (const string& cpdomain : cpdomains) {\n      const int space = cpdomain.find(' ');\n      const int num = stoi(cpdomain.substr(0, space));\n      const string& domain = cpdomain.substr(space + 1);\n      count[domain] += num;\n      for (int i = 0; i < domain.length(); ++i)\n        if (domain[i] == '.')\n          count[domain.substr(i + 1)] += num;\n    }\n\n    for (const auto& [subdomain, freq] : count)\n      ans.push_back(to_string(freq) + ' ' + subdomain);\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/811.%20Subdomain%20Visit%20Count",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "reversed-label-trie",
+      "approach": "Reversed-Label Trie",
+      "explanation": "### How it works\n\nInsert domains from their top-level label inward. Every visited trie node corresponds to a parent domain and accumulates that domain's visits.\n\n### Steps\n\n1. Parse each count and reverse its domain labels.\n2. Walk or create one trie node per label.\n3. Add the visit count at every traversed node.\n4. Traverse the trie to reconstruct and format full suffix names.\n\n### Complexity\n\n- Time: O(L + T) for input label text L and total returned domain text T.\n- Space: O(L + T) trie and output construction.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/811.%20Subdomain%20Visit%20Count",
+      "code": {
+        "python": "class Solution:\n    def subdomainVisits(self, cpdomains: list[str]) -> list[str]:\n        root = {'children': {}, 'count': 0}\n        for entry in cpdomains:\n            count, domain = entry.split()\n            node = root\n            for label in reversed(domain.split('.')):\n                node = node['children'].setdefault(label, {'children': {}, 'count': 0})\n                node['count'] += int(count)\n        result = []\n        stack = [(node, label) for label, node in root['children'].items()]\n        while stack:\n            node, domain = stack.pop()\n            result.append(f'{node[\"count\"]} {domain}')\n            stack.extend((child, label + '.' + domain) for label, child in node['children'].items())\n        return result\n"
+      }
+    }
+  ]
+}

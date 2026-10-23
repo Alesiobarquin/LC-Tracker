@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    vector<string> commonChars(vector<string>& words) {\n        vector<int> cnt(26, INT_MAX);\n\n        for (string& word : words) {\n            vector<int> curCnt(26, 0);\n            for (char c : word) {\n                curCnt[c - 'a']++;\n            }\n\n            for (int i = 0; i < 26; i++) {\n                cnt[i] = min(cnt[i], curCnt[i]);\n            }\n        }\n\n        vector<string> res;\n        for (int i = 0; i < 26; i++) {\n            for (int j = 0; j < cnt[i]; j++) {\n                res.push_back(string(1, i + 'a'));\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-common-characters.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-common-characters.md",
+  "alternatives": [
+    {
+      "id": "sort-and-merge-character-multisets",
+      "approach": "Sort and Merge Character Multisets",
+      "explanation": "### How it works\n\nSort each word's characters and intersect the sorted lists with two pointers. Equal characters consume one occurrence from each side, preserving the minimum multiplicity across all words.\n\n### Steps\n\n1. Sort the first word's characters.\n2. For each later word, merge-intersect its sorted characters with the current result.\n3. Return the remaining character list.\n\n### Complexity\n\n- Time: `O(S log L)` for S total characters and maximum word length L.\n- Space: `O(L)` workspace, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-common-characters.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def commonChars(self, words: list[str]) -> list[str]:\n        common = sorted(words[0])\n        for word in words[1:]:\n            chars, merged = sorted(word), []\n            i = j = 0\n            while i < len(common) and j < len(chars):\n                if common[i] < chars[j]:\n                    i += 1\n                elif chars[j] < common[i]:\n                    j += 1\n                else:\n                    merged.append(common[i])\n                    i += 1\n                    j += 1\n            common = merged\n        return common\n"
+      }
+    }
+  ]
 }

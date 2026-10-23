@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long minEnd(int n, int x) {\n        long long res = x;\n        long long i_x = 1;\n        long long i_n = 1; // for n - 1\n\n        while (i_n <= n - 1) {\n            if ((i_x & x) == 0) {\n                if (i_n & (n - 1)) {\n                    res = res | i_x;\n                }\n                i_n = i_n << 1;\n            }\n            i_x = i_x << 1;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-array-end.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-array-end.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to build an array of `n` elements where the AND of all elements equals `x`, and the array is strictly increasing. The smallest such array starts with `x` as the first element. Each subsequent element must be greater than the previous one and still have `x` as a subset of its bits (so the AND remains `x`).\n\nTo find the next valid number after `res`, we add 1 and then OR with `x`. Adding 1 ensures the number increases, and ORing with `x` ensures all bits of `x` are set (preserving the AND property).\n\n### Steps\n\n1. Initialize `res = x`.\n2. Repeat `n - 1` times:\n    - Set `res = (res + 1) | x`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def minEnd(self, n: int, x: int) -> int:\n        res = x\n        for i in range(n - 1):\n            res = (res + 1) | x\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-array-end.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Representation And Bit Manipulation",
+      "explanation": "### How it works\n\nThe brute force iterates `n - 1` times, which is too slow for large `n`. Instead, we can directly compute the answer using bit manipulation. The key insight is that the answer must have all bits of `x` set, and we need to \"count\" to `n - 1` using only the bit positions where `x` has 0s.\n\nThink of it as embedding the binary representation of `n - 1` into the zero-bit positions of `x`. The bits of `x` stay fixed at 1, while the zero positions of `x` are filled with the bits of `n - 1` in order.\n\n### Steps\n\n1. Convert `x` and `n - 1` to binary arrays.\n2. Iterate through bit positions of `x`:\n    - Skip positions where `x` has a `1`.\n    - For positions where `x` has a `0`, fill in the next bit from `n - 1`.\n3. Convert the resulting binary array back to an integer.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)`",
+      "code": {
+        "python": "class Solution:\n    def minEnd(self, n: int, x: int) -> int:\n        res = 0\n        n -= 1\n\n        x_bin = [0] * 64  # Binary representation of x\n        n_bin = [0] * 64  # Binary representation of n-1\n\n        for i in range(32):\n            x_bin[i] = (x >> i) & 1\n            n_bin[i] = (n >> i) & 1\n\n        i_x = 0\n        i_n = 0\n        while i_x < 63:\n            while i_x < 63 and x_bin[i_x] != 0:\n                i_x += 1\n            x_bin[i_x] = n_bin[i_n]\n            i_x += 1\n            i_n += 1\n\n        for i in range(64):\n            if x_bin[i] == 1:\n                res += (1 << i)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-array-end.md",
+      "id": "binary-representation-and-bit-manipulation"
+    }
+  ]
 }

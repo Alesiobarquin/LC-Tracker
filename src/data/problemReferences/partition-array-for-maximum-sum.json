@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxSumAfterPartitioning(vector<int>& arr, int k) {\n        int n = arr.size();\n        vector<int> dp(k);\n        dp[0] = arr[0];\n\n        for (int i = 1; i < n; i++) {\n            int cur_max = 0, max_at_i = 0;\n            for (int j = i; j > i - k; j--) {\n                if (j < 0) break;\n                cur_max = max(cur_max, arr[j]);\n                int window_size = i - j + 1;\n                int cur_sum = cur_max * window_size;\n                int sub_sum = (j > 0) ? dp[(j - 1) % k] : 0;\n                max_at_i = max(max_at_i, cur_sum + sub_sum);\n            }\n            dp[i % k] = max_at_i;\n        }\n\n        return dp[(n - 1) % k];\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-array-for-maximum-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-array-for-maximum-sum.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to partition the array into subarrays of length at most k, where each element in a subarray becomes the maximum value of that subarray. The goal is to maximize the total sum after this transformation.\n\nAt each position, we have a choice: end the current subarray at any of the next k positions. For each choice, we calculate the contribution (maximum element times subarray length) and recursively solve the remaining array. We try all valid partition lengths and take the maximum result.\n\n### Steps\n\n1. Define a recursive function starting at index `i`.\n2. Base case: if `i` reaches the end of the array, return `0`.\n3. For each possible subarray ending at positions `i` to `min(i + k - 1, n - 1)`:\n    - Track the maximum element seen so far in this subarray.\n    - Calculate the sum contribution as max element times window size.\n    - Recursively solve for the rest of the array starting at `j + 1`.\n    - Keep track of the best total sum.\n4. Return the maximum sum found.\n\n### Complexity\n\n- Time complexity: `O(k ^ n)`\n- Space complexity: `O(n)` for recursion stack.\n\n> Where `k` is the maximum length of the subarray and `n` is the size of the array `arr`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxSumAfterPartitioning(self, arr: List[int], k: int) -> int:\n        def dfs(i):\n            if i >= len(arr):\n                return 0\n\n            cur_max = 0\n            res = 0\n            for j in range(i, min(len(arr), i + k)):\n                cur_max = max(cur_max, arr[j])\n                window_size = j - i + 1\n                res = max(res, dfs(j + 1) + cur_max * window_size)\n\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-array-for-maximum-sum.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems. When we compute the maximum sum starting from index `i`, we might need this value multiple times from different partition choices. By caching results, we avoid redundant calculations.\n\nThis is the memoized version of the recursive approach. We store computed results in a cache and return them directly when we encounter the same subproblem again.\n\n### Steps\n\n1. Create a cache dictionary with base case: `cache[n] = 0`.\n2. Define a recursive function with memoization starting at index `i`.\n3. If `i` is in the cache, return the cached value immediately.\n4. Try all possible subarray lengths from `1` to `k`:\n    - Track the maximum element in the current window.\n    - Calculate contribution and add the recursive result for the remaining array.\n    - Take the maximum across all choices.\n5. Store the result in the cache and return it.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(n)`\n\n> Where `k` is the maximum length of the subarray and `n` is the size of the array `arr`.",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\n\nclass Solution:\n    def maxSumAfterPartitioning(self, arr: List[int], k: int) -> int:\n        cache = { len(arr) : 0 }\n\n        def dfs(i):\n            if i in cache:\n                return cache[i]\n\n            cur_max = 0\n            res = 0\n            for j in range(i, min(len(arr), i + k)):\n                cur_max = max(cur_max, arr[j])\n                window_size = j - i + 1\n                res = max(res, dfs(j + 1) + cur_max * window_size)\n\n            cache[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-array-for-maximum-sum.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

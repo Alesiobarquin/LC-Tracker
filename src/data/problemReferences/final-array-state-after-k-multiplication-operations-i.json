@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> getFinalState(vector<int>& nums, int k, int multiplier) {\n        int n = nums.size();\n        vector<int> res = nums;\n\n        auto cmp = [&](int a, int b) {\n            if (res[a] != res[b]) return res[a] > res[b];\n            return a > b;\n        };\n        priority_queue<int, vector<int>, decltype(cmp)> minHeap(cmp);\n\n        for (int i = 0; i < n; i++) {\n            minHeap.push(i);\n        }\n\n        for (int _ = 0; _ < k; _++) {\n            int i = minHeap.top();\n            minHeap.pop();\n            res[i] *= multiplier;\n            minHeap.push(i);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/final-array-state-after-k-multiplication-operations-i.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/final-array-state-after-k-multiplication-operations-i.md",
+  "alternatives": [
+    {
+      "approach": "Simulation",
+      "explanation": "### How it works\n\nThe problem asks us to repeatedly find the minimum element and multiply it by a given multiplier. A straightforward approach is to simulate exactly what the problem describes: for each of the `k` operations, scan through the array to find the smallest element (choosing the first occurrence if there are ties), then multiply that element by the multiplier.\n\n### Steps\n\n1. Repeat the following `k` times:\n    - Find the index of the minimum element in the array. If there are duplicates, pick the smallest index.\n    - Multiply the element at that index by `multiplier`.\n2. Return the modified array.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(1)` extra space.\n\n> Where `n` is the size of the input array, and `k` is the number of operations.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def getFinalState(self, nums: List[int], k: int, multiplier: int) -> List[int]:\n        n = len(nums)\n        for _ in range(k):\n            minIdx = 0\n            for i in range(1, n):\n                if nums[i] < nums[minIdx]:\n                    minIdx = i\n            nums[minIdx] *= multiplier\n        return nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/final-array-state-after-k-multiplication-operations-i.md",
+      "id": "simulation"
+    }
+  ]
 }

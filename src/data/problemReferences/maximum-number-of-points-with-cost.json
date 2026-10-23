@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long maxPoints(vector<vector<int>>& points) {\n        int rows = points.size(), cols = points[0].size();\n        vector<long long> prev(cols);\n        for (int c = 0; c < cols; c++) prev[c] = points[0][c];\n\n        for (int r = 1; r < rows; r++) {\n            vector<long long> cur(cols);\n            cur[0] = prev[0];\n            for (int c = 1; c < cols; c++)\n                cur[c] = max(prev[c], cur[c - 1] - 1);\n\n            long long rightMax = prev[cols - 1];\n            for (int c = cols - 2; c >= 0; c--) {\n                rightMax = max(prev[c], rightMax - 1);\n                cur[c] = max(cur[c], rightMax) + points[r][c];\n            }\n            cur[cols - 1] += points[r][cols - 1];\n            prev = cur;\n        }\n        return *max_element(prev.begin(), prev.end());\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-points-with-cost.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-points-with-cost.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to pick one cell from each row such that the total points are maximized. The tricky part is the penalty: if we pick column `c` in row `r` and column `c'` in row `r+1`, we lose `|c - c'|` points.\n\nA natural approach is to try all possibilities. For each starting column in the first row, we recursively explore all column choices in subsequent rows, subtracting the movement penalty and adding the cell value. We return the maximum sum found.\n\n### Steps\n\n1. Define a recursive function `dfs(r, c)` that returns the maximum points obtainable from row `r+1` to the last row, given we are currently at column `c` in row `r`.\n2. Base case: if `r` is the last row, return `0` (no more rows to process).\n3. For each column `col` in the next row, compute `points[r+1][col] - |col - c| + dfs(r+1, col)`.\n4. Return the maximum over all column choices.\n5. The answer is the maximum of `points[0][c] + dfs(0, c)` for all starting columns `c`.\n\n### Complexity\n\n- Time complexity: `O(n ^ m)`\n- Space complexity: `O(m)` for recursion stack.\n\n> Where `m` is the number of rows, and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        m, n = len(points), len(points[0])\n\n        def dfs(r, c):\n            if r == m - 1:\n                return 0\n\n            res = 0\n            for col in range(n):\n                res = max(res, points[r + 1][col] - abs(col - c) + dfs(r + 1, col))\n            return res\n\n        ans = 0\n        for c in range(n):\n            ans = max(ans, points[0][c] + dfs(0, c))\n        return ans\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-points-with-cost.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recalculates the same subproblems multiple times. For a given `(row, column)` pair, the maximum points from that position onward is always the same, regardless of how we got there.\n\nBy storing (memoizing) the result for each `(r, c)` pair, we avoid redundant computation. This transforms the exponential solution into a polynomial one.\n\n### Steps\n\n1. Create a memoization table `memo` to cache results for each `(r, c)` pair.\n2. Define `dfs(r, c)` as before, but first check if the result is already cached.\n3. If cached, return it immediately.\n4. Otherwise, compute the result by trying all columns in the next row, cache it, and return.\n5. The final answer is computed the same way as the recursive approach.\n\n### Complexity\n\n- Time complexity: `O(m * n ^ 2)`\n- Space complexity: `O(n)`\n\n> Where `m` is the number of rows, and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        m, n = len(points), len(points[0])\n        memo = {}\n\n        def dfs(r, c):\n            if (r, c) in memo:\n                return memo[(r, c)]\n            if r == m - 1:\n                return 0\n\n            res = 0\n            for col in range(n):\n                res = max(res, points[r + 1][col] - abs(col - c) + dfs(r + 1, col))\n\n            memo[(r, c)] = res\n            return res\n\n        ans = 0\n        for c in range(n):\n            ans = max(ans, points[0][c] + dfs(0, c))\n        return ans\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-points-with-cost.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

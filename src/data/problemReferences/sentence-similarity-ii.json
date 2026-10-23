@@ -1,0 +1,29 @@
+{
+  "problemId": "sentence-similarity-ii",
+  "approach": "Similarity Graph Search",
+  "explanation": "### How it works\n\nSimilarity pairs form an undirected graph, and transitive similarity is graph connectivity. For each unequal word pair, search for a path between them.\n\n### Steps\n\n1. Reject sentences of different lengths.\n2. Build the undirected word graph.\n3. Skip equal word pairs.\n4. Search the graph for every remaining pair and reject any disconnected pair.\n\n### Complexity\n\n- Time: O(P + q × (V + P)) for P pairs, V graph words, and q sentence positions.\n- Space: O(V + P) graph and traversal state.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def areSentencesSimilarTwo(\n      self,\n      words1: list[str],\n      words2: list[str],\n      pairs: list[list[str]],\n  ) -> bool:\n    if len(words1) != len(words2):\n      return False\n\n    # graph[key] := all the similar words of key\n    graph = collections.defaultdict(set)\n\n    for a, b in pairs:\n      graph[a].add(b)\n      graph[b].add(a)\n\n    def dfs(word1: str, word2: str, seen: set) -> bool:\n      if word1 in graph[word2]:\n        return True\n\n      seen.add(word1)\n\n      for child in graph[word1]:\n        if child in seen:\n          continue\n        if dfs(child, word2, seen):\n          return True\n\n      return False\n\n    for word1, word2 in zip(words1, words2):\n      if word1 == word2:\n        continue\n      if word1 not in graph:\n        return False\n      if not dfs(word1, word2, set()):\n        return False\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool areSentencesSimilarTwo(vector<string>& words1, vector<string>& words2,\n                              vector<vector<string>>& pairs) {\n    if (words1.size() != words2.size())\n      return false;\n\n    // graph[key] := all the similar words of key\n    unordered_map<string, unordered_set<string>> graph;\n\n    for (const vector<string>& pair : pairs) {\n      graph[pair[1]].insert(pair[0]);\n      graph[pair[0]].insert(pair[1]);\n    }\n\n    for (int i = 0; i < words1.size(); ++i) {\n      if (words1[i] == words2[i])\n        continue;\n      if (!graph.contains(words1[i]))\n        return false;\n      if (!dfs(graph, words1[i], words2[i], {}))\n        return false;\n    }\n\n    return true;\n  }\n\n private:\n  bool dfs(const unordered_map<string, unordered_set<string>>& graph,\n           const string& source, const string& target,\n           unordered_set<string>&& seen) {\n    if (graph.at(source).contains(target))\n      return true;\n\n    seen.insert(source);\n\n    for (const string& child : graph.at(source)) {\n      if (seen.contains(child))\n        continue;\n      if (dfs(graph, child, target, std::move(seen)))\n        return true;\n    }\n\n    return false;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/737.%20Sentence%20Similarity%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "union-find-word-components",
+      "approach": "Union-Find Word Components",
+      "explanation": "### How it works\n\nUnion all directly similar words once. Path-compressed component lookups then answer every sentence-position comparison.\n\n### Steps\n\n1. Reject different sentence lengths.\n2. Create parent and size records for words.\n3. Union every similarity pair by component size.\n4. Accept each position only when the words are equal or share a component.\n\n### Complexity\n\n- Time: Expected O((P + q) × α(V)) component operations, plus word hashing.\n- Space: O(V) parent and size maps.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/737.%20Sentence%20Similarity%20II",
+      "code": {
+        "python": "class Solution:\n    def areSentencesSimilarTwo(self, sentence1: list[str], sentence2: list[str], similarPairs: list[list[str]]) -> bool:\n        if len(sentence1) != len(sentence2):\n            return False\n        parent, sizes = {}, {}\n        def find(word):\n            parent.setdefault(word, word)\n            sizes.setdefault(word, 1)\n            while word != parent[word]:\n                parent[word] = parent[parent[word]]\n                word = parent[word]\n            return word\n        for a, b in similarPairs:\n            a, b = find(a), find(b)\n            if a != b:\n                if sizes[a] < sizes[b]:\n                    a, b = b, a\n                parent[b] = a\n                sizes[a] += sizes[b]\n        return all(a == b or find(a) == find(b) for a, b in zip(sentence1, sentence2))\n"
+      }
+    }
+  ]
+}

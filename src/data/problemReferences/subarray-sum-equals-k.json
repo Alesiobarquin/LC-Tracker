@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        int res = 0, curSum = 0;\n        unordered_map<int, int> prefixSums;\n        prefixSums[0] = 1;\n\n        for (int num : nums) {\n            curSum += num;\n            int diff = curSum - k;\n            res += prefixSums[diff];\n            prefixSums[curSum]++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=fFVZt-6sgyo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sum-equals-k.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sum-equals-k.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to consider every possible subarray and check if its sum equals `k`. For each starting index, we extend the subarray element by element, maintaining a running sum. Whenever the sum equals `k`, we count it.\n\n### Steps\n\n1. Initialize `res = 0`.\n2. For each starting index `i`:\n    - Set `sum = 0`.\n    - For each ending index `j` from `i` to `n - 1`:\n        - Add `nums[j]` to `sum`.\n        - If `sum == k`, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        res = 0\n        for i in range(len(nums)):\n            sum = 0\n            for j in range(i, len(nums)):\n                sum += nums[j]\n                if sum == k:\n                    res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sum-equals-k.md",
+      "id": "brute-force"
+    }
+  ]
 }

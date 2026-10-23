@@ -1,0 +1,29 @@
+{
+  "problemId": "maximum-depth-of-n-ary-tree",
+  "approach": "Recursive Maximum Child Depth",
+  "explanation": "### How it works\n\nThe depth of a nonempty N-ary tree is one plus the maximum child depth. A leaf contributes one and an empty tree contributes zero.\n\n### Steps\n\n1. Return zero for an empty node.\n2. Return one for a leaf.\n3. Recursively find the maximum child depth and add one.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion space.",
+  "code": {
+    "python": "class Solution:\n  def maxDepth(self, root: 'Node') -> int:\n    if not root:\n      return 0\n    if not root.children:\n      return 1\n    return 1 + max(self.maxDepth(child) for child in root.children)\n",
+    "cpp": "class Solution {\n public:\n  int maxDepth(Node* root) {\n    if (root == nullptr)\n      return 0;\n\n    int ans = 0;\n\n    for (Node* child : root->children)\n      ans = max(ans, maxDepth(child));\n\n    return 1 + ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/559.%20Maximum%20Depth%20of%20N-ary%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "level-order-depth-counting",
+      "approach": "Level-Order Depth Counting",
+      "explanation": "### How it works\n\nEach breadth-first queue layer is one tree depth. Count complete layers until all children have been visited.\n\n### Steps\n\n1. Enqueue the root when present.\n2. Process the current queue length.\n3. Enqueue every child.\n4. Increment depth once per processed level.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(w) for maximum level width.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/559.%20Maximum%20Depth%20of%20N-ary%20Tree",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def maxDepth(self, root: 'Node') -> int:\n        queue = deque([root] if root else [])\n        depth = 0\n        while queue:\n            for _ in range(len(queue)):\n                queue.extend(queue.popleft().children)\n            depth += 1\n        return depth\n"
+      }
+    }
+  ]
+}

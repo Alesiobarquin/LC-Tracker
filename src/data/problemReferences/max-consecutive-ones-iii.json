@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int longestOnes(vector<int>& nums, int k) {\n        int l = 0, res = 0;\n        for (int r = 0; r < nums.size(); ++r) {\n            k -= (nums[r] == 0 ? 1 : 0);\n            while (k < 0) {\n                k += (nums[l] == 0 ? 1 : 0);\n                ++l;\n            }\n            res = max(res, r - l + 1);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-iii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-iii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible starting position and see how far we can extend while flipping at most `k` zeros. For each starting index, we move forward and count zeros. Once the count exceeds `k`, we stop and record the window length. This method explores all contiguous subarrays but performs redundant work by rescanning overlapping regions.\n\n### Steps\n\n1. Initialize `res` to store the maximum length found.\n2. For each starting index `l`, set a zero counter `cnt` to `0` and expand with pointer `r`:\n    - If the current element is `0` and `cnt` already equals `k`, stop expanding.\n    - Otherwise, if the element is `0`, increment `cnt`.\n    - Move `r` forward.\n3. After the inner loop, update `res` with `r - l`.\n4. Return `res` after checking all starting positions.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def longestOnes(self, nums: List[int], k: int) -> int:\n        res = 0\n        for l in range(len(nums)):\n            cnt, r = 0, l\n            while r < len(nums):\n                if nums[r] == 0:\n                    if cnt == k:\n                        break\n                    cnt += 1\n                r += 1\n            res = max(res, r - l)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-iii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search + Prefix Sum",
+      "explanation": "### How it works\n\nWe can precompute a prefix sum array that counts zeros up to each index. For any subarray from `l` to `r`, the number of zeros is simply `prefix[r + 1] - prefix[l]`. This allows us to quickly check if a window is valid (contains at most `k` zeros). For each starting position, we binary search for the farthest ending position where the zero count stays within the limit. This avoids the linear scan of the brute force approach.\n\n### Steps\n\n1. Build a prefix sum array where `prefix[i]` stores the count of zeros in `nums[0..i-1]`.\n2. For each starting index `l`, binary search for the largest `r` such that `prefix[r + 1] - prefix[l] <= k`.\n3. Update `res` with `r - l` (the window length).\n4. Return `res` after processing all starting positions.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def longestOnes(self, nums: List[int], k: int) -> int:\n        prefix = [0]\n        for num in nums:\n            prefix.append(prefix[-1] + (1 if num == 0 else 0))\n\n        res = 0\n        for l in range(len(nums)):\n            low, high = l, len(nums)\n            while low < high:\n                mid = (low + high) // 2\n                if prefix[mid + 1] - prefix[l] <= k:\n                    low = mid + 1\n                else:\n                    high = mid\n            res = max(res, low - l)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-iii.md",
+      "id": "binary-search-prefix-sum"
+    }
+  ]
 }

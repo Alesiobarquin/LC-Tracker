@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/454.%204Sum%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "four-nested-choices",
+      "approach": "Four Nested Choices",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nChoose one value from each array and test the sum directly. This baseline exposes the repeated work avoided by hashing pair sums.\n\n### Steps\n\n1. Enumerate one index from each of the four arrays.\n2. Count choices whose values sum to zero.\n3. Return the count.\n\n### Complexity\n\n- Time: `O(n⁴)` for equal-sized arrays.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/454.%204Sum%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def fourSumCount(self, nums1: list[int], nums2: list[int], nums3: list[int], nums4: list[int]) -> int:\n        return sum(a + b + c + d == 0 for a in nums1 for b in nums2 for c in nums3 for d in nums4)\n"
+      }
+    }
+  ]
 }

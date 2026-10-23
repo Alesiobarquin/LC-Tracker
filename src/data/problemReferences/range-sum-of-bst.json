@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int rangeSumBST(TreeNode* root, int low, int high) {\n        int res = 0;\n        stack<TreeNode*> stack;\n        stack.push(root);\n\n        while (!stack.empty()) {\n            TreeNode* node = stack.top();\n            stack.pop();\n            if (!node) continue;\n\n            if (low <= node->val && node->val <= high) {\n                res += node->val;\n            }\n            if (node->val > low) {\n                stack.push(node->left);\n            }\n            if (node->val < high) {\n                stack.push(node->right);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-of-bst.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-of-bst.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nWe traverse the entire tree and sum up values that fall within the given range. For each node, we check if its value is between `low` and `high`, adding it to our sum if so. We then recursively process both children. This approach visits every node regardless of the BST property.\n\n### Steps\n\n1. Base case: if the node is `null`, return `0`.\n2. Check if the current node's value is within `[low, high]`. If yes, include it in the result.\n3. Recursively compute the range sum for the left subtree.\n4. Recursively compute the range sum for the right subtree.\n5. Return the sum of all contributions.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:\n        if not root:\n            return 0\n\n        res = root.val if low <= root.val <= high else 0\n        res += self.rangeSumBST(root.left, low, high)\n        res += self.rangeSumBST(root.right, low, high)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-of-bst.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Depth First Search (Optimal)",
+      "explanation": "### How it works\n\nWe can leverage the BST property to prune unnecessary branches. If the current node's value is greater than `high`, all values in the right subtree are also too large, so we only need to search left. Similarly, if the current value is less than `low`, we only search right. This eliminates entire subtrees that cannot contribute to the sum.\n\n### Steps\n\n1. Base case: if the node is `null`, return `0`.\n2. If the current value exceeds `high`, skip the right subtree and recurse only on the left.\n3. If the current value is below `low`, skip the left subtree and recurse only on the right.\n4. Otherwise, the current value is in range. Add it to the sum of both subtree results.\n5. Return the computed sum.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:\n        if not root:\n            return 0\n\n        if root.val > high:\n            return self.rangeSumBST(root.left, low, high)\n        if root.val < low:\n            return self.rangeSumBST(root.right, low, high)\n\n        return (\n            root.val +\n            self.rangeSumBST(root.left, low, high) +\n            self.rangeSumBST(root.right, low, high)\n        )\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-of-bst.md",
+      "id": "depth-first-search-optimal"
+    }
+  ]
 }

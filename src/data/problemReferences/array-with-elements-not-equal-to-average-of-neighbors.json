@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> rearrangeArray(vector<int>& nums) {\n        bool increase = nums[0] < nums[1];\n        for (int i = 1; i < nums.size() - 1; i++) {\n            if ((increase && nums[i] < nums[i + 1]) ||\n                (!increase && nums[i] > nums[i + 1])) {\n                swap(nums[i], nums[i + 1]);\n            }\n            increase = !increase;\n        }\n        return nums;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Wmb3YdVYfqM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/array-with-elements-not-equal-to-average-of-neighbors.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/array-with-elements-not-equal-to-average-of-neighbors.md",
+  "alternatives": [
+    {
+      "approach": "Greedy",
+      "explanation": "### How it works\n\nIf we sort the array, adjacent elements become close in value, which makes it more likely for an element to be the average of its neighbors. To avoid this, we can interleave elements from the small and large ends of the sorted array. By alternating between picking from the front (small) and back (large), we create a pattern where neighbors differ significantly, preventing any element from being the exact average of its neighbors.\n\n### Steps\n\n1. Sort the array in ascending order.\n2. Use two pointers: one at the beginning (`l`) and one at the end (`r`) of the sorted array.\n3. Build the result by alternating between taking from `l` (small values) and `r` (large values).\n4. Continue until all elements are placed.\n5. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(nlog n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rearrangeArray(self, nums: List[int]) -> List[int]:\n        nums.sort()\n        res = []\n        l, r = 0, len(nums) - 1\n        while len(res) != len(nums):\n            res.append(nums[l])\n            l += 1\n            if l <= r:\n                res.append(nums[r])\n                r -= 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/array-with-elements-not-equal-to-average-of-neighbors.md",
+      "id": "greedy"
+    },
+    {
+      "approach": "Greedy (Space Optimized)",
+      "explanation": "### How it works\n\nInstead of building a new array, we can rearrange in place. After sorting, if we swap every pair of adjacent elements at odd indices with their preceding element, we create a zigzag pattern. This ensures that each element at an odd index is a local maximum or minimum relative to its neighbors, which prevents any element from being the average of its neighbors.\n\n### Steps\n\n1. Sort the array in ascending order.\n2. Iterate through the array starting at index 1, stepping by 2.\n3. At each step, swap the element at index `i` with the element at index `i - 1`.\n4. This creates pairs where the larger element comes before the smaller one in each pair.\n5. Return the modified array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rearrangeArray(self, nums: List[int]) -> List[int]:\n        nums.sort()\n        for i in range(1, len(nums), 2):\n            nums[i], nums[i - 1] = nums[i - 1], nums[i]\n        return nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/array-with-elements-not-equal-to-average-of-neighbors.md",
+      "id": "greedy-space-optimized"
+    }
+  ]
 }

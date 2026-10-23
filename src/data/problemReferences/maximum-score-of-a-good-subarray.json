@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maximumScore(vector<int>& nums, int k) {\n        int l = k, r = k;\n        int res = nums[k];\n        int curMin = nums[k];\n        int n = nums.size();\n\n        while (l > 0 || r < n - 1) {\n            int left = (l > 0) ? nums[l - 1] : 0;\n            int right = (r < n - 1) ? nums[r + 1] : 0;\n\n            if (left > right) {\n                l--;\n                curMin = min(curMin, left);\n            } else {\n                r++;\n                curMin = min(curMin, right);\n            }\n\n            res = max(res, curMin * (r - l + 1));\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-of-a-good-subarray.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-of-a-good-subarray.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA \"good\" subarray must contain index `k`. The score is the minimum element multiplied by the subarray length. The straightforward approach is to try all possible subarrays that include `k`, tracking the minimum as we extend each one. For each starting point at or before `k`, we extend rightward past `k`, updating the minimum and calculating the score at each step.\n\n### Steps\n\n1. For each starting index `i` from `0` to `k`:\n    - Initialize `minEle` with `nums[i]`.\n    - Extend the subarray rightward from `i` to `n-1`.\n    - Update `minEle` as we encounter each new element.\n    - Once `j` reaches `k` or beyond, calculate the score and update the result.\n2. Return the maximum score found.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maximumScore(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(k + 1):\n            minEle = nums[i]\n            for j in range(i, n):\n                minEle = min(minEle, nums[j])\n                if j >= k:\n                    res = max(res, minEle * (j - i + 1))\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-of-a-good-subarray.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nFor any subarray containing `k`, the minimum value decreases (or stays the same) as we expand outward from `k`. We can preprocess the array so that `arr[i]` represents the minimum value in the subarray from `i` to `k` (for left side) or from `k` to `i` (for right side). This creates sorted arrays on each side, allowing binary search to quickly find how far we can extend while maintaining at least a given minimum value.\n\n### Steps\n\n1. Create a copy of the array and modify it:\n    - From `k-1` down to `0`, set `arr[i] = min(arr[i], arr[i+1])`.\n    - From `k+1` to `n-1`, set `arr[i] = min(arr[i], arr[i-1])`.\n2. For each unique minimum value in the modified array:\n    - Binary search the left array to find the leftmost index with value >= `minVal`.\n    - Binary search the right array to find the rightmost index with value >= `minVal`.\n    - Calculate the score and update the result.\n3. Return the maximum score.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom bisect import bisect_left\n\nclass Solution:\n    def maximumScore(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n        arr = nums[:]\n\n        for i in range(k - 1, -1, -1):\n            arr[i] = min(arr[i], arr[i + 1])\n        for i in range(k + 1, n):\n            arr[i] = min(arr[i], arr[i - 1])\n\n        left_arr = arr[:k+1]\n        right_arr = arr[k:]\n\n        def find_right(target):\n            lo, hi = 0, len(right_arr) - 1\n            pos = 0\n            while lo <= hi:\n                mid = (lo + hi) // 2\n                if right_arr[mid] >= target:\n                    pos = mid\n                    lo = mid + 1\n                else:\n                    hi = mid - 1\n            return pos\n\n        for minVal in set(arr):\n            l = bisect_left(left_arr, minVal)\n            r = find_right(minVal)\n            res = max(res, minVal * (k - l + 1 + r))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-of-a-good-subarray.md",
+      "id": "binary-search"
+    }
+  ]
 }

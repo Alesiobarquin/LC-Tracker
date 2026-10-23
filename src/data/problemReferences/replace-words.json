@@ -1,0 +1,29 @@
+{
+  "problemId": "replace-words",
+  "approach": "Shortest-Root Trie",
+  "explanation": "### How it works\n\nInsert dictionary roots into a trie and stop a sentence-word search at the first terminal node. The earliest terminal is its shortest matching root.\n\n### Steps\n\n1. Insert dictionary roots and mark their terminal nodes.\n2. Traverse each sentence word through the trie.\n3. Return the first terminal root or the original word if no root matches.\n4. Join the replaced words.\n\n### Complexity\n\n- Time: O(D + S) for dictionary text D and sentence text S.\n- Space: O(D + S) including trie and output words.",
+  "code": {
+    "python": "class Solution:\n  def __init__(self):\n    self.root = {}\n\n  def insert(self, word: str) -> None:\n    node = self.root\n    for c in word:\n      if c not in node:\n        node[c] = {}\n      node = node[c]\n    node['word'] = word\n\n  def search(self, word: str) -> str:\n    node = self.root\n    for c in word:\n      if 'word' in node:\n        return node['word']\n      if c not in node:\n        return word\n      node = node[c]\n    return word\n\n  def replaceWords(self, dictionary: list[str], sentence: str) -> str:\n    for word in dictionary:\n      self.insert(word)\n\n    words = sentence.split(' ')\n    return ' '.join([self.search(word) for word in words])\n",
+    "cpp": "struct TrieNode {\n  vector<shared_ptr<TrieNode>> children;\n  const string* word = nullptr;\n  TrieNode() : children(26) {}\n};\n\nclass Solution {\n public:\n  string replaceWords(vector<string>& dictionary, string sentence) {\n    for (const string& word : dictionary)\n      insert(word);\n\n    string ans;\n    istringstream iss(sentence);\n\n    for (string s; iss >> s;)\n      ans += search(s) + ' ';\n    ans.pop_back();\n\n    return ans;\n  }\n\n private:\n  shared_ptr<TrieNode> root = make_shared<TrieNode>();\n\n  void insert(const string& word) {\n    shared_ptr<TrieNode> node = root;\n    for (const char c : word) {\n      const int i = c - 'a';\n      if (node->children[i] == nullptr)\n        node->children[i] = make_shared<TrieNode>();\n      node = node->children[i];\n    }\n    node->word = &word;\n  }\n\n  string search(const string& word) {\n    shared_ptr<TrieNode> node = root;\n    for (const char c : word) {\n      if (node->word)\n        return *node->word;\n      const int i = c - 'a';\n      if (node->children[i] == nullptr)\n        return word;\n      node = node->children[i];\n    }\n    return word;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/648.%20Replace%20Words",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "prefix-set-lookup",
+      "approach": "Prefix Set Lookup",
+      "explanation": "### How it works\n\nKeep roots in a hash set and test each word's prefixes from shortest to longest. The first membership hit supplies the required shortest root.\n\n### Steps\n\n1. Build the root set.\n2. For each sentence word, test increasing prefix lengths.\n3. Replace at the first set match.\n4. Keep unmatched words unchanged and join the result.\n\n### Complexity\n\n- Time: O(D + sum of word-length²), including Python prefix copying and hashing.\n- Space: O(D + S) stored roots and output words.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/648.%20Replace%20Words",
+      "code": {
+        "python": "class Solution:\n    def replaceWords(self, dictionary: list[str], sentence: str) -> str:\n        roots = set(dictionary)\n        words = sentence.split()\n        for i, word in enumerate(words):\n            for length in range(1, len(word) + 1):\n                if word[:length] in roots:\n                    words[i] = word[:length]\n                    break\n        return ' '.join(words)\n"
+      }
+    }
+  ]
+}

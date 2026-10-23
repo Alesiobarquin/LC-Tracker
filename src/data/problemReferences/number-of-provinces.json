@@ -7,5 +7,25 @@
     "cpp": "class DSU {\npublic:\n    vector<int> Parent, Size;\n    int components;\n\n    DSU(int n) {\n        Parent.resize(n);\n        Size.assign(n, 1);\n        components = n;\n        for (int i = 0; i < n; ++i) Parent[i] = i;\n    }\n\n    int find(int node) {\n        if (Parent[node] != node)\n            Parent[node] = find(Parent[node]);\n        return Parent[node];\n    }\n\n    bool unionSet(int u, int v) {\n        int pu = find(u), pv = find(v);\n        if (pu == pv) return false;\n\n        components--;\n        if (Size[pu] >= Size[pv]) {\n            Size[pu] += Size[pv];\n            Parent[pv] = pu;\n        } else {\n            Size[pv] += Size[pu];\n            Parent[pu] = pv;\n        }\n        return true;\n    }\n\n    int numOfComps() {\n        return components;\n    }\n};\n\nclass Solution {\npublic:\n    int findCircleNum(vector<vector<int>>& isConnected) {\n        int n = isConnected.size();\n        DSU dsu(n);\n        for (int i = 0; i < n; ++i)\n            for (int j = 0; j < n; ++j)\n                if (isConnected[i][j])\n                    dsu.unionSet(i, j);\n        return dsu.numOfComps();\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-provinces.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-provinces.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA province is a group of directly or indirectly connected cities. This is essentially finding the number of connected components in an undirected graph. We can use DFS to explore all cities reachable from a starting city, marking them as visited. Each time we start a new DFS from an unvisited city, we have found a new province.\n\n### Steps\n\n1. Create a `visited` array of size `n` initialized to `false`.\n2. Initialize province count `res` to `0`.\n3. For each city `i` from `0` to `n-1`:\n    - If city `i` is not visited:\n        - Increment `res` (found a new province).\n        - Run `dfs` from city `i` to mark all connected cities as visited.\n4. In the `dfs`:\n    - Mark the current node as visited.\n    - For each neighbor `nei` that is connected and not visited, recursively call `dfs`.\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findCircleNum(self, isConnected: List[List[int]]) -> int:\n        n = len(isConnected)\n        res = 0\n        visited = [False] * n\n\n        def dfs(node):\n            visited[node] = True\n            for nei in range(n):\n                if isConnected[node][nei] and not visited[nei]:\n                    dfs(nei)\n\n        for i in range(n):\n            if not visited[i]:\n                dfs(i)\n                res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-provinces.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\n`BFS` provides an alternative to `DFS` for exploring connected components. Instead of going deep first, we explore all neighbors at the current level before moving to the next. The logic remains the same: start from an unvisited city, explore all reachable cities using a queue, and count each new starting point as a separate province.\n\n### Steps\n\n1. Create a `visited` array of size `n` initialized to `false`.\n2. Initialize province count `res` to `0` and create an empty queue.\n3. For each city `i` from `0` to `n-1`:\n    - If city `i` is not visited:\n        - Increment `res`.\n        - Mark city `i` as visited and add it to the queue.\n        - While the queue is not empty:\n            - Dequeue a city `node`.\n            - For each neighbor `nei` that is connected and not visited, mark it visited and enqueue it.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def findCircleNum(self, isConnected: List[List[int]]) -> int:\n        n = len(isConnected)\n        visited = [False] * n\n        res = 0\n        q = deque()\n\n        for i in range(n):\n            if not visited[i]:\n                res += 1\n                visited[i] = True\n                q.append(i)\n                while q:\n                    node = q.popleft()\n                    for nei in range(n):\n                        if isConnected[node][nei] and not visited[nei]:\n                            visited[nei] = True\n                            q.append(nei)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-provinces.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

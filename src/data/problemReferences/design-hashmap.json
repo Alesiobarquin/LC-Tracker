@@ -7,5 +7,16 @@
     "cpp": "class MyHashMap {\nprivate:\n    struct ListNode {\n        int key, val;\n        ListNode* next;\n\n        ListNode(int key = -1, int val = -1, ListNode* next = nullptr)\n            : key(key), val(val), next(next) {}\n    };\n\n    vector<ListNode*> map;\n    int hash(int key) {\n        return key % map.size();\n    }\n\npublic:\n    MyHashMap() {\n        map.resize(1000);\n        for (auto& bucket : map) {\n            bucket = new ListNode(0);\n        }\n    }\n\n    void put(int key, int value) {\n        ListNode* cur = map[hash(key)];\n        while (cur->next) {\n            if (cur->next->key == key) {\n                cur->next->val = value;\n                return;\n            }\n            cur = cur->next;\n        }\n        cur->next = new ListNode(key, value);\n    }\n\n    int get(int key) {\n        ListNode* cur = map[hash(key)]->next;\n        while (cur) {\n            if (cur->key == key) {\n                return cur->val;\n            }\n            cur = cur->next;\n        }\n        return -1;\n    }\n\n    void remove(int key) {\n        ListNode* cur = map[hash(key)];\n        while (cur->next) {\n            if (cur->next->key == key) {\n                ListNode* tmp = cur->next;\n                cur->next = cur->next->next;\n                delete tmp;\n                return;\n            }\n            cur = cur->next;\n        }\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cNWsgbKwwoU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-hashmap.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-hashmap.md",
+  "alternatives": [
+    {
+      "approach": "Array",
+      "explanation": "### How it works\n\nSince keys are constrained to the range [0, 1000000], we can use direct addressing. We allocate an array where the index represents the key and the value at that index is the stored value. We use -1 to indicate that a key is not present. This gives O(1) time for all operations at the cost of fixed memory usage regardless of how many keys are actually stored.\n\n### Steps\n\n1. Initialize an array of size `1000001` with all values set to `-1`.\n2. For `put(key, value)`: Set `map[key] = value`.\n3. For `get(key)`: Return `map[key]` (returns `-1` if the key was never set or was removed).\n4. For `remove(key)`: Set `map[key] = -1`.\n\n### Complexity\n\n- Time complexity: `O(1)` for each function call.\n- Space complexity: `O(1000000)` since the key is in the range `[0, 1000000]`.",
+      "code": {
+        "python": "class MyHashMap:\n\n    def __init__(self):\n        self.map = [-1] * 1000001\n\n    def put(self, key: int, value: int) -> None:\n        self.map[key] = value\n\n    def get(self, key: int) -> int:\n        return self.map[key]\n\n    def remove(self, key: int) -> None:\n        self.map[key] = -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-hashmap.md",
+      "id": "array"
+    }
+  ]
 }

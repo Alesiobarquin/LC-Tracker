@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    long long countBadPairs(vector<int>& nums) {\n        unordered_map<int, int> count;\n        long long total = 0, good = 0;\n        for (int i = 0; i < nums.size(); i++) {\n            int key = nums[i] - i;\n            good += count[key];\n            count[key]++;\n            total += i;\n        }\n        return total - good;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-number-of-bad-pairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-number-of-bad-pairs.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA bad pair is defined as `i < j` where `j - i != nums[j] - nums[i]`. We can check every possible pair of indices and count how many satisfy this condition.\n\n### Steps\n\n1. Initialize a counter for bad pairs.\n2. Use two nested loops: the outer loop picks index `i`, the inner loop picks index `j` where `j > i`.\n3. For each pair, check if `j - i != nums[j] - nums[i]`.\n4. If the condition is true, increment the bad pair counter.\n5. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countBadPairs(self, nums: List[int]) -> int:\n        n, res = len(nums), 0\n        for i in range(n - 1):\n            for j in range(i + 1, n):\n                if j - i != nums[j] - nums[i]:\n                    res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-number-of-bad-pairs.md",
+      "id": "brute-force"
+    }
+  ]
 }

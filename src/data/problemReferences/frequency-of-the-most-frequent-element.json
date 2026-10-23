@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxFrequency(vector<int>& nums, int k) {\n        sort(nums.begin(), nums.end());\n        long long total = 0;\n        int l = 0;\n\n        for (int r = 0; r < nums.size(); ++r) {\n            total += nums[r];\n            if ((r - l + 1) * 1L * nums[r] > total + k) {\n                total -= nums[l];\n                l++;\n            }\n        }\n\n        return nums.size() - l;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=vgBrQ0NM5vE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/frequency-of-the-most-frequent-element.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/frequency-of-the-most-frequent-element.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can only increment elements, so the target value for our frequent element must already exist in the array. For each element, we check how many smaller elements we can increment to match it using at most `k` operations.\n\nSorting the array helps because the elements closest in value to our target require the fewest increments. We greedily extend leftward from each position, incrementing elements until we run out of operations.\n\n### Steps\n\n1. Sort the array in ascending order.\n2. For each index `i`, treat `nums[i]` as the target value.\n3. Starting from `j = i - 1`, work backward and subtract the cost `nums[i] - nums[j]` from a temporary budget.\n4. Stop when the budget becomes negative.\n5. The count of elements matching `nums[i]` is `i - j`.\n6. Track and return the maximum count found in `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 + n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxFrequency(self, nums: List[int], k: int) -> int:\n        nums.sort()\n        res = 1\n        for i in range(len(nums)):\n            j = i - 1\n            tmpK = k\n            while j >= 0 and (tmpK - (nums[i] - nums[j])) >= 0:\n                tmpK -= (nums[i] - nums[j])\n                j -= 1\n            res = max(res, i - j)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/frequency-of-the-most-frequent-element.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum + Binary Search",
+      "explanation": "### How it works\n\nInstead of extending leftward one element at a time, we can use binary search to find the optimal left boundary. The cost to make all elements in a range equal to the rightmost element is: `(count * target) - sum_of_range`. Using prefix sums, we compute range sums in `O(1)`.\n\nFor each right boundary `i`, we binary search for the smallest left boundary `m` such that the cost is within budget `k`. The window size `i - m + 1` gives us the frequency.\n\n### Steps\n\n1. Sort the array and build a prefix sum array.\n2. For each index `i`:\n    - Binary search for the leftmost index `m` where the cost `(i - m + 1) * nums[i] - (prefix[i+1] - prefix[m])` is at most `k`.\n    - Update `res` with the window size.\n3. Return the maximum frequency found.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxFrequency(self, nums: List[int], k: int) -> int:\n        nums.sort()\n        n = len(nums)\n        prefix_sum = [0] * (n + 1)\n        for i in range(n):\n            prefix_sum[i + 1] = prefix_sum[i] + nums[i]\n\n        res = 1\n        for i in range(n):\n            l, r = 0, i\n            while l <= r:\n                m = (l + r) // 2\n                curSum = prefix_sum[i + 1] - prefix_sum[m]\n                need = (i - m + 1) * nums[i] - curSum\n                if need <= k:\n                    r = m - 1\n                    res = max(res, i - m + 1)\n                else:\n                    l = m + 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/frequency-of-the-most-frequent-element.md",
+      "id": "prefix-sum-binary-search"
+    }
+  ]
 }

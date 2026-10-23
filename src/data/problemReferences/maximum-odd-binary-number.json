@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string maximumOddBinaryNumber(string s) {\n        vector<char> arr(s.begin(), s.end());\n        int left = 0;\n\n        for (int i = 0; i < arr.size(); i++) {\n            if (arr[i] == '1') {\n                swap(arr[left], arr[i]);\n                left++;\n            }\n        }\n\n        swap(arr[left - 1], arr[arr.size() - 1]);\n        return string(arr.begin(), arr.end());\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-odd-binary-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-odd-binary-number.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nA binary number is odd if and only if its last bit is `1`. To maximize the number, we want as many `1`s as possible in the higher-order positions (leftmost).\n\nWe can sort the string in descending order to push all `1`s to the front. Then, we swap one `1` to the last position to ensure the number is odd. Since we sorted in descending order, the rightmost `1` is easy to find.\n\n### Steps\n\n1. Convert the string to a character array and sort in descending order (all `1`s come first).\n2. Find the last `1` in the sorted array (it will be at the boundary between `1`s and `0`s).\n3. Swap this `1` with the last character of the array.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def maximumOddBinaryNumber(self, s: str) -> str:\n        s = sorted(s)\n        s.reverse()\n        i = len(s) - 1\n        while i >= 0 and s[i] == \"0\":\n            i -= 1\n\n        s[i], s[len(s) - 1] = s[len(s) - 1], s[i]\n        return ''.join(s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-odd-binary-number.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Greedy",
+      "explanation": "### How it works\n\nWe do not actually need to sort. The optimal answer has a simple structure: place all but one `1` at the beginning, followed by all `0`s, and end with a single `1`.\n\nWe just need to count the `1`s. If there are `count` ones, the result is `(count - 1)` ones, then `(n - count)` zeros, then one `1`.\n\n### Steps\n\n1. Count the number of `1`s in the string.\n2. Construct the result: `(count - 1)` ones + `(length - count)` zeros + `1`.\n3. Return the constructed string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def maximumOddBinaryNumber(self, s: str) -> str:\n        count = 0\n        for c in s:\n            if c == \"1\":\n                count += 1\n\n        return (count - 1) * \"1\" + (len(s) - count) * \"0\" + \"1\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-odd-binary-number.md",
+      "id": "greedy"
+    }
+  ]
 }

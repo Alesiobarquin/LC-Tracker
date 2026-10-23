@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxScore(vector<int>& cardPoints, int k) {\n        int l = 0, r = cardPoints.size() - k;\n        int total = 0;\n\n        for (int i = r; i < cardPoints.size(); i++) {\n            total += cardPoints[i];\n        }\n\n        int res = total;\n\n        while (r < cardPoints.size()) {\n            total += cardPoints[l] - cardPoints[r];\n            res = max(res, total);\n            l++;\n            r++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=TsA4vbtfCvo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-points-you-can-obtain-from-cards.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-points-you-can-obtain-from-cards.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nSince we can only take cards from the beginning or end, any valid selection forms two contiguous segments: one from the left and one from the right, totaling `k` cards. We can try all possible splits: take `0` from left and `k` from right, take `1` from left and `k-1` from right, and so on.\n\n### Steps\n\n1. For each split `left` from `0` to `k`:\n    - Compute the sum of the first `left` cards.\n    - Compute the sum of the last `k - left` cards.\n    - Track the maximum total.\n2. Return the maximum sum found.\n\n### Complexity\n\n- Time complexity: `O(k ^ 2)`\n- Space complexity: `O(1)` extra space.\n\n> Where `k` is the number of cards to pick.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxScore(self, cardPoints: List[int], k: int) -> int:\n        n = len(cardPoints)\n        res = 0\n\n        for left in range(k + 1):\n            leftSum = sum(cardPoints[:left])\n            rightSum = sum(cardPoints[n - (k - left):])\n            res = max(res, leftSum + rightSum)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-points-you-can-obtain-from-cards.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix & Suffix Sums",
+      "explanation": "### How it works\n\nInstead of recomputing sums for each split, we precompute prefix sums (sums from the left) and suffix sums (sums from the right). Then for any split, we can get the total in constant time by combining the appropriate prefix and suffix values.\n\n### Steps\n\n1. Build a prefix sum array where `prefix[i]` is the sum of the first `i` cards.\n2. Build a suffix sum array where `suffix[i]` is the sum of cards from index `i` to the end.\n3. For each split taking `left` cards from the front and `k - left` from the back:\n    - Total = `prefix[left] + suffix[n - (k - left)]`.\n    - Track the maximum.\n4. Return the maximum sum.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxScore(self, cardPoints: List[int], k: int) -> int:\n        n = len(cardPoints)\n\n        prefix = [0] * (n + 1)\n        for i in range(n):\n            prefix[i + 1] = prefix[i] + cardPoints[i]\n\n        suffix = [0] * (n + 1)\n        for i in range(n - 1, -1, -1):\n            suffix[i] = suffix[i + 1] + cardPoints[i]\n\n        res = 0\n        for left in range(k + 1):\n            right = k - left\n            res = max(res, prefix[left] + suffix[n - right])\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-points-you-can-obtain-from-cards.md",
+      "id": "prefix-suffix-sums"
+    }
+  ]
 }

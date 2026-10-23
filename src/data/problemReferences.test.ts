@@ -1,5 +1,8 @@
 import manifest from "../../scripts/additional-reference-manifest.json";
 import approachManifest from "../../scripts/approach-reference-manifest.json";
+import extendedApproachManifest from "../../scripts/extended-approach-reference-manifest.json";
+import moreApproachManifest from "../../scripts/more-approach-reference-manifest.json";
+import catalogApproachManifest from "../../scripts/catalog-approach-reference-manifest.json";
 import { describe, expect, it } from "vitest";
 import { ensureExtendedCatalogLoaded, problems } from "./problems";
 import { getProblemApproaches, hasProblemReference, loadProblemReference } from "./problemReferences";
@@ -49,10 +52,131 @@ describe("problem references", () => {
       expect(reference?.sourceUrl).toContain("/articles/");
     }
   });
+  it("expands 429 extended problems with 743 coherent Python alternatives while retaining their defaults", async () => {
+    const catalog = await ensureExtendedCatalogLoaded();
+    const extendedIds = new Set(catalog.map((problem) => problem.id));
+    const coreIds = new Set(problems.map((problem) => problem.id));
+    expect(extendedApproachManifest.problems).toHaveLength(429);
+    expect(new Set(extendedApproachManifest.problems.map((entry) => entry.id)).size).toBe(429);
+    let added = 0;
+    for (const entry of extendedApproachManifest.problems) {
+      expect(extendedIds.has(entry.id), entry.id).toBe(true);
+      expect(coreIds.has(entry.id), entry.id).toBe(false);
+      const reference = (await loadProblemReference(entry.id))!;
+      const approaches = getProblemApproaches(reference);
+      expect(approaches[0].id, entry.id).toBe("default");
+      expect(approaches[0].approach, entry.id).toBe(entry.default);
+      expect(approaches[0].code.cpp, entry.id).toBeTruthy();
+      expect(approaches.slice(1).map((approach) => approach.approach), entry.id).toEqual(entry.alternatives);
+      expect(approaches.length, entry.id).toBeGreaterThanOrEqual(2);
+      expect(approaches.length, entry.id).toBeLessThanOrEqual(3);
+      expect(new Set(approaches.map((approach) => approach.id)).size, entry.id).toBe(approaches.length);
+      expect(new Set(approaches.map((approach) => approach.code.python.trim())).size, entry.id).toBe(approaches.length);
+      for (const approach of approaches.slice(1)) {
+        for (const section of ["How it works", "Steps", "Complexity"]) {
+          expect(approach.explanation, `${entry.id}: ${approach.id}`).toContain(`### ${section}`);
+        }
+        expect(approach.code.python, entry.id).toContain("class ");
+        expect(approach.code.cpp, entry.id).toBeUndefined();
+        expect(approach.sourceUrl, entry.id).toBe(reference.sourceUrl);
+        expect(approach.sourceUrl, entry.id).toContain(extendedApproachManifest.revision);
+        expect(approach.code.python, entry.id).not.toContain("sortedcontainers");
+        expect(approach.explanation, entry.id).not.toContain("::tabs-");
+        added++;
+      }
+    }
+    expect(added).toBe(743);
+  });
+  it("adds 127 further alternatives with accurate authored or source-specific attribution", async () => {
+    const catalog = await ensureExtendedCatalogLoaded();
+    const catalogIds = new Set(catalog.map((problem) => problem.id));
+    const priorIds = new Set([...approachManifest.problems, ...extendedApproachManifest.problems].map((entry) => entry.id));
+    expect(moreApproachManifest.problems).toHaveLength(127);
+    expect(new Set(moreApproachManifest.problems.map((entry) => entry.id)).size).toBe(127);
+    let authored = 0;
+    let adapted = 0;
+    for (const entry of moreApproachManifest.problems) {
+      expect(catalogIds.has(entry.id), entry.id).toBe(true);
+      expect(priorIds.has(entry.id), entry.id).toBe(false);
+      const reference = (await loadProblemReference(entry.id))!;
+      const approaches = getProblemApproaches(reference);
+      expect(approaches).toHaveLength(2);
+      expect(approaches[0].approach, entry.id).toBe(entry.default);
+      expect(approaches[0].code.cpp, entry.id).toBeTruthy();
+      const alternative = approaches[1];
+      expect(alternative.approach, entry.id).toBe(entry.alternatives[0].approach);
+      expect(alternative.code.python.trim(), entry.id).not.toBe(reference.code.python.trim());
+      expect(alternative.code.cpp, entry.id).toBeUndefined();
+      for (const section of ["How it works", "Steps", "Complexity"]) {
+        expect(alternative.explanation, entry.id).toContain(`### ${section}`);
+      }
+      expect(alternative.explanationAuthor, entry.id).toBe("LC Tracker");
+      expect(alternative.code.python, entry.id).not.toContain("sortedcontainers");
+      expect(alternative.code.python, entry.id).not.toContain("eval(");
+      if (entry.alternatives[0].kind === "authored") {
+        expect(alternative.codeAuthor, entry.id).toBe("LC Tracker");
+        expect(alternative.sourceUrl, entry.id).toBe(reference.sourceUrl);
+        expect(alternative.licenseUrl, entry.id).toBe(reference.licenseUrl ?? "/neetcode-license.txt");
+        authored++;
+      } else {
+        expect(alternative.codeAuthor, entry.id).toBeUndefined();
+        expect(alternative.sourceName, entry.id).toBe("walkccc / Peng-Yu Chen");
+        expect(alternative.sourceUrl, entry.id).toContain(`/blob/${moreApproachManifest.sourceRevision}/`);
+        expect(alternative.licenseUrl, entry.id).toBe("/walkccc-license.txt");
+        adapted++;
+      }
+    }
+    expect(authored).toBe(117);
+    expect(adapted).toBe(10);
+  });
+  it("adds 120 previously uncovered catalog problems with complete, distinct approaches", async () => {
+    const catalog = await ensureExtendedCatalogLoaded();
+    const catalogById = new Map(catalog.map((problem) => [problem.id, problem]));
+    const previousIds = new Set([...approachManifest.problems, ...extendedApproachManifest.problems, ...moreApproachManifest.problems, ...manifest.references].map((entry) => entry.id));
+    expect(catalogApproachManifest.problems).toHaveLength(120);
+    expect(catalogApproachManifest.problems.filter((entry) => entry.difficulty === "Medium")).toHaveLength(87);
+    expect(catalogApproachManifest.problems.filter((entry) => entry.difficulty === "Easy")).toHaveLength(33);
+    let authored = 0;
+    for (const entry of catalogApproachManifest.problems) {
+      expect(catalogById.has(entry.id), entry.id).toBe(true);
+      expect(previousIds.has(entry.id), entry.id).toBe(false);
+      const reference = (await loadProblemReference(entry.id))!;
+      const approaches = getProblemApproaches(reference);
+      expect(approaches).toHaveLength(2);
+      expect(reference.approach, entry.id).toBe(entry.default);
+      expect(reference.code.cpp, entry.id).toMatch(/class |struct /);
+      expect(reference.videoUrl, entry.id).toBe(catalogById.get(entry.id)!.videoUrl);
+      const alternative = approaches[1];
+      expect(alternative.approach, entry.id).toBe(entry.alternative.approach);
+      expect(alternative.code.cpp, entry.id).toBeUndefined();
+      expect(alternative.code.python.trim(), entry.id).not.toBe(reference.code.python.trim());
+      for (const approach of approaches) {
+        for (const section of ["How it works", "Steps", "Complexity"]) {
+          expect(approach.explanation, entry.id).toContain(`### ${section}`);
+        }
+        expect(approach.code.python, entry.id).toContain("class ");
+        expect(approach.code.python, entry.id).not.toContain("sortedcontainers");
+        expect(approach.code.python, entry.id).not.toContain("eval(");
+        expect(approach.sourceUrl, entry.id).toContain(catalogApproachManifest.revision);
+        expect(approach.sourceName, entry.id).toBe("walkccc / Peng-Yu Chen");
+        expect(approach.licenseUrl, entry.id).toBe("/walkccc-license.txt");
+        expect(approach.explanationAuthor, entry.id).toBe("LC Tracker");
+      }
+      if (entry.alternative.kind === "authored") {
+        expect(alternative.codeAuthor, entry.id).toBe("LC Tracker");
+        expect(alternative.sourceUrl, entry.id).toBe(reference.sourceUrl);
+        authored++;
+      } else {
+        expect(alternative.codeAuthor, entry.id).toBeUndefined();
+        expect(alternative.sourceUrl, entry.id).toContain(`/blob/${catalogApproachManifest.revision}/`);
+      }
+    }
+    expect(authored).toBe(108);
+  });
   it("provides coherent Python/C++ references for the supported extended catalog", async () => {
     const catalog = await ensureExtendedCatalogLoaded();
     const supported = catalog.filter((problem) => hasProblemReference(problem.id));
-    expect(supported).toHaveLength(586);
+    expect(supported).toHaveLength(706);
     for (const problem of supported) {
       const reference = await loadProblemReference(problem.id);
       expect(reference?.problemId).toBe(problem.id);

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int largestSubmatrix(vector<vector<int>>& matrix) {\n        int ROWS = matrix.size(), COLS = matrix[0].size(), res = 0;\n        vector<int> prevHeights;\n\n        for (int r = 0; r < ROWS; r++) {\n            vector<int> heights;\n\n            for (int c : prevHeights) {\n                if (matrix[r][c] == 1) {\n                    matrix[r][c] += matrix[r - 1][c];\n                    heights.push_back(c);\n                }\n            }\n\n            for (int c = 0; c < COLS; c++) {\n                if (matrix[r][c] == 1) {\n                    heights.push_back(c);\n                }\n            }\n\n            for (int i = 0; i < heights.size(); i++) {\n                res = max(res, (i + 1) * matrix[r][heights[i]]);\n            }\n\n            prevHeights = heights;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-submatrix-with-rearrangements.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-submatrix-with-rearrangements.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe can rearrange columns in any order, so the key is to find which columns can form a rectangle of all `1`s. For each starting row, we track which columns have continuous `1`s from that row downward. As we extend the rectangle row by row, columns with a `0` are eliminated. The area at each step is the number of surviving columns multiplied by the current height.\n\n### Steps\n\n1. For each starting row, initialize a set containing all column indices.\n2. Iterate through each subsequent row:\n    - Remove columns that have a `0` in the current row.\n    - Calculate the area as `(remaining columns) * (current height)`.\n    - Update the maximum area found.\n3. Return the maximum area.\n\n### Complexity\n\n- Time complexity: `O(m * n ^ 2)`\n- Space complexity: `O(n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def largestSubmatrix(self, matrix: List[List[int]]) -> int:\n        ROWS, COLS = len(matrix), len(matrix[0])\n        res = 0\n\n        for start_row in range(ROWS):\n            ones = deque(list(range(COLS)))\n\n            for r in range(start_row, ROWS):\n                if not ones:\n                    break\n                for _ in range(len(ones)):\n                    c = ones.popleft()\n                    if matrix[r][c] == 1:\n                        ones.append(c)\n\n                res = max(res, len(ones) * (r - start_row + 1))\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-submatrix-with-rearrangements.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Greedy + Sorting",
+      "explanation": "### How it works\n\nThink of each cell as the height of a bar extending upward through consecutive `1`s. For each row, compute these heights based on the previous row. Since we can rearrange columns, sort the heights in descending order. Then greedily compute the largest rectangle: the first column can use its full height, the first two columns are limited by the second height, and so on.\n\n### Steps\n\n1. Maintain a `heights` array tracking consecutive `1`s above each cell.\n2. For each row:\n    - Update heights: if the cell is `1`, add the previous height; otherwise reset to `0`.\n    - Sort heights in descending order.\n    - For each position `i`, compute area as `(i + 1) * heights[i]` and track the maximum.\n3. Return the maximum area found.\n\n### Complexity\n\n- Time complexity: `O(m * n log n)`\n- Space complexity: `O(n)`\n\n> Where `m` is the number of rows and `n` is the number of columns.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def largestSubmatrix(self, matrix: List[List[int]]) -> int:\n        ROWS, COLS = len(matrix), len(matrix[0])\n        res = 0\n        prev_heights = [0] * COLS\n\n        for r in range(ROWS):\n            heights = matrix[r][:]\n            for c in range(COLS):\n                if heights[c] > 0:\n                    heights[c] += prev_heights[c]\n\n            sorted_heights = sorted(heights, reverse=True)\n            for i in range(COLS):\n                res = max(res, (i + 1) * sorted_heights[i])\n\n            prev_heights = heights\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/largest-submatrix-with-rearrangements.md",
+      "id": "greedy-sorting"
+    }
+  ]
 }

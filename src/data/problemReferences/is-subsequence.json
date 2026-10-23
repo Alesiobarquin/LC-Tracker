@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool isSubsequence(string s, string t) {\n        int n = s.length(), m = t.length();\n        if (m == 0) return n == 0;\n\n        vector<vector<int>> store(m, vector<int>(26, m + 1));\n        store[m - 1][t[m - 1] - 'a'] = m - 1;\n\n        for (int i = m - 2; i >= 0; i--) {\n            store[i] = store[i + 1];\n            store[i][t[i] - 'a'] = i;\n        }\n\n        int i = 0, j = 0;\n        while (i < n && j < m) {\n            j = store[j][s[i] - 'a'] + 1;\n            if (j > m) return false;\n            i++;\n        }\n\n        return i == n;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=99RVfqklbCE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-subsequence.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-subsequence.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo check if `s` is a subsequence of `t`, we need to find all characters of `s` in `t` in the same order, though not necessarily contiguous. Recursively, we compare the current characters of both strings: if they match, we advance both pointers; if they do not match, we only advance the pointer in `t` to continue searching. The base cases are reaching the end of `s` (success) or the end of `t` before finishing `s` (failure).\n\n### Steps\n\n1. Define a recursive function `rec(i, j)` where `i` is the index in `s` and `j` is the index in `t`.\n2. Base cases:\n    - If `i == len(s)`, all characters matched, return `true`.\n    - If `j == len(t)`, ran out of characters in `t`, return `false`.\n3. If `s[i] == t[j]`, both characters match, so recurse with `rec(i + 1, j + 1)`.\n4. Otherwise, skip the current character in `t` and recurse with `rec(i, j + 1)`.\n5. Start with `rec(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the string `s` and `m` is the length of the string `t`.",
+      "code": {
+        "python": "class Solution:\n    def isSubsequence(self, s: str, t: str) -> bool:\n        def rec(i, j):\n            if i == len(s):\n                return True\n            if j == len(t):\n                return False\n\n            if s[i] == t[j]:\n                return rec(i + 1, j + 1)\n            return rec(i, j + 1)\n        return rec(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-subsequence.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution may recompute the same subproblems multiple times. By adding memoization, we cache the result for each `(i, j)` state so that each pair is computed at most once. This transforms the exponential worst case into a polynomial time solution while keeping the recursive structure intact.\n\n### Steps\n\n1. Create a 2D memo table initialized to `-1`.\n2. Define a recursive function `rec(i, j)`:\n    - Base cases same as before.\n    - If `memo[i][j]` is already computed, return the cached result.\n    - Compute the result based on whether characters match or not.\n    - Store the result in `memo[i][j]` and return it.\n3. Call `rec(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the length of the string `s` and `m` is the length of the string `t`.",
+      "code": {
+        "python": "class Solution:\n    def isSubsequence(self, s: str, t: str) -> bool:\n        n, m = len(s), len(t)\n        memo = [[-1] * m for _ in range(n)]\n\n        def rec(i, j):\n            if i == n:\n                return True\n            if j == m:\n                return False\n            if memo[i][j] != -1:\n                return memo[i][j] == 1\n            if s[i] == t[j]:\n                memo[i][j] = 1 if rec(i + 1, j + 1) else 0\n            else:\n                memo[i][j] = 1 if rec(i, j + 1) else 0\n            return memo[i][j] == 1\n\n        return rec(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/is-subsequence.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

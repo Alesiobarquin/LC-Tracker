@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* swapNodes(ListNode* head, int k) {\n        ListNode* left = nullptr;\n        ListNode* right = nullptr;\n        ListNode* cur = head;\n\n        while (cur) {\n            if (right) {\n                right = right->next;\n            }\n            if (k == 1) {\n                left = cur;\n                right = head;\n            }\n            k--;\n            cur = cur->next;\n        }\n\n        swap(left->val, right->val);\n        return head;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4LsrgMyQIjQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swapping-nodes-in-a-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swapping-nodes-in-a-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nConverting the linked list to an array gives us random access to any position. The `k`-th node from the beginning is at index `k-1`, and the `k`-th node from the end is at index `n-k` (where `n` is the length). After swapping values in the array, we simply copy them back to the original nodes. This approach is simple but uses extra space.\n\n### Steps\n\n1. Traverse the linked list and store all values in an array.\n2. Swap the values at positions `k-1` and `n-k`.\n3. Traverse the linked list again, updating each node's value from the array.\n4. Return the head.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def swapNodes(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:\n        arr = []\n        cur = head\n        while cur:\n            arr.append(cur.val)\n            cur = cur.next\n\n        n = len(arr)\n        arr[k - 1], arr[n - k] = arr[n - k], arr[k - 1]\n\n        cur, i = head, 0\n        while cur:\n            cur.val = arr[i]\n            cur = cur.next\n            i += 1\n\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swapping-nodes-in-a-linked-list.md",
+      "id": "convert-to-array"
+    },
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nRecursion naturally gives us access to positions from both ends. As we recurse, we can count from the start (using a variable incremented before the recursive call) to find the `k`-th node from the beginning. The recursive call returns a count from the end, allowing us to identify the `k`-th node from the end. Once both nodes are found, we swap their values.\n\n### Steps\n\n1. Use a recursive helper that tracks position from the start via a counter incremented on each call.\n2. When the start counter equals k, save a reference to the current node as `left`.\n3. The recursion returns the position from the end (incrementing on return).\n4. When the end position equals k, save a reference to the current node as `right`.\n5. After recursion completes, swap the values of `left` and `right`.\n6. Return the head.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def swapNodes(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:\n        left, right, startIdx = None, None, 0\n\n        def dfs(node):\n            nonlocal left, right, startIdx\n            if not node:\n                return 0\n\n            startIdx += 1\n            if startIdx == k:\n                left = node\n\n            endIdx = dfs(node.next) + 1\n            if endIdx == k:\n                right = node\n\n            return endIdx\n\n        dfs(head)\n        if left and right:\n            left.val, right.val = right.val, left.val\n\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/swapping-nodes-in-a-linked-list.md",
+      "id": "recursion"
+    }
+  ]
 }

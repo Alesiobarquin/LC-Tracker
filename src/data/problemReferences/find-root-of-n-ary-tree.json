@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    Node* findRoot(vector<Node*> tree) {\n        int value_sum = 0;\n\n        for (Node* node : tree) {\n            // the value is added as a parent node\n            value_sum += node->val;\n            for (Node* child : node->children) {\n                // the value is deducted as a child node.\n                value_sum -= child->val;\n            }\n        }\n\n        // the value of the root node is `value_sum`\n        for (Node* node : tree) {\n            if (node->val == value_sum) {\n                return node;\n            }\n        }\n        return nullptr;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-root-of-n-ary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-root-of-n-ary-tree.md",
+  "alternatives": [
+    {
+      "approach": "O(n) Space",
+      "explanation": "### How it works\n\nThe root of a tree is the only node that is never a child of any other node. By collecting all child nodes into a set, we can identify the root as the node whose value does not appear in the set. Every non-root node will appear exactly once as someone's child, but the root never will.\n\n### Steps\n\n1. Create a set to store all child node values.\n2. Iterate through every node in the tree and add all of its children's values to the set.\n3. Iterate through the tree again and find the node whose value is not in the `seen` set.\n4. Return that node as the root.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the length of the input list, which is also the number of nodes in the N-ary tree.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findRoot(self, tree: List['Node']) -> 'Node':\n        # set that contains all the child nodes.\n        seen = set()\n\n        # add all the child nodes into the set\n        for node in tree:\n            for child in node.children:\n                # we could either add the value or the node itself.\n                seen.add(child.val)\n\n        # find the node that is not in the child node set.\n        for node in tree:\n            if node.val not in seen:\n                return node\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-root-of-n-ary-tree.md",
+      "id": "o-n-space"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/264.%20Ugly%20Number%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "min-heap-generation",
+      "approach": "Min-Heap Generation",
+      "explanation": "### How it works\n\nEvery ugly number after one is an earlier ugly number multiplied by two, three, or five. A min-heap emits them in increasing order, and a set prevents duplicate products.\n\n### Steps\n\n1. Seed the heap and seen set with one.\n2. Pop the next smallest number n times.\n3. Insert unseen products with two, three, and five.\n4. Return the last popped number.\n\n### Complexity\n\n- Time: `O(n log n)` fixed-width heap operations.\n- Space: `O(n)` for the heap and seen set.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/264.%20Ugly%20Number%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from heapq import heappop, heappush\n\nclass Solution:\n    def nthUglyNumber(self, n: int) -> int:\n        heap, seen = [1], {1}\n        value = 1\n        for _ in range(n):\n            value = heappop(heap)\n            for prime in (2, 3, 5):\n                candidate = value * prime\n                if candidate not in seen:\n                    seen.add(candidate)\n                    heappush(heap, candidate)\n        return value\n"
+      }
+    }
+  ]
 }

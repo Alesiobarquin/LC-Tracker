@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long distributeCandies(int n, int limit) {\n        int C3[4] = {1, 3, 3, 1};\n        long long res = 0;\n        for (int j = 0; j < 4; j++) {\n            long long m = n - j * (limit + 1);\n            if (m < 0) continue;\n            long long ways = (m + 2) * (m + 1) / 2;\n            int sign = (j % 2 == 0 ? 1 : -1);\n            res += sign * C3[j] * ways;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/distribute-candies-among-children-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/distribute-candies-among-children-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to try every possible combination of candies for the three children. We iterate through all values for child A, child B, and child C (each from `0` to the `limit`), and count only those combinations where the total equals exactly `n` candies. While simple to understand, this method checks many invalid combinations.\n\n### Steps\n\n1. Initialize a counter `res` to `0`.\n2. Use three nested loops to iterate through all possible candy amounts for each child (`0` to `limit`).\n3. For each combination `(a, b, c)`, check if `a + b + c == n`.\n4. If `true`, increment the counter.\n5. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(l ^ 3)`\n- Space complexity: `O(1)`\n\n> Where `l` is the given limit.",
+      "code": {
+        "python": "class Solution:\n    def distributeCandies(self, n: int, limit: int) -> int:\n        res = 0\n        for a in range(limit + 1):\n            for b in range(limit + 1):\n                for c in range(limit + 1):\n                    if a + b + c == n:\n                        res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/distribute-candies-among-children-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Better Approach",
+      "explanation": "### How it works\n\nWe can reduce unnecessary iterations by fixing the first child's amount and only looping through valid values for the second child. Once we know how many candies child A and child B receive, child C's amount is determined: `c = n - a - b`. We simply check if this value is within the allowed `limit`.\n\n### Steps\n\n1. Initialize a counter `res` to `0`.\n2. Loop through possible values for `a` from `0` to `min(n, limit)`.\n3. For each `a`, loop through possible values for `b` from `0` to `min(n - a, limit)`.\n4. Calculate `c = n - a - b`. If `c <= limit`, increment the counter.\n5. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(min(n, limit) ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def distributeCandies(self, n: int, limit: int) -> int:\n        res = 0\n        for a in range(min(n, limit) + 1):\n            for b in range(min(n - a, limit) + 1):\n                if n - a - b <= limit:\n                    res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/distribute-candies-among-children-ii.md",
+      "id": "better-approach"
+    }
+  ]
 }

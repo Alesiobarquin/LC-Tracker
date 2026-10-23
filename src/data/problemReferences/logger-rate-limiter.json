@@ -1,0 +1,28 @@
+{
+  "problemId": "logger-rate-limiter",
+  "approach": "Expiring Queue and Active Set",
+  "explanation": "### How it works\n\nKeep only messages printed within the last ten seconds. Ordered timestamps allow expired queue entries to be removed from both the queue and the membership set.\n\n### Steps\n\n1. Remove printed messages whose timestamps are at least ten seconds old.\n2. Reject a message still in the active set.\n3. Otherwise append its timestamp and add it to the set.\n\n### Complexity\n\n- Time: Expected amortized O(1) per call; a single call may remove O(w) entries.\n- Space: O(w) active messages within the ten-second window.\n\n### Things to watch for\n\n- Timestamps arrive in nondecreasing order.\n- A rejected message does not extend its suppression window.",
+  "code": {
+    "python": "import collections\n\nclass Logger:\n  def __init__(self):\n    # [(timestamp, message)]\n    self.messageQueue = collections.deque()\n    self.messageSet = set()\n\n  def shouldPrintMessage(self, timestamp: int, message: str) -> bool:\n    # Remove the messages that are 10 seconds from the current timestamp.\n    while self.messageQueue:\n      headTimestamp, headMessage = self.messageQueue[0]\n      if timestamp < headTimestamp + 10:\n        break\n      self.messageQueue.popleft()\n      self.messageSet.remove(headMessage)\n\n    if message in self.messageSet:\n      return False\n\n    self.messageQueue.append((timestamp, message))\n    self.messageSet.add(message)\n    return True\n",
+    "cpp": "class Logger {\n public:\n  bool shouldPrintMessage(int timestamp, string message) {\n    // Remove the messages that are 10 seconds from the current timestamp.\n    while (!messageQueue.empty()) {\n      const auto [headTimestamp, headMessage] = messageQueue.front();\n      if (timestamp < headTimestamp + 10)\n        break;\n      messageQueue.pop_front();\n      messageSet.erase(headMessage);\n    }\n\n    if (messageSet.contains(message))\n      return false;\n\n    messageQueue.emplace_back(timestamp, message);\n    messageSet.insert(message);\n    return true;\n  }\n\n private:\n  // [(timestamp, message)]\n  deque<pair<int, string>> messageQueue;\n  unordered_set<string> messageSet;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/359.%20Logger%20Rate%20Limiter",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "next-allowed-timestamp-map",
+      "approach": "Next-Allowed Timestamp Map",
+      "explanation": "### How it works\n\nStore the earliest timestamp when each message may be printed again. This removes expiry processing in exchange for retaining entries for old messages.\n\n### Steps\n\n1. Look up the message's next allowed timestamp.\n2. Reject an earlier timestamp.\n3. On success, replace the allowed time with timestamp + 10.\n\n### Complexity\n\n- Time: Expected O(1) per call.\n- Space: O(u) for all distinct messages seen.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/359.%20Logger%20Rate%20Limiter/359-2.py",
+      "code": {
+        "python": "class Logger:\n  def __init__(self):\n    self.okTime = {}  # {message: ok time}\n\n  def shouldPrintMessage(self, timestamp: int, message: str) -> bool:\n    if timestamp < self.okTime.get(message, 0):\n      return False\n\n    self.okTime[message] = timestamp + 10\n    return True\n"
+      }
+    }
+  ]
+}

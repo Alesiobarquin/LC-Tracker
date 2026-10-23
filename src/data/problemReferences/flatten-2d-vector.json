@@ -1,0 +1,29 @@
+{
+  "problemId": "flatten-2d-vector",
+  "approach": "Eager Flattening",
+  "explanation": "### How it works\n\nCopy all row contents into one array during construction. Iteration then needs only one index, and empty rows disappear naturally.\n\n### Steps\n\n1. Append every row into a flat array.\n2. Keep an index for the next unread item.\n3. Return and advance on next.\n4. Compare the index with the flat array length on hasNext.\n\n### Complexity\n\n- Time: O(N + r) construction for N values and r rows; O(1) per operation.\n- Space: O(N) copied values.",
+  "code": {
+    "python": "class Vector2D:\n  def __init__(self, vec: list[list[int]]):\n    self.vec = []\n    self.i = 0\n\n    for arr in vec:\n      self.vec += arr\n\n  def next(self) -> int:\n    ans = self.vec[self.i]\n    self.i += 1\n    return ans\n\n  def hasNext(self) -> bool:\n    return self.i < len(self.vec)\n",
+    "cpp": "class Vector2D {\n public:\n  Vector2D(vector<vector<int>>& vec) {\n    for (const vector<int>& arr : vec)\n      for (const int a : arr)\n        this->vec.push_back(a);\n  }\n\n  int next() {\n    return vec[i++];\n  }\n\n  bool hasNext() {\n    return i < vec.size();\n  }\n\n private:\n  vector<int> vec;\n  int i = 0;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/251.%20Flatten%202D%20Vector",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "lazy-row-and-column-cursors",
+      "approach": "Lazy Row and Column Cursors",
+      "explanation": "### How it works\n\nKeep the original rows and advance across empty or exhausted rows only when needed. This avoids copying the contents.\n\n### Steps\n\n1. Store the input and two cursor indices.\n2. Normalize the cursor by skipping exhausted rows.\n3. On next, read the current item and advance the column.\n4. Let repeated hasNext calls preserve the same unread item.\n\n### Complexity\n\n- Time: O(1) construction; O(N + r) total traversal, with O(r) worst-case for one skip.\n- Space: O(1) auxiliary space, retaining the input.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/251.%20Flatten%202D%20Vector",
+      "code": {
+        "python": "class Vector2D:\n    def __init__(self, vec: list[list[int]]):\n        self.rows = vec\n        self.row = self.column = 0\n\n    def hasNext(self) -> bool:\n        while self.row < len(self.rows) and self.column == len(self.rows[self.row]):\n            self.row += 1\n            self.column = 0\n        return self.row < len(self.rows)\n\n    def next(self) -> int:\n        if not self.hasNext():\n            raise StopIteration\n        value = self.rows[self.row][self.column]\n        self.column += 1\n        return value\n"
+      }
+    }
+  ]
+}

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/328.%20Odd%20Even%20Linked%20List",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "collect-and-relink-nodes",
+      "approach": "Collect and Relink Nodes",
+      "explanation": "### How it works\n\nStore original nodes in traversal order, then concatenate odd-position nodes with even-position nodes. Relinking these objects preserves their values and identity with extra workspace.\n\n### Steps\n\n1. Collect nodes without changing links.\n2. Order odd positions before even positions.\n3. Reconnect adjacent nodes and terminate the final next pointer.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(n)` auxiliary space for node references.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/328.%20Odd%20Even%20Linked%20List",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        nodes = []\n        while head:\n            nodes.append(head)\n            head = head.next\n        ordered = nodes[::2] + nodes[1::2]\n        for i, node in enumerate(ordered):\n            node.next = ordered[i + 1] if i + 1 < len(ordered) else None\n        return ordered[0] if ordered else None\n"
+      }
+    }
+  ]
 }

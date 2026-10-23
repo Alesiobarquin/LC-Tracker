@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minCost(string colors, vector<int>& neededTime) {\n        int res = 0, maxi = 0;\n        for (int i = 0; i < colors.size(); i++) {\n            if (i > 0 && colors[i] != colors[i - 1]) {\n                maxi = 0;\n            }\n            res += min(maxi, neededTime[i]);\n            maxi = max(maxi, neededTime[i]);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-time-to-make-rope-colorful.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-time-to-make-rope-colorful.md",
+  "alternatives": [
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nThe goal is to remove consecutive balloons of the same color such that no two adjacent balloons share a color. When we find a group of consecutive same-colored balloons, we need to keep exactly one and remove the rest. To minimize the total removal time, we should keep the balloon with the highest removal cost and remove all others.\n\n### Steps\n\n1. Initialize `res = 0` and `i = 0`.\n2. While `i < n`:\n    - Find all consecutive balloons with the same color starting at `i`.\n    - Track the sum of removal times (`curr`) and the maximum removal time (`maxi`) in this group.\n    - Add `curr - maxi` to `res` (we keep the most expensive one, remove the rest).\n    - Move `i` to the next group.\n3. Return `res` as the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCost(self, colors: str, neededTime: List[int]) -> int:\n        n = len(neededTime)\n        res = i = 0\n        while i < n:\n            j = i\n            maxi = curr = 0\n            while j < n and colors[j] == colors[i]:\n                maxi = max(maxi, neededTime[j])\n                curr += neededTime[j]\n                j += 1\n            res += curr - maxi\n            i = j\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-time-to-make-rope-colorful.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

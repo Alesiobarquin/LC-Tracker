@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> missingRolls(vector<int>& rolls, int mean, int n) {\n        int m = rolls.size();\n        int nTotal = (mean * (n + m)) - accumulate(rolls.begin(), rolls.end(), 0);\n\n        if (nTotal < n || nTotal > n * 6) {\n            return {};\n        }\n\n        int avg = nTotal / n;\n        int rem = nTotal - (avg * n);\n        vector<int> res;\n\n        for (int i = 0; i < n - rem; ++i) {\n            res.push_back(avg);\n        }\n        for (int i = 0; i < rem; ++i) {\n            res.push_back(avg + 1);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=86yKkaNi3sU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-observations.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-observations.md",
+  "alternatives": [
+    {
+      "approach": "Math - I",
+      "explanation": "### How it works\n\nWe know the target mean and the sum of the existing rolls. From this, we can calculate the total sum needed for all `n + m` dice, and therefore the sum required for the `n` missing dice. If this required sum is impossible (less than `n` or greater than `6 * n`), no valid solution exists. Otherwise, we greedily assign values to each die, giving each one as high a value as possible while ensuring the remaining dice can still reach at least `1` each.\n\n### Steps\n\n1. Calculate the required sum for the `n` missing dice: `nTotal = mean * (n + m) - sum(rolls)`.\n2. If `nTotal < n` or `nTotal > 6 * n`, return an empty array (no valid solution).\n3. For each of the `n` missing dice:\n    - Assign the maximum possible value while leaving enough for the remaining dice to each have at least `1`.\n    - The value is `min(nTotal - (remaining dice) + 1, 6)`.\n    - Subtract this value from `nTotal` and decrement the remaining count.\n4. Return the constructed result array.\n\n### Complexity\n\n- Time complexity: `O(m + n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output array.\n\n> Where `m` is the size of the array `rolls` and `n` is the number of missing observations.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def missingRolls(self, rolls: List[int], mean: int, n: int) -> List[int]:\n        m = len(rolls)\n        nTotal = (mean * (n + m)) - sum(rolls)\n\n        if nTotal < n or nTotal > n * 6:\n            return []\n\n        res = []\n        while nTotal:\n            dice = min(nTotal - n + 1, 6)\n            res.append(dice)\n            nTotal -= dice\n            n -= 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-observations.md",
+      "id": "math-i"
+    }
+  ]
 }

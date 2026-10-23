@@ -1,0 +1,29 @@
+{
+  "problemId": "teemo-attacking",
+  "approach": "Cap Each Consecutive Gap",
+  "explanation": "### How it works\n\nBefore the next attack, the current poison contributes at most duration seconds and at most the gap to that next attack. The final attack contributes its full duration.\n\n### Steps\n\n1. Handle zero duration.\n2. Sum the smaller of each consecutive timestamp gap and duration.\n3. Add duration for the final attack.\n\n### Complexity\n\n- Time: O(n) for n attacks.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def findPoisonedDuration(self, timeSeries: list[int], duration: int) -> int:\n    if duration == 0:\n      return 0\n\n    ans = 0\n\n    for i in range(0, len(timeSeries) - 1):\n      ans += min(timeSeries[i + 1] - timeSeries[i], duration)\n\n    return ans + duration\n",
+    "cpp": "class Solution {\n public:\n  int findPoisonedDuration(vector<int>& timeSeries, int duration) {\n    if (duration == 0)\n      return 0;\n\n    int ans = 0;\n\n    for (int i = 0; i + 1 < timeSeries.size(); ++i)\n      ans += min(timeSeries[i + 1] - timeSeries[i], duration);\n\n    return ans + duration;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/495.%20Teemo%20Attacking",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "union-poison-intervals",
+      "approach": "Union Poison Intervals",
+      "explanation": "### How it works\n\nTreat each attack as the half-open interval [time, time + duration). Maintain the union length while extending the end of the current poisoned interval.\n\n### Steps\n\n1. Keep the end of the poison union processed so far.\n2. For each attack, start newly counted time after both its timestamp and the previous end.\n3. Add only its uncovered suffix.\n4. Advance the ending timestamp.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/495.%20Teemo%20Attacking",
+      "code": {
+        "python": "class Solution:\n    def findPoisonedDuration(self, timeSeries: list[int], duration: int) -> int:\n        total, end = 0, 0\n        for time in timeSeries:\n            finish = time + duration\n            total += max(0, finish - max(time, end))\n            end = max(end, finish)\n        return total\n"
+      }
+    }
+  ]
+}

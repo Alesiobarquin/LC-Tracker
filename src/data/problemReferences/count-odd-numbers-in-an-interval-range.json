@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countOdds(int low, int high) {\n        return ((high + 1) >> 1) - (low >> 1);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=wrIWye928JQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-odd-numbers-in-an-interval-range.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-odd-numbers-in-an-interval-range.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to iterate through every number in the range and check if it is odd. We count all numbers where the least significant bit is 1.\n\n### Steps\n\n1. Initialize a counter for odd numbers.\n2. Loop through every integer from `low` to `high` (inclusive).\n3. For each number, check if it is odd using bitwise AND with `1`.\n4. If odd, increment the counter.\n5. Return the final count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n> Where `n` is the number of integers in the given range.",
+      "code": {
+        "python": "class Solution:\n    def countOdds(self, low: int, high: int) -> int:\n        odd = 0\n        for num in range(low, high + 1):\n            if num & 1:\n                odd += 1\n        return odd\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-odd-numbers-in-an-interval-range.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Math",
+      "explanation": "### How it works\n\nIn any range of consecutive integers, odd and even numbers alternate. In a range of length `n`, there are `n/2` odd numbers if `n` is even. If `n` is odd, the count depends on whether the range starts with an odd number. Starting with odd gives one extra odd number.\n\n### Steps\n\n1. Calculate the length of the range: `high - low + 1`.\n2. The base count of odd numbers is `length / 2`.\n3. If the length is odd and the starting number (`low`) is odd, add `1` to include the extra odd.\n4. Return the count.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def countOdds(self, low: int, high: int) -> int:\n        length = high - low + 1\n        count = length // 2\n        if length % 2 and low % 2:\n            count += 1\n        return count\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-odd-numbers-in-an-interval-range.md",
+      "id": "math"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/386.%20Lexicographical%20Numbers",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-decimal-representations",
+      "approach": "Sort Decimal Representations",
+      "explanation": "### How it works\n\nLexicographical number order is string order on decimal representations. Sorting integers by those strings gives a baseline for walking the decimal-prefix tree.\n\n### Steps\n\n1. Enumerate integers one through n.\n2. Use decimal strings as sorting keys.\n3. Return the sorted integers.\n\n### Complexity\n\n- Time: `O(n × D × log n)` as an upper bound for D decimal digits per key.\n- Space: `O(n × D)` including keys and output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/386.%20Lexicographical%20Numbers",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def lexicalOrder(self, n: int) -> list[int]:\n        return sorted(range(1, n + 1), key=str)\n"
+      }
+    }
+  ]
 }

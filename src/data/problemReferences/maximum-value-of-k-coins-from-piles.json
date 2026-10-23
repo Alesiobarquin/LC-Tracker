@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxValueOfCoins(vector<vector<int>>& piles, int k) {\n        vector<int> dp(k + 1, 0);\n\n        for (const auto& pile : piles) {\n            for (int coins = k; coins >= 1; coins--) {\n                int curPile = 0;\n                for (int j = 0; j < min(coins, (int)pile.size()); j++) {\n                    curPile += pile[j];\n                    dp[coins] = max(dp[coins], dp[coins - (j + 1)] + curPile);\n                }\n            }\n        }\n\n        return dp[k];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ZRdEd_eun8g",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-value-of-k-coins-from-piles.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-value-of-k-coins-from-piles.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to pick exactly `k` coins from the tops of various piles to maximize total value. For each pile, we can take zero or more coins from the top, but once we move to the next pile, we cannot return. This naturally suggests a recursive approach: at each pile, try all possible numbers of coins to take (from zero up to the pile size or remaining coins), then recurse on the next pile with fewer coins left to pick. The answer is the maximum across all choices.\n\n### Steps\n\n1. Define a recursive function `dfs(i, coins)` that returns the maximum value starting from pile `i` with `coins` remaining.\n2. Base case: if `i` == `n`, return `0` (no more piles).\n3. First, consider skipping the current pile entirely: `res` = `dfs(i + 1, coins)`.\n4. Then, for each `j` from `0` to `min(coins, len(piles[i]))` - `1`:\n    - Accumulate the sum of the top `j` + `1` coins from pile `i`.\n    - Update `res` with `curPile` + `dfs(i + 1, coins - (j + 1))`.\n5. Return `res`.\n6. Call `dfs(0, k)` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(k ^ n)`\n- Space complexity: `O(n)` for the recursion stack.\n\n> Where `n` is the number of piles and `k` is the number of coins to choose.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxValueOfCoins(self, piles: List[List[int]], k: int) -> int:\n        n = len(piles)\n\n        def dfs(i, coins):\n            if i == n:\n                return 0\n\n            res = dfs(i + 1, coins)  # skip current pile\n            curPile = 0\n            for j in range(min(coins, len(piles[i]))):\n                curPile += piles[i][j]\n                res = max(res, curPile + dfs(i + 1, coins - (j + 1)))\n            return res\n\n        return dfs(0, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-value-of-k-coins-from-piles.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe plain recursive solution recomputes the same subproblems many times. We can add memoization by storing results for each state `(pile index, remaining coins)`. Once a state is computed, we return the cached result instead of recomputing. This reduces exponential time complexity to polynomial.\n\n### Steps\n\n1. Create a 2D array `dp` of size `n` x `(k + 1)`, initialized to `-1`.\n2. Define `dfs(i, coins)` as before, but before computing, check if `dp[i][coins]` is already computed. If so, return it.\n3. Compute the result as in the recursive approach.\n4. Store the result in `dp[i][coins]` before returning.\n5. Call `dfs(0, k)` as the final answer.\n\n### Complexity\n\n- Time complexity: `O(m * k)`\n- Space complexity: `O(n * k)`\n\n> Where `n` is the number of piles, `k` is the number of coins to choose, and `m` is the total number of coins among all the piles.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxValueOfCoins(self, piles: List[List[int]], k: int) -> int:\n        n = len(piles)\n        dp = [[-1] * (k + 1) for _ in range(n)]\n\n        def dfs(i, coins):\n            if i == n:\n                return 0\n            if dp[i][coins] != -1:\n                return dp[i][coins]\n\n            dp[i][coins] = dfs(i + 1, coins)  # skip current pile\n            curPile = 0\n            for j in range(min(coins, len(piles[i]))):\n                curPile += piles[i][j]\n                dp[i][coins] = max(dp[i][coins], curPile + dfs(i + 1, coins - (j + 1)))\n            return dp[i][coins]\n\n        return dfs(0, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-value-of-k-coins-from-piles.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/532.%20K-diff%20Pairs%20in%20an%20Array",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-and-advance-two-pointers",
+      "approach": "Sort and Advance Two Pointers",
+      "explanation": "### How it works\n\nSort values and compare the difference between two positions. Move the right pointer to increase that difference or the left pointer to decrease it, skipping repeated first values after a match.\n\n### Steps\n\n1. Sort the values and start two distinct pointers.\n2. Move right when the difference is too small and left when too large.\n3. Count a match once, then skip its repeated first value.\n4. Keep the two pointers distinct.\n\n### Complexity\n\n- Time: `O(n log n)` time.\n- Space: `O(n)` worst-case Python sorting workspace.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/532.%20K-diff%20Pairs%20in%20an%20Array",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findPairs(self, nums: list[int], k: int) -> int:\n        if k < 0:\n            return 0\n        nums.sort()\n        left, right, count = 0, 1, 0\n        while right < len(nums):\n            if left == right or nums[right] - nums[left] < k:\n                right += 1\n            elif nums[right] - nums[left] > k:\n                left += 1\n            else:\n                count += 1\n                value = nums[left]\n                while left < len(nums) and nums[left] == value:\n                    left += 1\n                right = max(right, left + 1)\n        return count\n"
+      }
+    }
+  ]
 }

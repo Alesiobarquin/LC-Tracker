@@ -1,0 +1,29 @@
+{
+  "problemId": "knight-probability-in-chessboard",
+  "approach": "Rolling Survival Probabilities",
+  "explanation": "### How it works\n\nThe board array stores the probability of being at each square without having left the board. Each move distributes one eighth of every current probability to valid knight destinations; off-board probability is discarded.\n\n### Steps\n\n1. Place probability one at the starting square.\n2. Build a fresh board using the eight knight offsets and one-eighth contributions.\n3. Repeat for k moves.\n4. Sum the surviving board probabilities.\n\n### Complexity\n\n- Time: O(k × n²).\n- Space: O(n²) rolling probability arrays.",
+  "code": {
+    "python": "class Solution:\n  def knightProbability(self, n: int, k: int, row: int, column: int) -> float:\n    DIRS = ((1, 2), (2, 1), (2, -1), (1, -2),\n            (-1, -2), (-2, -1), (-2, 1), (-1, 2))\n    # dp[i][j] := the probability to stand on (i, j)\n    dp = [[0] * n for _ in range(n)]\n    dp[row][column] = 1.0\n\n    for _ in range(k):\n      newDp = [[0] * n for _ in range(n)]\n      for i in range(n):\n        for j in range(n):\n          for dx, dy in DIRS:\n            x = i + dx\n            y = j + dy\n            if 0 <= x < n and 0 <= y < n:\n              newDp[i][j] += dp[x][y] / 8\n      dp = newDp\n\n    return sum(map(sum, dp))\n",
+    "cpp": "class Solution {\n public:\n  double knightProbability(int n, int k, int row, int column) {\n    constexpr int kDirs[8][2] = {{1, 2},   {2, 1},   {2, -1}, {1, -2},\n                                 {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};\n    constexpr double kProb = 0.125;\n    // dp[i][j] := the probability to stand on (i, j)\n    vector<vector<double>> dp(n, vector<double>(n));\n    dp[row][column] = 1.0;\n\n    for (int move = 0; move < k; ++move) {\n      vector<vector<double>> newDp(n, vector<double>(n));\n      for (int i = 0; i < n; ++i)\n        for (int j = 0; j < n; ++j)\n          if (dp[i][j] > 0.0) {\n            for (const auto& [dx, dy] : kDirs) {\n              const int x = i + dx;\n              const int y = j + dy;\n              if (x < 0 || x >= n || y < 0 || y >= n)\n                continue;\n              newDp[x][y] += dp[i][j] * kProb;\n            }\n          }\n      dp = std::move(newDp);\n    }\n\n    return accumulate(dp.begin(), dp.end(), 0.0,\n                      [](double acc, const vector<double>& row) {\n      return acc + accumulate(row.begin(), row.end(), 0.0);\n    });\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/688.%20Knight%20Probability%20in%20Chessboard",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "memoized-survival-probability",
+      "approach": "Memoized Survival Probability",
+      "explanation": "### How it works\n\nThe chance of remaining on the board depends on the current square and moves remaining. Average the eight successor probabilities, counting off-board moves as zero.\n\n### Steps\n\n1. Return zero immediately for an off-board square.\n2. Return one when no moves remain on board.\n3. Average the eight recursive successor probabilities.\n4. Memoize each square and remaining-move state.\n\n### Complexity\n\n- Time: O(k × n²).\n- Space: O(k × n²) cached states and O(k) recursion.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/688.%20Knight%20Probability%20in%20Chessboard",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def knightProbability(self, n: int, k: int, row: int, column: int) -> float:\n        moves = [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]\n        @cache\n        def probability(r, c, remaining):\n            if not (0 <= r < n and 0 <= c < n):\n                return 0.0\n            if remaining == 0:\n                return 1.0\n            return sum(probability(r + dr, c + dc, remaining - 1) for dr, dc in moves) / 8\n        return probability(row, column, k)\n"
+      }
+    }
+  ]
+}

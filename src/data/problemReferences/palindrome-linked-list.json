@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    bool isPalindrome(ListNode* head) {\n        ListNode *fast = head, *slow = head;\n\n        // find middle (slow)\n        while (fast && fast->next) {\n            fast = fast->next->next;\n            slow = slow->next;\n        }\n\n        // reverse second half\n        ListNode *prev = nullptr;\n        while (slow) {\n            ListNode *tmp = slow->next;\n            slow->next = prev;\n            prev = slow;\n            slow = tmp;\n        }\n\n        // check palindrome\n        ListNode *left = head, *right = prev;\n        while (right) {\n            if (left->val != right->val) {\n                return false;\n            }\n            left = left->next;\n            right = right->next;\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=yOzXms1J6Nk",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nA palindrome reads the same forwards and backwards. Linked lists only allow forward traversal, making direct comparison difficult. The simplest approach is to convert the linked list to an array where we can use random access.\n\nOnce we have an array, we can use two pointers from both ends moving toward the center, comparing values as we go.\n\n### Steps\n\n1. Traverse the linked list and store all node values in an array.\n2. Initialize two pointers: `left` at the start and `right` at the end of the array.\n3. While `left < right`, compare `arr[left]` and `arr[right]`. If they differ, return `false`.\n4. Move `left` forward and `right` backward after each comparison.\n5. If all comparisons pass, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def isPalindrome(self, head: Optional[ListNode]) -> bool:\n        arr = []\n        cur = head\n        while cur:\n            arr.append(cur.val)\n            cur = cur.next\n\n        l, r = 0, len(arr) - 1\n        while l < r:\n            if arr[l] != arr[r]:\n                return False\n            l, r = l + 1, r - 1\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-linked-list.md",
+      "id": "convert-to-array"
+    },
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nWe can use recursion to simulate traversing from the end of the list. By recursing to the end first and comparing on the way back, we effectively compare nodes from both ends simultaneously.\n\nWe maintain a pointer starting at the head. As recursion unwinds from the tail, we compare each node with the head pointer and advance the head pointer after each match.\n\n### Steps\n\n1. Initialize a pointer `cur` at the head of the list.\n2. Define a recursive function `rec(node)` that:\n    - Returns `true` if `node` is `null` (base case).\n    - Recursively calls `rec(node.next)` first to reach the end.\n    - Compares `cur.val` with `node.val`. If they differ, return `false`.\n    - Advances `cur` to the next node.\n    - Returns `true` if all comparisons pass.\n3. Call `rec(head)` and return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def isPalindrome(self, head: Optional[ListNode]) -> bool:\n        self.cur = head\n\n        def rec(node):\n            if node is not None:\n                if not rec(node.next):\n                    return False\n                if self.cur.val != node.val:\n                    return False\n                self.cur = self.cur.next\n            return True\n\n        return rec(head)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/palindrome-linked-list.md",
+      "id": "recursion"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "maximum-binary-tree",
+  "approach": "Recursive Maximum Selection",
+  "explanation": "### How it works\n\nThe largest value becomes the subtree root. Values before and after it recursively form the left and right subtrees.\n\n### Steps\n\n1. Find the maximum in the current interval.\n2. Create its root node.\n3. Recurse on intervals before and after its index.\n4. Return the root, or null for an empty interval.\n\n### Complexity\n\n- Time: O(n²) worst case from repeated scans and index searches.\n- Space: O(n) worst-case recursion and temporary slices, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def constructMaximumBinaryTree(self, nums: list[int]) -> TreeNode | None:\n    def build(i: int, j: int) -> TreeNode | None:\n      if i > j:\n        return None\n\n      maxNum = max(nums[i:j + 1])\n      maxIndex = nums.index(maxNum)\n\n      root = TreeNode(maxNum)\n      root.left = build(i, maxIndex - 1)\n      root.right = build(maxIndex + 1, j)\n      return root\n\n    return build(0, len(nums) - 1)\n",
+    "cpp": "class Solution {\n public:\n  TreeNode* constructMaximumBinaryTree(vector<int>& nums) {\n    return build(nums, 0, nums.size() - 1);\n  }\n\n private:\n  TreeNode* build(const vector<int>& nums, int i, int j) {\n    if (i > j)\n      return nullptr;\n\n    const auto it = max_element(nums.begin() + i, nums.begin() + j + 1);\n    const int maxNum = *it;\n    const int maxIndex = it - nums.begin();\n\n    TreeNode* root = new TreeNode(maxNum);\n    root->left = build(nums, i, maxIndex - 1);\n    root->right = build(nums, maxIndex + 1, j);\n    return root;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/654.%20Maximum%20Binary%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "decreasing-monotonic-stack",
+      "approach": "Decreasing Monotonic Stack",
+      "explanation": "### How it works\n\nMaintain roots of unfinished decreasing subtrees. A new larger value takes popped smaller roots as its left subtree and becomes the right child of the remaining larger stack top.\n\n### Steps\n\n1. Create a node for each value.\n2. Pop smaller stack roots and attach the last popped root as the new left child.\n3. Attach the new node as the remaining top's right child.\n4. Push the new node and finally return the bottom stack root.\n\n### Complexity\n\n- Time: O(n), since each node is pushed and popped once.\n- Space: O(n) stack, excluding tree nodes.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/654.%20Maximum%20Binary%20Tree",
+      "code": {
+        "python": "class Solution:\n    def constructMaximumBinaryTree(self, nums: list[int]) -> 'TreeNode':\n        stack = []\n        for value in nums:\n            node = TreeNode(value)\n            while stack and stack[-1].val < value:\n                node.left = stack.pop()\n            if stack:\n                stack[-1].right = node\n            stack.append(node)\n        return stack[0] if stack else None\n"
+      }
+    }
+  ]
+}

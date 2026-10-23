@@ -98,7 +98,7 @@ IMPORTS = {
     'heapq': ['heapify', 'heappush', 'heappop', 'heappushpop', 'heapreplace', 'nlargest'],
     'functools': ['cache', 'lru_cache', 'cmp_to_key'],
     'bisect': ['bisect_left', 'bisect_right', 'insort', 'bisect'],
-    'math': ['inf', 'ceil', 'sqrt', 'gcd', 'factorial', 'comb'],
+    'math': ['inf', 'ceil', 'sqrt', 'gcd', 'factorial', 'comb', 'log'],
     'itertools': ['accumulate', 'product', 'combinations'],
 }
 

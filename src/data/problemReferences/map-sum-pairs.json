@@ -1,0 +1,29 @@
+{
+  "problemId": "map-sum-pairs",
+  "approach": "Prefix-Sum Trie with Value Deltas",
+  "explanation": "### How it works\n\nStore the sum of all keys sharing each trie prefix. Replacing a key changes those sums only by the difference between its new and old values.\n\n### Steps\n\n1. Look up the previous full-key value.\n2. Compute the value delta.\n3. Walk the key, creating trie nodes and adding the delta.\n4. Answer a prefix query using its final node's stored sum.\n\n### Complexity\n\n- Time: Expected O(L) per insertion or prefix query for text length L.\n- Space: O(D) for distinct stored key-prefix characters and key values.",
+  "code": {
+    "python": "class TrieNode:\n  def __init__(self):\n    self.children: dict[str, TrieNode] = {}\n    self.sum = 0\n\n\nclass MapSum:\n  def __init__(self):\n    self.root = TrieNode()\n    self.keyToVal = {}\n\n  def insert(self, key: str, val: int) -> None:\n    diff = val - self.keyToVal.get(key, 0)\n    node: TrieNode = self.root\n    for c in key:\n      node = node.children.setdefault(c, TrieNode())\n      node.sum += diff\n    self.keyToVal[key] = val\n\n  def sum(self, prefix: str) -> int:\n    node: TrieNode = self.root\n    for c in prefix:\n      if c not in node.children:\n        return 0\n      node = node.children[c]\n    return node.sum\n",
+    "cpp": "struct TrieNode {\n  vector<shared_ptr<TrieNode>> children;\n  int sum = 0;\n  TrieNode() : children(26) {}\n};\n\nclass MapSum {\n public:\n  void insert(string key, int val) {\n    const int diff = val - keyToVal[key];\n    shared_ptr<TrieNode> node = root;\n    for (const char c : key) {\n      const int i = c - 'a';\n      if (node->children[i] == nullptr)\n        node->children[i] = make_shared<TrieNode>();\n      node = node->children[i];\n      node->sum += diff;\n    }\n    keyToVal[key] = val;\n  }\n\n  int sum(string prefix) {\n    shared_ptr<TrieNode> node = root;\n    for (const char c : prefix) {\n      const int i = c - 'a';\n      if (node->children[i] == nullptr)\n        return 0;\n      node = node->children[i];\n    }\n    return node->sum;\n  }\n\n private:\n  shared_ptr<TrieNode> root = make_shared<TrieNode>();\n  unordered_map<string, int> keyToVal;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/677.%20Map%20Sum%20Pairs",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "full-key-map-and-prefix-scan",
+      "approach": "Full-Key Map and Prefix Scan",
+      "explanation": "### How it works\n\nKeep only full keys and their latest values. A sum query scans every stored key and includes values whose keys begin with the requested prefix.\n\n### Steps\n\n1. Assign the latest value in a key map.\n2. On sum, inspect all stored keys.\n3. Add values whose keys start with the prefix.\n\n### Complexity\n\n- Time: Expected O(L) insertion including hashing; O(k × p) query for k keys and prefix length p.\n- Space: O(D) stored keys and values.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/677.%20Map%20Sum%20Pairs",
+      "code": {
+        "python": "class MapSum:\n    def __init__(self):\n        self.values = {}\n\n    def insert(self, key: str, val: int) -> None:\n        self.values[key] = val\n\n    def sum(self, prefix: str) -> int:\n        return sum(value for key, value in self.values.items() if key.startswith(prefix))\n"
+      }
+    }
+  ]
+}

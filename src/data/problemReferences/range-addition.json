@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/370.%20Range%20Addition",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "apply-every-range-literally",
+      "approach": "Apply Every Range Literally",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nApply every inclusive update to each affected position. This exposes the repeated work avoided by the default difference array.\n\n### Steps\n\n1. Create a zero-filled result.\n2. For every update, add its increment at indices start through end.\n3. Return the array.\n\n### Complexity\n\n- Time: `O(length × u)` for u updates in the worst case.\n- Space: `O(1)` auxiliary space, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/370.%20Range%20Addition",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def getModifiedArray(self, length: int, updates: list[list[int]]) -> list[int]:\n        result = [0] * length\n        for start, end, increment in updates:\n            for i in range(start, end + 1):\n                result[i] += increment\n        return result\n"
+      }
+    }
+  ]
 }

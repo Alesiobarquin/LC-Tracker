@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countConsistentStrings(string allowed, vector<string>& words) {\n        int bitMask = 0;\n        for (char c : allowed) {\n            bitMask |= (1 << (c - 'a'));\n        }\n\n        int res = words.size();\n        for (const string& w : words) {\n            for (char c : w) {\n                int bit = 1 << (c - 'a');\n                if ((bit & bitMask) == 0) {\n                    res--;\n                    break;\n                }\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-the-number-of-consistent-strings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-the-number-of-consistent-strings.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA string is consistent if every character in it appears in the `allowed` string. The straightforward approach is to check each word character by character. For each character, we scan through the `allowed` string to see if it exists. If any character is not found, the word is inconsistent.\n\n### Steps\n\n1. Initialize a counter `res` to `0`.\n2. For each word in `words`:\n    - Set a flag to `true` (assuming the word is consistent).\n    - For each character in the word, check if it exists in `allowed` by scanning through `allowed`.\n    - If any character is not found, set the flag to `false` and break out of the inner loop.\n    - If the flag is still `true` after checking all characters, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n * m * l)`\n- Space complexity: `O(1)`\n\n> Where `n` is the number of words, `m` is the length of the string `allowed`, and `l` is the length of the longest word.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countConsistentStrings(self, allowed: str, words: List[str]) -> int:\n        res = 0\n\n        for w in words:\n            flag = 1\n            for c in w:\n                if c not in allowed:\n                    flag = 0\n                    break\n            res += flag\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-the-number-of-consistent-strings.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nThe brute force approach is slow because we scan through `allowed` for every character lookup. We can speed this up by storing all allowed characters in a hash set, which provides O(1) average lookup time. Instead of counting consistent words, we can start with the total count and subtract whenever we find an inconsistent word.\n\n### Steps\n\n1. Convert `allowed` into a hash set for O(1) character lookups.\n2. Initialize `res` to the total number of words.\n3. For each word in `words`:\n    - For each character in the word, check if it exists in the hash set.\n    - If any character is not found, decrement `res` and break out of the inner loop.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n * l + m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the number of words, `m` is the length of the string `allowed`, and `l` is the length of the longest word.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countConsistentStrings(self, allowed: str, words: List[str]) -> int:\n        allowed = set(allowed)\n\n        res = len(words)\n        for w in words:\n            for c in w:\n                if c not in allowed:\n                    res -= 1\n                    break\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-the-number-of-consistent-strings.md",
+      "id": "hash-set"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> largestValues(TreeNode* root) {\n        if (!root) return {};\n\n        vector<int> res;\n        stack<pair<TreeNode*, int>> stk;\n        stk.push({root, 0});\n        while (!stk.empty()) {\n            auto [node, level] = stk.top();stk.pop();\n            if (level == res.size()) {\n                res.push_back(node->val);\n            } else {\n                res[level] = max(res[level], node->val);\n            }\n\n            if (node->right) stk.push({node->right, level + 1});\n            if (node->left) stk.push({node->left, level + 1});\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-largest-value-in-each-tree-row.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-largest-value-in-each-tree-row.md",
+  "alternatives": [
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nTo find the largest value in each row, we need to visit all nodes level by level. BFS naturally processes nodes in level order using a queue. For each level, we track the maximum value seen among all nodes at that depth.\n\n### Steps\n\n1. If the root is `null`, return an empty list.\n2. Initialize a queue with the root node and an empty result list.\n3. While the queue is not empty:\n    - Record the number of nodes at the current level.\n    - Initialize `rowMax` with the first node's value.\n    - Process all nodes at this level: dequeue each node, update `rowMax` if needed, and enqueue its children.\n    - Append `rowMax` to the result list.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List, Optional\nfrom collections import deque\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def largestValues(self, root: Optional[TreeNode]) -> List[int]:\n        if not root:\n            return []\n\n        res = []\n        q = deque([root])\n        while q:\n            row_max = q[0].val\n            for _ in range(len(q)):\n                node = q.popleft()\n                row_max = max(row_max, node.val)\n                if node.left:\n                    q.append(node.left)\n                if node.right:\n                    q.append(node.right)\n            res.append(row_max)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-largest-value-in-each-tree-row.md",
+      "id": "breadth-first-search"
+    },
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nWe can also solve this with DFS by tracking the current depth as we traverse. When we reach a node, if it's the first node at that depth, we add it to the result. Otherwise, we compare it with the existing maximum for that depth and update if necessary.\n\n### Steps\n\n1. Initialize an empty result list.\n2. Define a recursive DFS function that takes a node and its level:\n    - If the node is `null`, return.\n    - If `level` equals the size of the result list, append the node's value (first node at this depth).\n    - Otherwise, update `res[level]` to be the maximum of its current value and the node's value.\n    - Recursively call DFS on the left and right children with `level + 1`.\n3. Call DFS starting from the root at level `0`.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def largestValues(self, root: Optional[TreeNode]) -> List[int]:\n        if not root:\n            return []\n\n        res = []\n        def dfs(node, level):\n            if not node:\n                return\n            if level == len(res):\n                res.append(node.val)\n            else:\n                res[level] = max(res[level], node.val)\n\n            dfs(node.left, level + 1)\n            dfs(node.right, level + 1)\n\n        dfs(root, 0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-largest-value-in-each-tree-row.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

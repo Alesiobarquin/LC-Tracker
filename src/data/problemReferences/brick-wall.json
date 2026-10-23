@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int leastBricks(vector<vector<int>>& wall) {\n        unordered_map<int, int> countGap;\n        countGap[0] = 0;\n\n        for (const auto& row : wall) {\n            int total = 0;\n            for (size_t i = 0; i < row.size() - 1; ++i) {\n                total += row[i];\n                countGap[total]++;\n            }\n        }\n\n        int maxGaps = 0;\n        for (const auto& [key, value] : countGap) {\n            maxGaps = max(maxGaps, value);\n        }\n\n        return wall.size() - maxGaps;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Kkmv2h48ekw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/brick-wall.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/brick-wall.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe goal is to draw a vertical line through the wall that crosses the fewest bricks. A line crosses a brick only if it doesn't pass through a gap between bricks. So we need to find the vertical position where the most gaps align across all rows.\n\nThe brute force approach is straightforward: for every possible vertical position (from 1 to wall width minus 1), count how many rows do NOT have a gap at that position. The position with the fewest cuts is our answer.\n\n### Steps\n\n1. Calculate the total width of the wall by summing the bricks in the first row.\n2. For each row, compute the cumulative positions where gaps exist (edges between bricks).\n3. For each possible vertical line position from `1` to `width - 1`:\n    - Count how many rows do not have a gap at this position (these are the bricks that would be cut).\n    - Track the minimum number of cuts found.\n4. Return the minimum cut count.\n\n### Complexity\n\n- Time complexity: `O(m * n * g)`\n- Space complexity: `O(n * g)`\n\n> Where `m` is the sum of widths of the bricks in the first row, `n` is the number of rows and `g` is the average number of gaps in each row.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def leastBricks(self, wall: List[List[int]]) -> int:\n        n = len(wall)\n        m = 0\n        for brick in wall[0]:\n            m += brick\n\n        gaps = [[] for _ in range(n)]\n        for i in range(n):\n            gap = 0\n            for brick in wall[i]:\n                gap += brick\n                gaps[i].append(gap)\n\n        res = n\n        for line in range(1, m):\n            cuts = 0\n            for i in range(n):\n                if line not in gaps[i]:\n                    cuts += 1\n\n            res = min(res, cuts)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/brick-wall.md",
+      "id": "brute-force"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass BSTIterator {\nprivate:\n    TreeNode* cur;\n    stack<TreeNode*> stack;\n\npublic:\n    BSTIterator(TreeNode* root) {\n        cur = root;\n    }\n\n    int next() {\n        while (cur) {\n            stack.push(cur);\n            cur = cur->left;\n        }\n\n        TreeNode* node = stack.top();\n        stack.pop();\n        cur = node->right;\n        return node->val;\n    }\n\n    bool hasNext() {\n        return cur || !stack.empty();\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=RXy5RzGF5wo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search-tree-iterator.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search-tree-iterator.md",
+  "alternatives": [
+    {
+      "approach": "Flattening the BST (DFS)",
+      "explanation": "### How it works\n\nThe simplest approach is to perform an inorder traversal of the BST upfront and store all values in an array. Since inorder traversal of a BST visits nodes in ascending order, the array will be sorted. Then, `next()` simply returns the next element from the array, and `hasNext()` checks if there are more elements remaining.\n\n### Steps\n\n1. In the constructor, perform a recursive inorder DFS traversal of the tree.\n2. Store each visited node's value in an array.\n3. Maintain an iterator pointer starting at index `0`.\n4. For `next()`, return the value at the current pointer and increment it.\n5. For `hasNext()`, check if the pointer is less than the array length.\n\n### Complexity\n\n- Time complexity:\n    - `O(n)` time for initialization.\n    - `O(1)` time for each `next()` and `hasNext()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass BSTIterator:\n\n    def __init__(self, root: Optional[TreeNode]):\n        self.arr = []\n        self.itr = 0\n\n        def dfs(node):\n            if not node:\n                return\n            dfs(node.left)\n            self.arr.append(node.val)\n            dfs(node.right)\n\n        dfs(root)\n\n    def next(self) -> int:\n        val = self.arr[self.itr]\n        self.itr += 1\n        return val\n\n    def hasNext(self) -> bool:\n        return self.itr < len(self.arr)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search-tree-iterator.md",
+      "id": "flattening-the-bst-dfs"
+    },
+    {
+      "approach": "Iterative DFS - I",
+      "explanation": "### How it works\n\nInstead of flattening the entire tree upfront, we can save memory by only keeping track of the path from the root to the current position. We initialize the stack with all nodes along the leftmost path. When `next()` is called, we pop the top node, and if it has a right child, we push all nodes along the leftmost path of the right subtree. This way, the stack always contains the ancestors needed to continue the traversal.\n\n### Steps\n\n1. In the constructor, push all nodes from root to the leftmost leaf onto the stack.\n2. For `next()`, pop the top node from the stack as the result.\n3. If the popped node has a right child, push all nodes from the right child down to its leftmost descendant.\n4. Return the popped node's value.\n5. For `hasNext()`, return true if the stack is not empty.\n\n### Complexity\n\n- Time complexity: `O(1)` in average for each function call.\n- Space complexity: `O(h)`\n\n> Where `n` is the number of nodes and `h` is the height of the given tree.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass BSTIterator:\n\n    def __init__(self, root: Optional[TreeNode]):\n        self.stack = []\n        while root:\n            self.stack.append(root)\n            root = root.left\n\n    def next(self) -> int:\n        res = self.stack.pop()\n        cur = res.right\n        while cur:\n            self.stack.append(cur)\n            cur = cur.left\n        return res.val\n\n    def hasNext(self) -> bool:\n        return bool(self.stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-search-tree-iterator.md",
+      "id": "iterative-dfs-i"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/360.%20Sort%20Transformed%20Array",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "transform-and-sort",
+      "approach": "Transform and Sort",
+      "explanation": "### How it works\n\nEvaluate the quadratic at every input value and sort the results. This avoids using the parabola's shape and the input's existing order.\n\n### Steps\n\n1. Compute a*x*x + b*x + c for each value.\n2. Sort the transformed values.\n3. Return the sorted list.\n\n### Complexity\n\n- Time: `O(n log n)` time.\n- Space: `O(n)` including output and Python sorting workspace.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/360.%20Sort%20Transformed%20Array",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def sortTransformedArray(self, nums: list[int], a: int, b: int, c: int) -> list[int]:\n        return sorted(a * x * x + b * x + c for x in nums)\n"
+      }
+    }
+  ]
 }

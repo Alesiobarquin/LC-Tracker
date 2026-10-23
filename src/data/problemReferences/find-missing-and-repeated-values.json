@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findMissingAndRepeatedValues(vector<vector<int>>& grid) {\n        int N = grid.size();\n        long long gridSum = 0;\n        long long gridSqSum = 0;\n\n        for (int i = 0; i < N; i++) {\n            for (int j = 0; j < N; j++) {\n                gridSum += grid[i][j];\n                gridSqSum += 1LL * grid[i][j] * grid[i][j];\n            }\n        }\n\n        long long totSum = 1LL * N * N * (N * N + 1) / 2;\n        long long diff = gridSum - totSum; // a - b\n\n        long long totSqSum = 1LL * N * N * (N * N + 1) * (2 * N * N + 1) / 6;\n        long long sqDiff = gridSqSum - totSqSum; // (a^2) - (b^2)\n\n        long long sum = sqDiff / diff; // a + b\n\n        int a = (sum + diff) / 2;\n        int b = sum - a;\n\n        return {a, b};\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-and-repeated-values.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-and-repeated-values.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe grid contains numbers from `1` to `n*n`, but one number appears twice (repeated) and one is missing. The simplest approach is to check each number individually by scanning the entire grid for every possible value. For each number from `1` to `n*n`, we count how many times it appears. If a number appears twice, it is the repeated value. If it appears zero times, it is the missing value.\n\n### Steps\n\n1. For each number from `1` to `n*n`:\n    - Count its occurrences by scanning every cell in the grid.\n    - If the count equals `2`, this is the repeated number.\n    - If the count equals `0`, this is the missing number.\n2. Return the repeated and missing numbers as the result.\n\n### Complexity\n\n- Time complexity: `O(n ^ 4)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMissingAndRepeatedValues(self, grid: List[List[int]]) -> List[int]:\n        n = len(grid)\n        double = missing = 0\n\n        for num in range(1, n * n + 1):\n            cnt = 0\n            for i in range(n):\n                for j in range(n):\n                    if num == grid[i][j]:\n                        cnt += 1\n\n            if cnt == 2:\n                double = num\n            elif cnt == 0:\n                missing = num\n\n        return [double, missing]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-and-repeated-values.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of rescanning the grid for every number, we can count all occurrences in a single pass using a hash map. First, we iterate through the grid once and record how many times each value appears. Then, we check each number from `1` to `n*n` in the map: a frequency of `2` indicates the repeated number, and a frequency of `0` indicates the missing number.\n\n### Steps\n\n1. Traverse the entire grid and store the frequency of each number in a hash map.\n2. Iterate through numbers from `1` to `n*n`:\n    - If the frequency is `0`, record it as the missing number.\n    - If the frequency is `2`, record it as the repeated number.\n3. Return the repeated and missing numbers.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def findMissingAndRepeatedValues(self, grid: List[List[int]]) -> List[int]:\n        N = len(grid)\n        count = defaultdict(int)\n\n        for i in range(N):\n            for j in range(N):\n                count[grid[i][j]] += 1\n\n        double = missing = 0\n\n        for num in range(1, N * N + 1):\n            if count[num] == 0:\n                missing = num\n            if count[num] == 2:\n                double = num\n\n        return [double, missing]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-missing-and-repeated-values.md",
+      "id": "hash-map"
+    }
+  ]
 }

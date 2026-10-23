@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/113.%20Path%20Sum%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "breadth-first-path-copies",
+      "approach": "Breadth-First Path Copies",
+      "explanation": "### How it works\n\nKeep the path and running sum with each queued node. When a leaf reaches the target sum, its stored path is already a complete answer.\n\n### Steps\n\n1. Queue the root with its value and one-element path.\n2. Check sums only at leaves.\n3. Queue each child with an updated sum and a copied path.\n\n### Complexity\n\n- Time: `O(nh)` including path copies for n nodes and height h.\n- Space: `O(nh)` worst-case space including queued paths and output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/113.%20Path%20Sum%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nfrom collections import deque\n\nclass Solution:\n    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> list[list[int]]:\n        if not root:\n            return []\n        result = []\n        queue = deque([(root, root.val, [root.val])])\n        while queue:\n            node, total, path = queue.popleft()\n            if not node.left and not node.right and total == targetSum:\n                result.append(path)\n            for child in (node.left, node.right):\n                if child:\n                    queue.append((child, total + child.val, path + [child.val]))\n        return result\n"
+      }
+    }
+  ]
 }

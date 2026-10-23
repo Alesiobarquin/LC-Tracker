@@ -1,0 +1,29 @@
+{
+  "problemId": "sentence-screen-fitting",
+  "approach": "Cyclic Sentence Cursor",
+  "explanation": "### How it works\n\nJoin the sentence with spaces and repeat it conceptually. For each row, advance by the column count, then adjust to a word boundary. Complete traversals of the joined text count fitted sentences.\n\n### Steps\n\n1. Create a space-terminated sentence string.\n2. Advance the cursor by cols for each row.\n3. Move past a boundary space or backtrack to the last whole-word boundary.\n4. Divide the final cursor by the sentence length.\n\n### Complexity\n\n- Time: O(L + r × w) for joined length L, rows r, and maximum word length w.\n- Space: O(L) for the joined sentence.",
+  "code": {
+    "python": "class Solution:\n  def wordsTyping(self, sentence: list[str], rows: int, cols: int) -> int:\n    combined = ' '.join(sentence) + ' '\n    n = len(combined)\n    i = 0\n\n    for _ in range(rows):\n      i += cols\n      if combined[i % n] == ' ':\n        i += 1\n      else:\n        while i > 0 and combined[(i - 1) % n] != ' ':\n          i -= 1\n\n    return i // n\n",
+    "cpp": "class Solution {\n public:\n  int wordsTyping(vector<string>& sentence, int rows, int cols) {\n    const string& combined = getCombined(sentence);\n    const int n = combined.length();\n    int i = 0;  // (i % n) points to the index of combined in each row\n\n    while (rows-- > 0) {\n      i += cols;\n      if (combined[i % n] == ' ') {\n        ++i;\n      } else {\n        while (i > 0 && combined[(i - 1) % n] != ' ')\n          --i;\n      }\n    }\n\n    return i / n;\n  }\n\n private:\n  string getCombined(const vector<string>& sentence) {\n    string combined;\n    for (const string& word : sentence)\n      combined += (word + ' ');\n    return combined;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/418.%20Sentence%20Screen%20Fitting",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "precomputed-row-transitions",
+      "approach": "Precomputed Row Transitions",
+      "explanation": "### How it works\n\nA row's effect depends only on which sentence word starts it. Precompute the next starting word and the number of complete sentences for every possible start, then process rows using those transitions.\n\n### Steps\n\n1. For every starting word, greedily fit complete words into one row.\n2. Record the next word index and wraps through the sentence.\n3. Apply the recorded transition once per row.\n4. Sum the recorded completed sentences.\n\n### Complexity\n\n- Time: O(k × (cols + 1) + rows) upper bound for k sentence words.\n- Space: O(k) transition storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/418.%20Sentence%20Screen%20Fitting",
+      "code": {
+        "python": "class Solution:\n    def wordsTyping(self, sentence: list[str], rows: int, cols: int) -> int:\n        size = len(sentence)\n        transitions = []\n        for start in range(size):\n            used = count = 0\n            while used + len(sentence[(start + count) % size]) <= cols:\n                used += len(sentence[(start + count) % size]) + 1\n                count += 1\n            transitions.append(((start + count) % size, (start + count) // size))\n        index = total = 0\n        for _ in range(rows):\n            index, completed = transitions[index]\n            total += completed\n        return total\n"
+      }
+    }
+  ]
+}

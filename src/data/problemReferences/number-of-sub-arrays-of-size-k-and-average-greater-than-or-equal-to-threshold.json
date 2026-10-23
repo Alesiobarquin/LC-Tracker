@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numOfSubarrays(vector<int>& arr, int k, int threshold) {\n        threshold *= k;\n        int res = 0, curSum = 0;\n\n        for (int R = 0; R < arr.size(); R++) {\n            curSum += arr[R];\n            if (R >= k - 1) {\n                if (curSum >= threshold) {\n                    res++;\n                }\n                curSum -= arr[R - k + 1];\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=D8B4tKxMTnY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each valid starting position of a subarray of size `k`, we compute the sum of all elements in that window and check if the average meets the threshold. This approach recalculates the sum from scratch for every window.\n\n### Steps\n\n1. Iterate through all possible starting indices `l` from `0` to `n - k`.\n2. For each window, compute the sum of elements from index `l` to `l + k - 1`.\n3. If `sum / k >= threshold`, increment the result counter.\n4. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(1)`\n\n> Where `n` is the size of the array `arr` and `k` is the size of the sub-array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numOfSubarrays(self, arr: List[int], k: int, threshold: int) -> int:\n        res = 0\n        l = 0\n\n        for r in range(k - 1, len(arr)):\n            sum_ = 0\n            for i in range(l, r + 1):\n                sum_ += arr[i]\n\n            if sum_ / k >= threshold:\n                res += 1\n            l += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum",
+      "explanation": "### How it works\n\nInstead of recalculating sums from scratch, we precompute prefix sums. The sum of any subarray from index `l` to `r` becomes a simple subtraction: `prefix[r+1] - prefix[l]`. This trades memory for faster subarray sum queries.\n\n### Steps\n\n1. Build a prefix sum array where `prefix[i]` holds the sum of elements from index `0` to `i-1`.\n2. For each window of size `k`, compute the sum as `prefix[r+1] - prefix[l]`.\n3. If the average meets the threshold, increment the count.\n4. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the array `arr` and `k` is the size of the sub-array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numOfSubarrays(self, arr: List[int], k: int, threshold: int) -> int:\n        prefix_sum = [0] * (len(arr) + 1)\n        for i in range(len(arr)):\n            prefix_sum[i + 1] += prefix_sum[i] + arr[i]\n\n        res = l = 0\n        for r in range(k - 1, len(arr)):\n            sum_ = prefix_sum[r + 1] - prefix_sum[l]\n            if sum_ / k >= threshold:\n                res += 1\n            l += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold.md",
+      "id": "prefix-sum"
+    }
+  ]
 }

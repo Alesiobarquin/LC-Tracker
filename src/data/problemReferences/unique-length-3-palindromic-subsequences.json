@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countPalindromicSubsequence(string s) {\n        vector<int> firstIndex(26, -1);\n        vector<int> lastIndex(26, -1);\n\n        for (int i = 0; i < s.size(); i++) {\n            int j = s[i] - 'a';\n            if (firstIndex[j] == -1) {\n                firstIndex[j] = i;\n            }\n            lastIndex[j] = i;\n        }\n\n        int res = 0;\n        for (int ends = 0; ends < 26; ends++) {\n            if (firstIndex[ends] == -1 || firstIndex[ends] == lastIndex[ends]) {\n                continue;\n            }\n            int l = firstIndex[ends], r = lastIndex[ends];\n            int mask = 0;\n            for (int i = l + 1; i < r; i++) {\n                int c = s[i] - 'a';\n                if (mask & (1 << c)) {\n                    continue;\n                }\n                mask |= (1 << c);\n                res++;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=3THUt0vAFLU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-length-3-palindromic-subsequences.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-length-3-palindromic-subsequences.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Recursion)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA length-3 palindrome has the form `aba` where the first and third characters are the same. We can use recursion to generate all subsequences of length 3 and check which ones are palindromes. This explores all possible combinations by either including or excluding each character.\n\n### Steps\n\n1. Use a set to store unique palindromic subsequences.\n2. Define a recursive function `rec(i, cur)` where `i` is the current index and `cur` is the current subsequence being built.\n3. If `cur` has length `3`:\n    - Check if it's a palindrome (first and last characters match).\n    - If yes, add it to the set.\n    - Return.\n4. If `i` reaches the end of the string, return.\n5. Make two recursive calls: skip the current character, or include it.\n6. Start with `rec(0, \"\")` and return the size of the set.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n + m)`\n\n> Where `n` is the length of the string `s` and `m` is the number of unique three length pallindromic subsequences (26 \\* 26 = 676).",
+      "code": {
+        "python": "class Solution:\n    def countPalindromicSubsequence(self, s: str) -> int:\n        res = set()\n\n        def rec(i, cur):\n            if len(cur) == 3:\n                if cur[0] == cur[2]:\n                    res.add(cur)\n                return\n            if i == len(s):\n                return\n            rec(i + 1, cur)\n            rec(i + 1, cur + s[i])\n\n        rec(0, \"\")\n        return len(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-length-3-palindromic-subsequences.md",
+      "id": "brute-force-recursion"
+    },
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nInstead of generating all subsequences recursively, we can use three nested loops to pick positions for the three characters. For indices `i < j < k`, we check if `s[i] == s[k]` to form a palindrome. Using a set ensures we count each unique palindrome only once.\n\n### Steps\n\n1. Use a set to store unique palindromic subsequences.\n2. For each index `i` from `0` to `n-3`:\n    - For each index `j` from `i+1` to `n-2`:\n        - For each index `k` from `j+1` to `n-1`:\n            - If `s[i] == s[k]`, add the string `s[i] + s[j] + s[k]` to the set.\n3. Return the size of the set.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `s` and `m` is the number of unique three length pallindromic subsequences (26 \\* 26 = 676).",
+      "code": {
+        "python": "class Solution:\n    def countPalindromicSubsequence(self, s: str) -> int:\n        res = set()\n\n        for i in range(len(s) - 2):\n            for j in range(i + 1, len(s) - 1):\n                for k in range(j + 1, len(s)):\n                    if s[i] != s[k]:\n                        continue\n                    res.add(s[i] + s[j] + s[k])\n        return len(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/unique-length-3-palindromic-subsequences.md",
+      "id": "brute-force"
+    }
+  ]
 }

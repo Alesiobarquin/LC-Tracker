@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findAnagrams(string s, string p) {\n        int n = s.size(), m = p.size();\n        if (m > n) return {};\n\n        vector<int> pCount(26, 0), sCount(26, 0);\n        for (int i = 0; i < m; i++) {\n            pCount[p[i] - 'a']++;\n            sCount[s[i] - 'a']++;\n        }\n\n        int match = 0;\n        for (int i = 0; i < 26; i++) {\n            if (pCount[i] == sCount[i]) match++;\n        }\n\n        vector<int> res;\n        if (match == 26) res.push_back(0);\n\n        int l = 0;\n        for (int r = m; r < n; r++) {\n            int c = s[l] - 'a';\n            if (sCount[c] == pCount[c]) match--;\n            sCount[c]--;\n            l++;\n            if (sCount[c] == pCount[c]) match++;\n\n            c = s[r] - 'a';\n            if (sCount[c] == pCount[c]) match--;\n            sCount[c]++;\n            if (sCount[c] == pCount[c]) match++;\n\n            if (match == 26) res.push_back(l);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=G8xtZy0fDKg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-all-anagrams-in-a-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-all-anagrams-in-a-string.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAn anagram is simply a rearrangement of characters. Two strings are anagrams if they contain the same characters with the same frequencies. The most direct way to check this is to sort both strings and compare them. We can slide through every substring of `s` that has the same length as `p`, sort it, and check if it matches the sorted version of `p`.\n\n### Steps\n\n1. Sort the pattern string `p`.\n2. For each starting index `i` from `0` to `len(s) - len(p)`:\n   - Extract the substring of length `len(p)` starting at `i`.\n   - Sort this substring.\n   - If it equals the sorted pattern, add `i` to the result list.\n3. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n * m log m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `s` and `m` is the length of the string `p`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findAnagrams(self, s: str, p: str) -> List[int]:\n        n, m = len(s), len(p)\n        p = sorted(p)\n        res = []\n        for i in range(n - m + 1):\n            sub = sorted(s[i : i + m])\n            if sub == p:\n                res.append(i)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-all-anagrams-in-a-string.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Count + Sliding Window",
+      "explanation": "### How it works\n\nInstead of sorting substrings repeatedly, we can precompute character frequencies using prefix sums. For each position in `s`, we maintain a cumulative count of each character seen so far. To get the character frequencies for any window, we subtract the prefix count at the start from the prefix count at the end. If the window's character counts match `p`'s counts, we found an anagram.\n\n### Steps\n\n1. Build a frequency array `pCount` for the pattern `p`.\n2. Build a 2D prefix array where `prefix[i]` stores the cumulative character counts for `s[0..i-1]`.\n3. Slide a window of size `len(p)` across `s`:\n   - For each window position, compute character frequencies using `prefix[j+1] - prefix[i]`.\n   - If all `26` character counts match `pCount`, add the starting index to the result.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the string `s` and `m` is the length of the string `p`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findAnagrams(self, s: str, p: str) -> List[int]:\n        n, m = len(s), len(p)\n        if m > n:\n            return []\n        pCount = [0] * 26\n        for c in p:\n            pCount[ord(c) - ord('a')] += 1\n\n        prefix = [[0] * 26 for _ in range(n + 1)]\n        for i in range(1, n + 1):\n            for j in range(26):\n                prefix[i][j] = prefix[i - 1][j]\n            prefix[i][ord(s[i - 1]) - ord('a')] += 1\n\n        i, j = 0, m - 1\n        res = []\n        while j < n:\n            isValid = True\n            for c in range(26):\n                if prefix[j + 1][c] - prefix[i][c] != pCount[c]:\n                    isValid = False\n                    break\n            if isValid:\n                res.append(i)\n            i += 1\n            j += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-all-anagrams-in-a-string.md",
+      "id": "prefix-count-sliding-window"
+    }
+  ]
 }

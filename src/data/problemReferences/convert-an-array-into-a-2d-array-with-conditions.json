@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> findMatrix(vector<int>& nums) {\n        unordered_map<int, int> count;\n        vector<vector<int>> res;\n\n        for (int num : nums) {\n            int row = count[num];\n            if (res.size() == row) {\n                res.push_back({});\n            }\n            res[row].push_back(num);\n            count[num]++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-an-array-into-a-2d-array-with-conditions.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-an-array-into-a-2d-array-with-conditions.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to distribute numbers into rows such that each row contains only distinct elements. For each number, we find the first row where it doesn't already exist and place it there. If no such row exists, we create a new row. This greedy placement ensures we use the minimum number of rows needed.\n\n### Steps\n\n1. Initialize an empty result list to hold the 2D array.\n2. For each number in the input array:\n    - Start from row `0` and search for a row that doesn't contain this number.\n    - Check each existing row sequentially until we find one where the number is absent.\n    - If all existing rows already contain this number, create a new empty row.\n    - Add the number to the found or newly created row.\n3. Return the result containing all rows.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)` for the output array.\n\n> Where `n` is the size of the array `nums` and `m` is the frequency of the most frequent element in the given array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMatrix(self, nums: List[int]) -> List[List[int]]:\n        res = []\n\n        for num in nums:\n            r = 0\n            while r < len(res):\n                if num not in res[r]:\n                    break\n                r += 1\n            if r == len(res):\n                res.append([])\n            res[r].append(num)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-an-array-into-a-2d-array-with-conditions.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nBy sorting the array first, all identical numbers become adjacent. This allows us to process each group of duplicates together. The number of rows needed equals the maximum frequency of any element, and by distributing each group of identical elements across consecutive rows starting from row `0`, we ensure each row has distinct values.\n\n### Steps\n\n1. Sort the input array.\n2. Initialize an empty result list for the 2D array.\n3. Iterate through the sorted array:\n    - For each group of identical consecutive numbers, distribute them one per row starting from row `0`.\n    - Create new rows as needed when we encounter more duplicates than existing rows.\n    - Use two pointers: one to track the start of a group, another to iterate through duplicates.\n4. Move to the next distinct number and repeat.\n5. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMatrix(self, nums: List[int]) -> List[List[int]]:\n        nums.sort()\n        res = []\n\n        i = 0\n        while i < len(nums):\n            j = i\n            r = 0\n            while j < len(nums) and nums[i] == nums[j]:\n                if r == len(res):\n                    res.append([])\n                res[r].append(nums[i])\n                r += 1\n                j += 1\n            i = j\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/convert-an-array-into-a-2d-array-with-conditions.md",
+      "id": "sorting"
+    }
+  ]
 }

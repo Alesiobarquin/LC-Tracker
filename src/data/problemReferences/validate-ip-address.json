@@ -1,0 +1,29 @@
+{
+  "problemId": "validate-ip-address",
+  "approach": "Split and Validate Address Groups",
+  "explanation": "### How it works\n\nIPv4 requires four bounded decimal groups without leading zeros. IPv6 requires eight groups of one to four hexadecimal characters; compressed notation is outside this problem's accepted format.\n\n### Steps\n\n1. Use separator counts to choose a candidate address family.\n2. Validate every IPv4 group's digits, length, leading zero, and value.\n3. Validate every IPv6 group's length and hexadecimal characters.\n4. Return Neither when neither complete format matches.\n\n### Complexity\n\n- Time: O(n) for address length n.\n- Space: O(n) for split groups.",
+  "code": {
+    "python": "class Solution:\n  def validIPAddress(self, queryIP: str) -> str:\n    if queryIP.count('.') == 3:\n      parts = queryIP.split('.')\n      if len(parts) == 4 and all(self._isIPv4(part) for part in parts):\n        return 'IPv4'\n\n    if queryIP.count(':') == 7:\n      parts = queryIP.split(':')\n      if len(parts) == 8 and all(self._isIPv6(part) for part in parts):\n        return 'IPv6'\n\n    return 'Neither'\n\n  def _isIPv4(self, digit: str) -> bool:\n    if not digit or len(digit) > 3:\n      return False\n    if len(digit) > 1 and digit[0] == '0':\n      return False\n    if not all(c.isdigit() for c in digit):\n      return False\n    num = int(digit)\n    return 0 <= num <= 255\n\n  def _isIPv6(self, digit: str) -> bool:\n    if not digit or len(digit) > 4:\n      return False\n    validChars = set('0123456789abcdefABCDEF')\n    return all(c in validChars for c in digit)\n",
+    "cpp": "class Solution {\n public:\n  string validIPAddress(string queryIP) {\n    string digit;\n    istringstream iss(queryIP);\n\n    if (ranges::count(queryIP, '.') == 3) {\n      for (int i = 0; i < 4; ++i)  // Make sure that we have four parts.\n        if (!getline(iss, digit, '.') || !isIPv4(digit))\n          return \"Neither\";\n      return \"IPv4\";\n    }\n\n    if (ranges::count(queryIP, ':') == 7) {\n      for (int i = 0; i < 8; ++i)  // Make sure that we have eight parts.\n        if (!getline(iss, digit, ':') || !isIPv6(digit))\n          return \"Neither\";\n      return \"IPv6\";\n    }\n\n    return \"Neither\";\n  }\n\n private:\n  static inline string validIPv6Chars = \"0123456789abcdefABCDEF\";\n\n  bool isIPv4(const string& digit) {\n    if (digit.empty() || digit.length() > 3)\n      return false;\n    if (digit.length() > 1 && digit[0] == '0')\n      return false;\n\n    for (const char c : digit)\n      if (c < '0' || c > '9')\n        return false;\n\n    const int num = stoi(digit);\n    return 0 <= num && num <= 255;\n  }\n\n  bool isIPv6(const string& digit) {\n    if (digit.empty() || digit.length() > 4)\n      return false;\n\n    for (const char c : digit)\n      if (validIPv6Chars.find(c) == string::npos)\n        return false;\n\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/468.%20Validate%20IP%20Address",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "full-string-regular-expressions",
+      "approach": "Full-String Regular Expressions",
+      "explanation": "### How it works\n\nEncode each allowed group as a regular-expression fragment and require the whole input to match exactly. The IPv4 fragment separately represents one-digit, two-digit, and bounded three-digit values.\n\n### Steps\n\n1. Define a decimal group for values zero through 255 without extra leading zeros.\n2. Repeat it four times with literal dots.\n3. Define an IPv6 group of one to four hexadecimal characters.\n4. Require a full match against either complete pattern.\n\n### Complexity\n\n- Time: O(n) for these fixed, bounded-group patterns.\n- Space: O(1) pattern storage and bounded matching state.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/468.%20Validate%20IP%20Address",
+      "code": {
+        "python": "import re\n\nclass Solution:\n    def validIPAddress(self, queryIP: str) -> str:\n        decimal = r'(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])'\n        if re.fullmatch(decimal + r'(?:\\.' + decimal + r'){3}', queryIP):\n            return 'IPv4'\n        hexadecimal = r'[0-9a-fA-F]{1,4}'\n        if re.fullmatch(hexadecimal + r'(?::' + hexadecimal + r'){7}', queryIP):\n            return 'IPv6'\n        return 'Neither'\n"
+      }
+    }
+  ]
+}

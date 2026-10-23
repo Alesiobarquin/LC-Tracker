@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int subarraysWithKDistinct(vector<int>& nums, int k) {\n        int n = nums.size();\n        vector<int> count(n + 1, 0);\n        int res = 0, l = 0, cnt = 0;\n\n        for (int r = 0; r < n; r++) {\n            count[nums[r]]++;\n            if (count[nums[r]] == 1) {\n                k--;\n            }\n\n            if (k < 0) {\n                count[nums[l]]--;\n                l++;\n                k++;\n                cnt = 0;\n            }\n\n            if (k == 0) {\n                while (count[nums[l]] > 1) {\n                    count[nums[l]]--;\n                    l++;\n                    cnt++;\n                }\n\n                res += (cnt + 1);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarrays-with-k-different-integers.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarrays-with-k-different-integers.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible subarray and count those with exactly `k` distinct integers. For each starting index, we expand the subarray one element at a time, tracking distinct values using a set. Once we exceed `k` distinct values, we stop and move to the next starting position.\n\n### Steps\n\n1. Initialize a result counter `res` to store the count of valid subarrays.\n2. For each starting index `i`:\n    - Create an empty set to track distinct values.\n    - Expand the subarray by moving index `j` from `i` to the end.\n    - Add each new element to the set.\n    - If the set size exceeds `k`, break out of the inner loop.\n    - If the set size equals `k`, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            seen = set()\n            for j in range(i, n):\n                seen.add(nums[j])\n                if len(seen) > k:\n                    break\n\n                if len(seen) == k:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarrays-with-k-different-integers.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nCounting subarrays with exactly `k` distinct values is tricky because adding an element can either increase or maintain the count of distinct values. A clever observation is that we can reframe the problem: subarrays with exactly `k` distinct = subarrays with at most `k` distinct minus subarrays with at most `k-1` distinct. Counting \"at most k\" is easier using a sliding window that shrinks whenever we exceed `k` distinct values.\n\n### Steps\n\n1. Define a helper function `atMostK(k)` that counts subarrays with at most `k` distinct values:\n    - Use two pointers `l` and `r` to define the window.\n    - Maintain a frequency map to track counts of elements in the window.\n    - Expand `r` and add each element to the map.\n    - When distinct count exceeds `k`, shrink from `l` until we have at most `k` distinct.\n    - For each position of `r`, add `(r - l + 1)` to the result, representing all valid subarrays ending at `r`.\n2. Return `atMostK(k) - atMostK(k - 1)`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:\n\n        def atMostK(k):\n            count = defaultdict(int)\n            res = l = 0\n\n            for r in range(len(nums)):\n                count[nums[r]] += 1\n                if count[nums[r]] == 1:\n                    k -= 1\n\n                while k < 0:\n                    count[nums[l]] -= 1\n                    if count[nums[l]] == 0:\n                        k += 1\n                    l += 1\n\n                res += (r - l + 1)\n\n            return res\n\n        return atMostK(k) - atMostK(k - 1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarrays-with-k-different-integers.md",
+      "id": "sliding-window"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "sum-of-square-numbers",
+  "approach": "Two Pointers on Square Values",
+  "explanation": "### How it works\n\nStart with the smallest possible square and the largest square not exceeding c. Increase the small endpoint when the sum is too small and decrease the large endpoint when it is too large.\n\n### Steps\n\n1. Set endpoints to zero and integer sqrt(c).\n2. Compare their squared sum with c.\n3. Move the endpoint that can bring the sum toward c.\n4. Stop on equality or crossing pointers.\n\n### Complexity\n\n- Time: O(sqrt(c)).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def judgeSquareSum(self, c: int) -> bool:\n    l = 0\n    r = math.isqrt(c)\n\n    while l <= r:\n      summ = l * l + r * r\n      if summ == c:\n        return True\n      if summ < c:\n        l += 1\n      else:\n        r -= 1\n\n    return False\n",
+    "cpp": "class Solution {\n public:\n  bool judgeSquareSum(int c) {\n    unsigned l = 0;\n    unsigned r = sqrt(c);\n\n    while (l <= r) {\n      const unsigned sum = l * l + r * r;\n      if (sum == c)\n        return true;\n      if (sum < c)\n        ++l;\n      else\n        --r;\n    }\n\n    return false;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/633.%20Sum%20of%20Square%20Numbers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "enumerate-one-square-and-test-the-remainder",
+      "approach": "Enumerate One Square and Test the Remainder",
+      "explanation": "### How it works\n\nTry each possible first square. The remaining value must itself be a perfect square, which an integer square-root check tests exactly.\n\n### Steps\n\n1. Enumerate a from zero through integer sqrt(c).\n2. Calculate c − a².\n3. Take its integer square root.\n4. Accept when squaring that root reconstructs the remainder.\n\n### Complexity\n\n- Time: O(sqrt(c)) integer-root tests under the bounded input domain.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/633.%20Sum%20of%20Square%20Numbers",
+      "code": {
+        "python": "from math import isqrt\n\nclass Solution:\n    def judgeSquareSum(self, c: int) -> bool:\n        for a in range(isqrt(c) + 1):\n            remainder = c - a * a\n            b = isqrt(remainder)\n            if b * b == remainder:\n                return True\n        return False\n"
+      }
+    }
+  ]
+}

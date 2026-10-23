@@ -1,0 +1,29 @@
+{
+  "problemId": "longest-harmonious-subsequence",
+  "approach": "Neighboring Frequency Counts",
+  "explanation": "### How it works\n\nA harmonious subsequence contains exactly two values differing by one. For each value, combine its frequency with the frequency of its successor when that successor exists.\n\n### Steps\n\n1. Count each value.\n2. Look for value + 1 for every distinct value.\n3. Maximize the combined frequency.\n4. Return zero if no neighboring pair exists.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(u) for distinct counts.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def findLHS(self, nums: list[int]) -> int:\n    ans = 0\n    count = collections.Counter(nums)\n\n    for num, freq in count.items():\n      if num + 1 in count:\n        ans = max(ans, freq + count[num + 1])\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findLHS(vector<int>& nums) {\n    int ans = 0;\n    unordered_map<int, int> count;\n\n    for (const int num : nums)\n      ++count[num];\n\n    for (const auto& [num, freq] : count)\n      if (const auto it = count.find(num + 1); it != count.cend())\n        ans = max(ans, freq + it->second);\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/594.%20Longest%20Harmonious%20Subsequence",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sorted-difference-one-window",
+      "approach": "Sorted Difference-One Window",
+      "explanation": "### How it works\n\nIn sorted order, all values in a harmonious subsequence can be taken as a contiguous window. Shrink the left edge whenever the range exceeds one and score only range exactly one.\n\n### Steps\n\n1. Sort a copy.\n2. Advance the right endpoint.\n3. Move the left endpoint until the value difference is at most one.\n4. Update the answer only when the difference equals one.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) for the sorted copy.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/594.%20Longest%20Harmonious%20Subsequence",
+      "code": {
+        "python": "class Solution:\n    def findLHS(self, nums: list[int]) -> int:\n        ordered = sorted(nums)\n        left = best = 0\n        for right, value in enumerate(ordered):\n            while value - ordered[left] > 1:\n                left += 1\n            if value - ordered[left] == 1:\n                best = max(best, right - left + 1)\n        return best\n"
+      }
+    }
+  ]
+}

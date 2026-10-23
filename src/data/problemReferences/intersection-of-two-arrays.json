@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {\n        set<int> set1(nums1.begin(), nums1.end()), set2(nums2.begin(), nums2.end());\n        vector<int> res;\n        set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), back_inserter(res));\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-arrays.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-arrays.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to check every element in the first array against every element in the second array. When we find a match, we add it to our result set. Using a set ensures we only include each common element once, even if it appears multiple times in both arrays.\n\n### Steps\n\n1. Initialize an empty set `res` to store unique intersection elements.\n2. For each element `i` in `nums1`:\n    - For each element `j` in `nums2`:\n        - If `i == j`, add `i` to `res` and break the inner loop.\n3. Convert `res` to a list and return it.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the array `nums1` and `m` is the size of the array `nums2`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:\n        res = set()\n        for i in nums1:\n            for j in nums2:\n                if i == j:\n                    res.add(i)\n                    break\n        return list(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-arrays.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting + Two Pointers",
+      "explanation": "### How it works\n\nBy sorting both arrays, we can use two pointers to efficiently find common elements. We advance the pointer pointing to the smaller element. When both pointers point to equal elements, we found an intersection. We skip duplicates to ensure each element appears only once in the result.\n\n### Steps\n\n1. Sort both `nums1` and `nums2`.\n2. Initialize two pointers `i` and `j` at the start of each array.\n3. While both pointers are in bounds:\n    - Advance `j` while `nums2[j] < nums1[i]`.\n    - If `nums1[i] == nums2[j]`, add to result.\n    - Advance `i`, skipping any duplicates.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n log n + m log m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the array `nums1` and `m` is the size of the array `nums2`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:\n        nums1.sort()\n        nums2.sort()\n\n        n, m = len(nums1), len(nums2)\n        res, i, j = [], 0, 0\n\n        while i < n and j < m:\n            while j < m and nums2[j] < nums1[i]:\n                j += 1\n            if j < m:\n                if nums1[i] == nums2[j]:\n                    res.append(nums1[i])\n                i += 1\n                while i < n and nums1[i] == nums1[i - 1]:\n                    i += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/intersection-of-two-arrays.md",
+      "id": "sorting-two-pointers"
+    }
+  ]
 }

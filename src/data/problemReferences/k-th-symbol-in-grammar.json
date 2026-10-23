@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int kthGrammar(int n, int k) {\n        return __builtin_popcount(k - 1) & 1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-symbol-in-grammar.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-symbol-in-grammar.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe problem generates rows where each row is built from the previous one: `0` becomes `01` and `1` becomes `10`. The most straightforward approach is to actually build each row until we reach row `n`, then return the character at position `k`. While simple to understand, this approach becomes impractical for large `n` since each row doubles in size.\n\n### Steps\n\n1. Start with the first row containing just `0`.\n2. For each subsequent row up to `n`:\n    - Create a new row by replacing each `0` with `01` and each `1` with `10`.\n3. Return the character at index `k - 1` from the final row.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(2 ^ n)`",
+      "code": {
+        "python": "class Solution:\n    def kthGrammar(self, n: int, k: int) -> int:\n        prev = ['0']\n        for i in range(2, n + 1):\n            cur = []\n            for c in prev:\n                if c == '0':\n                    cur.append('0')\n                    cur.append('1')\n                else:\n                    cur.append('1')\n                    cur.append('0')\n            prev = cur\n        return int(prev[k - 1])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-symbol-in-grammar.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Tree Traversal (Recursion)",
+      "explanation": "### How it works\n\nWe can visualize the grammar as a binary tree where each node generates two children. The key insight is that the position `k` in row `n` has a parent at position `ceil(k/2)` in row `n-1`. If `k` is in the left half of the current row, it inherits the parent's value directly. If `k` is in the right half, its value is the flip of the parent. This lets us trace from position `k` back to the root without building any rows.\n\n### Steps\n\n1. Define a recursive function `dfs(n, k, root)` where `root` tracks the current value.\n2. Base case: if `n == 1`, return the current `root` value.\n3. Calculate `total = 2^(n-1)`, the size of row `n`.\n4. If `k > total / 2`, we're in the right half:\n    - Recurse with `n - 1`, adjust `k` by subtracting half, and flip `root` using XOR.\n5. Otherwise, recurse with the same `root` value.\n6. Start with `dfs(n, k, 0)` since row 1 starts with `0`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "class Solution:\n    def kthGrammar(self, n: int, k: int) -> int:\n        def dfs(n, k, root):\n            if n == 1:\n                return root\n\n            total = 1 << (n - 1)\n            if k > (total // 2):\n                return dfs(n - 1, k - (total // 2), root ^ 1)\n            else:\n                return dfs(n - 1, k, root)\n\n        return dfs(n, k, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-symbol-in-grammar.md",
+      "id": "binary-tree-traversal-recursion"
+    }
+  ]
 }

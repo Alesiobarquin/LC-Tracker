@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> shiftGrid(vector<vector<int>>& grid, int k) {\n        int M = grid.size(), N = grid[0].size();\n        vector<vector<int>> res(M, vector<int>(N));\n\n        for (int r = 0; r < M; r++) {\n            for (int c = 0; c < N; c++) {\n                int newVal = (r * N + c + k) % (M * N);\n                int newR = newVal / N, newC = newVal % N;\n                res[newR][newC] = grid[r][c];\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nJYFh4Dl-as",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shift-2d-grid.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shift-2d-grid.md",
+  "alternatives": [
+    {
+      "approach": "Simulation (Extra Space)",
+      "explanation": "### How it works\n\nShifting a 2D grid is like rotating all elements forward by one position. Each element moves to the next column, and elements at the end of a row wrap around to the start of the next row. The last element of the grid wraps to position (0, 0).\n\nBy simulating this process k times, we can achieve the desired result. For each shift, we copy each element to its new position in a fresh grid.\n\n### Steps\n\n1. For each shift iteration (k times):\n    - Create a new grid `cur` filled with zeros.\n    - Copy each element from column `c` to column `c + 1` in the same row.\n    - Handle the last column separately: element at `(r, n-1)` wraps to `((r + 1) % m, 0)`.\n    - Replace the original grid with `cur`.\n2. Return the final grid after all shifts.\n\n### Complexity\n\n- Time complexity: `O(k * m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows in the grid, `n` is the number of columns in the grid, and `k` is the shift count.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def shiftGrid(self, grid: List[List[int]], k: int) -> List[List[int]]:\n        m, n = len(grid), len(grid[0])\n\n        while k:\n            cur = [[0] * n for _ in range(m)]\n\n            for r in range(m):\n                for c in range(n - 1):\n                    cur[r][c + 1] = grid[r][c]\n\n            for r in range(m):\n                cur[(r + 1) % m][0] = grid[r][n - 1]\n\n            grid = cur\n            k -= 1\n\n        return grid\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shift-2d-grid.md",
+      "id": "simulation-extra-space"
+    },
+    {
+      "approach": "Simulation",
+      "explanation": "### How it works\n\nInstead of creating a new grid each time, we can shift elements in place. The key insight is that shifting works like a rotation: each element takes the place of the previous one. By keeping track of the last element (which wraps to the first position), we can propagate values through the entire grid in a single pass.\n\n### Steps\n\n1. For each shift iteration (k times):\n    - Store the last element `grid[m-1][n-1]` as `prev`.\n    - Traverse the grid row by row, column by column.\n    - At each cell, swap the current element with `prev`.\n    - This naturally propagates each element to the next position.\n2. Return the grid after all shifts.\n\n### Complexity\n\n- Time complexity: `O(k * m * n)`\n- Space complexity: `O(m * n)` for the output matrix.\n\n> Where `m` is the number of rows in the grid, `n` is the number of columns in the grid, and `k` is the shift count.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def shiftGrid(self, grid: List[List[int]], k: int) -> List[List[int]]:\n        m, n = len(grid), len(grid[0])\n\n        while k:\n            prev = grid[m - 1][n - 1]\n            for r in range(m):\n                for c in range(n):\n                    grid[r][c], prev = prev, grid[r][c]\n            k -= 1\n\n        return grid\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/shift-2d-grid.md",
+      "id": "simulation"
+    }
+  ]
 }

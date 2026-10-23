@@ -7,5 +7,26 @@
     "cpp": "class Solution {\npublic:\n    bool verifyPreorder(vector<int>& preorder) {\n        int i = 0;\n        return helper(preorder, i, INT_MIN, INT_MAX);\n    }\n\n    bool helper(vector<int>& preorder, int& i, int minLimit, int maxLimit) {\n        if (i == preorder.size()) {\n            return true;\n        }\n\n        int root = preorder[i];\n        if (root <= minLimit || root >= maxLimit) {\n            return false;\n        }\n\n        i++;\n        bool left = helper(preorder, i, minLimit, root);\n        bool right = helper(preorder, i, root, maxLimit);\n        return left || right;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verify-preorder-sequence-in-binary-search-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verify-preorder-sequence-in-binary-search-tree.md",
+  "alternatives": [
+    {
+      "approach": "Monotonic Stack",
+      "explanation": "### How it works\n\nIn a BST preorder traversal, we visit root, then left subtree, then right subtree. When we move to a right subtree, all subsequent values must be greater than the ancestors we are leaving behind. The key insight is to use a decreasing stack to track ancestors. When we encounter a larger value, we pop smaller ancestors and update the minimum limit, as we are now in a right subtree.\n\n### Steps\n\n1. Initialize a stack and set `min_limit` to negative infinity.\n2. Iterate through each number in the `preorder` sequence.\n3. While the stack is not empty and the stack top is less than the current number, pop from the stack and update `min_limit` to the popped value.\n4. If the current number is less than or equal to `min_limit`, return `false` as it violates BST property.\n5. Push the current number onto the stack.\n6. If all numbers are processed without violations, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of `preorder`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def verifyPreorder(self, preorder: List[int]) -> bool:\n        min_limit = float('-inf')\n        stack = []\n\n        for num in preorder:\n            while stack and stack[-1] < num:\n                min_limit = stack.pop()\n\n            if num <= min_limit:\n                return False\n\n            stack.append(num)\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verify-preorder-sequence-in-binary-search-tree.md",
+      "id": "monotonic-stack"
+    },
+    {
+      "approach": "Constant Auxiliary Space",
+      "explanation": "### How it works\n\nWe can optimize the stack approach by reusing the input array itself as our stack. Since we process elements left to right and the stack never grows larger than the elements we have processed, we can use the prefix of the preorder array to simulate the stack.\n\n### Steps\n\n1. Initialize `min_limit` to negative infinity and use index `i` as the stack pointer.\n2. Iterate through each number in the `preorder` sequence.\n3. While `i > 0` and `preorder[i-1]` is less than the current number, set `min_limit` to `preorder[i-1]` and decrement `i`.\n4. If the current number is less than or equal to `min_limit`, return `false`.\n5. Write the current number to `preorder[i]` and increment `i` to simulate pushing onto the stack.\n6. Return `true` if all numbers are processed without violations.\n\n### Complexity\n\nTime is `O(n)` and auxiliary space is `O(1)`. The input array supplies the stack storage, so this approach overwrites its contents. Counting input storage separately does not change the constant auxiliary-space claim.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def verifyPreorder(self, preorder: List[int]) -> bool:\n        min_limit = float('-inf')\n        i = 0\n\n        for num in preorder:\n            while i > 0 and preorder[i - 1] < num:\n                min_limit = preorder[i - 1]\n                i -= 1\n\n            if num <= min_limit:\n                return False\n\n            preorder[i] = num\n            i += 1\n\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/verify-preorder-sequence-in-binary-search-tree.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "constant-auxiliary-space"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/437.%20Path%20Sum%20III",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "prefix-sums-on-the-active-path",
+      "approach": "Prefix Sums on the Active Path",
+      "explanation": "### How it works\n\nA downward path ending here has the target sum when an earlier root-prefix sum differs by targetSum. Track prefix frequencies only along the current ancestor path and remove each prefix when backtracking.\n\n### Steps\n\n1. Seed prefix sum zero with count one.\n2. Add the current value to the root-prefix sum.\n3. Count earlier prefixes equal to current_sum - targetSum.\n4. Add the current prefix, visit both children, then remove it.\n\n### Complexity\n\n- Time: `O(n)` expected time with hash lookups.\n- Space: `O(h)` active prefix entries and recursion stack.\n\n### Things to watch for\n\n- Count equal prefixes with their full frequency, especially for zero-valued nodes.\n- Remove prefixes after a subtree so sibling paths are not joined.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/437.%20Path%20Sum%20III",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nfrom collections import defaultdict\n\nclass Solution:\n    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:\n        prefixes = defaultdict(int, {0: 1})\n        def visit(node, total):\n            if not node:\n                return 0\n            total += node.val\n            count = prefixes.get(total - targetSum, 0)\n            prefixes[total] += 1\n            count += visit(node.left, total) + visit(node.right, total)\n            prefixes[total] -= 1\n            if prefixes[total] == 0:\n                del prefixes[total]\n            return count\n        return visit(root, 0)\n"
+      }
+    }
+  ]
 }

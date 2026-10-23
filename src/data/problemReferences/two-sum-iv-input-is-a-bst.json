@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/653.%20Two%20Sum%20IV%20-%20Input%20is%20a%20BST",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "traversal-with-seen-values",
+      "approach": "Traversal with Seen Values",
+      "explanation": "### How it works\n\nTraverse the tree and remember values already encountered. A node forms a pair when its complement was seen at a different earlier node. Checking before insertion preserves the distinct-node rule.\n\n### Steps\n\n1. Traverse nodes with a stack.\n2. Before recording a value, check whether target minus value is already present.\n3. Return true on a complement match; otherwise store the value and continue.\n\n### Complexity\n\n- Time: `O(n)` expected time with hash lookups.\n- Space: `O(n)` for seen values and stack.\n\n### Things to watch for\n\n- One node cannot pair with itself.\n- Two distinct nodes with the same value can form a valid pair.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/653.%20Two%20Sum%20IV%20-%20Input%20is%20a%20BST",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def findTarget(self, root: Optional[TreeNode], k: int) -> bool:\n        stack = [root] if root else []\n        seen = set()\n        while stack:\n            node = stack.pop()\n            if k - node.val in seen:\n                return True\n            seen.add(node.val)\n            stack.extend(child for child in (node.left, node.right) if child)\n        return False\n"
+      }
+    }
+  ]
 }

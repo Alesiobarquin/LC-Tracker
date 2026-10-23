@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minFallingPathSum(vector<vector<int>>& matrix) {\n        int N = matrix.size();\n\n        for (int r = 1; r < N; r++) {\n            for (int c = 0; c < N; c++) {\n                int mid = matrix[r - 1][c];\n                int left = (c > 0) ? matrix[r - 1][c - 1] : INT_MAX;\n                int right = (c < N - 1) ? matrix[r - 1][c + 1] : INT_MAX;\n                matrix[r][c] = matrix[r][c] + min({mid, left, right});\n            }\n        }\n\n        return *min_element(matrix[N - 1].begin(), matrix[N - 1].end());\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA falling path starts at any cell in the first row and moves to an adjacent cell in the next row (directly below, diagonally left, or diagonally right). We want to find the path with the minimum sum. For each starting column in the first row, we recursively explore all valid paths and track the minimum total. This brute force approach considers all possible paths, leading to exponential time complexity.\n\n### Steps\n\n1. Define `dfs(r, c)` that returns the minimum path sum starting from cell `(r, c)` to the bottom row.\n2. Base cases:\n    - If `r == n`, we've gone past the last row, return `0`.\n    - If `c` is out of bounds, return `Infinity` (invalid path).\n3. Return `matrix[r][c]` plus the minimum of `dfs(r+1, c-1)`, `dfs(r+1, c)`, and `dfs(r+1, c+1)`.\n4. Try starting from each column in row `0` and return the minimum result.\n\n### Complexity\n\n- Time complexity: `O(3 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minFallingPathSum(self, matrix: List[List[int]]) -> int:\n        N = len(matrix)\n\n        def dfs(r, c):\n            if r == N:\n                return 0\n            if c < 0 or c >= N:\n                return float(\"inf\")\n            return matrix[r][c] + min(\n                dfs(r + 1, c - 1),\n                dfs(r + 1, c),\n                dfs(r + 1, c + 1)\n            )\n\n        res = float(\"inf\")\n        for c in range(N):\n            res = min(res, dfs(0, c))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems: the same `(r, c)` state is computed multiple times. By caching results in a `memoization` table, we avoid redundant calculations. Each unique `(r, c)` pair is computed only once, reducing time complexity from exponential to polynomial.\n\n### Steps\n\n1. Create a `cache` (dictionary or 2D array) to store computed results.\n2. Define `dfs(r, c)` that returns the minimum path sum from `(r, c)` to the bottom.\n3. Before computing, check if `(r, c)` is already in the `cache`; if so, return the cached value.\n4. Compute the result as `matrix[r][c]` plus the minimum of the three possible moves.\n5. Store the result in the `cache` and return it.\n6. Return the minimum among all starting columns in row `0`.\n\n### Complexity\n\n- Time complexity: `O(n * n)`\n- Space complexity: `O(n * n)`",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\n\nclass Solution:\n    def minFallingPathSum(self, matrix: List[List[int]]) -> int:\n        N = len(matrix)\n        cache = {}\n\n        def dfs(r, c):\n            if r == N:\n                return 0\n            if c < 0 or c >= N:\n                return float(\"inf\")\n            if (r, c) in cache:\n                return cache[(r, c)]\n            cache[(r, c)] = matrix[r][c] + min(\n                dfs(r + 1, c - 1),\n                dfs(r + 1, c),\n                dfs(r + 1, c + 1)\n            )\n            return cache[(r, c)]\n\n        res = float(\"inf\")\n        for c in range(N):\n            res = min(res, dfs(0, c))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

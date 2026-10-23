@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> closestKValues(TreeNode* root, double target, int k) {\n        deque<int> queue;\n        dfs(root, queue, k, target);\n        return vector<int>(queue.begin(), queue.end());\n    }\n    \nprivate:\n    void dfs(TreeNode* node, deque<int>& queue, int k, double target) {\n        if (node == nullptr) {\n            return;\n        }\n        \n        dfs(node->left, queue, k, target);\n        \n        queue.push_back(node->val);\n        if (queue.size() > k) {\n            if (abs(target - queue.front()) <= abs(target - queue.back())) {\n                queue.pop_back();\n                return;\n            } else {\n                queue.pop_front();\n            }\n        }\n        \n        dfs(node->right, queue, k, target);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value-ii.md",
+  "alternatives": [
+    {
+      "approach": "Sort With Custom Comparator",
+      "explanation": "### How it works\n\nThe simplest approach is to collect all node values from the tree and then sort them based on their distance to the target. Once sorted, the first k elements are the closest values. This works because we just need the k values closest to the target, regardless of their original position in the tree.\n\n### Steps\n\n1. Perform a DFS traversal to collect all node values into an array.\n2. Sort the array using a custom comparator that compares the absolute difference between each value and the target.\n3. Return the first k elements from the sorted array.\n\n### Complexity\n\n- Time complexity: `O(n  ×  log n)`\n- Space complexity: `O(n)`\n\n>  Where `n` is the number of nodes in the tree",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def closestKValues(self, root: TreeNode, target: float, k: int) -> List[int]:\n        def dfs(node, arr):\n            if not node:\n                return\n            \n            arr.append(node.val)\n            dfs(node.left, arr)\n            dfs(node.right, arr)\n        \n        arr = []\n        dfs(root, arr)\n        \n        arr.sort(key = lambda x: (abs(x - target), x))\n        return arr[:k]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value-ii.md",
+      "id": "sort-with-custom-comparator"
+    },
+    {
+      "approach": "Traverse With Heap",
+      "explanation": "### How it works\n\nInstead of sorting all values, we can use a max-heap of size k to track the k closest values seen so far. As we traverse the tree, we compare each node's distance to the target with the farthest element in our heap. If the current node is closer, we replace the farthest element. This avoids sorting the entire array.\n\n### Steps\n\n1. Create a max-heap that orders elements by their distance from the target (farthest at the top).\n2. Traverse all nodes in the tree using DFS.\n3. For each node, add its value to the heap. If the heap size exceeds `k`, remove the element with the largest distance.\n4. Return all elements remaining in the heap.\n\n### Complexity\n\n- Time complexity: `O(n  ×  log k)`\n- Space complexity: `O(n+k)`\n\n>  Where `n` is the number of nodes in the tree and `k` is the size of our heap",
+      "code": {
+        "python": "from typing import List\nfrom heapq import heappush, heappop\n\nclass Solution:\n    def closestKValues(self, root: TreeNode, target: float, k: int) -> List[int]:\n        def dfs(node, heap):\n            if not node:\n                return\n\n            if len(heap) < k:\n                heappush(heap, (-abs(node.val - target), node.val))\n            else:\n                if abs(node.val - target) <= abs(heap[0][0]):\n                    heappop(heap)\n                    heappush(heap, (-abs(node.val - target), node.val))\n\n            dfs(node.left, heap)\n            dfs(node.right, heap)\n\n        heap = []\n        dfs(root, heap)\n        return [x[1] for x in heap]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/closest-binary-search-tree-value-ii.md",
+      "id": "traverse-with-heap"
+    }
+  ]
 }

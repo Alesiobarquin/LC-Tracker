@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    string addBoldTag(string s, vector<string>& words) {\n        int n = s.size();\n        vector<bool> bold(n);\n        \n        for (string word: words) {\n            int start = s.find(word);\n            while (start != -1) {\n                for (int i = start; i < start + word.size(); i++) {\n                    bold[i] = true;\n                }\n                \n                start = s.find(word, start + 1);\n            }\n        }\n        \n        string openTag = \"<b>\";\n        string closeTag = \"</b>\";\n        string ans = \"\";\n        \n        for (int i = 0; i < n; i++) {\n            if (bold[i] && (i == 0 || !bold[i - 1])) {\n                ans += openTag;\n            }\n            \n            ans += s[i];\n            \n            if (bold[i] && (i == n - 1 || !bold[i + 1])) {\n                ans += closeTag;\n            }\n        }\n        \n        return ans;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-bold-tag-in-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-bold-tag-in-string.md",
+  "alternatives": [
+    {
+      "id": "find-and-merge-match-intervals",
+      "approach": "Find and Merge Match Intervals",
+      "explanation": "### How it works\n\nFind every word occurrence, including overlapping matches. Merge intervals that overlap or touch, then insert bold tags around each merged span.\n\n### Steps\n\n1. Find all occurrences of every dictionary word.\n2. Sort their half-open intervals.\n3. Merge overlapping or adjacent spans.\n4. Copy unbolded gaps and bolded spans in order.\n\n### Complexity\n\n- Time: `O(D × N × L + K log K)` as a substring-search upper bound for D words, length N, maximum word length L, and K matches.\n- Space: `O(K + N)` including merged intervals and output.\n\n### Things to watch for\n\n- Touching matches belong to one bold span.\n- Advance by one after a match so overlapping occurrences are found.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/add-bold-tag-in-string.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def addBoldTag(self, s: str, words: list[str]) -> str:\n        intervals = []\n        for word in words:\n            start = s.find(word)\n            while start != -1:\n                intervals.append((start, start + len(word)))\n                start = s.find(word, start + 1)\n        merged = []\n        for start, end in sorted(intervals):\n            if merged and start <= merged[-1][1]:\n                merged[-1][1] = max(merged[-1][1], end)\n            else:\n                merged.append([start, end])\n        parts, cursor = [], 0\n        for start, end in merged:\n            parts.extend([s[cursor:start], '<b>', s[start:end], '</b>'])\n            cursor = end\n        parts.append(s[cursor:])\n        return ''.join(parts)\n"
+      }
+    }
+  ]
 }

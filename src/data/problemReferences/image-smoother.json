@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> imageSmoother(vector<vector<int>>& img) {\n        int ROWS = img.size(), COLS = img[0].size();\n\n        for (int r = 0; r < ROWS; r++) {\n            for (int c = 0; c < COLS; c++) {\n                int total = 0, cnt = 0;\n                for (int i = r - 1; i <= r + 1; i++) {\n                    for (int j = c - 1; j <= c + 1; j++) {\n                        if (i < 0 || i >= ROWS || j < 0 || j >= COLS) {\n                            continue;\n                        }\n                        total += img[i][j] % 256;\n                        cnt++;\n                    }\n                }\n                img[r][c] ^= ((total / cnt) << 8);\n            }\n        }\n\n        for (int r = 0; r < ROWS; r++) {\n            for (int c = 0; c < COLS; c++) {\n                img[r][c] >>= 8;\n            }\n        }\n        return img;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/image-smoother.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/image-smoother.md",
+  "alternatives": [
+    {
+      "approach": "Iteration (Using Extra Matrix)",
+      "explanation": "### How it works\n\nFor each cell, we need to compute the average of all valid neighbors (including itself) within a 3x3 window.\nWe check all 9 potential neighbors, skip those outside the matrix bounds, sum the valid values, and divide by the count.\nSince we need the original values to compute neighbors, we store results in a separate matrix.\n\n### Steps\n\n1. Create a result matrix of the same dimensions.\n2. For each cell `(r, c)`, iterate through the 3x3 window centered at that cell.\n3. For each position `(i, j)` in the window, check if it is within bounds.\n4. If valid, add the value to the total and increment the count.\n5. Set the result cell to `total / count` (integer division).\n6. Return the result matrix.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the number of rows and `m` is the number of columns of the matrix.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def imageSmoother(self, img: List[List[int]]) -> List[List[int]]:\n        ROWS, COLS = len(img), len(img[0])\n        res = [[0] * COLS for _ in range(ROWS)]\n\n        for r in range(ROWS):\n            for c in range(COLS):\n                total, cnt = 0, 0\n                for i in range(r - 1, r + 2):\n                    for j in range(c - 1, c + 2):\n                        if 0 <= i < ROWS and 0 <= j < COLS:\n                            total += img[i][j]\n                            cnt += 1\n                res[r][c] = total // cnt\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/image-smoother.md",
+      "id": "iteration-using-extra-matrix"
+    }
+  ]
 }

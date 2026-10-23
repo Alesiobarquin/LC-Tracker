@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int> &arr) {\n        int n = arr.size();\n\n        // Get the difference `difference`.\n        int difference = (arr.back() - arr.front()) / n;\n        int lo = 0;\n        int hi = n - 1;\n\n        // Basic binary search template.\n        while (lo < hi) {\n\n            int mid = (lo + hi) / 2; // Note: int mid = lo + (hi - lo) / 2; is recommended to avoid potential overflow\n            // All numbers upto `mid` have no missing number, so search on the right side.\n            if (arr[mid] == arr.front() + mid * difference) {\n                lo = mid + 1;\n            }\n\n            // A number is missing before `mid` inclusive of `mid` itself.\n            else {\n                hi = mid;\n            }\n        }\n\n        // Index `lo` will be the position with the first incorrect number.\n        // Return the value that was supposed to be at this index.\n        return arr.front() + difference * lo;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number-in-arithmetic-progression.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number-in-arithmetic-progression.md",
+  "alternatives": [
+    {
+      "approach": "Linear search",
+      "explanation": "### How it works\n\nAn arithmetic progression has a constant difference between consecutive elements. Since exactly one element is missing, we can compute what the common difference should be using the first and last elements: `difference = (arr[n-1] - arr[0]) / n`. Then we walk through the array, checking if each element matches the expected value. The first mismatch reveals the missing number.\n\n### Steps\n\n1. Calculate the common difference: `difference = (arr[n - 1] - arr[0]) / n`.\n2. Initialize `expected = arr[0]`.\n3. Iterate through each element in the array:\n    - If the current element does not equal `expected`, return `expected` as the missing number.\n    - Otherwise, increment `expected` by `difference`.\n4. If no mismatch is found during iteration, return the final `expected` value as the missing number.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` constant space\n\n> Where `n` is the length of array `arr`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def missingNumber(self, arr: List[int]) -> int:\n        n = len(arr)\n\n        # Get the difference `difference`.\n        difference = (arr[-1] - arr[0]) // n\n\n        # The expected element equals the starting element.\n        expected = arr[0]\n\n        for val in arr:\n            # Return the expected value that doesn't match val.\n            if val != expected:\n                return expected\n\n            # Next element will be expected element + `difference`.\n            expected += difference\n\n        return expected\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-number-in-arithmetic-progression.md",
+      "id": "linear-search"
+    }
+  ]
 }

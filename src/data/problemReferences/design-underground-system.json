@@ -7,5 +7,20 @@
     "cpp": "class UndergroundSystem {\nprivate:\n    static constexpr int MOD1 = 768258391, MOD2 = 685683731;\n    static constexpr int BASE1 = 37, BASE2 = 31;\n    unordered_map<int, pair<string, int>> checkInMap;\n    unordered_map<unsigned long long, pair<int, int>> routeMap;\n\n    unsigned long long getHash(const string& s1, const string& s2) {\n        long long h1 = 0, h2 = 0, p1 = 1, p2 = 1;\n        string combined = s1 + \",\" + s2;\n\n        for (char c : combined) {\n            h1 = (h1 + (c - 96) * p1) % MOD1;\n            h2 = (h2 + (c - 96) * p2) % MOD2;\n            p1 = (p1 * BASE1) % MOD1;\n            p2 = (p2 * BASE2) % MOD2;\n        }\n        return (h1 << 32) | h2;\n    }\n\npublic:\n    UndergroundSystem() {}\n\n    void checkIn(int id, string startStation, int t) {\n        checkInMap[id] = {startStation, t};\n    }\n\n    void checkOut(int id, string endStation, int t) {\n        auto [startStation, time] = checkInMap[id];\n        unsigned long long routeHash = getHash(startStation, endStation);\n        routeMap[routeHash].first += (t - time);\n        routeMap[routeHash].second++;\n    }\n\n    double getAverageTime(string startStation, string endStation) {\n        unsigned long long routeHash = getHash(startStation, endStation);\n        auto [totalTime, count] = routeMap[routeHash];\n        return (double) totalTime / count;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=W5QOLqXskZM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-underground-system.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-underground-system.md",
+  "alternatives": [
+    {
+      "id": "store-trips-and-query-averages",
+      "approach": "Store Trips and Query Averages",
+      "explanation": "### How it works\n\nKeep each completed trip duration rather than an aggregate total and count. Queries scan the matching route's durations and calculate their average, providing a data-storage comparison with constant-time aggregate queries.\n\n### Steps\n\n1. Store active check-ins by customer ID.\n2. On checkout, append the completed duration to its route list and remove the active entry.\n3. Calculate a requested route's average from its stored durations.\n\n### Complexity\n\n- Time: Expected `O(1)` check-in/checkout; `O(T)` average query for T trips on that route.\n- Space: `O(A + C)` for active check-ins and all completed trips.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/design-underground-system.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass UndergroundSystem:\n    def __init__(self):\n        self.active = {}\n        self.trips = defaultdict(list)\n\n    def checkIn(self, id: int, stationName: str, t: int) -> None:\n        self.active[id] = (stationName, t)\n\n    def checkOut(self, id: int, stationName: str, t: int) -> None:\n        start, time = self.active.pop(id)\n        self.trips[(start, stationName)].append(t - time)\n\n    def getAverageTime(self, startStation: str, endStation: str) -> float:\n        durations = self.trips[(startStation, endStation)]\n        return sum(durations) / len(durations)\n"
+      }
+    }
+  ]
 }

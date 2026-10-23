@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countTriplets(vector<int>& arr) {\n        int N = arr.size(), res = 0, prefix = 0;\n        unordered_map<int, int> count; // number of prefixes\n        unordered_map<int, int> indexSum; // sum of indices with that prefix\n        count[0] = 1;\n\n        for (int i = 0; i < N; i++) {\n            prefix ^= arr[i];\n            if (count.count(prefix)) {\n                res += i * count[prefix] - indexSum[prefix];\n            }\n            count[prefix]++;\n            indexSum[prefix] += i + 1;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-triplets-that-can-form-two-arrays-of-equal-xor.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-triplets-that-can-form-two-arrays-of-equal-xor.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to find triplets `(i, j, k)` where `a = arr[i] XOR arr[i+1] XOR ... XOR arr[j-1]` equals `b = arr[j] XOR arr[j+1] XOR ... XOR arr[k]`. The most direct approach is to try all valid combinations of `i`, `j`, and `k`, compute both XOR values for each triplet, and count when they match.\n\n### Steps\n\n1. Initialize a result counter `res` to `0`.\n2. Iterate through all possible values of `i` from `0` to `N-2`.\n3. For each `i`, iterate through all possible values of `j` from `i+1` to `N-1`.\n4. For each `j`, iterate through all possible values of `k` from `j` to `N-1`.\n5. Compute `a` by XORing elements from index `i` to `j-1`.\n6. Compute `b` by XORing elements from index `j` to `k`.\n7. If `a == b`, increment `res`.\n8. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 4)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countTriplets(self, arr: List[int]) -> int:\n        N = len(arr)\n        res = 0\n\n        for i in range(N - 1):\n            for j in range(i + 1, N):\n                for k in range(j, N):\n                    a = b = 0\n                    for idx in range(i, j):\n                        a ^= arr[idx]\n                    for idx in range(j, k + 1):\n                        b ^= arr[idx]\n                    if a == b:\n                        res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-triplets-that-can-form-two-arrays-of-equal-xor.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Math + Bitwise XOR",
+      "explanation": "### How it works\n\nThe key insight is that if `a == b`, then `a XOR b == 0`, which means `arr[i] XOR arr[i+1] XOR ... XOR arr[k] == 0`. So we need to find subarrays where the XOR of all elements is `0`. For any such subarray from index `i` to `k`, we can place `j` at any position from `i+1` to `k`, giving us `k - i` valid triplets. This reduces the problem to finding pairs `(i, k)` where the subarray XOR is `0`.\n\n### Steps\n\n1. Initialize a result counter `res` to `0`.\n2. Iterate through all possible starting indices `i` from `0` to `N-2`.\n3. Initialize `cur_xor` to `arr[i]`.\n4. For each ending index `k` from `i+1` to `N-1`:\n    - Update `cur_xor` by XORing it with `arr[k]`.\n    - If `cur_xor == 0`, add `k - i` to `res` (representing all valid positions for `j`).\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countTriplets(self, arr: List[int]) -> int:\n        N = len(arr)\n        res = 0\n\n        for i in range(N - 1):\n            cur_xor = arr[i]\n            for k in range(i + 1, N):\n                cur_xor ^= arr[k]\n                if cur_xor == 0:\n                    res += k - i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-triplets-that-can-form-two-arrays-of-equal-xor.md",
+      "id": "math-bitwise-xor"
+    }
+  ]
 }

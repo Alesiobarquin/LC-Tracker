@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/345.%20Reverse%20Vowels%20of%20a%20String",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "collect-and-replace-vowels",
+      "approach": "Collect and Replace Vowels",
+      "explanation": "### How it works\n\nCollect vowels separately, then fill vowel positions from that collection in reverse order. Other positions retain their original characters.\n\n### Steps\n\n1. Collect uppercase and lowercase vowels.\n2. Scan the string again.\n3. Replace each vowel by the last remaining collected vowel.\n4. Join the output characters.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(n)` auxiliary and output space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/345.%20Reverse%20Vowels%20of%20a%20String",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def reverseVowels(self, s: str) -> str:\n        vowels = set('aeiouAEIOU')\n        saved = [char for char in s if char in vowels]\n        return ''.join(saved.pop() if char in vowels else char for char in s)\n"
+      }
+    }
+  ]
 }

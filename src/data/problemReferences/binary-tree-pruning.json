@@ -1,0 +1,29 @@
+{
+  "problemId": "binary-tree-pruning",
+  "approach": "Recursive Bottom-Up Pruning",
+  "explanation": "### How it works\n\nPrune both child subtrees first. A zero-valued node with no surviving children contains no one and can then be removed.\n\n### Steps\n\n1. Return null for an empty subtree.\n2. Recursively replace both children with their pruned results.\n3. Remove a zero node whose children are both null.\n4. Otherwise keep the node.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion space.",
+  "code": {
+    "python": "class Solution:\n  def pruneTree(self, root: TreeNode | None) -> TreeNode | None:\n    if not root:\n      return None\n    root.left = self.pruneTree(root.left)\n    root.right = self.pruneTree(root.right)\n    if not root.left and not root.right and not root.val:\n      return None\n    return root\n",
+    "cpp": "class Solution {\n public:\n  TreeNode* pruneTree(TreeNode* root) {\n    if (root == nullptr)\n      return nullptr;\n    root->left = pruneTree(root->left);\n    root->right = pruneTree(root->right);\n    if (root->left == nullptr && root->right == nullptr && root->val == 0)\n      return nullptr;\n    return root;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/814.%20Binary%20Tree%20Pruning",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-postorder-pruning",
+      "approach": "Iterative Postorder Pruning",
+      "explanation": "### How it works\n\nUse an explicit postorder stack and remember whether each processed subtree contains a one. Remove a child link when that child's completed subtree contains none.\n\n### Steps\n\n1. Schedule each node after its children.\n2. Read the children's contains-one flags.\n3. Clear links to children whose flags are false.\n4. Keep the root only when its final flag is true.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) flags and traversal state.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/814.%20Binary%20Tree%20Pruning",
+      "code": {
+        "python": "class Solution:\n    def pruneTree(self, root: 'TreeNode') -> 'TreeNode':\n        if not root:\n            return None\n        stack, contains = [(root, False)], {None: False}\n        while stack:\n            node, ready = stack.pop()\n            if ready:\n                left, right = contains[node.left], contains[node.right]\n                contains[node] = node.val == 1 or left or right\n                if not left:\n                    node.left = None\n                if not right:\n                    node.right = None\n            else:\n                stack.append((node, True))\n                stack.extend((child, False) for child in (node.left, node.right) if child)\n        return root if contains[root] else None\n"
+      }
+    }
+  ]
+}

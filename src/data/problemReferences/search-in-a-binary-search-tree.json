@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* searchBST(TreeNode* root, int val) {\n        while (root && root->val != val) {\n            root = val < root->val ? root->left : root->right;\n        }\n        return root;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-a-binary-search-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-a-binary-search-tree.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nA binary search tree has a special property: for any node, all values in the left subtree are smaller, and all values in the right subtree are larger. This lets us eliminate half the tree at each step. If the target is smaller than the current node, we recurse left; if larger, we recurse right. The search either finds the node or reaches a `null` pointer.\n\n### Steps\n\n1. If `root` is `null` or `root.val` equals the target, return `root`.\n2. If the target is less than `root.val`, recursively search the left subtree.\n3. Otherwise, recursively search the right subtree.\n4. Return the result of the recursive call.\n\n### Complexity\n\n- Time complexity: `O(H)`\n- Space complexity: `O(H)` for recursion stack.\n\n> Where `H` is the height of the given tree.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:\n        if not root or root.val == val:\n            return root\n        return self.searchBST(root.left, val) if val < root.val else self.searchBST(root.right, val)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/search-in-a-binary-search-tree.md",
+      "id": "recursion"
+    }
+  ]
 }

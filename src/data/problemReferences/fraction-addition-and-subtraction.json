@@ -1,0 +1,29 @@
+{
+  "problemId": "fraction-addition-and-subtraction",
+  "approach": "Incremental Reduced Fraction Sum",
+  "explanation": "### How it works\n\nParse signed numerators and denominators, add each fraction using cross multiplication, and reduce by the greatest common divisor after every step.\n\n### Steps\n\n1. Extract signed integer components.\n2. Start the accumulated fraction at zero over one.\n3. Cross-multiply to add each next fraction.\n4. Reduce numerator and denominator by their gcd and format the result.\n\n### Complexity\n\n- Time: O(L) parsing plus O(k log B) bounded-integer gcd work for k fractions and intermediate bound B.\n- Space: O(L) parsed components.",
+  "code": {
+    "python": "import re\nimport math\n\nclass Solution:\n  def fractionAddition(self, expression: str) -> str:\n    ints = list(map(int, re.findall('[+-]?[0-9]+', expression)))\n    A = 0\n    B = 1\n\n    for a, b in zip(ints[::2], ints[1::2]):\n      A = A * b + a * B\n      B *= b\n      g = math.gcd(A, B)\n      A //= g\n      B //= g\n\n    return str(A) + '/' + str(B)\n",
+    "cpp": "class Solution {\n public:\n  string fractionAddition(string expression) {\n    istringstream iss(expression);\n    char _;\n    int a;\n    int b;\n    int A = 0;\n    int B = 1;\n\n    // Init: A / B = 0 / 1\n    // A / B + a / b = (Ab + aB) / Bb\n    // So, in each round, set A = Ab + aB, B = Bb.\n    while (iss >> a >> _ >> b) {\n      A = A * b + a * B;\n      B *= b;\n      const int g = abs(std::gcd(A, B));\n      A /= g;\n      B /= g;\n    }\n\n    return to_string(A) + \"/\" + to_string(B);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/592.%20Fraction%20Addition%20and%20Subtraction",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "exact-fraction-objects",
+      "approach": "Exact Fraction Objects",
+      "explanation": "### How it works\n\nPython's standard-library Fraction maintains exact reduced rational values. Parse each signed fraction token and let rational addition normalize the result.\n\n### Steps\n\n1. Extract full signed numerator/denominator tokens.\n2. Construct a Fraction for each token.\n3. Add them exactly.\n4. Format the final numerator and positive denominator.\n\n### Complexity\n\n- Time: O(L) parsing plus exact rational arithmetic and gcd costs.\n- Space: O(L) parsed tokens plus rational integer storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/592.%20Fraction%20Addition%20and%20Subtraction",
+      "code": {
+        "python": "import re\nfrom fractions import Fraction\n\nclass Solution:\n    def fractionAddition(self, expression: str) -> str:\n        total = Fraction(0, 1)\n        for token in re.findall(r'[+-]?\\d+/\\d+', expression):\n            total += Fraction(token)\n        return f'{total.numerator}/{total.denominator}'\n"
+      }
+    }
+  ]
+}

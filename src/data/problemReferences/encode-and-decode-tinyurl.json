@@ -7,5 +7,25 @@
     "cpp": "class Solution {\nprivate:\n    unordered_map<string, string> encodeMap;\n    unordered_map<string, string> decodeMap;\n    string base = \"http://tinyurl.com/\";\n\npublic:\n    string encode(string longUrl) {\n        if (encodeMap.find(longUrl) == encodeMap.end()) {\n            string shortUrl = base + to_string(encodeMap.size() + 1);\n            encodeMap[longUrl] = shortUrl;\n            decodeMap[shortUrl] = longUrl;\n        }\n        return encodeMap[longUrl];\n    }\n\n    string decode(string shortUrl) {\n        return decodeMap[shortUrl];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=VyBOaboQLGc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/encode-and-decode-tinyurl.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/encode-and-decode-tinyurl.md",
+  "alternatives": [
+    {
+      "approach": "List",
+      "explanation": "### How it works\n\nThe simplest way to create a URL shortener is to assign each long URL a unique integer ID based on its position in a list. The short URL is just the base URL plus this index. When decoding, we extract the index from the short URL and retrieve the original URL from the list. This approach is straightforward but the short URL length grows with the number of stored URLs.\n\n### Steps\n\n1. Maintain a list `urls` to store all encoded long URLs.\n2. `encode(longUrl)`:\n    - Append `longUrl` to the list.\n    - Return `\"http://tinyurl.com/\"` followed by the index (list length - 1).\n3. `decode(shortUrl)`:\n    - Extract the index from the end of the short URL.\n    - Return `urls[index]`.\n\n### Complexity\n\n- Time complexity: `O(1)` for `encode()` and `decode()`.\n- Space complexity: `O(n * m)`\n\n> Where `n` is the number of `longUrls`, `m` is the average length of the URLs.",
+      "code": {
+        "python": "class Codec:\n\n    def __init__(self):\n        self.urls = []\n\n    def encode(self, longUrl: str) -> str:\n        self.urls.append(longUrl)\n        return 'http://tinyurl.com/' + str(len(self.urls) - 1)\n\n    def decode(self, shortUrl: str) -> str:\n        return self.urls[int(shortUrl.split('/')[-1])]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/encode-and-decode-tinyurl.md",
+      "id": "list"
+    },
+    {
+      "approach": "Hash Map - I",
+      "explanation": "### How it works\n\nInstead of using a list with implicit indices, we use a hash map with an explicit incrementing ID. This offers more flexibility since we can use the ID as a key and don't rely on list indexing. Each new URL gets assigned the current ID, which then increments. The hash map allows constant-time lookup when decoding.\n\n### Steps\n\n1. Maintain a hash map `url_map` and an integer `id` starting at `0`.\n2. `encode(longUrl)`:\n    - Store `url_map[id] = longUrl`.\n    - Generate the short URL using the current `id`.\n    - Increment `id` and return the short URL.\n3. `decode(shortUrl)`:\n    - Parse the ID from the short URL.\n    - Return `url_map[id]`.\n\n### Complexity\n\n- Time complexity: `O(1)` for `encode()` and `decode()`.\n- Space complexity: `O(n * m)`\n\n> Where `n` is the number of `longUrls`, `m` is the average length of the URLs.",
+      "code": {
+        "python": "class Codec:\n\n    def __init__(self):\n        self.url_map = {}\n        self.id = 0\n\n    def encode(self, longUrl: str) -> str:\n        self.url_map[self.id] = longUrl\n        short_url = f\"http://tinyurl.com/{self.id}\"\n        self.id += 1\n        return short_url\n\n    def decode(self, shortUrl: str) -> str:\n        url_id = int(shortUrl.split('/')[-1])\n        return self.url_map[url_id]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/encode-and-decode-tinyurl.md",
+      "id": "hash-map-i"
+    }
+  ]
 }

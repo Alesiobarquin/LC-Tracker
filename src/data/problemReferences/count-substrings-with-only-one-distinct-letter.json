@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int countLetters(string s) {\n        int total = 0;\n        for (int left = 0, right = 0; right <= s.length(); right++) {\n            if (right == s.length() || s[left] != s[right]) {\n                int lenSubstring = right - left;\n                // more details about the sum of the arithmetic sequence:\n                // https://en.wikipedia.org/wiki/Arithmetic_progression#Sum\n                total += (1 + lenSubstring) * lenSubstring / 2;\n                left = right;\n            }\n        }\n\n        return total;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-substrings-with-only-one-distinct-letter.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-substrings-with-only-one-distinct-letter.md",
+  "alternatives": [
+    {
+      "id": "extend-constant-letter-substrings",
+      "approach": "Extend Constant-Letter Substrings",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nChoose every starting position and extend while characters match the first one. Each successful extension is one valid substring.\n\n### Steps\n\n1. Start a substring at each position.\n2. Extend until a different character appears.\n3. Count every valid endpoint.\n\n### Complexity\n\n- Time: `O(n²)` time.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-substrings-with-only-one-distinct-letter.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def countLetters(self, s: str) -> int:\n        count = 0\n        for left in range(len(s)):\n            right = left\n            while right < len(s) and s[right] == s[left]:\n                count += 1\n                right += 1\n        return count\n"
+      }
+    }
+  ]
 }

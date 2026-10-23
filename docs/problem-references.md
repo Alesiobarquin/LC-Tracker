@@ -4,8 +4,10 @@ The 250 core library problems share their references across Pareto, NeetCode
 75, 150, and 250. Each core problem has two or three selectable approaches:
 195 have three and 55 have two. The existing default remains first, with its
 Python/C++ code preserved. The 445 additional examples are Python only.
-Another 586 extended-catalog problems have built-in references,
-for 836 total. This includes String Compression (#443) and Reverse Words in a
+Another 706 extended-catalog problems have built-in references,
+for 956 total. Of these extended problems, 676 now have two or three selectable
+approaches, adding 990 Python alternatives. There are 926 problems with multiple
+approaches across the core and extended sets. This includes String Compression (#443) and Reverse Words in a
 String (#151), II (#186), and III (#557). Remaining catalog problems use external
 references or personal notes; no general pattern lesson is labeled as their
 exact solution.
@@ -64,6 +66,42 @@ and independent row, column, and box conflicts while preserving the board.
 The broader snippet verifier checks syntax across all bundled C++ entries.
 These checks are finite examples and boundaries, not exhaustive correctness proofs.
 
+A subsequent catalog batch adds 120 previously uncovered problems (87 medium,
+33 easy), each with a complete Python/C++ default and a second Python approach.
+Default code and 12 alternatives are adapted from the same pinned walkccc
+revision. The other 108 alternatives and all explanations were authored for
+LC Tracker with AI assistance. Authored alternatives link a related reference
+without attributing their code to that source.
+
+The source paths, SHA-256 hashes, and approach names are recorded in
+`scripts/catalog-approach-reference-manifest.json`; reasoning, steps, complexity,
+limits, and inline alternatives are in
+`scripts/catalog-approach-reference-content.py`. Rebuild and verify with:
+
+```sh
+python3 scripts/build-catalog-approach-references.py /path/to/walkccc/LeetCode
+python3 scripts/verify-catalog-approaches.py --cpp
+```
+
+The builder checks the pinned files and license before writing. Adaptations in
+`scripts/catalog-reference-code-adaptations.py` use shift-only division, fix
+Word Pattern II's current-offset check, preserve Flip Game II positions and
+repair its C++ cache lookup, avoid duplicate-driven Python quickselect recursion,
+validate reconstruction coverage, correct two C++ portability/API errors,
+normalize knight probabilities, skip the trie terminal marker in Longest Word,
+and keep tiling states reduced modulo the problem modulus. It also makes small
+annotation, separator, boundary, and allocation corrections. These adaptations
+affect only the 120 new records; all 836 earlier references remain unchanged.
+
+All 240 Python examples in this batch pass 1,708 example, boundary, API-trace,
+structural, and small exhaustive-search checks. Every C++ default is syntax
+checked, and 17 native boundary programs compile and run. Checks include
+node-preserving tree splits, repeated updates, empty iterator rows, duplicate
+dictionary entries, unknown-array reader-call bounds, and a duplicate-heavy
+wiggle arrangement. The small searches cover every +/- game state through
+length seven and all five-element permutations for chunk sorting. They are
+finite checks, not full-input correctness proofs or performance benchmarks.
+
 `src/data/problemReferences/*.json` contains the bundled references. Vite loads
 only the requested reference after comparison or an explicit library visit.
 `src/data/problemVideos.json` holds NeetCode's published problem-to-video mapping;
@@ -98,7 +136,7 @@ and edge cases; they are not an exhaustive correctness proof for every solution.
 
 ## Alternate approaches
 
-The NeetCode 250 expansion is the first part of the
+The NeetCode 250 expansion and the extended-catalog batch follow the
 [solution expansion plan](solution-expansion.md). Options are curated teaching
 comparisons, not a measured popularity ranking. Useful brute-force approaches
 are labeled as baselines that may exceed the full problem limits. Approaches
@@ -144,6 +182,100 @@ stateful API operations, list/tree structure, in-place changes, multiple valid
 output orders, wildcard searches, zeroes, negative values, and impossible cases.
 GitHub's required `verify` job runs it. These checks do not prove correctness
 for every input or that a teaching baseline meets the maximum time limits.
+
+### Extended-catalog alternatives
+
+`scripts/extended-approach-reference-manifest.json` adds 743 Python approaches
+to 429 existing extended references: 314 have three options and 115 have two.
+Examples include Count Primes, Design Browser History, Word Break II, Number
+of Provinces, String Compression, and Sort an Array. All new code is adapted
+from the same pinned NeetCode revision and uses its existing MIT attribution.
+This article batch preserves the 250 core records and the 100 walkccc defaults.
+The [further batch](#further-alternatives) expands 90 of those walkccc references
+and 37 other single-option references. Thirty bundled references retain one
+option; minor rewrites are not added solely to increase their counts.
+
+The extended manifest pins each source article's SHA-256 and the entire existing
+default's SHA-256, excluding only the new `alternatives` field. Generation
+rejects a changed article or default before writing any records. The offline
+verifier also checks default hashes. Rebuild all extended batches with:
+
+```sh
+python3 scripts/build-approach-references.py /path/to/neetcode-gh/leetcode \
+  --manifest scripts/extended-approach-reference-manifest.json
+npm run verify:approaches
+```
+
+Add `--batch foundations`, `structures`, `graphs`, `dynamic`, or `remaining`
+to rebuild one topic batch. The default manifest still rebuilds NeetCode 250
+independently, and its regenerated alternatives remain identical.
+
+`scripts/extended-approach-fixtures.py` supplies independent expected examples,
+boundaries, and stateful operation traces for every new approach. Its verifier
+runs 1,922 checks across all 743 snippets, covering graph cycles, missing results,
+negative values, inclusive intervals, tied rankings, iterator exhaustion,
+cache eviction, corrected list/tree structures, in-place compression, and
+deterministic boundaries for weighted random selection. Randomized outputs
+are checked by their contract, not by requiring one arbitrary answer.
+The required GitHub `verify` job runs both core and extended checks through
+`npm run verify:approaches`. These finite examples do not establish exhaustive
+correctness or full-size performance.
+
+Reviewed adaptations in `scripts/approach-reference-notes.py` add standard
+logarithm imports, use LeetCode's `minCost` method name for Paint House, remove
+a debug print from distinct-island counting, return a list of crawled URLs,
+and preserve Recover Binary Search Tree's in-place return contract. The
+inorder closest-value example accumulates into one list instead of repeatedly
+concatenating lists, so its linear time claim also holds on skew trees.
+`scripts/extended-approach-reference-notes.py` supplies Python-specific
+workspace and string-comparison bounds. It explicitly labels String
+Compression's extra-space baseline as exceeding the constant-space requirement.
+These content repairs do not change the existing defaults.
+
+### Further alternatives
+
+`scripts/more-approach-reference-manifest.json` adds a second approach to 127
+more existing references: 90 from the walkccc group and 37 from the NeetCode
+group. Examples include 01 Matrix, Single Number II, H-Index, Game of Life,
+Path Sum III, Divide Chocolate, Design Snake Game, and both rolling-maze
+variants. That batch brought the library to 806 problems with multiple options;
+the subsequent 120-problem catalog batch brings the current total to 926.
+
+Ten code examples are adapted from separate Python files in
+[walkccc/LeetCode](https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6),
+at the same pinned revision as their defaults. The manifest records each
+source path and SHA-256, the license SHA-256, and the complete existing default
+SHA-256. They retain Peng-Yu Chen's attribution and the bundled MIT license.
+The remaining 117 code examples and all explanations were written for LC
+Tracker with AI assistance in `scripts/more-approach-reference-content.py`.
+Authored entries use `codeAuthor` and `explanationAuthor` to identify LC Tracker;
+their source link and license describe the related reference and do not assign
+that source's license to the new code. The interface already supports both
+attribution forms.
+
+Rebuild from an extracted archive or checkout of the pinned walkccc revision:
+
+```sh
+python3 scripts/build-more-approach-references.py /path/to/walkccc/LeetCode
+npm run verify:approaches
+```
+
+The builder validates every selected source, license, and default before any
+writes. `build-additional-problem-references.py` now preserves alternatives
+when refreshing those defaults, and rejects a changed default pending review.
+Neither builder changes the earlier 250 core or 429 extended alternative sets.
+
+`scripts/more-approach-fixtures.py` reuses established examples for the existing
+reference group and adds problem-specific contracts. Its verifier executes
+393 checks across all 127 added snippets, including exact expected values,
+tree/list structure, original node identities during flattening, in-place
+boards, stateful operations, API mocks, and nonunique output contracts.
+The required `verify:approaches` command now runs all three batches for 3,160
+finite checks. This verifies examples and boundaries, not every possible input.
+Teaching baselines state time, memory, recursion, or API-query limits, and
+extra-space word reversal is explicitly labeled against the problem's space
+restriction. Original defaults, C++ examples, sources, videos, and personal
+study state remain intact.
 
 The approach title buttons change explanation, complexity, code, and attribution together in
 both the library and revealed recall comparison. Python-only approaches cannot

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/539.%20Minimum%20Time%20Difference",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-minutes-and-check-the-wrap",
+      "approach": "Sort Minutes and Check the Wrap",
+      "explanation": "### How it works\n\nConvert clock readings to minutes and sort them. The minimum circular gap lies between adjacent sorted readings or between the last and first readings across midnight.\n\n### Steps\n\n1. Convert each HH:MM value to minutes after midnight.\n2. Sort the readings.\n3. Check neighboring gaps and the midnight wrap gap.\n\n### Complexity\n\n- Time: `O(n log n)` time.\n- Space: `O(n)` for minute values and sorting workspace.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/539.%20Minimum%20Time%20Difference",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findMinDifference(self, timePoints: list[str]) -> int:\n        minutes = sorted(int(t[:2]) * 60 + int(t[3:]) for t in timePoints)\n        best = minutes[0] + 1440 - minutes[-1]\n        for a, b in zip(minutes, minutes[1:]):\n            best = min(best, b - a)\n        return best\n"
+      }
+    }
+  ]
 }

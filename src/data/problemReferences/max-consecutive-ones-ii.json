@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int findMaxConsecutiveOnes(vector<int>& nums) {\n        int longestSequence = 0;\n        int left = 0;\n        int right = 0;\n        int numZeroes = 0;\n\n        // While our window is in bounds\n        while (right < nums.size()) {\n\n            // Increase numZeroes if the rightmost element is 0\n            if (nums[right] == 0) {\n                numZeroes++;\n            }\n\n            //If our window is invalid, contract our window\n            while (numZeroes == 2) {\n                if (nums[left] == 0) {\n                    numZeroes--;\n                }\n                left++;\n            }\n\n            // Update our longest sequence answer\n            longestSequence = max(longestSequence, right - left + 1);\n\n            // Expand our window\n            right++;\n        }\n\n        return longestSequence;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to try every possible starting position and extend the window as far as we can while allowing at most one zero to be flipped. For each starting index, we scan forward and count zeros. As long as we have seen at most one zero, the current window is valid. Once we encounter a second zero, we stop extending and record the maximum length found so far. This guarantees we consider all possible substrings but results in checking many overlapping ranges.\n\n### Steps\n\n1. Initialize `longestSequence` to track the maximum valid window length.\n2. For each starting index `left`, iterate through the array with `right`:\n    - Count zeros encountered so far.\n    - If the count exceeds `1`, stop expanding this window.\n    - Otherwise, update `longestSequence` with the current window size.\n3. Return `longestSequence`.\n\n### Complexity\n\n- Time complexity: `O(n^2)`\n- Space complexity: `O(1)` constant space used\n\n> Where `n` is the length of the input array `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:\n        longest_sequence = 0\n\n        for left in range(len(nums)):\n            num_zeroes = 0\n            for right in range(left, len(nums)):   # Check every consecutive sequence\n                if num_zeroes == 2:\n                    break\n                if nums[right] == 0:               # Count how many 0's\n                    num_zeroes += 1\n                if num_zeroes <= 1:                 # Update answer if it's valid\n                    longest_sequence = max(longest_sequence, right - left + 1)\n\n        return longest_sequence\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-consecutive-ones-ii.md",
+      "id": "brute-force"
+    }
+  ]
 }

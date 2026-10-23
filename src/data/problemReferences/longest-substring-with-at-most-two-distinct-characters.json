@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstringTwoDistinct(string s) {\n        int n = s.size();\n        unordered_map<char, int> count;\n        int j = 0, i = 0;\n        for (i = 0; i < n; i++) {\n            count[s[i]]++;\n            if (count.size() > 2) {\n                count[s[j]]--;\n                if (count[s[j]] == 0) count.erase(s[j]);\n                j++;\n            }\n        }\n        return i - j;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-two-distinct-characters.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-two-distinct-characters.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most direct approach is to examine every possible substring and check if it contains at most two distinct characters. For each starting position, we extend the substring character by character, tracking the distinct characters seen. Once we see a third distinct character, we stop and record the maximum valid length found.\n\n### Steps\n\n1. Initialize `res = 0` to store the maximum length.\n2. For each starting index `i` from `0` to `n-1`:\n    - Create a set `seen` to track distinct characters.\n    - Initialize `curLen = 0`.\n    - For each ending index `j` from `i` to `n-1`:\n        - Add `s[j]` to the set.\n        - If the set size exceeds `2`, break out of the inner loop.\n        - Otherwise, increment `curLen`.\n    - Update `res = max(res, curLen)`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` since we have at most `52` different characters.",
+      "code": {
+        "python": "class Solution:\n    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:\n        res, n = 0, len(s)\n\n        for i in range(n):\n            seen = set()\n            cnt = curLen = 0\n            for j in range(i, n):\n                seen.add(s[j])\n                if len(seen) > 2:\n                    break\n                curLen += 1\n            res = max(res, curLen)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-two-distinct-characters.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nWe maintain a window that always contains at most two distinct characters. As we expand the window to the right, we track character frequencies in a hash map. When adding a new character causes us to have more than two distinct characters, we shrink the window from the left until we're back to two or fewer distinct characters.\n\n### Steps\n\n1. Initialize `res = 0`, `j = 0` (left pointer), and a hash map `seen` for character counts.\n2. For each `i` (right pointer) from `0` to `n-1`:\n    - Increment the count of `s[i]` in the map.\n    - While the map contains more than `2` distinct characters:\n        - Decrement the count of `s[j]`.\n        - If the count reaches `0`, remove `s[j]` from the map.\n        - Increment `j`.\n    - Update `res = max(res, i - j + 1)`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` since we have at most `52` different characters.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:\n        res, n = 0, len(s)\n        seen = defaultdict(int)\n        j = 0\n\n        for i in range(n):\n            seen[s[i]] += 1\n            while len(seen) > 2:\n                seen[s[j]] -= 1\n                if seen[s[j]] == 0:\n                    seen.pop(s[j])\n                j += 1\n            res = max(res, i - j + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-substring-with-at-most-two-distinct-characters.md",
+      "id": "sliding-window"
+    }
+  ]
 }

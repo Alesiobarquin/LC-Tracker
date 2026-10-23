@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/477.%20Total%20Hamming%20Distance",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "count-every-pair",
+      "approach": "Count Every Pair",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nCompute the Hamming distance independently for each unordered pair and add the results. This contrasts with aggregating all pairs by bit position.\n\n### Steps\n\n1. Enumerate i < j.\n2. XOR the two values and count set bits.\n3. Add those counts.\n\n### Complexity\n\n- Time: `O(n² × w)` as a bit-work upper bound for width w, fixed by the problem.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/477.%20Total%20Hamming%20Distance",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def totalHammingDistance(self, nums: list[int]) -> int:\n        return sum((nums[i] ^ nums[j]).bit_count()\n                   for i in range(len(nums)) for j in range(i + 1, len(nums)))\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "shortest-word-distance-ii",
+  "approach": "Indexed Occurrences with Two Pointers",
+  "explanation": "### How it works\n\nPreprocessing groups word positions in increasing order. Each query merges the two relevant position lists, moving whichever current index is smaller.\n\n### Steps\n\n1. Build a position list for every word.\n2. Start at the first occurrence in each queried list.\n3. Record the distance and advance the smaller index.\n4. Stop when one list is exhausted.\n\n### Complexity\n\n- Time: O(n) preprocessing; O(a + b) per query for occurrence counts a and b.\n- Space: O(n) stored positions; O(1) query workspace.",
+  "code": {
+    "python": "import collections\nimport math\n\nclass WordDistance:\n  def __init__(self, wordsDict: list[str]):\n    self.wordToIndices = collections.defaultdict(list)\n    for i, word in enumerate(wordsDict):\n      self.wordToIndices[word].append(i)\n\n  def shortest(self, word1: str, word2: str) -> int:\n    indices1 = self.wordToIndices[word1]\n    indices2 = self.wordToIndices[word2]\n    ans = math.inf\n\n    i = 0\n    j = 0\n    while i < len(indices1) and j < len(indices2):\n      ans = min(ans, abs(indices1[i] - indices2[j]))\n      if indices1[i] < indices2[j]:\n        i += 1\n      else:\n        j += 1\n\n    return ans\n",
+    "cpp": "class WordDistance {\n public:\n  WordDistance(vector<string>& words) {\n    for (int i = 0; i < words.size(); ++i)\n      wordToIndices[words[i]].push_back(i);\n  }\n\n  int shortest(string word1, string word2) {\n    const vector<int> indices1 = wordToIndices[word1];\n    const vector<int> indices2 = wordToIndices[word2];\n    int ans = INT_MAX;\n\n    for (int i = 0, j = 0; i < indices1.size() && j < indices2.size();) {\n      ans = min(ans, abs(indices1[i] - indices2[j]));\n      if (indices1[i] < indices2[j])\n        ++i;\n      else\n        ++j;\n    }\n\n    return ans;\n  }\n\n private:\n  unordered_map<string, vector<int>> wordToIndices;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/244.%20Shortest%20Word%20Distance%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "binary-search-each-occurrence",
+      "approach": "Binary Search Each Occurrence",
+      "explanation": "### How it works\n\nFor each position in the shorter occurrence list, binary-search the other list. Only the insertion point and its predecessor can be closest.\n\n### Steps\n\n1. Build sorted position lists.\n2. Use the shorter list as the query driver.\n3. Binary-search each position in the longer list.\n4. Compare the two neighboring candidate positions.\n\n### Complexity\n\n- Time: O(n) preprocessing; O(min(a, b) log(max(a, b) + 1)) per query.\n- Space: O(n) stored positions; O(1) query workspace.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/244.%20Shortest%20Word%20Distance%20II",
+      "code": {
+        "python": "from bisect import bisect_left\nfrom collections import defaultdict\n\nclass WordDistance:\n    def __init__(self, wordsDict: list[str]):\n        self.positions = defaultdict(list)\n        for i, word in enumerate(wordsDict):\n            self.positions[word].append(i)\n\n    def shortest(self, word1: str, word2: str) -> int:\n        a, b = self.positions[word1], self.positions[word2]\n        if len(a) > len(b):\n            a, b = b, a\n        best = float('inf')\n        for position in a:\n            j = bisect_left(b, position)\n            if j < len(b):\n                best = min(best, b[j] - position)\n            if j:\n                best = min(best, position - b[j - 1])\n        return best\n"
+      }
+    }
+  ]
+}

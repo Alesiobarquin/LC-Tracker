@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/111.%20Minimum%20Depth%20of%20Binary%20Tree",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "first-leaf-bfs",
+      "approach": "First-Leaf BFS",
+      "explanation": "### How it works\n\nBreadth-first traversal reaches shallower nodes first. The first node with no children therefore determines the minimum root-to-leaf depth.\n\n### Steps\n\n1. Return zero for an empty tree.\n2. Process the queue one level at a time.\n3. Return the current depth on the first leaf.\n4. Enqueue existing children and advance the depth.\n\n### Complexity\n\n- Time: `O(n)` in the worst case.\n- Space: `O(w)` for the widest queued level.\n\n### Things to watch for\n\n- A missing child is not a leaf.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/111.%20Minimum%20Depth%20of%20Binary%20Tree/111-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "import collections\n\nclass Solution:\n  def minDepth(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n\n    q = collections.deque([root])\n\n    step = 1\n    while q:\n      for _ in range(len(q)):\n        node = q.popleft()\n        if not node.left and not node.right:\n          return step\n        if node.left:\n          q.append(node.left)\n        if node.right:\n          q.append(node.right)\n      step += 1\n"
+      }
+    }
+  ]
 }

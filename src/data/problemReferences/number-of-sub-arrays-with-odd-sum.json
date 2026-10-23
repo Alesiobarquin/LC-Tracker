@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int numOfSubarrays(vector<int>& arr) {\n        int count[2] = {1, 0};\n        int prefix = 0, res = 0;\n        const int MOD = 1e9 + 7;\n\n        for (int num : arr) {\n            prefix = (prefix + num) % 2;\n            res = (res + count[1 - prefix]) % MOD;\n            count[prefix]++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-with-odd-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-with-odd-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each possible subarray, compute its sum and check if it is odd. We try every starting index and extend to every possible ending index, accumulating the sum incrementally.\n\n### Steps\n\n1. For each starting index `i`, initialize a running sum.\n2. Extend the subarray by adding elements one at a time up to index `n-1`.\n3. After each addition, check if the current sum is odd and increment `res` if so.\n4. Return the total count modulo 10^9 + 7.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numOfSubarrays(self, arr: List[int]) -> int:\n        n, res = len(arr), 0\n        mod = int(1e9 + 7)\n\n        for i in range(n):\n            curSum = 0\n            for j in range(i, n):\n                curSum += arr[j]\n                if curSum % 2:\n                    res = (res + 1) % mod\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-with-odd-sum.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nWe use memoization to count subarrays ending at each position. For a subarray starting at index `i`, the parity of its sum depends on the running parity as we extend rightward. By caching results for each `(index, parity)` state, we avoid redundant calculations.\n\n### Steps\n\n1. Define `dfs(i, parity)` returning the count of odd-sum subarrays starting at index `i` with the given running parity.\n2. At each step, update the parity by adding the current element modulo 2.\n3. Add `1` to the count if the new parity is odd, then recurse to the next index.\n4. Sum up `dfs(i, 0)` for all starting indices to get the total.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def numOfSubarrays(self, arr: List[int]) -> int:\n        mod = 10**9 + 7\n        n = len(arr)\n        memo = {}\n\n        def dp(i: int, parity: int) -> int:\n            if i == n:\n                return 0\n\n            if (i, parity) in memo:\n                return memo[(i, parity)]\n\n            new_parity = (parity + arr[i]) % 2\n            res = new_parity + dp(i + 1, new_parity)\n            memo[(i, parity)] = res % mod\n            return memo[(i, parity)]\n\n        ans = 0\n        for i in range(n):\n            ans = (ans + dp(i, 0)) % mod\n\n        return ans\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-sub-arrays-with-odd-sum.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

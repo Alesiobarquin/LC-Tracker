@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> findDifference(vector<int>& nums1, vector<int>& nums2) {\n        vector<int> res1, res2;\n        set<int> numSet1(begin(nums1), end(nums1)), numSet2(begin(nums2), end(nums2));\n\n        set_difference(begin(numSet1), end(numSet1), begin(numSet2), end(numSet2), back_inserter(res1));\n        set_difference(begin(numSet2), end(numSet2), begin(numSet1), end(numSet1), back_inserter(res2));\n\n        return {res1, res2};\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=a4wqKR-znBE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference-of-two-arrays.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference-of-two-arrays.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check each element in one array against every element in the other array. For each number in `nums1`, we scan through all of `nums2` to see if it exists there. If not found, it belongs in our result. We repeat the same process for `nums2`. Using sets ensures we only include each distinct value once.\n\n### Steps\n\n1. Initialize two empty sets to store unique elements that don't appear in the other array.\n2. For each element in `nums1`, iterate through `nums2` to check if it exists. If not found, add it to the first result set.\n3. For each element in `nums2`, iterate through `nums1` to check if it exists. If not found, add it to the second result set.\n4. Convert both sets to lists and return them.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n + m)`\n\n> Where `n` is the size of the array `nums1` and `m` is the size of the array `nums2`.",
+      "code": {
+        "python": "class Solution:\n    def findDifference(self, nums1: list[int], nums2: list[int]) -> list[list[int]]:\n        res = [set(), set()]\n\n        for num1 in nums1:\n            found = False\n            for num2 in nums2:\n                if num1 == num2:\n                    found = True\n                    break\n            if not found:\n                res[0].add(num1)\n\n        for num2 in nums2:\n            found = False\n            for num1 in nums1:\n                if num1 == num2:\n                    found = True\n                    break\n            if not found:\n                res[1].add(num2)\n\n        return [list(res[0]), list(res[1])]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference-of-two-arrays.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nBy sorting both arrays, we can efficiently compare elements using a two-pointer technique. After sorting, elements are ordered, so we can walk through both arrays simultaneously. When we find an element in one array that doesn't have a match at the current position in the other, we know it's unique without needing to scan the entire array.\n\n### Steps\n\n1. Sort both input arrays.\n2. Define a helper function that finds elements in array `A` that don't exist in array `B`:\n   - Use a pointer `j` to track position in `B`.\n   - For each unique element in `A`, advance `j` in `B` until we reach an element greater than or equal to the current element.\n   - If `B` is exhausted or `B[j]` doesn't match, the element is unique to `A`.\n3. Call the helper function twice: once to find elements unique to `nums1`, and once for `nums2`.\n4. Return both result lists.\n\n### Complexity\n\n- Time complexity: `O(n log n + m log m)`\n- Space complexity: `O(n + m)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `n` is the size of the array `nums1` and `m` is the size of the array `nums2`.",
+      "code": {
+        "python": "class Solution:\n    def findDifference(self, nums1: list[int], nums2: list[int]) -> list[list[int]]:\n        nums1.sort()\n        nums2.sort()\n\n        def helper(A, B):\n            n, m = len(A), len(B)\n            res = []\n\n            j = 0\n            prev = float('-inf')\n            for num in A:\n                if prev == num:\n                    continue\n                while j < m and B[j] < num:\n                    j += 1\n                if j == m or B[j] != num:\n                    res.append(num)\n                prev = num\n            return res\n\n        return [helper(nums1, nums2), helper(nums2, nums1)]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference-of-two-arrays.md",
+      "id": "sorting"
+    }
+  ]
 }

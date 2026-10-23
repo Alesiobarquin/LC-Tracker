@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int findKthNumber(int n, int k) {\n        long long cur = 1;\n        long long i = 1;\n        while (i < k) {\n            long long steps = count(cur, n);\n            if (i + steps <= k) {\n                cur++;\n                i += steps;\n            } else {\n                cur *= 10;\n                i++;\n            }\n        }\n        return (int)cur;\n    }\n\nprivate:\n    long long count(long long cur, int n) {\n        long long res = 0;\n        long long nei = cur + 1;\n        while (cur <= n) {\n            res += min(nei, (long long)n + 1) - cur;\n            cur *= 10;\n            nei *= 10;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-smallest-in-lexicographical-order.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-smallest-in-lexicographical-order.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach converts all numbers from `1` to `n` into strings and sorts them lexicographically. In lexicographical order, \"10\" comes before \"2\" because '1' < '2'. After sorting, we simply return the `k`-th element. This is straightforward but inefficient for large `n`.\n\n### Steps\n\n1. Generate all numbers from `1` to `n` as strings.\n2. Sort the list of strings lexicographically.\n3. Return the `k`-th string converted back to an integer.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def findKthNumber(self, n: int, k: int) -> int:\n        nums = []\n        for num in range(1, n + 1):\n            nums.append(str(num))\n\n        nums.sort()\n        return int(nums[k - 1])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-th-smallest-in-lexicographical-order.md",
+      "id": "brute-force"
+    }
+  ]
 }

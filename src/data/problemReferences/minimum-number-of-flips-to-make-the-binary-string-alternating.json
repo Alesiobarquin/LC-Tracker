@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minFlips(string s) {\n        int start_1 = 0, n = s.size();\n\n        for (int i = 0; i < n; i++) {\n            if (i & 1) {\n                start_1 += (s[i] == '1');\n            } else {\n                start_1 += (s[i] == '0');\n            }\n        }\n\n        int start_0 = n - start_1;\n        int ans = min(start_0, start_1);\n        if (n % 2 == 0) {\n            return ans;\n        }\n\n        int dp0 = start_0, dp1 = start_1;\n        for (char c : s) {\n            int temp = dp0;\n            dp0 = dp1;\n            dp1 = temp;\n            if (c == '1') {\n                dp0++;\n                dp1--;\n            } else {\n                dp0--;\n                dp1++;\n            }\n            ans = min({ans, dp0, dp1});\n        }\n\n        return ans;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=MOeuK6gaC2A",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-flips-to-make-the-binary-string-alternating.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-flips-to-make-the-binary-string-alternating.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAn alternating string is either `\"010101...\"` or `\"101010...\"`. The type-1 operation (moving first character to end) lets us try all possible rotations of the string. For each rotation, we count how many flips are needed to match either target pattern.\n\nWe generate both alternating patterns of length `n`, then for each of the `n` possible rotations, compute the difference count against both patterns and track the minimum.\n\n### Steps\n\n1. Build two target patterns: `alt1` starting with `'0'` and `alt2` starting with `'1'`.\n2. For each rotation index `i` from `0` to `n-1`:\n    - Create the rotated string by moving the first `i` characters to the end.\n    - Count mismatches with both `alt1` and `alt2`.\n    - Update the minimum flip count.\n3. Return the minimum found.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def minFlips(self, s: str) -> int:\n        res = n = len(s)\n        alt1, alt2 = [], []\n        for i in range(n):\n            alt1.append(\"0\" if i % 2 == 0 else \"1\")\n            alt2.append(\"1\" if i % 2 == 0 else \"0\")\n\n        def diff(A, B):\n            cnt = 0\n            for i in range(n):\n                cnt += 1 if (A[i] != B[i]) else 0\n            return cnt\n\n        for i in range(n):\n            newS = s[i:] + s[:i]\n            res = min(res, min(diff(alt1, newS), diff(alt2, newS)))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-flips-to-make-the-binary-string-alternating.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nConcatenating the string with itself (`s + s`) simulates all rotations. A window of size `n` sliding over this doubled string represents each rotation. We can maintain mismatch counts incrementally: add the new character's contribution when expanding the window, and remove the old character's contribution when shrinking.\n\nThis transforms the O(n^2) brute force into O(n) by avoiding recalculation of the full difference for each rotation.\n\n### Steps\n\n1. Double the string: `s = s + s`.\n2. Build alternating patterns of length `2n`.\n3. Use two pointers `l` and `r` to maintain a window of size `n`:\n    - As `r` expands, update `diff1` and `diff2` based on mismatches at position `r`.\n    - When window exceeds size `n`, remove contribution from position `l` and advance `l`.\n    - When window is exactly size `n`, record the minimum of `diff1` and `diff2`.\n4. Return the minimum.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def minFlips(self, s: str) -> int:\n        n = len(s)\n        s = s + s\n        alt1, alt2 = [], []\n        for i in range(len(s)):\n            alt1.append(\"0\" if i % 2 == 0 else \"1\")\n            alt2.append(\"1\" if i % 2 == 0 else \"0\")\n\n        res = len(s)\n        diff1, diff2 = 0, 0\n        l = 0\n\n        for r in range(len(s)):\n            if s[r] != alt1[r]:\n                diff1 += 1\n            if s[r] != alt2[r]:\n                diff2 += 1\n\n            if r - l + 1 > n:\n                if s[l] != alt1[l]:\n                    diff1 -= 1\n                if s[l] != alt2[l]:\n                    diff2 -= 1\n                l += 1\n\n            if r - l + 1 == n:\n                res = min(res, diff1, diff2)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-flips-to-make-the-binary-string-alternating.md",
+      "id": "sliding-window"
+    }
+  ]
 }

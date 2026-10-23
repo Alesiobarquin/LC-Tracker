@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/331.%20Verify%20Preorder%20Serialization%20of%20a%20Binary%20Tree",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "reduce-completed-subtrees",
+      "approach": "Reduce Completed Subtrees",
+      "explanation": "### How it works\n\nA non-null node followed by two null subtrees forms a completed subtree. Replace each such triple by one null marker. A valid serialization reduces to exactly one marker.\n\n### Steps\n\n1. Push tokens onto a stack.\n2. Replace a non-null node followed by two null markers with one null marker.\n3. Accept only a final stack containing one null marker.\n\n### Complexity\n\n- Time: `O(n)` for n tokens; every token is pushed and removed a bounded number of times.\n- Space: `O(n)` for tokenization and the stack.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/331.%20Verify%20Preorder%20Serialization%20of%20a%20Binary%20Tree",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def isValidSerialization(self, preorder: str) -> bool:\n        stack = []\n        for token in preorder.split(','):\n            stack.append(token)\n            while len(stack) >= 3 and stack[-1] == stack[-2] == '#' and stack[-3] != '#':\n                stack[-3:] = ['#']\n        return stack == ['#']\n"
+      }
+    }
+  ]
 }

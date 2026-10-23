@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int removeCoveredIntervals(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end());\n        int res = 1, start = intervals[0][0], end = intervals[0][1];\n\n        for (const auto& interval : intervals) {\n            int l = interval[0], r = interval[1];\n            if (start < l && end < r) {\n                start = l;\n                res++;\n            }\n            end = max(end, r);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nhAsMabiVkM",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-covered-intervals.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-covered-intervals.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAn interval is \"covered\" if another interval completely contains it. We check every pair of intervals to see if one covers the other. For interval `i` to be covered by interval `j`, we need `j`'s start to be at or before `i`'s start, and `j`'s end to be at or after `i`'s end. We count how many intervals are not covered by any other.\n\n### Steps\n\n1. Start with the total count of intervals.\n2. For each interval `i`, check all other intervals `j`.\n3. If interval `j` covers interval `i` (starts earlier or equal, ends later or equal), decrement the count and move to the next interval.\n4. Return the remaining count of uncovered intervals.\n\nTime Complexity: `O(n^2)` because we check each pair of intervals.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def removeCoveredIntervals(self, intervals: List[List[int]]) -> int:\n        n = len(intervals)\n        res = n\n\n        for i in range(n):\n            for j in range(n):\n                if (i != j and intervals[j][0] <= intervals[i][0] and\n                    intervals[j][1] >= intervals[i][1]\n                ):\n                    res -= 1\n                    break\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-covered-intervals.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting - I",
+      "explanation": "### How it works\n\nSorting helps us process intervals in an order where we can easily detect covered intervals. By sorting by start time (ascending) and then by end time (descending), intervals that share the same start will have the longest one first. This means when we encounter a new interval, we only need to check if it's covered by the most recent \"dominant\" interval we've seen.\n\n### Steps\n\n1. Sort intervals by start time ascending, and by end time descending for ties.\n2. Track the previous interval's boundaries.\n3. For each interval, if it's completely contained within the previous interval's boundaries, skip it.\n4. Otherwise, count it as uncovered and update the tracked boundaries.\n5. Return the count of uncovered intervals.\n\nThis sorting strategy ensures that once we sort, we only need to track `prevL` and `prevR`.\n\n### Complexity\n\n- Time complexity: `O(nlog n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def removeCoveredIntervals(self, intervals: List[List[int]]) -> int:\n        intervals.sort(key=lambda x: (x[0], -x[1]))\n        res = 1\n        prevL, prevR = intervals[0][0], intervals[0][1]\n        for l, r in intervals:\n            if prevL <= l and prevR >= r:\n                continue\n            res += 1\n            prevL, prevR = l, r\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-covered-intervals.md",
+      "id": "sorting-i"
+    }
+  ]
 }

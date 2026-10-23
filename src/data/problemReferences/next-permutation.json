@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        int i = n - 2;\n        while (i >= 0 && nums[i] >= nums[i + 1]) {\n            i--;\n        }\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) {\n                j--;\n            }\n            swap(nums[i], nums[j]);\n        }\n        int l = i + 1, r = n - 1;\n        while (l < r) {\n            swap(nums[l++], nums[r--]);\n        }\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/next-permutation.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/next-permutation.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach generates all permutations of the array, sorts them in lexicographic order, finds the current permutation in that sorted list, and returns the next one. If we are at the last permutation, we wrap around to the first.\n\nThis approach is extremely inefficient for large arrays since the number of permutations is n!, but it demonstrates the concept of what \"next permutation\" means.\n\n### Steps\n\n1. Generate all unique permutations of the input array.\n2. Sort the permutations lexicographically.\n3. Find the current array in the sorted list.\n4. Return the next permutation in the list (wrapping to the first if at the end).\n5. Copy the result back into the original array.\n\n### Complexity\n\n- Time complexity: `O(n! * n)`\n- Space complexity: `O(n! * n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def nextPermutation(self, nums: List[int]) -> None:\n        \"\"\"\n        Do not return anything, modify nums in-place instead.\n        \"\"\"\n        permutations = self.permute(nums[:])\n        permutations.sort()\n        for i, p in enumerate(permutations):\n            if p == nums:\n                nextP = permutations[(i + 1) % len(permutations)]\n                for j in range(len(nums)):\n                    nums[j] = nextP[j]\n                break\n\n\n    def permute(self, nums: List[int]) -> List[List[int]]:\n        res = []\n\n        def dfs(i):\n            if i == len(nums):\n                res.append(nums.copy())\n                return\n\n            for j in range(i, len(nums)):\n                if j > i and nums[i] == nums[j]:\n                    continue\n\n                nums[i], nums[j] = nums[j], nums[i]\n                dfs(i + 1)\n\n            for j in range(len(nums) - 1, i, -1):\n                nums[j], nums[i] = nums[i], nums[j]\n\n        nums.sort()\n        dfs(0)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/next-permutation.md",
+      "id": "brute-force"
+    }
+  ]
 }

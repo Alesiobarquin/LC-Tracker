@@ -1,0 +1,29 @@
+{
+  "problemId": "pyramid-transition-matrix",
+  "approach": "Row-Building Backtracking",
+  "explanation": "### How it works\n\nEach adjacent pair in a row permits a set of blocks above it. Backtrack while building the next row, then recurse on that row until reaching the single top block.\n\n### Steps\n\n1. Group allowed upper blocks by their two-block base.\n2. Build the next row one position at a time.\n3. On completing a row, recurse upward.\n4. Accept any path reaching a one-character row.\n\n### Complexity\n\n- Time: O(A^(b(b − 1)/2)) loose upper bound for alphabet size A and bottom width b.\n- Space: O(b²) live row strings and recursion.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def pyramidTransition(self, bottom: str, allowed: list[str]) -> bool:\n    prefixToBlocks = collections.defaultdict(list)\n\n    for a in allowed:\n      prefixToBlocks[a[:2]].append(a[2])\n\n    def dfs(row: str, nextRow: str, i: int) -> bool:\n      if len(row) == 1:\n        return True\n      if len(nextRow) + 1 == len(row):\n        return dfs(nextRow, '', 0)\n\n      for c in prefixToBlocks[row[i:i + 2]]:\n        if dfs(row, nextRow + c, i + 1):\n          return True\n\n      return False\n\n    return dfs(bottom, '', 0)\n",
+    "cpp": "class Solution {\n public:\n  bool pyramidTransition(string bottom, vector<string>& allowed) {\n    unordered_map<string, vector<char>> prefixToBlocks;\n\n    for (const string& a : allowed)\n      prefixToBlocks[a.substr(0, 2)].push_back(a[2]);\n\n    return dfs(bottom, \"\", 0, prefixToBlocks);\n  }\n\n private:\n  bool dfs(const string& row, const string& nextRow, int i,\n           const unordered_map<string, vector<char>>& prefixToBlocks) {\n    if (row.length() == 1)\n      return true;\n    if (nextRow.length() + 1 == row.length())\n      return dfs(nextRow, \"\", 0, prefixToBlocks);\n\n    const string& prefix = row.substr(i, 2);\n\n    if (const auto it = prefixToBlocks.find(prefix);\n        it != prefixToBlocks.cend())\n      for (const char c : it->second)\n        if (dfs(row, nextRow + c, i + 1, prefixToBlocks))\n          return true;\n\n    return false;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/756.%20Pyramid%20Transition%20Matrix",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "memoized-complete-row-states",
+      "approach": "Memoized Complete-Row States",
+      "explanation": "### How it works\n\nDifferent lower constructions may produce the same next row. Cache whether each complete row can reach the top, while a generator enumerates its valid successor rows.\n\n### Steps\n\n1. Map each adjacent pair to allowed upper characters.\n2. Memoize the result for each complete row.\n3. Generate successor rows position by position.\n4. Accept if any generated row can reach the top.\n\n### Complexity\n\n- Time: O(sum from r=2 to b of r × A^(2r − 1)) loose bound covering cached rows and successor enumeration.\n- Space: O(b × A^b + b²) loose cache and recursion bound.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/756.%20Pyramid%20Transition%20Matrix",
+      "code": {
+        "python": "from collections import defaultdict\nfrom functools import cache\n\nclass Solution:\n    def pyramidTransition(self, bottom: str, allowed: list[str]) -> bool:\n        choices = defaultdict(list)\n        for a, b, c in allowed:\n            choices[a + b].append(c)\n        @cache\n        def possible(row):\n            if len(row) == 1:\n                return True\n            def build(index, path):\n                if index == len(row) - 1:\n                    return possible(path)\n                return any(build(index + 1, path + char)\n                           for char in choices[row[index:index + 2]])\n            return build(0, '')\n        return possible(bottom)\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "problemId": "shortest-word-distance-iii",
+  "approach": "Single Pass with Equal-Word Handling",
+  "explanation": "### How it works\n\nFor different targets, track the newest index of each. If the targets are equal, compare each occurrence with the previous occurrence rather than with itself.\n\n### Steps\n\n1. Detect whether the target words are equal.\n2. Update the newest matching index on each visit.\n3. For equal targets, shift the old newest index into the previous slot.\n4. Minimize the distance between valid target indices.\n\n### Complexity\n\n- Time: O(n) word comparisons.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def shortestWordDistance(\n      self,\n      wordsDict: list[str],\n      word1: str,\n      word2: str,\n  ) -> int:\n    isSame = word1 == word2\n    ans = math.inf\n    # If word1 == word2, index1 is the newest index.\n    index1 = len(wordsDict)\n    # If word1 == word2, index2 is the previous index.\n    index2 = -len(wordsDict)\n\n    for i, word in enumerate(wordsDict):\n      if word == word1:\n        if isSame:\n          index2 = index1\n        index1 = i\n      elif word == word2:\n        index2 = i\n      ans = min(ans, abs(index1 - index2))\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int shortestWordDistance(vector<string>& words, string word1, string word2) {\n    const bool isSame = word1 == word2;\n    int ans = INT_MAX;\n    // If word1 == word2, index1 is the newest index.\n    int index1 = words.size();\n    // If word1 == word2, index2 is the previous index.\n    int index2 = -words.size();\n\n    for (int i = 0; i < words.size(); ++i) {\n      if (words[i] == word1) {\n        if (isSame)\n          index2 = index1;\n        index1 = i;\n      } else if (words[i] == word2) {\n        index2 = i;\n      }\n      ans = min(ans, abs(index1 - index2));\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/245.%20Shortest%20Word%20Distance%20III",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "collected-target-positions",
+      "approach": "Collected Target Positions",
+      "explanation": "### How it works\n\nSeparate preprocessing makes the equal-word rule explicit: consecutive positions are the only candidates for identical targets, while two sorted lists handle distinct targets.\n\n### Steps\n\n1. Collect positions of both target words.\n2. For identical targets, compare adjacent occurrences.\n3. Otherwise merge the two lists with pointers.\n4. Return the smallest valid distance.\n\n### Complexity\n\n- Time: O(n) word comparisons.\n- Space: O(n) for positions.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/245.%20Shortest%20Word%20Distance%20III",
+      "code": {
+        "python": "class Solution:\n    def shortestWordDistance(self, wordsDict: list[str], word1: str, word2: str) -> int:\n        a = [i for i, word in enumerate(wordsDict) if word == word1]\n        if word1 == word2:\n            return min(y - x for x, y in zip(a, a[1:]))\n        b = [i for i, word in enumerate(wordsDict) if word == word2]\n        i = j = 0\n        best = len(wordsDict)\n        while i < len(a) and j < len(b):\n            best = min(best, abs(a[i] - b[j]))\n            if a[i] < b[j]:\n                i += 1\n            else:\n                j += 1\n        return best\n"
+      }
+    }
+  ]
+}

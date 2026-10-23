@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> vowelStrings(vector<string>& words, vector<vector<int>>& queries) {\n        int vowels = 0;\n        for (char c : string(\"aeiou\")) {\n            vowels |= (1 << (c - 'a'));\n        }\n\n        int n = words.size();\n        vector<int> prefix(n + 1);\n        for (int i = 0; i < n; i++) {\n            int f = words[i][0] - 'a';\n            int l = words[i].back() - 'a';\n            int isVowel = ((1 << f) & vowels) && ((1 << l) & vowels);\n            prefix[i + 1] = prefix[i] + isVowel;\n        }\n\n        vector<int> res;\n        for (auto& q : queries) {\n            int l = q[0], r = q[1];\n            res.push_back(prefix[r + 1] - prefix[l]);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-vowel-strings-in-ranges.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-vowel-strings-in-ranges.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA word is a \"vowel string\" if it starts and ends with a vowel (a, e, i, o, u). For each query, we need to count how many words in the given range satisfy this condition. The straightforward approach is to iterate through the range for each query and check each word.\n\n### Steps\n\n1. Create a set of vowels for O(1) lookup.\n2. Initialize an empty result list.\n3. For each query `(start, end)`:\n    - Initialize a counter to `0`.\n    - For each word from index `start` to `end`:\n        - Check if the first and last characters are both vowels.\n        - If so, increment the counter.\n    - Append the counter to the result list.\n4. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(m)` space for the output list.\n\n> Where `n` is the number of words, and `m` is the number of queries.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def vowelStrings(self, words: List[str], queries: List[List[int]]) -> List[int]:\n        vowels = set(\"aeiou\")\n        res = []\n\n        for start, end in queries:\n            cnt = 0\n            for i in range(start, end + 1):\n                if words[i][0] in vowels and words[i][-1] in vowels:\n                    cnt += 1\n            res.append(cnt)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-vowel-strings-in-ranges.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum + Hash Set",
+      "explanation": "### How it works\n\nThe brute force approach recomputes the count for overlapping or similar ranges repeatedly. We can precompute a prefix sum array where `prefix[i]` stores the count of vowel strings from index `0` to `i-1`. Then any range query `(l, r)` can be answered in O(1) time as `prefix[r+1] - prefix[l]`.\n\n### Steps\n\n1. Create a set of vowels for O(1) lookup.\n2. Build a prefix sum array of size `n+1`, initialized to `0`.\n3. For each word at index `i`:\n    - Set `prefix[i+1] = prefix[i]`.\n    - If the word starts and ends with a vowel, increment `prefix[i+1]`.\n4. For each query `(l, r)`:\n    - The answer is `prefix[r+1] - prefix[l]`.\n5. Return the results.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity:\n    - `O(n)` extra space.\n    - `O(m)` space for the output list.\n\n> Where `n` is the number of words, and `m` is the number of queries.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def vowelStrings(self, words: List[str], queries: List[List[int]]) -> List[int]:\n        vowel_set = set(\"aeiou\")\n        prefix_cnt = [0] * (len(words) + 1)\n        prev = 0\n\n        for i, w in enumerate(words):\n            if w[0] in vowel_set and w[-1] in vowel_set:\n                prev += 1\n            prefix_cnt[i + 1] = prev\n\n        res = [0] * len(queries)\n        for i, q in enumerate(queries):\n            l, r = q\n            res[i] = prefix_cnt[r + 1] - prefix_cnt[l]\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-vowel-strings-in-ranges.md",
+      "id": "prefix-sum-hash-set"
+    }
+  ]
 }

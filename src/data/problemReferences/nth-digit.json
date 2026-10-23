@@ -1,0 +1,29 @@
+{
+  "problemId": "nth-digit",
+  "approach": "Skip Fixed-Digit Blocks",
+  "explanation": "### How it works\n\nThere are 9 one-digit numbers, 90 two-digit numbers, and so on. Remove entire digit blocks until the desired position falls inside one, then locate its number and digit.\n\n### Steps\n\n1. Track the block's digit width, first number, and count.\n2. Subtract complete blocks before the target.\n3. Locate the target number with a zero-based offset.\n4. Extract its requested decimal digit.\n\n### Complexity\n\n- Time: O(log n) bounded-integer operations.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def findNthDigit(self, n: int) -> int:\n    def getDigit(num: int, pos: int, digitSize: int):\n      if pos == 0:\n        return num % 10\n      for _ in range(digitSize - pos):\n        num //= 10\n      return num % 10\n\n    digitSize = 1\n    startNum = 1\n    count = 9\n\n    while digitSize * count < n:\n      n -= digitSize * count\n      digitSize += 1\n      startNum *= 10\n      count *= 10\n\n    targetNum = startNum + (n - 1) // digitSize\n    pos = n % digitSize\n\n    return getDigit(targetNum, pos, digitSize)\n",
+    "cpp": "class Solution {\n public:\n  int findNthDigit(int n) {\n    int digitSize = 1;\n    int startNum = 1;\n    long count = 9;\n\n    while (digitSize * count < n) {\n      n -= digitSize * count;\n      ++digitSize;\n      startNum *= 10;\n      count *= 10;\n    }\n\n    const int targetNum = startNum + (n - 1) / digitSize;\n    const int index = (n - 1) % digitSize;\n    return to_string(targetNum)[index] - '0';\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/400.%20Nth%20Digit",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "binary-search-the-containing-number",
+      "approach": "Binary Search the Containing Number",
+      "explanation": "### How it works\n\nThe total number of digits written through integer x is monotone. Binary-search the first x whose cumulative digit count reaches n, then index into that number.\n\n### Steps\n\n1. Count digits through a candidate number by decimal blocks.\n2. Binary-search the smallest candidate reaching position n.\n3. Count digits before that number.\n4. Select the target character at the remaining offset.\n\n### Complexity\n\n- Time: O(log² n) bounded-integer operations.\n- Space: O(log n) for the final decimal representation.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/400.%20Nth%20Digit",
+      "code": {
+        "python": "class Solution:\n    def findNthDigit(self, n: int) -> int:\n        def count_through(value):\n            total, start, width = 0, 1, 1\n            while start <= value:\n                total += (min(value, start * 10 - 1) - start + 1) * width\n                start *= 10\n                width += 1\n            return total\n        low, high = 1, n\n        while low < high:\n            middle = (low + high) // 2\n            if count_through(middle) >= n:\n                high = middle\n            else:\n                low = middle + 1\n        offset = n - count_through(low - 1) - 1\n        return int(str(low)[offset])\n"
+      }
+    }
+  ]
+}

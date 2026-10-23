@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int mincostTickets(vector<int>& days, vector<int>& costs) {\n        vector<int> dp(31, 0);\n        int i = 0;\n\n        for (int d = 1; d <= 365; d++) {\n            if (i >= days.size()) break;\n\n            dp[d % 31] = dp[(d - 1) % 31];\n\n            if (d == days[i]) {\n                dp[d % 31] += costs[0];\n                dp[d % 31] = min(dp[d % 31], costs[1] + dp[max(0, d - 7) % 31]);\n                dp[d % 31] = min(dp[d % 31], costs[2] + dp[max(0, d - 30) % 31]);\n                i++;\n            }\n        }\n\n        return dp[days.back() % 31];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4pY1bsBpIY4",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-for-tickets.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-for-tickets.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to cover all travel days with the minimum cost using 1-day, 7-day, or 30-day passes. At each travel day, we have three choices: buy a 1-day pass (covers today), buy a 7-day pass (covers 7 days starting today), or buy a 30-day pass (covers 30 days starting today). We try all possibilities recursively and pick the minimum cost.\n\n### Steps\n\n1. Define a recursive function `dfs(i)` that returns the minimum cost to cover all days starting from index `i`.\n2. Base case: If `i` equals the number of travel days, return `0` (no more days to cover).\n3. For each pass type (1-day, 7-day, 30-day):\n    - Find the next day index `j` that is not covered by this pass.\n    - Calculate the cost as the pass price plus `dfs(j)`.\n4. Return the `min` cost among all three options.\n\n### Complexity\n\n- Time complexity: `O(3 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def mincostTickets(self, days: List[int], costs: List[int]) -> int:\n        n = len(days)\n\n        def dfs(i):\n            if i == n:\n                return 0\n\n            res = costs[0] + dfs(i + 1)\n            j = i\n            while j < n and days[j] < days[i] + 7:\n                j += 1\n            res = min(res, costs[1] + dfs(j))\n\n            j = i\n            while j < n and days[j] < days[i] + 30:\n                j += 1\n            res = min(res, costs[2] + dfs(j))\n\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-for-tickets.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes the same subproblems many times. Since the minimum cost from day `i` onward depends only on `i`, we can cache these results. This transforms our exponential solution into a linear one by ensuring each state is computed only once.\n\n### Steps\n\n1. Create a memoization dictionary `dp` to store computed results.\n2. Define `dfs(i)` that returns the minimum cost from index `i`.\n3. If `i` is already in `dp`, return the cached value.\n4. For each pass duration (1, 7, 30 days):\n    - Find the first uncovered day index `j`.\n    - Update the minimum cost as `min(current_min, cost + dfs(j))`.\n5. Store and return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def mincostTickets(self, days: List[int], costs: List[int]) -> int:\n        dp = {}\n\n        def dfs(i):\n            if i == len(days):\n                return 0\n            if i in dp:\n                return dp[i]\n\n            dp[i] = float(\"inf\")\n            j = i\n            for d, c in zip([1, 7, 30], costs):\n                while j < len(days) and days[j] < days[i] + d:\n                    j += 1\n                dp[i] = min(dp[i], c + dfs(j))\n\n            return dp[i]\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-for-tickets.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

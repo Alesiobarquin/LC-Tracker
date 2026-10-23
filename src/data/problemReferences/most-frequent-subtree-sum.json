@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/508.%20Most%20Frequent%20Subtree%20Sum",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "recompute-each-subtree-sum",
+      "approach": "Recompute Each Subtree Sum",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nVisit every node as a possible subtree root, recomputing its complete subtree sum independently. Count those sums to expose the work saved by a single postorder pass.\n\n### Steps\n\n1. Enumerate all tree nodes.\n2. For each node, traverse its subtree to calculate the sum.\n3. Count sum frequencies and return every most-frequent sum.\n\n### Complexity\n\n- Time: `O(n²)` in the worst case of a skew tree.\n- Space: `O(n)` for traversal, sum frequencies, and recursion.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/508.%20Most%20Frequent%20Subtree%20Sum",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nfrom collections import Counter\n\nclass Solution:\n    def findFrequentTreeSum(self, root: Optional[TreeNode]) -> list[int]:\n        if not root:\n            return []\n        def total(node):\n            return node.val + total(node.left) + total(node.right) if node else 0\n        counts, stack = Counter(), [root]\n        while stack:\n            node = stack.pop()\n            counts[total(node)] += 1\n            stack.extend(child for child in (node.left, node.right) if child)\n        largest = max(counts.values())\n        return [value for value, count in counts.items() if count == largest]\n"
+      }
+    }
+  ]
 }

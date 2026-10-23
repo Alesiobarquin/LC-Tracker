@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minDeletions(string s) {\n        vector<int> count(26, 0);\n        for (char& c : s) {\n            count[c - 'a']++;\n        }\n\n        sort(count.begin(), count.end(), greater<int>());\n        int res = 0;\n        int maxAllowedFreq = count[0];\n\n        for (int& freq : count) {\n            if (freq > maxAllowedFreq) {\n                res += freq - maxAllowedFreq;\n                freq = maxAllowedFreq;\n            }\n            maxAllowedFreq = max(0, freq - 1);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=h8AZEN49gTc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-deletions-to-make-character-frequencies-unique.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-deletions-to-make-character-frequencies-unique.md",
+  "alternatives": [
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nFor frequencies to be unique, no two characters can have the same count. When we encounter a frequency that already exists, we must delete characters until we reach an unused frequency (or zero). A hash set tracks which frequencies are already taken. For each character's frequency, we decrement it until we find an available slot, counting each decrement as a deletion.\n\n### Steps\n\n1. Count the frequency of each character.\n2. Create a hash set to track used frequencies.\n3. For each frequency:\n    - While the frequency is positive and already in the set, decrement it and count a deletion.\n    - Add the resulting frequency to the set.\n4. Return the total deletion count.\n\n### Complexity\n\n- Time complexity: `O(n + m ^ 2)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `s` and `m` is the total number of unique frequncies possible.",
+      "code": {
+        "python": "class Solution:\n    def minDeletions(self, s: str) -> int:\n        count = [0] * 26\n        for c in s:\n            count[ord(c) - ord('a')] += 1\n\n        used_freq = set()\n        res = 0\n        for freq in count:\n            while freq > 0 and freq in used_freq:\n                freq -= 1\n                res += 1\n            used_freq.add(freq)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-deletions-to-make-character-frequencies-unique.md",
+      "id": "hash-set"
+    },
+    {
+      "approach": "Max-Heap",
+      "explanation": "### How it works\n\nUsing a max-heap, we process frequencies from largest to smallest. When the top two frequencies are equal, we have a conflict. We resolve it by decrementing one of them and pushing the reduced value back (if still positive). This greedy approach ensures we minimize deletions by keeping larger frequencies intact when possible.\n\n### Steps\n\n1. Count character frequencies and build a max-heap.\n2. While more than one frequency remains:\n    - Pop the largest frequency.\n    - If it equals the next largest, decrement it, count a deletion, and push back if positive.\n3. Return the total deletion count.\n\n### Complexity\n\n- Time complexity: `O(n + m ^ 2 log m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the string `s` and `m` is the total number of unique frequncies possible.",
+      "code": {
+        "python": "from collections import Counter\nimport heapq\n\nclass Solution:\n    def minDeletions(self, s: str) -> int:\n        freq = Counter(s)\n        maxHeap = [-f for f in freq.values()]\n        heapq.heapify(maxHeap)\n\n        res = 0\n        while len(maxHeap) > 1:\n            top = -heapq.heappop(maxHeap)\n            if top == -maxHeap[0]:\n                if top - 1 > 0:\n                    heapq.heappush(maxHeap, -(top - 1))\n                res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-deletions-to-make-character-frequencies-unique.md",
+      "id": "max-heap"
+    }
+  ]
 }

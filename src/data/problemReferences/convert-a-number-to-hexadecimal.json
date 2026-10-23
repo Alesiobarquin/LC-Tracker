@@ -1,0 +1,29 @@
+{
+  "problemId": "convert-a-number-to-hexadecimal",
+  "approach": "Low-Nibble Extraction",
+  "explanation": "### How it works\n\nNormalize a negative input to its unsigned 32-bit representation, then repeatedly read the low four bits and shift them away. Reverse the collected hexadecimal digits.\n\n### Steps\n\n1. Return zero for input zero.\n2. Add 2^32 to a negative Python input.\n3. Map each low nibble to a hexadecimal digit.\n4. Shift right four bits and reverse the digit sequence.\n\n### Complexity\n\n- Time: O(8) for the 32-bit domain.\n- Space: O(8) output and temporary digits.",
+  "code": {
+    "python": "class Solution:\n  def toHex(self, num: int) -> str:\n    if num == 0:\n      return '0'\n\n    hex = '0123456789abcdef'\n    ans = []\n\n    # Handling negative numbers by using 32-bit unsigned representation Python's\n    # bitwise operation works on signed numbers, so we convert to 32-bit\n    # unsigned for negative numbers.\n    if num < 0:\n      num += 2**32\n\n    while num > 0:\n      ans.append(hex[num & 0xF])\n      num >>= 4\n\n    return ''.join(reversed(ans))\n",
+    "cpp": "class Solution {\n public:\n  string toHex(int num) {\n    unsigned unsignedNum = static_cast<unsigned>(num);\n    if (unsignedNum == 0)\n      return \"0\";\n\n    constexpr char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7',\n                            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};\n    string ans;\n\n    while (unsignedNum != 0) {\n      ans += hex[unsignedNum & 0xf];\n      unsignedNum >>= 4;\n    }\n\n    ranges::reverse(ans);\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/405.%20Convert%20a%20Number%20to%20Hexadecimal",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "high-to-low-nibble-scan",
+      "approach": "High-to-Low Nibble Scan",
+      "explanation": "### How it works\n\nScan all eight 4-bit groups from the most significant end. Skip leading zero groups, then emit each remaining nibble.\n\n### Steps\n\n1. Mask to 32 bits.\n2. Visit shifts 28, 24, …, 0.\n3. Start output at the first nonzero nibble.\n4. Return zero if every nibble was zero.\n\n### Complexity\n\n- Time: O(8) for the 32-bit domain.\n- Space: O(8) output and temporary digits.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/405.%20Convert%20a%20Number%20to%20Hexadecimal",
+      "code": {
+        "python": "class Solution:\n    def toHex(self, num: int) -> str:\n        value = num & 0xffffffff\n        digits, result = '0123456789abcdef', []\n        for shift in range(28, -1, -4):\n            nibble = (value >> shift) & 15\n            if nibble or result:\n                result.append(digits[nibble])\n        return ''.join(result) or '0'\n"
+      }
+    }
+  ]
+}

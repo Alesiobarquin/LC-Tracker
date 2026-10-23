@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/275.%20H-Index%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "linear-threshold-scan",
+      "approach": "Linear Threshold Scan",
+      "explanation": "### How it works\n\nThe input is already sorted. Scan it directly and find the first position whose citation count is at least the number of papers from that position onward.\n\n### Steps\n\n1. For each position i, compute n - i.\n2. Return that count when citations[i] is large enough.\n3. Return zero if no position qualifies.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/275.%20H-Index%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def hIndex(self, citations: list[int]) -> int:\n        for i, citation in enumerate(citations):\n            if citation >= len(citations) - i:\n                return len(citations) - i\n        return 0\n"
+      }
+    }
+  ]
 }

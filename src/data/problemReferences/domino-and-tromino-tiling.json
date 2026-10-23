@@ -1,0 +1,29 @@
+{
+  "problemId": "domino-and-tromino-tiling",
+  "approach": "Full-Board Tiling Recurrence",
+  "explanation": "### How it works\n\nDomino and tromino tilings satisfy F(n) = 2F(n − 1) + F(n − 3), with initial counts one, two, and five for widths one, two, and three. Store preceding counts and reduce each step modulo 10^9 + 7.\n\n### Steps\n\n1. Initialize the first three nonempty widths.\n2. Apply the recurrence from width four onward.\n3. Reduce every entry modulo 10^9 + 7.\n4. Return the requested width.\n\n### Complexity\n\n- Time: O(n) arithmetic operations.\n- Space: O(n) states after adapting the source's fixed upper-bound allocation.",
+  "code": {
+    "python": "class Solution:\n  def numTilings(self, n: int) -> int:\n    MOD = 1_000_000_007\n    dp = [0, 1, 2, 5] + [0] * max(0, n - 3)\n\n    for i in range(4, n + 1):\n      dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD\n\n    return dp[n] % MOD\n",
+    "cpp": "class Solution {\n public:\n  int numTilings(int n) {\n    constexpr int kMod = 1'000'000'007;\n    vector<long> dp(max(4, n + 1));\n    dp[1] = 1;\n    dp[2] = 2;\n    dp[3] = 5;\n\n    for (int i = 4; i <= n; ++i)\n      dp[i] = (2 * dp[i - 1] + dp[i - 3]) % kMod;\n\n    return dp[n];\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/790.%20Domino%20and%20Tromino%20Tiling",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "full-and-one-gap-profile-states",
+      "approach": "Full and One-Gap Profile States",
+      "explanation": "### How it works\n\nTrack complete boards and a board with one specified corner missing. A full board extends a previous full board by a vertical domino, a two-columns-earlier full board by horizontal dominoes, or either gap profile by a tromino.\n\n### Steps\n\n1. Initialize full counts for widths zero and one and a zero gap count.\n2. Compute the next full count as previous full + two-back full + twice the previous gap.\n3. Update the gap count as previous gap + two-back full.\n4. Roll the states modulo 10^9 + 7.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/790.%20Domino%20and%20Tromino%20Tiling",
+      "code": {
+        "python": "class Solution:\n    def numTilings(self, n: int) -> int:\n        if n <= 1:\n            return 1\n        two_back, full, gap = 1, 1, 0\n        modulus = 1_000_000_007\n        for _ in range(2, n + 1):\n            next_full = (full + two_back + 2 * gap) % modulus\n            gap = (gap + two_back) % modulus\n            two_back, full = full, next_full\n        return full\n"
+      }
+    }
+  ]
+}

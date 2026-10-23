@@ -1,0 +1,28 @@
+{
+  "problemId": "nested-list-weight-sum",
+  "approach": "Breadth-First Depth Weighting",
+  "explanation": "### How it works\n\nProcess nested values one depth at a time. Multiply integers by the current level and enqueue the contents of lists for the next level.\n\n### Steps\n\n1. Enqueue the top-level NestedInteger values.\n2. Increment depth for each queue level.\n3. Add depth times every encountered integer.\n4. Enqueue child lists without increasing depth inside the same level.\n\n### Complexity\n\n- Time: O(N) for N integers and list containers.\n- Space: O(w) for maximum nested-level width w.",
+  "code": {
+    "python": "from __future__ import annotations\n\nimport collections\n\nclass Solution:\n  def depthSum(self, nestedList: list[NestedInteger]) -> int:\n    ans = 0\n    depth = 0\n    q = collections.deque()\n\n    def addIntegers(nestedList: list[NestedInteger]) -> None:\n      for ni in nestedList:\n        q.append(ni)\n\n    addIntegers(nestedList)\n\n    while q:\n      depth += 1\n      for _ in range(len(q)):\n        ni = q.popleft()\n        if ni.isInteger():\n          ans += ni.getInteger() * depth\n        else:\n          addIntegers(ni.getList())\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int depthSum(vector<NestedInteger>& nestedList) {\n    int ans = 0;\n    int depth = 0;\n    queue<NestedInteger> q;\n\n    addIntegers(q, nestedList);\n\n    while (!q.empty()) {\n      ++depth;\n      for (int sz = q.size(); sz > 0; --sz) {\n        const NestedInteger ni = q.front();\n        q.pop();\n        if (ni.isInteger())\n          ans += ni.getInteger() * depth;\n        else\n          addIntegers(q, ni.getList());\n      }\n    }\n\n    return ans;\n  }\n\n private:\n  void addIntegers(queue<NestedInteger>& q,\n                   const vector<NestedInteger>& nestedList) {\n    for (const NestedInteger& ni : nestedList)\n      q.push(ni);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/339.%20Nested%20List%20Weight%20Sum",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "recursive-depth-weighting",
+      "approach": "Recursive Depth Weighting",
+      "explanation": "### How it works\n\nCarry the current depth through recursion. Integers contribute their value times depth, while a nested list is visited at depth plus one.\n\n### Steps\n\n1. Begin at depth one.\n2. Add weighted integers.\n3. Recurse into nested lists with the next depth.\n4. Accumulate all contributions.\n\n### Complexity\n\n- Time: O(N).\n- Space: O(d) recursion space for maximum nesting depth d.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/339.%20Nested%20List%20Weight%20Sum/339-2.py",
+      "code": {
+        "python": "from __future__ import annotations\n\nclass Solution:\n  def depthSum(self, nestedList: list[NestedInteger]) -> int:\n    ans = 0\n\n    def dfs(nestedList: list[NestedInteger], depth: int) -> None:\n      nonlocal ans\n      for ni in nestedList:\n        if ni.isInteger():\n          ans += ni.getInteger() * depth\n        else:\n          dfs(ni.getList(), depth + 1)\n\n    dfs(nestedList, 1)\n    return ans\n"
+      }
+    }
+  ]
+}

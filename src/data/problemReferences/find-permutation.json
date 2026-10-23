@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findPermutation(string s) {\n        int n = s.length();\n        vector<int> res(n + 1);\n        res[0] = 1;\n        int i = 1;\n\n        while (i <= n) {\n            res[i] = i + 1;\n            int j = i;\n\n            if (s[i - 1] == 'D') {\n                while (i <= n && s[i - 1] == 'D') {\n                    i++;\n                }\n\n                for (int k = j - 1, c = i; k <= i - 1; k++, c--) {\n                    res[k] = c;\n                }\n            } else {\n                i++;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-permutation.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-permutation.md",
+  "alternatives": [
+    {
+      "approach": "Using Stack",
+      "explanation": "### How it works\n\nTo produce the lexicographically smallest permutation, we want to place smaller numbers as early as possible. The string tells us the relationship between consecutive elements: 'I' means increasing, 'D' means decreasing. When we encounter a sequence of 'D's, we need to reverse the order of those numbers. A stack naturally handles this: push numbers onto the stack during 'D' sequences, then pop them all when we hit an 'I' (or the end), which reverses their order.\n\n### Steps\n\n1. Initialize an empty result array and a stack.\n2. Iterate through positions `1` to `n`:\n    - If the character at position `i-1` is 'I', push `i` onto the stack, then pop all elements from the stack into the result.\n    - If the character is 'D', just push `i` onto the stack.\n3. After the loop, push `n+1` onto the stack and pop all remaining elements into the result.\n4. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the number of elements in the resultant arrangement",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findPermutation(self, s: str) -> List[int]:\n        res = [0] * (len(s) + 1)\n        stack = []\n        j = 0\n\n        for i in range(1, len(s) + 1):\n            if s[i - 1] == 'I':\n                stack.append(i)\n                while stack:\n                    res[j] = stack.pop()\n                    j += 1\n            else:\n                stack.append(i)\n\n        stack.append(len(s) + 1)\n        while stack:\n            res[j] = stack.pop()\n            j += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-permutation.md",
+      "id": "using-stack"
+    },
+    {
+      "approach": "Reversing the Subarray",
+      "explanation": "### How it works\n\nStart with the identity permutation `[1, 2, ..., n+1]`, which is already the smallest possible arrangement. Whenever we see a sequence of consecutive 'D's, we need those corresponding elements to be in decreasing order. We can achieve this by reversing the subarray that spans those 'D's. This maintains the smallest possible values in earlier positions while satisfying the decrease constraints.\n\n### Steps\n\n1. Initialize the result array as `[1, 2, 3, ..., n+1]`.\n2. Iterate through the string:\n    - When a 'D' is encountered, find the end of the consecutive 'D' sequence.\n    - Reverse the subarray from the position before the first 'D' to the position after the last 'D'.\n    - Continue from after the reversed segment.\n3. Return the modified result array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`\n\n> Where `n` is the size of the resultant array",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findPermutation(self, s: str) -> List[int]:\n        n = len(s)\n        res = [i + 1 for i in range(n + 1)]\n\n        i = 1\n\n        while i <= n:\n            j = i\n\n            while i <= n and s[i - 1] == 'D':\n                i += 1\n\n            self.reverse(res, j - 1, i)\n            i += 1\n\n        return res\n\n    def reverse(self, a: List[int], start: int, end: int) -> None:\n        for i in range((end - start) // 2):\n            temp = a[i + start]\n            a[i + start] = a[end - i - 1]\n            a[end - i - 1] = temp\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-permutation.md",
+      "id": "reversing-the-subarray"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/376.%20Wiggle%20Subsequence",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "quadratic-up-and-down-dp",
+      "approach": "Quadratic Up-and-Down DP",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nStore the best subsequence ending at each index with an upward or downward final step. Extend from earlier positions to compare with the rolling greedy default.\n\n### Steps\n\n1. Initialize both lengths to one.\n2. A smaller earlier value extends a downward state into an upward state.\n3. A larger earlier value extends an upward state into a downward state.\n4. Return the largest length.\n\n### Complexity\n\n- Time: `O(n²)` time.\n- Space: `O(n)` for both state arrays.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/376.%20Wiggle%20Subsequence",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def wiggleMaxLength(self, nums: list[int]) -> int:\n        if not nums:\n            return 0\n        up, down = [1] * len(nums), [1] * len(nums)\n        for i in range(len(nums)):\n            for j in range(i):\n                if nums[i] > nums[j]:\n                    up[i] = max(up[i], down[j] + 1)\n                elif nums[i] < nums[j]:\n                    down[i] = max(down[i], up[j] + 1)\n        return max(max(up), max(down))\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "best-time-to-buy-and-sell-stock-with-transaction-fee",
+  "approach": "Two Rolling Trading States",
+  "explanation": "### How it works\n\nTrack the best cash after selling and the best balance while holding one share. Charge the fee when buying; each day offers a choice to keep a state or perform its allowed trade.\n\n### Steps\n\n1. Start with zero cash and an impossible holding balance.\n2. Update the selling state from the prior holding balance.\n3. Update holding from available cash minus price and fee.\n4. Return the selling balance.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.\n\n### Things to watch for\n\n- Using the just-updated cash cannot improve a same-day rebuy because the fee is nonnegative.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def maxProfit(self, prices: list[int], fee: int) -> int:\n    sell = 0\n    hold = -math.inf\n\n    for price in prices:\n      sell = max(sell, hold + price)\n      hold = max(hold, sell - price - fee)\n\n    return sell\n",
+    "cpp": "class Solution {\n public:\n  int maxProfit(vector<int>& prices, int fee) {\n    int sell = 0;\n    int hold = INT_MIN;\n\n    for (const int price : prices) {\n      sell = max(sell, hold + price);\n      hold = max(hold, sell - price - fee);\n    }\n\n    return sell;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/714.%20Best%20Time%20to%20Buy%20and%20Sell%20Stock%20with%20Transaction%20Fee",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "explicit-day-by-day-trading-table",
+      "approach": "Explicit Day-by-Day Trading Table",
+      "explanation": "### How it works\n\nStore cash and holding balances for every day, updating both only from the preceding day. Charge the fee on sale to make the transition accounting explicit.\n\n### Steps\n\n1. Initialize day-zero cash and holding values.\n2. For each later day, choose between keeping cash and selling with the fee.\n3. Choose between keeping a share and buying from prior cash.\n4. Return the last cash state.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for both daily state arrays.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/714.%20Best%20Time%20to%20Buy%20and%20Sell%20Stock%20with%20Transaction%20Fee",
+      "code": {
+        "python": "class Solution:\n    def maxProfit(self, prices: list[int], fee: int) -> int:\n        cash, holding = [0] * len(prices), [0] * len(prices)\n        holding[0] = -prices[0]\n        for day in range(1, len(prices)):\n            cash[day] = max(cash[day - 1], holding[day - 1] + prices[day] - fee)\n            holding[day] = max(holding[day - 1], cash[day - 1] - prices[day])\n        return cash[-1]\n"
+      }
+    }
+  ]
+}

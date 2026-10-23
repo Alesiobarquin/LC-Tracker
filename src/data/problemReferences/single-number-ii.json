@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/137.%20Single%20Number%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "two-bit-state-masks",
+      "approach": "Two Bit-State Masks",
+      "explanation": "### How it works\n\nThe ones and twos masks represent each bit's occurrence count modulo three. A bit moves through the states zero, one, two, then back to zero, leaving only the bits of the value that appears once.\n\n### Steps\n\n1. Start both masks at zero.\n2. Update ones using bits that are not currently in twos.\n3. Update twos using the newly updated ones.\n4. Return the ones mask.\n\n### Complexity\n\n- Time: `O(n)` fixed-width bit operations.\n- Space: `O(1)` for two masks under the signed 32-bit input bounds.\n\n### Things to watch for\n\n- The second assignment uses the updated ones mask.\n- Signed inputs are included in the verification cases.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/137.%20Single%20Number%20II/137-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n  def singleNumber(self, nums: list[int]) -> int:\n    ones = 0\n    twos = 0\n\n    for num in nums:\n      ones ^= (num & ~twos)\n      twos ^= (num & ~ones)\n\n    return ones\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minimizeArrayValue(vector<int>& nums) {\n        int res = nums[0];\n        long long total = nums[0];\n\n        for (int i = 1; i < nums.size(); i++) {\n            total += nums[i];\n            res = max(res, (int)ceil((double)total / (i + 1)));\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=AeHMvcKuR0Y",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimize-maximum-of-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimize-maximum-of-array.md",
+  "alternatives": [
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nThe operation allows us to move value from a position to its left neighbor. This means we can redistribute values leftward but never rightward. The key observation is: for any target maximum value `m`, we can achieve it if and only if the prefix sum up to each index `i` does not exceed `m * (i + 1)`. This is because we can spread the total sum of the first `i+1` elements evenly among those positions.\n\nSince the answer lies between 0 and the maximum element, we can binary search for the smallest valid maximum. For each candidate, we check if the prefix sum constraint holds for all positions.\n\n### Steps\n\n1. Binary search on the answer between `0` and `max(nums)`.\n2. For each candidate maximum `mid`, check validity:\n    - Iterate through the array maintaining a running `prefix_sum`.\n    - If at any index `i`, the `prefix_sum` exceeds `mid * (i + 1)`, the candidate is too small.\n3. If valid, try a smaller maximum. If invalid, try a larger one.\n4. Return the smallest valid maximum.\n\n### Complexity\n\n- Time complexity: `O(n log m)`\n- Space complexity: `O(1)` extra space.\n\n> Where `n` is the size of the array `nums` and `m` is the maximum value in the array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minimizeArrayValue(self, nums: List[int]) -> int:\n        def isValid(maxVal):\n            prefix_sum = 0\n            for i in range(len(nums)):\n                prefix_sum += nums[i]\n                if prefix_sum > maxVal * (i + 1):\n                    return False\n            return True\n\n        left, right = 0, max(nums)\n        while left < right:\n            mid = left + (right - left) // 2\n            if isValid(mid):\n                right = mid\n            else:\n                left = mid + 1\n\n        return left\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimize-maximum-of-array.md",
+      "id": "binary-search"
+    }
+  ]
 }

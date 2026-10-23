@@ -1,0 +1,29 @@
+{
+  "problemId": "lonely-pixel-ii",
+  "approach": "Row Signatures and Black Counts",
+  "explanation": "### How it works\n\nA qualifying black pixel requires target black cells in its row and column, and every black cell in that column must belong to the same row pattern. A row pattern occurring target times makes that last condition testable by counts.\n\n### Steps\n\n1. Count black pixels per row and column.\n2. Count identical row strings.\n3. Keep rows with target black pixels and target identical copies.\n4. Count their black pixels in columns containing target black pixels.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(mn) for row strings and signature counts.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def findBlackPixel(self, picture: list[list[str]], target: int) -> int:\n    m = len(picture)\n    n = len(picture[0])\n    ans = 0\n    rows = [row.count('B') for row in picture]\n    cols = [col.count('B') for col in zip(*picture)]\n    rowStrings = [''.join(row) for row in picture]\n    countRowStrings = collections.Counter(rowStrings)\n\n    for i, (row, stringRow) in enumerate(zip(rows, rowStrings)):\n      if row == target and countRowStrings[stringRow] == target:\n        for j, col in enumerate(cols):\n          if picture[i][j] == 'B' and col == target:\n            ans += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findBlackPixel(vector<vector<char>>& picture, int target) {\n    const int m = picture.size();\n    const int n = picture[0].size();\n    int ans = 0;\n    vector<int> rows(m);\n    vector<int> cols(n);\n    vector<string> rowStrings(m);\n    unordered_map<string, int> countRowStrings;\n\n    for (int i = 0; i < m; ++i) {\n      string s;\n      for (int j = 0; j < n; ++j) {\n        if (picture[i][j] == 'B') {\n          ++rows[i];\n          ++cols[j];\n        }\n        s += picture[i][j];\n      }\n      rowStrings[i] = s;\n      ++countRowStrings[s];\n    }\n\n    for (int i = 0; i < m; ++i)\n      if (rows[i] == target && countRowStrings[rowStrings[i]] == target)\n        for (int j = 0; j < n; ++j)\n          if (picture[i][j] == 'B' && cols[j] == target)\n            ++ans;\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/533.%20Lonely%20Pixel%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "validate-each-column-directly",
+      "approach": "Validate Each Column Directly",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nFor each column, collect the rows containing black pixels. If exactly target rows appear, verify that all those rows are identical and each has target black pixels.\n\n### Steps\n\n1. Collect black-row indices for each column.\n2. Reject columns with the wrong black count.\n3. Compare each selected row with the first selected row.\n4. Add target when the identical row has the correct black count.\n\n### Complexity\n\n- Time: O(mn²) worst case including row comparisons.\n- Space: O(m) temporary row indices.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/533.%20Lonely%20Pixel%20II",
+      "code": {
+        "python": "class Solution:\n    def findBlackPixel(self, picture: list[list[str]], target: int) -> int:\n        total = 0\n        for col in range(len(picture[0])):\n            rows = [row for row in range(len(picture)) if picture[row][col] == 'B']\n            if len(rows) != target:\n                continue\n            first = picture[rows[0]]\n            if first.count('B') == target and all(picture[row] == first for row in rows):\n                total += target\n        return total\n"
+      }
+    }
+  ]
+}

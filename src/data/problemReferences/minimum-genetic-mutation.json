@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/433.%20Minimum%20Genetic%20Mutation",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "bidirectional-bfs",
+      "approach": "Bidirectional BFS",
+      "explanation": "### How it works\n\nSearch from both genes, expanding the smaller frontier. A meeting mutation connects the two shortest frontier distances, while the bank prevents invalid intermediate genes.\n\n### Steps\n\n1. Return zero if start equals end; otherwise require end in the bank.\n2. Maintain frontiers from start and end.\n3. Expand the smaller frontier by one-character mutations.\n4. Return the accumulated layer count when frontiers meet.\n\n### Complexity\n\n- Time: `O(B × L²)` as an upper bound including constructing and hashing L-character mutations for B bank genes.\n- Space: `O(B × L)` for the bank and frontiers.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/433.%20Minimum%20Genetic%20Mutation",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def minMutation(self, startGene: str, endGene: str, bank: list[str]) -> int:\n        if startGene == endGene:\n            return 0\n        remaining = set(bank)\n        if endGene not in remaining:\n            return -1\n        front, back = {startGene}, {endGene}\n        remaining -= front | back\n        distance = 0\n        while front and back:\n            if len(front) > len(back):\n                front, back = back, front\n            following = set()\n            for gene in front:\n                for i in range(len(gene)):\n                    for char in 'ACGT':\n                        candidate = gene[:i] + char + gene[i + 1:]\n                        if candidate in back:\n                            return distance + 1\n                        if candidate in remaining:\n                            remaining.remove(candidate)\n                            following.add(candidate)\n            front = following\n            distance += 1\n        return -1\n"
+      }
+    }
+  ]
 }

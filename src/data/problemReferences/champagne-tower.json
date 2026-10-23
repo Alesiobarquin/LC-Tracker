@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    double champagneTower(int poured, int query_row, int query_glass) {\n        vector<double> dp(query_row + 1, 0);\n        dp[0] = poured;\n\n        for (int row = 1; row <= query_row; row++) {\n            for (int i = row - 1; i >= 0; i--) {\n                double extra = dp[i] - 1;\n                if (extra > 0) {\n                    dp[i] = 0.5 * extra;\n                    dp[i + 1] += 0.5 * extra;\n                } else {\n                    dp[i] = 0;\n                }\n            }\n        }\n\n        return min(1.0, dp[query_glass]);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/champagne-tower.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/champagne-tower.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nEach glass receives champagne from the two glasses directly above it (its \"parents\"). When a glass overflows, half of the excess spills to each child below. We can recursively compute how much champagne flows into any glass by summing the overflow from its two parent glasses. The base case is the top glass, which receives all the poured champagne.\n\n### Steps\n\n1. Define a recursive function that returns the total champagne flowing into glass (`row`, `glass`).\n2. Base case: if we are out of bounds, return `0`. If at position (0, 0), return the total poured amount.\n3. For any other glass, compute the overflow from the left parent (`row`-1, `glass`-1) and right parent (`row`-1, `glass`).\n4. Each parent contributes half of its excess (amount - 1) if positive.\n5. The final answer is the minimum of 1 and the computed flow for the queried glass.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the given `queryRow`.",
+      "code": {
+        "python": "class Solution:\n    def champagneTower(self, poured: int, query_row: int, query_glass: int) -> float:\n        def rec(row, glass):\n            if row < 0 or glass < 0 or glass > row:\n                return 0\n\n            if row == 0 and glass == 0:\n                return poured\n\n            left_parent = max(0, rec(row - 1, glass - 1) - 1)\n            right_parent = max(0, rec(row - 1, glass) - 1)\n\n            return (left_parent + right_parent) / 2\n\n        return min(1, rec(query_row, query_glass))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/champagne-tower.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recalculates the same glasses many times. By storing computed values in a memoization table, we avoid redundant work. Each glass only needs to be computed once since its inflow depends only on the glasses above it.\n\n### Steps\n\n1. Create a memo table to store the champagne flow for each (`row`, `glass`) position.\n2. Initialize `memo[0][0]` with the poured amount.\n3. Use the same recursive logic as before, but check the memo before computing.\n4. Store computed results in the memo table before returning.\n5. Return min(1, `memo[query_row][query_glass]`).\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n * m)`\n\n> Where `n` is the given `queryRow` and `m` is the given `queryGlass`.",
+      "code": {
+        "python": "class Solution:\n    def champagneTower(self, poured: int, query_row: int, query_glass: int) -> float:\n        memo = { (0, 0) : poured }\n\n        def rec(row, glass):\n            if row < 0 or glass < 0 or glass > row:\n                return 0\n            if (row, glass) in memo:\n                return memo[(row, glass)]\n\n            left_parent = max(0, rec(row - 1, glass - 1) - 1)\n            right_parent = max(0, rec(row - 1, glass) - 1)\n\n            memo[(row, glass)] = (left_parent + right_parent) / 2\n            return memo[(row, glass)]\n\n        return min(1, rec(query_row, query_glass))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/champagne-tower.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

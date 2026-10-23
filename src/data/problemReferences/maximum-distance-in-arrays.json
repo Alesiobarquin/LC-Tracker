@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxDistance(std::vector<std::vector<int>>& arrays) {\n        int res = 0;\n        int n = arrays[0].size();\n        int min_val = arrays[0][0];\n        int max_val = arrays[0][arrays[0].size() - 1];\n        for (int i = 1; i < arrays.size(); i++) {\n            n = arrays[i].size();\n            res = std::max(res, std::max(std::abs(arrays[i][n - 1] - min_val),\n                                         std::abs(max_val - arrays[i][0])));\n            min_val = std::min(min_val, arrays[i][0]);\n            max_val = std::max(max_val, arrays[i][n - 1]);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-distance-in-arrays.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-distance-in-arrays.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to find the maximum absolute difference between elements from two different arrays. The naive approach is to compare every element from every array with every element from every other array. This guarantees we find the answer but is slow due to the nested iteration over all elements.\n\n### Steps\n\n1. Use four nested loops: the outer two select a pair of different arrays, and the inner two select elements from each array.\n2. For each pair of elements from different arrays, compute the absolute difference.\n3. Track the maximum difference found.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O((n * x)^2)`\n- Space complexity: `O(1)` constant space used\n\n> Where `n` refers to the number of arrays in `arrays` and `x` refers to the average number of elements in each array in `arrays`.",
+      "code": {
+        "python": "class Solution:\n    def maxDistance(self, arrays: list[list[int]]) -> int:\n        res = 0\n        n = len(arrays)\n        for i in range(n - 1):\n            for j in range(len(arrays[i])):\n                for k in range(i + 1, n):\n                    for l in range(len(arrays[k])):\n                        res = max(res, abs(arrays[i][j] - arrays[k][l]))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-distance-in-arrays.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Better Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nSince each array is sorted, the minimum is always at the start and the maximum is always at the end. This means we only need to consider the first and last elements of each array. For any pair of arrays, the maximum distance is either `|min1 - max2|` or `|min2 - max1|`. This reduces the inner loops to constant time per pair.\n\n### Steps\n\n1. For each pair of arrays `(i, j)` where `i` < `j`:\n    - Compute `|array1[0] - array2[last]|` and `|array2[0] - array1[last]|`.\n    - Update the maximum distance.\n2. Return the maximum distance found.\n\n### Complexity\n\n- Time complexity: `O(n^2)`\n- Space complexity: `O(1)` constant space used\n\n> Where `n` is the number of arrays in `arrays`",
+      "code": {
+        "python": "class Solution:\n    def maxDistance(self, arrays: list[list[int]]) -> int:\n        res = 0\n        n = len(arrays)\n        for i in range(n - 1):\n            for j in range(i + 1, n):\n                array1 = arrays[i]\n                array2 = arrays[j]\n                res = max(res, abs(array1[0] - array2[-1]))\n                res = max(res, abs(array2[0] - array1[-1]))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-distance-in-arrays.md",
+      "id": "better-brute-force"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxPoints(vector<vector<int>>& points) {\n        if (points.size() <= 2) {\n            return points.size();\n        }\n\n        int res = 1;\n        for (int i = 0; i < points.size() - 1; i++) {\n            unordered_map<string, int> count;\n            for (int j = i + 1; j < points.size(); j++) {\n                int dx = points[j][0] - points[i][0];\n                int dy = points[j][1] - points[i][1];\n                int g = gcd(dx, dy);\n                dx /= g;\n                dy /= g;\n                string slope = to_string(dx) + \":\" + to_string(dy);\n                count[slope]++;\n            }\n            for (const auto& [slope, freq] : count) {\n                res = max(res, freq + 1);\n            }\n        }\n        return res;\n    }\n\nprivate:\n    int gcd(int a, int b) {\n        return b == 0 ? a : gcd(b, a % b);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Bb9lOXUOnFw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-points-on-a-line.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-points-on-a-line.md",
+  "alternatives": [
+    {
+      "approach": "Math",
+      "explanation": "### How it works\n\nPoints are collinear if they share the same slope when measured from a common reference point. For each pair of points, we compute the slope and then check how many other points lie on that same line. By fixing two points and iterating through all remaining points to count matches, we can find the maximum number of collinear points. This triple nested loop is simple but has cubic time complexity.\n\n### Steps\n\n1. If there are 2 or fewer points, return the count directly since all such points are trivially collinear.\n2. For each pair of points `(i, j)`, compute their slope.\n3. For every other point `k`, check if the slope from `i` to `k` matches. If so, increment the count.\n4. Track the maximum count across all pairs.\n5. Return the maximum.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        n = len(points)\n        if n <= 2:\n            return n\n\n        def get_slope(p1, p2):\n            if p1[0] == p2[0]:\n                return float(\"inf\")\n            return (p2[1] - p1[1]) / (p2[0] - p1[0])\n\n        res = 1\n        for i in range(n):\n            for j in range(i + 1, n):\n                slope = get_slope(points[i], points[j])\n                cnt = 2\n                for k in range(j + 1, n):\n                    if slope == get_slope(points[i], points[k]):\n                        cnt += 1\n                res = max(res, cnt)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-points-on-a-line.md",
+      "id": "math"
+    },
+    {
+      "approach": "Math + Hash Map",
+      "explanation": "### How it works\n\nInstead of checking every pair and then scanning all other points, we can fix one point and use a hash map to group all other points by their slope relative to the fixed point. Points with the same slope lie on the same line through the fixed point. The largest group size plus one (for the fixed point itself) gives the maximum collinear points for that reference. Repeating this for every point as the reference yields the global maximum.\n\n### Steps\n\n1. Initialize `res` to `1` (at least one point exists).\n2. For each point `i`, create a hash map to count slopes.\n3. For every other point `j`, compute the slope from `i` to `j` and increment its count in the map.\n4. Update `res` with `count + 1` (including point `i`).\n5. Return `res` after processing all points.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        res = 1\n        for i in range(len(points)):\n            p1 = points[i]\n            count = defaultdict(int)\n            for j in range(i + 1, len(points)):\n                p2 = points[j]\n                if p2[0] == p1[0]:\n                    slope = float(\"inf\")\n                else:\n                    slope = (p2[1] - p1[1]) / (p2[0] - p1[0])\n                count[slope] += 1\n                res = max(res, count[slope] + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-points-on-a-line.md",
+      "id": "math-hash-map"
+    }
+  ]
 }

@@ -1,0 +1,28 @@
+{
+  "problemId": "global-and-local-inversions",
+  "approach": "Detect Nonlocal Inversions",
+  "explanation": "### How it works\n\nEvery local inversion is global. Equality of their counts therefore means there is no inversion spanning at least two positions. A running prefix maximum detects exactly those forbidden pairs.\n\n### Steps\n\n1. Track the maximum through index i.\n2. Compare it against the value at i + 2.\n3. Reject if the maximum is larger.\n4. Accept when no nonlocal inversion exists.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def isIdealPermutation(self, nums: list[int]) -> bool:\n    mx = -1  # the number that is most likely > nums[i + 2]\n\n    for i in range(len(nums) - 2):\n      mx = max(mx, nums[i])\n      if mx > nums[i + 2]:\n        return False\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool isIdealPermutation(vector<int>& nums) {\n    int mx = -1;  // the number that is most likely > nums[i + 2]\n\n    for (int i = 0; i + 2 < nums.size(); ++i) {\n      mx = max(mx, nums[i]);\n      if (mx > nums[i + 2])\n        return false;\n    }\n\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/775.%20Global%20and%20Local%20Inversions",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "permutation-displacement-bound",
+      "approach": "Permutation Displacement Bound",
+      "explanation": "### How it works\n\nFor a permutation of 0 through n − 1, the absence of nonlocal inversions is equivalent to every value lying at most one position from its sorted index.\n\n### Steps\n\n1. Visit each index and value.\n2. Reject an absolute displacement greater than one.\n3. Otherwise accept.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/775.%20Global%20and%20Local%20Inversions/775-2.py",
+      "code": {
+        "python": "class Solution:\n  def isIdealPermutation(self, nums: list[int]) -> bool:\n    for i, num in enumerate(nums):\n      if abs(num - i) > 1:\n        return False\n    return True\n"
+      }
+    }
+  ]
+}

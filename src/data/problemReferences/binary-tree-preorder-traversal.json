@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> preorderTraversal(TreeNode* root) {\n        vector<int> res;\n        TreeNode* cur = root;\n\n        while (cur) {\n            if (!cur->left) {\n                res.push_back(cur->val);\n                cur = cur->right;\n            } else {\n                TreeNode* prev = cur->left;\n                while (prev->right && prev->right != cur) {\n                    prev = prev->right;\n                }\n\n                if (!prev->right) {\n                    res.push_back(cur->val);\n                    prev->right = cur;\n                    cur = cur->left;\n                } else {\n                    prev->right = nullptr;\n                    cur = cur->right;\n                }\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=afTpieEZXck",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-preorder-traversal.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-preorder-traversal.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nPreorder traversal visits nodes in this exact order:\n\n**1. Node itself → 2. Left subtree → 3. Right subtree**\n\nSo we simply start at the root and:\n\n- Record its value,\n- Recursively explore the left child,\n- Then recursively explore the right child.\n\nThis naturally follows the preorder definition, and recursion handles the tree structure automatically.\n\n### Steps\n\n1. Create an empty result list `res`.\n2. Define a recursive function:\n    - If the `node` is `null`, return.\n    - Add the node's value to `res`.\n    - Recurse on its left child.\n    - Recurse on its right child.\n3. Call the function starting from the root.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(n)` space for the recursion stack.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:\n        res = []\n\n        def preorder(node):\n            if not node:\n                return\n\n            res.append(node.val)\n            preorder(node.left)\n            preorder(node.right)\n\n        preorder(root)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-preorder-traversal.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Iterative Depth First Search",
+      "explanation": "### How it works\n\nPreorder traversal follows the pattern:\n\n**Visit Node → Left → Right**\n\nUsing a stack, we can simulate recursion.  \nThe trick:\n\n- Whenever we visit a node, we immediately record its value (preorder rule).\n- Then we push the **right child first**, because the stack is LIFO and we want to process the left child next.\n- Move to the left child and repeat.\n- If we reach a null left child, pop from the stack to continue with the right subtree.\n\nThis preserves the exact preorder sequence without recursion.\n\n### Steps\n\n1. Initialize an empty list `res` for the result.\n2. Create an empty stack.\n3. Set `cur = root`.\n4. While `cur` is not `null` **or** stack is not empty:\n    - If `cur` exists:\n        - Add `cur.val` to `res`.\n        - Push `cur.right` onto the stack.\n        - Move `cur` to `cur.left`.\n    - Else:\n        - Pop from the stack and set `cur` to that node.\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(n)` space for the stack.\n    - `O(n)` space for the output array.",
+      "code": {
+        "python": "from typing import List, Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:\n        res = []\n        stack = []\n        cur = root\n\n        while cur or stack:\n            if cur:\n                res.append(cur.val)\n                stack.append(cur.right)\n                cur = cur.left\n            else:\n                cur = stack.pop()\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-preorder-traversal.md",
+      "id": "iterative-depth-first-search"
+    }
+  ]
 }

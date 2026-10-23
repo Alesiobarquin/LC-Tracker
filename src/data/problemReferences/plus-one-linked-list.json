@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    ListNode* plusOne(ListNode* head) {\n        // sentinel head\n        ListNode* sentinel = new ListNode(0);\n        sentinel->next = head;\n        ListNode* notNine = sentinel;\n\n        // find the rightmost not-nine digit\n        while (head != nullptr) {\n            if (head->val != 9) notNine = head;\n            head = head->next;\n        }\n        // increase this rightmost not-nine digit by 1\n        notNine->val++;\n        notNine = notNine->next;\n        // set all the following nines to zeros\n        while (notNine != nullptr) {\n            notNine->val = 0;\n            notNine = notNine->next;\n        }\n\n        delete notNine;\n        return sentinel->val != 0 ? sentinel : sentinel->next;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one-linked-list.md",
+  "alternatives": [
+    {
+      "id": "reverse-add-and-reverse-back",
+      "approach": "Reverse, Add, and Reverse Back",
+      "explanation": "### How it works\n\nReverse the list to reach the least significant digit first. Propagate a carry of one, add a node if every digit overflows, then reverse back to restore forward digit order.\n\n### Steps\n\n1. Reverse the links.\n2. Propagate one through the least significant digits.\n3. Append a carry node if needed.\n4. Reverse back and return the head.\n\n### Complexity\n\n- Time: `O(n)` time.\n- Space: `O(1)` auxiliary space, excluding one possible new node.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/plus-one-linked-list.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def plusOne(self, head: ListNode) -> ListNode:\n        def reverse(node):\n            previous = None\n            while node:\n                following = node.next\n                node.next = previous\n                previous, node = node, following\n            return previous\n        backward = reverse(head)\n        current, previous, carry = backward, None, 1\n        while current and carry:\n            carry, current.val = divmod(current.val + carry, 10)\n            previous, current = current, current.next\n        if carry:\n            previous.next = ListNode(carry)\n        return reverse(backward)\n"
+      }
+    }
+  ]
 }

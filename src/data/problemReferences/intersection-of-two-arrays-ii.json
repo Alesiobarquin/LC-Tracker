@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/350.%20Intersection%20of%20Two%20Arrays%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-and-merge",
+      "approach": "Sort and Merge",
+      "explanation": "### How it works\n\nSort both arrays to group repeats. Two pointers consume one occurrence from each side on a match, preserving intersection multiplicity.\n\n### Steps\n\n1. Sort both arrays.\n2. Advance the pointer on the smaller value.\n3. On equality, emit that value and advance both pointers.\n\n### Complexity\n\n- Time: `O(n log n + m log m)` time.\n- Space: `O(n + m)` worst-case Python sorting workspace, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/350.%20Intersection%20of%20Two%20Arrays%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def intersect(self, nums1: list[int], nums2: list[int]) -> list[int]:\n        nums1.sort()\n        nums2.sort()\n        i = j = 0\n        result = []\n        while i < len(nums1) and j < len(nums2):\n            if nums1[i] < nums2[j]:\n                i += 1\n            elif nums1[i] > nums2[j]:\n                j += 1\n            else:\n                result.append(nums1[i])\n                i += 1\n                j += 1\n        return result\n"
+      }
+    }
+  ]
 }

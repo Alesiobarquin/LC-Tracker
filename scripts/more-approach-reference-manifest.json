@@ -1,0 +1,1425 @@
+{
+  "scope": "Further existing single-reference problems",
+  "selection": "Add distinct teaching comparisons with matching explanations, complexity, code, attribution, and independent behavioral checks. Preserve complete defaults and all prior alternative sets. Authored code is written for LC Tracker with AI assistance and is not assigned the related source license.",
+  "sourceRevision": "9b85aa15e086d0b5dc1ead7184bca547942e6ff6",
+  "sourceLicenseSha256": "fdf5471fdcd13a27ce9f89c336229e4f7b9a90c3b8f59e0f618aab846729a67e",
+  "problems": [
+    {
+      "id": "01-matrix",
+      "default": "Multi-Source Breadth-First Search",
+      "defaultSha256": "a44178de722381adc9e10272b2521d5ee5184513f4ba25bbe142103e177cd9a5",
+      "alternatives": [
+        {
+          "approach": "Two-Pass Distance DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "3sum-closest",
+      "default": "Sorting and Two Pointers",
+      "defaultSha256": "fd78a0d2b4406e254ab0785fdf74d7dc692b1261308d8e964f33d191d619e855",
+      "alternatives": [
+        {
+          "approach": "Enumerate Triplets",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "3sum-smaller",
+      "default": "Sorting and Two-Pointer Counting",
+      "defaultSha256": "fb47a939eb4a04f42ad446307c0026510e24faa5d4e438f0658f2fc445d9240d",
+      "alternatives": [
+        {
+          "approach": "Enumerate Triplets",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "4-keys-keyboard",
+      "default": "Dynamic Programming",
+      "defaultSha256": "4eb8f07f4ec3135c6ddb0f0f0d468c82491152adcabec1d0ff9385dc82339bc6",
+      "alternatives": [
+        {
+          "approach": "Memoized Keyboard States",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "4sum-ii",
+      "default": "Hash Pair Sums",
+      "defaultSha256": "fd9925260aaa1ab3e681b696e7544654f1ce8a1748980418032b3053f8dbdf2a",
+      "alternatives": [
+        {
+          "approach": "Four Nested Choices",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "add-bold-tag-in-string",
+      "default": "Mark Bold Characters",
+      "defaultSha256": "660f8c1d50d436a42cb5c48d8cc32196d9d4a37c5e91427746689820a9fd1156",
+      "alternatives": [
+        {
+          "approach": "Find and Merge Match Intervals",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "add-digits",
+      "default": "Digital Root Modulo Nine",
+      "defaultSha256": "add61ba9e4ce997757ec99251d9ed3a918e2564800c2572fbabc1e616c10ef66",
+      "alternatives": [
+        {
+          "approach": "Repeated Digit Sums",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "all-paths-from-source-lead-to-destination",
+      "default": "Depth First Search",
+      "defaultSha256": "6aff0b0674865869d6565cf3afc3d3290fa7f80e60d7a0658aa70e22047c1ee5",
+      "alternatives": [
+        {
+          "approach": "Reverse Topological Elimination",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "analyze-user-website-visit-pattern",
+      "default": "Hash Map",
+      "defaultSha256": "42f304150ac35e9546a227e58459d227838a4608698260643993982b9065ba4a",
+      "alternatives": [
+        {
+          "approach": "Enumerate Global Visit Triples",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "arithmetic-slices",
+      "default": "Count Arithmetic Runs Ending at Each Index",
+      "defaultSha256": "ea999e3a5c66280a05e2537fcc4ae5f834726b92e2901b70659dadc2277cccaf",
+      "alternatives": [
+        {
+          "approach": "Extend Every Starting Position",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "array-nesting",
+      "default": "Walk and Mark Permutation Cycles",
+      "defaultSha256": "88a0520ed26f342949bc4e26102afa3e803996e3f5c31caa562a3d8bca023aff",
+      "alternatives": [
+        {
+          "approach": "Independent Cycle Walks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "bag-of-tokens",
+      "default": "Greedy + Two Pointers",
+      "defaultSha256": "2e9e5cd94e5bb6b02f70d7825f9e3ff51c713c52a0a2395f1fe53cd14277cc87",
+      "alternatives": [
+        {
+          "approach": "Explore Buy and Sell Orders",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "battleships-in-a-board",
+      "default": "Count Only Ship Starts",
+      "defaultSha256": "526234aa57382bc17da6de8eba060172e0780f20d435be5a9e474f5fc34cda35",
+      "alternatives": [
+        {
+          "approach": "Flood-Fill Ship Components",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "beautiful-arrangement",
+      "default": "Memoized Backtracking by Used Positions",
+      "defaultSha256": "49eb034650f0befa9c012ff32b134cdfeb6bf209b373119659e7fff6858b94e0",
+      "alternatives": [
+        {
+          "approach": "Bottom-Up Used-Digit Masks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "binary-tree-level-order-traversal-ii",
+      "default": "Breadth-First Search and Reverse",
+      "defaultSha256": "e447c5b26c8a200bb03d320f6f0e8953b74b06c23a0ad0a2e51ffb7fd15681d2",
+      "alternatives": [
+        {
+          "approach": "Depth-Indexed DFS",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "binary-tree-longest-consecutive-sequence-ii",
+      "default": "Single traversal",
+      "defaultSha256": "8c37efd45ed210a52d72259b8a56e2f634c4717c8cd11197d04363047b18696d",
+      "alternatives": [
+        {
+          "approach": "Search Consecutive Paths from Each Node",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "binary-tree-paths",
+      "default": "Root-to-Leaf DFS Paths",
+      "defaultSha256": "aa7fa3554e79e0aa523dbb30256b6e19d5936dd7a89d44618b611c918b47838e",
+      "alternatives": [
+        {
+          "approach": "Breadth-First Paths",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "bomb-enemy",
+      "default": "Four Directional Sweeps",
+      "defaultSha256": "876759e8db7e4b1d135861fd140e88f6ddf84580930214a8606cca0ac8bfd5ad",
+      "alternatives": [
+        {
+          "approach": "Scan Four Rays per Empty Cell",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "bulb-switcher",
+      "default": "Count Perfect Squares",
+      "defaultSha256": "529b24d0a18bf0ee9441bea171b817023ca3a2719c53806e56059e2a4192599d",
+      "alternatives": [
+        {
+          "approach": "Simulate Every Round",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "bulls-and-cows",
+      "default": "Exact Matches and Remaining Digit Counts",
+      "defaultSha256": "4ed710e7df364fa8e608e9438fbb7d01a4cd42a06db916ec450865a6fac1474f",
+      "alternatives": [
+        {
+          "approach": "One-Pass Balance Counts",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "can-place-flowers",
+      "default": "Iteration - II",
+      "defaultSha256": "e1dd7f2a0791869fa5e6ef96394461ce12ce058777da60e4eac131f143fae997",
+      "alternatives": [
+        {
+          "approach": "Two-State Planting DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "combination-sum-iii",
+      "default": "Backtracking over Distinct Digits",
+      "defaultSha256": "c37db39dfd6bfc333d3bdbf53d3c60317a1389ac7cf1c3320b0599b0d8f3b615",
+      "alternatives": [
+        {
+          "approach": "Enumerate Digit Masks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "compare-version-numbers",
+      "default": "Compare Numeric Revisions",
+      "defaultSha256": "b4032932723775b9d374da1c425f308f44ad8608eab17e7286a0169882adefdd",
+      "alternatives": [
+        {
+          "approach": "Normalized String Revisions",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "convert-sorted-list-to-binary-search-tree",
+      "default": "Middle Node Divide and Conquer",
+      "defaultSha256": "5f0cc8ae459eb152c8ffcf17239ed9d5e0acfad2d9a5338b72d531e3fbbcf8b5",
+      "alternatives": [
+        {
+          "approach": "Inorder Construction",
+          "kind": "walkccc",
+          "path": "solutions/109. Convert Sorted List to Binary Search Tree/109-3.py",
+          "sha256": "7b9f698b4ec56eac39ce8cab6e6b8e2aac7ed331059c828c04fcaedca77e246f"
+        }
+      ]
+    },
+    {
+      "id": "count-complete-tree-nodes",
+      "default": "Recognize Perfect Complete Subtrees",
+      "defaultSha256": "12bcff71585a8c365ac85a5ab10d93ff4f9f3feca4b328348168120525352308",
+      "alternatives": [
+        {
+          "approach": "Recursive Node Counting",
+          "kind": "walkccc",
+          "path": "solutions/222. Count Complete Tree Nodes/222.py",
+          "sha256": "8fe3bc47117cce99ef0e103453cc2981b887120d066823ff942e5cacf02b495e"
+        }
+      ]
+    },
+    {
+      "id": "count-numbers-with-unique-digits",
+      "default": "Count Choices by Digit Length",
+      "defaultSha256": "bcd6e764b3e62229f33a49cf4bba2a998bcde846c1a12738a94d1729af133660",
+      "alternatives": [
+        {
+          "approach": "Digit Backtracking",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "count-substrings-with-only-one-distinct-letter",
+      "default": "Arithmetic Sequence",
+      "defaultSha256": "bec478f404c359bd1eae24de9fc0cdd1d3f678e59d44a92c36b6c52227126b51",
+      "alternatives": [
+        {
+          "approach": "Extend Constant-Letter Substrings",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "delete-n-nodes-after-m-nodes-of-a-linked-list",
+      "default": "Traverse Linked List and Delete In Place",
+      "defaultSha256": "4922a200d1932907a146ca482b2daa6e0b788e9ca288e40e89b4d12582a7c012",
+      "alternatives": [
+        {
+          "approach": "Collect and Filter Node Positions",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "delete-operation-for-two-strings",
+      "default": "Longest Common Subsequence",
+      "defaultSha256": "a7572bac8bf3f1f8f5f40ff8474f1b675bbaa2769dacbdc14837d485c8d0cc2c",
+      "alternatives": [
+        {
+          "approach": "Deletion-Cost DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "design-hit-counter",
+      "default": "Timestamped Circular Buckets",
+      "defaultSha256": "a85b02ec2f8f26b1fbf2178d85cb3914205bbe151da2c01b8be01ea37548f048",
+      "alternatives": [
+        {
+          "approach": "Timestamp Queue",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "design-snake-game",
+      "default": "Queue and Hash Set",
+      "defaultSha256": "6ada43592b87dc85484f9d23cb0d10e7c72fe68cb66de2e63bf7483c02ee3c8f",
+      "alternatives": [
+        {
+          "approach": "Body List and Linear Collision Checks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "design-underground-system",
+      "default": "Two HashMaps + Hashing",
+      "defaultSha256": "30a2c99e701f2666dd2547b4ce86a26d8bf2c13dc39044e464399831f687fb56",
+      "alternatives": [
+        {
+          "approach": "Store Trips and Query Averages",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "diagonal-traverse",
+      "default": "Alternating Diagonal Walk",
+      "defaultSha256": "80ffb673580e0f52840087dcb5a08ed7123a6349f461d3f5086996dda75df8e4",
+      "alternatives": [
+        {
+          "approach": "Group by Coordinate Sum",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "different-ways-to-add-parentheses",
+      "default": "Memoized Expression Splitting",
+      "defaultSha256": "c3ccb80cb822a3cbfbc46b92ac7eae52557635ca84bfef7cddab0f7fa8d8d376",
+      "alternatives": [
+        {
+          "approach": "Bottom-Up Expression Intervals",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "divide-chocolate",
+      "default": "Binary Search + Greedy",
+      "defaultSha256": "ec7daa6a9eb0d5564cd9b5213ad723c7b5a50e40917fab45cbd8277271d95669",
+      "alternatives": [
+        {
+          "approach": "Maximin Partition DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "factor-combinations",
+      "default": "Backtracking",
+      "defaultSha256": "d1e2de831c3937e16eeee16362a00c942dc20e26f077a80fea3f7a333fc8f6f4",
+      "alternatives": [
+        {
+          "approach": "Breadth-First Factor Splitting",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "factorial-trailing-zeroes",
+      "default": "Count Factors of Five",
+      "defaultSha256": "35e60107fcfb3b8d514213f6fd78646628b0463fb02a5e2ff7bea6f162b12b31",
+      "alternatives": [
+        {
+          "approach": "Factor Each Multiple of Five",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "fibonacci-number",
+      "default": "Rolling Fibonacci State",
+      "defaultSha256": "9b062508f3550424e8e91266226f24c17d0dbda239bea20cbd8e177bd31025d5",
+      "alternatives": [
+        {
+          "approach": "Memoized Recursion",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "find-common-characters",
+      "default": "Frequency Count",
+      "defaultSha256": "335985d9d479bfcea931e0a025f280bfc3dea97469079d7d0327bdd66c455996",
+      "alternatives": [
+        {
+          "approach": "Sort and Merge Character Multisets",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "find-k-pairs-with-smallest-sums",
+      "default": "Heap Merge of Pair-Sum Rows",
+      "defaultSha256": "bc488e1412e4e70d8302edac91903644477c2a65b918380a44bfc2c402a39fde",
+      "alternatives": [
+        {
+          "approach": "Enumerate and Sort Pairs",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "find-right-interval",
+      "default": "Ordered Starts and Lower Bound",
+      "defaultSha256": "505bb25d32a131eba14cd95e05c8a21580e7a6c38182acdc35c691f7f4cc074c",
+      "alternatives": [
+        {
+          "approach": "Scan Candidate Starts",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "find-the-index-of-the-large-integer",
+      "default": "Binary Search",
+      "defaultSha256": "4f555b696451899d5fb8b949a2bc95c67ab9f99af81eb8b13dde550dc5334825",
+      "alternatives": [
+        {
+          "approach": "Linear Reader Comparisons",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "flatten-binary-tree-to-linked-list",
+      "default": "Iterative Pointer Rewiring",
+      "defaultSha256": "aa7afbc5ff94b1cedcab55f63206441301abe2eb3549e01d7dd9aefbadfc5d78",
+      "alternatives": [
+        {
+          "approach": "Preorder Stack",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "fraction-to-recurring-decimal",
+      "default": "Long Division with Remainder Positions",
+      "defaultSha256": "0b2d6a61384f9396fe7acad7be1805dc3af5ca3691b7c0d80b852663e4e2472e",
+      "alternatives": [
+        {
+          "approach": "Linear Remainder Search",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "game-of-life",
+      "default": "Store Old and New Cell States in Bits",
+      "defaultSha256": "dfbe330590d63ae9af0be67eea5a93bbee7ba8e099988866622724de754f014c",
+      "alternatives": [
+        {
+          "approach": "Snapshot and Update",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "gray-code",
+      "default": "Reflect and Prefix",
+      "defaultSha256": "b3e7ac4854f7274d897575e1d7b378809d7b600b62c724d5c69abdb3b455dd7d",
+      "alternatives": [
+        {
+          "approach": "Binary-to-Gray Formula",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "group-shifted-strings",
+      "default": "Hashing",
+      "defaultSha256": "5d4f72e53a149c89d391e7f4ed96871cdd1ae6867f4f941cdd75edca5be30abb",
+      "alternatives": [
+        {
+          "approach": "Pairwise Shift Checks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "guess-number-higher-or-lower-ii",
+      "default": "Memoized Minimax on Intervals",
+      "defaultSha256": "162734bdb93a8343babe6c0b00700682cd01aca53ed48d8945ad8792b53fa287",
+      "alternatives": [
+        {
+          "approach": "Bottom-Up Minimax Intervals",
+          "kind": "walkccc",
+          "path": "solutions/375. Guess Number Higher or Lower II/375-2.py",
+          "sha256": "6791af5861fc6a063c31dedfa18ae3d30fd9f0be8526b00a5f0a9a95681c9c55"
+        }
+      ]
+    },
+    {
+      "id": "h-index",
+      "default": "Citation Buckets",
+      "defaultSha256": "a821e62d41fbf4999534eaf88593d909c4945a4dd13d5650c192cec6c186878d",
+      "alternatives": [
+        {
+          "approach": "Sort and Find the Threshold",
+          "kind": "walkccc",
+          "path": "solutions/274. H-Index/274-2.py",
+          "sha256": "267fa1053a91df61e28992b6f5c980f1c5a461a4b5c712e886de2d1ec3eccca9"
+        }
+      ]
+    },
+    {
+      "id": "h-index-ii",
+      "default": "Binary Search for the First Valid Position",
+      "defaultSha256": "a389cb369285653eccc1f73937f598bdf15178adb7e8e5ee9283cb3d11a2f5ab",
+      "alternatives": [
+        {
+          "approach": "Linear Threshold Scan",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "hamming-distance",
+      "default": "Compare Bits and Shift",
+      "defaultSha256": "860bf74d252643231debbbb489999c3a65eae9c2373d451da8ea2a11fcdb8699",
+      "alternatives": [
+        {
+          "approach": "Clear Differing Set Bits",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "heaters",
+      "default": "Sorted Houses and a Monotone Heater Pointer",
+      "defaultSha256": "3766f7637155adfd766f2393ba710c3d794f37e28db06ea9028ded4221ca5d2f",
+      "alternatives": [
+        {
+          "approach": "Binary Search Each House",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "increasing-triplet-subsequence",
+      "default": "Smallest First and Second Candidates",
+      "defaultSha256": "ce693397758bca53a60664cff9b64d2705cc16f9338c6e9b68ef4cab4fe54f1b",
+      "alternatives": [
+        {
+          "approach": "Quadratic Subsequence DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "inorder-successor-in-bst",
+      "default": "BST Successor Search",
+      "defaultSha256": "e0aa162d295c6015f791935c651bb7c1fc90a914f574b5c57e61020d458b1e21",
+      "alternatives": [
+        {
+          "approach": "Explicit Inorder Traversal",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "integer-replacement",
+      "default": "Greedy Bit Reduction",
+      "defaultSha256": "bbfd4116b2683ee30f4339bfcbecc6afb04b8056d7a7ab399dbb4bef43f51cd8",
+      "alternatives": [
+        {
+          "approach": "Memoized Odd Branches",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "intersection-of-two-arrays-ii",
+      "default": "Frequency-Limited Intersection",
+      "defaultSha256": "045f8f1c7f9212adefc77ef678b7bfe0c9131f7bf7885bf14947b4c9e82c5639",
+      "alternatives": [
+        {
+          "approach": "Sort and Merge",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "k-diff-pairs-in-an-array",
+      "default": "Value-to-Index Map and One-Time Pair Counting",
+      "defaultSha256": "36a884dc3a9c472e803606bc1ec2245814b5ea4ddb6d2c4e62d66a91c6689d83",
+      "alternatives": [
+        {
+          "approach": "Sort and Advance Two Pointers",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "kth-smallest-element-in-a-sorted-matrix",
+      "default": "Heap Merge of Sorted Matrix Rows",
+      "defaultSha256": "6a945c07d0d0e9e1b8385930e21938a0f87a2ca8c1cfadf8c01e1adcbad94235",
+      "alternatives": [
+        {
+          "approach": "Binary Search the Value Range",
+          "kind": "walkccc",
+          "path": "solutions/378. Kth Smallest Element in a Sorted Matrix/378-2.py",
+          "sha256": "6a1707abf8b9ff12ea8ecce6046e24502f2b03cceeadf3c18915853a8f016c3e"
+        }
+      ]
+    },
+    {
+      "id": "lemonade-change",
+      "default": "Iteration - II",
+      "defaultSha256": "66e3d259b4efb84af4b759d13bd47236074ee48700db22e59ba17ff443b9bcc9",
+      "alternatives": [
+        {
+          "approach": "Explore Change Inventories",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "lexicographical-numbers",
+      "default": "Iterative Decimal-Prefix Traversal",
+      "defaultSha256": "43d0fe40166ef6834be35a02aea2d0065426a45ded2d8e0d25c620f2d646eed2",
+      "alternatives": [
+        {
+          "approach": "Sort Decimal Representations",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "longest-substring-with-at-least-k-repeating-characters",
+      "default": "Sliding Windows with a Fixed Distinct Count",
+      "defaultSha256": "74c8edaffd152eb03a3efac7545ce4deebac7fb91e188d4b6e2ef403abe2a262",
+      "alternatives": [
+        {
+          "approach": "Split on Ineligible Characters",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "longest-word-in-dictionary-through-deleting",
+      "default": "Subsequence Checks with Tie Breaking",
+      "defaultSha256": "7fd5dfd2478126b48a09970b8b18974a31c998366dcb909e0c19200c0f988f69",
+      "alternatives": [
+        {
+          "approach": "Sort Candidates Before Matching",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "max-stack",
+      "default": "Heap + Lazy Update",
+      "defaultSha256": "09ee3696aecd78478e9698b897acdc1822a71c3584959d5acc6ad8dc1aeddba3",
+      "alternatives": [
+        {
+          "approach": "List and Reverse Maximum Search",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "maximum-average-subarray-i",
+      "default": "Fixed-Length Sliding Sum",
+      "defaultSha256": "afab80afac77298b03e1f6ae62a82d0513538712aad3b4babd68f434a3776f94",
+      "alternatives": [
+        {
+          "approach": "Recompute Every Window",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "maximum-average-subtree",
+      "default": "Postorder Traversal",
+      "defaultSha256": "aa76a60f266b001bf65d14b8c05bf7273b75792253d3bd92b33d38718f8b3de5",
+      "alternatives": [
+        {
+          "approach": "Recompute Subtree Totals",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "maximum-product-of-word-lengths",
+      "default": "Letter Masks and Pair Comparison",
+      "defaultSha256": "56c953e64d299b592e26c01d9bdbcb3d8678bc7d34a272d95a6c7bb3c1feb1e5",
+      "alternatives": [
+        {
+          "approach": "Character-Set Pair Checks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "maximum-size-subarray-sum-equals-k",
+      "default": "Prefix Sums with Earliest Indices",
+      "defaultSha256": "ef2c461a9a68e7471c08954a95194bd83e3787def183f7829b94115febf72597",
+      "alternatives": [
+        {
+          "approach": "Enumerate Running Sums",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minesweeper",
+      "default": "Reveal Blank Regions with DFS",
+      "defaultSha256": "0c10c84878bcdf38c999351185903e0b66b7cbc54d3aeefdd103e8e0bd008691",
+      "alternatives": [
+        {
+          "approach": "Breadth-First Reveal",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-cost-to-connect-sticks",
+      "default": "Greedy",
+      "defaultSha256": "d181d3779efc3466d4f056755dfe175b3f1a8d845a8e46a09f0c80dd6f2bd96d",
+      "alternatives": [
+        {
+          "approach": "Explore Every Merge Order",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-cost-to-hire-k-workers",
+      "default": "Greedy + Max-Heap",
+      "defaultSha256": "0c6fc50787eb5ee8da661340da7ce5a5620fa489af2506bd43b59a6391551c1d",
+      "alternatives": [
+        {
+          "approach": "Enumerate Worker Teams",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-depth-of-binary-tree",
+      "default": "Recursive Minimum Leaf Depth",
+      "defaultSha256": "7bd0045d20092c34ea2d276f83851b1713ca9e41e6117218b9d384d3dbc695e9",
+      "alternatives": [
+        {
+          "approach": "First-Leaf BFS",
+          "kind": "walkccc",
+          "path": "solutions/111. Minimum Depth of Binary Tree/111-2.py",
+          "sha256": "6d2c84ac2ff9e3201b74d887c9b63bbab2c3e52326507b6f256269f90e6830b4"
+        }
+      ]
+    },
+    {
+      "id": "minimum-difference-between-highest-and-lowest-of-k-scores",
+      "default": "Sorting + Sliding Window",
+      "defaultSha256": "953abd4ad88b64c4d80693b099cf50baeb1e62779a1b5916aab6ddc7ccb38d63",
+      "alternatives": [
+        {
+          "approach": "Enumerate Student Groups",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-genetic-mutation",
+      "default": "Breadth-First Search over Valid Genes",
+      "defaultSha256": "a60c3409dbdd69cbd0fe93c492ad7ae7a0b63ad049364ffc962331ad2bde8567",
+      "alternatives": [
+        {
+          "approach": "Bidirectional BFS",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-length-of-string-after-deleting-similar-ends",
+      "default": "Greedy + Two Pointers",
+      "defaultSha256": "3e8aa66f69c08150ff4dbf9742c209f4a1ef1f56fdd8f0352626579a07ae3850",
+      "alternatives": [
+        {
+          "approach": "Run-Length Deque",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-moves-to-equal-array-elements-ii",
+      "default": "Move All Values to a Median",
+      "defaultSha256": "a5d15ea00fd31b7c5586a8cb0b4918a74e9457e821dea3f63c16bfef7f0edec4",
+      "alternatives": [
+        {
+          "approach": "Try Every Input Target",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "minimum-time-difference",
+      "default": "Minute Buckets on a Circular Day",
+      "defaultSha256": "eebf8645b496de5f950e0a63b482f8f20ac06f7e2f6da95dc733c2a705e0e786",
+      "alternatives": [
+        {
+          "approach": "Sort Minutes and Check the Wrap",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "most-frequent-subtree-sum",
+      "default": "Postorder Sums and a Frequency Map",
+      "defaultSha256": "065594d609712eda1ddb82ca2b6c78b0cac6b08ca99ca22a3d27d65ca3bc2e66",
+      "alternatives": [
+        {
+          "approach": "Recompute Each Subtree Sum",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "n-ary-tree-level-order-traversal",
+      "default": "Breadth-First Search",
+      "defaultSha256": "bb8d2cce188ede4a221c53358de64a831ca7bab40c8f50d7e00a8014f394ab90",
+      "alternatives": [
+        {
+          "approach": "Depth-Indexed DFS",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "next-greater-element-ii",
+      "default": "Circular Monotone Stack",
+      "defaultSha256": "ad0bd48e35ee347ebaf9578f395f65bffc910554f5a0ed436b6ee2360a2a1277",
+      "alternatives": [
+        {
+          "approach": "Circular Scan per Position",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "next-greater-element-iii",
+      "default": "Next Permutation of Decimal Digits",
+      "defaultSha256": "dfbbf1414bebd5f568562e4f66c4da05922f8c091a83ce8030fbd706b1378524",
+      "alternatives": [
+        {
+          "approach": "Digit-Count Backtracking",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "non-decreasing-array",
+      "default": "Greedy",
+      "defaultSha256": "8e827cc48732cf1a2c53499106bec6d3d90b880fd6c4c8109a893b6c9b99e812",
+      "alternatives": [
+        {
+          "approach": "Try One Neighbor Replacement",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "non-decreasing-subsequences",
+      "default": "Backtracking with Depth-Local Deduplication",
+      "defaultSha256": "299b5dd9cc3e549a8e801d4cf889f44738dcb3406eef6b005a9775b3d41576f0",
+      "alternatives": [
+        {
+          "approach": "Enumerate Subsequence Masks",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "number-complement",
+      "default": "Flip Significant Bits",
+      "defaultSha256": "385d7bac873c7338708b09263ae5909dc31e22b1fc9efca85dc3305f79e9e9e0",
+      "alternatives": [
+        {
+          "approach": "Significant-Bit Mask",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "number-of-boomerangs",
+      "default": "Squared-Distance Frequencies",
+      "defaultSha256": "53e5adc07305bcbd72ca0c78edb315b282bd3859b8c8892c609125eb4ad614a2",
+      "alternatives": [
+        {
+          "approach": "Enumerate Ordered Triples",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "number-of-islands-ii",
+      "default": "Union Find",
+      "defaultSha256": "f84f32516b677098ba53fb046af6df7013a7bf6794fc1c20c227d445f3f328bf",
+      "alternatives": [
+        {
+          "approach": "Recount Components after Each Addition",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "odd-even-linked-list",
+      "default": "Separate Odd and Even Positions",
+      "defaultSha256": "86964383e9cdccfeb118a67e78dcd01dd22ff56057f49ae2d0448f6fa6897b68",
+      "alternatives": [
+        {
+          "approach": "Collect and Relink Nodes",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "one-edit-distance",
+      "default": "One Pass Algorithm",
+      "defaultSha256": "eb5a733eb4f2ce301abe932be09a472585b69b75acfa89c94b808a90cfa50e61",
+      "alternatives": [
+        {
+          "approach": "Levenshtein Distance DP",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "optimal-division",
+      "default": "Minimize the Denominator",
+      "defaultSha256": "d73a804691140fc24ae023fc300b38d2972087c5939ae6e5d43c4c0948f64f27",
+      "alternatives": [
+        {
+          "approach": "Enumerate Parenthesizations",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "path-sum-ii",
+      "default": "Depth-First Search with Backtracking",
+      "defaultSha256": "2faf68fe4abd60d1ecefbaaa91532b12501d5eca6de9c4b6087006070100ed1f",
+      "alternatives": [
+        {
+          "approach": "Breadth-First Path Copies",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "path-sum-iii",
+      "default": "Try Every Downward Path Start",
+      "defaultSha256": "74440ab6c5329b4fbb2ad975c4974940d20a219827cdbf701a83f09675453edd",
+      "alternatives": [
+        {
+          "approach": "Prefix Sums on the Active Path",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "plus-one-linked-list",
+      "default": "Sentinel Head + Textbook Addition",
+      "defaultSha256": "e27b8b590c52424e8247f570431873b8b60c950e906a026d1398c31e2b1c3f6d",
+      "alternatives": [
+        {
+          "approach": "Reverse, Add, and Reverse Back",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "power-of-three",
+      "default": "Divisibility by the Largest 32-Bit Power",
+      "defaultSha256": "429cc984784eba973cd884e8f8e0b0a774a06bb6bba884ed4f0b012e706f4ad0",
+      "alternatives": [
+        {
+          "approach": "Repeated Division",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "predict-the-winner",
+      "default": "Interval DP for Score Difference",
+      "defaultSha256": "c90c09b224014bf61816b69690e51e455d19e063555f3fddad517664a35970bf",
+      "alternatives": [
+        {
+          "approach": "Memoized Score Difference",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "range-addition",
+      "default": "Difference Array and Prefix Sum",
+      "defaultSha256": "23786e322d872c1247baed5c462c02815e042067fdff42a80bedd37c6b77cadc",
+      "alternatives": [
+        {
+          "approach": "Apply Every Range Literally",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "rearrange-string-k-distance-apart",
+      "default": "Greedy",
+      "defaultSha256": "a6fe535360a09c062bc1beeb234dc0a9f8e03295aa0f1684d9c1c0abff1e37eb",
+      "alternatives": [
+        {
+          "approach": "Max-Heap with Cooldown Queue",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "rectangle-area",
+      "default": "Subtract Rectangle Intersection",
+      "defaultSha256": "1ea0af59dfbf11bf2dc3ea2a2a5538b41620c61ea8154daa7bf1f0265f3d9107",
+      "alternatives": [
+        {
+          "approach": "Coordinate Compression",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "remove-duplicate-letters",
+      "default": "Monotone Stack with Remaining Counts",
+      "defaultSha256": "b4bfb6b010ca670e624ab847f65d2b6f96bd4bb51cc2a32a206d402a36520775",
+      "alternatives": [
+        {
+          "approach": "Recursive Smallest Feasible Prefix",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "remove-duplicates-from-sorted-list-ii",
+      "default": "Dummy Node and Run Skipping",
+      "defaultSha256": "b57800fccd4309c92f7cf71b3356600e3ee132e51b5639b24f156ebfa92369fa",
+      "alternatives": [
+        {
+          "approach": "Recursive Run Removal",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "repeated-substring-pattern",
+      "default": "Search Inside a Doubled String",
+      "defaultSha256": "3d5013bf41c159c154eef64eef71bf9cbd1bb372e0df90db22b231c6b28826a2",
+      "alternatives": [
+        {
+          "approach": "Try Every Period Length",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "reverse-vowels-of-a-string",
+      "default": "Two Pointers on Vowels",
+      "defaultSha256": "5580bfdf35c94c0b5d01b75a21438c70855cc47fd283e9a62e7365c22d3d1dde",
+      "alternatives": [
+        {
+          "approach": "Collect and Replace Vowels",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "reverse-words-in-a-string",
+      "default": "Split, Reverse, and Join",
+      "defaultSha256": "95b58dbbdbeb6bd41a189c4edac5ca87af18dd201ff66cb9edae855eff94befe",
+      "alternatives": [
+        {
+          "approach": "Scan and Prepend Words",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "reverse-words-in-a-string-ii",
+      "default": "Reverse the Whole String and Then Reverse Each Word",
+      "defaultSha256": "ade2ea33aa23cedc42b0b015bc130b9c5ed29016efdd75d3c32fb13a471ce289",
+      "alternatives": [
+        {
+          "approach": "Word Buffer and Copy Back",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "robot-bounded-in-circle",
+      "default": "Simulation",
+      "defaultSha256": "081c3596a1054e4c4ca7f1a6800475caec9c366e2c039b8577999859e6af2015",
+      "alternatives": [
+        {
+          "approach": "Four-Cycle Simulation",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "rotate-function",
+      "default": "Rotate-Sum Recurrence",
+      "defaultSha256": "44c15fae19817f4bc32682465e7352231f1056e863223542b506658809659e50",
+      "alternatives": [
+        {
+          "approach": "Evaluate Every Rotation",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "search-a-2d-matrix-ii",
+      "default": "Staircase Search",
+      "defaultSha256": "2fafdaba29382b3b2e284bc11dd99f10952de242f912c3d3fff4d99855a3155b",
+      "alternatives": [
+        {
+          "approach": "Binary Search Each Row",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "sentence-similarity",
+      "default": "Using Hash Map and Hash Set",
+      "defaultSha256": "ae73e0103dcdce1fa1ce9bc5797068ce2bb6e8aae99cdfc4af64bcacc82ced86",
+      "alternatives": [
+        {
+          "approach": "Scan Similarity Pairs per Word",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "shortest-unsorted-continuous-subarray",
+      "default": "Find the Disorder Extremes and Expand Bounds",
+      "defaultSha256": "1bbc20733d95947e85b3a9d43415d2d081827a21b31ac36f17b769cc74d55003",
+      "alternatives": [
+        {
+          "approach": "Compare with a Sorted Copy",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "single-number-ii",
+      "default": "Bit Counts Modulo Three",
+      "defaultSha256": "ad2268bceacaddcbd8002caea68cba4d1111faf027bfc6350999ab9fb6259e0e",
+      "alternatives": [
+        {
+          "approach": "Two Bit-State Masks",
+          "kind": "walkccc",
+          "path": "solutions/137. Single Number II/137-2.py",
+          "sha256": "b5c0aa1aa5c7b7153e662332963f9abe66c596c4b0dda31e7f67e801fe6f07ee"
+        }
+      ]
+    },
+    {
+      "id": "sort-array-by-increasing-frequency",
+      "default": "Custom Sort",
+      "defaultSha256": "4f2dc62e0a0f3f7a903bd151e01a25b90d6d329cea81cb7d69500e829c4df07b",
+      "alternatives": [
+        {
+          "approach": "Frequency Buckets",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "sort-transformed-array",
+      "default": "Two Pointers on a Quadratic Transform",
+      "defaultSha256": "6767401e6e41f32bd4cb6bd855f7a7cd22d4504fd9138216a49559a6b55e9c64",
+      "alternatives": [
+        {
+          "approach": "Transform and Sort",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "string-to-integer-atoi",
+      "default": "Parse and Clamp",
+      "defaultSha256": "da91baff6b6c2890219497ddf12cdebb6cb0fc3a5741edf066c5b233e33478c7",
+      "alternatives": [
+        {
+          "approach": "Regular Expression Prefix",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "sum-of-left-leaves",
+      "default": "Sum Only Left Leaf Children",
+      "defaultSha256": "76e740b5bed21a12a30192ab82ce833819767b3f1bffa7abd9a42d060fe52478",
+      "alternatives": [
+        {
+          "approach": "Iterative Tree Stack",
+          "kind": "walkccc",
+          "path": "solutions/404. Sum of Left Leaves/404-2.py",
+          "sha256": "ee28b3752f96f1c43fc5dc5df9ebdece8128c4b575edd3678435c3546d2286ec"
+        }
+      ]
+    },
+    {
+      "id": "super-ugly-number",
+      "default": "Merge Prime-Multiple Streams",
+      "defaultSha256": "4748b7341c34bcf234fa5de7b1cf8ca579edfdea3599c6ee42f2454d5149276b",
+      "alternatives": [
+        {
+          "approach": "Heap-Merge Prime Streams",
+          "kind": "walkccc",
+          "path": "solutions/313. Super Ugly Number/313-2.py",
+          "sha256": "008c13dc2bc3d9f253ce32c7195514176c27f0b01532b446bff670f6ad355792"
+        }
+      ]
+    },
+    {
+      "id": "the-maze-ii",
+      "default": "Dijkstra's Algorithm and Priority Queue",
+      "defaultSha256": "063f800f601f178db1e0b018e580cc4b936301b4e3f009c2bbebcc06903c7aaa",
+      "alternatives": [
+        {
+          "approach": "Bellman-Ford on Rolling Stops",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "the-maze-iii",
+      "default": "Dijkstra's",
+      "defaultSha256": "346b9d88bf7789af21ec4b41acccbb74cd689e85f6581abd5ab10b880dadd049",
+      "alternatives": [
+        {
+          "approach": "Scan-Based Dijkstra",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "third-maximum-number",
+      "default": "Three Distinct Maximum Candidates",
+      "defaultSha256": "329a63d497f9ba231d3c36a8497d3cad7aa3f8ba50beb9be487d7d9c6283db08",
+      "alternatives": [
+        {
+          "approach": "Three-Value Min-Heap",
+          "kind": "walkccc",
+          "path": "solutions/414. Third Maximum Number/414-2.py",
+          "sha256": "fa6bde413bf18d80062228168452f27a6141558f2e4e69773f4fc87e20ad08f6"
+        }
+      ]
+    },
+    {
+      "id": "total-hamming-distance",
+      "default": "Count Different Bits Independently",
+      "defaultSha256": "8b1a3f9e1272b1613f73948016a9256595bd0190066b69ae253b6f35e9ba84cb",
+      "alternatives": [
+        {
+          "approach": "Count Every Pair",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "two-sum-iv-input-is-a-bst",
+      "default": "Opposite BST Iterators",
+      "defaultSha256": "2dace74a3631ae23837a3e7405c254aa73b9582b5121773575125b42732d1f79",
+      "alternatives": [
+        {
+          "approach": "Traversal with Seen Values",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "ugly-number",
+      "default": "Math",
+      "defaultSha256": "c96a10687be8dea9fe191bb15059451e1f0a515311ab71eba5930a47b77d5065",
+      "alternatives": [
+        {
+          "approach": "Generate Ugly Numbers in Order",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "ugly-number-ii",
+      "default": "Three Monotone Candidate Streams",
+      "defaultSha256": "0421ad5533c8818b5e40b42c5dca17aca4db963fbe3697e014eb48d007a6ded1",
+      "alternatives": [
+        {
+          "approach": "Min-Heap Generation",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "unique-substrings-in-wraparound-string",
+      "default": "Longest Wraparound Run per Ending Letter",
+      "defaultSha256": "070d7f7ae2f7bef0bc434103f3bca2299afe23aeba0baa497fb1dad021131609",
+      "alternatives": [
+        {
+          "approach": "Store Valid Substrings",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "valid-square",
+      "default": "Six Squared Distances",
+      "defaultSha256": "04981bb27c45dc30f38e9f2eccd3ff0e85b8cf77c69278abcc8565100feee6ce",
+      "alternatives": [
+        {
+          "approach": "Try Cyclic Vertex Orders",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "valid-triangle-number",
+      "default": "Sorting and Two-Pointer Triangle Counting",
+      "defaultSha256": "2181e7ad9b3a99e7e286ef2880a7a359d8c83518062f10670c14421d5ae5d947",
+      "alternatives": [
+        {
+          "approach": "Enumerate Side Triples",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "valid-word-abbreviation",
+      "default": "Two Pointers",
+      "defaultSha256": "8a6e42a40563f7784e10b8d5ff6986bb84802509af798c6f2934757242203d1c",
+      "alternatives": [
+        {
+          "approach": "Compile a Fixed-Length Pattern",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "verify-preorder-serialization-of-a-binary-tree",
+      "default": "Available Child Slots",
+      "defaultSha256": "cacf14ce3c7e806009ef4f632639327d984f33f8542c7a37e2365bc1e08986dc",
+      "alternatives": [
+        {
+          "approach": "Reduce Completed Subtrees",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "water-and-jug-problem",
+      "default": "Capacity Bound and Greatest Common Divisor",
+      "defaultSha256": "3a59677cca3bdc4acb6a9f5349514db4c5e7ce0a1fab0091e47650df8e12e64e",
+      "alternatives": [
+        {
+          "approach": "Breadth-First Jug States",
+          "kind": "authored"
+        }
+      ]
+    },
+    {
+      "id": "wiggle-subsequence",
+      "default": "Up and Down Subsequence Lengths",
+      "defaultSha256": "24225edcb8adbefd58ced9f6a97356ffae99fd7e7be07a1d351060360fb9f3da",
+      "alternatives": [
+        {
+          "approach": "Quadratic Up-and-Down DP",
+          "kind": "authored"
+        }
+      ]
+    }
+  ]
+}

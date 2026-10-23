@@ -1,0 +1,29 @@
+{
+  "problemId": "split-bst",
+  "approach": "Recursive Split Along the Search Path",
+  "explanation": "### How it works\n\nOnly the search path toward the target crosses the partition. Recursively split that child, reconnect the matching piece, and leave the opposite subtree unchanged.\n\n### Steps\n\n1. Return two empty trees for an empty root.\n2. For a root above target, split its left child and retain the larger piece as its new left child.\n3. Otherwise split its right child and retain the smaller piece as its new right child.\n4. Return both partition roots.\n\n### Complexity\n\n- Time: O(h) for tree height h.\n- Space: O(h) recursion space.\n\n### Things to watch for\n\n- Values equal to target belong in the first tree.\n- Reuse the original nodes and preserve links within each partition.",
+  "code": {
+    "python": "class Solution:\n  def splitBST(self, root: TreeNode | None, target: int) -> list[TreeNode | None]:\n    if not root:\n      return None, None\n    if root.val > target:\n      left, right = self.splitBST(root.left, target)\n      root.left = right\n      return left, root\n    else:  # root.val <= target\n      left, right = self.splitBST(root.right, target)\n      root.right = left\n      return root, right\n",
+    "cpp": "class Solution {\n public:\n  vector<TreeNode*> splitBST(TreeNode* root, int target) {\n    if (root == nullptr)\n      return {nullptr, nullptr};\n    if (root->val > target) {\n      const vector<TreeNode*> res = splitBST(root->left, target);\n      root->left = res[1];\n      return {res[0], root};\n    } else {  // root->val <= target\n      const vector<TreeNode*> res = splitBST(root->right, target);\n      root->right = res[0];\n      return {root, res[1]};\n    }\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/776.%20Split%20BST",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-two-chain-split",
+      "approach": "Iterative Two-Chain Split",
+      "explanation": "### How it works\n\nFollow the same search path, appending nodes to a small-value right chain or a large-value left chain. Off-path subtrees already belong entirely to their node's partition.\n\n### Steps\n\n1. Create dummy roots for the two result chains.\n2. Append a value at most target to the small chain and follow its original right child.\n3. Append a larger value to the large chain and follow its original left child.\n4. Terminate both boundary chains and return their roots.\n\n### Complexity\n\n- Time: O(h).\n- Space: O(1) auxiliary space, reusing original nodes.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/776.%20Split%20BST",
+      "code": {
+        "python": "class Solution:\n    def splitBST(self, root: 'TreeNode', target: int) -> list['TreeNode']:\n        small_dummy, large_dummy = TreeNode(0), TreeNode(0)\n        small, large = small_dummy, large_dummy\n        while root:\n            if root.val <= target:\n                small.right = root\n                small = root\n                root = root.right\n            else:\n                large.left = root\n                large = root\n                root = root.left\n        small.right = None\n        large.left = None\n        return [small_dummy.right, large_dummy.left]\n"
+      }
+    }
+  ]
+}

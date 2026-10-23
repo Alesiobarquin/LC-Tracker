@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> rearrangeArray(vector<int>& nums) {\n        int i = 0, j = 1;\n        vector<int> res(nums.size());\n        for (int k = 0; k < nums.size(); k++) {\n            if (nums[k] > 0) {\n                res[i] = nums[k];\n                i += 2;\n            } else {\n                res[j] = nums[k];\n                j += 2;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rearrange-array-elements-by-sign.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rearrange-array-elements-by-sign.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe process the array position by position. At each index, we check if the current element has the correct sign (positive at even indices, negative at odd indices). If not, we search forward for an element with the correct sign and shift all elements in between to make room for it.\n\n### Steps\n\n1. Iterate through each index `i`:\n    - If index is even and `nums[i] > 0`, or index is odd and `nums[i] < 0`, continue.\n    - Otherwise, find the next element with the opposite sign at position `j`.\n    - Save `nums[j]`, then shift all elements from `i` to `j-1` one position right.\n    - Place the saved element at position `i`.\n2. Return the modified array.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rearrangeArray(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        for i in range(n):\n            if ((i % 2 == 0 and nums[i] > 0) or\n                (i % 2 == 1 and nums[i] < 0)):\n                continue\n\n            j = i + 1\n            while j < n and ((nums[j] > 0) == (nums[i] > 0)):\n                j += 1\n\n            tmp = nums[j]\n            while j > i:\n                nums[j] = nums[j - 1]\n                j -= 1\n            nums[i] = tmp\n        return nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rearrange-array-elements-by-sign.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Group Numbers Into Two Arrays",
+      "explanation": "### How it works\n\nSince we need to alternate positive and negative numbers while preserving their relative order, we can first separate them into two lists. Then we interleave them back into the original array: positive numbers go to even indices, negative numbers go to odd indices.\n\n### Steps\n\n1. Create two separate lists: `pos` for positive numbers and `neg` for negative numbers.\n2. Iterate through the input array and add each number to the appropriate list.\n3. Rebuild the array by interleaving:\n    - Place `pos[i]` at index `2 * i`.\n    - Place `neg[i]` at index `2 * i + 1`.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def rearrangeArray(self, nums: List[int]) -> List[int]:\n        pos, neg = [], []\n        for num in nums:\n            if num > 0:\n                pos.append(num)\n            else:\n                neg.append(num)\n\n        i = 0\n        while 2 * i < len(nums):\n            nums[2 * i] = pos[i]\n            nums[2 * i + 1] = neg[i]\n            i += 1\n        return nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/rearrange-array-elements-by-sign.md",
+      "id": "group-numbers-into-two-arrays"
+    }
+  ]
 }

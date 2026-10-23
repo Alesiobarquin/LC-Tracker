@@ -1,0 +1,29 @@
+{
+  "problemId": "range-addition-ii",
+  "approach": "Common Prefix-Rectangle Intersection",
+  "explanation": "### How it works\n\nEvery operation increments a rectangle anchored at the origin. The cells receiving every increment form the intersection, whose dimensions are the minimum operation height and width.\n\n### Steps\n\n1. Start with the full matrix dimensions.\n2. Minimize height and width across operations.\n3. Multiply the resulting intersection dimensions.\n\n### Complexity\n\n- Time: O(k) for k operations.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def maxCount(self, m: int, n: int, ops: list[list[int]]) -> int:\n    minY = m\n    minX = n\n\n    for y, x in ops:\n      minY = min(minY, y)\n      minX = min(minX, x)\n\n    return minX * minY\n",
+    "cpp": "class Solution {\n public:\n  int maxCount(int m, int n, vector<vector<int>>& ops) {\n    int minY = m;\n    int minX = n;\n\n    for (const vector<int>& op : ops) {\n      minY = min(minY, op[0]);\n      minX = min(minX, op[1]);\n    }\n\n    return minX * minY;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/598.%20Range%20Addition%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "compressed-cell-simulation",
+      "approach": "Compressed-Cell Simulation",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nOperation boundaries partition the matrix into cells with uniform increment counts. Simulate each compressed cell, then sum the areas of cells attaining the largest count.\n\n### Steps\n\n1. Collect all operation row and column boundaries plus matrix boundaries.\n2. Visit every compressed cell.\n3. Count operations covering its top-left corner.\n4. Keep the largest count and total area at that count.\n\n### Complexity\n\n- Time: O(k³ + k log k) upper bound.\n- Space: O(k) compressed boundaries.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/598.%20Range%20Addition%20II",
+      "code": {
+        "python": "class Solution:\n    def maxCount(self, m: int, n: int, ops: list[list[int]]) -> int:\n        rows = sorted({0, m, *(a for a, _ in ops)})\n        cols = sorted({0, n, *(b for _, b in ops)})\n        best, area = -1, 0\n        for r, end_r in zip(rows, rows[1:]):\n            for c, end_c in zip(cols, cols[1:]):\n                count = sum(r < a and c < b for a, b in ops)\n                size = (end_r - r) * (end_c - c)\n                if count > best:\n                    best, area = count, size\n                elif count == best:\n                    area += size\n        return area\n"
+      }
+    }
+  ]
+}

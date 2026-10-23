@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int buyChoco(vector<int>& prices, int money) {\n        int min1 = INT_MAX, min2 = INT_MAX;\n\n        for (int p : prices) {\n            if (p < min1) {\n                min2 = min1;\n                min1 = p;\n            } else if (p < min2) {\n                min2 = p;\n            }\n        }\n\n        int leftover = money - min1 - min2;\n        return leftover >= 0 ? leftover : money;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-two-chocolates.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-two-chocolates.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe want to buy two chocolates and maximize the leftover money, which means we should minimize the total cost of the two chocolates. The brute force approach tries every possible pair of chocolates and keeps track of the maximum leftover (or equivalently, the pair with minimum total cost that we can afford).\n\n### Steps\n\n1. Initialize result to `-1` (indicating no valid purchase found yet).\n2. For each pair of chocolates `(i, j)` where `i < j`:\n    - If the sum of their prices is within our budget, calculate the leftover money.\n    - Update result with the maximum leftover found.\n3. If no valid pair was found (result is `-1`), return the original money (we buy nothing).\n4. Otherwise, return the maximum leftover amount.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def buyChoco(self, prices: List[int], money: int) -> int:\n        res = -1\n        for i in range(len(prices)):\n            for j in range(i + 1, len(prices)):\n                if prices[i] + prices[j] <= money:\n                    res = max(res, money - prices[i] - prices[j])\n        return res if res != -1 else money\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-two-chocolates.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo maximize leftover money, we need to buy the two cheapest chocolates. After sorting the prices, the two cheapest chocolates will be at the beginning of the array. We just need to check if we can afford them.\n\n### Steps\n\n1. Sort the prices array in ascending order.\n2. Calculate the cost of buying the two cheapest chocolates (first two elements).\n3. If this cost exceeds our money, return the original money (we buy nothing).\n4. Otherwise, return money minus the cost of the two chocolates.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def buyChoco(self, prices: List[int], money: int) -> int:\n        prices.sort()\n        buy = prices[0] + prices[1]\n        return money if buy > money else money - buy\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buy-two-chocolates.md",
+      "id": "sorting"
+    }
+  ]
 }

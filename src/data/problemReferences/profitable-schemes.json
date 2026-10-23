@@ -7,5 +7,25 @@
     "cpp": "class Solution {\nprivate:\n    static const int MOD = 1e9 + 7;\n\npublic:\n    int profitableSchemes(int n, int minProfit, vector<int>& group, vector<int>& profit) {\n        int N = group.size();\n        vector<vector<int>> dp(n + 2, vector<int>(minProfit + 1, 0));\n\n        for (int j = 0; j <= n; j++) {\n            dp[j][minProfit] = 1;\n        }\n\n        for (int i = N - 1; i >= 0; i--) {\n            for (int j = n; j >= 0; j--) {\n                for (int p = 0; p <= minProfit; p++) {\n                    int res = dp[j][p];\n                    if (j >= group[i]) {\n                        int nxtP = min(profit[i] + p, minProfit);\n                        res = (res + dp[j - group[i]][nxtP]) % MOD;\n                    }\n                    dp[j][p] = res;\n                }\n            }\n        }\n\n        return dp[n][0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=CcLKQLKvOl8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/profitable-schemes.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/profitable-schemes.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis is a variation of the 0/1 knapsack problem with two constraints: number of members and minimum profit. For each crime, we decide whether to include it or skip it. If we include a crime, we use its required members and gain its profit. At the end, we count paths where total profit meets the threshold and total members used does not exceed the limit.\n\n### Steps\n\n1. Define a recursive function `dfs(i, n, p)` where:\n    - `i` is the current crime index.\n    - `n` is the remaining number of members available.\n    - `p` is the profit accumulated so far.\n2. Base case: if `i` equals the number of crimes, return `1` if `p >= minProfit`, else return `0`.\n3. For the current crime:\n    - Option 1: skip it and recurse with `dfs(i + 1, n, p)`.\n    - Option 2: if we have enough members, include it and recurse with `dfs(i + 1, n - group[i], p + profit[i])`.\n4. Sum both options and return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the size of the `group` array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def profitableSchemes(self, n: int, minProfit: int, group: List[int], profit: List[int]) -> int:\n        mod = 10**9 + 7\n\n        def dfs(i, n, p):\n            if i == len(group):\n                return 1 if p >= minProfit else 0\n\n            res = dfs(i + 1, n, p)\n            if n - group[i] >= 0:\n                res = (res + dfs(i + 1, n - group[i], p + profit[i])) % mod\n\n            return res\n\n        return dfs(0, n, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/profitable-schemes.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems because the same state (crime index, remaining members, current profit) can be reached through different paths. By memoizing results, we avoid redundant computation. We also cap profit at `minProfit` since any profit beyond the threshold is equivalent for counting purposes.\n\n### Steps\n\n1. Create a 3D memoization table indexed by (crime index, remaining members, current profit).\n2. Define `dfs(i, n, p)` with the same logic as the recursive approach.\n3. Before computing, check if the state is already in the cache.\n4. When including a crime, cap the new profit at `minProfit` to reduce state space.\n5. Store and return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(N * m * n)`\n- Space complexity: `O(N * m * n)`\n\n> Where `N` is the size of the `group` array, `m` is the given minimum profit, and `n` is the number of group members.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def profitableSchemes(self, n: int, minProfit: int, group: List[int], profit: List[int]) -> int:\n        mod = 10**9 + 7\n        dp = {}\n\n        def dfs(i, n, p):\n            if i == len(group):\n                return 1 if p >= minProfit else 0\n            if (i, n, p) in dp:\n                return dp[(i, n, p)]\n\n            res = dfs(i + 1, n, p)\n            if n - group[i] >= 0:\n                nxtP = min(p + profit[i], minProfit)\n                res = (res + dfs(i + 1, n - group[i], nxtP)) % mod\n\n            dp[(i, n, p)] = res\n            return res\n\n        return dfs(0, n, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/profitable-schemes.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/509.%20Fibonacci%20Number",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "memoized-recursion",
+      "approach": "Memoized Recursion",
+      "explanation": "### How it works\n\nUse the recursive Fibonacci definition while caching each argument. Shared subproblems are evaluated once instead of being expanded repeatedly.\n\n### Steps\n\n1. Return n for zero and one.\n2. Recursively sum the previous two values.\n3. Cache the result for each n.\n\n### Complexity\n\n- Time: `O(n)` under the fixed integer bounds.\n- Space: `O(n)` for cache and recursion.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/509.%20Fibonacci%20Number",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def fib(self, n: int) -> int:\n        @cache\n        def solve(value):\n            if value < 2:\n                return value\n            return solve(value - 1) + solve(value - 2)\n        return solve(n)\n"
+      }
+    }
+  ]
 }

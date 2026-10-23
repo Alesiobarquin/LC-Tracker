@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* removeElements(ListNode* head, int val) {\n        ListNode dummy(-1, head);\n        ListNode *curr = &dummy;\n\n        while (curr->next) {\n            if (curr->next->val == val) {\n                curr->next = curr->next->next;\n            } else {\n                curr = curr->next;\n            }\n        }\n\n        return dummy.next;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=JI71sxtHTng",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-linked-list-elements.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-linked-list-elements.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA straightforward approach is to extract all values we want to keep into an array, then build a new linked list from scratch.\nWe traverse the original list, skipping nodes with the target value, and collect the remaining values.\nFinally, we create new nodes from this array and link them together.\nThis works but requires extra space and creates entirely new nodes.\n\n### Steps\n\n1. Traverse the linked list and collect all node values that are not equal to `val` into an array.\n2. If the array is empty, return `null`.\n3. Create a new linked list by making nodes from each value in the array.\n4. Return the head of the new list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeElements(self, head: Optional[ListNode], val: int) -> Optional[ListNode]:\n        arr = []\n        cur = head\n\n        while cur:\n            if cur.val != val:\n                arr.append(cur.val)\n            cur = cur.next\n\n        if not arr:\n            return None\n\n        res = ListNode(arr[0])\n        cur = res\n        for i in range(1, len(arr)):\n            node = ListNode(arr[i])\n            cur.next = node\n            cur = cur.next\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-linked-list-elements.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nRecursion naturally fits linked list problems because each node is structurally similar to the rest of the list.\nWe recursively process the remainder of the list first, then decide whether to include the current node.\nIf the current node matches the target value, we skip it by returning the already-processed next portion.\nOtherwise, we attach the current node to the processed tail and return it.\n\n### Steps\n\n1. Base case: if the list is empty, return `null`.\n2. Recursively call the function on `head.next` to process the rest of the list.\n3. Attach the result to `head.next`.\n4. If `head.val` equals `val`, return `head.next` to skip the current node; otherwise return `head`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeElements(self, head: Optional[ListNode], val: int) -> Optional[ListNode]:\n        if not head:\n            return None\n        head.next = self.removeElements(head.next, val)\n        return head if head.val != val else head.next\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-linked-list-elements.md",
+      "id": "recursion"
+    }
+  ]
 }

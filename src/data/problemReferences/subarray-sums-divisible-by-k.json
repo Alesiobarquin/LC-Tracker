@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int subarraysDivByK(vector<int>& nums, int k) {\n        vector<int> count(k, 0);\n        count[0] = 1;\n        int prefix = 0, res = 0;\n\n        for (int num : nums) {\n            prefix = (prefix + num % k + k) % k;\n            res += count[prefix];\n            count[prefix]++;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sums-divisible-by-k.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sums-divisible-by-k.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach checks every possible subarray. For each starting index, we extend the subarray one element at a time, keeping a running sum. If the sum is divisible by `k` (i.e., `sum % k == 0`), we count it.\n\n### Steps\n\n1. Initialize `res = 0`.\n2. For each starting index `i`:\n    - Set `curSum = 0`.\n    - For each ending index `j` from `i` to `n - 1`:\n        - Add `nums[j]` to `curSum`.\n        - If `curSum % k == 0`, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def subarraysDivByK(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            curSum = 0\n            for j in range(i, n):\n                curSum += nums[j]\n                if curSum % k == 0:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sums-divisible-by-k.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum + Hash Map",
+      "explanation": "### How it works\n\nIf two prefix sums have the same remainder when divided by `k`, their difference is divisible by `k`. So the subarray between those two positions has a sum divisible by `k`. We use a hash map to count how many times each remainder has appeared. For each new prefix sum, we check how many previous prefix sums share the same remainder.\n\n### Steps\n\n1. Initialize `prefixSum = 0`, `res = 0`, and a hash map `prefixCnt` with `{0: 1}`.\n2. For each number in the array:\n    - Add it to `prefixSum`.\n    - Compute `remain = prefixSum % k`. Handle negative remainders by adding `k` if needed.\n    - Add `prefixCnt[remain]` to `res`.\n    - Increment `prefixCnt[remain]` by `1`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(k)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def subarraysDivByK(self, nums: List[int], k: int) -> int:\n        prefix_sum = 0\n        res = 0\n        prefix_cnt = defaultdict(int)\n        prefix_cnt[0] = 1\n\n        for n in nums:\n            prefix_sum += n\n            remain = prefix_sum % k\n\n            res += prefix_cnt[remain]\n            prefix_cnt[remain] += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/subarray-sums-divisible-by-k.md",
+      "id": "prefix-sum-hash-map"
+    }
+  ]
 }

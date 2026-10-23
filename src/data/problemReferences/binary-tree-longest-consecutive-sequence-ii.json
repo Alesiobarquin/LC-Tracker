@@ -7,5 +7,20 @@
     "cpp": "class Solution {\nprivate:\n    int maxval = 0;\n\n    vector<int> longestPath(TreeNode* root) {\n        if (root == nullptr) {\n            return {0, 0};\n        }\n\n        int inr = 1, dcr = 1;\n\n        if (root->left != nullptr) {\n            vector<int> left = longestPath(root->left);\n            if (root->val == root->left->val + 1) {\n                dcr = left[1] + 1;\n            } else if (root->val == root->left->val - 1) {\n                inr = left[0] + 1;\n            }\n        }\n\n        if (root->right != nullptr) {\n            vector<int> right = longestPath(root->right);\n            if (root->val == root->right->val + 1) {\n                dcr = max(dcr, right[1] + 1);\n            } else if (root->val == root->right->val - 1) {\n                inr = max(inr, right[0] + 1);\n            }\n        }\n\n        maxval = max(maxval, dcr + inr - 1);\n\n        return {inr, dcr};\n    }\n\npublic:\n    int longestConsecutive(TreeNode* root) {\n        longestPath(root);\n        return maxval;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-longest-consecutive-sequence-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-longest-consecutive-sequence-ii.md",
+  "alternatives": [
+    {
+      "id": "search-consecutive-paths-from-each-node",
+      "approach": "Search Consecutive Paths from Each Node",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nTreat the tree as an undirected graph and start an increasing-by-one path search at every node. A path in the opposite direction is covered when its lower-valued endpoint is chosen as the start.\n\n### Steps\n\n1. Build undirected parent-child adjacency.\n2. Start a traversal at each node.\n3. Follow only neighbors whose value is exactly one larger.\n4. Keep the longest path length.\n\n### Complexity\n\n- Time: `O(n²)` as an upper bound over all starting nodes.\n- Space: `O(n)` for adjacency and traversal.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/binary-tree-longest-consecutive-sequence-ii.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def longestConsecutive(self, root: Optional[TreeNode]) -> int:\n        if not root:\n            return 0\n        adjacency, pending = {}, [root]\n        while pending:\n            node = pending.pop()\n            adjacency.setdefault(node, [])\n            for child in (node.left, node.right):\n                if child:\n                    adjacency[node].append(child)\n                    adjacency.setdefault(child, []).append(node)\n                    pending.append(child)\n        best = 1\n        for start in adjacency:\n            stack = [(start, 1)]\n            while stack:\n                node, length = stack.pop()\n                best = max(best, length)\n                stack.extend((neighbor, length + 1) for neighbor in adjacency[node] if neighbor.val == node.val + 1)\n        return best\n"
+      }
+    }
+  ]
 }

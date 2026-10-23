@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minimumRecolors(string blocks, int k) {\n        int count_w = 0;\n        for (int i = 0; i < k; i++) {\n            if (blocks[i] == 'W') {\n                count_w++;\n            }\n        }\n\n        int res = count_w;\n        for (int i = k; i < blocks.size(); i++) {\n            if (blocks[i - k] == 'W') {\n                count_w--;\n            }\n            if (blocks[i] == 'W') {\n                count_w++;\n            }\n            res = min(res, count_w);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-recolors-to-get-k-consecutive-black-blocks.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-recolors-to-get-k-consecutive-black-blocks.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to find a window of `k` consecutive blocks that requires the fewest recolors to become all black. A recolor is needed for each white block ('W') in the window. We can check every possible window of size `k` and count the white blocks in each, keeping track of the minimum count.\n\n### Steps\n\n1. Initialize `res` to the length of the string (worst case).\n2. For each starting position `i` from `0` to `n - k`:\n    - Count the number of 'W' characters in the window from `i` to `i + k - 1`.\n    - Update `res` with the minimum count seen.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def minimumRecolors(self, blocks: str, k: int) -> int:\n        res = len(blocks)\n        for i in range(len(blocks) - k + 1):\n            count_w = 0\n            for j in range(i, i + k):\n                if blocks[j] == 'W':\n                    count_w += 1\n            res = min(res, count_w)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-recolors-to-get-k-consecutive-black-blocks.md",
+      "id": "brute-force"
+    }
+  ]
 }

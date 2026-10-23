@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minimumOneBitOperations(int n) {\n        int res = n;\n        while (n != 0) {\n            n >>= 1;\n            res ^= n;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-one-bit-operations-to-make-integers-zero.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-one-bit-operations-to-make-integers-zero.md",
+  "alternatives": [
+    {
+      "approach": "Math (Recursion)",
+      "explanation": "### How it works\n\nThe key insight is understanding what it takes to flip the highest set bit to zero. To clear a bit at position `k`, we need to first set up a specific pattern where the bit at position `k-1` is `1` and all lower bits are `0`. This requires `2^k - 1` operations to go from `0` to that pattern. Once we have that setup, clearing the highest bit leaves us with a smaller number, and we recursively solve for that remainder. The operations alternate between adding and subtracting because each recursive step either builds toward or tears down from the target pattern.\n\n### Steps\n\n1. Base case: if `n` is `0`, return `0` since no operations are needed.\n2. Find `k`, the highest power of `2` that is less than or equal to `n`. This represents the position of the highest set bit.\n3. The number of operations to clear just the highest bit from a power of `2` is `2*k - 1` (e.g., clearing bit position `3` requires `7` operations: `2^3 * 2 - 1`).\n4. After clearing the highest bit, we have a remainder `k XOR n`. The operations needed for this remainder are subtracted because the setup steps overlap.\n5. Return `(k * 2) - 1 - recursiveCall(k XOR n)`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)` for recursion stack.",
+      "code": {
+        "python": "class Solution:\n    def minimumOneBitOperations(self, n: int) -> int:\n        if n == 0:\n            return 0\n\n        k = 1\n        while (k << 1) <= n:\n            k <<= 1\n\n        return (k << 1) - 1 - self.minimumOneBitOperations(k ^ n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-one-bit-operations-to-make-integers-zero.md",
+      "id": "math-recursion"
+    }
+  ]
 }

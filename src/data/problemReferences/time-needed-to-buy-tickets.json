@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int timeRequiredToBuy(vector<int>& tickets, int k) {\n        int res = 0;\n\n        for (int i = 0; i < tickets.size(); i++) {\n            if (i <= k) {\n                res += min(tickets[i], tickets[k]);\n            } else {\n                res += min(tickets[i], tickets[k] - 1);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-buy-tickets.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-buy-tickets.md",
+  "alternatives": [
+    {
+      "approach": "Queue",
+      "explanation": "### How it works\n\nWe can simulate the ticket buying process exactly as described. People stand in a queue, and each person buys one ticket at a time before going to the back of the line. We continue this process until the person at position `k` has bought all their tickets.\n\nUsing a queue data structure naturally models this behavior. We track each person's index and decrement their remaining tickets each time they reach the front. When someone finishes buying all their tickets, they leave the queue. The simulation ends when the person at index `k` completes their purchase.\n\n### Steps\n\n1. Initialize a queue with indices `0` to `n-1` representing each person's position.\n2. Track the total time elapsed starting at `0`.\n3. While the queue is not empty, dequeue the front person and increment `time` by `1`.\n4. Decrement that person's ticket count in the array.\n5. If their count reaches `0` and their index equals `k`, return the current `time`.\n6. If their count is still positive, add them back to the queue.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the input array and `m` is the maximum value in the input array.",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def timeRequiredToBuy(self, tickets: List[int], k: int) -> int:\n        n = len(tickets)\n        q = deque()\n\n        for i in range(n):\n            q.append(i)\n\n        time = 0\n        while q:\n            time += 1\n            cur = q.popleft()\n            tickets[cur] -= 1\n            if tickets[cur] == 0:\n                if cur == k:\n                    return time\n            else:\n                q.append(cur)\n        return time\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-buy-tickets.md",
+      "id": "queue"
+    },
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nInstead of using a queue, we can simulate the process by iterating through the array in a circular manner. We keep a pointer that cycles through positions `0, 1, 2, ..., n-1, 0, 1, ...` and skip anyone who has already finished buying tickets.\n\nThis approach eliminates the need for a separate queue data structure while achieving the same simulation. We track time and decrement ticket counts as we cycle through, stopping when the person at position `k` finishes.\n\n### Steps\n\n1. Initialize an index pointer at `0` and time counter at `0`.\n2. Loop indefinitely, incrementing `time` and decrementing the current person's ticket count.\n3. If the current person finishes (count becomes `0`) and their index equals `k`, return `time`.\n4. Move the index to the next position using modulo: `idx = (idx + 1) % n`.\n5. Skip over any person with zero tickets by advancing the index.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(1)`\n\n> Where `n` is the size of the input array and `m` is the maximum value in the input array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def timeRequiredToBuy(self, tickets: List[int], k: int) -> int:\n        n = len(tickets)\n        idx = 0\n\n        time = 0\n        while True:\n            time += 1\n            tickets[idx] -= 1\n            if tickets[idx] == 0:\n                if idx == k:\n                    return time\n            idx = (idx + 1) % n\n            while tickets[idx] == 0:\n                idx = (idx + 1) % n\n\n        return time\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/time-needed-to-buy-tickets.md",
+      "id": "iteration"
+    }
+  ]
 }

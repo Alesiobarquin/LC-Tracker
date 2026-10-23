@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int kInversePairs(int n, int k) {\n        const int MOD = 1e9 + 7;\n        vector<int> prev(k + 1, 0);\n        prev[0] = 1;\n\n        for (int N = 1; N <= n; N++) {\n            vector<int> cur(k + 1, 0);\n            int total = 0;\n            for (int K = 0; K <= k; K++) {\n                total = (total + prev[K]) % MOD;\n                if (K >= N) {\n                    total = (total - prev[K - N] + MOD) % MOD;\n                }\n                cur[K] = total;\n            }\n            prev = cur;\n        }\n\n        return prev[k];\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-inverse-pairs-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-inverse-pairs-array.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nWhen placing the number `n` into a permutation of `n - 1` elements, we can create `0` to `n - 1` new inverse pairs depending on its position. Placing `n` at the end creates `0` new pairs, while placing it at the start creates `n - 1` pairs since `n` is larger than all other elements. This gives us a recurrence: the count for `(n, k)` equals the sum of counts for `(n - 1, k)`, `(n - 1, k - 1)`, ..., `(n - 1, k - (n - 1))`.\n\n### Steps\n\n1. Define `count(n, k)` as the number of permutations of `n` elements with exactly `k` inverse pairs.\n2. Base case: If `n == 0`, return `1` if `k == 0`, else return `0`.\n3. For each position where we can place `n`, it creates `i` inverse pairs (where `i` goes from `0` to `n - 1`).\n4. Sum up `count(n - 1, k - i)` for all valid `i`.\n5. Cache results to avoid recomputation.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 * k)`\n- Space complexity: `O(n * k)`\n\n> Where `n` is the size of the permutation and `k` is the number of inverse pairs in the permutation.",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def kInversePairs(self, n: int, k: int) -> int:\n        MOD = 10**9 + 7\n        cache = {}\n\n        def count(n, k):\n            if n == 0:\n                return 1 if k == 0 else 0\n            if k < 0:\n                return 0\n            if (n, k) in cache:\n                return cache[(n, k)]\n\n            cache[(n, k)] = 0\n            for i in range(n):\n                cache[(n, k)] = (cache[(n, k)] + count(n - 1, k - i)) % MOD\n\n            return cache[(n, k)]\n\n        return count(n, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-inverse-pairs-array.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down Optimized)",
+      "explanation": "### How it works\n\nThe basic recurrence sums up to `n` terms. We can optimize using the relationship: `count(n, k) = count(n, k - 1) + count(n - 1, k) - count(n - 1, k - n)`. This comes from observing that `count(n, k)` and `count(n, k - 1)` share most terms, differing only at the boundaries. We also add early termination when `k` exceeds the maximum possible inverse pairs for `n` elements, which is `n * (n - 1) / 2`.\n\n### Steps\n\n1. Base cases: Return `1` if `k == 0`, return `0` if `n == 1`, and handle bounds based on max pairs.\n2. Use the optimized recurrence: `count(n, k) = count(n, k - 1) + count(n - 1, k) - count(n - 1, k - n)`.\n3. The subtraction handles the term that falls outside the valid range when shifting from `k - 1` to `k`.\n4. Apply modular arithmetic to keep numbers manageable.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(n * k)`\n\n> Where `n` is the size of the permutation and `k` is the number of inverse pairs in the permutation.",
+      "code": {
+        "python": "class Solution:\n    def kInversePairs(self, n: int, k: int) -> int:\n        MOD = 10**9 + 7\n        dp = [[-1] * (k + 1) for _ in range(n + 1)]\n\n        def count(n, k):\n            if k == 0:\n                return 1\n            if n == 1:\n                return 0\n            if n * (n - 1) // 2 < k:\n                return 0\n            if n * (n - 1) // 2 == k:\n                return 1\n            if dp[n][k] != -1:\n                return dp[n][k]\n\n            res = count(n, k - 1)\n            if k >= n:\n                res -= count(n - 1, k - n)\n            res = (res + count(n - 1, k)) % MOD\n\n            dp[n][k] = res\n            return res\n\n        return count(n, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/k-inverse-pairs-array.md",
+      "id": "dynamic-programming-top-down-optimized"
+    }
+  ]
 }

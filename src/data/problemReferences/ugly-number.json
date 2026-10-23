@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool isUgly(int n) {\n        if (n <= 0) return false;\n\n        for (int p = 2; p <= 5 && n > 0; p++) {\n            while (n % p == 0) {\n                n /= p;\n            }\n        }\n\n        return n == 1;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=M0Zay1Qr9ws",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ugly-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ugly-number.md",
+  "alternatives": [
+    {
+      "id": "generate-ugly-numbers-in-order",
+      "approach": "Generate Ugly Numbers in Order",
+      "explanation": "### How it works\n\nGenerate numbers with prime factors two, three, and five in increasing order. Stop when the smallest generated value reaches or passes the query. This compares generation with the default factor-stripping test.\n\n### Steps\n\n1. Reject nonpositive input.\n2. Start a min-heap and seen set with one.\n3. Pop the smallest value and insert unseen multiples of two, three, and five.\n4. Accept if the popped value equals n; reject once it exceeds n.\n\n### Complexity\n\n- Time: `O(U log U)` heap operations for U ugly numbers generated through n.\n- Space: `O(U)` for generated candidates.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/ugly-number.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from heapq import heappop, heappush\n\nclass Solution:\n    def isUgly(self, n: int) -> bool:\n        if n <= 0:\n            return False\n        heap, seen = [1], {1}\n        while heap:\n            value = heappop(heap)\n            if value >= n:\n                return value == n\n            for prime in (2, 3, 5):\n                candidate = value * prime\n                if candidate not in seen:\n                    seen.add(candidate)\n                    heappush(heap, candidate)\n        return False\n"
+      }
+    }
+  ]
 }

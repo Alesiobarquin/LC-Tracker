@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxProductDifference(vector<int>& nums) {\n        int max1 = 0, max2 = 0;\n        int min1 = INT_MAX, min2 = INT_MAX;\n        for (int num : nums) {\n            if (num > max1) {\n                max2 = max1;\n                max1 = num;\n            } else if (num > max2) {\n                max2 = num;\n            }\n            if (num < min1) {\n                min2 = min1;\n                min1 = num;\n            } else if (num < min2) {\n                min2 = num;\n            }\n        }\n        return (max1 * max2) - (min1 * min2);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-difference-between-two-pairs.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-difference-between-two-pairs.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe product difference is `(nums[a] * nums[b]) - (nums[c] * nums[d])` where all four indices are distinct. To maximize this, we want the first product as large as possible and the second product as small as possible. The brute force approach tries all valid combinations of four distinct indices.\n\n### Steps\n\n1. Use four nested loops to select indices `a`, `b`, `c`, `d`.\n2. Skip any iteration where indices overlap.\n3. For each valid combination, compute the product difference.\n4. Track and return the maximum difference found.\n\n### Complexity\n\n- Time complexity: `O(n ^ 4)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProductDifference(self, nums: List[int]) -> int:\n        n, res = len(nums), 0\n        for a in range(n):\n            for b in range(n):\n                if a == b: continue\n                for c in range(n):\n                    if a == c or b == c: continue\n                    for d in range(n):\n                        if a == d or b == d or c == d: continue\n                        res = max(res, nums[a] * nums[b] - nums[c] * nums[d])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-difference-between-two-pairs.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo maximize the product difference, we need the two largest numbers for the first product and the two smallest numbers for the second product. After sorting, these are simply the last two and first two elements.\n\n### Steps\n\n1. Sort the array in ascending order.\n2. The maximum product is `nums[n-1] * nums[n-2]` (two largest).\n3. The minimum product is `nums[0] * nums[1]` (two smallest).\n4. Return their difference.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxProductDifference(self, nums: List[int]) -> int:\n        nums.sort()\n        return nums[-1] * nums[-2] - nums[0] * nums[1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-product-difference-between-two-pairs.md",
+      "id": "sorting"
+    }
+  ]
 }

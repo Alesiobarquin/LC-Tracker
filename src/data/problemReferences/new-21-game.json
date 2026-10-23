@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    double new21Game(int n, int k, int maxPts) {\n        if (k == 0) {\n            return 1.0;\n        }\n        double windowSum = 0.0;\n        for (int i = k; i < k + maxPts; i++) {\n            windowSum += (i <= n) ? 1.0 : 0.0;\n        }\n        unordered_map<int, double> dp;\n        for (int i = k - 1; i >= 0; i--) {\n            dp[i] = windowSum / maxPts;\n            double remove = 0.0;\n            if (i + maxPts <= n) {\n                remove = (dp.find(i + maxPts) != dp.end()) ? dp[i + maxPts] : 1.0;\n            }\n            windowSum += dp[i] - remove;\n        }\n        return dp[0];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=zKi4LzjK27k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/new-21-game.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/new-21-game.md",
+  "alternatives": [
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThis problem asks for the probability of ending with a score between `k` and `n` (inclusive). Alice draws cards with values 1 to `maxPts` with equal probability until her score reaches `k` or more.\n\nWe can think recursively: from a given score, what is the probability of eventually ending at or below `n`? If our score is already >= `k`, we stop drawing. The outcome is successful (probability `1`) if `score <= n`, and failed (probability `0`) if `score > n`.\n\nFor scores below `k`, we draw one of `maxPts` values with equal probability `1/maxPts`, so the probability at score `s` is the average of probabilities at scores `s+1`, `s+2`, ..., `s+maxPts`.\n\n### Steps\n\n1. Define `dfs(score)` that returns the probability of ending with a final score <= `n`.\n2. Base case: if `score >= k`, return `1` if `score <= n`, else return `0`.\n3. For `score < k`, sum up `dfs(score + i)` for `i` from 1 to `maxPts`, then divide by `maxPts`.\n4. Use memoization to cache computed values.\n5. Return `dfs(0)`.\n\n### Complexity\n\n- Time complexity: `O(k * m)`\n- Space complexity: `O(k)`\n\n> Where `k` is the threshold score, `m` is the maximum points per draw and `n` is the upper bound on score.",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def new21Game(self, n: int, k: int, maxPts: int) -> float:\n        cache = {}\n\n        def dfs(score):\n            if score >= k:\n                return 1 if score <= n else 0\n            if score in cache:\n                return cache[score]\n\n            prob = 0\n            for i in range(1, maxPts + 1):\n                prob += dfs(score + i)\n\n            cache[score] = prob / maxPts\n            return cache[score]\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/new-21-game.md",
+      "id": "dynamic-programming-top-down"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down Optimized)",
+      "explanation": "### How it works\n\nThe basic top-down approach sums over `maxPts` values at each state, leading to O(k \\* maxPts) time. We can optimize by noticing that consecutive states have overlapping sums.\n\nThe probability at score `s` equals the sum of probabilities from `s+1` to `s+maxPts` divided by `maxPts`. The probability at `s` can be expressed in terms of `s+1`'s probability using a sliding window technique: `dp[s] = dp[s+1]` minus the difference caused by the window shifting.\n\nThe boundary at `k-1` needs special handling since it is the last score where we still draw cards.\n\n### Steps\n\n1. Handle edge case: if `score` is `k-1`, directly compute probability based on how many outcomes land within `n`.\n2. If `score > n`, return `0`. If `score >= k` and `score <= n`, return `1`.\n3. Use the recurrence: `dp[score] = dp[score+1]` minus `(dp[score+1+maxPts] - dp[score+1]) / maxPts`.\n4. Memoize results and return `dp[0]`.\n\n### Complexity\n\n- Time complexity: `O(k + m)`\n- Space complexity: `O(n)`\n\n> Where `k` is the threshold score, `m` is the maximum points per draw and `n` is the upper bound on score.",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def new21Game(self, n: int, k: int, maxPts: int) -> float:\n        cache = {}\n\n        def dfs(score):\n            if score == k - 1:\n                return min(n - k + 1, maxPts) / maxPts\n            if score > n:\n                return 0\n            if score >= k:\n                return 1.0\n\n            if score in cache:\n                return cache[score]\n\n            cache[score] = dfs(score + 1)\n            cache[score] -= (dfs(score + 1 + maxPts) - dfs(score + 1)) / maxPts\n            return cache[score]\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/new-21-game.md",
+      "id": "dynamic-programming-top-down-optimized"
+    }
+  ]
 }

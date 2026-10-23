@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/476.%20Number%20Complement",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "significant-bit-mask",
+      "approach": "Significant-Bit Mask",
+      "explanation": "### How it works\n\nCreate a mask with one bit for every significant bit in the positive input. XOR flips exactly those positions and leaves leading zeros outside the mask untouched.\n\n### Steps\n\n1. Find the input's significant-bit count.\n2. Construct an all-ones mask of that width.\n3. XOR the mask with the input.\n\n### Complexity\n\n- Time: `O(1)` under the fixed 32-bit input range.\n- Space: `O(1)` under the same bounds.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/476.%20Number%20Complement",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findComplement(self, num: int) -> int:\n        return num ^ ((1 << num.bit_length()) - 1)\n"
+      }
+    }
+  ]
 }

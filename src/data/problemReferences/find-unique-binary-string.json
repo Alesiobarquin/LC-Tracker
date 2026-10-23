@@ -7,5 +7,25 @@
     "cpp": "class Node {\npublic:\n    Node *children[2];\n\n    Node() {\n        this->children[0] = nullptr;\n        this->children[1] = nullptr;\n    }\n\n    bool containsBit(int bit) {\n        return this->children[bit] != nullptr;\n    }\n\n    void put(int bit) {\n        this->children[bit] = new Node();\n    }\n\n    Node* get(int bit) {\n        return this->children[bit];\n    }\n};\n\nclass Trie {\npublic:\n    Node* root;\n\n    Trie() {\n        this->root = new Node();\n    }\n\n    void insert(const string& s) {\n        Node* curr = root;\n        for (char c : s) {\n            int bit = c - '0';\n            if (!curr->containsBit(bit)) {\n                curr->put(bit);\n            }\n            curr = curr->get(bit);\n        }\n    }\n\n    bool search(string& res, Node* curr) {\n        while (curr->containsBit(0) || curr->containsBit(1)) {\n            if (!curr->containsBit(0)) {\n                res += '0';\n                return true;\n            }\n            if (!curr->containsBit(1)) {\n                res += '1';\n                return true;\n            }\n\n            res += '1';\n            curr = curr->get(1);\n        }\n\n        return false;\n    }\n};\n\nclass Solution {\npublic:\n    string findDifferentBinaryString(vector<string>& nums) {\n        Trie trie;\n        for (const string& s : nums) {\n            trie.insert(s);\n        }\n\n        string res;\n        trie.search(res, trie.root);\n\n        while (res.length() < nums.size()) {\n            res += '1';\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=aHqn4Dynd1k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-unique-binary-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-unique-binary-string.md",
+  "alternatives": [
+    {
+      "approach": "Backtracking (Recursion)",
+      "explanation": "### How it works\n\nWe need to find any binary string of length `n` that is not in the given array. Since there are `2^n` possible strings but only `n` strings in the input, at least one must be missing. We can systematically try building strings character by character, checking at each complete string whether it exists in the set.\n\n### Steps\n\n1. Store all input strings in a hash set for O(1) lookup.\n2. Use backtracking starting with a string of all zeros.\n3. At position `i`:\n    - If `i == n`, check if the current string is in the set. If not, return it.\n    - Try keeping position `i` as `'0'` and recurse.\n    - If that fails, change position `i` to `'1'` and recurse.\n4. Return the first string not found in the set.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findDifferentBinaryString(self, nums: List[str]) -> str:\n        strSet = {s for s in nums}\n\n        def backtrack(i, cur):\n            if i == len(nums):\n                res = \"\".join(cur)\n                return None if res in strSet else res\n\n            res = backtrack(i + 1, cur)\n            if res: return res\n\n            cur[i] = \"1\"\n            return backtrack(i + 1, cur)\n\n        return backtrack(0, [\"0\" for _ in nums])\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-unique-binary-string.md",
+      "id": "backtracking-recursion"
+    },
+    {
+      "approach": "Cantor's Diagonal Argument",
+      "explanation": "### How it works\n\nCantor's diagonal argument provides an elegant O(n) solution. For each string `nums[i]`, we look at its `i`-th character and flip it. The resulting string differs from `nums[0]` at position 0, from `nums[1]` at position 1, and so on. This guarantees the constructed string differs from every input string at at least one position.\n\n### Steps\n\n1. Create an empty result string.\n2. For each index `i` from `0` to `n-1`:\n    - Look at character `nums[i][i]` (the diagonal).\n    - Append the opposite character: if it is `'0'`, append `'1'`; if `'1'`, append `'0'`.\n3. Return the result string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output string.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findDifferentBinaryString(self, nums: List[str]) -> str:\n        res = []\n        for i in range(len(nums)):\n            if nums[i][i] == '0':\n                res.append('1')\n            else:\n                res.append('0')\n        return \"\".join(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-unique-binary-string.md",
+      "id": "cantor-s-diagonal-argument"
+    }
+  ]
 }

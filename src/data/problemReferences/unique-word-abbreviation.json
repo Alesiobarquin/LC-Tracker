@@ -1,0 +1,29 @@
+{
+  "problemId": "unique-word-abbreviation",
+  "approach": "Abbreviation Uniqueness Flags",
+  "explanation": "### How it works\n\nDeduplicate dictionary words first. Each abbreviation is unique until a second distinct word claims it. Queries are valid when the abbreviation is absent or belongs uniquely to that exact word.\n\n### Steps\n\n1. Create the set of distinct dictionary words.\n2. Mark each abbreviation unique on its first encounter and ambiguous thereafter.\n3. Build the query abbreviation.\n4. Accept an unused abbreviation or its sole dictionary owner.\n\n### Complexity\n\n- Time: O(D) preprocessing and O(L) per query, including string hashing, for total dictionary text D and query length L.\n- Space: O(D) for dictionary and abbreviation keys.\n\n### Things to watch for\n\n- Repeated copies of one dictionary word do not create ambiguity.\n- A third owner must never turn an ambiguous abbreviation back into a unique one.",
+  "code": {
+    "python": "class ValidWordAbbr:\n  def __init__(self, dictionary: list[str]):\n    self.dict = set(dictionary)\n    # T := unique, F := not unique\n    self.abbrUnique = {}\n\n    for word in self.dict:\n      abbr = self._getAbbr(word)\n      self.abbrUnique[abbr] = abbr not in self.abbrUnique\n\n  def isUnique(self, word: str) -> bool:\n    abbr = self._getAbbr(word)\n    return abbr not in self.abbrUnique or self.abbrUnique[abbr] and word in self.dict\n\n  def _getAbbr(self, s: str) -> str:\n    n = len(s)\n    if n <= 2:\n      return s\n    return s[0] + str(n - 2) + s[-1]\n",
+    "cpp": "class ValidWordAbbr {\n public:\n  ValidWordAbbr(vector<string>& dictionary) {\n    dict = unordered_set(dictionary.begin(), dictionary.end());\n\n    for (const string& word : dict) {\n      const string& abbr = getAbbr(word);\n      abbrUnique[abbr] = !abbrUnique.contains(abbr);\n    }\n  }\n\n  bool isUnique(string word) {\n    const string& abbr = getAbbr(word);\n    return !abbrUnique.contains(abbr) ||\n           abbrUnique[abbr] && dict.contains(word);\n  }\n\n private:\n  unordered_set<string> dict;\n  unordered_map<string, bool> abbrUnique;  // T := unique, F := not unique\n\n  string getAbbr(const string& s) {\n    const int n = s.length();\n    if (n <= 2)\n      return s;\n    return s[0] + to_string(n - 2) + s.back();\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/288.%20Unique%20Word%20Abbreviation",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sets-of-abbreviation-owners",
+      "approach": "Sets of Abbreviation Owners",
+      "explanation": "### How it works\n\nStore the actual distinct owners for every abbreviation. A query succeeds only when that owner set is empty or contains exactly the queried word.\n\n### Steps\n\n1. Map each abbreviation to a set of dictionary words.\n2. Use the unchanged word as its abbreviation when its length is at most two.\n3. For a query, inspect the associated owner set.\n4. Accept an empty set or the singleton containing the query.\n\n### Complexity\n\n- Time: O(D) preprocessing and O(L) per query, including string hashing.\n- Space: O(D) for owner sets and keys.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/288.%20Unique%20Word%20Abbreviation",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass ValidWordAbbr:\n    def __init__(self, dictionary: list[str]):\n        self.owners = defaultdict(set)\n        for word in dictionary:\n            self.owners[self._abbr(word)].add(word)\n\n    def _abbr(self, word):\n        return word if len(word) <= 2 else word[0] + str(len(word) - 2) + word[-1]\n\n    def isUnique(self, word: str) -> bool:\n        owners = self.owners.get(self._abbr(word), set())\n        return not owners or owners == {word}\n"
+      }
+    }
+  ]
+}

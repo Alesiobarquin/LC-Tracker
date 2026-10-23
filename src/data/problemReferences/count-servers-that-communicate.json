@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countServers(vector<vector<int>>& grid) {\n        int res = 0;\n        int ROWS = grid.size(), COLS = grid[0].size();\n\n        // Rows\n        for (int r = 0; r < ROWS; r++) {\n            int rowSum = accumulate(grid[r].begin(), grid[r].end(), 0);\n            if (rowSum <= 1) continue;\n            res += rowSum;\n            for (int c = 0; c < COLS; c++) {\n                if (grid[r][c] == 1) grid[r][c] = -1; // Mark\n            }\n        }\n\n        // Cols\n        for (int c = 0; c < COLS; c++) {\n            int colSum = 0, unmarked = 0;\n            for (int r = 0; r < ROWS; r++) {\n                colSum += abs(grid[r][c]);\n                if (grid[r][c] > 0) unmarked++;\n                else if (grid[r][c] < 0) grid[r][c] = 1; // Unmark\n            }\n            if (colSum >= 2) res += unmarked;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-servers-that-communicate.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-servers-that-communicate.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA server can communicate if there is at least one other server in the same row or column. For each server, we can directly check its entire row and column to see if any other server exists. If we find at least one, this server counts toward our result.\n\n### Steps\n\n1. Iterate through each cell in the grid.\n2. For each cell containing a server (value `1`):\n    - Check all other cells in the same row for another server.\n    - If not found in the row, check all other cells in the same column.\n    - If another server is found in either the row or column, increment the result.\n3. Return the total count of servers that can communicate.\n\n### Complexity\n\n- Time complexity: `O(m * n ^ 2)`\n- Space complexity: `O(1)`\n\n> Where `m` is the number of rows and `n` is the number of columns of the given matrix `grid`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countServers(self, grid: List[List[int]]) -> int:\n        m, n = len(grid), len(grid[0])\n        res = 0\n\n        for r in range(m):\n            for c in range(n):\n                if grid[r][c] == 0:\n                    continue\n\n                found = False\n                for col in range(n):\n                    if col != c and grid[r][col] == 1:\n                        found = True\n                        break\n\n                if not found:\n                    for row in range(m):\n                        if row != r and grid[row][c] == 1:\n                            found = True\n                            break\n\n                if found:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-servers-that-communicate.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nInstead of checking each server's row and column individually, we can precompute the count of servers in each row and column. A server can communicate if there is more than one server in its row or more than one server in its column. This allows us to determine each server's status in constant time after the preprocessing step.\n\n### Steps\n\n1. Create two arrays: `row_cnt` to store server counts per row and `col_cnt` for columns.\n2. First pass: Count the number of servers in each row and column.\n3. Second pass: For each server, check if its row count or column count is greater than `1`.\n    - If yes, this server can communicate with at least one other server.\n4. Return the total count of communicating servers.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m + n)`\n\n> Where `m` is the number of rows and `n` is the number of columns of the given matrix `grid`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countServers(self, grid: List[List[int]]) -> int:\n        ROWS, COLS = len(grid), len(grid[0])\n        row_cnt = [0] * ROWS\n        col_cnt = [0] * COLS\n\n        for r in range(ROWS):\n            for c in range(COLS):\n                if grid[r][c] == 1:\n                    row_cnt[r] += 1\n                    col_cnt[c] += 1\n\n        res = 0\n        for r in range(ROWS):\n            for c in range(COLS):\n                if grid[r][c] and max(row_cnt[r], col_cnt[c]) > 1:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-servers-that-communicate.md",
+      "id": "iteration"
+    }
+  ]
 }

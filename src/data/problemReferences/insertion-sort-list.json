@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* insertionSortList(ListNode* head) {\n        ListNode* dummy = new ListNode(0, head);\n        ListNode* prev = head;\n        ListNode* cur = head->next;\n\n        while (cur) {\n            if (cur->val >= prev->val) {\n                prev = cur;\n                cur = cur->next;\n                continue;\n            }\n\n            ListNode* tmp = dummy;\n            while (tmp->next->val < cur->val) {\n                tmp = tmp->next;\n            }\n\n            prev->next = cur->next;\n            cur->next = tmp->next;\n            tmp->next = cur;\n            cur = prev->next;\n        }\n\n        return dummy->next;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=Kk6mXAzqX3Y",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insertion-sort-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insertion-sort-list.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nSince sorting a linked list in place can be tricky, we can simplify the problem by extracting all the values into an array. Once in array form, we can use any standard sorting algorithm. After sorting, we traverse the linked list again and overwrite each node's value with the sorted values in order.\n\n### Steps\n\n1. Traverse the linked list and collect all node values into an array.\n2. Sort the array.\n3. Traverse the linked list again, replacing each node's value with the next sorted value from the array.\n4. Return the head of the list.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def insertionSortList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        arr = []\n        cur = head\n        while cur:\n            arr.append(cur.val)\n            cur = cur.next\n\n        arr.sort()\n        cur = head\n        for val in arr:\n            cur.val = val\n            cur = cur.next\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/insertion-sort-list.md",
+      "id": "convert-to-array"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string removeDuplicates(string s, int k) {\n        int i = 0, n = s.length();\n        vector<int> count(n);\n        for (int j = 0; j < n; i++, j++) {\n            s[i] = s[j];\n            count[i] = 1;\n            if (i > 0 && s[i - 1] == s[j]) {\n                count[i] += count[i - 1];\n            }\n            if (count[i] == k) i -= k;\n        }\n        return s.substr(0, i);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=w6LcypDgC4w",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-all-adjacent-duplicates-in-string-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-all-adjacent-duplicates-in-string-ii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most direct approach is to repeatedly scan the string looking for `k` consecutive identical characters. When found, we remove them and restart the scan from the beginning since the removal might create new groups of `k` adjacent duplicates.\n\nThis process continues until a full scan completes without finding any group to remove. While straightforward, this approach is inefficient because each removal requires rescanning from the start.\n\n### Steps\n\n1. Convert the string to a mutable format (list or character array).\n2. Repeatedly scan the string:\n    - Track the current character and count consecutive occurrences.\n    - When the count reaches `k`, remove those characters from the string, set a flag, and restart the scan.\n3. If a full scan completes without any removal, exit the loop.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(frac {n ^ 2}{k})`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeDuplicates(self, s: str, k: int) -> str:\n        while s:\n            flag = False\n            cur = s[0]\n            cnt = 1\n            for i in range(1, len(s)):\n                if cur != s[i]:\n                    cnt = 0\n                    cur = s[i]\n                cnt += 1\n                if cnt == k:\n                    s = s[:i - cnt + 1] + s[i + 1:]\n                    flag = True\n                    break\n\n            if not flag:\n                break\n\n        return s\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-all-adjacent-duplicates-in-string-ii.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nTo avoid rescanning the entire string after each removal, we can use a stack to track consecutive counts as we process each character. When we encounter a character, we check if it matches the previous one. If so, we increment the count; otherwise, we start a new count.\n\nWhen the count reaches `k`, we remove those `k` characters and continue from where we left off. The stack helps us remember the count before the removal so we can correctly continue counting if the characters before and after the removed segment match.\n\n### Steps\n\n1. Convert the string to a mutable list and initialize an empty stack to track counts.\n2. Iterate through the string with an index `i`:\n    - If the current character differs from the previous, push `1` onto the stack.\n    - If it matches, increment the top of the stack.\n    - If the count reaches `k`, pop from the stack, delete those `k` characters, and adjust the index.\n3. Continue until the end of the string.\n4. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeDuplicates(self, s: str, k: int) -> str:\n        stack = []\n        n = len(s)\n        i = 0\n        s = list(s)\n\n        while i < n:\n            if i == 0 or s[i] != s[i - 1]:\n                stack.append(1)\n            else:\n                stack[-1] += 1\n                if stack[-1] == k:\n                    stack.pop()\n                    del s[i - k + 1:i + 1]\n                    i -= k\n                    n -= k\n\n            i += 1\n\n        return ''.join(s)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-all-adjacent-duplicates-in-string-ii.md",
+      "id": "stack"
+    }
+  ]
 }

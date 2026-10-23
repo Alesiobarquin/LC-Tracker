@@ -7,5 +7,25 @@
     "cpp": "class NumMatrix {\nprivate:\n    vector<vector<int>> sumMat;\n\npublic:\n    NumMatrix(vector<vector<int>>& matrix) {\n        int ROWS = matrix.size(), COLS = matrix[0].size();\n        sumMat = vector<vector<int>>(ROWS + 1, vector<int>(COLS + 1, 0));\n\n        for (int r = 0; r < ROWS; r++) {\n            int prefix = 0;\n            for (int c = 0; c < COLS; c++) {\n                prefix += matrix[r][c];\n                int above = sumMat[r][c + 1];\n                sumMat[r + 1][c + 1] = prefix + above;\n            }\n        }\n    }\n\n    int sumRegion(int row1, int col1, int row2, int col2) {\n        row1++; col1++; row2++; col2++;\n        int bottomRight = sumMat[row2][col2];\n        int above = sumMat[row1 - 1][col2];\n        int left = sumMat[row2][col1 - 1];\n        int topLeft = sumMat[row1 - 1][col1 - 1];\n        return bottomRight - above - left + topLeft;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=KE8MQuwE2yA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-2d-immutable.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-2d-immutable.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to iterate through every cell in the specified rectangular region and sum up all the values. For each query, we simply loop from the top-left corner to the bottom-right corner and accumulate the result. While this is easy to implement, it becomes slow when we have many queries or large regions to sum.\n\n### Steps\n\n1. Store the original matrix.\n2. For each `sumRegion(row1, col1, row2, col2)` query:\n    - Initialize `res = 0`.\n    - Iterate through all rows from `row1` to `row2`.\n    - For each row, iterate through all columns from `col1` to `col2`.\n    - Add each cell value to `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(m * n)` for each query.\n- Space complexity: `O(1)`\n\n> Where `m` is the number of rows and `n` is the number of columns in the matrix.",
+      "code": {
+        "python": "class NumMatrix:\n\n    def __init__(self, matrix: list[list[int]]):\n        self.matrix = matrix\n\n    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:\n        res = 0\n        for r in range(row1, row2 + 1):\n            for c in range(col1, col2 + 1):\n                res += self.matrix[r][c]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-2d-immutable.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "One Dimensional Prefix Sum",
+      "explanation": "### How it works\n\nInstead of summing every cell for each query, we can precompute prefix sums for each row. Each `prefixSum[row][col]` stores the sum of all elements from `matrix[row][0]` to `matrix[row][col]`. This way, finding the sum of any range within a single row takes constant time. For a rectangular region spanning multiple rows, we sum each row's contribution using its prefix sum.\n\n### Steps\n\n1. Build a 2D prefix sum array where `prefixSum[row][col]` holds the cumulative sum of row `row` from column `0` to `col`.\n2. For each `sumRegion(row1, col1, row2, col2)` query:\n    - Initialize `res = 0`.\n    - For each row from `row1` to `row2`:\n        - Add `prefixSum[row][col2]` to `res`.\n        - If `col1 > 0`, subtract `prefixSum[row][col1 - 1]` from `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(m)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns in the matrix.",
+      "code": {
+        "python": "class NumMatrix:\n\n    def __init__(self, matrix: list[list[int]]):\n        self.prefixSum = [[0] * len(matrix[0]) for _ in range(len(matrix))]\n\n        for row in range(len(matrix)):\n            self.prefixSum[row][0] = matrix[row][0]\n            for col in range(1, len(matrix[0])):\n                self.prefixSum[row][col] = self.prefixSum[row][col - 1] + matrix[row][col]\n\n    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:\n        res = 0\n        for row in range(row1, row2 + 1):\n            if col1 > 0:\n                res += self.prefixSum[row][col2] - self.prefixSum[row][col1 - 1]\n            else:\n                res += self.prefixSum[row][col2]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-2d-immutable.md",
+      "id": "one-dimensional-prefix-sum"
+    }
+  ]
 }

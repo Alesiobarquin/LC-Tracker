@@ -1,0 +1,29 @@
+{
+  "problemId": "shortest-word-distance",
+  "approach": "Latest Occurrence Scan",
+  "explanation": "### How it works\n\nWhen either target word appears, its closest preceding occurrence of the other target is the most recently seen one. Keep only those two indices.\n\n### Steps\n\n1. Initialize both target positions as unseen.\n2. Update the appropriate position when a target appears.\n3. Compare the current index to the latest opposite target.\n4. Keep the smallest distance.\n\n### Complexity\n\n- Time: O(n) word comparisons.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def shortestDistance(\n      self,\n      wordsDict: list[str],\n      word1: str,\n      word2: str,\n  ) -> int:\n    ans = len(wordsDict)\n    index1 = -1  # wordsdict[index1] == word1\n    index2 = -1  # wordsdict[index2] == word2\n\n    for i, word in enumerate(wordsDict):\n      if word == word1:\n        index1 = i\n        if index2 != -1:\n          ans = min(ans, index1 - index2)\n      if word == word2:\n        index2 = i\n        if index1 != -1:\n          ans = min(ans, index2 - index1)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int shortestDistance(vector<string>& wordsDict, string word1, string word2) {\n    int ans = wordsDict.size();\n    int index1 = -1;  // wordsDict[index1] == word1\n    int index2 = -1;  // wordsDict[index2] == word2\n\n    for (int i = 0; i < wordsDict.size(); ++i) {\n      if (wordsDict[i] == word1) {\n        index1 = i;\n        if (index2 != -1)\n          ans = min(ans, index1 - index2);\n      }\n      if (wordsDict[i] == word2) {\n        index2 = i;\n        if (index1 != -1)\n          ans = min(ans, index2 - index1);\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/243.%20Shortest%20Word%20Distance",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "occurrence-lists-and-two-pointers",
+      "approach": "Occurrence Lists and Two Pointers",
+      "explanation": "### How it works\n\nCollect the sorted positions of each target. Advancing the smaller position is sufficient because keeping it while moving the larger position can only increase their distance.\n\n### Steps\n\n1. Collect both target index lists.\n2. Compare their current positions.\n3. Advance the pointer at the smaller position.\n4. Return the minimum difference encountered.\n\n### Complexity\n\n- Time: O(n) word comparisons.\n- Space: O(n) for occurrence lists.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/243.%20Shortest%20Word%20Distance",
+      "code": {
+        "python": "class Solution:\n    def shortestDistance(self, wordsDict: list[str], word1: str, word2: str) -> int:\n        left = [i for i, word in enumerate(wordsDict) if word == word1]\n        right = [i for i, word in enumerate(wordsDict) if word == word2]\n        i = j = 0\n        best = len(wordsDict)\n        while i < len(left) and j < len(right):\n            best = min(best, abs(left[i] - right[j]))\n            if left[i] < right[j]:\n                i += 1\n            else:\n                j += 1\n        return best\n"
+      }
+    }
+  ]
+}

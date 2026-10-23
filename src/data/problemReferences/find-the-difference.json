@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    char findTheDifference(string s, string t) {\n        int res = 0;\n        for (char c : s) {\n            res ^= c;\n        }\n        for (char c : t) {\n            res ^= c;\n        }\n        return (char) (res);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference.md",
+  "alternatives": [
+    {
+      "approach": "Two Hash Maps",
+      "explanation": "### How it works\n\nString `t` is formed by shuffling string `s` and adding one extra character. By counting the frequency of each character in both strings, the added character will have a higher count in `t` than in `s`. We can compare these counts to find the difference.\n\n### Steps\n\n1. Create two count arrays of size 26 for characters in `s` and `t`.\n2. Count the frequency of each character in both strings.\n3. Compare the counts. The character where `countT[i] > countS[i]` is the answer.\n4. Return that character.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` since we have at most `26` different characters.",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def findTheDifference(self, s: str, t: str) -> str:\n        count_s, count_t = Counter(s), Counter(t)\n        for c in count_t:\n            if c not in count_s or count_s[c] < count_t[c]:\n                return c\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference.md",
+      "id": "two-hash-maps"
+    },
+    {
+      "approach": "One Hash Map",
+      "explanation": "### How it works\n\nInstead of using two separate count arrays, we can use a single array. First count all characters from `t`, then subtract counts for characters in `s`. The character left with count `1` is the added character.\n\n### Steps\n\n1. Create a count array of size 26.\n2. Increment counts for each character in `t`.\n3. Decrement counts for each character in `s`.\n4. Find and return the character with count equal to `1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` since we have at most `26` different characters.",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def findTheDifference(self, s: str, t: str) -> str:\n        count = Counter(t)\n        for c in s:\n            count[c] -= 1\n        for c in count:\n            if count[c] == 1:\n                return c\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-difference.md",
+      "id": "one-hash-map"
+    }
+  ]
 }

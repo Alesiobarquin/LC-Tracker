@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool makeEqual(vector<string>& words) {\n        vector<int> freq(26, 0);\n        int flag = 0;\n        int n = words.size();\n\n        for (const string& w : words) {\n            for (char c : w) {\n                int i = c - 'a';\n                if (freq[i] != 0) {\n                    freq[i]++;\n                    if (freq[i] % n == 0) {\n                        flag++;\n                    }\n                } else {\n                    freq[i]++;\n                    if (freq[i] % n != 0) {\n                        flag--;\n                    }\n                }\n                freq[i] %= n;\n            }\n        }\n\n        return flag == 0;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/redistribute-characters-to-make-all-strings-equal.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/redistribute-characters-to-make-all-strings-equal.md",
+  "alternatives": [
+    {
+      "approach": "Frequency Count (Hash Map)",
+      "explanation": "### How it works\n\nTo make all strings equal, each character must be evenly distributed across all `n` strings. This means the total count of each character across all words must be divisible by `n`.\n\nThink of it this way: if we have 6 occurrences of the letter 'a' and 3 words, each word can have exactly 2 'a's. But if we have 7 occurrences of 'a' and 3 words, there is no way to distribute them evenly.\n\nThe order of characters within each string does not matter since we can move characters freely. We only need to verify that redistribution is mathematically possible.\n\n### Steps\n\n1. Create a hash map to count the total frequency of each character across all words.\n2. Iterate through every character in every word, incrementing the count in the hash map.\n3. For each character in the hash map, check if its count is divisible by the number of words.\n4. If any character's count is not divisible by the number of words, return `false`.\n5. If all characters pass the divisibility check, return `true`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(1)` since we have at most `26` different characters.\n\n> Where `n` is the number of words and `m` is the average length of each word.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def makeEqual(self, words: List[str]) -> bool:\n        char_cnt = defaultdict(int)\n\n        for w in words:\n            for c in w:\n                char_cnt[c] += 1\n\n        for c in char_cnt:\n            if char_cnt[c] % len(words):\n                return False\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/redistribute-characters-to-make-all-strings-equal.md",
+      "id": "frequency-count-hash-map"
+    }
+  ]
 }

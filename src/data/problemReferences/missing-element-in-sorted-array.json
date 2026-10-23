@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int missingElement(vector<int>& nums, int k) {\n        int n = nums.size();\n        int left = 0, right = n - 1;\n\n        while (left < right) {\n            int mid = right - (right - left) / 2;\n            if (nums[mid] - nums[0] - mid < k) {\n                left = mid;\n            } else{\n                right = mid - 1;\n            }\n        }\n\n        return nums[0] + k + left;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-element-in-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-element-in-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nSince the array is sorted and strictly increasing, any missing numbers must fall in the gaps between consecutive elements. For each pair of adjacent elements, we can calculate how many numbers are missing by looking at the difference minus one. As we scan through the array, we count missing numbers until we accumulate at least `k` of them. Once we find the gap that contains the `k`-th missing number, we can compute its exact value.\n\n### Steps\n\n1. Iterate through the array from index `1` to `n - 1`.\n2. For each pair of consecutive elements, calculate `missedInGap = nums[i] - nums[i - 1] - 1`.\n3. If `missedInGap >= k`, the `k`-th missing number lies in this gap. Return `nums[i - 1] + k`.\n4. Otherwise, subtract `missedInGap` from `k` and continue.\n5. If we finish the loop without finding the answer, the `k`-th missing number is beyond the last element. Return `nums[n - 1] + k`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` constant space\n\n> Where `n` is the length of the input array `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def missingElement(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n\n        for i in range(1, n):\n            missed_in_gap = nums[i] - nums[i - 1] - 1\n            if missed_in_gap >= k:\n                return nums[i - 1] + k\n            k -= missed_in_gap\n\n        return nums[n - 1] + k\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/missing-element-in-sorted-array.md",
+      "id": "iteration"
+    }
+  ]
 }

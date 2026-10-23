@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        if (!root) return nullptr;\n        unordered_map<TreeNode*, TreeNode*> parent;\n        queue<TreeNode*> queue;\n        parent[root] = nullptr;\n        queue.push(root);\n        while (!parent.count(p) || !parent.count(q)) {\n            TreeNode* node = queue.front(); queue.pop();\n            if (node->left) {\n                parent[node->left] = node;\n                queue.push(node->left);\n            }\n            if (node->right) {\n                parent[node->right] = node;\n                queue.push(node->right);\n            }\n        }\n\n        unordered_set<TreeNode*> ancestors;\n        while (p) {\n            ancestors.insert(p);\n            p = parent[p];\n        }\n        while (!ancestors.count(q)) {\n            q = parent[q];\n        }\n        return q;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-of-a-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-of-a-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nThe lowest common ancestor (LCA) is the deepest node that has both `p` and `q` as descendants. We traverse the tree and track whether each subtree contains `p`, `q`, or both. The first node where we find both targets in its subtree (including itself) is the LCA. Once found, we can stop searching.\n\n### Steps\n\n1. Define `dfs(node)` that returns a pair of booleans indicating whether `p` and `q` are found in the subtree rooted at `node`.\n2. If `node` is `null` or LCA is already found, return `[false, false]`.\n3. Recursively search left and right subtrees.\n4. Combine results: `foundP = left[0] or right[0] or (node == p)` and similarly for `foundQ`.\n5. If both `foundP` and `foundQ` are `true` and LCA is not yet set, mark the current node as LCA.\n6. Return the combined result.\n7. Call `dfs(root)` and return the LCA.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\n\nclass Solution:\n    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n        lca = None\n\n        def dfs(node):\n            nonlocal lca\n            if not node:\n                return [False, False]\n            if lca:\n                return [False, False]\n\n            left = dfs(node.left)\n            right = dfs(node.right)\n            res = [left[0] or right[0] or (node == p), left[1] or right[1] or (node == q)]\n            if res[0] and res[1] and not lca:\n                lca = node\n\n            return res\n\n        dfs(root)\n        return lca\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lowest-common-ancestor-of-a-binary-tree.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

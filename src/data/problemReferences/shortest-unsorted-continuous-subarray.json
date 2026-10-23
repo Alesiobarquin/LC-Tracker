@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/581.%20Shortest%20Unsorted%20Continuous%20Subarray",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "compare-with-a-sorted-copy",
+      "approach": "Compare with a Sorted Copy",
+      "explanation": "### How it works\n\nThe first and last positions differing from the fully sorted array bound the shortest segment that must be sorted. Positions outside those bounds already have their required values.\n\n### Steps\n\n1. Sort a copy of the array.\n2. Find all positions whose values differ.\n3. Return the span from first to last mismatch, or zero.\n\n### Complexity\n\n- Time: `O(n log n)` time.\n- Space: `O(n)` for the sorted copy and mismatch indices.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/581.%20Shortest%20Unsorted%20Continuous%20Subarray",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def findUnsortedSubarray(self, nums: list[int]) -> int:\n        ordered = sorted(nums)\n        wrong = [i for i, (a, b) in enumerate(zip(nums, ordered)) if a != b]\n        return wrong[-1] - wrong[0] + 1 if wrong else 0\n"
+      }
+    }
+  ]
 }

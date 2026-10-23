@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> sortedSquares(vector<int>& nums) {\n        int n = nums.size();\n        vector<int> res(n);\n        int l = 0, r = n - 1, resIndex = n - 1;\n\n        while (l <= r) {\n            if (abs(nums[l]) > abs(nums[r])) {\n                res[resIndex] = nums[l] * nums[l];\n                l++;\n            } else {\n                res[resIndex] = nums[r] * nums[r];\n                r--;\n            }\n            resIndex--;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=FPCZsG_AkUg",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/squares-of-a-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/squares-of-a-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nThe straightforward approach is to square each element first and then sort the result. While the original array is sorted, squaring can change the order since negative numbers become positive. For example, `[-4, -1, 0, 3]` becomes `[16, 1, 0, 9]` after squaring, which needs to be sorted to `[0, 1, 9, 16]`.\n\n### Steps\n\n1. Iterate through the array and square each element in place.\n2. Sort the array using the built-in sort function.\n3. Return the sorted array of squares.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortedSquares(self, nums: List[int]) -> List[int]:\n        for i in range(len(nums)):\n            nums[i] *= nums[i]\n        nums.sort()\n        return nums\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/squares-of-a-sorted-array.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nSince the input array is sorted, the largest squares will be at either end (the most negative or most positive values). By using two pointers at both ends, we can compare absolute values and always pick the larger square. This builds the result in descending order, which we then reverse.\n\n### Steps\n\n1. Initialize two pointers: `l` at the start and `r` at the end of the array.\n2. Create an empty `result` list.\n3. While `l <= r`:\n    - Compare the squares of `nums[l]` and `nums[r]`.\n    - Append the larger square to the `result` and move the corresponding pointer inward.\n4. Reverse the `result` array (since we collected largest to smallest).\n5. Return the reversed `result`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sortedSquares(self, nums: List[int]) -> List[int]:\n        l, r, res = 0, len(nums) - 1, []\n\n        while l <= r:\n            if (nums[l] * nums[l]) > (nums[r] * nums[r]):\n                res.append(nums[l] * nums[l])\n                l += 1\n            else:\n                res.append(nums[r] * nums[r])\n                r -= 1\n\n        return res[::-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/squares-of-a-sorted-array.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

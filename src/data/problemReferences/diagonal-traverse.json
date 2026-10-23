@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/498.%20Diagonal%20Traverse",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "group-by-coordinate-sum",
+      "approach": "Group by Coordinate Sum",
+      "explanation": "### How it works\n\nCells with equal row-plus-column belong to one diagonal. Row-major collection gives their downward order; reversing even-numbered groups produces the alternating traversal.\n\n### Steps\n\n1. Group values by r + c while scanning rows.\n2. Visit diagonal groups in increasing index order.\n3. Reverse even-index groups and concatenate them.\n\n### Complexity\n\n- Time: `O(r × c)` time.\n- Space: `O(r × c)` for grouped values and output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/498.%20Diagonal%20Traverse",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def findDiagonalOrder(self, mat: list[list[int]]) -> list[int]:\n        diagonals = defaultdict(list)\n        for r, row in enumerate(mat):\n            for c, value in enumerate(row):\n                diagonals[r + c].append(value)\n        result = []\n        for d in range(len(mat) + len(mat[0]) - 1):\n            result.extend(diagonals[d][::-1] if d % 2 == 0 else diagonals[d])\n        return result\n"
+      }
+    }
+  ]
 }

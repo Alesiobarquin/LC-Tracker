@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxUncrossedLines(vector<int>& nums1, vector<int>& nums2) {\n        int n = nums1.size(), m = nums2.size();\n        if (m > n) {\n            swap(nums1, nums2);\n            swap(n, m);\n        }\n\n        vector<int> dp(m + 1, 0);\n\n        for (int i = 0; i < n; i++) {\n            int prev = 0;\n            for (int j = 0; j < m; j++) {\n                int temp = dp[j + 1];\n                if (nums1[i] == nums2[j]) {\n                    dp[j + 1] = 1 + prev;\n                } else {\n                    dp[j + 1] = max(dp[j + 1], dp[j]);\n                }\n                prev = temp;\n            }\n        }\n\n        return dp[m];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=mnJF4vJ7GyE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/uncrossed-lines.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/uncrossed-lines.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis problem is essentially finding the longest common subsequence (LCS) between two arrays. We can draw a line between `nums1[i]` and `nums2[j]` only if they have the same value. Lines cannot cross, which means if we connect `nums1[i]` to `nums2[j]`, we can only connect elements after index `i` in `nums1` to elements after index `j` in `nums2`.\n\nAt each position, we have two choices: if the current elements match, we draw a line and move both pointers forward. If they don't match, we try skipping an element from either array and take the maximum result.\n\n### Steps\n\n1. Define a recursive function `dfs(i, j)` that returns the maximum number of uncrossed lines starting from index `i` in `nums1` and index `j` in `nums2`.\n2. Base case: If either `i` or `j` reaches the end of its array, return `0`.\n3. If `nums1[i] == nums2[j]`, we can draw a line. Return `1 + dfs(i + 1, j + 1)`.\n4. Otherwise, try skipping either element and return the maximum of `dfs(i, j + 1)` and `dfs(i + 1, j)`.\n5. Start the recursion from `dfs(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ {n + m})`\n- Space complexity: `O(n + m)` for recursion stack.\n\n> Where `n` and `m` are the sizes of the arrays `nums1` and `nums2` respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:\n        def dfs(i, j):\n            if i == len(nums1) or j == len(nums2):\n                return 0\n\n            if nums1[i] == nums2[j]:\n                return 1 + dfs(i + 1, j + 1)\n            return max(dfs(i, j + 1), dfs(i + 1, j))\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/uncrossed-lines.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes many subproblems. For example, `dfs(2, 3)` might be called multiple times through different paths. We can use memoization to store results of subproblems and avoid redundant calculations.\n\n### Steps\n\n1. Create a 2D memoization table `dp` initialized with `-1` to indicate uncomputed states.\n2. Define a recursive function `dfs(i, j)` similar to the brute force approach.\n3. Before computing, check if `dp[i][j]` is already computed. If so, return the cached value.\n4. Compute the result using the same logic as the recursive approach and store it in `dp[i][j]`.\n5. Return `dfs(0, 0)`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n * m)`\n\n> Where `n` and `m` are the sizes of the arrays `nums1` and `nums2` respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:\n        dp = {}\n\n        def dfs(i, j):\n            if i == len(nums1) or j == len(nums2):\n                return 0\n\n            if (i, j) in dp:\n                return dp[(i, j)]\n\n            if nums1[i] == nums2[j]:\n                dp[(i, j)] = 1 + dfs(i + 1, j + 1)\n            else:\n                dp[(i, j)] = max(dfs(i, j + 1), dfs(i + 1, j))\n\n            return dp[(i, j)]\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/uncrossed-lines.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

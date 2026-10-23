@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/259.%203Sum%20Smaller",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "enumerate-triplets",
+      "approach": "Enumerate Triplets",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nTest each three-index choice directly. Counting one matching triplet at a time provides a baseline for the sorted approach that counts an entire valid suffix at once.\n\n### Steps\n\n1. Enumerate i < j < k.\n2. Add one when the three values sum to less than the target.\n3. Return the count.\n\n### Complexity\n\n- Time: `O(n³)` time.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/259.%203Sum%20Smaller",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def threeSumSmaller(self, nums: list[int], target: int) -> int:\n        return sum(nums[i] + nums[j] + nums[k] < target\n                   for i in range(len(nums)) for j in range(i + 1, len(nums))\n                   for k in range(j + 1, len(nums)))\n"
+      }
+    }
+  ]
 }

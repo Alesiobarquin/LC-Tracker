@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minFallingPathSum(vector<vector<int>>& grid) {\n        int n = grid.size();\n        if (n == 1) {\n            return grid[0][0];\n        }\n\n        int dpIdx1 = -1, dpIdx2 = -1;\n        int dpVal1 = 0, dpVal2 = 0;\n\n        for (int i = 1; i < n; i++) {\n            int nextDpIdx1 = -1, nextDpIdx2 = -1;\n            int nextDpVal1 = INT_MAX, nextDpVal2 = INT_MAX;\n\n            for (int j = 0; j < n; j++) {\n                int cur = (j != dpIdx1) ? dpVal1 : dpVal2;\n                cur += grid[i][j];\n\n                if (nextDpIdx1 == -1 || cur < nextDpVal1) {\n                    nextDpIdx2 = nextDpIdx1;\n                    nextDpVal2 = nextDpVal1;\n                    nextDpIdx1 = j;\n                    nextDpVal1 = cur;\n                } else if (nextDpIdx2 == -1 || cur < nextDpVal2) {\n                    nextDpIdx2 = j;\n                    nextDpVal2 = cur;\n                }\n            }\n\n            dpIdx1 = nextDpIdx1;\n            dpIdx2 = nextDpIdx2;\n            dpVal1 = nextDpVal1;\n            dpVal2 = nextDpVal2;\n        }\n\n        return dpVal1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum-ii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum-ii.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nUnlike the standard falling path problem where we can move to adjacent columns, here we must pick a different column in each row. For each cell in a row, we recursively try all columns in the next row except the current one. This constraint increases complexity since we need to consider more transitions. The brute force approach explores all valid paths.\n\n### Steps\n\n1. Define `helper(r, c)` that returns the minimum path sum from cell `(r, c)` to the last row.\n2. Base case: if `r == n-1`, return `grid[r][c]` (we've reached the last row).\n3. For each column `next_col` in the next row where `next_col != c`:\n    - Recursively compute the path sum and track the minimum.\n4. Return `grid[r][c]` plus the minimum path sum found.\n5. Try starting from each column in row `0` and return the minimum result.\n\n### Complexity\n\n- Time complexity: `O(n ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minFallingPathSum(self, grid: List[List[int]]) -> int:\n        N = len(grid)\n\n        def helper(r, c):\n            if r == N - 1:\n                return grid[r][c]\n            res = float(\"inf\")\n            for next_col in range(N):\n                if c != next_col:\n                    res = min(res, grid[r][c] + helper(r + 1, next_col))\n            return res\n\n        res = float(\"inf\")\n        for c in range(N):\n            res = min(res, helper(0, c))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum-ii.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes the same `(r, c)` states multiple times. By storing computed results in a memoization table, we ensure each state is solved only once. This reduces time complexity from exponential to O(n^3), since for each of the n^2 cells, we may consider up to n transitions.\n\n### Steps\n\n1. Create a memo table (dictionary or 2D array) to cache results.\n2. Define `helper(r, c)` that returns the minimum path sum from `(r, c)` to the last row.\n3. If `(r, c)` is already computed, return the cached value.\n4. Base case: if `r == n-1`, return `grid[r][c]`.\n5. For each `next_col != c`, recursively compute and track the minimum.\n6. Cache and return `grid[r][c]` plus the minimum found.\n7. Return the minimum among all starting columns.\n\n### Complexity\n\n- Time complexity: `O(n ^ 3)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\nfrom functools import cache\n\nclass Solution:\n    def minFallingPathSum(self, grid: List[List[int]]) -> int:\n        N = len(grid)\n        cache = {}\n\n        def helper(r, c):\n            if r == N - 1:\n                return grid[r][c]\n            if (r, c) in cache:\n                return cache[(r, c)]\n\n            res = float(\"inf\")\n            for next_col in range(N):\n                if c != next_col:\n                    res = min(res, grid[r][c] + helper(r + 1, next_col))\n            cache[(r, c)] = res\n            return res\n\n        res = float(\"inf\")\n        for c in range(N):\n            res = min(res, helper(0, c))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-falling-path-sum-ii.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

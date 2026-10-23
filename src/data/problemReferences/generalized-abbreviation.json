@@ -1,0 +1,29 @@
+{
+  "problemId": "generalized-abbreviation",
+  "approach": "Backtracking with a Pending Count",
+  "explanation": "### How it works\n\nEach character can be kept or abbreviated. Accumulate consecutive abbreviated characters as a count and emit that count only when keeping a character or finishing the word.\n\n### Steps\n\n1. Branch at each position between abbreviation and keeping the letter.\n2. Increase the pending count on abbreviation.\n3. Flush the count before a kept letter.\n4. Flush any final count when recording an answer.\n\n### Complexity\n\n- Time: O(n × 2^n), including all output strings.\n- Space: O(n) workspace, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def generateAbbreviations(self, word: str) -> list[str]:\n    ans = []\n\n    def getCountString(count: int) -> str:\n      return str(count) if count > 0 else ''\n\n    def dfs(i: int, count: int, path: list[str]) -> None:\n      if i == len(word):\n        ans.append(''.join(path) + getCountString(count))\n        return\n\n      # Abbreviate the word[i].\n      dfs(i + 1, count + 1, path)\n      # Keep the word[i], so consume the count as a string.\n      path.append(getCountString(count) + word[i])\n      # Reset the count to 0.\n      dfs(i + 1, 0, path)\n      path.pop()\n\n    dfs(0, 0, [])\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> generateAbbreviations(string word) {\n    vector<string> ans;\n    dfs(word, 0, 0, {}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(const string& word, int i, int count, vector<string>&& path,\n           vector<string>& ans) {\n    if (i == word.length()) {\n      ans.push_back(join(path) + getCountString(count));\n      return;\n    }\n\n    // Abbreviate the word[i].\n    dfs(word, i + 1, count + 1, std::move(path), ans);\n    // Keep the word[i], so consume the count as a string\n    path.push_back(getCountString(count) + word[i]);\n    // Reset the count to 0.\n    dfs(word, i + 1, 0, std::move(path), ans);\n    path.pop_back();\n  }\n\n  string getCountString(int count) {\n    return count > 0 ? to_string(count) : \"\";\n  }\n\n  string join(const vector<string>& path) {\n    string joined;\n    for (const string& s : path)\n      joined += s;\n    return joined;\n  };\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/320.%20Generalized%20Abbreviation",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "enumerate-abbreviation-masks",
+      "approach": "Enumerate Abbreviation Masks",
+      "explanation": "### How it works\n\nA bitmask explicitly chooses which positions are abbreviated. Scan each mask to merge consecutive selected positions into a single decimal count.\n\n### Steps\n\n1. Enumerate all 2^n masks.\n2. Scan the word and count consecutive selected positions.\n3. Flush each count before an unselected letter.\n4. Append the final count and record the abbreviation.\n\n### Complexity\n\n- Time: O(n × 2^n).\n- Space: O(n) temporary space, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/320.%20Generalized%20Abbreviation",
+      "code": {
+        "python": "class Solution:\n    def generateAbbreviations(self, word: str) -> list[str]:\n        result = []\n        for mask in range(1 << len(word)):\n            pieces, count = [], 0\n            for i, char in enumerate(word):\n                if mask & (1 << i):\n                    count += 1\n                else:\n                    if count:\n                        pieces.append(str(count))\n                        count = 0\n                    pieces.append(char)\n            if count:\n                pieces.append(str(count))\n            result.append(''.join(pieces))\n        return result\n"
+      }
+    }
+  ]
+}

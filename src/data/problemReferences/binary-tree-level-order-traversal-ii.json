@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/107.%20Binary%20Tree%20Level%20Order%20Traversal%20II",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "depth-indexed-dfs",
+      "approach": "Depth-Indexed DFS",
+      "explanation": "### How it works\n\nA depth-first traversal can collect values by depth. Visiting left before right preserves each level's reading order, and reversing the level list gives the requested bottom-up order.\n\n### Steps\n\n1. Create a list for each newly encountered depth.\n2. Visit a node before recursively visiting its left and right children.\n3. Reverse the completed level list.\n\n### Complexity\n\n- Time: `O(n)` for n nodes.\n- Space: `O(h)` recursion stack plus `O(n)` output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/107.%20Binary%20Tree%20Level%20Order%20Traversal%20II",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def levelOrderBottom(self, root: Optional[TreeNode]) -> list[list[int]]:\n        levels = []\n        def visit(node, depth):\n            if not node:\n                return\n            if depth == len(levels):\n                levels.append([])\n            levels[depth].append(node.val)\n            visit(node.left, depth + 1)\n            visit(node.right, depth + 1)\n        visit(root, 0)\n        return levels[::-1]\n"
+      }
+    }
+  ]
 }

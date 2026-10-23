@@ -1,0 +1,29 @@
+{
+  "problemId": "equal-tree-partition",
+  "approach": "Proper-Subtree Sum Set",
+  "explanation": "### How it works\n\nRemoving one edge isolates a proper subtree. Such a cut splits the total equally exactly when that subtree sum is half the full tree sum. Exclude the root itself from candidate cuts.\n\n### Steps\n\n1. Compute and store sums of all subtrees below the root.\n2. Add the root value to obtain the full total.\n3. Reject an odd total.\n4. Look for half the total among proper-subtree sums.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(n) stored sums and O(h) recursion.\n\n### Things to watch for\n\n- A zero total still requires a proper zero-sum subtree.",
+  "code": {
+    "python": "class Solution:\n  def checkEqualTree(self, root: TreeNode | None) -> bool:\n    if not root:\n      return False\n\n    seen = set()\n\n    def dfs(root: TreeNode | None) -> int:\n      if not root:\n        return 0\n\n      summ = root.val + dfs(root.left) + dfs(root.right)\n      seen.add(summ)\n      return summ\n\n    summ = root.val + dfs(root.left) + dfs(root.right)\n    return summ % 2 == 0 and summ // 2 in seen\n",
+    "cpp": "class Solution {\n public:\n  bool checkEqualTree(TreeNode* root) {\n    if (root == nullptr)\n      return false;\n\n    unordered_set<int> seen;\n    const int sum = root->val + dfs(root->left, seen) + dfs(root->right, seen);\n    return sum % 2 == 0 && seen.contains(sum / 2);\n  }\n\n private:\n  int dfs(TreeNode* root, unordered_set<int>& seen) {\n    if (root == nullptr)\n      return 0;\n\n    const int sum = root->val + dfs(root->left, seen) + dfs(root->right, seen);\n    seen.insert(sum);\n    return sum;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/663.%20Equal%20Tree%20Partition",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "reverse-traversal-subtree-table",
+      "approach": "Reverse Traversal Subtree Table",
+      "explanation": "### How it works\n\nCollect nodes with parents before children, then process that order backward so child sums are ready. Compare every nonroot sum with half the full total.\n\n### Steps\n\n1. Collect all nodes in a parent-before-child traversal.\n2. Compute sums in reverse order.\n3. Read the root total.\n4. Test twice each nonroot subtree sum against that total.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) traversal order and sum table.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/663.%20Equal%20Tree%20Partition",
+      "code": {
+        "python": "class Solution:\n    def checkEqualTree(self, root: 'TreeNode') -> bool:\n        if not root:\n            return False\n        order, stack = [], [root]\n        while stack:\n            node = stack.pop()\n            order.append(node)\n            stack.extend(child for child in (node.left, node.right) if child)\n        sums = {None: 0}\n        for node in reversed(order):\n            sums[node] = node.val + sums[node.left] + sums[node.right]\n        return any(2 * sums[node] == sums[root] for node in order[1:])\n"
+      }
+    }
+  ]
+}

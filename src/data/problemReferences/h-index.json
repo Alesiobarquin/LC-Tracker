@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/274.%20H-Index",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "sort-and-find-the-threshold",
+      "approach": "Sort and Find the Threshold",
+      "explanation": "### How it works\n\nAfter sorting citations in ascending order, position i has n - i papers at or above its value. The first citation meeting that count determines the largest valid h-index.\n\n### Steps\n\n1. Sort the citations.\n2. Scan for the first citation at least n - i.\n3. Return n - i, or zero when no position qualifies.\n\n### Complexity\n\n- Time: `O(n log n)` time.\n- Space: `O(n)` worst-case workspace for Python sorting.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/274.%20H-Index/274-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n  def hIndex(self, citations: list[int]) -> int:\n    n = len(citations)\n\n    citations.sort()\n\n    for i, citation in enumerate(citations):\n      if citation >= n - i:\n        return n - i\n\n    return 0\n"
+      }
+    }
+  ]
 }

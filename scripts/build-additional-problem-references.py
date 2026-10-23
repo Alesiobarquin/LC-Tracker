@@ -84,8 +84,15 @@ def main():
                       sourceUrl=f'https://github.com/walkccc/LeetCode/tree/{revision}/' + urllib.parse.quote(path, safe='/'),
                       sourceName='walkccc / Peng-Yu Chen', licenseUrl='/walkccc-license.txt', explanationAuthor='LC Tracker')
         existing = output / (r['id'] + '.json')
-        if existing.exists() and 'walkccc/LeetCode' not in json.loads(existing.read_text())['sourceUrl']:
-            raise ValueError(f'Refusing to replace another source: {r["id"]}')
+        if existing.exists():
+            previous = json.loads(existing.read_text())
+            if 'walkccc/LeetCode' not in previous['sourceUrl']:
+                raise ValueError(f'Refusing to replace another source: {r["id"]}')
+            if previous.get('alternatives'):
+                default = {key: value for key, value in previous.items() if key != 'alternatives'}
+                if default != record:
+                    raise ValueError(f'Default changed for {r["id"]}; review its alternatives before replacing it')
+                record['alternatives'] = previous['alternatives']
         built.append((existing, json.dumps(record, ensure_ascii=False, indent=2) + '\n'))
     (ROOT / 'public/walkccc-license.txt').write_bytes(license_data)
     for path, content in built:

@@ -1,0 +1,29 @@
+{
+  "problemId": "strobogrammatic-number",
+  "approach": "Rotational Two Pointers",
+  "explanation": "### How it works\n\nA 180-degree rotation reverses digit order and maps 6 to 9 and 9 to 6, while 0, 1, and 8 remain unchanged. Compare mirrored digits under that mapping.\n\n### Steps\n\n1. Place pointers at both ends.\n2. Reject a digit without a rotational partner.\n3. Compare the left digit with the rotated right digit.\n4. Move inward, including the middle digit.\n\n### Complexity\n\n- Time: O(n) for n digits.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def isStrobogrammatic(self, num: str) -> bool:\n    rotated = {'0': '0', '1': '1', '6': '9', '8': '8', '9': '6'}\n    l = 0\n    r = len(num) - 1\n\n    while l <= r:\n      if num[r] not in rotated:\n        return False\n      if num[l] != rotated[num[r]]:\n        return False\n      l += 1\n      r -= 1\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool isStrobogrammatic(string num) {\n    const vector<char> rotated{'0', '1', 'x', 'x', 'x',\n                               'x', '9', 'x', '8', '6'};\n    int l = 0;\n    int r = num.length() - 1;\n\n    while (l <= r)\n      if (num[l++] != rotated[num[r--] - '0'])\n        return false;\n\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/246.%20Strobogrammatic%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "construct-the-rotated-string",
+      "approach": "Construct the Rotated String",
+      "explanation": "### How it works\n\nBuild the entire rotated representation by mapping the reversed digits. The number is strobogrammatic precisely when this constructed text equals the original.\n\n### Steps\n\n1. Reject digits outside 0, 1, 6, 8, and 9.\n2. Reverse the digit sequence and map each digit.\n3. Join the mapped digits and compare with the original text.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for the rotated representation.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/246.%20Strobogrammatic%20Number",
+      "code": {
+        "python": "class Solution:\n    def isStrobogrammatic(self, num: str) -> bool:\n        rotation = {'0': '0', '1': '1', '6': '9', '8': '8', '9': '6'}\n        if any(digit not in rotation for digit in num):\n            return False\n        return ''.join(rotation[digit] for digit in reversed(num)) == num\n"
+      }
+    }
+  ]
+}

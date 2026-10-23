@@ -1,0 +1,29 @@
+{
+  "problemId": "keyboard-row",
+  "approach": "Keyboard Row Sets",
+  "explanation": "### How it works\n\nA word uses one keyboard row when the set of its lowercase letters is a subset of one row's character set.\n\n### Steps\n\n1. Create the three keyboard-row sets.\n2. Lowercase and deduplicate each word's letters.\n3. Keep the original word if one row contains its entire letter set.\n\n### Complexity\n\n- Time: O(L) for total input characters L.\n- Space: O(w) temporary space for maximum word length w, bounded by the alphabet, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def findWords(self, words: list[str]) -> list[str]:\n    ans = []\n    rows = [set('qwertyuiop'), set('asdfghjkl'), set('zxcvbnm')]\n\n    for word in words:\n      lowerWord = set(word.lower())\n      if any(lowerWord <= row for row in rows):\n        ans.append(word)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> findWords(vector<string>& words) {\n    vector<string> ans;\n    const vector<int> rows{2, 3, 3, 2, 1, 2, 2, 2, 1, 2, 2, 2, 3,\n                           3, 1, 1, 1, 1, 2, 1, 1, 3, 1, 3, 1, 3};\n\n    for (const string& word : words) {\n      string lowerWord = word;\n      ranges::transform(lowerWord, lowerWord.begin(), ::tolower);\n      const int row = rows[lowerWord[0] - 'a'];\n      const bool isValid = ranges::all_of(\n          lowerWord, [&](int c) { return rows[c - 'a'] == row; });\n      if (isValid)\n        ans.push_back(word);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/500.%20Keyboard%20Row",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "letter-to-row-lookup",
+      "approach": "Letter-to-Row Lookup",
+      "explanation": "### How it works\n\nAssign every keyboard letter its row number. A word is valid when each letter has the same row number as its first letter.\n\n### Steps\n\n1. Build a lookup from lowercase letter to keyboard row.\n2. Read the first letter's row for each word.\n3. Check every remaining letter against that row.\n4. Preserve the original spelling in output.\n\n### Complexity\n\n- Time: O(L).\n- Space: O(1) fixed alphabet lookup, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/500.%20Keyboard%20Row",
+      "code": {
+        "python": "class Solution:\n    def findWords(self, words: list[str]) -> list[str]:\n        row_of = {char: i for i, row in enumerate(['qwertyuiop', 'asdfghjkl', 'zxcvbnm']) for char in row}\n        return [word for word in words\n                if all(row_of[char.lower()] == row_of[word[0].lower()] for char in word)]\n"
+      }
+    }
+  ]
+}

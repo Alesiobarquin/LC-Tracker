@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int maximizeSweetness(vector<int>& sweetness, int k) {\n        // Initialize the left and right boundaries.\n        // left = 1 and right = total sweetness / number of people.\n        int numberOfPeople = k + 1;\n        int left = *min_element(sweetness.begin(), sweetness.end());\n        int right = accumulate(sweetness.begin(), sweetness.end(), 0) / numberOfPeople;\n\n        while (left < right) {\n            // Get the middle index between left and right boundary indexes.\n            // cur_sweetness stands for the total sweetness for the current person.\n            // people_with_chocolate stands for the number of people that have\n            // a piece of chocolate of sweetness greater than or equal to mid.\n            int mid = (left + right + 1) / 2;\n            int curSweetness = 0;\n            int peopleWithChocolate = 0;\n\n            // Start assigning chunks to the current people,.\n            for (int s : sweetness) {\n                curSweetness += s;\n\n                // When the total sweetness from him is no less than mid, meaning we\n                // have done with him and move on to assigning chunks to the next people.\n                if (curSweetness >= mid) {\n                    peopleWithChocolate += 1;\n                    curSweetness = 0;\n                }\n            }\n\n            // Check if we successfully give everyone a piece of chocolate with sweetness\n            // no less than mid, and eliminate the search space by half.\n            if (peopleWithChocolate >= numberOfPeople) {\n                left = mid;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        // Once the left and right boundaries coincide, we find the target value,\n        // that is, the maximum possible sweetness we can get.\n        return right;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-chocolate.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-chocolate.md",
+  "alternatives": [
+    {
+      "id": "maximin-partition-dp",
+      "approach": "Maximin Partition DP",
+      "explanation": "### How it works\n\nFor each suffix and number of pieces, try every next cut. The value of a partition is its least sweet piece; choose cuts maximizing that minimum.\n\n### Steps\n\n1. Build prefix sums for constant-time segment sums.\n2. Memoize a suffix start and required piece count.\n3. Try every first cut leaving enough elements for other pieces.\n4. Take the best minimum of the first piece and the suffix solution.\n\n### Complexity\n\n- Time: `O(k × n²)` time.\n- Space: `O(k × n)` memoization plus `O(k)` recursion depth.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/divide-chocolate.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from functools import cache\nfrom itertools import accumulate\n\nclass Solution:\n    def maximizeSweetness(self, sweetness: list[int], k: int) -> int:\n        prefix = [0] + list(accumulate(sweetness))\n        @cache\n        def solve(start, pieces):\n            if pieces == 1:\n                return prefix[-1] - prefix[start]\n            return max(min(prefix[end] - prefix[start], solve(end, pieces - 1))\n                       for end in range(start + 1, len(sweetness) - pieces + 2))\n        return solve(0, k + 1)\n"
+      }
+    }
+  ]
 }

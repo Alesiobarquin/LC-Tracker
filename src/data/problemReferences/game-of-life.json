@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/289.%20Game%20of%20Life",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "snapshot-and-update",
+      "approach": "Snapshot and Update",
+      "explanation": "### How it works\n\nRead every neighbor from a copy of the old board, then write the next generation into the original board. The snapshot prevents earlier updates from affecting later decisions.\n\n### Steps\n\n1. Copy the board before changing cells.\n2. Count the eight valid neighbors using the copy.\n3. Keep a live cell with two neighbors, or any cell with three neighbors.\n4. Write each next state into the original board.\n\n### Complexity\n\n- Time: `O(r × c)` time.\n- Space: `O(r × c)` auxiliary space for the snapshot.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/289.%20Game%20of%20Life",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def gameOfLife(self, board: list[list[int]]) -> None:\n        old = [row[:] for row in board]\n        for r in range(len(board)):\n            for c in range(len(board[0])):\n                neighbors = sum(old[x][y]\n                                for x in range(max(0, r - 1), min(len(board), r + 2))\n                                for y in range(max(0, c - 1), min(len(board[0]), c + 2))\n                                if (x, y) != (r, c))\n                board[r][c] = int(neighbors == 3 or (old[r][c] == 1 and neighbors == 2))\n"
+      }
+    }
+  ]
 }

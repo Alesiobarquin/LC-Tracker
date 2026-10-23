@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/326.%20Power%20of%20Three",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "repeated-division",
+      "approach": "Repeated Division",
+      "explanation": "### How it works\n\nDivide a positive power of three repeatedly until it reaches one. This recognizes powers without relying on the largest power fitting in 32 bits.\n\n### Steps\n\n1. Reject nonpositive values.\n2. Divide by three while the remainder is zero.\n3. Accept exactly when the final value is one.\n\n### Complexity\n\n- Time: `O(log n)` divisions for positive n under bounded arithmetic.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/326.%20Power%20of%20Three",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def isPowerOfThree(self, n: int) -> bool:\n        if n <= 0:\n            return False\n        while n % 3 == 0:\n            n //= 3\n        return n == 1\n"
+      }
+    }
+  ]
 }

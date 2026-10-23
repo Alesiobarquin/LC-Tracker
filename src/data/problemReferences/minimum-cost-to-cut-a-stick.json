@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minCost(int n, vector<int>& cuts) {\n        int m = cuts.size();\n        cuts.push_back(0);\n        cuts.push_back(n);\n        sort(cuts.begin(), cuts.end());\n\n        vector<vector<int>> dp(m + 2, vector<int>(m + 2, 0));\n\n        for (int length = 2; length <= m + 1; length++) {\n            for (int i = 0; i + length <= m + 1; i++) {\n                int j = i + length;\n                dp[i][j] = INT_MAX;\n                for (int mid = i + 1; mid < j; mid++) {\n                    dp[i][j] = min(dp[i][j],\n                        cuts[j] - cuts[i] + dp[i][mid] + dp[mid][j]);\n                }\n            }\n        }\n\n        return dp[0][m + 1];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=EVxTO5I0d7w",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-cut-a-stick.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-cut-a-stick.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nEach cut costs the length of the current stick segment. The order of cuts matters because earlier cuts determine the lengths of segments for later cuts. We need to try all possible orderings of cuts and find the one with minimum total cost. For a segment from position `l` to `r`, we try each valid cut point, pay the segment length, then recursively solve the resulting sub-segments.\n\n### Steps\n\n1. Define `dfs(l, r)` to return the minimum cost to make all cuts within the segment `[l, r]`.\n2. Base case: If `r - l == 1`, no cuts are possible, return `0`.\n3. For each cut point `c` between `l` and `r`:\n    - Calculate cost as `(r - l) + dfs(l, c) + dfs(c, r)`.\n    - Track the minimum across all choices.\n4. Return `0` if no cuts exist in the range, otherwise return the minimum cost.\n\n### Complexity\n\n- Time complexity: `O(m ^ N)`\n- Space complexity: `O(N)` for recursion stack.\n\n> Where `m` is the size of the `cuts` array, `n` is the length of the stick, and `N = min(n, m)`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCost(self, n: int, cuts: List[int]) -> int:\n        def dfs(l, r):\n            if r - l == 1:\n                return 0\n            res = float(\"inf\")\n            for c in cuts:\n                if l < c < r:\n                    res = min(res, (r - l) + dfs(l, c) + dfs(c, r))\n            res = 0 if res == float(\"inf\") else res\n            return res\n\n        return dfs(0, n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-cut-a-stick.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down) - I",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems since many segment pairs `(l, r)` are computed multiple times. By caching results for each unique `(l, r)` pair, we avoid redundant computation. The state depends only on the segment boundaries, not on how we arrived at that segment.\n\n### Steps\n\n1. Create a memoization dictionary keyed by `(l, r)` pairs.\n2. Define `dfs(l, r)` that returns cached results when available.\n3. For each cut point in the range, compute the cost recursively.\n4. Store and return the minimum cost for each segment.\n\n### Complexity\n\n- Time complexity: `O(m * N ^ 2)`\n- Space complexity: `O(N ^ 2)`\n\n> Where `m` is the size of the `cuts` array, `n` is the length of the stick, and `N = min(n, m)`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minCost(self, n: int, cuts: List[int]) -> int:\n        dp = {}\n\n        def dfs(l, r):\n            if r - l == 1:\n                return 0\n            if (l, r) in dp:\n                return dp[(l, r)]\n\n            res = float(\"inf\")\n            for c in cuts:\n                if l < c < r:\n                    res = min(res, (r - l) + dfs(l, c) + dfs(c, r))\n            res = 0 if res == float(\"inf\") else res\n            dp[(l, r)] = res\n            return res\n\n        return dfs(0, n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-cost-to-cut-a-stick.md",
+      "id": "dynamic-programming-top-down-i"
+    }
+  ]
 }

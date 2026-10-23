@@ -1,0 +1,29 @@
+{
+  "problemId": "find-duplicate-file-in-system",
+  "approach": "Group File Paths by Content",
+  "explanation": "### How it works\n\nParse each directory description into filenames and contents. Use content as a hash-map key and retain groups with at least two file paths.\n\n### Steps\n\n1. Split each description into directory and file tokens.\n2. Separate each filename from its parenthesized content.\n3. Append its full path to the content group.\n4. Return groups containing duplicates.\n\n### Complexity\n\n- Time: Expected O(L) parsing and hashing for total text length L.\n- Space: O(L) grouped content and paths.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def findDuplicate(self, paths: list[str]) -> list[list[str]]:\n    contentToPathFiles = collections.defaultdict(list)\n\n    for path in paths:\n      words = path.split(' ')\n      rootPath = words[0]  # \"root/d1/d2/.../dm\"\n      for fileAndContent in words[1:]:  # \"fn.txt(fn_content)\"\n        l = fileAndContent.find('(')\n        r = fileAndContent.find(')')\n        # \"fn.txt\"\n        file = fileAndContent[:l]\n        # \"fn_content\"\n        content = fileAndContent[l + 1:r]\n        # \"root/d1/d2/.../dm/fn.txt\"\n        filePath = rootPath + '/' + file\n        contentToPathFiles[content].append(filePath)\n\n    return [filePath for filePath in contentToPathFiles.values() if len(filePath) > 1]\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<string>> findDuplicate(vector<string>& paths) {\n    vector<vector<string>> ans;\n    unordered_map<string, vector<string>> contentToFilePaths;\n\n    for (const string& path : paths) {\n      istringstream iss(path);\n      string rootPath;\n      iss >> rootPath;  // \"root/d1/d2/.../dm\"\n\n      string fileAndContent;\n      while (iss >> fileAndContent) {  // \"fn.txt(fn_content)\"\n        const int l = fileAndContent.find('(');\n        const int r = fileAndContent.find(')');\n        // \"fn.txt\"\n        const string file = fileAndContent.substr(0, l);\n        // \"fn_content\"\n        const string content = fileAndContent.substr(l + 1, r - l - 1);\n        // \"root/d1/d2/.../dm/fn.txt\"\n        const string filePath = rootPath + '/' + file;\n        contentToFilePaths[content].push_back(filePath);\n      }\n    }\n\n    for (const auto& [_, filePaths] : contentToFilePaths)\n      if (filePaths.size() > 1)\n        ans.push_back(filePaths);\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/609.%20Find%20Duplicate%20File%20in%20System",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sort-content-path-records",
+      "approach": "Sort Content-Path Records",
+      "explanation": "### How it works\n\nSort parsed files by content so equal-content files become consecutive. Scan those runs and return only groups with multiple members.\n\n### Steps\n\n1. Parse every file into a content/path pair.\n2. Sort all pairs by content.\n3. Group adjacent equal-content records.\n4. Return paths from groups of size at least two.\n\n### Complexity\n\n- Time: O(L + f log f × C) upper bound for f files and maximum compared content length C.\n- Space: O(L) parsed records and grouping storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/609.%20Find%20Duplicate%20File%20in%20System",
+      "code": {
+        "python": "from itertools import groupby\n\nclass Solution:\n    def findDuplicate(self, paths: list[str]) -> list[list[str]]:\n        records = []\n        for description in paths:\n            directory, *files = description.split()\n            for file in files:\n                name, content = file.split('(', 1)\n                records.append((content[:-1], directory + '/' + name))\n        records.sort()\n        result = []\n        for _, group in groupby(records, key=lambda record: record[0]):\n            names = [path for _, path in group]\n            if len(names) > 1:\n                result.append(names)\n        return result\n"
+      }
+    }
+  ]
+}

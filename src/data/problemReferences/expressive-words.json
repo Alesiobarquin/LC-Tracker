@@ -1,0 +1,29 @@
+{
+  "problemId": "expressive-words",
+  "approach": "Character Scan with Stretchable Runs",
+  "explanation": "### How it works\n\nMatch each candidate word against s. An unmatched repeated character in s may be skipped only when it belongs to a run of at least three, making that run stretchable.\n\n### Steps\n\n1. Scan s while advancing a candidate pointer on equal characters.\n2. Allow unmatched characters inside a length-at-least-three repeated run.\n3. Reject any other mismatch.\n4. Require the entire candidate to be consumed.\n\n### Complexity\n\n- Time: O(k × n) for k candidate words and source length n.\n- Space: O(1) per-candidate auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def expressiveWords(self, s: str, words: list[str]) -> int:\n    def isStretchy(word: str) -> bool:\n      n = len(s)\n      m = len(word)\n\n      j = 0\n      for i in range(n):\n        if j < m and s[i] == word[j]:\n          j += 1\n        elif i > 1 and s[i] == s[i - 1] == s[i - 2]:\n          continue\n        elif 0 < i < n - 1 and s[i - 1] == s[i] == s[i + 1]:\n          continue\n        else:\n          return False\n\n      return j == m\n\n    return sum(isStretchy(word) for word in words)\n",
+    "cpp": "class Solution {\n public:\n  int expressiveWords(string s, vector<string>& words) {\n    int ans = 0;\n\n    for (const string& word : words)\n      if (isStretchy(s, word))\n        ++ans;\n\n    return ans;\n  }\n\n private:\n  bool isStretchy(const string& s, const string& word) {\n    const int n = s.length();\n    const int m = word.length();\n\n    int j = 0;\n    for (int i = 0; i < n; ++i)\n      if (j < m && s[i] == word[j])\n        ++j;\n      else if (i > 1 && s[i] == s[i - 1] && s[i - 1] == s[i - 2])\n        continue;\n      else if (0 < i && i + 1 < n && s[i - 1] == s[i] && s[i] == s[i + 1])\n        continue;\n      else\n        return false;\n\n    return j == m;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/809.%20Expressive%20Words",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "run-length-encoded-word-comparison",
+      "approach": "Run-Length Encoded Word Comparison",
+      "explanation": "### How it works\n\nEncode s and each candidate as character/run-length pairs. Matching runs need equal characters, no longer candidate run, and exact equality whenever the source run is shorter than three.\n\n### Steps\n\n1. Run-length encode s.\n2. Encode each candidate.\n3. Require the same run-character sequence.\n4. Accept each pair when lengths are equal or the source run is at least three and no shorter.\n\n### Complexity\n\n- Time: O(n + W) for total candidate text W.\n- Space: O(n + L) temporary runs for maximum candidate length L.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/809.%20Expressive%20Words",
+      "code": {
+        "python": "from itertools import groupby\n\nclass Solution:\n    def expressiveWords(self, s: str, words: list[str]) -> int:\n        def encode(word):\n            return [(char, sum(1 for _ in group)) for char, group in groupby(word)]\n        target = encode(s)\n        total = 0\n        for word in words:\n            runs = encode(word)\n            if len(runs) == len(target) and all(a == b and (x == y or x >= 3 and x >= y)\n                                               for (a, x), (b, y) in zip(target, runs)):\n                total += 1\n        return total\n"
+      }
+    }
+  ]
+}

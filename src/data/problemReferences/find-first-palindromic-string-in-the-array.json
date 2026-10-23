@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    string firstPalindrome(vector<string>& words) {\n        for (const string& w : words) {\n            int l = 0, r = w.length() - 1;\n            while (w[l] == w[r]) {\n                if (l >= r) return w;\n                l++;\n                r--;\n            }\n        }\n        return \"\";\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-palindromic-string-in-the-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-palindromic-string-in-the-array.md",
+  "alternatives": [
+    {
+      "approach": "Reverse String",
+      "explanation": "### How it works\n\nA palindrome reads the same forwards and backwards. The simplest way to check this is to reverse the string and compare it to the original. If they match, it's a palindrome. We iterate through the array and return the first string that passes this check.\n\n### Steps\n\n1. Iterate through each word in the array.\n2. For each word, create a reversed copy.\n3. Compare the original word with its reversed version.\n4. If they are equal, return that word immediately.\n5. If no palindrome is found after checking all words, return an empty string.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(m)`\n\n> Where `n` is the size of the string array `words` and `m` is the average length of a word in the array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def firstPalindrome(self, words: List[str]) -> str:\n        for w in words:\n            if w == w[::-1]:\n                return w\n        return \"\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-first-palindromic-string-in-the-array.md",
+      "id": "reverse-string"
+    }
+  ]
 }

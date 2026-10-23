@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int longestPalindrome(string s) {\n        int mask1 = 0; // [a - z]\n        int mask2 = 0; // [A - Z]\n        int res = 0;\n\n        for (char c : s) {\n            if ('a' <= c && c <= 'z') {\n                int bit = 1 << (c - 'a');\n                if (mask1 & bit) {\n                    res += 2;\n                }\n                mask1 ^= bit;\n            } else {\n                int bit = 1 << (c - 'A');\n                if (mask2 & bit) {\n                    res += 2;\n                }\n                mask2 ^= bit;\n            }\n        }\n\n        return (mask1 || mask2) ? res + 1 : res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindrome.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindrome.md",
+  "alternatives": [
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nA palindrome reads the same forwards and backwards. For most characters, we need pairs: one for each side. Characters with even counts can be fully used. Characters with odd counts contribute their largest even portion, and at most one odd character can sit in the middle. We count character frequencies and sum up pairs as we find them.\n\n### Steps\n\n1. Use a hash map to count each character's frequency.\n2. Initialize `result` to `0`.\n3. For each character encountered, increment its count. When the count becomes even, add `2` to the result (a new pair formed).\n4. After processing, check if any character has an odd count. If so, add `1` for the middle position.\n5. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the given string, and `m` is the number of distinct characters in the string.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def longestPalindrome(self, s: str) -> int:\n        count = defaultdict(int)\n        res = 0\n\n        for c in s:\n            count[c] += 1\n            if count[c] % 2 == 0:\n                res += 2\n\n        for cnt in count.values():\n            if cnt % 2:\n                res += 1\n                break\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindrome.md",
+      "id": "hash-map"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nInstead of counting exact frequencies, we only need to know if a character has been seen an odd number of times. A set works perfectly: add a character when first seen, remove it when seen again (forming a pair). Each removal represents a pair. At the end, if the set is non-empty, we can use one character as the center.\n\n### Steps\n\n1. Initialize an empty set and `result` to `0`.\n2. For each character:\n    - If it's in the set, remove it and add `2` to `result` (pair completed).\n    - Otherwise, add it to the set.\n3. If the set is non-empty after processing, add `1` to `result`.\n4. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(m)`\n\n> Where `n` is the length of the given string, and `m` is the number of distinct characters in the string.",
+      "code": {
+        "python": "class Solution:\n    def longestPalindrome(self, s: str) -> int:\n        seen = set()\n        res = 0\n\n        for c in s:\n            if c in seen:\n                seen.remove(c)\n                res += 2\n            else:\n                seen.add(c)\n\n        return res + 1 if seen else res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/longest-palindrome.md",
+      "id": "hash-set"
+    }
+  ]
 }

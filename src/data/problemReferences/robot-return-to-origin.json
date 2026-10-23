@@ -1,0 +1,29 @@
+{
+  "problemId": "robot-return-to-origin",
+  "approach": "Opposite-Move Counts",
+  "explanation": "### How it works\n\nHorizontal displacement is zero when left and right counts agree; vertical displacement is zero when up and down counts agree.\n\n### Steps\n\n1. Count R and L and compare them.\n2. Count U and D and compare them.\n3. Accept only when both pairs agree.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def judgeCircle(self, moves: str) -> bool:\n    return moves.count('R') == moves.count('L') and moves.count('U') == moves.count('D')\n",
+    "cpp": "class Solution {\n public:\n  bool judgeCircle(string moves) {\n    int right = 0;\n    int up = 0;\n\n    for (const char move : moves) {\n      switch (move) {\n        case 'R':\n          ++right;\n          break;\n        case 'L':\n          --right;\n          break;\n        case 'U':\n          ++up;\n          break;\n        case 'D':\n          --up;\n          break;\n      }\n    }\n\n    return right == 0 && up == 0;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/657.%20Robot%20Return%20to%20Origin",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "coordinate-simulation",
+      "approach": "Coordinate Simulation",
+      "explanation": "### How it works\n\nSimulate each movement as a unit change to an x or y coordinate and check the final position.\n\n### Steps\n\n1. Start at (0, 0).\n2. Apply the coordinate delta for every move.\n3. Return whether both coordinates are zero.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/657.%20Robot%20Return%20to%20Origin",
+      "code": {
+        "python": "class Solution:\n    def judgeCircle(self, moves: str) -> bool:\n        changes = {'L': (-1, 0), 'R': (1, 0), 'U': (0, 1), 'D': (0, -1)}\n        x = y = 0\n        for move in moves:\n            dx, dy = changes[move]\n            x += dx\n            y += dy\n        return x == 0 and y == 0\n"
+      }
+    }
+  ]
+}

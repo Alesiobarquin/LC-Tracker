@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int paintWalls(vector<int>& cost, vector<int>& time) {\n        int n = cost.size();\n        vector<int> dp(n + 2, INT_MAX);\n        dp[0] = 0;\n\n        for (int i = 0; i < n; i++) {\n            for (int remain = n; remain > 0; remain--) {\n                int paint = dp[max(remain - 1 - time[i], 0)];\n                if (paint != INT_MAX) paint += cost[i];\n                dp[remain] = min(paint, dp[remain]);\n            }\n        }\n\n        return dp[n];\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/painting-the-walls.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/painting-the-walls.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe have a paid painter and a free painter working simultaneously. The paid painter takes `time[i]` to paint wall `i` and costs `cost[i]`. The free painter paints one wall per unit time at no cost, but can only work while the paid painter is busy.\n\nThe key insight is that when the paid painter paints wall `i`, the free painter can paint `time[i]` walls during that period. So assigning wall `i` to the paid painter effectively handles `1 + time[i]` walls total.\n\nWe use recursion to decide for each wall: either pay to paint it (and let the free painter handle `time[i]` additional walls), or skip it (hoping the free painter will handle it later).\n\n### Steps\n\n1. Define `dfs(i, remain)` where `i` is the current wall index and `remain` is the number of walls still needing to be painted.\n2. Base case: If `remain <= 0`, all walls are covered, return `0`. If `i == n`, we have run out of walls to assign without covering everything, return `infinity`.\n3. For each wall, we have two choices:\n    - Paint it with the paid painter: cost is `cost[i] + dfs(i + 1, remain - 1 - time[i])`.\n    - Skip it: cost is `dfs(i + 1, remain)`.\n4. Return the minimum of these two choices.\n5. Start with `dfs(0, n)` since all `n` walls need to be painted.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def paintWalls(self, cost: List[int], time: List[int]) -> int:\n\n        def dfs(i, remain):\n            if remain <= 0:\n                return 0\n            if i == len(cost):\n                return float(\"inf\")\n\n            paint = cost[i] + dfs(i + 1, remain - 1 - time[i])\n            skip = dfs(i + 1, remain)\n            return min(paint, skip)\n\n        return dfs(0, len(cost))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/painting-the-walls.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems. The state `(i, remain)` can be reached through different paths, and we recompute the same results multiple times.\n\nBy caching results in a memoization table, we ensure each unique state is computed only once. The table has dimensions `n x (n + 1)` since `remain` ranges from 0 to n.\n\n### Steps\n\n1. Create a 2D memoization table `dp[i][remain]` initialized to `-1` (unvisited).\n2. In the recursive function, first check if the result is already cached.\n3. If not, compute the result by considering both choices (paint or skip) and cache it before returning.\n4. The base cases remain the same: return `0` when `remain <= 0`, return `infinity` when `i == n`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n ^ 2)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def paintWalls(self, cost: List[int], time: List[int]) -> int:\n        dp = {}\n\n        def dfs(i, remain):\n            if remain <= 0:\n                return 0\n            if i == len(cost):\n                return float(\"inf\")\n            if (i, remain) in dp:\n                return dp[(i, remain)]\n\n            paint = cost[i] + dfs(i + 1, remain - 1 - time[i])\n            skip = dfs(i + 1, remain)\n            dp[(i, remain)] = min(paint, skip)\n            return dp[(i, remain)]\n\n        return dfs(0, len(cost))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/painting-the-walls.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

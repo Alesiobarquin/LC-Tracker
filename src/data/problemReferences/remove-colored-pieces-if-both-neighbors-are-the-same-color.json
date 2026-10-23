@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool winnerOfGame(string colors) {\n        int alice = 0, bob = 0;\n\n        for (int i = 1; i < colors.size() - 1; i++) {\n            if (colors[i - 1] == colors[i] && colors[i] == colors[i + 1]) {\n                if (colors[i] == 'A') {\n                    alice++;\n                }\n                if (colors[i] == 'B') {\n                    bob++;\n                }\n            }\n        }\n\n        return alice > bob;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-colored-pieces-if-both-neighbors-are-the-same-color.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-colored-pieces-if-both-neighbors-are-the-same-color.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe simulate the game turn by turn. Alice looks for a piece 'A' surrounded by two other 'A's and removes it. Then Bob does the same for 'B'. If a player cannot make a move on their turn, they lose. This straightforward simulation mirrors the actual gameplay but is slow because we repeatedly scan and modify the string.\n\n### Steps\n\n1. Convert the string to a mutable list.\n2. Alternate turns between Alice (`'A'`) and Bob (`'B'`).\n3. On each turn, scan for a removable piece (one that has the same color on both sides).\n4. If found, remove it and continue. If not found, the current player loses.\n5. Alice wins if Bob cannot move; Bob wins if Alice cannot move.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def winnerOfGame(self, colors: str) -> bool:\n        s = list(colors)\n\n        def removeChar(c):\n            for i in range(1, len(s) - 1):\n                if s[i] != c:\n                    continue\n\n                if s[i] == s[i + 1] == s[i - 1]:\n                    s.pop(i)\n                    return True\n            return False\n\n        while True:\n            if not removeChar('A'):\n                return False\n            if not removeChar('B'):\n                return True\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-colored-pieces-if-both-neighbors-are-the-same-color.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Greedy + Two Pointers",
+      "explanation": "### How it works\n\nThe key insight is that each player's moves are independent. Removing an 'A' from a sequence of A's doesn't affect Bob's sequences of B's, and vice versa. So instead of simulating the game, we can count how many moves each player has available. For a run of consecutive same-colored pieces of length `k`, a player can remove `k - 2` pieces (since they need neighbors on both sides). Alice wins if she has more moves than Bob.\n\n### Steps\n\n1. Use two pointers to track consecutive runs of the same color.\n2. For each position, calculate how many \"extra\" pieces exist beyond the first two in the current run.\n3. Add these extras to Alice's count if the color is `'A'`, or Bob's count if `'B'`.\n4. Return `true` if Alice has more moves than Bob.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "class Solution:\n    def winnerOfGame(self, colors: str) -> bool:\n        alice = bob = l = 0\n\n        for r in range(len(colors)):\n            if colors[l] != colors[r]:\n                l = r\n\n            extra = r - l - 1\n            if extra > 0:\n                if colors[l] == 'A':\n                    alice += 1\n                else:\n                    bob += 1\n\n        return alice > bob\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/remove-colored-pieces-if-both-neighbors-are-the-same-color.md",
+      "id": "greedy-two-pointers"
+    }
+  ]
 }

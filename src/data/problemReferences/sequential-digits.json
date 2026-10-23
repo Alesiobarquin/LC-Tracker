@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> sequentialDigits(int low, int high) {\n        string nums = \"123456789\";\n        vector<int> res;\n\n        for (int d = 2; d <= 9; d++) {\n            for (int i = 0; i <= 9 - d; i++) {\n                int num = stoi(nums.substr(i, d));\n                if (num > high) {\n                    break;\n                }\n                if (num >= low && num <= high) {\n                    res.push_back(num);\n                }\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sequential-digits.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sequential-digits.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA sequential digit number has digits that increase by exactly 1 from left to right (like 123 or 4567). The straightforward approach is to check every number in the range `[low, high]` and verify if it has sequential digits by comparing adjacent digit characters. While simple to implement, this becomes impractical for large ranges.\n\n### Steps\n\n1. Iterate through every number from `low` to `high`.\n2. For each number, convert it to a string.\n3. Check if each adjacent pair of digits differs by exactly 1.\n4. If all adjacent pairs satisfy this condition, add the number to the result.\n5. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def sequentialDigits(self, low: int, high: int) -> List[int]:\n        res = []\n\n        for num in range(low, high + 1):\n            s = str(num)\n            flag = True\n            for i in range(1, len(s)):\n                if ord(s[i]) - ord(s[i - 1]) != 1:\n                    flag = False\n                    break\n            if flag:\n                res.append(num)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sequential-digits.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nWe can think of generating sequential digit numbers as a BFS traversal. Start with single digits 1 through 9 in a queue. For each number, we can extend it by appending the next consecutive digit (if the last digit is less than 9). Processing the queue level by level naturally generates numbers in increasing order of length, and within each length, in increasing order of value.\n\n### Steps\n\n1. Initialize a queue with digits 1 through 9.\n2. While the queue is not empty:\n    - Dequeue a number `n`.\n    - If `n > high`, skip it.\n    - If `n` is within `[low, high]`, add it to the result.\n    - Get the last digit of `n`. If it's less than 9, enqueue `n * 10 + (lastDigit + 1)`.\n3. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(1)`\n- Space complexity: `O(1)`\n\n> Since, we have at most `36` valid numbers as per the given constraints.",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def sequentialDigits(self, low: int, high: int) -> List[int]:\n        res = []\n        queue = deque(range(1, 10))\n\n        while queue:\n            n = queue.popleft()\n            if n > high:\n                continue\n            if low <= n <= high:\n                res.append(n)\n            ones = n % 10\n            if ones < 9:\n                queue.append(n * 10 + (ones + 1))\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sequential-digits.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

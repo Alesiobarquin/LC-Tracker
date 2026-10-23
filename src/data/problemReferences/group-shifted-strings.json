@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    string getHash(string &s) {\n        string hashKey;\n        for (int i = 1; i < s.length(); i++) {\n            hashKey += (s[i] - s[i - 1] + 26) % 26 + 'a';\n        }\n\n        return hashKey;\n    }\n\n    vector<vector<string>> groupStrings(vector<string>& strings) {\n        unordered_map<string, vector<string>> mapHashToList;\n\n        // Create a hash_value (hashKey) for each string and append the string\n        // to the list of hash values i.e. mapHashToList[\"cd\"] = [\"acf\", \"gil\", \"xzc\"]\n        for (string str : strings) {\n            string hashKey = getHash(str);\n            mapHashToList[hashKey].push_back(str);\n        }\n\n        // Iterate over the map, and add the values to groups\n        vector<vector<string>> groups;\n        for (auto it : mapHashToList) {\n            groups.push_back(it.second);\n        }\n\n        // Return a list of all of the grouped strings\n        return groups;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/group-shifted-strings.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/group-shifted-strings.md",
+  "alternatives": [
+    {
+      "id": "pairwise-shift-checks",
+      "approach": "Pairwise Shift Checks",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nCompare a word with one representative from each existing group. Equal-length words belong together when every character is shifted by the same amount modulo 26.\n\n### Steps\n\n1. Visit each word.\n2. Compare its length and character shifts with group representatives.\n3. Append it to the first matching group, or start a new group.\n\n### Complexity\n\n- Time: `O(n² × L)` for n words of maximum length L.\n- Space: `O(n)` group references, excluding the input strings.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/group-shifted-strings.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def groupStrings(self, strings: list[str]) -> list[list[str]]:\n        groups = []\n        for word in strings:\n            for group in groups:\n                other = group[0]\n                if len(word) == len(other):\n                    shift = (ord(word[0]) - ord(other[0])) % 26\n                    if all((ord(a) - ord(b)) % 26 == shift for a, b in zip(word, other)):\n                        group.append(word)\n                        break\n            else:\n                groups.append([word])\n        return groups\n"
+      }
+    }
+  ]
 }

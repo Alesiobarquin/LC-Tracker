@@ -1,0 +1,29 @@
+{
+  "problemId": "circular-array-loop",
+  "approach": "Floyd Cycles with Processed-Path Marking",
+  "explanation": "### How it works\n\nA valid cycle must keep one direction and contain more than one index. Use slow and fast pointers under that direction constraint, then mark an unsuccessful path with zeros so later starts skip it.\n\n### Steps\n\n1. Start from each unprocessed index.\n2. Advance slow and fast pointers only through values with the starting sign.\n3. Accept a meeting only when it is not a self-loop.\n4. Mark the unsuccessful same-direction path as processed.\n\n### Complexity\n\n- Time: O(n) total path processing.\n- Space: O(1) auxiliary space; mutates the input.",
+  "code": {
+    "python": "class Solution:\n  def circularArrayLoop(self, nums: list[int]) -> bool:\n    def advance(i: int) -> int:\n      return (i + nums[i]) % len(nums)\n\n    if len(nums) < 2:\n      return False\n\n    for i, num in enumerate(nums):\n      if num == 0:\n        continue\n\n      slow = i\n      fast = advance(slow)\n      while num * nums[fast] > 0 and num * nums[advance(fast)] > 0:\n        if slow == fast:\n          if slow == advance(slow):\n            break\n          return True\n        slow = advance(slow)\n        fast = advance(advance(fast))\n\n      slow = i\n      sign = num\n      while sign * nums[slow] > 0:\n        next = advance(slow)\n        nums[slow] = 0\n        slow = next\n\n    return False\n",
+    "cpp": "class Solution {\n public:\n  bool circularArrayLoop(vector<int>& nums) {\n    const int n = nums.size();\n    if (n < 2)\n      return false;\n\n    auto advance = [&](int i) {\n      const int val = (i + nums[i]) % n;\n      return i + nums[i] >= 0 ? val : n + val;\n    };\n\n    for (int i = 0; i < n; ++i) {\n      if (nums[i] == 0)\n        continue;\n      int slow = i;\n      int fast = advance(slow);\n      while (nums[i] * nums[fast] > 0 && nums[i] * nums[advance(fast)] > 0) {\n        if (slow == fast) {\n          if (slow == advance(slow))\n            break;\n          return true;\n        }\n        slow = advance(slow);\n        fast = advance(advance(fast));\n      }\n\n      slow = i;\n      const int sign = nums[i];\n      while (sign * nums[slow] > 0) {\n        const int next = advance(slow);\n        nums[slow] = 0;\n        slow = next;\n      }\n    }\n\n    return false;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/457.%20Circular%20Array%20Loop",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "per-start-visited-indices",
+      "approach": "Per-Start Visited Indices",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nFollow each possible start while recording the first step at which each index appears. A repeated index gives a cycle, whose length must exceed one; mixed-direction paths are abandoned.\n\n### Steps\n\n1. Choose a starting direction.\n2. Follow modular next indices while signs agree.\n3. Record the step number for every visited index.\n4. Accept a repeat with a cycle length greater than one.\n\n### Complexity\n\n- Time: O(n²) worst case.\n- Space: O(n) per-start visited indices.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/457.%20Circular%20Array%20Loop",
+      "code": {
+        "python": "class Solution:\n    def circularArrayLoop(self, nums: list[int]) -> bool:\n        for start in range(len(nums)):\n            positive = nums[start] > 0\n            seen = {}\n            index = start\n            while (nums[index] > 0) == positive:\n                if index in seen:\n                    if len(seen) - seen[index] > 1:\n                        return True\n                    break\n                seen[index] = len(seen)\n                index = (index + nums[index]) % len(nums)\n        return False\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    // Returns the index of the first element equal to or greater than the target.\n    // If there is no instance of the target in the list, it returns the length of the list.\n    int lower_bound(vector<int>& nums, int target) {\n        int start = 0;\n        int end = nums.size() - 1;\n        int index = nums.size();\n\n        while (start <= end) {\n            int mid = (start + end) / 2;\n\n            if (nums[mid] >= target) {\n                end = mid - 1;\n                index = mid;\n            } else {\n                start = mid + 1;\n            }\n        }\n\n        return index;\n    }\n\n    bool isMajorityElement(vector<int>& nums, int target) {\n        int firstIndex = lower_bound(nums, target);\n\n        return firstIndex + nums.size() / 2 < nums.size() && nums[firstIndex + nums.size() / 2] == target;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-number-is-majority-element-in-a-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-number-is-majority-element-in-a-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Frequency Count",
+      "explanation": "### How it works\n\nA majority element appears more than half the time. The simplest approach is to count how many times the target appears in the array by scanning through all elements. If the count exceeds `n`/2, the target is a majority element.\n\n### Steps\n\n1. Initialize a counter to 0.\n2. Iterate through the array:\n    - Increment the counter each time we encounter the target.\n3. Return `true` if the count is greater than half the array length, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(1)` constant space\n\n> Where `N` is the size of `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def isMajorityElement(self, nums: List[int], target: int) -> bool:\n        count = 0\n        for num in nums:\n            count = count + 1 if num == target else count\n\n        return count > len(nums) // 2\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-number-is-majority-element-in-a-sorted-array.md",
+      "id": "frequency-count"
+    },
+    {
+      "approach": "Binary Search (Two Pass)",
+      "explanation": "### How it works\n\nSince the array is sorted, all occurrences of the target are contiguous. We can use binary search to find the first and last occurrence of the target. The count is simply (`lastIndex` - `firstIndex` + 1), which we compare against `n`/2.\n\n### Steps\n\n1. Use `lower_bound` to find the index of the first element >= target.\n2. Use `upper_bound` to find the index of the first element > target.\n3. The count of target is (`upper_bound` - `lower_bound`).\n4. Return `true` if this count is greater than `n`/2.\n\n### Complexity\n\n- Time complexity: `O(log N)`\n- Space complexity: `O(1)` constant space\n\n> Where `N` is the size of `nums`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def lower_bound(self, nums: List[int], target: int) -> int:\n        \"\"\"\n        Returns the index of the first element equal to or greater than the target.\n        If there is no instance of the target in the list, it returns the length of the list.\n        \"\"\"\n        start = 0\n        end = len(nums) - 1\n        index = len(nums)\n\n        while start <= end:\n            mid = (start + end) // 2\n            if nums[mid] >= target:\n                end = mid - 1\n                index = mid\n            else:\n                start = mid + 1\n\n        return index\n\n    def upper_bound(self, nums: List[int], target: int) -> int:\n        \"\"\"\n        Returns the index of the first element greater than the target.\n        If there is no instance of the target in the list, it returns the length of the list.\n        \"\"\"\n        start = 0\n        end = len(nums) - 1\n        index = len(nums)\n\n        while start <= end:\n            mid = (start + end) // 2\n            if nums[mid] > target:\n                end = mid - 1\n                index = mid\n            else:\n                start = mid + 1\n\n        return index\n\n    def isMajorityElement(self, nums: List[int], target: int) -> bool:\n        first_index = self.lower_bound(nums, target)\n        next_to_last_index = self.upper_bound(nums, target)\n        return next_to_last_index - first_index > len(nums) // 2\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-a-number-is-majority-element-in-a-sorted-array.md",
+      "id": "binary-search-two-pass"
+    }
+  ]
 }

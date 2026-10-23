@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findSmallestSetOfVertices(int n, vector<vector<int>>& edges) {\n        vector<bool> indegree(n, false);\n        for (const auto& edge : edges) {\n            indegree[edge[1]] = true;\n        }\n\n        vector<int> res;\n        for (int i = 0; i < n; i++) {\n            if (!indegree[i]) {\n                res.push_back(i);\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=TLzcum7vrTc",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-vertices-to-reach-all-nodes.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-vertices-to-reach-all-nodes.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nWe want to find the smallest set of vertices from which all other vertices are reachable. A vertex must be in this set if no other vertex can reach it, meaning it has no incoming edges.\n\nUsing `dfs`, we traverse from each unvisited `node` and mark all reachable nodes. Any `node` that gets reached from another `node` can be removed from our candidate set. The nodes that remain are those with no incoming edges.\n\n### Steps\n\n1. Build an adjacency list from the edges.\n2. Initialize a set containing all vertices as potential starting points.\n3. For each unvisited vertex, run `dfs`:\n    - Mark the vertex as visited.\n    - For each neighbor, recursively visit it and remove it from the `res` set.\n4. Return the remaining vertices in the set.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findSmallestSetOfVertices(self, n: int, edges: List[List[int]]) -> List[int]:\n        adj = [[] for _ in range(n)]\n        for u, v in edges:\n            adj[u].append(v)\n\n        res = set(range(n))\n        visited = [False] * n\n\n        def dfs(node):\n            visited[node] = True\n            for nei in adj[node]:\n                if not visited[nei]:\n                    dfs(nei)\n                res.discard(nei)\n\n        for i in range(n):\n            if not visited[i]:\n                dfs(i)\n        return list(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-vertices-to-reach-all-nodes.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Indegree Count",
+      "explanation": "### How it works\n\nA vertex needs to be in our starting set only if it cannot be reached from any other vertex. This happens exactly when the vertex has no incoming edges. We can track which vertices have incoming edges by building a list of sources for each destination.\n\n### Steps\n\n1. Create an array of lists where `incoming[v]` stores all vertices with edges pointing to `v`.\n2. Iterate through all edges and populate the `incoming` lists.\n3. Collect all vertices where `incoming[v]` is empty.\n4. Return these vertices as the `res`.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from typing import List\nimport collections\n\nclass Solution:\n    def findSmallestSetOfVertices(self, n: int, edges: List[List[int]]) -> List[int]:\n        incoming = collections.defaultdict(list)\n        for src, dst in edges:\n            incoming[dst].append(src)\n\n        res = []\n        for i in range(n):\n            if not incoming[i]:\n                res.append(i)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-vertices-to-reach-all-nodes.md",
+      "id": "indegree-count"
+    }
+  ]
 }

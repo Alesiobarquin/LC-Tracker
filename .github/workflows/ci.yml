@@ -22,7 +22,7 @@ jobs:
       - run: npm test
       - name: Verify additional solution examples
         run: python3 scripts/verify-additional-references.py --cpp
-      - name: Verify NeetCode 250 alternate approaches
+      - name: Verify core and extended alternate approaches
         run: npm run verify:approaches
       - name: Add PostgreSQL binaries to PATH
         run: pg_config --bindir >> "$GITHUB_PATH"

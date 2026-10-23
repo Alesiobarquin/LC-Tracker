@@ -7,5 +7,25 @@
     "cpp": "// The API isBadVersion is defined for you.\n// bool isBadVersion(int version);\n\nclass Solution {\npublic:\n    int firstBadVersion(int n) {\n        int l = 1, r = n;\n        while (l < r) {\n            int m = l + (r - l) / 2;\n            if (isBadVersion(m)) {\n                r = m;\n            } else {\n                l = m + 1;\n            }\n        }\n        return r;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-bad-version.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-bad-version.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Linear Search)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to check each version starting from 1 until we find one that is bad. Since all versions after the first bad one are also bad, the first bad version we encounter is our answer.\n\n### Steps\n\n1. Iterate through versions from `1` to `n - 1`.\n2. For each version, call `isBadVersion()` to check if it's bad.\n3. Return the first version that is bad.\n4. If no bad version is found in the loop, return `n` (the last version must be the first bad one).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "# The isBadVersion API is already defined for you.\n# def isBadVersion(version: int) -> bool:\n\nclass Solution:\n    def firstBadVersion(self, n: int) -> int:\n        for i in range(1, n):\n            if isBadVersion(i):\n                return i\n        return n\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-bad-version.md",
+      "id": "brute-force-linear-search"
+    },
+    {
+      "approach": "Recursive Binary Search",
+      "explanation": "### How it works\n\nSince versions are sorted (all good versions come before all bad versions), we can use binary search to find the boundary between good and bad. If the middle version is bad, the first bad version is at or before the middle. If it's good, the first bad version is after the middle. This reduces our search space by half each time.\n\n### Steps\n\n1. Use a recursive helper function with parameters `l` (left bound) and `r` (right bound).\n2. Base case: if `l > r`, return `l` as the first bad version.\n3. Calculate the middle index `m = l + (r - l) / 2` to avoid overflow.\n4. If `isBadVersion(m)` is `true`, search the left half by calling `helper(l, m - 1)`.\n5. Otherwise, search the right half by calling `helper(m + 1, r)`.\n6. Start the search with `helper(1, n)`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(log n)` for recursion stack.",
+      "code": {
+        "python": "# The isBadVersion API is already defined for you.\n# def isBadVersion(version: int) -> bool:\n\nclass Solution:\n    def firstBadVersion(self, n: int) -> int:\n        def helper(l, r):\n            if l > r:\n                return l\n            m = l + (r - l) // 2\n            if isBadVersion(m):\n                return helper(l, m - 1)\n            else:\n                return helper(m + 1, r)\n\n        return helper(1, n)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-bad-version.md",
+      "id": "recursive-binary-search"
+    }
+  ]
 }

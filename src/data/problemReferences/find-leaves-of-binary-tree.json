@@ -7,5 +7,16 @@
     "cpp": "class Solution {\nprivate:\n\n    vector<vector<int>> solution;\n\npublic:\n\n    int getHeight(TreeNode *root) {\n\n        if (!root) {\n            return -1;\n        }\n\n        int leftHeight = getHeight(root->left);\n        int rightHeight = getHeight(root->right);\n\n        int currHeight = max(leftHeight, rightHeight) + 1;\n\n        if (this->solution.size() == currHeight) {\n            this->solution.push_back({});\n        }\n\n        this->solution[currHeight].push_back(root->val);\n\n        return currHeight;\n    }\n\n    vector<vector<int>> findLeaves(TreeNode* root) {\n        this->solution.clear();\n\n        getHeight(root);\n\n        return this->solution;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-leaves-of-binary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-leaves-of-binary-tree.md",
+  "alternatives": [
+    {
+      "approach": "DFS (Depth-First Search) with sorting",
+      "explanation": "### How it works\n\nLeaves are nodes with no children, and they have height `0`. Their parents have height `1`, and so on. If we compute the height of each node (where height is the distance to the farthest leaf in its subtree), nodes with the same height should be grouped together. By collecting all (height, value) pairs and sorting by height, we can form the required groups.\n\n### Steps\n\n1. Perform a DFS to compute the height of each node.\n2. For each node, calculate its height as `max(leftHeight, rightHeight) + 1`, where leaf nodes return `-1` from `null` children.\n3. Store each (height, value) pair in a list.\n4. Sort the list by height.\n5. Group nodes with the same height into sublists and return the result.\n\n### Complexity\n\n- Time complexity: `O(N log N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the total number of nodes in the binary tree",
+      "code": {
+        "python": "from typing import List, Optional\n\nclass Solution:\n    def findLeaves(self, root: Optional[TreeNode]) -> List[List[int]]:\n        self.pairs = []\n\n        def getHeight(node):\n            if node is None:\n                return -1\n\n            # first calculate the height of the left and right children\n            leftHeight = getHeight(node.left)\n            rightHeight = getHeight(node.right)\n\n            # based on the height of the left and right children, obtain the height of the current (parent) node\n            currHeight = max(leftHeight, rightHeight) + 1\n\n            # collect the pair -> (height, val)\n            self.pairs.append((currHeight, node.val))\n\n            # return the height of the current node\n            return currHeight\n\n        getHeight(root)\n\n        # sort all the (height, val) pairs\n        self.pairs.sort(key=lambda p: p[0])\n\n        n = len(self.pairs)\n        height = 0\n        i = 0\n        solution = []\n\n        while i < n:\n            nums = []\n            while i < n and self.pairs[i][0] == height:\n                nums.append(self.pairs[i][1])\n                i += 1\n            solution.append(nums)\n            height += 1\n\n        return solution\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-leaves-of-binary-tree.md",
+      "id": "dfs-depth-first-search-with-sorting"
+    }
+  ]
 }

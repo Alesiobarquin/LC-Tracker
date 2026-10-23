@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool lemonadeChange(vector<int>& bills) {\n        int five = 0, ten = 0;\n        for (int b : bills) {\n            if (b == 5) {\n                five++;\n            } else if (b == 10) {\n                five--;\n                ten++;\n            } else if (ten > 0) {\n                five--;\n                ten--;\n            } else {\n                five -= 3;\n            }\n            if (five < 0) {\n                return false;\n            }\n        }\n        return true;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lemonade-change.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lemonade-change.md",
+  "alternatives": [
+    {
+      "id": "explore-change-inventories",
+      "approach": "Explore Change Inventories",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nRetain all reachable inventories of five- and ten-dollar bills after each customer. For a twenty-dollar payment, try both a ten plus a five and three fives rather than choosing greedily.\n\n### Steps\n\n1. Start with no change.\n2. For a five, add one five to every inventory.\n3. For a ten, require and spend one five.\n4. For a twenty, explore both legal change combinations.\n5. Reject when no inventory remains reachable.\n\n### Complexity\n\n- Time: `O(n³)` as a conservative bound from n steps and at most `O(n²)` inventory states.\n- Space: `O(n²)` for reachable inventories.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/lemonade-change.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def lemonadeChange(self, bills: list[int]) -> bool:\n        states = {(0, 0)}\n        for bill in bills:\n            following = set()\n            for fives, tens in states:\n                if bill == 5:\n                    following.add((fives + 1, tens))\n                elif bill == 10 and fives:\n                    following.add((fives - 1, tens + 1))\n                elif bill == 20:\n                    if fives and tens:\n                        following.add((fives - 1, tens - 1))\n                    if fives >= 3:\n                        following.add((fives - 3, tens))\n            states = following\n            if not states:\n                return False\n        return True\n"
+      }
+    }
+  ]
 }

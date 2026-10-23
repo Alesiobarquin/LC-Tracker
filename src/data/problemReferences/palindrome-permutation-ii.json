@@ -1,0 +1,29 @@
+{
+  "problemId": "palindrome-permutation-ii",
+  "approach": "Unique Half-Permutation Backtracking",
+  "explanation": "### How it works\n\nA palindrome is determined by its left half and optional odd-count middle character. Backtrack over half the character multiset, skipping repeated choices at the same depth, then mirror each completed half.\n\n### Steps\n\n1. Reject more than one odd character count.\n2. Group half of each character's occurrences as candidates.\n3. Generate distinct permutations with used flags and duplicate skipping.\n4. Mirror each half around the optional middle.\n\n### Complexity\n\n- Time: O(n × h!) upper bound for n characters and h = floor(n/2), including output construction.\n- Space: O(n) workspace, excluding returned palindromes.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def generatePalindromes(self, s: str) -> list[str]:\n    count = collections.Counter(s)\n\n    # Count odd ones.\n    odd = sum(value & 1 for value in count.values())\n\n    # Can't form any palindrome.\n    if odd > 1:\n      return []\n\n    ans = []\n    candidates = []\n    mid = ''\n\n    # Get the mid and the candidates characters.\n    for key, value in count.items():\n      if value % 2 == 1:\n        mid += key\n      for _ in range(value // 2):\n        candidates.append(key)\n\n    def dfs(used: list[bool], path: list[str]) -> None:\n      \"\"\"Generates all the unique palindromes from the candidates.\"\"\"\n      if len(path) == len(candidates):\n        ans.append(''.join(path) + mid + ''.join(reversed(path)))\n        return\n\n      for i, candidate in enumerate(candidates):\n        if used[i]:\n          continue\n        if i > 0 and candidate == candidates[i - 1] and not used[i - 1]:\n          continue\n        used[i] = True\n        path.append(candidate)\n        dfs(used, path)\n        path.pop()\n        used[i] = False\n\n    # Backtrack to generate the ans strings.\n    dfs([False] * len(candidates), [])\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> generatePalindromes(string s) {\n    int odd = 0;\n    unordered_map<char, int> count;\n\n    for (const char c : s)\n      ++count[c];\n\n    // Count odd ones.\n    for (const auto& [_, value] : count)\n      if (value % 2 == 1)\n        ++odd;\n\n    // Can't form any palindrome.\n    if (odd > 1)\n      return {};\n\n    vector<string> ans;\n    vector<char> candidates;\n    string mid;\n\n    // Get the mid and the candidates characters.\n    for (const auto& [key, value] : count) {\n      if (value % 2 == 1)\n        mid += key;\n      for (int i = 0; i < value / 2; ++i)\n        candidates.push_back(key);\n    }\n\n    // Backtrack to generate the ans strings.\n    dfs(candidates, mid, vector<bool>(candidates.size()), \"\", ans);\n    return ans;\n  }\n\n private:\n  // Generates all the unique palindromes from the candidates.\n  void dfs(const vector<char>& candidates, const string& mid,\n           vector<bool>&& used, string&& path, vector<string>& ans) {\n    if (path.length() == candidates.size()) {\n      string secondHalf = path;\n      ranges::reverse(secondHalf);\n      ans.push_back(path + mid + secondHalf);\n      return;\n    }\n\n    for (int i = 0; i < candidates.size(); ++i) {\n      if (used[i])\n        continue;\n      if (i > 0 && candidates[i] == candidates[i - 1] && !used[i - 1])\n        continue;\n      used[i] = true;\n      path.push_back(candidates[i]);\n      dfs(candidates, mid, std::move(used), std::move(path), ans);\n      path.pop_back();\n      used[i] = false;\n    }\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/267.%20Palindrome%20Permutation%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "count-driven-half-construction",
+      "approach": "Count-Driven Half Construction",
+      "explanation": "### How it works\n\nChoose the next half-character directly from its remaining frequency instead of selecting individual copies. Equal copies never create separate branches.\n\n### Steps\n\n1. Count characters and identify the middle character.\n2. Halve the counts.\n3. Recursively choose any character with a remaining half-count.\n4. Mirror completed halves and restore counts while backtracking.\n\n### Complexity\n\n- Time: O(n × h!) upper bound, with duplicate branches avoided by counts.\n- Space: O(n) workspace, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/267.%20Palindrome%20Permutation%20II",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def generatePalindromes(self, s: str) -> list[str]:\n        counts = Counter(s)\n        odd = [c for c in counts if counts[c] % 2]\n        if len(odd) > 1:\n            return []\n        middle = ''.join(odd)\n        for c in counts:\n            counts[c] //= 2\n        result, path = [], []\n        def build():\n            if len(path) == len(s) // 2:\n                half = ''.join(path)\n                result.append(half + middle + half[::-1])\n                return\n            for c in counts:\n                if counts[c]:\n                    counts[c] -= 1\n                    path.append(c)\n                    build()\n                    path.pop()\n                    counts[c] += 1\n        build()\n        return result\n"
+      }
+    }
+  ]
+}

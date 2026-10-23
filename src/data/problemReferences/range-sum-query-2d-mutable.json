@@ -1,0 +1,29 @@
+{
+  "problemId": "range-sum-query-2d-mutable",
+  "approach": "Two-Dimensional Fenwick Tree",
+  "explanation": "### How it works\n\nA 2D Fenwick tree supports point deltas and rectangle-prefix sums. Store the current cell values so an assignment can be converted into a delta, then use four prefix queries for an inclusive rectangle.\n\n### Steps\n\n1. Build a Fenwick tree by adding every initial cell.\n2. On update, add the difference from the stored value.\n3. Compute a rectangle-prefix sum by walking decreasing low bits in both dimensions.\n4. Combine four prefixes using inclusion-exclusion.\n\n### Complexity\n\n- Time: O(mn log m log n) construction; O(log m log n) per update or query.\n- Space: O(mn) for matrix and Fenwick storage.",
+  "code": {
+    "python": "class FenwickTree:\n  def __init__(self, m: int, n: int):\n    self.sums = [[0] * (n + 1) for _ in range(m + 1)]\n\n  def add(self, row: int, col: int, delta: int) -> None:\n    i = row\n    while i < len(self.sums):\n      j = col\n      while j < len(self.sums[0]):\n        self.sums[i][j] += delta\n        j += FenwickTree.lowbit(j)\n      i += FenwickTree.lowbit(i)\n\n  def get(self, row: int, col: int) -> int:\n    summ = 0\n    i = row\n    while i > 0:\n      j = col\n      while j > 0:\n        summ += self.sums[i][j]\n        j -= FenwickTree.lowbit(j)\n      i -= FenwickTree.lowbit(i)\n    return summ\n\n  @staticmethod\n  def lowbit(i: int) -> int:\n    return i & -i\n\n\nclass NumMatrix:\n  def __init__(self, matrix: list[list[int]]):\n    self.matrix = matrix\n    self.tree = FenwickTree(len(matrix), len(matrix[0]))\n\n    for i in range(len(matrix)):\n      for j, val in enumerate(matrix[i]):\n        self.tree.add(i + 1, j + 1, val)\n\n  def update(self, row: int, col: int, val: int) -> None:\n    self.tree.add(row + 1, col + 1, val - self.matrix[row][col])\n    self.matrix[row][col] = val\n\n  def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:\n    return (self.tree.get(row2 + 1, col2 + 1) - self.tree.get(row1, col2 + 1) -\n            self.tree.get(row2 + 1, col1) + self.tree.get(row1, col1))\n",
+    "cpp": "class FenwickTree {\n public:\n  FenwickTree(int m, int n) : sums(m + 1, vector<int>(n + 1)) {}\n\n  void add(int row, int col, int delta) {\n    for (int i = row; i < sums.size(); i += lowbit(i))\n      for (int j = col; j < sums[0].size(); j += lowbit(j))\n        sums[i][j] += delta;\n  }\n\n  int get(int row, int col) {\n    int sum = 0;\n    for (int i = row; i > 0; i -= lowbit(i))\n      for (int j = col; j > 0; j -= lowbit(j))\n        sum += sums[i][j];\n    return sum;\n  }\n\n private:\n  vector<vector<int>> sums;\n\n  static inline int lowbit(int i) {\n    return i & -i;\n  }\n};\n\nclass NumMatrix {\n public:\n  NumMatrix(vector<vector<int>>& matrix)\n      : matrix(matrix), tree(matrix.size(), matrix[0].size()) {\n    for (int i = 0; i < matrix.size(); ++i)\n      for (int j = 0; j < matrix[0].size(); ++j)\n        tree.add(i + 1, j + 1, matrix[i][j]);\n  }\n\n  void update(int row, int col, int val) {\n    tree.add(row + 1, col + 1, val - matrix[row][col]);\n    matrix[row][col] = val;\n  }\n\n  int sumRegion(int row1, int col1, int row2, int col2) {\n    return tree.get(row2 + 1, col2 + 1) - tree.get(row1, col2 + 1) -\n           tree.get(row2 + 1, col1) + tree.get(row1, col1);\n  }\n\n private:\n  vector<vector<int>> matrix;\n  FenwickTree tree;\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/308.%20Range%20Sum%20Query%202D%20-%20Mutable",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "per-row-prefix-sums",
+      "approach": "Per-Row Prefix Sums",
+      "explanation": "### How it works\n\nEach row has its own prefix array. A point assignment changes the suffix of only that row; a rectangle query sums one prefix difference from each included row.\n\n### Steps\n\n1. Copy the matrix and build row prefixes.\n2. Convert an update to a delta and adjust that row's later prefixes.\n3. For a rectangle, add the requested column-range sum from each included row.\n\n### Complexity\n\n- Time: O(mn) construction; O(n) per update and O(m) per rectangle query.\n- Space: O(mn) for copied cells and row prefixes.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/308.%20Range%20Sum%20Query%202D%20-%20Mutable",
+      "code": {
+        "python": "class NumMatrix:\n    def __init__(self, matrix: list[list[int]]):\n        self.matrix = [row[:] for row in matrix]\n        self.prefix = []\n        for row in matrix:\n            sums = [0]\n            for value in row:\n                sums.append(sums[-1] + value)\n            self.prefix.append(sums)\n\n    def update(self, row: int, col: int, val: int) -> None:\n        delta = val - self.matrix[row][col]\n        self.matrix[row][col] = val\n        for j in range(col + 1, len(self.prefix[row])):\n            self.prefix[row][j] += delta\n\n    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:\n        return sum(self.prefix[i][col2 + 1] - self.prefix[i][col1]\n                   for i in range(row1, row2 + 1))\n"
+      }
+    }
+  ]
+}

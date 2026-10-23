@@ -7,5 +7,25 @@
     "cpp": "class DSU {\npublic:\n    vector<int> parent, size;\n\n    DSU(int n) {\n        parent.resize(n + 1);\n        size.resize(n + 1, 1);\n        for (int i = 0; i <= n; i++) {\n            parent[i] = i;\n        }\n    }\n\n    int find(int node) {\n        if (parent[node] != node) {\n            parent[node] = find(parent[node]);\n        }\n        return parent[node];\n    }\n\n    bool unionSets(int u, int v) {\n        int pu = find(u), pv = find(v);\n        if (pu == pv) return false;\n        if (size[pu] >= size[pv]) {\n            size[pu] += size[pv];\n            parent[pv] = pu;\n        } else {\n            size[pv] += size[pu];\n            parent[pu] = pv;\n        }\n        return true;\n    }\n};\n\nclass Solution {\npublic:\n    int minScore(int n, vector<vector<int>>& roads) {\n        DSU dsu(n);\n        for (auto& road : roads) {\n            dsu.unionSets(road[0], road[1]);\n        }\n\n        int res = INT_MAX;\n        int root = dsu.find(1);\n        for (auto& road : roads) {\n            if (dsu.find(road[0]) == root) {\n                res = min(res, road[2]);\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=K7-mXA0irhY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-score-of-a-path-between-two-cities.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-score-of-a-path-between-two-cities.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nThe problem asks for the minimum edge weight on any path from city `1` to city `n`, where we can revisit edges and nodes. The key realization is that since we can traverse any edge multiple times, we're essentially looking for the minimum edge weight in the entire connected component containing city `1`. If an edge is reachable from city `1`, we can always include it in our path by going there and back.\n\n### Steps\n\n1. Build an adjacency list from the edges, storing both the neighbor and the edge distance.\n2. Initialize `res` to infinity and a visited set.\n3. Run DFS starting from node `1`:\n    - Mark the current node as visited.\n    - For each neighbor, update `res` with the minimum of `res` and the edge distance.\n    - Recursively visit unvisited neighbors.\n4. Return `res` after DFS completes.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def minScore(self, n: int, roads: list[list[int]]) -> int:\n        adj = defaultdict(list)\n        for src, dst, dist in roads:\n            adj[src].append((dst, dist))\n            adj[dst].append((src, dist))\n\n        res = float(\"inf\")\n        visit = set()\n\n        def dfs(node):\n            nonlocal res\n            if node in visit:\n                return\n            visit.add(node)\n            for nei, dist in adj[node]:\n                res = min(res, dist)\n                dfs(nei)\n\n        dfs(1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-score-of-a-path-between-two-cities.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nBFS achieves the same goal as DFS by exploring all reachable nodes level by level. Since we need to find the minimum edge weight in the connected component containing node `1`, BFS works equally well. We process each node, check all its edges, and track the smallest weight seen.\n\n### Steps\n\n1. Build an adjacency list storing neighbors and distances.\n2. Initialize `res` to infinity, a visited array, and a queue starting with node `1`.\n3. While the queue is not empty:\n    - Dequeue a node.\n    - For each neighbor, update `res` with the minimum edge distance.\n    - If the neighbor hasn't been visited, mark it visited and enqueue it.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(V + E)`\n- Space complexity: `O(V + E)`\n\n> Where `V` is the number of vertices and `E` is the number of edges.",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def minScore(self, n: int, roads: list[list[int]]) -> int:\n        adj = [[] for _ in range(n + 1)]\n        for src, dst, dist in roads:\n            adj[src].append((dst, dist))\n            adj[dst].append((src, dist))\n\n        res = float(\"inf\")\n        visit = [False] * (n + 1)\n        q = deque([1])\n        visit[1] = True\n\n        while q:\n            node = q.popleft()\n            for nei, dist in adj[node]:\n                res = min(res, dist)\n                if not visit[nei]:\n                    visit[nei] = True\n                    q.append(nei)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-score-of-a-path-between-two-cities.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

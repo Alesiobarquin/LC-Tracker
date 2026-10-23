@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long maxAlternatingSum(vector<int>& nums) {\n        long long sumEven = 0, sumOdd = 0;\n\n        for (int i = nums.size() - 1; i >= 0; i--) {\n            long long tmpEven = max(nums[i] + sumOdd, sumEven);\n            long long tmpOdd = max(-nums[i] + sumEven, sumOdd);\n            sumEven = tmpEven;\n            sumOdd = tmpOdd;\n        }\n\n        return sumEven;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=4v42XOuU1XA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-alternating-subsequence-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-alternating-subsequence-sum.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nAn alternating subsequence sum adds elements at even positions and subtracts elements at odd positions. At each index, we have two choices: include the current element in our subsequence or skip it. If we include it, the sign depends on whether we are at an even or odd position in our chosen subsequence.\n\nThe recursive approach explores both choices at every index and tracks whether the next element we pick would be at an even or odd position.\n\n### Steps\n\n1. Define `dfs(i, even)` where `i` is the current index and `even` indicates if the next picked element contributes positively.\n2. Base case: if `i == n`, return `0`.\n3. If `even` is `true`, we can either:\n    - Pick `nums[i]` (adding it) and recurse with `even = false`.\n    - Skip and recurse with `even = true`.\n4. If `even` is `false`, we can either:\n    - Pick `nums[i]` (subtracting it) and recurse with `even = true`.\n    - Skip and recurse with `even = false`.\n5. Return the maximum of including or skipping.\n6. Start with `dfs(0, true)`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxAlternatingSum(self, nums: List[int]) -> int:\n        def dfs(i, even):\n            if i == len(nums):\n                return 0\n            total = nums[i] if even else -nums[i]\n            return max(total + dfs(i + 1, not even), dfs(i + 1, even))\n\n        return dfs(0, True)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-alternating-subsequence-sum.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems. The state `(i, even)` can be reached multiple times through different paths, so we can cache results to avoid redundant computation.\n\nSince there are `n` possible indices and `2` possible parity states, we have `O(n)` unique states. Memoizing these transforms the exponential time complexity into linear.\n\n### Steps\n\n1. Create a memoization table `dp[i][even]` initialized to `-1` (unvisited).\n2. Define `dfs(i, even)` with the same logic as before.\n3. Before computing, check if `dp[i][even]` is cached and return it if so.\n4. After computing the result, store it in `dp[i][even]`.\n5. Return `dfs(0, 1)` where `1` represents the even state.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maxAlternatingSum(self, nums: List[int]) -> int:\n        dp = {}\n\n        def dfs(i, even):\n            if i == len(nums):\n                return 0\n            if (i, even) in dp:\n                return dp[(i, even)]\n\n            total = nums[i] if even else -nums[i]\n            dp[(i, even)] = max(total + dfs(i + 1, not even), dfs(i + 1, even))\n            return dp[(i, even)]\n\n        return dfs(0, True)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-alternating-subsequence-sum.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findLeastNumOfUniqueInts(vector<int>& arr, int k) {\n        unordered_map<int, int> freqMap;\n        for (int num : arr) {\n            freqMap[num]++;\n        }\n\n        vector<int> freqList(arr.size() + 1, 0);\n        for (auto& [_, f] : freqMap) {\n            freqList[f]++;\n        }\n\n        int res = freqMap.size();\n        for (int f = 1; f < freqList.size(); f++) {\n            int remove = freqList[f];\n            if (k >= f * remove) {\n                k -= f * remove;\n                res -= remove;\n            } else {\n                remove = k / f;\n                res -= remove;\n                break;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/least-number-of-unique-integers-after-k-removals.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/least-number-of-unique-integers-after-k-removals.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nTo minimize the number of unique integers after removing `k` elements, we should prioritize removing integers that appear least frequently. By eliminating all occurrences of the rarest integers first, we reduce the unique count most efficiently. Sorting frequencies in ascending order lets us greedily remove elements starting from the smallest frequency.\n\n### Steps\n\n1. Count the frequency of each integer using a hash map.\n2. Extract the frequency values and sort them in ascending order.\n3. Iterate through the sorted frequencies:\n    - If `k` is large enough to remove all occurrences of this integer, subtract the frequency from `k` and decrease the unique count.\n    - Otherwise, we cannot fully remove this integer, so return the remaining unique count.\n4. If all integers can be removed, return `0`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\n\nclass Solution:\n    def findLeastNumOfUniqueInts(self, arr: List[int], k: int) -> int:\n        freq = sorted(Counter(arr).values())\n        n = len(freq)\n        for i in range(n):\n            if k >= freq[i]:\n                k -= freq[i]\n            else:\n                return n - i\n        return 0\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/least-number-of-unique-integers-after-k-removals.md",
+      "id": "sorting"
+    },
+    {
+      "approach": "Min-Heap",
+      "explanation": "### How it works\n\nA min-heap naturally gives us access to the smallest frequency first. Instead of sorting all frequencies upfront, we can repeatedly extract the minimum frequency and try to remove that integer. This approach works similarly to sorting but uses a heap data structure for extraction.\n\n### Steps\n\n1. Build a frequency map of all integers.\n2. Insert all frequency values into a min-heap.\n3. While `k > 0` and the heap is not empty:\n    - Pop the smallest frequency.\n    - If `k` can cover this frequency, subtract it from `k` and decrement the result count.\n    - Otherwise, stop (we cannot fully remove this integer).\n4. Return the remaining unique count.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import Counter\nimport heapq\n\nclass Solution:\n    def findLeastNumOfUniqueInts(self, arr: List[int], k: int) -> int:\n        freq = Counter(arr)\n        heap = list(freq.values())\n        heapq.heapify(heap)\n\n        res = len(heap)\n        while k > 0 and heap:\n            f = heapq.heappop(heap)\n            if k >= f:\n                k -= f\n                res -= 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/least-number-of-unique-integers-after-k-removals.md",
+      "id": "min-heap"
+    }
+  ]
 }

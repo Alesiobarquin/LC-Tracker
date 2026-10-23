@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool canReach(string s, int minJump, int maxJump) {\n        int n = s.size();\n        if (s[n - 1] == '1') {\n            return false;\n        }\n\n        vector<bool> dp(n, false);\n        dp[0] = true;\n        int j = 0;\n\n        for (int i = 0; i < n; i++) {\n            if (!dp[i]) {\n                continue;\n            }\n            j = max(j, i + minJump);\n            while (j < min(i + maxJump + 1, n)) {\n                if (s[j] == '0') {\n                    dp[j] = true;\n                }\n                j++;\n            }\n        }\n\n        return dp[n - 1];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=v1HpZUnQ4Yo",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-vii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-vii.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (Memoization)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFrom each position, we can jump to any position within the range `[i + minJump, i + maxJump]` if that position contains `'0'`. We use recursion with memoization to explore all valid jumps. Starting from index `0`, we try every reachable position and recursively check if we can reach the end. Memoization prevents recalculating the same positions.\n\n### Steps\n\n1. Create a memoization array initialized to `null`/unknown.\n2. Define a recursive function `dfs(i)`:\n    - If already computed, return the cached result.\n    - Mark the current position as unreachable initially.\n    - Try all positions `j` in range `[i + minJump, i + maxJump]`.\n    - If `s[j] == '0'` and `dfs(j)` returns `true`, mark current as reachable.\n3. Return the result for index `0`.\n\n### Complexity\n\n- Time complexity: `O(n * m)`\n- Space complexity: `O(n)`\n\n> Where `n` is the length of the string `s` and `m` is the given range of the jump `(maxJump - minJump + 1)`.",
+      "code": {
+        "python": "class Solution:\n    def canReach(self, s: str, minJump: int, maxJump: int) -> bool:\n        n = len(s)\n        dp = [None] * n\n        dp[n - 1] = True\n\n        def dfs(i):\n            if dp[i] is not None:\n                return dp[i]\n\n            dp[i] = False\n            for j in range(i + minJump, min(n, i + maxJump + 1)):\n                if s[j] == '0' and dfs(j):\n                    dp[i] = True\n                    break\n\n            return dp[i]\n\n        if s[-1] == '1':\n            return False\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-vii.md",
+      "id": "brute-force-memoization"
+    },
+    {
+      "approach": "Breadth First Search",
+      "explanation": "### How it works\n\nBFS naturally explores positions level by level, where each level represents positions reachable in one jump. The key optimization is tracking the farthest index we've already processed. When processing position `i`, we only need to check new positions starting from `max(i + minJump, farthest + 1)` to avoid revisiting positions already added to the queue.\n\n### Steps\n\n1. Initialize a queue with position `0` and track `farthest = 0`.\n2. While the queue is not empty:\n    - Dequeue position `i`.\n    - Compute `start = max(i + minJump, farthest + 1)`.\n    - For each `j` from `start` to `min(i + maxJump, n - 1)`:\n        - If `s[j] == '0'`, enqueue `j`. If `j` is the last index, return `true`.\n    - Update `farthest = i + maxJump`.\n3. Return `false` if the queue empties without reaching the end.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def canReach(self, s: str, minJump: int, maxJump: int) -> bool:\n        q = deque([0])\n        farthest = 0\n\n        while q:\n            i = q.popleft()\n            start = max(i + minJump, farthest + 1)\n            for j in range(start, min(i + maxJump + 1, len(s))):\n                if s[j] == \"0\":\n                    q.append(j)\n                    if j == len(s) - 1:\n                        return True\n            farthest = i + maxJump\n\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/jump-game-vii.md",
+      "id": "breadth-first-search"
+    }
+  ]
 }

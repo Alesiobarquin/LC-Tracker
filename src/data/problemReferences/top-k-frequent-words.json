@@ -1,0 +1,28 @@
+{
+  "problemId": "top-k-frequent-words",
+  "approach": "Frequency Buckets with Lexical Ties",
+  "explanation": "### How it works\n\nGroup distinct words by occurrence count. Visit frequency buckets from largest to smallest and sort words inside each bucket lexicographically to resolve ties.\n\n### Steps\n\n1. Count word frequencies.\n2. Place each distinct word in its frequency bucket.\n3. Visit buckets in decreasing frequency.\n4. Append lexically sorted words until k are collected.\n\n### Complexity\n\n- Time: O(n + u log u × L) conservative bound for u distinct words of maximum length L.\n- Space: O(n + u × L) buckets and count keys.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def topKFrequent(self, words: list[str], k: int) -> list[str]:\n    ans = []\n    bucket = [[] for _ in range(len(words) + 1)]\n\n    for word, freq in collections.Counter(words).items():\n      bucket[freq].append(word)\n\n    for b in reversed(bucket):\n      for word in sorted(b):\n        ans.append(word)\n        if len(ans) == k:\n          return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> topKFrequent(vector<string>& words, int k) {\n    const int n = words.size();\n    vector<string> ans;\n    vector<vector<string>> bucket(n + 1);\n    unordered_map<string, int> count;\n\n    for (const string& word : words)\n      ++count[word];\n\n    for (const auto& [word, freq] : count)\n      bucket[freq].push_back(word);\n\n    for (int freq = n; freq > 0; --freq) {\n      ranges::sort(bucket[freq]);\n      for (const string& word : bucket[freq]) {\n        ans.push_back(word);\n        if (ans.size() == k)\n          return ans;\n      }\n    }\n\n    throw;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/692.%20Top%20K%20Frequent%20Words",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "size-k-heap-with-reversed-lexical-ties",
+      "approach": "Size-k Heap with Reversed Lexical Ties",
+      "explanation": "### How it works\n\nKeep the best k words in a min-heap whose root is the worst retained candidate: lowest frequency, or lexicographically largest among ties. Reverse the removal order to obtain the requested ranking.\n\n### Steps\n\n1. Count frequencies.\n2. Push each word/frequency pair using the custom comparator.\n3. Pop the worst candidate whenever the heap grows beyond k.\n4. Pop remaining words and reverse the result.\n\n### Complexity\n\n- Time: O(n + u log(k + 1) × L).\n- Space: O(u × L + k) for counts and heap.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/692.%20Top%20K%20Frequent%20Words/692-2.py",
+      "code": {
+        "python": "import collections\nimport heapq\n\nfrom dataclasses import dataclass\n\n\n@dataclass(frozen=True)\nclass T:\n  word: str\n  freq: int\n\n  def __lt__(self, other):\n    if self.freq == other.freq:\n      return self.word > other.word\n    return self.freq < other.freq\n\n\nclass Solution:\n  def topKFrequent(self, words: list[str], k: int) -> list[str]:\n    ans = []\n    heap = []\n\n    for word, freq in collections.Counter(words).items():\n      heapq.heappush(heap, T(word, freq))\n      if len(heap) > k:\n        heapq.heappop(heap)\n\n    while heap:\n      ans.append(heapq.heappop(heap).word)\n\n    return ans[::-1]\n"
+      }
+    }
+  ]
+}

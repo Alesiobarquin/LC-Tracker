@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string removeStars(string s) {\n        int l = 0;\n\n        for (int r = 0; r < s.size(); r++) {\n            if (s[r] == '*') {\n                l--;\n            } else {\n                s[l] = s[r];\n                l++;\n            }\n        }\n        return s.substr(0, l);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=pRyFZIaKegA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/removing-stars-from-a-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/removing-stars-from-a-string.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nEach star removes the closest non-star character to its left. The simplest approach is to simulate this process directly: scan for a star, remove it along with the character before it, then repeat until no more removals are possible. This is straightforward but inefficient because each removal requires rebuilding the string. In the loop, we iterate with index `i` to find each star.\n\n### Steps\n\n1. Loop until no changes occur:\n    - Scan the string from left to right using index `i`.\n    - When a star is found at `s[i]` with a non-star character before it, remove both characters.\n    - Restart the scan.\n2. Return the final string.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeStars(self, s: str) -> str:\n        while True:\n            flag = False\n            for i in range(1, len(s)):\n                if s[i] == '*' and s[i - 1] != '*':\n                    s = s[:i - 1] + s[i + 1:]\n                    flag = True\n                    break\n            if not flag:\n                break\n        return s\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/removing-stars-from-a-string.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nA star removes the most recently added non-star character, which is exactly what a stack does with pop operations. As we scan the string with index `i`, we push non-star characters `c` onto the `stack`. When we encounter a star, we pop the top element. The remaining `stack` contents form the answer.\n\n### Steps\n\n1. Initialize an empty `stack`.\n2. For each character `c` in the string:\n    - If it is a star and the `stack` is not empty, pop from the `stack`.\n    - Otherwise, push `c` onto the `stack`.\n3. Join the `stack` contents into a string and return it.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def removeStars(self, s: str) -> str:\n        stack = []\n        for c in s:\n            if c == \"*\":\n                stack and stack.pop()\n            else:\n                stack.append(c)\n        return \"\".join(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/removing-stars-from-a-string.md",
+      "id": "stack"
+    }
+  ]
 }

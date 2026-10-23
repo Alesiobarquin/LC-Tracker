@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long hash(int a, int b) {\n        long long mask = a;\n        mask |= ((long long)b << 31);\n        return mask;\n    }\n\n    long long interchangeableRectangles(vector<vector<int>>& rectangles) {\n        long long res = 0;\n        unordered_map<long long, int> count;\n        for (const auto& rect : rectangles) {\n            int gcd = std::gcd(rect[0], rect[1]);\n            long long key = hash(rect[0] / gcd, rect[1] / gcd);\n            res += count[key];\n            count[key]++;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=lEQ8ZlLOuyQ",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-pairs-of-interchangeable-rectangles.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-pairs-of-interchangeable-rectangles.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTwo rectangles are interchangeable if they have the same aspect ratio (width divided by height). The simplest approach is to compare every pair of rectangles and check if their ratios match. For each pair where the ratios are equal, we count it as an interchangeable pair.\n\n### Steps\n\n1. Initialize a counter `res` to `0`.\n2. For each rectangle `i` from `1` to `n-1`:\n    - For each rectangle `j` from `0` to `i-1`:\n        - If `rectangles[i][0] / rectangles[i][1]` equals `rectangles[j][0] / rectangles[j][1]`, increment `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def interchangeableRectangles(self, rectangles: List[List[int]]) -> int:\n        res = 0\n        for i in range(1, len(rectangles)):\n            for j in range(i):\n                if rectangles[i][0] / rectangles[i][1] == rectangles[j][0] / rectangles[j][1]:\n                    res += 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-pairs-of-interchangeable-rectangles.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map (Two Pass)",
+      "explanation": "### How it works\n\nInstead of comparing every pair, we can group rectangles by their aspect ratio. Rectangles with the same ratio form a group, and any two rectangles in the same group are interchangeable. If a group has `c` rectangles, the number of pairs is `c * (c-1) / 2` (choosing 2 from `c`). We use a hash map to count how many rectangles share each ratio.\n\n### Steps\n\n1. Create a hash map `count` to store the frequency of each aspect ratio.\n2. First pass: for each rectangle, compute its ratio and increment the count in the map.\n3. Second pass: for each ratio with count `c > 1`, add `c * (c-1) / 2` to the result.\n4. Return the total count of interchangeable pairs.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def interchangeableRectangles(self, rectangles: List[List[int]]) -> int:\n        count = {}\n        for w, h in rectangles:\n            count[w / h] = 1 + count.get(w / h, 0)\n\n        res = 0\n        for c in count.values():\n            if c > 1:\n                res += (c * (c - 1)) // 2\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-pairs-of-interchangeable-rectangles.md",
+      "id": "hash-map-two-pass"
+    }
+  ]
 }

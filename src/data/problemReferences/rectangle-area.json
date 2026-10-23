@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/223.%20Rectangle%20Area",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "coordinate-compression",
+      "approach": "Coordinate Compression",
+      "explanation": "### How it works\n\nThe four x boundaries and four y boundaries partition the two rectangles into a constant number of small cells. Each cell lies entirely inside or outside each rectangle. Count a cell once if either rectangle covers it.\n\n### Steps\n\n1. Sort the distinct x and y boundaries of both rectangles.\n2. Visit each cell between adjacent boundaries.\n3. Check whether either rectangle covers the entire cell.\n4. Sum the covered cell areas once.\n\n### Complexity\n\n- Time: `O(1)` for two rectangles: at most nine compressed cells.\n- Space: `O(1)` for the boundary lists.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/223.%20Rectangle%20Area",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def computeArea(self, ax1: int, ay1: int, ax2: int, ay2: int,\n                    bx1: int, by1: int, bx2: int, by2: int) -> int:\n        xs = sorted({ax1, ax2, bx1, bx2})\n        ys = sorted({ay1, ay2, by1, by2})\n        rectangles = [(ax1, ay1, ax2, ay2), (bx1, by1, bx2, by2)]\n        total = 0\n        for left, right in zip(xs, xs[1:]):\n            for bottom, top in zip(ys, ys[1:]):\n                if any(x1 <= left and right <= x2 and y1 <= bottom and top <= y2\n                       for x1, y1, x2, y2 in rectangles):\n                    total += (right - left) * (top - bottom)\n        return total\n"
+      }
+    }
+  ]
 }

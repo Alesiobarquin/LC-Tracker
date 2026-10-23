@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {\n        int l = 0, r = 0;\n        for (int& num : pushed) {\n            pushed[l++] = num;\n            while (l > 0 && pushed[l - 1] == popped[r]) {\n                r++;\n                l--;\n            }\n        }\n        return l == 0;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=mzua0r94kb8",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-stack-sequences.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-stack-sequences.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nWe can simulate the actual push and pop operations on a stack to verify if the sequences are valid. The key insight is that whenever we push an element, we should immediately try to pop as many elements as possible that match the expected pop sequence. If the simulation completes with an empty stack, the sequences are valid.\n\n### Steps\n\n1. Initialize an empty stack and a pointer `i` to track position in the `popped` array.\n2. Iterate through each element in the `pushed` array and push it onto the stack.\n3. After each push, check if the stack top matches the current element in `popped` (at index `i`).\n4. While there is a match, pop from the stack and increment the pointer `i`.\n5. Continue until no more matches are found or the stack is empty.\n6. After processing all elements, return `true` if the stack is empty, indicating all elements were successfully popped in the correct order.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:\n        i = 0\n        stack = []\n        for n in pushed:\n            stack.append(n)\n            while i < len(popped) and stack and popped[i] == stack[-1]:\n                stack.pop()\n                i += 1\n        return not stack\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/validate-stack-sequences.md",
+      "id": "stack"
+    }
+  ]
 }

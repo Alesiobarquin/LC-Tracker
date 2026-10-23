@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/542.%2001%20Matrix",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "two-pass-distance-dp",
+      "approach": "Two-Pass Distance DP",
+      "explanation": "### How it works\n\nEvery nonzero cell is one step beyond a neighboring distance. A forward pass propagates information from above and left; a backward pass adds information from below and right.\n\n### Steps\n\n1. Initialize zero cells to zero and other cells to infinity.\n2. Scan top-left to bottom-right using top and left neighbors.\n3. Scan in reverse using bottom and right neighbors.\n4. Return the distance matrix.\n\n### Complexity\n\n- Time: `O(r × c)` time.\n- Space: `O(r × c)` for the returned matrix; `O(1)` other workspace.\n\n### Things to watch for\n\n- The problem guarantees at least one zero.\n- Both passes are needed for sources on different sides.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/542.%2001%20Matrix",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def updateMatrix(self, mat: list[list[int]]) -> list[list[int]]:\n        rows, cols = len(mat), len(mat[0])\n        distance = [[float('inf')] * cols for _ in range(rows)]\n        for r in range(rows):\n            for c in range(cols):\n                if mat[r][c] == 0:\n                    distance[r][c] = 0\n                else:\n                    if r:\n                        distance[r][c] = min(distance[r][c], distance[r - 1][c] + 1)\n                    if c:\n                        distance[r][c] = min(distance[r][c], distance[r][c - 1] + 1)\n        for r in range(rows - 1, -1, -1):\n            for c in range(cols - 1, -1, -1):\n                if r + 1 < rows:\n                    distance[r][c] = min(distance[r][c], distance[r + 1][c] + 1)\n                if c + 1 < cols:\n                    distance[r][c] = min(distance[r][c], distance[r][c + 1] + 1)\n        return distance\n"
+      }
+    }
+  ]
 }

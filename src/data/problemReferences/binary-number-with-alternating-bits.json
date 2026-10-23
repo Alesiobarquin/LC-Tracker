@@ -1,0 +1,29 @@
+{
+  "problemId": "binary-number-with-alternating-bits",
+  "approach": "Two-Bit-Shift Identity",
+  "explanation": "### How it works\n\nFor an alternating binary pattern, shifting by two aligns every repeated bit except the leading one. XOR therefore leaves exactly one set bit, recognized by a & (a − 1) = 0.\n\n### Steps\n\n1. XOR n with n shifted right by two.\n2. Test whether the result has exactly one set bit.\n3. Return that test for the positive input.\n\n### Complexity\n\n- Time: O(1) under the 32-bit input bound.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def hasAlternatingBits(self, n: int) -> bool:\n    #            n = 0b010101\n    #       n >> 2 = 0b000101\n    # n ^ (n >> 2) = 0b010000 = a\n    #        a - 1 = 0b001111\n    #  a & (a - 1) = 0\n    a = n ^ (n >> 2)\n    return (a & (a - 1)) == 0\n",
+    "cpp": "class Solution {\n public:\n  bool hasAlternatingBits(int n) {\n    //            n = 0b010101\n    //       n >> 2 = 0b000101\n    // n ^ (n >> 2) = 0b010000 = a\n    //        a - 1 = 0b001111\n    //  a & (a - 1) = 0\n    const int a = n ^ (n >> 2);\n    return (a & (a - 1)) == 0;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/693.%20Binary%20Number%20with%20Alternating%20Bits",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "compare-adjacent-binary-digits",
+      "approach": "Compare Adjacent Binary Digits",
+      "explanation": "### How it works\n\nWrite the positive number in binary and ensure every adjacent pair differs.\n\n### Steps\n\n1. Convert n to binary without the prefix.\n2. Compare neighboring characters.\n3. Reject any equal pair.\n\n### Complexity\n\n- Time: O(b) for b binary digits.\n- Space: O(b) binary text.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/693.%20Binary%20Number%20with%20Alternating%20Bits",
+      "code": {
+        "python": "class Solution:\n    def hasAlternatingBits(self, n: int) -> bool:\n        bits = bin(n)[2:]\n        return all(a != b for a, b in zip(bits, bits[1:]))\n"
+      }
+    }
+  ]
+}

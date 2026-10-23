@@ -1,0 +1,29 @@
+{
+  "problemId": "convex-polygon",
+  "approach": "Consistent Consecutive Cross Products",
+  "explanation": "### How it works\n\nFor the guaranteed simple polygon, convexity means every noncollinear turn has the same orientation. Cross products reveal left and right turns without floating-point slopes.\n\n### Steps\n\n1. Visit each cyclic triple of consecutive vertices.\n2. Compute the cross product of its two edges.\n3. Ignore zero cross products.\n4. Reject any nonzero sign change.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.\n\n### Things to watch for\n\n- The input vertices form a simple polygon in boundary order.\n- Collinear boundary vertices do not force rejection.",
+  "code": {
+    "python": "class Solution:\n  def isConvex(self, points: list[list[int]]) -> bool:\n    def getCross(p: list[int], q: list[int], r: list[int]):\n      \"\"\"Returns pq x qr.\"\"\"\n      return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])\n\n    sign = 0\n    for i in range(len(points)):\n      cross = getCross(points[i - 2], points[i - 1], points[i])\n      if cross == 0:  # p, q, r are collinear.\n        continue\n      if sign == 0:  # Find the first cross that's not 0.\n        sign = cross\n      elif cross * sign < 0:\n        return False\n\n    return True\n",
+    "cpp": "class Solution {\n public:\n  bool isConvex(vector<vector<int>>& points) {\n    const int n = points.size();\n    long sign = 0;\n\n    for (int i = 0; i < points.size(); ++i) {\n      const int cross =\n          getCross(points[i], points[(i + 1) % n], points[(i + 2) % n]);\n      if (cross == 0)  // p, q, r are collinear.\n        continue;\n      if (sign == 0)  // Find the first cross that's not 0.\n        sign = cross;\n      else if (cross * sign < 0)\n        return false;\n    }\n\n    return true;\n  }\n\n private:\n  // Returns pq x qr.\n  int getCross(const vector<int>& p, const vector<int>& q,\n               const vector<int>& r) {\n    return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/469.%20Convex%20Polygon",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "every-edge-supports-one-half-plane",
+      "approach": "Every Edge Supports One Half-Plane",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nA convex polygon lies entirely on one side of each of its directed edges. Check all other vertices against every edge and reject an edge seeing points on both sides.\n\n### Steps\n\n1. Choose each cyclic edge.\n2. Compute cross products from that edge to every vertex.\n3. Ignore collinear points.\n4. Reject an edge with both positive and negative cross products.\n\n### Complexity\n\n- Time: O(n²).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/469.%20Convex%20Polygon",
+      "code": {
+        "python": "class Solution:\n    def isConvex(self, points: list[list[int]]) -> bool:\n        for i, (x, y) in enumerate(points):\n            a, b = points[(i + 1) % len(points)]\n            sign = 0\n            for c, d in points:\n                cross = (a - x) * (d - y) - (b - y) * (c - x)\n                if cross:\n                    current = 1 if cross > 0 else -1\n                    if sign and sign != current:\n                        return False\n                    sign = current\n        return True\n"
+      }
+    }
+  ]
+}

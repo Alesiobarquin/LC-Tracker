@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> prefix;\n\n    Solution(vector<int>& w) {\n        prefix.push_back(0);\n        for (int wgt : w) {\n            prefix.push_back(prefix.back() + wgt);\n        }\n    }\n\n    int pickIndex() {\n        double target = prefix.back() * ((double) rand() / RAND_MAX);\n        int l = 1, r = prefix.size();\n        while (l < r) {\n            int mid = (l + r) >> 1;\n            if (prefix[mid] <= target) {\n                l = mid + 1;\n            } else {\n                r = mid;\n            }\n        }\n        return l - 1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/random-pick-with-weight.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/random-pick-with-weight.md",
+  "alternatives": [
+    {
+      "approach": "Prefix Sum + Linear Search",
+      "explanation": "### How it works\n\nTo pick an index with probability proportional to its weight, imagine laying all weights on a number line. A weight of `3` takes up `3` units, a weight of `1` takes up `1` unit, and so on. We pick a random point on this line, then find which weight's segment contains that point. The larger the weight, the more likely its segment gets hit.\n\n### Steps\n\n1. In the constructor, store the weights and compute their total sum.\n2. For `pickIndex()`:\n    - Generate a random number between `0` and the total sum.\n    - Iterate through weights, accumulating a running sum.\n    - Return the first index where the running sum exceeds the random target.\n3. This linear scan takes `O(n)` per pick.\n\n### Complexity\n\n- Time complexity: `O(n)` for initializing and `O(n)` for each `pickIndex()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nimport random\n\nclass Solution:\n\n    def __init__(self, w: List[int]):\n        self.w = w\n        self.total = sum(w)\n\n    def pickIndex(self) -> int:\n        target = self.total * random.random()\n        curSum = 0\n        for i in range(len(self.w)):\n            curSum += self.w[i]\n            if curSum > target:\n                return i\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/random-pick-with-weight.md",
+      "id": "prefix-sum-linear-search"
+    }
+  ]
 }

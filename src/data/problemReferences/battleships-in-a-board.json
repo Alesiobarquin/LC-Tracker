@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/419.%20Battleships%20in%20a%20Board",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "flood-fill-ship-components",
+      "approach": "Flood-Fill Ship Components",
+      "explanation": "### How it works\n\nTreat connected ship cells as components. Start a traversal from each unseen ship cell and count one ship per traversal. The visited set preserves the board.\n\n### Steps\n\n1. Scan all board cells.\n2. Start a component traversal at each unseen X.\n3. Visit orthogonally adjacent X cells.\n4. Count the number of traversals.\n\n### Complexity\n\n- Time: `O(r × c)` time.\n- Space: `O(r × c)` for visited cells and the stack.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/419.%20Battleships%20in%20a%20Board",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def countBattleships(self, board: list[list[str]]) -> int:\n        seen, count = set(), 0\n        for r in range(len(board)):\n            for c in range(len(board[0])):\n                if board[r][c] != 'X' or (r, c) in seen:\n                    continue\n                count += 1\n                stack = [(r, c)]\n                seen.add((r, c))\n                while stack:\n                    x, y = stack.pop()\n                    for a, b in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:\n                        if 0 <= a < len(board) and 0 <= b < len(board[0]) and board[a][b] == 'X' and (a, b) not in seen:\n                            seen.add((a, b))\n                            stack.append((a, b))\n        return count\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<int> replaceElements(vector<int>& arr) {\n        int n = arr.size();\n        vector<int> ans(n);\n        int rightMax = -1;\n        for (int i = n - 1; i >= 0; --i) {\n            ans[i] = rightMax;\n            rightMax = max(rightMax, arr[i]);\n        }\n        return ans;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ZHjKhUjcsaU",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/replace-elements-with-greatest-element-on-right-side.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/replace-elements-with-greatest-element-on-right-side.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each element at index `i`, we need to find the maximum value among all elements to its right. The most straightforward approach is to scan every element to the right for each position using index `j`. The last element has no elements to its right, so it becomes `-1`.\n\n### Steps\n\n1. Create a result array `ans` of the same size as the input.\n2. For each index `i`, initialize `rightMax` to `-1`.\n3. Iterate through all indices `j` from `i + 1` to the end, updating `rightMax` with the maximum value found.\n4. Store `rightMax` in `ans` at position `i`.\n5. Return the `ans` array.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`\n\n> The output array is not counted towards space complexity, as the [standard convention](https://en.wikipedia.org/wiki/DSPACE) measures only auxiliary working space.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def replaceElements(self, arr: List[int]) -> List[int]:\n        n = len(arr)\n        ans = [0] * n\n        for i in range(n):\n            rightMax = -1\n            for j in range(i + 1, n):\n                rightMax = max(rightMax, arr[j])\n            ans[i] = rightMax\n        return ans\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/replace-elements-with-greatest-element-on-right-side.md",
+      "id": "brute-force"
+    }
+  ]
 }

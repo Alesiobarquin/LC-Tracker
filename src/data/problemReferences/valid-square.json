@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/593.%20Valid%20Square",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "try-cyclic-vertex-orders",
+      "approach": "Try Cyclic Vertex Orders",
+      "explanation": "### How it works\n\nTry each ordering as a possible walk around the square. Four equal nonzero sides and two diagonals with twice the squared side length characterize a square in that order.\n\n### Steps\n\n1. Enumerate orderings of the four points.\n2. Check equal positive squared side lengths.\n3. Check both squared diagonals equal twice a squared side.\n4. Accept any ordering meeting those conditions.\n\n### Complexity\n\n- Time: `O(1)` for 24 orderings of four points.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/593.%20Valid%20Square",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from itertools import permutations\n\nclass Solution:\n    def validSquare(self, p1: list[int], p2: list[int], p3: list[int], p4: list[int]) -> bool:\n        def distance(a, b):\n            return (a[0] - b[0])**2 + (a[1] - b[1])**2\n        for a, b, c, d in permutations([p1, p2, p3, p4]):\n            side = distance(a, b)\n            if side > 0 and distance(b, c) == distance(c, d) == distance(d, a) == side and distance(a, c) == distance(b, d) == 2 * side:\n                return True\n        return False\n"
+      }
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "all-paths-from-source-to-target",
+  "approach": "Depth-First Path Enumeration",
+  "explanation": "### How it works\n\nThe graph is a DAG, so following every outgoing edge from the source enumerates all source-to-target paths without a cycle guard. Store a copied path at each branch.\n\n### Steps\n\n1. Start from node zero with path [0].\n2. Record the path on reaching the final node.\n3. Otherwise recurse on each outgoing neighbor with that neighbor appended.\n\n### Complexity\n\n- Time: O(n × 2^n) loose upper bound including copied and returned paths.\n- Space: O(n²) live copied paths in recursion, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def allPathsSourceTarget(self, graph: list[list[int]]) -> list[list[int]]:\n    ans = []\n\n    def dfs(u: int, path: list[int]) -> None:\n      if u == len(graph) - 1:\n        ans.append(path)\n        return\n\n      for v in graph[u]:\n        dfs(v, path + [v])\n\n    dfs(0, [0])\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {\n    vector<vector<int>> ans;\n    dfs(graph, 0, {0}, ans);\n    return ans;\n  }\n\n private:\n  void dfs(const vector<vector<int>>& graph, int u, vector<int>&& path,\n           vector<vector<int>>& ans) {\n    if (u == graph.size() - 1) {\n      ans.push_back(path);\n      return;\n    }\n\n    for (const int v : graph[u]) {\n      path.push_back(v);\n      dfs(graph, v, std::move(path), ans);\n      path.pop_back();\n    }\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/797.%20All%20Paths%20From%20Source%20to%20Target",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "breadth-first-partial-paths",
+      "approach": "Breadth-First Partial Paths",
+      "explanation": "### How it works\n\nUse a queue of unfinished paths. Expand the last node of each path, recording complete target paths and enqueuing the rest.\n\n### Steps\n\n1. Enqueue the initial source path.\n2. Pop a partial path.\n3. Record it if its last node is the target.\n4. Otherwise append each outgoing neighbor in a copied path.\n\n### Complexity\n\n- Time: O(n × 2^n) loose upper bound.\n- Space: O(n × 2^n) queued and returned path storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/797.%20All%20Paths%20From%20Source%20to%20Target",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def allPathsSourceTarget(self, graph: list[list[int]]) -> list[list[int]]:\n        queue, result = deque([[0]]), []\n        while queue:\n            path = queue.popleft()\n            if path[-1] == len(graph) - 1:\n                result.append(path)\n            else:\n                for neighbor in graph[path[-1]]:\n                    queue.append(path + [neighbor])\n        return result\n"
+      }
+    }
+  ]
+}

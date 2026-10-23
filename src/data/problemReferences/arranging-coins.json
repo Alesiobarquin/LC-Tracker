@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int arrangeCoins(int n) {\n        return (int)(sqrt(2.0 * n + 0.25) - 0.5);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=5rHz_6s2Buw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/arranging-coins.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/arranging-coins.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe are building a staircase where row 1 needs 1 coin, row 2 needs 2 coins, and so on. The question is: how many complete rows can we build with `n` coins?\n\nThe simplest approach is to simulate the process. Keep adding rows one by one, subtracting the required coins from `n` until we cannot complete another row.\n\n### Steps\n\n1. Initialize `row = 0`.\n2. While we have enough coins for the next row (`n > row`):\n    - Increment `row`.\n    - Subtract `row` coins from `n`.\n3. Return `row` as the number of complete rows.\n\n### Complexity\n\n- Time complexity: `O(sqrt {n})`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def arrangeCoins(self, n: int) -> int:\n        row = 0\n        while n - row > 0:\n            row += 1\n            n -= row\n        return row\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/arranging-coins.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nBuilding rows one by one is slow for large `n`. Instead, we can use the formula for the sum of first `k` integers: `k * (k + 1) / 2`. If this sum is at most `n`, we can build `k` complete rows.\n\nThis creates a monotonic condition perfect for binary search. We search for the largest `k` such that `k * (k + 1) / 2 <= n`.\n\n### Steps\n\n1. Set search bounds: `l = 1` and `r = n`.\n2. While `l <= r`:\n    - Compute `mid` and calculate coins needed for `mid` rows.\n    - If coins needed exceeds `n`, search the left half.\n    - Otherwise, update the result and search the right half.\n3. Return the maximum valid `k`.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def arrangeCoins(self, n: int) -> int:\n        l, r = 1, n\n        res = 0\n\n        while l <= r:\n            mid = (l + r) // 2\n            coins = (mid * (mid + 1)) // 2\n            if coins > n:\n                r = mid - 1\n            else:\n                l = mid + 1\n                res = max(res, mid)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/arranging-coins.md",
+      "id": "binary-search"
+    }
+  ]
 }

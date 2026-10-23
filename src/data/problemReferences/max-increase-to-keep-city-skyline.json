@@ -1,0 +1,29 @@
+{
+  "problemId": "max-increase-to-keep-city-skyline",
+  "approach": "Precomputed Row and Column Skylines",
+  "explanation": "### How it works\n\nA building can rise to the smaller of its row maximum and column maximum. Raising it to that cap preserves both skyline views, and independent cell increases can be summed.\n\n### Steps\n\n1. Compute every row maximum.\n2. Compute every column maximum.\n3. For each cell, find the smaller skyline bound.\n4. Sum that cap minus the current height.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(m + n) skyline arrays.",
+  "code": {
+    "python": "class Solution:\n  def maxIncreaseKeepingSkyline(self, grid: list[list[int]]) -> int:\n    rowMax = list(map(max, grid))\n    colMax = list(map(max, zip(*grid)))\n    return sum(min(i, j) for i in rowMax for j in colMax) - sum(map(sum, grid))\n",
+    "cpp": "class Solution {\n public:\n  int maxIncreaseKeepingSkyline(vector<vector<int>>& grid) {\n    const int n = grid.size();\n    int ans = 0;\n    vector<int> rowMax(n);\n    vector<int> colMax(n);\n\n    for (int i = 0; i < n; ++i)\n      for (int j = 0; j < n; ++j) {\n        rowMax[i] = max(rowMax[i], grid[i][j]);\n        colMax[j] = max(colMax[j], grid[i][j]);\n      }\n\n    for (int i = 0; i < n; ++i)\n      for (int j = 0; j < n; ++j)\n        ans += min(rowMax[i], colMax[j]) - grid[i][j];\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/807.%20Max%20Increase%20to%20Keep%20City%20Skyline",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "recompute-each-cell-s-skyline-bounds",
+      "approach": "Recompute Each Cell's Skyline Bounds",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nApply the same per-cell cap directly by rescanning its row and column. This makes the redundant work removed by precomputation visible.\n\n### Steps\n\n1. Visit each cell.\n2. Scan its row and column for their maxima.\n3. Subtract the cell height from the smaller maximum.\n4. Add all independent increases.\n\n### Complexity\n\n- Time: O(mn × (m + n)).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/807.%20Max%20Increase%20to%20Keep%20City%20Skyline",
+      "code": {
+        "python": "class Solution:\n    def maxIncreaseKeepingSkyline(self, grid: list[list[int]]) -> int:\n        total = 0\n        for row in range(len(grid)):\n            for col in range(len(grid[0])):\n                row_max = max(grid[row])\n                col_max = max(grid[r][col] for r in range(len(grid)))\n                total += min(row_max, col_max) - grid[row][col]\n        return total\n"
+      }
+    }
+  ]
+}

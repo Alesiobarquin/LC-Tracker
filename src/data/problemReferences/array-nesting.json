@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/565.%20Array%20Nesting",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "independent-cycle-walks",
+      "approach": "Independent Cycle Walks",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nWalk the permutation from every starting position with a fresh visited set. This recomputes cycles and gives a baseline for globally marking them once.\n\n### Steps\n\n1. Start a local set for each index.\n2. Follow array values as next indices until a repeat.\n3. Keep the largest set size.\n\n### Complexity\n\n- Time: `O(n²)` in the worst case.\n- Space: `O(n)` for a local cycle set.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/565.%20Array%20Nesting",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def arrayNesting(self, nums: list[int]) -> int:\n        best = 0\n        for start in range(len(nums)):\n            seen, current = set(), start\n            while current not in seen:\n                seen.add(current)\n                current = nums[current]\n            best = max(best, len(seen))\n        return best\n"
+      }
+    }
+  ]
 }

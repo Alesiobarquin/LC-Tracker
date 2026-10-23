@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/475.%20Heaters",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "binary-search-each-house",
+      "approach": "Binary Search Each House",
+      "explanation": "### How it works\n\nA house's closest heater is one of the two heater positions surrounding it in sorted order. Binary-search those neighbors independently for each house and take the largest required distance.\n\n### Steps\n\n1. Sort heater positions.\n2. Find each house's insertion point.\n3. Measure distances to its existing neighbors.\n4. Return the largest nearest-heater distance.\n\n### Complexity\n\n- Time: `O(m log m + n log m)` for n houses and m heaters.\n- Space: `O(m)` worst-case Python sorting workspace.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/475.%20Heaters",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from bisect import bisect_left\n\nclass Solution:\n    def findRadius(self, houses: list[int], heaters: list[int]) -> int:\n        heaters.sort()\n        radius = 0\n        for house in houses:\n            i = bisect_left(heaters, house)\n            distance = float('inf')\n            if i < len(heaters):\n                distance = heaters[i] - house\n            if i:\n                distance = min(distance, house - heaters[i - 1])\n            radius = max(radius, distance)\n        return radius\n"
+      }
+    }
+  ]
 }

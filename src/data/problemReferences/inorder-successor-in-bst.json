@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/285.%20Inorder%20Successor%20in%20BST",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "explicit-inorder-traversal",
+      "approach": "Explicit Inorder Traversal",
+      "explanation": "### How it works\n\nThe successor is the node immediately after p in inorder traversal. An explicit stack visits nodes in sorted order and can identify p by object identity.\n\n### Steps\n\n1. Push the left spine of the tree.\n2. Pop nodes in inorder order, pushing each right subtree's left spine.\n3. After visiting p, return the very next node.\n4. Return null when p is the final node.\n\n### Complexity\n\n- Time: `O(n)` in the worst case.\n- Space: `O(h)` for the stack.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/285.%20Inorder%20Successor%20in%20BST",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def inorderSuccessor(self, root: TreeNode, p: TreeNode) -> Optional[TreeNode]:\n        stack, found = [], False\n        while root or stack:\n            while root:\n                stack.append(root)\n                root = root.left\n            root = stack.pop()\n            if found:\n                return root\n            found = root is p\n            root = root.right\n        return None\n"
+      }
+    }
+  ]
 }

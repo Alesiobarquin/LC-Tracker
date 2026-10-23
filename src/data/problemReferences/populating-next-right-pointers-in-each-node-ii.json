@@ -1,0 +1,29 @@
+{
+  "problemId": "populating-next-right-pointers-in-each-node-ii",
+  "approach": "Link the Next Level In Place",
+  "explanation": "### How it works\n\nOnce a level is connected, its next pointers provide a traversal without a queue. Append its children to a temporary dummy-headed chain, then move down to that chain.\n\n### Steps\n\n1. Start at the root level.\n2. Follow existing next pointers and append each left then right child to the next-level chain.\n3. Move to the dummy node's first child.\n4. Repeat until no children remain.\n\n### Complexity\n\n- Time: O(n) for n nodes.\n- Space: O(1) auxiliary space.\n\n### Things to watch for\n\n- The input next pointers initially contain null.\n- Skip absent children without creating gaps in the chain.",
+  "code": {
+    "python": "class Solution:\n  def connect(self, root: 'Node') -> 'Node':\n    node = root  # the node that is above the current needling\n\n    while node:\n      dummy = Node(0)  # a dummy node before needling\n      # Needle the children of the node.\n      needle = dummy\n      while node:\n        if node.left:  # Needle the left child.\n          needle.next = node.left\n          needle = needle.next\n        if node.right:  # Needle the right child.\n          needle.next = node.right\n          needle = needle.next\n        node = node.next\n      node = dummy.next  # Move the node to the next level.\n\n    return root\n",
+    "cpp": "class Solution {\n public:\n  Node* connect(Node* root) {\n    Node* node = root;  // the node that is above the current needling\n\n    while (node != nullptr) {\n      Node dummy(0);  // the dummy node before needling\n      // Needle the children of the node.\n      for (Node* needle = &dummy; node; node = node->next) {\n        if (node->left != nullptr) {  // Needle the left child.\n          needle->next = node->left;\n          needle = needle->next;\n        }\n        if (node->right != nullptr) {  // Needle the right child.\n          needle->next = node->right;\n          needle = needle->next;\n        }\n      }\n      node = dummy.next;  // Move the node to the next level.\n    }\n\n    return root;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/117.%20Populating%20Next%20Right%20Pointers%20in%20Each%20Node%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "breadth-first-queue",
+      "approach": "Breadth-First Queue",
+      "explanation": "### How it works\n\nAll nodes currently in the queue belong to one level. Link them in queue order and enqueue their children for the next level.\n\n### Steps\n\n1. Enqueue the root when present.\n2. Process exactly the current queue length.\n3. Link each node to its predecessor and enqueue existing children.\n4. Terminate the last next pointer on every level.\n\n### Complexity\n\n- Time: O(n) for n nodes.\n- Space: O(w) for maximum level width w.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/117.%20Populating%20Next%20Right%20Pointers%20in%20Each%20Node%20II",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def connect(self, root: 'Node') -> 'Node':\n        queue = deque([root] if root else [])\n        while queue:\n            previous = None\n            for _ in range(len(queue)):\n                node = queue.popleft()\n                if previous:\n                    previous.next = node\n                previous = node\n                if node.left:\n                    queue.append(node.left)\n                if node.right:\n                    queue.append(node.right)\n            previous.next = None\n        return root\n"
+      }
+    }
+  ]
+}

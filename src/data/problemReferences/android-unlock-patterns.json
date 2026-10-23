@@ -1,0 +1,29 @@
+{
+  "problemId": "android-unlock-patterns",
+  "approach": "Symmetry-Reduced Pattern Search",
+  "explanation": "### How it works\n\nA move is legal when its destination is unused and any intermediate key has already been visited. Corner starts are symmetric, as are edge starts, so only one representative from each group needs exploration.\n\n### Steps\n\n1. Record the required midpoint for moves crossing another key.\n2. Backtrack over unvisited destinations whose midpoint is already visited or absent.\n3. Count prefixes with lengths between m and n.\n4. Multiply one corner and one edge result by four, then add the center result.\n\n### Complexity\n\n- Time: O(sum of 9!/(9 − k)! for k from 1 to n), a fixed nine-key search.\n- Space: O(1) bounded storage for nine keys and recursion.",
+  "code": {
+    "python": "class Solution:\n  def numberOfPatterns(self, m: int, n: int) -> int:\n    seen = set()\n    accross = [[0] * 10 for _ in range(10)]\n\n    accross[1][3] = accross[3][1] = 2\n    accross[1][7] = accross[7][1] = 4\n    accross[3][9] = accross[9][3] = 6\n    accross[7][9] = accross[9][7] = 8\n    accross[1][9] = accross[9][1] = accross[2][8] = accross[8][2] = \\\n        accross[3][7] = accross[7][3] = accross[4][6] = accross[6][4] = 5\n\n    def dfs(u: int, depth: int) -> int:\n      if depth > n:\n        return 0\n\n      seen.add(u)\n      ans = 1 if depth >= m else 0\n\n      for v in range(1, 10):\n        if v == u or v in seen:\n          continue\n        accrossed = accross[u][v]\n        if not accrossed or accrossed in seen:\n          ans += dfs(v, depth + 1)\n\n      seen.remove(u)\n      return ans\n\n    # 1, 3, 7, 9 are symmetric\n    # 2, 4, 6, 8 are symmetric\n    return dfs(1, 1) * 4 + dfs(2, 1) * 4 + dfs(5, 1)\n",
+    "cpp": "class Solution {\n public:\n  int numberOfPatterns(int m, int n) {\n    int ans = 0;\n    vector<vector<int>> across(10, vector<int>(10));\n    vector<bool> seen(10);\n\n    across[1][3] = across[3][1] = 2;\n    across[1][7] = across[7][1] = 4;\n    across[3][9] = across[9][3] = 6;\n    across[7][9] = across[9][7] = 8;\n    across[1][9] = across[9][1] = across[2][8] = across[8][2] = across[3][7] =\n        across[7][3] = across[4][6] = across[6][4] = 5;\n\n    ans += dfs(m, n, 1, 1, seen, across) * 4;  // 1, 3, 7, 9 are symmetric\n    ans += dfs(m, n, 2, 1, seen, across) * 4;  // 2, 4, 6, 8 are symmetric\n    ans += dfs(m, n, 5, 1, seen, across);      // 5\n    return ans;\n  }\n\n private:\n  int dfs(int m, int n, int u, int depth, vector<bool>& seen,\n          const vector<vector<int>>& across) {\n    if (depth > n)\n      return 0;\n\n    seen[u] = true;\n    int ans = depth >= m ? 1 : 0;\n\n    for (int v = 1; v <= 9; ++v) {\n      if (v == u || seen[v])\n        continue;\n      const int acrossed = across[u][v];\n      if (acrossed == 0 || seen[acrossed])\n        ans += dfs(m, n, v, depth + 1, seen, across);\n    }\n\n    seen[u] = false;\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/351.%20Android%20Unlock%20Patterns",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "bitmask-dynamic-programming",
+      "approach": "Bitmask Dynamic Programming",
+      "explanation": "### How it works\n\nA visited-key mask and current endpoint completely describe legal future moves. Memoize the number of valid continuations, computing midpoint legality from the 3×3 coordinates.\n\n### Steps\n\n1. Represent each key by a bit and a grid coordinate.\n2. Memoize states of endpoint and visited mask.\n3. Count the current pattern when its length is in range.\n4. Extend to each unused key unless an unvisited midpoint blocks the move.\n\n### Complexity\n\n- Time: O(9² × 2^9) for the fixed keypad.\n- Space: O(9 × 2^9) memoized states.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/351.%20Android%20Unlock%20Patterns",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def numberOfPatterns(self, m: int, n: int) -> int:\n        @cache\n        def count(last, mask):\n            length = mask.bit_count()\n            total = int(m <= length <= n)\n            if length == n:\n                return total\n            x, y = divmod(last, 3)\n            for nxt in range(9):\n                if mask & (1 << nxt):\n                    continue\n                a, b = divmod(nxt, 3)\n                if (x + a) % 2 == 0 and (y + b) % 2 == 0:\n                    midpoint = ((x + a) // 2) * 3 + (y + b) // 2\n                    if not mask & (1 << midpoint):\n                        continue\n                total += count(nxt, mask | (1 << nxt))\n            return total\n        return sum(count(start, 1 << start) for start in range(9))\n"
+      }
+    }
+  ]
+}

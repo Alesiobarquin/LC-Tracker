@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/611.%20Valid%20Triangle%20Number",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "enumerate-side-triples",
+      "approach": "Enumerate Side Triples",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nTest every index triple against all three triangle inequalities. Zero-length sides fail automatically, and equal lengths at distinct indices remain separate choices.\n\n### Steps\n\n1. Enumerate three distinct indices.\n2. Require each pair of sides to sum to more than the third.\n3. Count valid triples.\n\n### Complexity\n\n- Time: `O(n³)` time.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/611.%20Valid%20Triangle%20Number",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def triangleNumber(self, nums: list[int]) -> int:\n        count = 0\n        for i in range(len(nums)):\n            for j in range(i + 1, len(nums)):\n                for k in range(j + 1, len(nums)):\n                    a, b, c = nums[i], nums[j], nums[k]\n                    count += a + b > c and a + c > b and b + c > a\n        return count\n"
+      }
+    }
+  ]
 }

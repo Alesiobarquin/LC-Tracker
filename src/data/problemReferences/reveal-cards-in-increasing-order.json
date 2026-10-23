@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> deckRevealedIncreasing(vector<int>& deck) {\n        int n = deck.size();\n        vector<int> res(n, 0);\n        bool skip = false;\n        int deckIndex = 0, i = 0;\n\n        sort(deck.begin(), deck.end());\n\n        while (deckIndex < n) {\n            if (res[i] == 0) {\n                if (!skip) {\n                    res[i] = deck[deckIndex++];\n                }\n                skip = !skip;\n            }\n            i = (i + 1) % n;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reveal-cards-in-increasing-order.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reveal-cards-in-increasing-order.md",
+  "alternatives": [
+    {
+      "approach": "Simulation Using Queue - I",
+      "explanation": "### How it works\n\nThe reveal process takes the top card, then moves the next card to the bottom. To arrange cards so they reveal in increasing order, we simulate this process in reverse by tracking positions. We use a queue of indices representing available positions. As we assign sorted values in order, each assignment follows the reveal pattern: take the front index, then rotate the next index to the back.\n\n### Steps\n\n1. Sort the deck in ascending order.\n2. Create a result array `res` and a queue `q` containing indices `0` through `n-1`.\n3. For each card value `num` in the sorted deck:\n    - Dequeue the front index `i` and place the current value there.\n    - If the queue is not empty, move the new front index to the back (simulating the card rotation).\n4. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def deckRevealedIncreasing(self, deck: List[int]) -> List[int]:\n        deck.sort()\n        res = [0] * len(deck)\n        q = deque(range(len(deck)))\n\n        for num in deck:\n            i = q.popleft()\n            res[i] = num\n            if q:\n                q.append(q.popleft())\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reveal-cards-in-increasing-order.md",
+      "id": "simulation-using-queue-i"
+    },
+    {
+      "approach": "Simulation Using Queue - II",
+      "explanation": "### How it works\n\nAnother approach processes the sorted deck from largest to smallest. We build the final arrangement by simulating the reverse of the reveal process: before placing each card, we rotate the bottom card to the top (undoing the move that would have happened during reveal). This builds the deck configuration backward.\n\n### Steps\n\n1. Sort the deck in ascending order.\n2. Initialize an empty queue `q`.\n3. Traverse the sorted deck from largest to smallest (using index `i`):\n    - If the queue is not empty, move the front element to the back (reverse rotation).\n    - Add the current card value to the queue.\n4. Extract elements from the queue in reverse order to form the result.\n5. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def deckRevealedIncreasing(self, deck: List[int]) -> List[int]:\n        deck.sort()\n        q = deque()\n        for i in range(len(deck) - 1, -1, -1):\n            if q:\n                q.append(q.popleft())\n            q.append(deck[i])\n        return list(q)[::-1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reveal-cards-in-increasing-order.md",
+      "id": "simulation-using-queue-ii"
+    }
+  ]
 }

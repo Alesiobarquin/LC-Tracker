@@ -1,0 +1,29 @@
+{
+  "problemId": "serialize-and-deserialize-bst",
+  "approach": "Preorder with BST Bounds",
+  "explanation": "### How it works\n\nPreorder values alone describe a BST when the valid value range is carried through reconstruction. Consume the next value only if it fits the current subtree's bounds.\n\n### Steps\n\n1. Serialize the root before its left and right subtrees.\n2. Parse serialized values into a queue.\n3. Build a subtree only when the next value lies within its bounds.\n4. Tighten the bounds around each accepted root value.\n\n### Complexity\n\n- Time: O(n) node visits, plus decimal text processing.\n- Space: O(n) for serialized values and O(h) recursion.\n\n### Things to watch for\n\n- This problem uses distinct BST values.",
+  "code": {
+    "python": "import collections\nimport math\n\nclass Codec:\n  def serialize(self, root: TreeNode | None) -> str:\n    \"\"\"Encodes a tree to a single string.\"\"\"\n    if not root:\n      return ''\n    chars = []\n    self._serialize(root, chars)\n    return ''.join(chars)\n\n  def deserialize(self, data: str) -> TreeNode | None:\n    \"\"\"Decodes your encoded data to tree.\"\"\"\n    if not data:\n      return None\n    q = collections.deque(int(val) for val in data.split())\n    return self._deserialize(-math.inf, math.inf, q)\n\n  def _serialize(self, root: TreeNode | None, chars: list[str]) -> None:\n    if not root:\n      return\n    chars.append(str(root.val))\n    chars.append(' ')\n    self._serialize(root.left, chars)\n    self._serialize(root.right, chars)\n\n  def _deserialize(\n      self,\n      mn: int,\n      mx: int,\n      q: collections.deque[int]\n  ) -> TreeNode | None:\n    if not q:\n      return None\n\n    val = q[0]\n    if val < mn or val > mx:\n      return None\n\n    q.popleft()\n    return TreeNode(val,\n                    self._deserialize(mn, val, q),\n                    self._deserialize(val, mx, q))\n",
+    "cpp": "class Codec {\n public:\n  // Encodes a tree to a single string.\n  string serialize(TreeNode* root) {\n    if (root == nullptr)\n      return \"\";\n    string s;\n    serialize(root, s);\n    return s;\n  }\n\n  // Decodes your encoded data to tree.\n  TreeNode* deserialize(string data) {\n    if (data.empty())\n      return nullptr;\n\n    istringstream iss(data);\n    queue<int> q;\n\n    for (string s; iss >> s;)\n      q.push(stoi(s));\n\n    return deserialize(INT_MIN, INT_MAX, q);\n  }\n\n private:\n  void serialize(TreeNode* root, string& s) {\n    if (root == nullptr)\n      return;\n    s += to_string(root->val) + \" \";\n    serialize(root->left, s);\n    serialize(root->right, s);\n  }\n\n  TreeNode* deserialize(int mn, int mx, queue<int>& q) {\n    if (q.empty())\n      return nullptr;\n\n    const int val = q.front();\n    if (val < mn || val > mx)\n      return nullptr;\n\n    q.pop();\n    TreeNode* root = new TreeNode(val);\n    root->left = deserialize(mn, val, q);\n    root->right = deserialize(val, mx, q);\n    return root;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/449.%20Serialize%20and%20Deserialize%20BST",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "explicit-null-marker-preorder",
+      "approach": "Explicit Null-Marker Preorder",
+      "explanation": "### How it works\n\nInclude a marker for every missing child. This general binary-tree encoding reconstructs structure directly and does not depend on the BST ordering invariant.\n\n### Steps\n\n1. Serialize each value followed by its left and right subtree encodings.\n2. Write # for missing nodes.\n3. Read one token at a time during reconstruction.\n4. Build children recursively unless the token is #.\n\n### Complexity\n\n- Time: O(n) node visits, plus text processing.\n- Space: O(n) tokens and O(h) recursion.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/449.%20Serialize%20and%20Deserialize%20BST",
+      "code": {
+        "python": "class Codec:\n    def serialize(self, root: 'TreeNode') -> str:\n        tokens = []\n        def visit(node):\n            if node is None:\n                tokens.append('#')\n            else:\n                tokens.append(str(node.val))\n                visit(node.left)\n                visit(node.right)\n        visit(root)\n        return ','.join(tokens)\n\n    def deserialize(self, data: str) -> 'TreeNode':\n        tokens = iter(data.split(','))\n        def build():\n            token = next(tokens)\n            if token == '#':\n                return None\n            node = TreeNode(int(token))\n            node.left = build()\n            node.right = build()\n            return node\n        return build()\n"
+      }
+    }
+  ]
+}

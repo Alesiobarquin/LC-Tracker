@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/109.%20Convert%20Sorted%20List%20to%20Binary%20Search%20Tree",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "inorder-construction",
+      "approach": "Inorder Construction",
+      "explanation": "### How it works\n\nCount the list once, then simulate the inorder traversal of a balanced tree. Build the left half first, consume the current list node as the root, and then build the right half. The list pointer advances once per tree node.\n\n### Steps\n\n1. Count the linked-list nodes.\n2. Recursively allocate balanced index ranges.\n3. Build the left subtree before consuming the current list value.\n4. Advance the shared list pointer and construct the right subtree.\n\n### Complexity\n\n- Time: `O(n)` for the length pass and one construction visit per node.\n- Space: `O(log n)` recursion space, excluding the new tree.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/109.%20Convert%20Sorted%20List%20to%20Binary%20Search%20Tree/109-3.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n  def sortedListToBST(self, head: ListNode | None) -> TreeNode | None:\n    def helper(l: int, r: int) -> TreeNode | None:\n      nonlocal head\n      if l > r:\n        return None\n\n      m = (l + r) // 2\n\n      # Simulate inorder traversal: recursively form the left half.\n      left = helper(l, m - 1)\n\n      # Once the left half is traversed, process the current node.\n      root = TreeNode(head.val)\n      root.left = left\n\n      # Maintain the invariance.\n      head = head.next\n\n      # Simulate inorder traversal: recursively form the right half.\n      root.right = helper(m + 1, r)\n      return root\n\n    return helper(0, self._getLength(head) - 1)\n\n  def _getLength(self, head: ListNode | None) -> int:\n    length = 0\n    curr = head\n    while curr:\n      length += 1\n      curr = curr.next\n    return length\n"
+      }
+    }
+  ]
 }

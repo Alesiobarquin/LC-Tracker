@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/114.%20Flatten%20Binary%20Tree%20to%20Linked%20List",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "preorder-stack",
+      "approach": "Preorder Stack",
+      "explanation": "### How it works\n\nAn explicit stack records preorder traversal before links are changed. Connect each visited node to the previous node's right pointer and clear the previous left pointer.\n\n### Steps\n\n1. Push the root when present.\n2. Pop the next preorder node and push its original right child before its left child.\n3. Connect the previous node to this node.\n4. Finish with no left child or trailing right child on the final node.\n\n### Complexity\n\n- Time: `O(n)` for n nodes.\n- Space: `O(h)` for the traversal stack.\n\n### Things to watch for\n\n- Save the original children before rewiring.\n- Reuse the original nodes rather than constructing a new list.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/114.%20Flatten%20Binary%20Tree%20to%20Linked%20List",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from typing import Optional\n\nclass Solution:\n    def flatten(self, root: Optional[TreeNode]) -> None:\n        stack = [root] if root else []\n        previous = None\n        while stack:\n            node = stack.pop()\n            if node.right:\n                stack.append(node.right)\n            if node.left:\n                stack.append(node.left)\n            if previous:\n                previous.left = None\n                previous.right = node\n            previous = node\n        if previous:\n            previous.left = previous.right = None\n"
+      }
+    }
+  ]
 }

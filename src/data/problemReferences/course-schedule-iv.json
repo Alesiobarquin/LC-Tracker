@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<bool> checkIfPrerequisite(int numCourses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {\n        vector<vector<bool>> adj(numCourses, vector<bool>(numCourses, false));\n        vector<bool> res;\n\n        for (auto& pre : prerequisites) {\n            adj[pre[0]][pre[1]] = true;\n        }\n\n        for (int k = 0; k < numCourses; k++) {\n            for (int i = 0; i < numCourses; i++) {\n                for (int j = 0; j < numCourses; j++) {\n                    adj[i][j] = adj[i][j] || (adj[i][k] && adj[k][j]);\n                }\n            }\n        }\n\n        for (auto& q : queries) {\n            res.push_back(adj[q[0]][q[1]]);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=cEW05ofxhn0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/course-schedule-iv.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/course-schedule-iv.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force (DFS)",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo check if course A is a prerequisite of course B, we need to determine if there is a path from A to B in the prerequisite graph. A depth-first search starting from A can explore all courses reachable from A. If we reach B during this traversal, then A is indeed a prerequisite of B.\n\n### Steps\n\n1. Build an adjacency list from the prerequisites, where each course points to its direct successors.\n2. For each query `(u, v)`, run a DFS starting from `u`.\n3. In the DFS, if we reach `v`, return `true`.\n4. Otherwise, recursively explore all neighbors and return `true` if any path reaches `v`.\n5. If no path is found, return `false`.\n\n### Complexity\n\n- Time complexity: `O((V + E) * m)`\n- Space complexity: `O(V + E + m)`\n\n> Where `m` is the number of queries, `V` is the number of courses, and `E` is the number of prerequisites.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def checkIfPrerequisite(self, numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:\n        adj = [[] for _ in range(numCourses)]\n        for u, v in prerequisites:\n            adj[u].append(v)\n\n        def dfs(node, target):\n            if node == target:\n                return True\n            for nei in adj[node]:\n                if dfs(nei, target):\n                    return True\n            return False\n\n        res = []\n        for u, v in queries:\n            res.append(dfs(u, v))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/course-schedule-iv.md",
+      "id": "brute-force-dfs"
+    },
+    {
+      "approach": "Depth First Search (Hash Set)",
+      "explanation": "### How it works\n\nInstead of running DFS for every query, we can precompute all prerequisites for each course. For each course, we use DFS to find all courses that are prerequisites (directly or indirectly) and store them in a set. Then answering any query becomes a simple set lookup.\n\n### Steps\n\n1. Build an adjacency list where each course points to its direct prerequisites.\n2. For each course, run DFS to collect all reachable prerequisites into a set.\n3. Cache these sets to avoid recomputation.\n4. Each course's prerequisite set includes itself and all prerequisites of its direct prerequisites.\n5. For each query `(u, v)`, check if `u` is in the prerequisite set of `v`.\n\n### Complexity\n\n- Time complexity: `O(V * (V + E) + m)`\n- Space complexity: `O(V ^ 2 + E + m)`\n\n> Where `m` is the number of queries, `V` is the number of courses, and `E` is the number of prerequisites.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def checkIfPrerequisite(self, numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:\n        adj = defaultdict(list)\n        for prereq, crs in prerequisites:\n            adj[crs].append(prereq)\n\n        def dfs(crs):\n            if crs not in prereqMap:\n                prereqMap[crs] = set()\n                for prereq in adj[crs]:\n                    prereqMap[crs] |= dfs(prereq)\n                prereqMap[crs].add(crs)\n            return prereqMap[crs]\n\n        prereqMap = {}\n        for crs in range(numCourses):\n            dfs(crs)\n\n        res = []\n        for u, v in queries:\n            res.append(u in prereqMap[v])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/course-schedule-iv.md",
+      "id": "depth-first-search-hash-set"
+    }
+  ]
 }

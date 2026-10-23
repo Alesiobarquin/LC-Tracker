@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int bestClosingTime(string customers) {\n        int res = 0, minPenalty = 0, penalty = 0;\n\n        for (int i = 0; i < customers.size(); i++) {\n            penalty += customers[i] == 'Y' ? 1 : -1;\n\n            if (penalty > minPenalty) {\n                minPenalty = penalty;\n                res = i + 1;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=0d7ShRoOFVE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-penalty-for-a-shop.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-penalty-for-a-shop.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe shop can close at any hour from `0` to `n` (inclusive). If we close at hour `i`, we incur a penalty of `1` for each 'N' before hour `i` (shop was open but no customer) and `1` for each 'Y' from hour `i` onward (shop was closed but customer came). We try every possible closing time and pick the one with minimum penalty.\n\n### Steps\n\n1. Initialize `res` and `minPenalty` to `n` (worst case).\n2. For each possible closing hour `i` from `0` to `n`:\n    - Count 'N' characters in positions `0` to `i-1` (penalty for being open when no one came).\n    - Count 'Y' characters in positions `i` to `n-1` (penalty for being closed when customers came).\n    - If this total penalty is less than `minPenalty`, update `minPenalty` and `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def bestClosingTime(self, customers: str) -> int:\n        n = len(customers)\n        res = n\n        minPenalty = n\n\n        for i in range(n + 1):\n            penalty = 0\n            for j in range(i):\n                if customers[j] == 'N':\n                    penalty += 1\n            for j in range(i, n):\n                if customers[j] == 'Y':\n                    penalty += 1\n\n            if penalty < minPenalty:\n                minPenalty = penalty\n                res = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-penalty-for-a-shop.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix & Suffix",
+      "explanation": "### How it works\n\nInstead of recounting 'N' and 'Y' characters for each closing hour, we precompute prefix counts of 'N' and suffix counts of 'Y'. The prefix array tells us how many 'N' characters appear before each position, and the suffix array tells us how many 'Y' characters appear from each position onward. The penalty at any closing hour is simply the sum of these two precomputed values.\n\n### Steps\n\n1. Build `prefixN[i]` = count of 'N' in positions `0` to `i-1`.\n2. Build `suffixY[i]` = count of 'Y' in positions `i` to `n-1`.\n3. For each closing hour `i` from `0` to `n`:\n    - Calculate penalty as `prefixN[i] + suffixY[i]`.\n    - Track the minimum penalty and its corresponding hour.\n4. Return the hour with minimum penalty.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def bestClosingTime(self, customers: str) -> int:\n        n = len(customers)\n        cnt = 0\n\n        prefixN = []\n        for c in customers:\n            prefixN.append(cnt)\n            if c == 'N':\n                cnt += 1\n        prefixN.append(cnt)\n\n        suffixY = [0] * (n + 1)\n        for i in range(n - 1, -1, -1):\n            suffixY[i] = suffixY[i + 1]\n            if customers[i] == 'Y':\n                suffixY[i] += 1\n\n        res = n\n        minPenalty = n\n        for i in range(n + 1):\n            penalty = prefixN[i] + suffixY[i]\n            if penalty < minPenalty:\n                minPenalty = penalty\n                res = i\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-penalty-for-a-shop.md",
+      "id": "prefix-suffix"
+    }
+  ]
 }

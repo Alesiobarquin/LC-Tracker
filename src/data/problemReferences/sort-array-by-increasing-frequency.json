@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    vector<int> frequencySort(vector<int>& nums) {\n        unordered_map<int, int> count;\n        for (int num : nums) {\n            count[num]++;\n        }\n\n        sort(nums.begin(), nums.end(), [&](int a, int b) {\n            if (count[a] != count[b]) return count[a] < count[b];\n            return a > b;\n        });\n\n        return nums;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-array-by-increasing-frequency.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-array-by-increasing-frequency.md",
+  "alternatives": [
+    {
+      "id": "frequency-buckets",
+      "approach": "Frequency Buckets",
+      "explanation": "### How it works\n\nBucket distinct values by their occurrence count. Insert distinct values in descending order so ties inside each frequency bucket already satisfy the required order.\n\n### Steps\n\n1. Count occurrences.\n2. Visit distinct values in descending numeric order and place them in count-indexed buckets.\n3. Read buckets from low frequency to high, repeating each value by its count.\n\n### Complexity\n\n- Time: `O(n + u log u)` for u distinct values.\n- Space: `O(n + u)` including buckets and output.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sort-array-by-increasing-frequency.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def frequencySort(self, nums: list[int]) -> list[int]:\n        counts = Counter(nums)\n        buckets = [[] for _ in range(len(nums) + 1)]\n        for value in sorted(counts, reverse=True):\n            buckets[counts[value]].append(value)\n        return [value for frequency, bucket in enumerate(buckets)\n                for value in bucket for _ in range(frequency)]\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minReorder(int n, vector<vector<int>>& connections) {\n        vector<vector<pair<int, int>>> adj(n);\n        for (auto& conn : connections) {\n            adj[conn[0]].push_back({conn[1], 1});\n            adj[conn[1]].push_back({conn[0], 0});\n        }\n\n        vector<bool> visit(n, false);\n        queue<int> q;\n        q.push(0);\n        visit[0] = true;\n        int changes = 0;\n\n        while (!q.empty()) {\n            int node = q.front();\n            q.pop();\n            for (auto& [neighbor, isForward] : adj[node]) {\n                if (!visit[neighbor]) {\n                    visit[neighbor] = true;\n                    changes += isForward;\n                    q.push(neighbor);\n                }\n            }\n        }\n        return changes;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=m17yOR5_PpI",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reorder-routes-to-make-all-paths-lead-to-the-city-zero.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reorder-routes-to-make-all-paths-lead-to-the-city-zero.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search - I",
+      "explanation": "### How it works\n\nWe need all cities to reach city 0, so we traverse outward from city 0 and check edge directions. Build an undirected `neighbors` graph for traversal, but store original edges in `edges` set to check direction. When moving from `city` A to `neighbor` B, if the original edge goes from A to B (away from 0), it needs to be reversed. `dfs` ensures we visit every city exactly once.\n\n### Steps\n\n1. Store all original directed edges in a set called `edges` as `(a, b)` pairs.\n2. Build an adjacency list called `neighbors` treating edges as undirected.\n3. Start `dfs` from city 0, marking visited cities in `visit` set.\n4. For each `neighbor`:\n    - If not visited, check if `(neighbor, city)` exists in the `edges` set.\n    - If not, the edge points away from 0 and needs reversal; increment `changes`.\n    - Recursively visit the `neighbor`.\n5. Return the total count of edges to reverse.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minReorder(self, n: int, connections: List[List[int]]) -> int:\n        edges = {(a, b) for a, b in connections}\n        neighbors = {city: [] for city in range(n)}\n        visit = set()\n        changes = 0\n\n        for a, b in connections:\n            neighbors[a].append(b)\n            neighbors[b].append(a)\n\n        def dfs(city):\n            nonlocal changes\n            visit.add(city)\n            for neighbor in neighbors[city]:\n                if neighbor in visit:\n                    continue\n                if (neighbor, city) not in edges:\n                    changes += 1\n                dfs(neighbor)\n\n        dfs(0)\n        return changes\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/reorder-routes-to-make-all-paths-lead-to-the-city-zero.md",
+      "id": "depth-first-search-i"
+    }
+  ]
 }

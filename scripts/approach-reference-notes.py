@@ -295,4 +295,20 @@ def adapt_code(problem_id, name, code):
         # A full adder computes the carry with bit operations too. The source's
         # a_bit + b_bit + carry violates this problem's operator restriction.
         code = code.replace('(a_bit + b_bit + carry) >= 2', '(a_bit & b_bit) | (a_bit & carry) | (b_bit & carry)')
+    if problem_id == 'paint-house':
+        code = code.replace('def min_cost(', 'def minCost(')
+    if problem_id == 'number-of-distinct-islands':
+        code = code.replace('        print(unique_islands)\n', '')
+    if problem_id == 'recover-binary-search-tree' and name == 'Brute Force':
+        # LeetCode's contract is an in-place update with no returned tree.
+        code = code.removesuffix('return root').rstrip()
+    if problem_id == 'web-crawler':
+        code = code.replace('return visited', 'return list(visited)')
+    if problem_id == 'closest-binary-search-tree-value' and name == 'Recursive Inorder + Linear search, O(N) time':
+        # Repeated list concatenation in the source can take quadratic time on
+        # a skew tree. Accumulate once so the advertised linear bound holds.
+        code = code.replace(
+            'return inorder(r.left) + [r.val] + inorder(r.right) if r else []',
+            'if r:\n                inorder(r.left)\n                values.append(r.val)\n                inorder(r.right)')
+        code = code.replace('return min(inorder(root),', 'values = []\n        inorder(root)\n        return min(values,')
     return code

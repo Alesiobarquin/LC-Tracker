@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/556.%20Next%20Greater%20Element%20III",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "digit-count-backtracking",
+      "approach": "Digit-Count Backtracking",
+      "explanation": "### How it works\n\nBuild candidate numbers in increasing digit order from the same digit counts. A prefix smaller than the original can never produce the next greater number; a prefix above the 32-bit maximum can never be valid.\n\n### Steps\n\n1. Count available decimal digits.\n2. Build candidate digits in ascending order, never using a leading zero.\n3. Prune prefixes below the original or above the signed 32-bit limit.\n4. Return the first complete strictly larger candidate.\n\n### Complexity\n\n- Time: `O(D × D!)` as a conservative unpruned upper bound for D digits; prefix pruning reduces the explored states.\n- Space: `O(D)` recursion and digit counts.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/556.%20Next%20Greater%20Element%20III",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def nextGreaterElement(self, n: int) -> int:\n        original = str(n)\n        counts = Counter(original)\n        limit = str((1 << 31) - 1)\n        def visit(prefix):\n            if len(prefix) == len(original):\n                value = int(prefix)\n                return value if n < value <= (1 << 31) - 1 else -1\n            for digit in '0123456789':\n                if counts[digit] == 0 or (not prefix and digit == '0'):\n                    continue\n                candidate = prefix + digit\n                if candidate < original[:len(candidate)]:\n                    continue\n                if len(original) == len(limit) and candidate > limit[:len(candidate)]:\n                    continue\n                counts[digit] -= 1\n                value = visit(candidate)\n                counts[digit] += 1\n                if value != -1:\n                    return value\n            return -1\n        return visit('')\n"
+      }
+    }
+  ]
 }

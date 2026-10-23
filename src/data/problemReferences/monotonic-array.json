@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool isMonotonic(vector<int>& nums) {\n        bool increase = true, decrease = true;\n\n        for (int i = 0; i < nums.size() - 1; ++i) {\n            if (!(nums[i] <= nums[i + 1])) {\n                increase = false;\n            }\n            if (!(nums[i] >= nums[i + 1])) {\n                decrease = false;\n            }\n        }\n        return increase || decrease;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/monotonic-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/monotonic-array.md",
+  "alternatives": [
+    {
+      "approach": "Two Pass",
+      "explanation": "### How it works\n\nAn array is monotonic if it is entirely non-decreasing or entirely non-increasing. We can check each condition separately. First, scan to see if every element is greater than or equal to the previous one. If this holds, the array is monotonically increasing. If not, scan again to check if every element is less than or equal to the previous one. If either condition is satisfied, the array is monotonic.\n\n### Steps\n\n1. Assume the array is increasing. Iterate through and check if `nums[i] < nums[i - 1]` for any `i`. If found, the array is not increasing.\n2. If the array passed the increasing check, return `true`.\n3. Otherwise, assume the array is decreasing. Iterate through and check if `nums[i] > nums[i - 1]` for any `i`. If found, the array is not decreasing.\n4. Return whether the array passed the decreasing check.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def isMonotonic(self, nums: List[int]) -> bool:\n        n = len(nums)\n        increase = True\n        for i in range(1, n):\n            if nums[i] < nums[i - 1]:\n                increase = False\n                break\n\n        if increase:\n            return True\n\n        decrease = True\n        for i in range(1, n):\n            if nums[i] > nums[i - 1]:\n                decrease = False\n                break\n        return decrease\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/monotonic-array.md",
+      "id": "two-pass"
+    }
+  ]
 }

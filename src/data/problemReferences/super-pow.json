@@ -1,0 +1,29 @@
+{
+  "problemId": "super-pow",
+  "approach": "Left-to-Right Decimal Exponent Fold",
+  "explanation": "### How it works\n\nAppending digit d to an exponent changes e into 10e + d. Update the modular result as result^10 × a^d, reducing modulo 1337.\n\n### Steps\n\n1. Start the result at one.\n2. Read exponent digits from left to right.\n3. Raise the previous result to ten modulo 1337.\n4. Multiply by the base raised to the current digit and reduce.\n\n### Complexity\n\n- Time: O(d) bounded-modulus operations for d exponent digits.\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def superPow(self, a: int, b: list[int]) -> int:\n    MOD = 1337\n    ans = 1\n\n    for i in b:\n      ans = pow(ans, 10, MOD) * pow(a, i, MOD)\n\n    return ans % MOD\n",
+    "cpp": "class Solution {\n public:\n  int superPow(int a, vector<int>& b) {\n    int ans = 1;\n\n    a %= kMod;\n    for (const int i : b)\n      ans = modPow(ans, 10) * modPow(a, i) % kMod;\n\n    return ans;\n  }\n\n private:\n  static constexpr int kMod = 1337;\n\n  long modPow(long x, long n) {\n    if (n == 0)\n      return 1;\n    if (n % 2 == 1)\n      return x * modPow(x % kMod, (n - 1)) % kMod;\n    return modPow(x * x % kMod, (n / 2)) % kMod;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/372.%20Super%20Pow",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "right-to-left-decimal-place-powers",
+      "approach": "Right-to-Left Decimal Place Powers",
+      "explanation": "### How it works\n\nTreat the exponent as a sum of digit × decimal-place values. Scan from the least significant digit while repeatedly raising the base power to ten.\n\n### Steps\n\n1. Reduce the base modulo 1337.\n2. Visit exponent digits in reverse.\n3. Multiply the result by the current place power raised to that digit.\n4. Raise the place power to ten for the next digit.\n\n### Complexity\n\n- Time: O(d) bounded-modulus operations.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/372.%20Super%20Pow",
+      "code": {
+        "python": "class Solution:\n    def superPow(self, a: int, b: list[int]) -> int:\n        result, power = 1, a % 1337\n        for digit in reversed(b):\n            result = result * pow(power, digit, 1337) % 1337\n            power = pow(power, 10, 1337)\n        return result\n"
+      }
+    }
+  ]
+}

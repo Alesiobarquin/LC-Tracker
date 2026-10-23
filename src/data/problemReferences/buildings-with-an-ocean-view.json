@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> findBuildings(vector<int>& heights) {\n        vector<int> res;\n        int n = heights.size();\n        res.push_back(n - 1);\n\n        for (int i = n - 2; i >= 0; i--) {\n            if (heights[i] > heights[res.back()]) {\n                res.push_back(i);\n            }\n        }\n\n        reverse(res.begin(), res.end());\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buildings-with-an-ocean-view.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buildings-with-an-ocean-view.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA building has an ocean view if no building to its right is taller or equal in height. The ocean is to the right of all buildings. The simplest approach is to check each building individually: for every building, scan all buildings to its right and see if any of them block the view.\n\n### Steps\n\n1. Iterate through each building from left to right.\n2. For each building at index `i`, check all buildings from index `i+1` to the end.\n3. If any building to the right has height greater than or equal to the current building, mark this building as having no ocean view.\n4. If no taller or equal building is found to the right, add this index to the result.\n5. Return all indices of buildings with ocean views.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)` for the output array.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findBuildings(self, heights: List[int]) -> List[int]:\n        n = len(heights)\n        res = []\n\n        for i in range(n):\n            flag = True\n            for j in range(i + 1, n):\n                if heights[i] <= heights[j]:\n                    flag = False\n                    break\n            if flag:\n                res.append(i)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buildings-with-an-ocean-view.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Monotonic Stack",
+      "explanation": "### How it works\n\nWe can use a monotonic decreasing stack to efficiently track buildings with ocean views. As we scan from left to right, whenever we encounter a building that is taller than or equal to the building at the top of the stack, the stack building loses its ocean view (because this new building blocks it). We pop such buildings and push the current one. The remaining buildings in the stack at the end all have ocean views.\n\n### Steps\n\n1. Initialize an empty stack to store building indices.\n2. Iterate through buildings from left to right.\n3. While the stack is not empty and the current building's height is greater than or equal to the height of the building at the stack top:\n    - Pop from the stack (that building no longer has an ocean view).\n4. Push the current building index onto the stack.\n5. Return the stack contents as the result (indices are already in increasing order).\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findBuildings(self, heights: List[int]) -> List[int]:\n        stack = []\n\n        for i, h in enumerate(heights):\n            while stack and heights[stack[-1]] <= h:\n                stack.pop()\n            stack.append(i)\n\n        return stack\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/buildings-with-an-ocean-view.md",
+      "id": "monotonic-stack"
+    }
+  ]
 }

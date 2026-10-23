@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int deleteAndEarn(vector<int>& nums) {\n        unordered_map<int, int> count;\n        for (int num : nums) count[num] += num;\n        vector<int> uniqueNums;\n        for (auto& pair : count) uniqueNums.push_back(pair.first);\n        sort(uniqueNums.begin(), uniqueNums.end());\n\n        int earn1 = 0, earn2 = 0;\n        for (int i = 0; i < uniqueNums.size(); i++) {\n            int curEarn = count[uniqueNums[i]];\n            if (i > 0 && uniqueNums[i] == uniqueNums[i - 1] + 1) {\n                int temp = earn2;\n                earn2 = max(curEarn + earn1, earn2);\n                earn1 = temp;\n            } else {\n                int temp = earn2;\n                earn2 = curEarn + earn2;\n                earn1 = temp;\n            }\n        }\n        return earn2;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=7FCemBxvGw0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-and-earn.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-and-earn.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWhen you pick a number `x`, you earn all points from every occurrence of `x`, but you must delete all instances of `x - 1` and `x + 1`. This creates a choice at each distinct value: either take it (and skip the next consecutive value) or skip it. Sorting helps group identical values together, making it easy to sum all occurrences. We recursively explore both choices at each group of identical numbers.\n\n### Steps\n\n1. Sort the array to group identical numbers together.\n2. Define a recursive function `dfs(i)` starting at index `i`:\n    - If `i` is out of bounds, return `0`.\n    - Sum all occurrences of `nums[i]` and move `i` past this group.\n    - Compute the result of skipping this group: `dfs(new_i)`.\n    - Skip any numbers equal to `nums[i] + 1` (they would be deleted if we pick).\n    - Compute the result of picking this group: `pick + dfs(after_skipping)`.\n    - Return the maximum of picking vs skipping.\n3. Call `dfs(0)` and return the result.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def deleteAndEarn(self, nums: List[int]) -> int:\n        nums.sort()\n\n        def dfs(i):\n            if i >= len(nums):\n                return 0\n\n            cur = nums[i]\n            pick = 0\n            while i < len(nums) and nums[i] == cur:\n                pick += nums[i]\n                i += 1\n\n            res = dfs(i)\n            while i < len(nums) and nums[i] == 1 + cur:\n                i += 1\n\n            res = max(res, pick + dfs(i))\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-and-earn.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems since we may revisit the same index multiple times. By precomputing the total value for each unique number (sum of all occurrences) and using memoization, we avoid redundant calculations. The problem reduces to: for each unique number, decide whether to take it (earning its total value but skipping the next consecutive number) or skip it.\n\n### Steps\n\n1. Build a map where each unique number maps to the sum of all its occurrences.\n2. Extract and sort the unique numbers.\n3. Create a memo array initialized to `-1`.\n4. Define `dfs(i)`:\n    - If `i` is out of bounds, return `0`.\n    - If `memo[i]` is set, return it.\n    - Compute the value of taking `nums[i]`: its total value plus `dfs(i + 2)` if the next number is consecutive, else `dfs(i + 1)`.\n    - The result is `max(take, dfs(i + 1))`.\n    - Store in memo and return.\n5. Return `dfs(0)`.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def deleteAndEarn(self, nums: List[int]) -> int:\n        val = defaultdict(int)\n        for num in nums:\n            val[num] += num\n        nums = sorted(list(set(nums)))\n        memo = [-1] * len(nums)\n\n        def dfs(i):\n            if i >= len(nums):\n                return 0\n            if memo[i] != -1:\n                return memo[i]\n\n            res = val[nums[i]]\n            if i + 1 < len(nums) and nums[i] + 1 == nums[i + 1]:\n                res += dfs(i + 2)\n            else:\n                res += dfs(i + 1)\n\n            res = max(res, dfs(i + 1))\n            memo[i] = res\n            return res\n\n        return dfs(0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/delete-and-earn.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

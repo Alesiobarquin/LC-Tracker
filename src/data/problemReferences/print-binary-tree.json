@@ -1,0 +1,29 @@
+{
+  "problemId": "print-binary-tree",
+  "approach": "Recursive Interval Placement",
+  "explanation": "### How it works\n\nA tree of height h needs h rows and 2^h − 1 columns. Place each node at the center of its allocated column interval, then give its children the left and right subintervals.\n\n### Steps\n\n1. Measure tree height.\n2. Allocate the required empty string matrix.\n3. Write each node at its interval midpoint.\n4. Recurse into the two child intervals on the next row.\n\n### Complexity\n\n- Time: O(h × 2^h + n), including output initialization.\n- Space: O(h) recursion workspace plus O(h × 2^h) output.",
+  "code": {
+    "python": "class Solution:\n  def printTree(self, root: TreeNode | None) -> list[list[str]]:\n    def maxHeight(root: TreeNode | None) -> int:\n      if not root:\n        return 0\n      return 1 + max(maxHeight(root.left), maxHeight(root.right))\n\n    def dfs(root: TreeNode | None, row: int, left: int, right: int) -> None:\n      if not root:\n        return\n\n      mid = (left + right) // 2\n      ans[row][mid] = str(root.val)\n      dfs(root.left, row + 1, left, mid - 1)\n      dfs(root.right, row + 1, mid + 1, right)\n\n    m = maxHeight(root)\n    n = pow(2, m) - 1\n    ans = [[''] * n for _ in range(m)]\n    dfs(root, 0, 0, len(ans[0]) - 1)\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<string>> printTree(TreeNode* root) {\n    const int m = maxHeight(root);\n    const int n = pow(2, m) - 1;\n    vector<vector<string>> ans(m, vector<string>(n));\n    dfs(root, 0, 0, ans[0].size() - 1, ans);\n    return ans;\n  }\n\n private:\n  int maxHeight(TreeNode* root) {\n    if (root == nullptr)\n      return 0;\n    return 1 + max(maxHeight(root->left), maxHeight(root->right));\n  }\n\n  void dfs(TreeNode* root, int row, int left, int right,\n           vector<vector<string>>& ans) {\n    if (root == nullptr)\n      return;\n\n    const int mid = (left + right) / 2;\n    ans[row][mid] = to_string(root->val);\n    dfs(root->left, row + 1, left, mid - 1, ans);\n    dfs(root->right, row + 1, mid + 1, right, ans);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/655.%20Print%20Binary%20Tree",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "breadth-first-column-offsets",
+      "approach": "Breadth-First Column Offsets",
+      "explanation": "### How it works\n\nAfter measuring height, the root has the center column. Each child offset is a power of two determined by its row, so a queue can place nodes level by level.\n\n### Steps\n\n1. Measure height with level-order traversal.\n2. Allocate the output matrix.\n3. Queue the root at the center column.\n4. Place children using the next-row power-of-two offset.\n\n### Complexity\n\n- Time: O(h × 2^h + n).\n- Space: O(w) queue plus O(h × 2^h) output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/655.%20Print%20Binary%20Tree",
+      "code": {
+        "python": "from collections import deque\n\nclass Solution:\n    def printTree(self, root: 'TreeNode') -> list[list[str]]:\n        if not root:\n            return []\n        level, height = [root], 0\n        while level:\n            height += 1\n            level = [child for node in level for child in (node.left, node.right) if child]\n        width = (1 << height) - 1\n        result = [[''] * width for _ in range(height)]\n        queue = deque([(root, 0, width // 2)])\n        while queue:\n            node, row, column = queue.popleft()\n            result[row][column] = str(node.val)\n            if row + 1 < height:\n                offset = 1 << (height - row - 2)\n                if node.left:\n                    queue.append((node.left, row + 1, column - offset))\n                if node.right:\n                    queue.append((node.right, row + 1, column + offset))\n        return result\n"
+      }
+    }
+  ]
+}

@@ -7,5 +7,20 @@
     "cpp": "class MaxStack {\nprivate:\n    stack<pair<int, int>> stk;\n    priority_queue<pair<int, int>> heap;\n    unordered_set<int> removed;\n    int cnt;\n\npublic:\n    MaxStack() { cnt = 0; }\n\n    void push(int x) {\n        stk.push({x, cnt});\n        heap.push({x, cnt});\n        cnt++;\n    }\n\n    int pop() {\n        while (removed.count(stk.top().second)) {\n            stk.pop();\n        }\n\n        const pair<int, int> p = stk.top();\n        stk.pop();\n        removed.insert(p.second);\n\n        return p.first;\n    }\n\n    int top() {\n        while (removed.count(stk.top().second)) {\n            stk.pop();\n        }\n\n        return stk.top().first;\n    }\n\n    int peekMax() {\n        while (removed.count(heap.top().second)) {\n            heap.pop();\n        }\n\n        return heap.top().first;\n    }\n\n    int popMax() {\n        while (removed.count(heap.top().second)) {\n            heap.pop();\n        }\n\n        const pair<int, int> p = heap.top();\n        heap.pop();\n        removed.insert(p.second);\n\n        return p.first;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-stack.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-stack.md",
+  "alternatives": [
+    {
+      "id": "list-and-reverse-maximum-search",
+      "approach": "List and Reverse Maximum Search",
+      "explanation": "### How it works\n\nUse a list for the ordinary stack operations. Find the maximum by scanning; remove its last occurrence for popMax so ties follow the stack's most-recent rule.\n\n### Steps\n\n1. Append and remove at the list end for push and pop.\n2. Read the last value for top.\n3. Scan for the maximum.\n4. For popMax, scan backward and remove the first matching maximum.\n\n### Complexity\n\n- Time: Amortized `O(1)` push; `O(1)` pop/top; `O(n)` peekMax and popMax.\n- Space: `O(n)` for stored values.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/max-stack.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class MaxStack:\n    def __init__(self):\n        self.values = []\n\n    def push(self, x: int) -> None:\n        self.values.append(x)\n\n    def pop(self) -> int:\n        return self.values.pop()\n\n    def top(self) -> int:\n        return self.values[-1]\n\n    def peekMax(self) -> int:\n        return max(self.values)\n\n    def popMax(self) -> int:\n        largest = max(self.values)\n        for i in range(len(self.values) - 1, -1, -1):\n            if self.values[i] == largest:\n                return self.values.pop(i)\n"
+      }
+    }
+  ]
 }

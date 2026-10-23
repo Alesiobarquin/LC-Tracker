@@ -1,0 +1,29 @@
+{
+  "problemId": "longest-continuous-increasing-subsequence",
+  "approach": "Increasing-Run Start Index",
+  "explanation": "### How it works\n\nA nonincreasing adjacent pair breaks the current increasing run. Track the index after the last break and maximize the current run length.\n\n### Steps\n\n1. Start the current run at index zero.\n2. Reset its start when the current value is not larger than its predecessor.\n3. Measure the current index minus run start plus one.\n4. Keep the maximum.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def findLengthOfLCIS(self, nums: list[int]) -> int:\n    ans = 0\n    j = 0\n\n    for i in range(len(nums)):\n      if i > 0 and nums[i] <= nums[i - 1]:\n        j = i\n      ans = max(ans, i - j + 1)\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findLengthOfLCIS(vector<int>& nums) {\n    int ans = 0;\n\n    for (int l = 0, r = 0; r < nums.size(); ++r) {\n      if (r > 0 && nums[r] <= nums[r - 1])\n        l = r;\n      ans = max(ans, r - l + 1);\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/674.%20Longest%20Continuous%20Increasing%20Subsequence",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "run-length-dynamic-programming",
+      "approach": "Run-Length Dynamic Programming",
+      "explanation": "### How it works\n\nStore the longest increasing run ending at every position. It extends the preceding state by one when the adjacent values increase, and otherwise restarts at one.\n\n### Steps\n\n1. Initialize each position to run length one.\n2. Extend from the preceding position on a strict increase.\n3. Take the largest stored run length.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for the state array.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/674.%20Longest%20Continuous%20Increasing%20Subsequence",
+      "code": {
+        "python": "class Solution:\n    def findLengthOfLCIS(self, nums: list[int]) -> int:\n        lengths = [1] * len(nums)\n        for i in range(1, len(nums)):\n            if nums[i] > nums[i - 1]:\n                lengths[i] = lengths[i - 1] + 1\n        return max(lengths, default=0)\n"
+      }
+    }
+  ]
+}

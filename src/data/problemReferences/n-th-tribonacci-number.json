@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int tribonacci(int n) {\n        int t[] = {0, 1, 1};\n        if (n < 3) return t[n];\n\n        for (int i = 3; i <= n; ++i) {\n            t[i % 3] = t[0] + t[1] + t[2];\n        }\n        return t[n % 3];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=3lpNp5Ojvrw",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-th-tribonacci-number.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-th-tribonacci-number.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe tribonacci sequence is defined similarly to Fibonacci, but instead of summing the previous two numbers, we sum the previous three. The base cases are T(0) = 0, T(1) = 1, and T(2) = 1. For any n >= 3, we compute T(n) = T(n-1) + T(n-2) + T(n-3).\n\nA straightforward recursive approach directly implements this definition. However, this leads to exponential time complexity because we recompute the same subproblems many times. Each call branches into three more calls, creating a tree with many redundant calculations.\n\n### Steps\n\n1. If `n` is `0`, return `0`. If `n` is `1` or `2`, return `1`.\n2. Otherwise, recursively compute `tribonacci(n-1)`, `tribonacci(n-2)`, and `tribonacci(n-3)`.\n3. Return the sum of these three values.\n\n### Complexity\n\n- Time complexity: `O(3 ^ n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def tribonacci(self, n: int) -> int:\n        if n <= 2:\n            return 1 if n != 0 else 0\n        return self.tribonacci(n - 1) + self.tribonacci(n - 2) + self.tribonacci(n - 3)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-th-tribonacci-number.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution wastes time by recomputing the same values over and over. We can fix this with memoization: store each computed result in a cache. Before computing T(n), check if it already exists in the cache. If so, return the cached value immediately. This transforms our exponential algorithm into a linear one, since each unique subproblem is solved only once.\n\n### Steps\n\n1. Create a `dp` hash map or dictionary to store computed values.\n2. If `n` is `0`, return `0`. If `n` is `1` or `2`, return `1`.\n3. If `n` is already in the `dp` cache, return the cached value.\n4. Otherwise, compute `tribonacci(n-1) + tribonacci(n-2) + tribonacci(n-3)`, store it in the `dp` cache, and return it.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def __init__(self):\n        self.dp = {}\n\n    def tribonacci(self, n: int) -> int:\n        if n <= 2:\n            return 1 if n != 0 else 0\n        if n in self.dp:\n            return self.dp[n]\n\n        self.dp[n] = self.tribonacci(n - 1) + self.tribonacci(n - 2) + self.tribonacci(n - 3)\n        return self.dp[n]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-th-tribonacci-number.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/241.%20Different%20Ways%20to%20Add%20Parentheses",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "bottom-up-expression-intervals",
+      "approach": "Bottom-Up Expression Intervals",
+      "explanation": "### How it works\n\nParse the expression into numbers and operators. For each interval, try every possible final operator and combine all results from its left and right intervals. Keeping duplicates preserves distinct parenthesizations with equal results.\n\n### Steps\n\n1. Tokenize numbers and operators without using eval.\n2. Seed one-number intervals.\n3. Build longer intervals by splitting at every operator.\n4. Combine every left/right result pair with that operator.\n\n### Complexity\n\n- Time: `O(C × n²)` is a conservative upper bound for n numbers and C full parenthesizations; the output is already exponential.\n- Space: `O(C × n²)` as a conservative bound including all interval result lists.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/241.%20Different%20Ways%20to%20Add%20Parentheses",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "import re\n\nclass Solution:\n    def diffWaysToCompute(self, expression: str) -> list[int]:\n        tokens = re.findall(r'[0-9]+|[+*-]', expression)\n        numbers = [int(value) for value in tokens[::2]]\n        operators = tokens[1::2]\n        n = len(numbers)\n        dp = [[[] for _ in range(n)] for _ in range(n)]\n        for i, value in enumerate(numbers):\n            dp[i][i] = [value]\n        for length in range(2, n + 1):\n            for left in range(n - length + 1):\n                right = left + length - 1\n                for split in range(left, right):\n                    for a in dp[left][split]:\n                        for b in dp[split + 1][right]:\n                            op = operators[split]\n                            dp[left][right].append(a + b if op == '+' else a - b if op == '-' else a * b)\n        return dp[0][-1]\n"
+      }
+    }
+  ]
 }

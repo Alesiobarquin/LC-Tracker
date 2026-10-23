@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string minRemoveToMakeValid(string s) {\n        int openCnt = 0, closeCnt = 0;\n        for (char& c : s) {\n            if (c == ')') closeCnt++;\n        }\n\n        string res;\n        for (char& c : s) {\n            if (c == '(') {\n                if (openCnt == closeCnt) continue;\n                openCnt++;\n            } else if (c == ')') {\n                closeCnt--;\n                if (openCnt == 0) continue;\n                openCnt--;\n            }\n            res.push_back(c);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-remove-to-make-valid-parentheses.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-remove-to-make-valid-parentheses.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nA string of parentheses is valid when every opening parenthesis has a matching closing one, and they nest properly. The key insight is that we can process the string in two passes. In the first pass (left to right), we skip any closing parenthesis that doesn't have a matching open one. After this pass, we know exactly how many unmatched opening parentheses remain. In the second pass (right to left), we remove those excess opening parentheses from the end.\n\n### Steps\n\n1. Initialize an empty result list and a counter `cnt` to track unmatched opening parentheses.\n2. First pass (left to right): For each character:\n    - If it's `(`, add it to result and increment `cnt`.\n    - If it's `)` and `cnt > 0`, add it and decrement `cnt` (it matches an open paren).\n    - If it's `)` and `cnt == 0`, skip it (no matching open paren).\n    - If it's any other character, add it to result.\n3. Second pass (right to left): Traverse the result and skip the first `cnt` opening parentheses.\n4. Reverse and return the filtered result as a string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def minRemoveToMakeValid(self, s: str) -> str:\n        res = []\n        cnt = 0  # extra ( parentheses\n        for c in s:\n            if c == \"(\":\n                res.append(c)\n                cnt += 1\n            elif c == \")\" and cnt > 0:\n                res.append(c)\n                cnt -= 1\n            elif c != \")\":\n                res.append(c)\n\n        filtered = []\n        for c in reversed(res):\n            if c == \"(\" and cnt > 0:\n                cnt -= 1\n            else:\n                filtered.append(c)\n        return \"\".join(reversed(filtered))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-remove-to-make-valid-parentheses.md",
+      "id": "stack"
+    },
+    {
+      "approach": "Without Stack",
+      "explanation": "### How it works\n\nThis approach follows the same logic as the stack solution but modifies the string in place. Instead of building a new result list during the first pass, we mark invalid closing parentheses directly in the original array. The second pass still removes excess opening parentheses from the right side.\n\n### Steps\n\n1. Convert the string to a character array and initialize counter `cnt` for unmatched opening parentheses.\n2. First pass: Iterate through the array:\n    - If it's `(`, increment `cnt`.\n    - If it's `)` and `cnt > 0`, decrement `cnt`.\n    - If it's `)` and `cnt == 0`, mark this position as empty (invalid closing paren).\n3. Second pass (right to left): Skip the first `cnt` opening parentheses while building the result.\n4. Reverse and return the result string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def minRemoveToMakeValid(self, s: str) -> str:\n        arr = list(s)\n        cnt = 0  # extra ( parentheses\n        for i, c in enumerate(s):\n            if c == \"(\":\n                cnt += 1\n            elif c == \")\" and cnt > 0:\n                cnt -= 1\n            elif c == \")\":\n                arr[i] = ''\n\n        res = []\n        for c in reversed(arr):\n            if c == '(' and cnt > 0:\n                cnt -= 1\n            else:\n                res.append(c)\n\n        return ''.join(reversed(res))\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-remove-to-make-valid-parentheses.md",
+      "id": "without-stack"
+    }
+  ]
 }

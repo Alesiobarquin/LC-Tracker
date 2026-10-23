@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool validWordAbbreviation(string word, string abbr) {\n        int n = word.length(), m = abbr.length();\n        int i = 0, j = 0;\n\n        while (i < n && j < m) {\n            if (abbr[j] == '0') return false;\n\n            if (isalpha(abbr[j])) {\n                if (word[i] == abbr[j]) {\n                    i++; j++;\n                } else {\n                    return false;\n                }\n            } else {\n                int subLen = 0;\n                while (j < m && isdigit(abbr[j])) {\n                    subLen = subLen * 10 + (abbr[j] - '0');\n                    j++;\n                }\n                i += subLen;\n            }\n        }\n\n        return i == n && j == m;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-word-abbreviation.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-word-abbreviation.md",
+  "alternatives": [
+    {
+      "id": "compile-a-fixed-length-pattern",
+      "approach": "Compile a Fixed-Length Pattern",
+      "explanation": "### How it works\n\nTranslate each numeric abbreviation token into a fixed number of wildcard characters and keep letters literal. A full regular-expression match enforces that the whole word is consumed.\n\n### Steps\n\n1. Scan letters and decimal skip counts.\n2. Reject leading zeros and skips longer than the whole word.\n3. Compile skips as fixed-length wildcard groups and escape literal letters.\n4. Require a full match.\n\n### Complexity\n\n- Time: `O(n + m)` under the bounded word/abbreviation lengths, with fixed-size wildcard groups and no variable-length alternatives.\n- Space: `O(m)` for pattern pieces.\n\n### Things to watch for\n\n- A numeric token cannot begin with zero.\n- Full matching prevents accepting an abbreviation for only a prefix.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/valid-word-abbreviation.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "import re\n\nclass Solution:\n    def validWordAbbreviation(self, word: str, abbr: str) -> bool:\n        pieces, i = [], 0\n        while i < len(abbr):\n            if abbr[i].isdigit():\n                if abbr[i] == '0':\n                    return False\n                start = i\n                while i < len(abbr) and abbr[i].isdigit():\n                    i += 1\n                count = int(abbr[start:i])\n                if count > len(word):\n                    return False\n                pieces.append('.{' + str(count) + '}')\n            else:\n                pieces.append(re.escape(abbr[i]))\n                i += 1\n        return re.fullmatch(''.join(pieces), word) is not None\n"
+      }
+    }
+  ]
 }

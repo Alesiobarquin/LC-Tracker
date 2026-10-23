@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    Node* cloneTree(Node* root) {\n        if (!root) {\n            return root;\n        }\n        \n        Node* new_root = new Node(root->val);\n        // Starting point to kick off the BFS visits.\n        queue<pair<Node*, Node*>> q;\n        q.push({root, new_root});\n        \n        while (!q.empty()) {\n            // Get the element from the head of the queue.\n            auto [old_node, new_node] = q.front();\n            q.pop();\n            \n            for (Node* child_node : old_node->children) {\n                Node* new_child_node = new Node(child_node->val);\n                // Make a copy for each child node.\n                new_node->children.push_back(new_child_node);\n                // Schedule a visit to copy the child nodes of each child node.\n                q.push({child_node, new_child_node});\n            }\n        }\n        \n        return new_root;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-n-ary-tree.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-n-ary-tree.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nCloning an N-ary tree is a natural fit for recursion. For each node, we create a copy with the same value, then recursively clone all of its children. The recursive structure mirrors the tree structure itself, making the solution straightforward and elegant.\n\n### Steps\n\n1. Base case: If the node is `null`, return `null`.\n2. Create a new node with the same value as the current node.\n3. For each child of the current node, recursively clone the child and add it to the new node's children list.\n4. Return the newly created node.\n\n### Complexity\n\n- Time complexity: `O(M)`\n- Space complexity: `O(M)`\n\n>  Where `M` is the number of nodes in the input tree.",
+      "code": {
+        "python": "class Solution:\n    def cloneTree(self, root: 'Node') -> 'Node':\n\n        # Base case: empty node.\n        if not root:\n            return root\n\n        # First, copy the node itself.\n        node_copy = Node(root.val)\n\n        # Then, recursively clone the sub-trees.\n        for child in root.children:\n            node_copy.children.append(self.cloneTree(child))\n\n        return node_copy\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-n-ary-tree.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "DFS with Iteration",
+      "explanation": "### How it works\n\nWe can avoid recursion by using an explicit stack. We maintain pairs of (original node, cloned node) on the stack. When we pop a pair, we iterate through the original node's children, create cloned children, link them to the cloned parent, and push the new pairs onto the stack for further processing.\n\n### Steps\n\n1. If root is `null`, return `null`.\n2. Create the cloned root and push the pair (root, new_root) onto a stack.\n3. While the stack is not empty:\n   - Pop a pair (old_node, new_node).\n   - For each child of old_node:\n     - Create a new cloned child node.\n     - Append the cloned child to new_node's children.\n     - Push the pair (child, new_child) onto the stack.\n4. Return the cloned root.\n\n### Complexity\n\n- Time complexity: `O(M)`\n- Space complexity: `O(log_{n}{M})`\n\n>  Where `M` is the number of nodes in the input tree and `N` is the maximum number of children that a node can have",
+      "code": {
+        "python": "class Solution:\n    def cloneTree(self, root: 'Node') -> 'Node':\n\n        if not root:\n            return root\n\n        new_root = Node(root.val)\n        # Starting point to kick off the DFS visits.\n        stack = [(root, new_root)]\n\n        while stack:\n            old_node, new_node = stack.pop()\n            for child_node in old_node.children:\n                new_child_node = Node(child_node.val)\n\n                # Make a copy for each child node.\n                new_node.children.append(new_child_node)\n\n                # Schedule a visit to copy the child nodes of each child node.\n                stack.append((child_node, new_child_node))\n\n        return new_root\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/clone-n-ary-tree.md",
+      "id": "dfs-with-iteration"
+    }
+  ]
 }

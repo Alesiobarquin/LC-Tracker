@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/362.%20Design%20Hit%20Counter",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "timestamp-queue",
+      "approach": "Timestamp Queue",
+      "explanation": "### How it works\n\nKeep each hit timestamp in a queue. Chronological calls mean expired hits form a prefix that can be removed before answering a query.\n\n### Steps\n\n1. Append every hit timestamp.\n2. Before counting, remove timestamps at most current_time - 300.\n3. Return the number of remaining hits.\n\n### Complexity\n\n- Time: `O(1)` per hit and amortized `O(1)` per removed hit; one query may remove many.\n- Space: `O(H)` for stored hits between cleanups, rather than fixed-size buckets.\n\n### Things to watch for\n\n- A hit exactly 300 seconds old is excluded.\n- Repeated hits at one timestamp count separately.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/362.%20Design%20Hit%20Counter",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import deque\n\nclass HitCounter:\n    def __init__(self):\n        self.hits = deque()\n\n    def hit(self, timestamp: int) -> None:\n        self.hits.append(timestamp)\n\n    def getHits(self, timestamp: int) -> int:\n        while self.hits and self.hits[0] <= timestamp - 300:\n            self.hits.popleft()\n        return len(self.hits)\n"
+      }
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class SeatManager {\nprivate:\n    set<int> available;\n    int nextSeat;\n\npublic:\n    SeatManager(int n) {\n        nextSeat = 1;\n    }\n\n    int reserve() {\n        if (!available.empty()) {\n            int seat = *available.begin();\n            available.erase(available.begin());\n            return seat;\n        }\n        return nextSeat++;\n    }\n\n    void unreserve(int seatNumber) {\n        available.insert(seatNumber);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=ahobllKXEEY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/seat-reservation-manager.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/seat-reservation-manager.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest way to manage seat reservations is to track each seat's status with a boolean array. When someone reserves, we scan from the beginning to find the first unreserved seat. When someone unreserves, we simply mark that seat as available again. This guarantees we always return the smallest available seat number, but the linear scan makes reservations slow for large numbers of seats.\n\n### Steps\n\n1. Initialize a boolean array `seats` of size `n`, where `false` means unreserved.\n2. For `reserve()`:\n    - Scan through the array from index `0`.\n    - Find the first seat that is `false` (unreserved).\n    - Mark it as `true` (reserved) and return the seat number (index + 1).\n3. For `unreserve(seatNumber)`:\n    - Mark `seats[seatNumber - 1]` as `false`.\n\n### Complexity\n\n- Time complexity:\n    - `O(n)` time for initialization.\n    - `O(n)` time for each `reserve()` function call.\n    - `O(1)` time for each `unreserve()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class SeatManager:\n\n    def __init__(self, n: int):\n        self.seats = [False] * n\n\n    def reserve(self) -> int:\n        for i in range(len(self.seats)):\n            if not self.seats[i]:\n                self.seats[i] = True\n                return i + 1\n\n    def unreserve(self, seatNumber: int) -> None:\n        self.seats[seatNumber - 1] = False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/seat-reservation-manager.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Min-Heap",
+      "explanation": "### How it works\n\nTo efficiently retrieve the smallest available seat, we can use a min-heap. By initializing the heap with all seat numbers from 1 to `n`, the smallest seat is always at the top. Reserving pops from the heap, and unreserving pushes back onto it. The heap maintains the ordering automatically.\n\n### Steps\n\n1. Initialize a min-heap with all seat numbers from 1 to `n`.\n2. For `reserve()`:\n    - Pop and return the minimum element from the heap.\n3. For `unreserve(seatNumber)`:\n    - Push `seatNumber` back into the heap.\n\n### Complexity\n\n- Time complexity:\n    - `O(n log n)` time for initialization.\n    - `O(log n)` time for each `reserve()` function call.\n    - `O(log n)` time for each `unreserve()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "import heapq\n\nclass SeatManager:\n    def __init__(self, n: int):\n        self.unres = list(range(1, n + 1))\n        heapq.heapify(self.unres)\n\n    def reserve(self) -> int:\n        return heapq.heappop(self.unres)\n\n    def unreserve(self, seatNumber: int) -> None:\n        heapq.heappush(self.unres, seatNumber)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/seat-reservation-manager.md",
+      "id": "min-heap"
+    }
+  ]
 }

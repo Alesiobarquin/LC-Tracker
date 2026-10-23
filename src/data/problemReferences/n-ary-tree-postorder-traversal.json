@@ -7,5 +7,16 @@
     "cpp": "/*\n// Definition for a Node.\nclass Node {\npublic:\n    int val;\n    vector<Node*> children;\n\n    Node() {}\n\n    Node(int _val) {\n        val = _val;\n    }\n\n    Node(int _val, vector<Node*> _children) {\n        val = _val;\n        children = _children;\n    }\n};\n*/\n\nclass Solution {\npublic:\n    vector<int> postorder(Node* root) {\n        vector<int> res;\n        if (!root) return res;\n\n        stack<pair<Node*, bool>> st;\n        st.push({root, false});\n\n        while (!st.empty()) {\n            auto [node, visited] = st.top();\n            st.pop();\n\n            if (visited) {\n                res.push_back(node->val);\n            } else {\n                st.push({node, true});\n                for (int i = (int)node->children.size() - 1; i >= 0; i--) {\n                    st.push({node->children[i], false});\n                }\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-ary-tree-postorder-traversal.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-ary-tree-postorder-traversal.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nPostorder traversal means we visit all children of a node before visiting the node itself. For an N-ary tree, this translates to recursively processing each child subtree from left to right, then adding the current node's value to the result. The recursive approach naturally handles this ordering since the node's value is appended only after all recursive calls on its children have completed.\n\n### Steps\n\n1. Create an empty `res` list.\n2. Define a recursive helper function `dfs(node)`:\n    - If the node is `null`, return immediately.\n    - For each `child` of the node, recursively call `dfs(child)`.\n    - After processing all children, append the node's value to the `res` list.\n3. Call `dfs(root)` and return the `res` list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)` for the recursion stack.",
+      "code": {
+        "python": "from typing import List\n\n\"\"\"\n# Definition for a Node.\nclass Node:\n    def __init__(self, val: Optional[int] = None, children: Optional[List['Node']] = None):\n        self.val = val\n        self.children = children\n\"\"\"\n\nclass Solution:\n    def postorder(self, root: 'Node') -> List[int]:\n        res = []\n\n        def dfs(node):\n            if not node:\n                return\n\n            for child in node.children:\n                dfs(child)\n            res.append(node.val)\n\n        dfs(root)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/n-ary-tree-postorder-traversal.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

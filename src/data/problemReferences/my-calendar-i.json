@@ -7,5 +7,25 @@
     "cpp": "class MyCalendar {\nprivate:\n    set<pair<int, int>> events;\n\npublic:\n    MyCalendar() {}\n\n    bool book(int startTime, int endTime) {\n        if (startTime >= endTime) {\n            return false;\n        }\n\n        auto next = events.lower_bound({startTime, startTime});\n        if (next != events.end() && next->first < endTime) {\n            return false;\n        }\n        if (next != events.begin()) {\n            auto prev = std::prev(next);\n            if (prev->second > startTime) {\n                return false;\n            }\n        }\n\n        events.insert({startTime, endTime});\n        return true;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/my-calendar-i.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/my-calendar-i.md",
+  "alternatives": [
+    {
+      "approach": "Iteration",
+      "explanation": "### How it works\n\nTwo events overlap if one starts before the other ends and vice versa. For each new booking request, we need to check whether it conflicts with any existing event. We can store all booked events in a list and iterate through them to detect overlaps. If no conflict is found, we add the new event to the list.\n\n### Steps\n\n1. Maintain a list of booked events, where each event is stored as a `(start, end)` pair.\n2. When `book(startTime, endTime)` is called:\n    - Iterate through all existing events.\n    - For each event `(start, end)`, check if `startTime < end` and `start < endTime`. If both conditions are `true`, there is an overlap, so return `false`.\n3. If no overlap is found, append the new event to the list and return `true`.\n\n### Complexity\n\n- Time complexity: `O(n)` for each `book()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class MyCalendar:\n\n    def __init__(self):\n        self.events = []\n\n    def book(self, startTime: int, endTime: int) -> bool:\n        for start, end in self.events:\n            if startTime < end and start < endTime:\n                return False\n\n        self.events.append((startTime, endTime))\n        return True\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/my-calendar-i.md",
+      "id": "iteration"
+    },
+    {
+      "approach": "Binary Search Tree",
+      "explanation": "### How it works\n\nWe can organize events in a binary search tree where each node represents a booked interval. The tree is ordered by start times: intervals that end before a node's start time go to the left subtree, and intervals that start after a node's end time go to the right subtree. When inserting a new interval, we traverse the tree to find where it fits without overlapping any existing node. If it overlaps with a node during traversal, we reject it.\n\n### Steps\n\n1. Each tree node stores `(start, end)` and has `left` and `right` children.\n2. When `book(startTime, endTime)` is called:\n    - If the tree is empty, create the root node with this interval and return `true`.\n    - Otherwise, traverse from the root:\n        - If `endTime <= node.start`, the new interval belongs in the `left` subtree.\n        - If `startTime >= node.end`, the new interval belongs in the `right` subtree.\n        - Otherwise, there is an overlap, so return `false`.\n    - When reaching a `null` child pointer, insert the new node there and return `true`.\n\n### Complexity\n\n- Time complexity: `O(log n)` in average case, `O(n)` in worst case for each `book()` function call.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class TreeNode:\n    def __init__(self, start: int, end: int):\n        self.start = start\n        self.end = end\n        self.left = None\n        self.right = None\n\nclass MyCalendar:\n\n    def __init__(self):\n        self.root = None\n\n    def _insert(self, node: TreeNode, start: int, end: int) -> bool:\n        if end <= node.start:\n            if not node.left:\n                node.left = TreeNode(start, end)\n                return True\n            return self._insert(node.left, start, end)\n        elif start >= node.end:\n            if not node.right:\n                node.right = TreeNode(start, end)\n                return True\n            return self._insert(node.right, start, end)\n        else:\n            return False\n\n    def book(self, startTime: int, endTime: int) -> bool:\n        if not self.root:\n            self.root = TreeNode(startTime, endTime)\n            return True\n        return self._insert(self.root, startTime, endTime)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/my-calendar-i.md",
+      "id": "binary-search-tree"
+    }
+  ]
 }

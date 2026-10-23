@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int minOperations(vector<string>& logs) {\n        int res = 0;\n        for (auto& log : logs) {\n            if (log == \"./\") {\n                continue;\n            }\n            if (log == \"../\") {\n                res = max(0, res - 1);\n            } else {\n                res++;\n            }\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/crawler-log-folder.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/crawler-log-folder.md",
+  "alternatives": [
+    {
+      "approach": "Stack",
+      "explanation": "### How it works\n\nA file system path can be naturally modeled using a stack. Moving into a folder pushes onto the stack, while moving to the parent folder pops from the stack. The operation `\"./\"` does nothing (stay in current folder). At the end, the stack's size represents how deep we are from the main folder, which equals the minimum operations needed to return.\n\n### Steps\n\n1. Initialize an empty stack.\n2. For each log operation:\n    - If it is `\"../\"`, pop from the stack if it is not empty (move to parent).\n    - If it is `\"./\"`, do nothing (stay in current folder).\n    - Otherwise, push the folder name onto the stack (move into child folder).\n3. Return the size of the stack, representing the depth from the main folder.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom math import log\n\nclass Solution:\n    def minOperations(self, logs: List[str]) -> int:\n        stack = []\n        for log in logs:\n            if log == \"../\":\n                if stack:\n                    stack.pop()\n            elif log != \"./\":\n                stack.append(log)\n        return len(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/crawler-log-folder.md",
+      "id": "stack"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "employee-importance",
+  "approach": "Employee Lookup and Recursive Aggregation",
+  "explanation": "### How it works\n\nMap IDs to employee records, then recursively sum the selected employee's importance and that of every subordinate in the guaranteed hierarchy.\n\n### Steps\n\n1. Build the ID lookup.\n2. Add the selected employee's importance.\n3. Recurse into each listed subordinate.\n4. Return the combined sum.\n\n### Complexity\n\n- Time: O(n + r) for n employee records and r reachable employees.\n- Space: O(n) lookup plus O(h) recursion.",
+  "code": {
+    "python": "class Solution:\n  def getImportance(self, employees: list['Employee'], id: int) -> int:\n    idToEmployee = {employee.id: employee for employee in employees}\n\n    def dfs(id: int) -> int:\n      values = idToEmployee[id].importance\n      for subId in idToEmployee[id].subordinates:\n        values += dfs(subId)\n      return values\n\n    return dfs(id)\n",
+    "cpp": "class Solution {\n public:\n  int getImportance(vector<Employee*> employees, int id) {\n    unordered_map<int, Employee*> idToEmployee;\n\n    for (Employee* employee : employees)\n      idToEmployee[employee->id] = employee;\n\n    return dfs(id, idToEmployee);\n  }\n\n private:\n  int dfs(int id, const unordered_map<int, Employee*>& idToEmployee) {\n    int values = 0;\n\n    for (const int subId : idToEmployee.at(id)->subordinates)\n      values += dfs(subId, idToEmployee);\n\n    return idToEmployee.at(id)->importance + values;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/690.%20Employee%20Importance",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-hierarchy-traversal",
+      "approach": "Iterative Hierarchy Traversal",
+      "explanation": "### How it works\n\nUse an explicit work stack of employee IDs to aggregate the selected hierarchy without recursive calls.\n\n### Steps\n\n1. Build the ID lookup.\n2. Push the selected ID.\n3. Pop an employee, add importance, and push subordinate IDs.\n4. Continue until the stack is empty.\n\n### Complexity\n\n- Time: O(n + r).\n- Space: O(n) lookup and traversal stack.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/690.%20Employee%20Importance",
+      "code": {
+        "python": "class Solution:\n    def getImportance(self, employees: list['Employee'], id: int) -> int:\n        by_id = {employee.id: employee for employee in employees}\n        pending, total = [id], 0\n        while pending:\n            employee = by_id[pending.pop()]\n            total += employee.importance\n            pending.extend(employee.subordinates)\n        return total\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "problemId": "self-dividing-numbers",
+  "approach": "Decimal-String Digit Checks",
+  "explanation": "### How it works\n\nA number is self-dividing when every decimal digit is nonzero and divides the original value. Check each candidate's string digits directly.\n\n### Steps\n\n1. Visit every number in the inclusive range.\n2. Convert it into decimal digits.\n3. Reject zero digits and nondividing digits.\n4. Collect candidates passing every test.\n\n### Complexity\n\n- Time: O(R × d) bounded-integer operations for R candidates and maximum d digits.\n- Space: O(d) temporary digit text, excluding output.",
+  "code": {
+    "python": "class Solution:\n  def selfDividingNumbers(self, left: int, right: int) -> list[int]:\n    return [num for num in range(left, right + 1) if all(n != 0 and num % n == 0 for n in map(int, str(num)))]\n",
+    "cpp": "class Solution {\n public:\n  vector<int> selfDividingNumbers(int left, int right) {\n    vector<int> ans;\n\n    for (int num = left; num <= right; ++num)\n      if (selfDividingNumbers(num))\n        ans.push_back(num);\n\n    return ans;\n  }\n\n private:\n  bool selfDividingNumbers(int num) {\n    for (int n = num; n > 0; n /= 10)\n      if (n % 10 == 0 || num % (n % 10) != 0)\n        return false;\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/728.%20Self%20Dividing%20Numbers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "arithmetic-digit-extraction",
+      "approach": "Arithmetic Digit Extraction",
+      "explanation": "### How it works\n\nRepeated remainder and division by ten expose every digit without converting the candidate to text.\n\n### Steps\n\n1. Copy each candidate into a working value.\n2. Extract its last digit.\n3. Reject zero or a digit that does not divide the original number.\n4. Remove that digit and continue until all pass.\n\n### Complexity\n\n- Time: O(R × d) bounded-integer operations.\n- Space: O(1) auxiliary space, excluding output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/728.%20Self%20Dividing%20Numbers",
+      "code": {
+        "python": "class Solution:\n    def selfDividingNumbers(self, left: int, right: int) -> list[int]:\n        result = []\n        for number in range(left, right + 1):\n            working = number\n            while working:\n                digit = working % 10\n                if digit == 0 or number % digit:\n                    break\n                working //= 10\n            if working == 0:\n                result.append(number)\n        return result\n"
+      }
+    }
+  ]
+}

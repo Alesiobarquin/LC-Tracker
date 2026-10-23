@@ -1,0 +1,29 @@
+{
+  "problemId": "search-in-a-sorted-array-of-unknown-size",
+  "approach": "Binary Search the Stated Index Bound",
+  "explanation": "### How it works\n\nThe problem bounds the hidden array length by 10000 and returns a large sentinel beyond its end. Binary-search that known index range through the reader API, then check the located value.\n\n### Steps\n\n1. Search the index range from zero to 10000.\n2. Compare reader.get(mid) with the target.\n3. Narrow to the first value at least the target.\n4. Verify equality before returning the index.\n\n### Complexity\n\n- Time: O(log 10000) reader calls.\n- Space: O(1) auxiliary space.\n\n### Things to watch for\n\n- This method relies on the problem's 10000-element upper bound and out-of-range sentinel.",
+  "code": {
+    "python": "from bisect import bisect\nimport bisect\n\n# \"\"\"\n# This is ArrayReader's API interface.\n# You should not implement it, or speculate about its implementation\n# \"\"\"\n# Class ArrayReader:\n#   def get(self, index: int) -> int:\n\nclass Solution:\n  def search(self, reader: 'ArrayReader', target: int) -> int:\n    l = bisect.bisect_left(range(10**4), target,\n                           key=lambda m: reader.get(m))\n    return l if reader.get(l) == target else -1\n",
+    "cpp": "/**\n * // This is the ArrayReader's API interface.\n * // You should not implement it, or speculate about its implementation\n * class ArrayReader {\n *  public:\n *   int get(int index);\n * };\n */\n\nclass Solution {\n public:\n  int search(const ArrayReader& reader, int target) {\n    int l = 0;\n    int r = 10'000;\n\n    while (l < r) {\n      const int m = (l + r) / 2;\n      if (reader.get(m) >= target)\n        r = m;\n      else\n        l = m + 1;\n    }\n\n    return reader.get(l) == target ? l : -1;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/702.%20Search%20in%20a%20Sorted%20Array%20of%20Unknown%20Size",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "exponential-bracketing-then-binary-search",
+      "approach": "Exponential Bracketing Then Binary Search",
+      "explanation": "### How it works\n\nDouble the upper index until its value reaches or exceeds the target. The bracket is proportional to the target position rather than a predetermined maximum size.\n\n### Steps\n\n1. Start with upper index one.\n2. Double it while the reader value is below the target.\n3. Binary-search the resulting bracket.\n4. Verify the final candidate value.\n\n### Complexity\n\n- Time: O(log(p + 2)) reader calls for target or insertion position p.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/702.%20Search%20in%20a%20Sorted%20Array%20of%20Unknown%20Size",
+      "code": {
+        "python": "class Solution:\n    def search(self, reader: 'ArrayReader', target: int) -> int:\n        low, high = 0, 1\n        while reader.get(high) < target:\n            low, high = high + 1, high * 2\n        while low < high:\n            middle = (low + high) // 2\n            if reader.get(middle) < target:\n                low = middle + 1\n            else:\n                high = middle\n        return low if reader.get(low) == target else -1\n"
+      }
+    }
+  ]
+}

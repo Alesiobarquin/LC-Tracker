@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int partitionString(string s) {\n        int res = 1, mask = 0;\n        for (char c : s) {\n            int i = c - 'a';\n            if (mask & (1 << i)) {\n                mask = 0;\n                res++;\n            }\n            mask |= (1 << i);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=CKZPdiXiQf0",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/optimal-partition-of-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/optimal-partition-of-string.md",
+  "alternatives": [
+    {
+      "approach": "Greedy (Hash Set)",
+      "explanation": "### How it works\n\nTo minimize the number of substrings, we want each substring to be as long as possible while containing only unique characters. A greedy approach works perfectly here: extend the current substring until we encounter a duplicate character, then start a new substring.\n\nWe use a hash set to track characters in the current substring. When we see a character already in the set, we've found a duplicate, so we increment our count and clear the set to start fresh.\n\n### Steps\n\n1. Initialize a set `curSet` to track characters in the current partition and `res = 1` for the result count.\n2. Iterate through each character in the string:\n    - If the character is already in `curSet`, increment `res` and clear the set.\n    - Add the current character to `curSet`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` since we have at most `26` different characters.",
+      "code": {
+        "python": "class Solution:\n    def partitionString(self, s: str) -> int:\n        curSet = set()\n        res = 1\n        for c in s:\n            if c in curSet:\n                res += 1\n                curSet.clear()\n            curSet.add(c)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/optimal-partition-of-string.md",
+      "id": "greedy-hash-set"
+    }
+  ]
 }

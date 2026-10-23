@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> fullBloomFlowers(vector<vector<int>>& flowers, vector<int>& people) {\n        vector<pair<int, int>> events;\n        for (auto& f : flowers) {\n            events.emplace_back(f[0], 1);\n            events.emplace_back(f[1] + 1, -1);\n        }\n\n        sort(events.begin(), events.end());\n        vector<pair<int, int>> queries;\n        for (int i = 0; i < people.size(); i++) {\n            queries.emplace_back(people[i], i);\n        }\n\n        sort(queries.begin(), queries.end());\n        vector<int> res(people.size());\n        int count = 0, j = 0;\n\n        for (auto& [time, index] : queries) {\n            while (j < events.size() && events[j].first <= time) {\n                count += events[j++].second;\n            }\n            res[index] = count;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-flowers-in-full-bloom.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-flowers-in-full-bloom.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check each person's arrival time against every flower's bloom period. A flower is visible to a person if the arrival time falls within the flower's start and end times (inclusive). We count all such flowers for each person.\n\n### Steps\n\n1. For each person in the `people` array, initialize a counter to zero.\n2. For each flower, check if the person's arrival time is within the flower's bloom period (`start <= time <= end`).\n3. If `yes`, increment the counter.\n4. Store the count in the result array and return it.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m)` for the output array.\n\n> Where `n` is the size of the array `flowers`, and `m` is the size of the array `people`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def fullBloomFlowers(self, flowers: List[List[int]], people: List[int]) -> List[int]:\n        res = []\n\n        for time in people:\n            cnt = 0\n            for start, end in flowers:\n                if start <= time <= end:\n                    cnt += 1\n            res.append(cnt)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-flowers-in-full-bloom.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Min-Heaps",
+      "explanation": "### How it works\n\nInstead of checking every flower for every person, we can process people in sorted order of their arrival times. By using two min-heaps (one for start times, one for end times), we can efficiently track how many flowers have started blooming and how many have finished. The difference gives us the count of flowers currently in bloom.\n\n### Steps\n\n1. Sort people by arrival time while preserving their original indices.\n2. Create two min-heaps: one containing all flower start times, another containing all flower end times.\n3. For each person (in sorted order):\n    - Pop all start times less than or equal to the person's arrival time and increment the `count`.\n    - Pop all end times strictly less than the person's arrival time and decrement the `count`.\n    - Record the current `count` for this person's original index.\n4. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(m log m + n log n)`\n- Space complexity: `O(m + n)`\n\n> Where `n` is the size of the array `flowers`, and `m` is the size of the array `people`.",
+      "code": {
+        "python": "from typing import List\nimport heapq\n\nclass Solution:\n    def fullBloomFlowers(self, flowers: List[List[int]], people: List[int]) -> List[int]:\n        people = sorted((p, i) for i, p in enumerate(people))\n        res = [0] * len(people)\n        count = 0\n\n        start = [f[0] for f in flowers]\n        end = [f[1] for f in flowers]\n\n        heapq.heapify(start)\n        heapq.heapify(end)\n\n        for p, i in people:\n            while start and start[0] <= p:\n                heapq.heappop(start)\n                count += 1\n            while end and end[0] < p:\n                heapq.heappop(end)\n                count -= 1\n            res[i] = count\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-flowers-in-full-bloom.md",
+      "id": "two-min-heaps"
+    }
+  ]
 }

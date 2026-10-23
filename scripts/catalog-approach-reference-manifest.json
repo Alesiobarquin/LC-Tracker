@@ -1,0 +1,2551 @@
+{
+  "repository": "https://github.com/walkccc/LeetCode",
+  "revision": "9b85aa15e086d0b5dc1ead7184bca547942e6ff6",
+  "licenseSha256": "fdf5471fdcd13a27ce9f89c336229e4f7b9a90c3b8f59e0f618aab846729a67e",
+  "problems": [
+    {
+      "id": "divide-two-integers",
+      "number": 29,
+      "difficulty": "Medium",
+      "folder": "solutions/29. Divide Two Integers",
+      "default": "Repeated Doubling",
+      "sources": {
+        "python": {
+          "path": "solutions/29. Divide Two Integers/29.py",
+          "sha256": "2fdab0f78e76738a99839262d26315902e577c29a1808d8458066a33fd689fac"
+        },
+        "cpp": {
+          "path": "solutions/29. Divide Two Integers/29.cpp",
+          "sha256": "f93a3d7e3ef034df9b32a190d70c01003b1f3cd4a65518a28a6adfb2281cca66"
+        }
+      },
+      "alternative": {
+        "approach": "Descending Bit Scan",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "populating-next-right-pointers-in-each-node-ii",
+      "number": 117,
+      "difficulty": "Medium",
+      "folder": "solutions/117. Populating Next Right Pointers in Each Node II",
+      "default": "Link the Next Level In Place",
+      "sources": {
+        "python": {
+          "path": "solutions/117. Populating Next Right Pointers in Each Node II/117.py",
+          "sha256": "1f8acd6137ba92f56a85cfe3d686197ce78284d6899586a429e08eb58ef39931"
+        },
+        "cpp": {
+          "path": "solutions/117. Populating Next Right Pointers in Each Node II/117.cpp",
+          "sha256": "d584f47aa6efdefd44f5805026f04587f06a75141985e35fc60b4e80556dccc2"
+        }
+      },
+      "alternative": {
+        "approach": "Breadth-First Queue",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "binary-tree-upside-down",
+      "number": 156,
+      "difficulty": "Medium",
+      "folder": "solutions/156. Binary Tree Upside Down",
+      "default": "Recursive Left-Spine Rotation",
+      "sources": {
+        "python": {
+          "path": "solutions/156. Binary Tree Upside Down/156.py",
+          "sha256": "f625907523d15feef09393e78229b72e83acc3405dc2cf50145e1951a6aeeb47"
+        },
+        "cpp": {
+          "path": "solutions/156. Binary Tree Upside Down/156.cpp",
+          "sha256": "d6df8e916c98ba5f5ccae425658390c944dfde2e68193e5f04aa3cd81b367e29"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Spine Rewiring",
+        "kind": "walkccc",
+        "path": "solutions/156. Binary Tree Upside Down/156-2.py",
+        "sha256": "f9c076bc22b299802263cde9e3e0f6fdacb3625771f1c76da1f4d1ae0fdc7a1c"
+      }
+    },
+    {
+      "id": "maximum-gap",
+      "number": 164,
+      "difficulty": "Medium",
+      "folder": "solutions/164. Maximum Gap",
+      "default": "Minimum-Gap Buckets",
+      "sources": {
+        "python": {
+          "path": "solutions/164. Maximum Gap/164.py",
+          "sha256": "dc25a7c03d608eec8e048d12aa94045aeb0f32d3eb2577b65352ca5eaafa5e8d"
+        },
+        "cpp": {
+          "path": "solutions/164. Maximum Gap/164.cpp",
+          "sha256": "33b878341a7fe0052c738c9b88966f995566456555210735d284afe1f1b55057"
+        }
+      },
+      "alternative": {
+        "approach": "Sort and Compare Neighbors",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "two-sum-iii-data-structure-design",
+      "number": 170,
+      "difficulty": "Easy",
+      "folder": "solutions/170. Two Sum III - Data structure design",
+      "default": "Frequency Map",
+      "sources": {
+        "python": {
+          "path": "solutions/170. Two Sum III - Data structure design/170.py",
+          "sha256": "d5f7f9bc266b6e8ae6af412a26fc0893bbd70be5dd3d19c84c79db85912f3f45"
+        },
+        "cpp": {
+          "path": "solutions/170. Two Sum III - Data structure design/170.cpp",
+          "sha256": "7369f1bde07cfd6a882b75a9d964c448732597405cfb2c4849c0603b8fb4788d"
+        }
+      },
+      "alternative": {
+        "approach": "Precomputed Pair Sums",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "shortest-word-distance",
+      "number": 243,
+      "difficulty": "Easy",
+      "folder": "solutions/243. Shortest Word Distance",
+      "default": "Latest Occurrence Scan",
+      "sources": {
+        "python": {
+          "path": "solutions/243. Shortest Word Distance/243.py",
+          "sha256": "d6499be659881ac47dff9fc33c25361dea1e1428f49a7756b2b1387ef32b0e61"
+        },
+        "cpp": {
+          "path": "solutions/243. Shortest Word Distance/243.cpp",
+          "sha256": "3b89147f42b4d375cc5fff09cc55cc75ace4bab51c5e511ae7421014f0499ea6"
+        }
+      },
+      "alternative": {
+        "approach": "Occurrence Lists and Two Pointers",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "shortest-word-distance-ii",
+      "number": 244,
+      "difficulty": "Medium",
+      "folder": "solutions/244. Shortest Word Distance II",
+      "default": "Indexed Occurrences with Two Pointers",
+      "sources": {
+        "python": {
+          "path": "solutions/244. Shortest Word Distance II/244.py",
+          "sha256": "24f82e548c30faff6d7d9e0fa840c088d779e4ede0bc40d88d1c37418514c6c2"
+        },
+        "cpp": {
+          "path": "solutions/244. Shortest Word Distance II/244.cpp",
+          "sha256": "6f8557ac35d6c63e8cda213446975faf5f9dd16ab4d52c8499879157204888db"
+        }
+      },
+      "alternative": {
+        "approach": "Binary Search Each Occurrence",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "shortest-word-distance-iii",
+      "number": 245,
+      "difficulty": "Medium",
+      "folder": "solutions/245. Shortest Word Distance III",
+      "default": "Single Pass with Equal-Word Handling",
+      "sources": {
+        "python": {
+          "path": "solutions/245. Shortest Word Distance III/245.py",
+          "sha256": "8bea66813c3e8a489891bd73a3a6fcc94ece60d6b438d8c647329ca4f9906097"
+        },
+        "cpp": {
+          "path": "solutions/245. Shortest Word Distance III/245.cpp",
+          "sha256": "adf46ddab8c295191521fd5dee84ea2cb353d902cfc65d90a9edda693e65e357"
+        }
+      },
+      "alternative": {
+        "approach": "Collected Target Positions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "strobogrammatic-number",
+      "number": 246,
+      "difficulty": "Easy",
+      "folder": "solutions/246. Strobogrammatic Number",
+      "default": "Rotational Two Pointers",
+      "sources": {
+        "python": {
+          "path": "solutions/246. Strobogrammatic Number/246.py",
+          "sha256": "0452fd99470fa5b0d3b384a744e0d0773c5a751ad2afead614e9fd935d1eb228"
+        },
+        "cpp": {
+          "path": "solutions/246. Strobogrammatic Number/246.cpp",
+          "sha256": "95eaee27da55b027c50395c5d9599fbd593359c4be30b3d66cbc264c5a04f200"
+        }
+      },
+      "alternative": {
+        "approach": "Construct the Rotated String",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "flatten-2d-vector",
+      "number": 251,
+      "difficulty": "Medium",
+      "folder": "solutions/251. Flatten 2D Vector",
+      "default": "Eager Flattening",
+      "sources": {
+        "python": {
+          "path": "solutions/251. Flatten 2D Vector/251.py",
+          "sha256": "79bcea44a893eb82a6ac2baadd286f5d3329b36e99f6f6e6a04761324da30025"
+        },
+        "cpp": {
+          "path": "solutions/251. Flatten 2D Vector/251.cpp",
+          "sha256": "68f17be97bd7fb5b67f6f300fbaf0d04982c9ea013d4f8a7a6b91914a212b9e1"
+        }
+      },
+      "alternative": {
+        "approach": "Lazy Row and Column Cursors",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "palindrome-permutation-ii",
+      "number": 267,
+      "difficulty": "Medium",
+      "folder": "solutions/267. Palindrome Permutation II",
+      "default": "Unique Half-Permutation Backtracking",
+      "sources": {
+        "python": {
+          "path": "solutions/267. Palindrome Permutation II/267.py",
+          "sha256": "044373ae935504d471944fa26b5c4604bae404fc4995191c7667652400e53ca0"
+        },
+        "cpp": {
+          "path": "solutions/267. Palindrome Permutation II/267.cpp",
+          "sha256": "5acb7f90d47c771a2e74f07b74b8e8d3fe4e60d7b3fa12db6752320a066c391d"
+        }
+      },
+      "alternative": {
+        "approach": "Count-Driven Half Construction",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "unique-word-abbreviation",
+      "number": 288,
+      "difficulty": "Medium",
+      "folder": "solutions/288. Unique Word Abbreviation",
+      "default": "Abbreviation Uniqueness Flags",
+      "sources": {
+        "python": {
+          "path": "solutions/288. Unique Word Abbreviation/288.py",
+          "sha256": "445eebcd4894bc394258dc7fb2f7e0c17eafa6c29263d7826847260cfa8e34db"
+        },
+        "cpp": {
+          "path": "solutions/288. Unique Word Abbreviation/288.cpp",
+          "sha256": "95f2af1b24963f7dadcd4be81d485fbf8f65c57e4e3c7cccb0a0f734f7412f8b"
+        }
+      },
+      "alternative": {
+        "approach": "Sets of Abbreviation Owners",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "word-pattern-ii",
+      "number": 291,
+      "difficulty": "Medium",
+      "folder": "solutions/291. Word Pattern II",
+      "default": "Bijection Backtracking",
+      "sources": {
+        "python": {
+          "path": "solutions/291. Word Pattern II/291.py",
+          "sha256": "4fb1d01ceffbdf1ace7ec141077e6c985bebbb7d234e1eda832a65a43337d323"
+        },
+        "cpp": {
+          "path": "solutions/291. Word Pattern II/291.cpp",
+          "sha256": "90a00768f5f7844a901a87b109f9ec8439dd381901372586cd4b96051737bc51"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate Mapping Lengths",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "flip-game-ii",
+      "number": 294,
+      "difficulty": "Medium",
+      "folder": "solutions/294. Flip Game II",
+      "default": "Memoized Game States",
+      "sources": {
+        "python": {
+          "path": "solutions/294. Flip Game II/294.py",
+          "sha256": "f9823b6e409e67cfeb09f53d6cb08d99d40909428244a5510dd9b69ffac5f159"
+        },
+        "cpp": {
+          "path": "solutions/294. Flip Game II/294.cpp",
+          "sha256": "5b92d9c8fe581f8855e072b13393ea0109b2a60389056629c898ab7e417b274f"
+        }
+      },
+      "alternative": {
+        "approach": "Independent Runs and Grundy Numbers",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "additive-number",
+      "number": 306,
+      "difficulty": "Medium",
+      "folder": "solutions/306. Additive Number",
+      "default": "Choose Two Numbers, Match Sums",
+      "sources": {
+        "python": {
+          "path": "solutions/306. Additive Number/306.py",
+          "sha256": "8dbe7ce3657f1f3a3b22ceda9309bb378aeeca65fbe70a3ecc83d81c222dabbc"
+        },
+        "cpp": {
+          "path": "solutions/306. Additive Number/306.cpp",
+          "sha256": "fcdc41403ddfe1f62750fe78a73fbc2e9c0fdf7309828a5e6066bc0d9d0bd396"
+        }
+      },
+      "alternative": {
+        "approach": "Backtrack Over All Next Numbers",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "range-sum-query-2d-mutable",
+      "number": 308,
+      "difficulty": "Medium",
+      "folder": "solutions/308. Range Sum Query 2D - Mutable",
+      "default": "Two-Dimensional Fenwick Tree",
+      "sources": {
+        "python": {
+          "path": "solutions/308. Range Sum Query 2D - Mutable/308.py",
+          "sha256": "20de620863714ecd206d7916fd3278958b28038957c74bd528d99aadbd3e8bea"
+        },
+        "cpp": {
+          "path": "solutions/308. Range Sum Query 2D - Mutable/308.cpp",
+          "sha256": "c2ee730ea64dea1e702228c2f9aec8cb9c46fb31bba00b28b1ca8ebd1585d6b6"
+        }
+      },
+      "alternative": {
+        "approach": "Per-Row Prefix Sums",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "generalized-abbreviation",
+      "number": 320,
+      "difficulty": "Medium",
+      "folder": "solutions/320. Generalized Abbreviation",
+      "default": "Backtracking with a Pending Count",
+      "sources": {
+        "python": {
+          "path": "solutions/320. Generalized Abbreviation/320.py",
+          "sha256": "ea1a8cbd5b41d3d5feb3d80a2a5201518495dc1d43976d19b2dbc36a502effe9"
+        },
+        "cpp": {
+          "path": "solutions/320. Generalized Abbreviation/320.cpp",
+          "sha256": "c5416c3a24f228e7891b8e07a4b505609b2887bb0f47906419becdae11a1843a"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate Abbreviation Masks",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "wiggle-sort-ii",
+      "number": 324,
+      "difficulty": "Medium",
+      "folder": "solutions/324. Wiggle Sort II",
+      "default": "Quickselect and Virtual-Index Partition",
+      "sources": {
+        "python": {
+          "path": "solutions/324. Wiggle Sort II/324.py",
+          "sha256": "8fe644c702439a7ae47d595418962ad596c5dddb1f79494e1552c7b494096338"
+        },
+        "cpp": {
+          "path": "solutions/324. Wiggle Sort II/324.cpp",
+          "sha256": "3b2c2879dc5548e5ef55a4484672a5ae778e9aab62eec9d6c1fb45034abf6331"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Reversed Halves",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "nested-list-weight-sum",
+      "number": 339,
+      "difficulty": "Medium",
+      "folder": "solutions/339. Nested List Weight Sum",
+      "default": "Breadth-First Depth Weighting",
+      "sources": {
+        "python": {
+          "path": "solutions/339. Nested List Weight Sum/339.py",
+          "sha256": "7e3d2b5e9b30ef3b34b47a38c84b9900bed757b9185d61b68f41b3a2d81ee615"
+        },
+        "cpp": {
+          "path": "solutions/339. Nested List Weight Sum/339.cpp",
+          "sha256": "da06403edd41885a307d17cd2ddb9f56d1f8e87ff09aa0743d5f267a31c219c0"
+        }
+      },
+      "alternative": {
+        "approach": "Recursive Depth Weighting",
+        "kind": "walkccc",
+        "path": "solutions/339. Nested List Weight Sum/339-2.py",
+        "sha256": "fcff215cffd0e5443162c5e62fe9d33d70aa6084756118028d50cb9753f8f480"
+      }
+    },
+    {
+      "id": "android-unlock-patterns",
+      "number": 351,
+      "difficulty": "Medium",
+      "folder": "solutions/351. Android Unlock Patterns",
+      "default": "Symmetry-Reduced Pattern Search",
+      "sources": {
+        "python": {
+          "path": "solutions/351. Android Unlock Patterns/351.py",
+          "sha256": "b95c135390094ae4259967b7f93e542375fe3ea258bc36a5ddc314b66e182a6f"
+        },
+        "cpp": {
+          "path": "solutions/351. Android Unlock Patterns/351.cpp",
+          "sha256": "3871b6c73c78649900b0c2c9a83de8ceb664dfe0c954ae6e3076a3075c857750"
+        }
+      },
+      "alternative": {
+        "approach": "Bitmask Dynamic Programming",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "line-reflection",
+      "number": 356,
+      "difficulty": "Medium",
+      "folder": "solutions/356. Line Reflection",
+      "default": "Global Reflection Axis and Point Set",
+      "sources": {
+        "python": {
+          "path": "solutions/356. Line Reflection/356.py",
+          "sha256": "3ece871c95a463149d01049bd80ef702eae7dc69153b18f9168834b019116783"
+        },
+        "cpp": {
+          "path": "solutions/356. Line Reflection/356.cpp",
+          "sha256": "a597b091381f0f8e5f213981eb5dc7f9fd852dae735297b6ee367adf91b9d536"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Horizontal Rows",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "logger-rate-limiter",
+      "number": 359,
+      "difficulty": "Easy",
+      "folder": "solutions/359. Logger Rate Limiter",
+      "default": "Expiring Queue and Active Set",
+      "sources": {
+        "python": {
+          "path": "solutions/359. Logger Rate Limiter/359.py",
+          "sha256": "0b072322cce418b52cae03c15fe8ec4c1b021aae60978ea5e49917688f556b71"
+        },
+        "cpp": {
+          "path": "solutions/359. Logger Rate Limiter/359.cpp",
+          "sha256": "3b60fde1949a2b5c26ed924de5bdcc0a191024f3d0d315c7ec4b8d024bf0cc7e"
+        }
+      },
+      "alternative": {
+        "approach": "Next-Allowed Timestamp Map",
+        "kind": "walkccc",
+        "path": "solutions/359. Logger Rate Limiter/359-2.py",
+        "sha256": "f078118679e4ae61e6d5b25f52c8252a519bd85881c2a2cd42c15e0e78792ad0"
+      }
+    },
+    {
+      "id": "nested-list-weight-sum-ii",
+      "number": 364,
+      "difficulty": "Medium",
+      "folder": "solutions/364. Nested List Weight Sum II",
+      "default": "Cumulative Breadth-First Sums",
+      "sources": {
+        "python": {
+          "path": "solutions/364. Nested List Weight Sum II/364.py",
+          "sha256": "6119eba98acb79c78b4d86da774a845e0cc21b93179f17aef80a886ec808554b"
+        },
+        "cpp": {
+          "path": "solutions/364. Nested List Weight Sum II/364.cpp",
+          "sha256": "2e11ddf39f1d837f090aebe128e99e7bad377c4d5666f109c815aa0197ea1df9"
+        }
+      },
+      "alternative": {
+        "approach": "Depth Records and Final Reweighting",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "super-pow",
+      "number": 372,
+      "difficulty": "Medium",
+      "folder": "solutions/372. Super Pow",
+      "default": "Left-to-Right Decimal Exponent Fold",
+      "sources": {
+        "python": {
+          "path": "solutions/372. Super Pow/372.py",
+          "sha256": "b8ccf1317256fefe004c2939bb9bd35212233b167711166282f3d7449114e9ea"
+        },
+        "cpp": {
+          "path": "solutions/372. Super Pow/372.cpp",
+          "sha256": "55ab28018626b1e42a41729193e28d400ab9e8a09824e848a4bcf43f37bc47cf"
+        }
+      },
+      "alternative": {
+        "approach": "Right-to-Left Decimal Place Powers",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "design-phone-directory",
+      "number": 379,
+      "difficulty": "Medium",
+      "folder": "solutions/379. Design Phone Directory",
+      "default": "Array-Backed Free List",
+      "sources": {
+        "python": {
+          "path": "solutions/379. Design Phone Directory/379.py",
+          "sha256": "9df28d74529b442b8545b064fef502de1609d5ccbcf0486e905297129632c2f0"
+        },
+        "cpp": {
+          "path": "solutions/379. Design Phone Directory/379.cpp",
+          "sha256": "3fe380fae6f98772724e533ead5c21382d0c6a77b7f8ceb5403722624524710d"
+        }
+      },
+      "alternative": {
+        "approach": "Available-Number Set",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-absolute-file-path",
+      "number": 388,
+      "difficulty": "Medium",
+      "folder": "solutions/388. Longest Absolute File Path",
+      "default": "Ancestor Length Stack",
+      "sources": {
+        "python": {
+          "path": "solutions/388. Longest Absolute File Path/388.py",
+          "sha256": "862474966b24f6927c1f20e8047c2786ac3c5150e3fb685dd62caf1be5727998"
+        },
+        "cpp": {
+          "path": "solutions/388. Longest Absolute File Path/388.cpp",
+          "sha256": "e82940f22dcf248661d71313851137d8ef3047da09a5e864213ef3cd5843f74f"
+        }
+      },
+      "alternative": {
+        "approach": "Depth-Indexed Prefix Lengths",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "elimination-game",
+      "number": 390,
+      "difficulty": "Medium",
+      "folder": "solutions/390. Elimination Game",
+      "default": "Reflected Elimination Recurrence",
+      "sources": {
+        "python": {
+          "path": "solutions/390. Elimination Game/390.py",
+          "sha256": "dfc5c240b7aff9bb38dab372b2b7dc68dcf30cefa84d4e95b1b628d90256689a"
+        },
+        "cpp": {
+          "path": "solutions/390. Elimination Game/390.cpp",
+          "sha256": "5d51618233b27e7b6d260cb9fa874aaaf8f209ae338a588f9d182308d47d1611"
+        }
+      },
+      "alternative": {
+        "approach": "Track Head, Step, and Direction",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "nth-digit",
+      "number": 400,
+      "difficulty": "Medium",
+      "folder": "solutions/400. Nth Digit",
+      "default": "Skip Fixed-Digit Blocks",
+      "sources": {
+        "python": {
+          "path": "solutions/400. Nth Digit/400.py",
+          "sha256": "fdc3199cda9c351ae01b3067530924cf61bdd85de81ef660cbfb24531347083a"
+        },
+        "cpp": {
+          "path": "solutions/400. Nth Digit/400.cpp",
+          "sha256": "ddb0be8a3de8dde79e75654f29fefba98028e80bf704c8978e9b538114cf9048"
+        }
+      },
+      "alternative": {
+        "approach": "Binary Search the Containing Number",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "binary-watch",
+      "number": 401,
+      "difficulty": "Easy",
+      "folder": "solutions/401. Binary Watch",
+      "default": "Choose Illuminated LEDs",
+      "sources": {
+        "python": {
+          "path": "solutions/401. Binary Watch/401.py",
+          "sha256": "849dee4c28e44a082ffbb8f1dac4ec4a6aad74b22fcace68fff66f17d4cbb292"
+        },
+        "cpp": {
+          "path": "solutions/401. Binary Watch/401.cpp",
+          "sha256": "4ca328988d25656903e56d417d6467778998b6d003b945ab57f795483263fd78"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate Valid Times",
+        "kind": "walkccc",
+        "path": "solutions/401. Binary Watch/401-2.py",
+        "sha256": "167701f67f4493ed1b5e848b47c76e53bb939a5d9f0a14479dc166ffe18183cd"
+      }
+    },
+    {
+      "id": "convert-a-number-to-hexadecimal",
+      "number": 405,
+      "difficulty": "Easy",
+      "folder": "solutions/405. Convert a Number to Hexadecimal",
+      "default": "Low-Nibble Extraction",
+      "sources": {
+        "python": {
+          "path": "solutions/405. Convert a Number to Hexadecimal/405.py",
+          "sha256": "2b8e7ea7432592be47f98a38f6f0ad884f965dca6fd810a5c1e5c858461abe25"
+        },
+        "cpp": {
+          "path": "solutions/405. Convert a Number to Hexadecimal/405.cpp",
+          "sha256": "c54b4bf6fbdd9a11517a2d8d487c717e34b5b70e7be4bbd59b9539d9d13d60f9"
+        }
+      },
+      "alternative": {
+        "approach": "High-to-Low Nibble Scan",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "sentence-screen-fitting",
+      "number": 418,
+      "difficulty": "Medium",
+      "folder": "solutions/418. Sentence Screen Fitting",
+      "default": "Cyclic Sentence Cursor",
+      "sources": {
+        "python": {
+          "path": "solutions/418. Sentence Screen Fitting/418.py",
+          "sha256": "73fde03b18f3e73658863ef0312e1e77b4332db571c221a81703af7515a7f686"
+        },
+        "cpp": {
+          "path": "solutions/418. Sentence Screen Fitting/418.cpp",
+          "sha256": "365ef2a008d49871ef711b01770fbc8cf23802c4302be54371454d7042b7bd66"
+        }
+      },
+      "alternative": {
+        "approach": "Precomputed Row Transitions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-xor-of-two-numbers-in-an-array",
+      "number": 421,
+      "difficulty": "Medium",
+      "folder": "solutions/421. Maximum XOR of Two Numbers in an Array",
+      "default": "Greedy XOR Prefixes",
+      "sources": {
+        "python": {
+          "path": "solutions/421. Maximum XOR of Two Numbers in an Array/421.py",
+          "sha256": "2e324cf61045fb927c9a2e44b23b52278e250b1a8db9969f868e281474280ed2"
+        },
+        "cpp": {
+          "path": "solutions/421. Maximum XOR of Two Numbers in an Array/421.cpp",
+          "sha256": "119ba10ece4bf96b0ab202e8492b1eb27b4e120bbf287e73a35e24dd76d65a25"
+        }
+      },
+      "alternative": {
+        "approach": "Binary Trie",
+        "kind": "walkccc",
+        "path": "solutions/421. Maximum XOR of Two Numbers in an Array/421-2.py",
+        "sha256": "fd4fd038041ef3e1bc63dd749fd0f72be88e2df64021322e5b2e85ee037a6423"
+      }
+    },
+    {
+      "id": "reconstruct-original-digits-from-english",
+      "number": 423,
+      "difficulty": "Medium",
+      "folder": "solutions/423. Reconstruct Original Digits from English",
+      "default": "Unique-Letter Count Equations",
+      "sources": {
+        "python": {
+          "path": "solutions/423. Reconstruct Original Digits from English/423.py",
+          "sha256": "217baf2bcf6277348a0f38668c1cb01b0ec45f7dc7d12f0eba83cf3dafb9ff2d"
+        },
+        "cpp": {
+          "path": "solutions/423. Reconstruct Original Digits from English/423.cpp",
+          "sha256": "984e4faa02023421fed1ee95000dd961864fc7195d9864f623654111f01ce86a"
+        }
+      },
+      "alternative": {
+        "approach": "Ordered Word-Multiset Elimination",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "sequence-reconstruction",
+      "number": 444,
+      "difficulty": "Medium",
+      "folder": "solutions/444. Sequence Reconstruction",
+      "default": "Unique Topological Order",
+      "sources": {
+        "python": {
+          "path": "solutions/444. Sequence Reconstruction/444.py",
+          "sha256": "2f16115e27a8df33ddacb6cc5c0b9663583ecee99dbb0f4e543ffcd3742ce303"
+        },
+        "cpp": {
+          "path": "solutions/444. Sequence Reconstruction/444.cpp",
+          "sha256": "57b654f0f2118e0cabeabeb1218d10a2c8942a7c08f82c3c5c41624f88edc77f"
+        }
+      },
+      "alternative": {
+        "approach": "Adjacent-Pair Coverage",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "serialize-and-deserialize-bst",
+      "number": 449,
+      "difficulty": "Medium",
+      "folder": "solutions/449. Serialize and Deserialize BST",
+      "default": "Preorder with BST Bounds",
+      "sources": {
+        "python": {
+          "path": "solutions/449. Serialize and Deserialize BST/449.py",
+          "sha256": "b6ac94a16f6465c079389b79da2a69d5670c754e5347cb48276aeaba3b193aac"
+        },
+        "cpp": {
+          "path": "solutions/449. Serialize and Deserialize BST/449.cpp",
+          "sha256": "6c5ce827d630e8fa170b040cb0e913cb89346aa5b5bc23d02c3d0b6d17a7fccd"
+        }
+      },
+      "alternative": {
+        "approach": "Explicit Null-Marker Preorder",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "circular-array-loop",
+      "number": 457,
+      "difficulty": "Medium",
+      "folder": "solutions/457. Circular Array Loop",
+      "default": "Floyd Cycles with Processed-Path Marking",
+      "sources": {
+        "python": {
+          "path": "solutions/457. Circular Array Loop/457.py",
+          "sha256": "9b9306691cc1b081c46a01cef9f5f1201ab62cf303d23a04180c293df808963c"
+        },
+        "cpp": {
+          "path": "solutions/457. Circular Array Loop/457.cpp",
+          "sha256": "1190366ff3ba1ae3b2faa2b295a2374f6b1b33ea4241ae60743046ac268d71f5"
+        }
+      },
+      "alternative": {
+        "approach": "Per-Start Visited Indices",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "can-i-win",
+      "number": 464,
+      "difficulty": "Medium",
+      "folder": "solutions/464. Can I Win",
+      "default": "Memoized Used-Number Masks",
+      "sources": {
+        "python": {
+          "path": "solutions/464. Can I Win/464.py",
+          "sha256": "02bb6dec60f5add576bf491e28e8526bb825acdcd74e9d36da4ab9190b6e5598"
+        },
+        "cpp": {
+          "path": "solutions/464. Can I Win/464.cpp",
+          "sha256": "6caf3fb20efe79cadf41ea1f04cb4c87330218a719452c2130c7c447b6503fe3"
+        }
+      },
+      "alternative": {
+        "approach": "Bottom-Up Subset Game Table",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "validate-ip-address",
+      "number": 468,
+      "difficulty": "Medium",
+      "folder": "solutions/468. Validate IP Address",
+      "default": "Split and Validate Address Groups",
+      "sources": {
+        "python": {
+          "path": "solutions/468. Validate IP Address/468.py",
+          "sha256": "aeae012750aaf643612c58840b75a82999871d0fea2c140ef712396d28d2f1cc"
+        },
+        "cpp": {
+          "path": "solutions/468. Validate IP Address/468.cpp",
+          "sha256": "bef165ce5d501a1c3278cf9e9adc155290d92bdc4dfa5d4afc4ab3c7186758cc"
+        }
+      },
+      "alternative": {
+        "approach": "Full-String Regular Expressions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "convex-polygon",
+      "number": 469,
+      "difficulty": "Medium",
+      "folder": "solutions/469. Convex Polygon",
+      "default": "Consistent Consecutive Cross Products",
+      "sources": {
+        "python": {
+          "path": "solutions/469. Convex Polygon/469.py",
+          "sha256": "969805815ac8196d56dfb73be5b716b1dc1cda9d9c4152580454879462b499fe"
+        },
+        "cpp": {
+          "path": "solutions/469. Convex Polygon/469.cpp",
+          "sha256": "c1926f12b95329145c48ee293b8c9b6b4b21d37e0f4c9fa844b77ad4ae06ff02"
+        }
+      },
+      "alternative": {
+        "approach": "Every Edge Supports One Half-Plane",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "magical-string",
+      "number": 481,
+      "difficulty": "Medium",
+      "folder": "solutions/481. Magical String",
+      "default": "Self-Describing Run Expansion",
+      "sources": {
+        "python": {
+          "path": "solutions/481. Magical String/481.py",
+          "sha256": "1c97db5665d04503018f8b76105ecdb278b128e79239e43609514d4ba9efba45"
+        },
+        "cpp": {
+          "path": "solutions/481. Magical String/481.cpp",
+          "sha256": "24b7b202e9ef20f3e8849059a6b6a4ea410c7fac5d11bc2dd32a0d4166563703"
+        }
+      },
+      "alternative": {
+        "approach": "Queued Run-Length Stream",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "license-key-formatting",
+      "number": 482,
+      "difficulty": "Easy",
+      "folder": "solutions/482. License Key Formatting",
+      "default": "Build Groups from the Right",
+      "sources": {
+        "python": {
+          "path": "solutions/482. License Key Formatting/482.py",
+          "sha256": "95431546f09cfb4067ac725e5c72cc8d06fe8278e4b09dce6585d394c355cc22"
+        },
+        "cpp": {
+          "path": "solutions/482. License Key Formatting/482.cpp",
+          "sha256": "68ece240569828925452f441206dd412c76be0e5038ac44607270176f5f66a62"
+        }
+      },
+      "alternative": {
+        "approach": "Clean Then Slice Groups",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "teemo-attacking",
+      "number": 495,
+      "difficulty": "Easy",
+      "folder": "solutions/495. Teemo Attacking",
+      "default": "Cap Each Consecutive Gap",
+      "sources": {
+        "python": {
+          "path": "solutions/495. Teemo Attacking/495.py",
+          "sha256": "4cae357e5c84469119890b65baeaf68c3a30ae5a99307971a26dd8a0f335be2f"
+        },
+        "cpp": {
+          "path": "solutions/495. Teemo Attacking/495.cpp",
+          "sha256": "bed27e3cf4705fc675820923911706a9dfabf87351c337da47e53bd567d9cae9"
+        }
+      },
+      "alternative": {
+        "approach": "Union Poison Intervals",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "keyboard-row",
+      "number": 500,
+      "difficulty": "Easy",
+      "folder": "solutions/500. Keyboard Row",
+      "default": "Keyboard Row Sets",
+      "sources": {
+        "python": {
+          "path": "solutions/500. Keyboard Row/500.py",
+          "sha256": "03b3b9447457ae63e262aa6b77b2b452e98938a686b721cfe60c4c850dc462c7"
+        },
+        "cpp": {
+          "path": "solutions/500. Keyboard Row/500.cpp",
+          "sha256": "a43f2f5d03c137050986e78720b34f693006ad4d0dd19a86f6e55af8c05141c5"
+        }
+      },
+      "alternative": {
+        "approach": "Letter-to-Row Lookup",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "find-mode-in-binary-search-tree",
+      "number": 501,
+      "difficulty": "Easy",
+      "folder": "solutions/501. Find Mode in Binary Search Tree",
+      "default": "Inorder Equal-Value Runs",
+      "sources": {
+        "python": {
+          "path": "solutions/501. Find Mode in Binary Search Tree/501.py",
+          "sha256": "ce57bbf700267569e8b2d0a93c7f48ab2c922a412bc5b6663d7c9a5d9bc26b67"
+        },
+        "cpp": {
+          "path": "solutions/501. Find Mode in Binary Search Tree/501.cpp",
+          "sha256": "9101df8ef0f996d58b5e467fa6a545f1a43bde449b090135616b63d5c64e2152"
+        }
+      },
+      "alternative": {
+        "approach": "Value Frequency Counting",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "perfect-number",
+      "number": 507,
+      "difficulty": "Easy",
+      "folder": "solutions/507. Perfect Number",
+      "default": "Perfect Numbers Within the Input Bound",
+      "sources": {
+        "python": {
+          "path": "solutions/507. Perfect Number/507.py",
+          "sha256": "d78abec25be34edfb2e427f3222a772cfc7015e70c2424491b8524344b02bb19"
+        },
+        "cpp": {
+          "path": "solutions/507. Perfect Number/507.cpp",
+          "sha256": "4d4918f718ba54ec65059426ddce89b0924a71b39b6f03d7772e9ff04688f361"
+        }
+      },
+      "alternative": {
+        "approach": "Sum Proper Divisor Pairs",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "detect-capital",
+      "number": 520,
+      "difficulty": "Easy",
+      "folder": "solutions/520. Detect Capital",
+      "default": "Whole-Word Case Predicates",
+      "sources": {
+        "python": {
+          "path": "solutions/520. Detect Capital/520.py",
+          "sha256": "2744ef88a9af13dab5f4f487e54aa21f8116af373d485053f5cf75458966bb08"
+        },
+        "cpp": {
+          "path": "solutions/520. Detect Capital/520.cpp",
+          "sha256": "9573a7ab012a52ff6a28cbfc81053fe1e59698c3a59ae599fc7930c3368e10bc"
+        }
+      },
+      "alternative": {
+        "approach": "Count Uppercase Positions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-uncommon-subsequence-ii",
+      "number": 522,
+      "difficulty": "Medium",
+      "folder": "solutions/522. Longest Uncommon Subsequence II",
+      "default": "Longest-First Subsequence Filtering",
+      "sources": {
+        "python": {
+          "path": "solutions/522. Longest Uncommon Subsequence II/522.py",
+          "sha256": "a59b08e5f3007cb3c88d969045eca64cd4acaa5e617e146dfaabd6cf4c34fff1"
+        },
+        "cpp": {
+          "path": "solutions/522. Longest Uncommon Subsequence II/522.cpp",
+          "sha256": "e147619fab90610c668081c2c9fc8fd0afc470bbccaffe026ed8b95bbbd0745b"
+        }
+      },
+      "alternative": {
+        "approach": "Compare Every Whole-String Candidate",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "lonely-pixel-ii",
+      "number": 533,
+      "difficulty": "Medium",
+      "folder": "solutions/533. Lonely Pixel II",
+      "default": "Row Signatures and Black Counts",
+      "sources": {
+        "python": {
+          "path": "solutions/533. Lonely Pixel II/533.py",
+          "sha256": "51abea60cb2ae9566e46f5ee940f790cd433f7defcaabdde2c5d2bb19d3f8680"
+        },
+        "cpp": {
+          "path": "solutions/533. Lonely Pixel II/533.cpp",
+          "sha256": "69cd1edda3e0f1a104f45df2fc347c9307c08522638df9a1723192cba5fb9323"
+        }
+      },
+      "alternative": {
+        "approach": "Validate Each Column Directly",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "output-contest-matches",
+      "number": 544,
+      "difficulty": "Medium",
+      "folder": "solutions/544. Output Contest Matches",
+      "default": "Recursive Tournament Rounds",
+      "sources": {
+        "python": {
+          "path": "solutions/544. Output Contest Matches/544.py",
+          "sha256": "5d75de4e4b318c2c87c754b9ac8c79c9d37eb4c21c30518cbf72d0045fb654ab"
+        },
+        "cpp": {
+          "path": "solutions/544. Output Contest Matches/544.cpp",
+          "sha256": "456420594eabfcf5f9d6aaed14a0d2349fd73ff88ceabab45c9ecfb05d5e806d"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Tournament Rounds",
+        "kind": "walkccc",
+        "path": "solutions/544. Output Contest Matches/544-2.py",
+        "sha256": "757e2f4a0e7027fc0224d08cbbdcea7e935f952e4697bd5b94fe98068bbf0d3a"
+      }
+    },
+    {
+      "id": "student-attendance-record-i",
+      "number": 551,
+      "difficulty": "Easy",
+      "folder": "solutions/551. Student Attendance Record I",
+      "default": "Absence Count and Late-Run Search",
+      "sources": {
+        "python": {
+          "path": "solutions/551. Student Attendance Record I/551.py",
+          "sha256": "fbebe7b498c0ef0c6b35af8cb6aad00a05cc1828402374979f9c55a0a87afa53"
+        },
+        "cpp": {
+          "path": "solutions/551. Student Attendance Record I/551.cpp",
+          "sha256": "d0fc5a85c3e03f64259a67e8475788c3b6bcb793ca530b9ea115976375b82444"
+        }
+      },
+      "alternative": {
+        "approach": "Streaming Attendance State",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-depth-of-n-ary-tree",
+      "number": 559,
+      "difficulty": "Easy",
+      "folder": "solutions/559. Maximum Depth of N-ary Tree",
+      "default": "Recursive Maximum Child Depth",
+      "sources": {
+        "python": {
+          "path": "solutions/559. Maximum Depth of N-ary Tree/559.py",
+          "sha256": "4853278edec28d7b9d85a41e07422c51dfff37119862f7948394bcb6df7742b4"
+        },
+        "cpp": {
+          "path": "solutions/559. Maximum Depth of N-ary Tree/559.cpp",
+          "sha256": "e7fb0cf04a13fd170db34280b6603382304ccb8fafe0c32e5f1b3c6eda0298d8"
+        }
+      },
+      "alternative": {
+        "approach": "Level-Order Depth Counting",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "array-partition",
+      "number": 561,
+      "difficulty": "Easy",
+      "folder": "solutions/561. Array Partition I",
+      "default": "Sorted Adjacent Pairing",
+      "sources": {
+        "python": {
+          "path": "solutions/561. Array Partition I/561.py",
+          "sha256": "64786dfcc5df71d6886a1c48601898f17d909982d88652e46106d96e0e793401"
+        },
+        "cpp": {
+          "path": "solutions/561. Array Partition I/561.cpp",
+          "sha256": "46bd3b1837364863ed5578429e8290590ede8337151c1ccebdda470f3a740bd0"
+        }
+      },
+      "alternative": {
+        "approach": "Counting-Sort Pair Minima",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-line-of-consecutive-one-in-matrix",
+      "number": 562,
+      "difficulty": "Medium",
+      "folder": "solutions/562. Longest Line of Consecutive One in Matrix",
+      "default": "Four-Direction Dynamic Programming",
+      "sources": {
+        "python": {
+          "path": "solutions/562. Longest Line of Consecutive One in Matrix/562.py",
+          "sha256": "661b688babf9677c854092d2e90c96376e6cc36350ff14a61b4cf3b18aeb8def"
+        },
+        "cpp": {
+          "path": "solutions/562. Longest Line of Consecutive One in Matrix/562.cpp",
+          "sha256": "015395ef3300102e723f5bf3f13420d3ea37e0c801051caed11a260442b9724f"
+        }
+      },
+      "alternative": {
+        "approach": "Start Only at Line Beginnings",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "binary-tree-tilt",
+      "number": 563,
+      "difficulty": "Easy",
+      "folder": "solutions/563. Binary Tree Tilt",
+      "default": "Postorder Subtree Sums",
+      "sources": {
+        "python": {
+          "path": "solutions/563. Binary Tree Tilt/563.py",
+          "sha256": "73ac41ad2011efce9318f383a9916f6b4321998edd94553e6ffe549caf0ffee0"
+        },
+        "cpp": {
+          "path": "solutions/563. Binary Tree Tilt/563.cpp",
+          "sha256": "c0599df6b42fb7ab008195965b40f98f222feaa76526e5e91dd296293673749b"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Postorder Sums",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "reshape-the-matrix",
+      "number": 566,
+      "difficulty": "Easy",
+      "folder": "solutions/566. Reshape the Matrix",
+      "default": "Row-Major Write Cursor",
+      "sources": {
+        "python": {
+          "path": "solutions/566. Reshape the Matrix/566.py",
+          "sha256": "98ae782d87313b538b79ac21381417445166c0b24e3e9f6b7a8b28e7f9916010"
+        },
+        "cpp": {
+          "path": "solutions/566. Reshape the Matrix/566.cpp",
+          "sha256": "06fa807ce7b8c9123d84dcd8c873d5eed5944eb89e38c65bec13fbdcc91326a7"
+        }
+      },
+      "alternative": {
+        "approach": "Flatten Then Slice",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "squirrel-simulation",
+      "number": 573,
+      "difficulty": "Medium",
+      "folder": "solutions/573. Squirrel Simulation",
+      "default": "Best First-Nut Saving",
+      "sources": {
+        "python": {
+          "path": "solutions/573. Squirrel Simulation/573.py",
+          "sha256": "0bbf13134bde1a4e781f1bdad31d680bb7748ec6b6ca2f58f87a920db7b64567"
+        },
+        "cpp": {
+          "path": "solutions/573. Squirrel Simulation/573.cpp",
+          "sha256": "12a42ec45f216fa0f1afe62a58c2cfd88a23a4cb8db9f86c733d5c1b53a59caa"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate the First Route",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "distribute-candies",
+      "number": 575,
+      "difficulty": "Easy",
+      "folder": "solutions/575. Distribute Candies",
+      "default": "Distinct Types Versus Eating Limit",
+      "sources": {
+        "python": {
+          "path": "solutions/575. Distribute Candies/575.py",
+          "sha256": "8f744865d484a5e622ae9b303987eabacc4b1c9d11011f5094c608bd232c074d"
+        },
+        "cpp": {
+          "path": "solutions/575. Distribute Candies/575.cpp",
+          "sha256": "e831f0e17a1ae2c98b314cd23fd7dcf340bd8ba38893b18ce9151a521b003fc5"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Type Transitions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "fraction-addition-and-subtraction",
+      "number": 592,
+      "difficulty": "Medium",
+      "folder": "solutions/592. Fraction Addition and Subtraction",
+      "default": "Incremental Reduced Fraction Sum",
+      "sources": {
+        "python": {
+          "path": "solutions/592. Fraction Addition and Subtraction/592.py",
+          "sha256": "711578b48136cea7bf67bb5efb925c6966dc57564a6a14a2b1bd23d21a7d5e0b"
+        },
+        "cpp": {
+          "path": "solutions/592. Fraction Addition and Subtraction/592.cpp",
+          "sha256": "87346515956de3416f87de0fb6afde6f63efc87d90e0c3ba6f8e31c6e50bb81c"
+        }
+      },
+      "alternative": {
+        "approach": "Exact Fraction Objects",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-harmonious-subsequence",
+      "number": 594,
+      "difficulty": "Easy",
+      "folder": "solutions/594. Longest Harmonious Subsequence",
+      "default": "Neighboring Frequency Counts",
+      "sources": {
+        "python": {
+          "path": "solutions/594. Longest Harmonious Subsequence/594.py",
+          "sha256": "2e26dd971503be0936bf4d97cacf5e9309ecb16e7d3dc58c7a122cea13fa616f"
+        },
+        "cpp": {
+          "path": "solutions/594. Longest Harmonious Subsequence/594.cpp",
+          "sha256": "5c85b9acebde0c65d00a05a22f39bca4e8a387583cccd5a703df15f707765db0"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Difference-One Window",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "range-addition-ii",
+      "number": 598,
+      "difficulty": "Easy",
+      "folder": "solutions/598. Range Addition II",
+      "default": "Common Prefix-Rectangle Intersection",
+      "sources": {
+        "python": {
+          "path": "solutions/598. Range Addition II/598.py",
+          "sha256": "bd185d60867c5a3ce07c60254a889d35aacc27f9ac80053e8f0797722ea66b90"
+        },
+        "cpp": {
+          "path": "solutions/598. Range Addition II/598.cpp",
+          "sha256": "13dd804214f95455d754e5561514202ae2f97c85347cc04e8b87a3b7f56faed3"
+        }
+      },
+      "alternative": {
+        "approach": "Compressed-Cell Simulation",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "minimum-index-sum-of-two-lists",
+      "number": 599,
+      "difficulty": "Easy",
+      "folder": "solutions/599. Minimum Index Sum of Two Lists",
+      "default": "Restaurant-to-Index Map",
+      "sources": {
+        "python": {
+          "path": "solutions/599. Minimum Index Sum of Two Lists/599.py",
+          "sha256": "1f5a00fef9da81a70554c044cf5ea8de74c8a85b3c8677ccd604c2545c20d1cd"
+        },
+        "cpp": {
+          "path": "solutions/599. Minimum Index Sum of Two Lists/599.cpp",
+          "sha256": "2119244dbb1e7e2446b6fecd0f9b104831d34c94ebfd34ef6cf6acd62f96e95c"
+        }
+      },
+      "alternative": {
+        "approach": "Search by Increasing Index Sum",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "find-duplicate-file-in-system",
+      "number": 609,
+      "difficulty": "Medium",
+      "folder": "solutions/609. Find Duplicate File in System",
+      "default": "Group File Paths by Content",
+      "sources": {
+        "python": {
+          "path": "solutions/609. Find Duplicate File in System/609.py",
+          "sha256": "2e6df970f19dee9fc8336b8e7b332b838ea3abda6cb566feca2398af1fc2534b"
+        },
+        "cpp": {
+          "path": "solutions/609. Find Duplicate File in System/609.cpp",
+          "sha256": "e02304b6f25435d335f92974594ca91f68db417114aec1a813f2a34979a3347e"
+        }
+      },
+      "alternative": {
+        "approach": "Sort Content-Path Records",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "minimum-factorization",
+      "number": 625,
+      "difficulty": "Medium",
+      "folder": "solutions/625. Minimum Factorization",
+      "default": "Greedy Large-Digit Factorization",
+      "sources": {
+        "python": {
+          "path": "solutions/625. Minimum Factorization/625.py",
+          "sha256": "ac3d879dc7c354e5aeaf41637c2e812ffd88e4280b4e3a5d4f9d397ea017ae18"
+        },
+        "cpp": {
+          "path": "solutions/625. Minimum Factorization/625.cpp",
+          "sha256": "49d10280eb121fa551d074155811d36062b6e1804527f89d240d829a33d88aba"
+        }
+      },
+      "alternative": {
+        "approach": "Memoized Divisor Search",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-product-of-three-numbers",
+      "number": 628,
+      "difficulty": "Easy",
+      "folder": "solutions/628. Maximum Product of Three Numbers",
+      "default": "Sorted Extremes",
+      "sources": {
+        "python": {
+          "path": "solutions/628. Maximum Product of Three Numbers/628.py",
+          "sha256": "f1eae0cb9f3b4ae3f75cb785b4843aecd2c1689996986c2fce87c2b7d5c27986"
+        },
+        "cpp": {
+          "path": "solutions/628. Maximum Product of Three Numbers/628.cpp",
+          "sha256": "b592cd325d2510254f503d619684566ca6119792a12c134a312dfd0838b47308"
+        }
+      },
+      "alternative": {
+        "approach": "Five Running Extremes",
+        "kind": "walkccc",
+        "path": "solutions/628. Maximum Product of Three Numbers/628-2.py",
+        "sha256": "82e6eb3355076a875fed7e674910e6c476a7b5eb8e38802dd3808a1135f8cf7a"
+      }
+    },
+    {
+      "id": "sum-of-square-numbers",
+      "number": 633,
+      "difficulty": "Medium",
+      "folder": "solutions/633. Sum of Square Numbers",
+      "default": "Two Pointers on Square Values",
+      "sources": {
+        "python": {
+          "path": "solutions/633. Sum of Square Numbers/633.py",
+          "sha256": "855afb93372de3ace81a6733c901fa49cb68a6d03dc882c83adfee834c8d218d"
+        },
+        "cpp": {
+          "path": "solutions/633. Sum of Square Numbers/633.cpp",
+          "sha256": "86432de4624437bd0a582dc57452dfe1d160b388b7fc2034ee77fa49f5bc6fe2"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate One Square and Test the Remainder",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "find-the-derangement-of-an-array",
+      "number": 634,
+      "difficulty": "Medium",
+      "folder": "solutions/634. Find the Derangement of An Array",
+      "default": "Derangement Table",
+      "sources": {
+        "python": {
+          "path": "solutions/634. Find the Derangement of An Array/634-2.py",
+          "sha256": "c57db30c5752285d90e01d010bf423c87c009ad65c8c679be2b3cc35482c98c4"
+        },
+        "cpp": {
+          "path": "solutions/634. Find the Derangement of An Array/634-2.cpp",
+          "sha256": "dbf2c4fadb5b3220f744a4b82f40a8cc21a8b347d76576e27c0dfbcd7a92ef35"
+        }
+      },
+      "alternative": {
+        "approach": "Alternating Single-State Recurrence",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "design-log-storage-system",
+      "number": 635,
+      "difficulty": "Medium",
+      "folder": "solutions/635. Design Log Storage System",
+      "default": "Timestamp-Prefix Scan",
+      "sources": {
+        "python": {
+          "path": "solutions/635. Design Log Storage System/635.py",
+          "sha256": "b98036cc243358421c06197564e7f37e33911210f9996c2c75092fb94bb54edd"
+        },
+        "cpp": {
+          "path": "solutions/635. Design Log Storage System/635.cpp",
+          "sha256": "7ac215e90c7a516b891361496612d60765043e2fb209c558d40b91983b8f8b0f"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Timestamps and Binary Search",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "shopping-offers",
+      "number": 638,
+      "difficulty": "Medium",
+      "folder": "solutions/638. Shopping Offers",
+      "default": "Ordered Offer Backtracking",
+      "sources": {
+        "python": {
+          "path": "solutions/638. Shopping Offers/638.py",
+          "sha256": "8fe79ac57416154a87fcf55430c5fdba148e05ef32cdd268ad92653a81d17d2e"
+        },
+        "cpp": {
+          "path": "solutions/638. Shopping Offers/638.cpp",
+          "sha256": "53f9f409b9c3b9e4c30230808554f03363468e93195fd8002047706de1cc3e9a"
+        }
+      },
+      "alternative": {
+        "approach": "Memoized Remaining-Needs States",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "solve-the-equation",
+      "number": 640,
+      "difficulty": "Medium",
+      "folder": "solutions/640. Solve the Equation",
+      "default": "Character-Level Linear-Term Parser",
+      "sources": {
+        "python": {
+          "path": "solutions/640. Solve the Equation/640.py",
+          "sha256": "27577cb6a2c8210cf20bedd656b92872063fe21658819e64216057e89b7598b3"
+        },
+        "cpp": {
+          "path": "solutions/640. Solve the Equation/640.cpp",
+          "sha256": "ccaccbd02ca3a365aa10cdfcfc8a0164630ad404791c985f7662ede6862e7f84"
+        }
+      },
+      "alternative": {
+        "approach": "Signed-Term Tokenization",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "replace-words",
+      "number": 648,
+      "difficulty": "Medium",
+      "folder": "solutions/648. Replace Words",
+      "default": "Shortest-Root Trie",
+      "sources": {
+        "python": {
+          "path": "solutions/648. Replace Words/648.py",
+          "sha256": "2c5af496f46ebcb2482f1a8494c929f54d5c50611fa14a5c9e3b18829543e4aa"
+        },
+        "cpp": {
+          "path": "solutions/648. Replace Words/648.cpp",
+          "sha256": "616357d792934dd416b776e68a93eb46abee1f3189589c4cb476b6b00a1ae6bc"
+        }
+      },
+      "alternative": {
+        "approach": "Prefix Set Lookup",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "2-keys-keyboard",
+      "number": 650,
+      "difficulty": "Medium",
+      "folder": "solutions/650. 2 Keys Keyboard",
+      "default": "Divisor-Based Dynamic Programming",
+      "sources": {
+        "python": {
+          "path": "solutions/650. 2 Keys Keyboard/650.py",
+          "sha256": "9e290facb011982d5bef0e3e87384739832c899ff109a2aef928c30c4e19be5d"
+        },
+        "cpp": {
+          "path": "solutions/650. 2 Keys Keyboard/650.cpp",
+          "sha256": "4ddb42eccb37814855aa636f5ea36033ad51f615051349f108f075fa3383091b"
+        }
+      },
+      "alternative": {
+        "approach": "Prime Factor Operation Groups",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-binary-tree",
+      "number": 654,
+      "difficulty": "Medium",
+      "folder": "solutions/654. Maximum Binary Tree",
+      "default": "Recursive Maximum Selection",
+      "sources": {
+        "python": {
+          "path": "solutions/654. Maximum Binary Tree/654.py",
+          "sha256": "06873539892eae46049e0d4a411efe67db9bcf8479453d5fae168f027f9dc4e7"
+        },
+        "cpp": {
+          "path": "solutions/654. Maximum Binary Tree/654.cpp",
+          "sha256": "dadb655a3ad47e5ea12621ef20fba8763d439e1cb335631508063d8c93038427"
+        }
+      },
+      "alternative": {
+        "approach": "Decreasing Monotonic Stack",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "print-binary-tree",
+      "number": 655,
+      "difficulty": "Medium",
+      "folder": "solutions/655. Print Binary Tree",
+      "default": "Recursive Interval Placement",
+      "sources": {
+        "python": {
+          "path": "solutions/655. Print Binary Tree/655.py",
+          "sha256": "75cf3bb8da24b713c34794c801e3a9ae56f74bec16de537870f7bc83a35b8744"
+        },
+        "cpp": {
+          "path": "solutions/655. Print Binary Tree/655.cpp",
+          "sha256": "85a3f09f5492a1eed3ac23e40d27404e3fbef3f400b8acd908be8c043edbc169"
+        }
+      },
+      "alternative": {
+        "approach": "Breadth-First Column Offsets",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "robot-return-to-origin",
+      "number": 657,
+      "difficulty": "Easy",
+      "folder": "solutions/657. Robot Return to Origin",
+      "default": "Opposite-Move Counts",
+      "sources": {
+        "python": {
+          "path": "solutions/657. Robot Return to Origin/657.py",
+          "sha256": "a7b259b6bd11a8f0bb65cd0e6e8b53ed316127d7b8443659fd865fc39b292417"
+        },
+        "cpp": {
+          "path": "solutions/657. Robot Return to Origin/657.cpp",
+          "sha256": "e883761534031a13c598dcd6a636985e8ccaa6a16e6d7f2620de3b7e5a0bf03a"
+        }
+      },
+      "alternative": {
+        "approach": "Coordinate Simulation",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "equal-tree-partition",
+      "number": 663,
+      "difficulty": "Medium",
+      "folder": "solutions/663. Equal Tree Partition",
+      "default": "Proper-Subtree Sum Set",
+      "sources": {
+        "python": {
+          "path": "solutions/663. Equal Tree Partition/663.py",
+          "sha256": "fdb439b967ae0c950d6816c2843c6fe203fc1839cb399c8dc3d67133ec129f44"
+        },
+        "cpp": {
+          "path": "solutions/663. Equal Tree Partition/663.cpp",
+          "sha256": "96a9669d39ea561ba108de5ad3a7e6128eb2c5d0c068d41c7be84e22dd432166"
+        }
+      },
+      "alternative": {
+        "approach": "Reverse Traversal Subtree Table",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "path-sum-iv",
+      "number": 666,
+      "difficulty": "Medium",
+      "folder": "solutions/666. Path Sum IV",
+      "default": "Decode and Traverse the Small Tree",
+      "sources": {
+        "python": {
+          "path": "solutions/666. Path Sum IV/666.py",
+          "sha256": "5b91fb46a1d384099289702e9e3af8505ae5da4f2f719fa30fd1b1ce2e48b93c"
+        },
+        "cpp": {
+          "path": "solutions/666. Path Sum IV/666.cpp",
+          "sha256": "07a75418b023814c242d3c73860ab2234b4ea7c5bf4069a47e09384205a43251"
+        }
+      },
+      "alternative": {
+        "approach": "Forward Encoded-Node Path Sums",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "beautiful-arrangement-ii",
+      "number": 667,
+      "difficulty": "Medium",
+      "folder": "solutions/667. Beautiful Arrangement II",
+      "default": "Increasing Prefix and Alternating Tail",
+      "sources": {
+        "python": {
+          "path": "solutions/667. Beautiful Arrangement II/667.py",
+          "sha256": "82f1d2708fcaed3c4f1b7ceaed976222ff02fdf2a636afd25a829eb4a1e18fc8"
+        },
+        "cpp": {
+          "path": "solutions/667. Beautiful Arrangement II/667.cpp",
+          "sha256": "049dbbd2ae7130fe18a914392532befcf54e5cde15f15d86c7338ab585f19148"
+        }
+      },
+      "alternative": {
+        "approach": "Alternating Prefix and Increasing Suffix",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-swap",
+      "number": 670,
+      "difficulty": "Medium",
+      "folder": "solutions/670. Maximum Swap",
+      "default": "Rightmost Larger-Digit Lookup",
+      "sources": {
+        "python": {
+          "path": "solutions/670. Maximum Swap/670.py",
+          "sha256": "a88c344fe0cac8b1a08c4a66ddbedecf400f2482984594d5cd858b3615bc7a68"
+        },
+        "cpp": {
+          "path": "solutions/670. Maximum Swap/670.cpp",
+          "sha256": "9532353fdf47279d0cc70db0e494a5f2faab47db39826830bc3bf5940cb266ab"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate Every Swap",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "bulb-switcher-ii",
+      "number": 672,
+      "difficulty": "Medium",
+      "folder": "solutions/672. Bulb Switcher II",
+      "default": "Reduced-State Case Analysis",
+      "sources": {
+        "python": {
+          "path": "solutions/672. Bulb Switcher II/672.py",
+          "sha256": "8e3f5ecc945c11399461f60cd105466e6f475c682691fc4add0dc81c52865f20"
+        },
+        "cpp": {
+          "path": "solutions/672. Bulb Switcher II/672.cpp",
+          "sha256": "b127d4564be325c030136e2a90e7a3d58c9778c1723a0ec85035ca82f38849de"
+        }
+      },
+      "alternative": {
+        "approach": "Enumerate Button-Press Parities",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-continuous-increasing-subsequence",
+      "number": 674,
+      "difficulty": "Easy",
+      "folder": "solutions/674. Longest Continuous Increasing Subsequence",
+      "default": "Increasing-Run Start Index",
+      "sources": {
+        "python": {
+          "path": "solutions/674. Longest Continuous Increasing Subsequence/674.py",
+          "sha256": "9aa406aa68da8abf18af19f735eeab93a0d28513617015a446ab3e87262b2193"
+        },
+        "cpp": {
+          "path": "solutions/674. Longest Continuous Increasing Subsequence/674.cpp",
+          "sha256": "dc5b3f9c798ac522ea7e595c453bb7bb7269e9c14d88b815a81ab0f331778cc0"
+        }
+      },
+      "alternative": {
+        "approach": "Run-Length Dynamic Programming",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "implement-magic-dictionary",
+      "number": 676,
+      "difficulty": "Medium",
+      "folder": "solutions/676. Implement Magic Dictionary",
+      "default": "Wildcard-Position Signatures",
+      "sources": {
+        "python": {
+          "path": "solutions/676. Implement Magic Dictionary/676.py",
+          "sha256": "6837a2bb9fa3e0037ba62807be66b678ffbca08fd06de29a81eb8f2b69de4265"
+        },
+        "cpp": {
+          "path": "solutions/676. Implement Magic Dictionary/676.cpp",
+          "sha256": "8bcb45c1f9415cd95cb8b93a9e1187631c0c7c1f8ae7d24d56b501a1eb5ce76d"
+        }
+      },
+      "alternative": {
+        "approach": "Trie with One Substitution",
+        "kind": "walkccc",
+        "path": "solutions/676. Implement Magic Dictionary/676-2.py",
+        "sha256": "1196cddf61c1a566be8fe6e5886bedc96b0dd02c3417d38c94905b4b75eb3f99"
+      }
+    },
+    {
+      "id": "map-sum-pairs",
+      "number": 677,
+      "difficulty": "Medium",
+      "folder": "solutions/677. Map Sum Pairs",
+      "default": "Prefix-Sum Trie with Value Deltas",
+      "sources": {
+        "python": {
+          "path": "solutions/677. Map Sum Pairs/677.py",
+          "sha256": "56af54a4d490564a035222959eae70c22fda75f2b493c1a03705fcf6b9128cce"
+        },
+        "cpp": {
+          "path": "solutions/677. Map Sum Pairs/677.cpp",
+          "sha256": "1cc60a7399eb96c6138680ddb3c236e98740f925be581b9aaf1cd3eee200e650"
+        }
+      },
+      "alternative": {
+        "approach": "Full-Key Map and Prefix Scan",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "next-closest-time",
+      "number": 681,
+      "difficulty": "Medium",
+      "folder": "solutions/681. Next Closest Time",
+      "default": "Greedy Digit Carry",
+      "sources": {
+        "python": {
+          "path": "solutions/681. Next Closest Time/681.py",
+          "sha256": "56d5adfe5287e1610ce854258f41d633f277ada970bd204c652f761362b63b5d"
+        },
+        "cpp": {
+          "path": "solutions/681. Next Closest Time/681.cpp",
+          "sha256": "695bd19d365b4d3e21096c4f4be66ffa0d6faba740b106dfe7a97e2d18fc03d9"
+        }
+      },
+      "alternative": {
+        "approach": "Scan the Next Day of Minutes",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "repeated-string-match",
+      "number": 686,
+      "difficulty": "Medium",
+      "folder": "solutions/686. Repeated String Match",
+      "default": "Bounded Repetition and Substring Search",
+      "sources": {
+        "python": {
+          "path": "solutions/686. Repeated String Match/686.py",
+          "sha256": "d3d23b2690c330464729e67ed73054f40d6e7c82bde5ceb6ba63d352c822899e"
+        },
+        "cpp": {
+          "path": "solutions/686. Repeated String Match/686.cpp",
+          "sha256": "d6aa23f8112ea066837e0ccd6b8864147345c8a56afa8c58ca39d060859a12b5"
+        }
+      },
+      "alternative": {
+        "approach": "KMP over a Virtual Repeated String",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "longest-univalue-path",
+      "number": 687,
+      "difficulty": "Medium",
+      "folder": "solutions/687. Longest Univalue Path",
+      "default": "Recursive Equal-Value Arrows",
+      "sources": {
+        "python": {
+          "path": "solutions/687. Longest Univalue Path/687.py",
+          "sha256": "759b0e4ed197ed7f44499b565e7314e3c96df035b2c90888f5636fe224023511"
+        },
+        "cpp": {
+          "path": "solutions/687. Longest Univalue Path/687.cpp",
+          "sha256": "c46140bc44a0fffd568a79207d3e6266e1a97ab6832e4d7ed8c4f78bb3a5ed85"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Postorder Arrow Table",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "knight-probability-in-chessboard",
+      "number": 688,
+      "difficulty": "Medium",
+      "folder": "solutions/688. Knight Probability in Chessboard",
+      "default": "Rolling Survival Probabilities",
+      "sources": {
+        "python": {
+          "path": "solutions/688. Knight Probability in Chessboard/688.py",
+          "sha256": "405826cdfb1fb34940a32e66df826b1b3898e29bd621e524be1303f94612bca1"
+        },
+        "cpp": {
+          "path": "solutions/688. Knight Probability in Chessboard/688.cpp",
+          "sha256": "5c0e786ee52e34ee8e441be9d332ab98bd581c4abc3d181fbb245ca82319ea08"
+        }
+      },
+      "alternative": {
+        "approach": "Memoized Survival Probability",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "employee-importance",
+      "number": 690,
+      "difficulty": "Medium",
+      "folder": "solutions/690. Employee Importance",
+      "default": "Employee Lookup and Recursive Aggregation",
+      "sources": {
+        "python": {
+          "path": "solutions/690. Employee Importance/690.py",
+          "sha256": "549c4eabf63384c1cdaa996ce0378841db1303a2b6fc9ff90edf1429e7ef63d1"
+        },
+        "cpp": {
+          "path": "solutions/690. Employee Importance/690.cpp",
+          "sha256": "cedd86be4f44dea7c85f5a4d88602260a9b9cd20a3bbc30099c83a6b1bbff943"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Hierarchy Traversal",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "top-k-frequent-words",
+      "number": 692,
+      "difficulty": "Medium",
+      "folder": "solutions/692. Top K Frequent Words",
+      "default": "Frequency Buckets with Lexical Ties",
+      "sources": {
+        "python": {
+          "path": "solutions/692. Top K Frequent Words/692.py",
+          "sha256": "99876f7d79d5e325d7c8fa75a3abc74c5dd1941a47b7b1b52b2414875074c861"
+        },
+        "cpp": {
+          "path": "solutions/692. Top K Frequent Words/692.cpp",
+          "sha256": "8ad29900d63508d4ea998ad58cd3c2f14004681b72817e2e3a0c3a4f72b3dc39"
+        }
+      },
+      "alternative": {
+        "approach": "Size-k Heap with Reversed Lexical Ties",
+        "kind": "walkccc",
+        "path": "solutions/692. Top K Frequent Words/692-2.py",
+        "sha256": "bdb6c80c1adc600701b3d8b5dcb85bdb7de87b3ce5dbc633d35105e1078d949d"
+      }
+    },
+    {
+      "id": "binary-number-with-alternating-bits",
+      "number": 693,
+      "difficulty": "Easy",
+      "folder": "solutions/693. Binary Number with Alternating Bits",
+      "default": "Two-Bit-Shift Identity",
+      "sources": {
+        "python": {
+          "path": "solutions/693. Binary Number with Alternating Bits/693.py",
+          "sha256": "e711b974ed894ad3f5d7392c733f4c7099dbae04e07e817f068579346c53841a"
+        },
+        "cpp": {
+          "path": "solutions/693. Binary Number with Alternating Bits/693.cpp",
+          "sha256": "f1b36251f22882f1400fb9e0fbc39c9d940f549044b383c64fb3180c925db8e9"
+        }
+      },
+      "alternative": {
+        "approach": "Compare Adjacent Binary Digits",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "count-binary-substrings",
+      "number": 696,
+      "difficulty": "Easy",
+      "folder": "solutions/696. Count Binary Substrings",
+      "default": "Two Consecutive Run Lengths",
+      "sources": {
+        "python": {
+          "path": "solutions/696. Count Binary Substrings/696.py",
+          "sha256": "869549124919110b2125e8c1da148470d15b35b4532707dd50279848009c3b94"
+        },
+        "cpp": {
+          "path": "solutions/696. Count Binary Substrings/696.cpp",
+          "sha256": "736732eb9d5ff8873bed6dbb9bead03806cf0c26fdca50ea51d54f19c9c187e7"
+        }
+      },
+      "alternative": {
+        "approach": "Run-Length Encoding Then Pairing",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "degree-of-an-array",
+      "number": 697,
+      "difficulty": "Easy",
+      "folder": "solutions/697. Degree of an Array",
+      "default": "Streaming Frequency and First Index",
+      "sources": {
+        "python": {
+          "path": "solutions/697. Degree of an Array/697.py",
+          "sha256": "c98694871d16d78eb1af5d4ba376a49c18d41d19a534a0e5cd4cc71dccad0d48"
+        },
+        "cpp": {
+          "path": "solutions/697. Degree of an Array/697.cpp",
+          "sha256": "8f67d348f0076847aee6b03c3603f17648f338ce0b0fdf04652c22bf0917e483"
+        }
+      },
+      "alternative": {
+        "approach": "Grouped Occurrence Positions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "search-in-a-sorted-array-of-unknown-size",
+      "number": 702,
+      "difficulty": "Medium",
+      "folder": "solutions/702. Search in a Sorted Array of Unknown Size",
+      "default": "Binary Search the Stated Index Bound",
+      "sources": {
+        "python": {
+          "path": "solutions/702. Search in a Sorted Array of Unknown Size/702.py",
+          "sha256": "fa54f2aa250afeb7b04e0bdcb062d39c37da9420d4591f1f0c78f7d316b2da49"
+        },
+        "cpp": {
+          "path": "solutions/702. Search in a Sorted Array of Unknown Size/702.cpp",
+          "sha256": "1a88f5433e12ed009627179de51f3daec883b3646a2cd300d37277aa616d05d0"
+        }
+      },
+      "alternative": {
+        "approach": "Exponential Bracketing Then Binary Search",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "best-time-to-buy-and-sell-stock-with-transaction-fee",
+      "number": 714,
+      "difficulty": "Medium",
+      "folder": "solutions/714. Best Time to Buy and Sell Stock with Transaction Fee",
+      "default": "Two Rolling Trading States",
+      "sources": {
+        "python": {
+          "path": "solutions/714. Best Time to Buy and Sell Stock with Transaction Fee/714.py",
+          "sha256": "a67a0b30d354429dcf26e1440063b7c2279d6931d2064fd5d2b2799a125fd102"
+        },
+        "cpp": {
+          "path": "solutions/714. Best Time to Buy and Sell Stock with Transaction Fee/714.cpp",
+          "sha256": "d874344d7bd225a09299974d4e1a41fd9df155be1a576b36d1f740f0a81e29b0"
+        }
+      },
+      "alternative": {
+        "approach": "Explicit Day-by-Day Trading Table",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "1-bit-and-2-bit-characters",
+      "number": 717,
+      "difficulty": "Easy",
+      "folder": "solutions/717. 1-bit and 2-bit Characters",
+      "default": "Forward Character Decoding",
+      "sources": {
+        "python": {
+          "path": "solutions/717. 1-bit and 2-bit Characters/717.py",
+          "sha256": "f8110ee442f95d524ab790b2bad96f71da87a6f1f38f60cef7bfc88d05737637"
+        },
+        "cpp": {
+          "path": "solutions/717. 1-bit and 2-bit Characters/717.cpp",
+          "sha256": "7306b2e58d110407d56ded2431234ac6a8f2d9ded0b3617bcdf4f694fccf87d7"
+        }
+      },
+      "alternative": {
+        "approach": "Parity of Ones Before the Final Zero",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "maximum-length-of-repeated-subarray",
+      "number": 718,
+      "difficulty": "Medium",
+      "folder": "solutions/718. Maximum Length of Repeated Subarray",
+      "default": "Common-Suffix Table",
+      "sources": {
+        "python": {
+          "path": "solutions/718. Maximum Length of Repeated Subarray/718.py",
+          "sha256": "e7ec181e5f051a07643fe78081e9dd156a57b281cd933f1a62d75293fbe8b908"
+        },
+        "cpp": {
+          "path": "solutions/718. Maximum Length of Repeated Subarray/718.cpp",
+          "sha256": "70747f0f44092045e0f670bdfdad8eec3ccc1e714fb258dc1a5bec0bbd63c12c"
+        }
+      },
+      "alternative": {
+        "approach": "One-Row Common-Run States",
+        "kind": "walkccc",
+        "path": "solutions/718. Maximum Length of Repeated Subarray/718-2.py",
+        "sha256": "6cd59edd46175f2502b6e091ced51631fb0e90da2d18cdaf4208a314effca16f"
+      }
+    },
+    {
+      "id": "longest-word-in-dictionary",
+      "number": 720,
+      "difficulty": "Medium",
+      "folder": "solutions/720. Longest Word in Dictionary",
+      "default": "Trie Traversal Through Complete Prefixes",
+      "sources": {
+        "python": {
+          "path": "solutions/720. Longest Word in Dictionary/720.py",
+          "sha256": "28064577ba2374142b89e10c1f676679e3fa5b9ac1c04c938518c12a391b7679"
+        },
+        "cpp": {
+          "path": "solutions/720. Longest Word in Dictionary/720.cpp",
+          "sha256": "7a1e00d0c0ec2f13e7a570705cbb073dc15e83411708bf3cae3b0054c6aa4f3e"
+        }
+      },
+      "alternative": {
+        "approach": "Sorted Words and Buildable Prefixes",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "remove-comments",
+      "number": 722,
+      "difficulty": "Medium",
+      "folder": "solutions/722. Remove Comments",
+      "default": "Comment-State Scanner",
+      "sources": {
+        "python": {
+          "path": "solutions/722. Remove Comments/722.py",
+          "sha256": "16fcebd88b5307ca9a161847a0183d2e3a3e985ee718f76ae9a54f373e67739a"
+        },
+        "cpp": {
+          "path": "solutions/722. Remove Comments/722.cpp",
+          "sha256": "92fea694367630c782b6a07e09246e53633c410b2676cfadf0c23710260d0bdb"
+        }
+      },
+      "alternative": {
+        "approach": "Ordered Comment-Token Removal",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "self-dividing-numbers",
+      "number": 728,
+      "difficulty": "Easy",
+      "folder": "solutions/728. Self Dividing Numbers",
+      "default": "Decimal-String Digit Checks",
+      "sources": {
+        "python": {
+          "path": "solutions/728. Self Dividing Numbers/728.py",
+          "sha256": "8cf0ddfb1b7fef7a0df6f5a60774cc52a59d1a6ed2f7c4bdcf7b621b55844835"
+        },
+        "cpp": {
+          "path": "solutions/728. Self Dividing Numbers/728.cpp",
+          "sha256": "9dece145b5f7c4e12ed2e744aef15d1338034f600b7f431afed6c1be1c1aa1ec"
+        }
+      },
+      "alternative": {
+        "approach": "Arithmetic Digit Extraction",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "sentence-similarity-ii",
+      "number": 737,
+      "difficulty": "Medium",
+      "folder": "solutions/737. Sentence Similarity II",
+      "default": "Similarity Graph Search",
+      "sources": {
+        "python": {
+          "path": "solutions/737. Sentence Similarity II/737.py",
+          "sha256": "ea4c04ece351b8cdb1a3cd9b0fb56ec4ecac8b924b97250cf5bdd5b36a20a22d"
+        },
+        "cpp": {
+          "path": "solutions/737. Sentence Similarity II/737.cpp",
+          "sha256": "c95c6f78acfbd4b9db78934e55a42dd472a0196b5b77f9171b11dafcb9dc3a5d"
+        }
+      },
+      "alternative": {
+        "approach": "Union-Find Word Components",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "find-smallest-letter-greater-than-target",
+      "number": 744,
+      "difficulty": "Easy",
+      "folder": "solutions/744. Find Smallest Letter Greater Than Target",
+      "default": "Upper-Bound Binary Search",
+      "sources": {
+        "python": {
+          "path": "solutions/744. Find Smallest Letter Greater Than Target/744.py",
+          "sha256": "dd1b044156de47d83f0e96e3c7a20e29f6560db5d6f707ad788345372adfcb46"
+        },
+        "cpp": {
+          "path": "solutions/744. Find Smallest Letter Greater Than Target/744.cpp",
+          "sha256": "603e912f08bf8c14385ff6514567a152e6ba3ac06f29ab7c287904480becbf19"
+        }
+      },
+      "alternative": {
+        "approach": "First-Greater Linear Scan",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "largest-number-at-least-twice-of-others",
+      "number": 747,
+      "difficulty": "Easy",
+      "folder": "solutions/747. Largest Number At Least Twice of Others",
+      "default": "Largest and Second-Largest Values",
+      "sources": {
+        "python": {
+          "path": "solutions/747. Largest Number At Least Twice of Others/747.py",
+          "sha256": "0155229928b518f983a7729f392f8f4a9b15ae4bdb9d6f08230d6dff7a8890a4"
+        },
+        "cpp": {
+          "path": "solutions/747. Largest Number At Least Twice of Others/747.cpp",
+          "sha256": "9eab728aa1a0a54fa4a2c45b3b6dbeeab7ca440d6e3760411f19a8c258d7d2c1"
+        }
+      },
+      "alternative": {
+        "approach": "Sort Value-Index Pairs",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "shortest-completing-word",
+      "number": 748,
+      "difficulty": "Easy",
+      "folder": "solutions/748. Shortest Completing Word",
+      "default": "Required-Letter Frequency Checks",
+      "sources": {
+        "python": {
+          "path": "solutions/748. Shortest Completing Word/748.py",
+          "sha256": "5fb330f38b1a0a952a37c58001ec2ba016f95ad94e69503aff5a38a203b0a60b"
+        },
+        "cpp": {
+          "path": "solutions/748. Shortest Completing Word/748.cpp",
+          "sha256": "d0c9702849576edc96ca73b616e24158fbb9da0628a1f85c505d92b00c098e12"
+        }
+      },
+      "alternative": {
+        "approach": "Length-Ordered Character Consumption",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "reach-a-number",
+      "number": 754,
+      "difficulty": "Medium",
+      "folder": "solutions/754. Reach a Number",
+      "default": "Grow the Triangular Sum Until Parity Matches",
+      "sources": {
+        "python": {
+          "path": "solutions/754. Reach a Number/754.py",
+          "sha256": "9c978d41d401bb1b243aaf03ac003ec044132b774f427844ec2983a196a585cd"
+        },
+        "cpp": {
+          "path": "solutions/754. Reach a Number/754.cpp",
+          "sha256": "4749216567a4102727ebb692e6a4c9a460a9778e202aa4f082ed4c51c6d283c4"
+        }
+      },
+      "alternative": {
+        "approach": "Integer-Root Starting Point",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "pyramid-transition-matrix",
+      "number": 756,
+      "difficulty": "Medium",
+      "folder": "solutions/756. Pyramid Transition Matrix",
+      "default": "Row-Building Backtracking",
+      "sources": {
+        "python": {
+          "path": "solutions/756. Pyramid Transition Matrix/756.py",
+          "sha256": "4cb371e29258f0e56bac51b8001806765f1847b091864f22088aa91fc7298d8b"
+        },
+        "cpp": {
+          "path": "solutions/756. Pyramid Transition Matrix/756.cpp",
+          "sha256": "5d44dfbda05534574efae2d62493852b9597dd30e89a9f9244ceebccd35fb2c5"
+        }
+      },
+      "alternative": {
+        "approach": "Memoized Complete-Row States",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "toeplitz-matrix",
+      "number": 766,
+      "difficulty": "Easy",
+      "folder": "solutions/766. Toeplitz Matrix",
+      "default": "Adjacent Diagonal Comparisons",
+      "sources": {
+        "python": {
+          "path": "solutions/766. Toeplitz Matrix/766.py",
+          "sha256": "f1ca218c6b846b0ddfed6570a7b118eb467ba942c9ee4df541dff958b9fcb01e"
+        },
+        "cpp": {
+          "path": "solutions/766. Toeplitz Matrix/766.cpp",
+          "sha256": "551f2e02e989c38dfc4dd6a64f3c21de82573bd040921a227f91191057d21dda"
+        }
+      },
+      "alternative": {
+        "approach": "Diagonal-ID Map",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "max-chunks-to-make-sorted",
+      "number": 769,
+      "difficulty": "Medium",
+      "folder": "solutions/769. Max Chunks To Make Sorted",
+      "default": "Prefix Maximum Boundaries",
+      "sources": {
+        "python": {
+          "path": "solutions/769. Max Chunks To Make Sorted/769.py",
+          "sha256": "0560412db44e3110bb4ac3c25f4737f22e13e3269726c77ecb8b23729a63aa6d"
+        },
+        "cpp": {
+          "path": "solutions/769. Max Chunks To Make Sorted/769.cpp",
+          "sha256": "8ba22a5a287ec70cb7cea666836bc646453769b337bdbbf5e6c27430bebe3378"
+        }
+      },
+      "alternative": {
+        "approach": "Prefix Sum Boundaries",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "global-and-local-inversions",
+      "number": 775,
+      "difficulty": "Medium",
+      "folder": "solutions/775. Global and Local Inversions",
+      "default": "Detect Nonlocal Inversions",
+      "sources": {
+        "python": {
+          "path": "solutions/775. Global and Local Inversions/775.py",
+          "sha256": "db1962df168282f6bb1e139e95d861a8d805d11d95f2350db441f7f20f932113"
+        },
+        "cpp": {
+          "path": "solutions/775. Global and Local Inversions/775.cpp",
+          "sha256": "61c9d345c7efdc26d20862b0c3c605e1c5411a9d81057bd98fb255f8664c44c4"
+        }
+      },
+      "alternative": {
+        "approach": "Permutation Displacement Bound",
+        "kind": "walkccc",
+        "path": "solutions/775. Global and Local Inversions/775-2.py",
+        "sha256": "e5967666e0aa37668bb681ae3ccaf982ef50b959c14cbe4af31957a270410ee0"
+      }
+    },
+    {
+      "id": "split-bst",
+      "number": 776,
+      "difficulty": "Medium",
+      "folder": "solutions/776. Split BST",
+      "default": "Recursive Split Along the Search Path",
+      "sources": {
+        "python": {
+          "path": "solutions/776. Split BST/776.py",
+          "sha256": "fa3035466f5eb89f181877274665ce3f65f39cc5f527afe927ab2808a8197399"
+        },
+        "cpp": {
+          "path": "solutions/776. Split BST/776.cpp",
+          "sha256": "3763a325de4271e202cb9a5a5f58662429bb4fe8e1e5a45f6c2f81f24f4d517a"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Two-Chain Split",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "swap-adjacent-in-lr-string",
+      "number": 777,
+      "difficulty": "Medium",
+      "folder": "solutions/777. Swap Adjacent in LR String",
+      "default": "Ordered Pieces with Direction Constraints",
+      "sources": {
+        "python": {
+          "path": "solutions/777. Swap Adjacent in LR String/777.py",
+          "sha256": "7050b21a1aaa82754a0fb54421ac34574660df70c93ca88363aff5cfc5333798"
+        },
+        "cpp": {
+          "path": "solutions/777. Swap Adjacent in LR String/777.cpp",
+          "sha256": "50e4b82e78648088841eba7a6f5544015d1229f2fa0b5d14d50ed06d5e818f1e"
+        }
+      },
+      "alternative": {
+        "approach": "Materialized Piece Positions",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "rabbits-in-forest",
+      "number": 781,
+      "difficulty": "Medium",
+      "folder": "solutions/781. Rabbits in Forest",
+      "default": "Allocate Answer-Sized Groups Online",
+      "sources": {
+        "python": {
+          "path": "solutions/781. Rabbits in Forest/781.py",
+          "sha256": "b9003f3fe229041790607047d607df506f83ff94d566ae21f670aee4feb63328"
+        },
+        "cpp": {
+          "path": "solutions/781. Rabbits in Forest/781.cpp",
+          "sha256": "391bf3e83ac8571bb5fbf92b1673d6cb2c80020ed22a0898a7e2fdf327202593"
+        }
+      },
+      "alternative": {
+        "approach": "Round Frequencies Up to Whole Groups",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "rotated-digits",
+      "number": 788,
+      "difficulty": "Medium",
+      "folder": "solutions/788. Rotated Digits",
+      "default": "Validate Each Rotated Number",
+      "sources": {
+        "python": {
+          "path": "solutions/788. Rotated Digits/788.py",
+          "sha256": "8c8e6ebe5ca128f719c236de326e0c04d644a223d5ac3a93db051b19903844da"
+        },
+        "cpp": {
+          "path": "solutions/788. Rotated Digits/788.cpp",
+          "sha256": "48fb94d50404f366a46e90452047173a33c0d855ba18a72e3a275fe84f38d327"
+        }
+      },
+      "alternative": {
+        "approach": "Digit Dynamic Programming",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "domino-and-tromino-tiling",
+      "number": 790,
+      "difficulty": "Medium",
+      "folder": "solutions/790. Domino and Tromino Tiling",
+      "default": "Full-Board Tiling Recurrence",
+      "sources": {
+        "python": {
+          "path": "solutions/790. Domino and Tromino Tiling/790.py",
+          "sha256": "f9a89a9e97888f459c9c10c98b868eb9f45100b7574a2e1561daecbe9f950258"
+        },
+        "cpp": {
+          "path": "solutions/790. Domino and Tromino Tiling/790.cpp",
+          "sha256": "fd7fdcf421b144515a2ecfb6bf0b27ff35cd98b9316435ac292e6c86f21d98a3"
+        }
+      },
+      "alternative": {
+        "approach": "Full and One-Gap Profile States",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "number-of-matching-subsequences",
+      "number": 792,
+      "difficulty": "Medium",
+      "folder": "solutions/792. Number of Matching Subsequences",
+      "default": "Dictionary Trie and Next-Character Search",
+      "sources": {
+        "python": {
+          "path": "solutions/792. Number of Matching Subsequences/792.py",
+          "sha256": "d6caa1b180fffa6bbc31ff6042c8d60d4a0917c62e216d04dcb1960b7eda7222"
+        },
+        "cpp": {
+          "path": "solutions/792. Number of Matching Subsequences/792.cpp",
+          "sha256": "b667523fd867603380a1ba0b1203783282e50717df54c6c1626b4a6f790462b8"
+        }
+      },
+      "alternative": {
+        "approach": "Buckets of Waiting Word Positions",
+        "kind": "walkccc",
+        "path": "solutions/792. Number of Matching Subsequences/792-2.py",
+        "sha256": "0db65141b857880cb71a13d3fa7ee4ae8ca3317057061213ce004812294b43d2"
+      }
+    },
+    {
+      "id": "number-of-subarrays-with-bounded-maximum",
+      "number": 795,
+      "difficulty": "Medium",
+      "folder": "solutions/795. Number of Subarrays with Bounded Maximum",
+      "default": "Last Forbidden and Last Required Positions",
+      "sources": {
+        "python": {
+          "path": "solutions/795. Number of Subarrays with Bounded Maximum/795.py",
+          "sha256": "87fa1db396b1eaa3cfcf342ceb4a426f510fe7c6f1153c02ee9963059697ceaa"
+        },
+        "cpp": {
+          "path": "solutions/795. Number of Subarrays with Bounded Maximum/795.cpp",
+          "sha256": "2ebad7dda4199d759b2f3e31563f76a87f2fbc766b57868d8bcbfbca6bee4daf"
+        }
+      },
+      "alternative": {
+        "approach": "Difference of At-Most Counts",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "all-paths-from-source-to-target",
+      "number": 797,
+      "difficulty": "Medium",
+      "folder": "solutions/797. All Paths From Source to Target",
+      "default": "Depth-First Path Enumeration",
+      "sources": {
+        "python": {
+          "path": "solutions/797. All Paths From Source to Target/797.py",
+          "sha256": "b1c4416c96f3258057d9a47a3b581372003df809841add550bb30d951cc27b61"
+        },
+        "cpp": {
+          "path": "solutions/797. All Paths From Source to Target/797.cpp",
+          "sha256": "c5d3d4329941a428ca22a7a52e7fbadee027870e1a5ff6ab421c5fc4e3ce7423"
+        }
+      },
+      "alternative": {
+        "approach": "Breadth-First Partial Paths",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "max-increase-to-keep-city-skyline",
+      "number": 807,
+      "difficulty": "Medium",
+      "folder": "solutions/807. Max Increase to Keep City Skyline",
+      "default": "Precomputed Row and Column Skylines",
+      "sources": {
+        "python": {
+          "path": "solutions/807. Max Increase to Keep City Skyline/807.py",
+          "sha256": "7afcf5d51e751fb3cee3f26f3251ca61f9cf7e9defa168fa16bd9c97603f8173"
+        },
+        "cpp": {
+          "path": "solutions/807. Max Increase to Keep City Skyline/807.cpp",
+          "sha256": "9736080099e726718f6acf2c6c7f222a6bc0aca813f9887f59c36e6e7215a494"
+        }
+      },
+      "alternative": {
+        "approach": "Recompute Each Cell's Skyline Bounds",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "expressive-words",
+      "number": 809,
+      "difficulty": "Medium",
+      "folder": "solutions/809. Expressive Words",
+      "default": "Character Scan with Stretchable Runs",
+      "sources": {
+        "python": {
+          "path": "solutions/809. Expressive Words/809.py",
+          "sha256": "136943a6c4a45ff3cd7b61cd29a0958f3455bf6f9d6a94fa5adaeeef8cfaa954"
+        },
+        "cpp": {
+          "path": "solutions/809. Expressive Words/809.cpp",
+          "sha256": "87ca03a152f26c9aa775b91ceebede7bb5176336c25f02cf9e2348ba50784798"
+        }
+      },
+      "alternative": {
+        "approach": "Run-Length Encoded Word Comparison",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "subdomain-visit-count",
+      "number": 811,
+      "difficulty": "Medium",
+      "folder": "solutions/811. Subdomain Visit Count",
+      "default": "Count Every Domain Suffix",
+      "sources": {
+        "python": {
+          "path": "solutions/811. Subdomain Visit Count/811.py",
+          "sha256": "aab596fd2f977b23b32fd9113fe9fc58a717e4eb1d6fd9cec2e39420737c88d3"
+        },
+        "cpp": {
+          "path": "solutions/811. Subdomain Visit Count/811.cpp",
+          "sha256": "2aabb5b6f9d0644817aacb8b8581bcb8f5404ab3f777a49106034ed2b2f508fc"
+        }
+      },
+      "alternative": {
+        "approach": "Reversed-Label Trie",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "binary-tree-pruning",
+      "number": 814,
+      "difficulty": "Medium",
+      "folder": "solutions/814. Binary Tree Pruning",
+      "default": "Recursive Bottom-Up Pruning",
+      "sources": {
+        "python": {
+          "path": "solutions/814. Binary Tree Pruning/814.py",
+          "sha256": "2f25b3499c8a779a2a655568f7d18c5398a1ef0d2a16ecab0351cce85b3c913f"
+        },
+        "cpp": {
+          "path": "solutions/814. Binary Tree Pruning/814.cpp",
+          "sha256": "4d8e587364f56a912d46f2150a1ef6bf136ec0231cd5715973370b3a1b5f2c11"
+        }
+      },
+      "alternative": {
+        "approach": "Iterative Postorder Pruning",
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "keys-and-rooms",
+      "number": 841,
+      "difficulty": "Medium",
+      "folder": "solutions/841. Keys and Rooms",
+      "default": "Recursive Key Graph Traversal",
+      "sources": {
+        "python": {
+          "path": "solutions/841. Keys and Rooms/841.py",
+          "sha256": "0dceedc6d299c419ab3ab792be0cec2df14b89b77273a9aced94e2f79bf1a663"
+        },
+        "cpp": {
+          "path": "solutions/841. Keys and Rooms/841.cpp",
+          "sha256": "f503c273764864c4ac5c9b232e54cc155c9465e87acc8540f01ac9c339e1171b"
+        }
+      },
+      "alternative": {
+        "approach": "Breadth-First Key Queue",
+        "kind": "authored"
+      }
+    }
+  ]
+}

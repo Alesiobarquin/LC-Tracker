@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/222.%20Count%20Complete%20Tree%20Nodes",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "recursive-node-counting",
+      "approach": "Recursive Node Counting",
+      "explanation": "### How it works\n\nCount the current node and recursively count both subtrees. This general tree traversal makes the complete-tree shortcut in the default easier to compare.\n\n### Steps\n\n1. An empty subtree contributes zero.\n2. Recursively count both children.\n3. Add one for the current node.\n\n### Complexity\n\n- Time: `O(n)` for n nodes.\n- Space: `O(log n)` recursion space for the guaranteed complete tree.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/222.%20Count%20Complete%20Tree%20Nodes/222.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n  def countNodes(self, root: TreeNode | None) -> int:\n    if not root:\n      return 0\n    return 1 + self.countNodes(root.left) + self.countNodes(root.right)\n"
+      }
+    }
+  ]
 }

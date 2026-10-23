@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    int getIndex(ArrayReader &reader) {\n        int left = 0;\n        int length = reader.length();\n        \n        while (length > 1) {\n            length /= 2;\n            int cmp = reader.compareSub(\n                left, \n                left + length - 1, \n                left + length,\n                left + length + length - 1\n            );\n            \n            if (cmp == 0) {\n                return left + length + length;\n            }\n            if (cmp < 0) {\n                left += length;\n            }\n        }\n        \n        return left;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-index-of-the-large-integer.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-index-of-the-large-integer.md",
+  "alternatives": [
+    {
+      "id": "linear-reader-comparisons",
+      "approach": "Linear Reader Comparisons",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nCompare each singleton with index zero. The unique larger element either exceeds index zero or makes index zero exceed the first ordinary element. This teaching baseline can exceed the reader's comparison allowance on large arrays.\n\n### Steps\n\n1. Compare singleton i with singleton zero.\n2. Return i for a larger comparison, or zero for a smaller one.\n3. Continue past equal comparisons.\n\n### Complexity\n\n- Time: `O(n)` reader calls; the default binary search uses logarithmically many.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-index-of-the-large-integer.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def getIndex(self, reader: 'ArrayReader') -> int:\n        for i in range(1, reader.length()):\n            comparison = reader.compareSub(i, i, 0, 0)\n            if comparison > 0:\n                return i\n            if comparison < 0:\n                return 0\n        return 0\n"
+      }
+    }
+  ]
 }

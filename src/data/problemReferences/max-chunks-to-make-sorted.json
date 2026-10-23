@@ -1,0 +1,29 @@
+{
+  "problemId": "max-chunks-to-make-sorted",
+  "approach": "Prefix Maximum Boundaries",
+  "explanation": "### How it works\n\nThe input is a permutation of 0 through n − 1. A prefix ending at index i can be sorted independently exactly when its maximum is i, meaning it contains every value zero through i.\n\n### Steps\n\n1. Track the running maximum.\n2. At each index i, compare that maximum with i.\n3. Count a chunk boundary on equality.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.\n\n### Things to watch for\n\n- The permutation constraint is essential; duplicates require a different criterion.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def maxChunksToSorted(self, arr: list[int]) -> int:\n    ans = 0\n    mx = -math.inf\n\n    for i, a in enumerate(arr):\n      mx = max(mx, a)\n      if mx == i:\n        ans += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int maxChunksToSorted(vector<int>& arr) {\n    int ans = 0;\n    int mx = INT_MIN;\n\n    for (int i = 0; i < arr.size(); ++i) {\n      mx = max(mx, arr[i]);\n      if (mx == i)\n        ++ans;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/769.%20Max%20Chunks%20To%20Make%20Sorted",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "prefix-sum-boundaries",
+      "approach": "Prefix Sum Boundaries",
+      "explanation": "### How it works\n\nFor i + 1 distinct nonnegative values, the smallest possible sum is 0 + … + i. Equality means the prefix contains exactly that smallest set, so it can end a chunk.\n\n### Steps\n\n1. Accumulate the permutation's prefix sum.\n2. Compare it with i(i + 1)/2 at every index.\n3. Count each equality as a chunk boundary.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/769.%20Max%20Chunks%20To%20Make%20Sorted",
+      "code": {
+        "python": "class Solution:\n    def maxChunksToSorted(self, arr: list[int]) -> int:\n        total = chunks = 0\n        for i, value in enumerate(arr):\n            total += value\n            if total == i * (i + 1) // 2:\n                chunks += 1\n        return chunks\n"
+      }
+    }
+  ]
+}

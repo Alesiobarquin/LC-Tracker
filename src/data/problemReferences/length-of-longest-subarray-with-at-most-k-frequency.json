@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxSubarrayLength(vector<int>& nums, int k) {\n        unordered_map<int, int> count;\n        int l = 0, cnt = 0; // count of numbers with freq > k\n        for (int r = 0; r < nums.size(); r++) {\n            count[nums[r]]++;\n            cnt += count[nums[r]] > k;\n            if (cnt > 0) {\n                cnt -= count[nums[l]] > k;\n                count[nums[l]]--;\n                l++;\n            }\n        }\n        return nums.size() - l;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-longest-subarray-with-at-most-k-frequency.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-longest-subarray-with-at-most-k-frequency.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most direct approach is to examine every possible subarray and check if it satisfies the frequency constraint. For each starting position, we extend the subarray one element at a time, tracking element frequencies as we go. The moment any element appears more than `k` times, we stop extending and move to the next starting position.\n\n### Steps\n\n1. Initialize `res` to track the maximum valid subarray length.\n2. For each starting index `i`, create a frequency map and iterate through all ending indices `j`.\n3. Increment the count for each element as we expand the window.\n4. If any element's frequency exceeds `k`, break out of the inner loop.\n5. Otherwise, update `res` with the current subarray length `j - i + 1`.\n6. Return `res` after checking all subarrays.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def maxSubarrayLength(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n\n        for i in range(n):\n            count = defaultdict(int)\n            for j in range(i, n):\n                count[nums[j]] += 1\n                if count[nums[j]] > k:\n                    break\n                res = max(res, j - i + 1)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-longest-subarray-with-at-most-k-frequency.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Sliding Window",
+      "explanation": "### How it works\n\nInstead of restarting from scratch for each position, we can maintain a sliding window that always represents a valid subarray. When adding an element causes a frequency violation, we shrink the window from the left until the constraint is satisfied again. This way, we only process each element twice at most: once when entering and once when leaving the window.\n\n### Steps\n\n1. Use two pointers `l` (left) and `r` (right) to define the current window.\n2. Maintain a hash map to track the frequency of each element in the window.\n3. For each right pointer position, add the current element to the frequency map.\n4. While the newly added element's frequency exceeds `k`, shrink the window by incrementing `l` and decrementing the corresponding frequency.\n5. Update `res` with the current window size `r - l + 1`.\n6. Return the maximum length found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def maxSubarrayLength(self, nums: List[int], k: int) -> int:\n        res = 0\n        count = defaultdict(int)\n        l = 0\n        for r in range(len(nums)):\n            count[nums[r]] += 1\n            while count[nums[r]] > k:\n                count[nums[l]] -= 1\n                l += 1\n            res = max(res, r - l + 1)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/length-of-longest-subarray-with-at-most-k-frequency.md",
+      "id": "sliding-window"
+    }
+  ]
 }

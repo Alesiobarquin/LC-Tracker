@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long countSubarrays(vector<int>& nums, int k) {\n        int maxN = *max_element(nums.begin(), nums.end());\n        queue<int> maxIndexes;\n        long long res = 0;\n\n        for (int i = 0; i < nums.size(); i++) {\n            if (nums[i] == maxN) {\n                maxIndexes.push(i);\n            }\n\n            if (maxIndexes.size() > k) {\n                maxIndexes.pop();\n            }\n\n            if (maxIndexes.size() == k) {\n                res += maxIndexes.front() + 1;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-subarrays-where-max-element-appears-at-least-k-times.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-subarrays-where-max-element-appears-at-least-k-times.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to count subarrays where the maximum element of the entire array appears at least `k` times. The simplest approach is to check every possible subarray by trying all starting and ending positions, counting occurrences of the maximum element in each subarray.\n\n### Steps\n\n1. Find the maximum element in the array.\n2. For each starting index `i` from `0` to `n-1`:\n    - Initialize a counter for max element occurrences.\n    - For each ending index `j` from `i` to `n-1`:\n        - If `nums[j]` equals the max element, increment the counter.\n        - If the counter is at least `k`, this subarray is valid; increment the result.\n3. Return the total count of valid subarrays.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countSubarrays(self, nums: List[int], k: int) -> int:\n        n, res = len(nums), 0\n        maxi = max(nums)\n\n        for i in range(n):\n            cnt = 0\n            for j in range(i, n):\n                if nums[j] == maxi:\n                    cnt += 1\n\n                if cnt >= k:\n                    res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-subarrays-where-max-element-appears-at-least-k-times.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Variable Size Sliding Window",
+      "explanation": "### How it works\n\nInstead of checking all subarrays, we can use a sliding window. For each right endpoint, we find the smallest left endpoint such that the window contains exactly `k` occurrences of the max element with the max element at position `l`. All positions from `0` to `l` can serve as left endpoints for valid subarrays ending at `r`.\n\n### Steps\n\n1. Find the maximum element and initialize counters.\n2. Use two pointers `l` and `r`, both starting at `0`.\n3. For each right pointer position:\n    - If `nums[r]` is the max element, increment the count.\n    - Shrink the window from the left while the count exceeds `k`, or while count equals `k` and the left element is not the max (to find the rightmost valid left position).\n    - If count equals `k`, add `(l + 1)` to the result, representing all valid starting positions.\n4. Return the total count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countSubarrays(self, nums: List[int], k: int) -> int:\n        max_n, max_cnt = max(nums), 0\n        l = 0\n        res = 0\n\n        for r in range(len(nums)):\n            if nums[r] == max_n:\n                max_cnt += 1\n\n            while max_cnt > k or (l <= r and max_cnt == k and nums[l] != max_n):\n                if nums[l] == max_n:\n                    max_cnt -= 1\n                l += 1\n\n            if max_cnt == k:\n                res += l + 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-subarrays-where-max-element-appears-at-least-k-times.md",
+      "id": "variable-size-sliding-window"
+    }
+  ]
 }

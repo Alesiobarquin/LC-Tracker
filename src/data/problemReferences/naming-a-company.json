@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    long long distinctNames(vector<string>& ideas) {\n        unordered_map<string, array<bool, 26>> mp;\n        long long count[26][26] = {};\n        long long res = 0;\n\n        for (const string& s : ideas) {\n            int firstChar = s[0] - 'a';\n            string suffix = s.substr(1);\n            mp[suffix][firstChar] = true;\n        }\n\n        for (auto& [suffix, arr] : mp) {\n            for (int i = 0; i < 26; i++) {\n                if (arr[i]) {\n                    for (int j = 0; j < 26; j++) {\n                        if (!arr[j]) {\n                            count[i][j]++;\n                            res += count[j][i];\n                        }\n                    }\n                }\n            }\n        }\n        return 2 * res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=NrHpgTScOcY",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/naming-a-company.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/naming-a-company.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nTo form a valid company name, we pick two distinct ideas and swap their first letters. The resulting two names must both be new (not in the original list). A straightforward approach checks every pair of ideas, performs the swap, and verifies that neither swapped name exists in the original set. We track valid combinations in a set to avoid counting duplicates.\n\nThis works but is slow because we examine O(n^2) pairs, and string operations add additional cost.\n\n### Steps\n\n1. Store all ideas in a set for O(1) lookup.\n2. For each pair of ideas `(i, j)` where `i < j`:\n    - Swap the first letters to create two new names `A` and `B`.\n    - If neither `A` nor `B` exists in the original set, add both orderings to the `res` set.\n3. Return the size of the `res` set.\n\n### Complexity\n\n- Time complexity: `O(m * n ^ 2)`\n- Space complexity: `O(m * n ^ 2)`\n\n> Where `n` is the size of the array `ideas` and `m` is the average length of the strings.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def distinctNames(self, ideas: List[str]) -> int:\n        n = len(ideas)\n        res = set()\n        ideasSet = set(ideas)\n\n        for i in range(n):\n            for j in range(i + 1, n):\n                A, B = ideas[j][0] + ideas[i][1:], ideas[i][0] + ideas[j][1:]\n                if A not in ideasSet and B not in ideasSet:\n                    res.add(A + ' ' + B)\n                    res.add(B + ' ' + A)\n\n        return len(res)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/naming-a-company.md",
+      "id": "brute-force"
+    }
+  ]
 }

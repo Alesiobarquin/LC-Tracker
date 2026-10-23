@@ -1,0 +1,29 @@
+{
+  "problemId": "array-partition",
+  "approach": "Sorted Adjacent Pairing",
+  "explanation": "### How it works\n\nPair adjacent values after sorting. Pairing the smallest value with the next smallest uses the least costly partner, leaving larger values available as later pair minima.\n\n### Steps\n\n1. Sort all values.\n2. Pair consecutive sorted positions.\n3. Sum values at even indices.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) for the sorted copy and slices.",
+  "code": {
+    "python": "class Solution:\n  def arrayPairSum(self, nums: list[int]) -> int:\n    return sum(sorted(nums)[::2])\n",
+    "cpp": "class Solution {\n public:\n  int arrayPairSum(vector<int>& nums) {\n    int ans = 0;\n\n    ranges::sort(nums);\n\n    for (int i = 0; i < nums.size(); i += 2)\n      ans += nums[i];\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/561.%20Array%20Partition%20I",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "counting-sort-pair-minima",
+      "approach": "Counting-Sort Pair Minima",
+      "explanation": "### How it works\n\nThe input values lie between −10000 and 10000. Count each value and traverse that fixed domain, adding every other occurrence in sorted order without a comparison sort.\n\n### Steps\n\n1. Count values in an offset array.\n2. Traverse counts from smallest to largest value.\n3. Track whether the next sorted occurrence contributes a pair minimum.\n4. Add the correct number of copies and update parity.\n\n### Complexity\n\n- Time: O(n + U) for fixed domain size U = 20001.\n- Space: O(U) counts.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/561.%20Array%20Partition%20I",
+      "code": {
+        "python": "class Solution:\n    def arrayPairSum(self, nums: list[int]) -> int:\n        counts = [0] * 20001\n        for value in nums:\n            counts[value + 10000] += 1\n        take = True\n        total = 0\n        for index, count in enumerate(counts):\n            selected = (count + int(take)) // 2\n            total += selected * (index - 10000)\n            if count % 2:\n                take = not take\n        return total\n"
+      }
+    }
+  ]
+}

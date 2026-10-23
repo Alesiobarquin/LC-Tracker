@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int rearrangeSticks(int n, int k) {\n        const int MOD = 1e9 + 7;\n        vector<int> dp(k + 1);\n        dp[1] = 1;\n\n        for (int N = 2; N <= n; N++) {\n            int prev = 0;\n            for (int K = 1; K <= k; K++) {\n                int tmp = dp[K];\n                dp[K] = (prev + (N - 1) * 1LL * dp[K]) % MOD;\n                prev = tmp;\n            }\n        }\n\n        return dp[k];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=O761YBjGxGA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-ways-to-rearrange-sticks-with-k-sticks-visible.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-ways-to-rearrange-sticks-with-k-sticks-visible.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nConsider placing sticks from tallest to shortest. The tallest stick must be visible. For the remaining sticks, we decide where to place each one relative to previously placed sticks. If a stick is placed at the leftmost available position, it becomes visible. Otherwise, it hides behind a taller stick already placed to its left.\n\n### Steps\n\n1. Define `dfs(N, K)` where `N` is the number of sticks remaining and `K` is how many still need to be visible.\n2. Base cases:\n    - If `N == K`, all remaining sticks must be visible (only one way: place them in increasing order from left), return `1`.\n    - If `N == 0` or `K == 0` (but not both), it's impossible, return `0`.\n3. Two choices for the shortest remaining stick:\n    - Place it at the leftmost position, making it visible: `dfs(N-1, K-1)`.\n    - Place it in one of the `N-1` positions behind a taller stick: `(N-1) * dfs(N-1, K)`.\n4. Return the sum modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "class Solution:\n    def rearrangeSticks(self, n: int, k: int) -> int:\n        MOD = 10**9 + 7\n\n        def dfs(N, K):\n            if N == K:\n                return 1\n            if N == 0 or K == 0:\n                return 0\n            return (dfs(N - 1, K - 1) + (N - 1) * dfs(N - 1, K)) % MOD\n\n        return dfs(n, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-ways-to-rearrange-sticks-with-k-sticks-visible.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nThe recursive solution has overlapping subproblems. By caching results in a 2D table, we avoid redundant computation.\n\n### Steps\n\n1. Create a memoization table of size `(n+1) x (k+1)` initialized to `-1`.\n2. In `dfs(N, K)`, check if the result is already computed.\n3. Apply the same recurrence: `dfs(N-1, K-1) + (N-1) * dfs(N-1, K)`.\n4. Store and return the result modulo `10^9 + 7`.\n\n### Complexity\n\n- Time complexity: `O(n * k)`\n- Space complexity: `O(n * k)`\n\n> Where `n` represents the total number of sticks, and `k` denotes the number of sticks that must be visible from the left side.",
+      "code": {
+        "python": "class Solution:\n    def rearrangeSticks(self, n: int, k: int) -> int:\n        MOD = 10**9 + 7\n        dp = [[-1] * (k + 1) for _ in range(n + 1)]\n\n        def dfs(N, K):\n            if N == K:\n                return 1\n            if N == 0 or K == 0:\n                return 0\n            if dp[N][K] != -1:\n                return dp[N][K]\n            dp[N][K] = (dfs(N - 1, K - 1) + (N - 1) * dfs(N - 1, K)) % MOD\n            return dp[N][K]\n\n        return dfs(n, k)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/number-of-ways-to-rearrange-sticks-with-k-sticks-visible.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

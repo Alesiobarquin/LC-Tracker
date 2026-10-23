@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/258.%20Add%20Digits",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "repeated-digit-sums",
+      "approach": "Repeated Digit Sums",
+      "explanation": "### How it works\n\nDirectly simulate the reduction rule: sum the decimal digits, then repeat until only one digit remains. This supplies a concrete comparison with the digital-root formula.\n\n### Steps\n\n1. While the number has at least two digits, extract digits with divmod.\n2. Sum those digits.\n3. Replace the number with that sum and repeat.\n\n### Complexity\n\n- Time: `O(D)` digit work for an initial D-digit bounded integer; later rounds are much shorter.\n- Space: `O(1)` auxiliary space under the problem's integer bounds.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/258.%20Add%20Digits",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def addDigits(self, num: int) -> int:\n        while num >= 10:\n            total = 0\n            while num:\n                num, digit = divmod(num, 10)\n                total += digit\n            num = total\n        return num\n"
+      }
+    }
+  ]
 }

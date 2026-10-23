@@ -7,5 +7,25 @@
     "cpp": "class Solution {\n    const int m = 1'000'000'007;\n    int mul(int a, int b) { return (long long)a * b % m; }\n\npublic:\n    int numberOfWays(int numPeople) {\n        int n = numPeople / 2;\n        vector<int> inv(n + 2);\n        inv[1] = 1;\n        for (int i = 2; i < n + 2; i++) {\n            int k = m / i, r = m % i;\n            inv[i] = m - mul(k, inv[r]);\n        }\n\n        int C = 1;\n        for (int i = 0; i < n; i++) {\n            C = mul(mul(2 * (2 * i + 1), inv[i + 2]), C);\n        }\n\n        return C;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/handshakes-that-dont-cross.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/handshakes-that-dont-cross.md",
+  "alternatives": [
+    {
+      "approach": "Bottom-Up Dynamic Programming",
+      "explanation": "### How it works\n\nConsider people standing in a circle. If person `0` shakes hands with person `k` (where `k` is odd, since we need an even number of people on each side), the circle splits into two independent groups: people between `0` and `k`, and people between `k` and the last person. The total ways for this configuration is the product of ways to arrange handshakes in both groups.\n\nBy summing over all valid choices for person `0`'s partner, we get a recurrence relation. This is precisely the Catalan number recurrence, which counts non-crossing pair arrangements.\n\n### Steps\n\n1. Let `dp[i]` represent the number of valid handshake arrangements for `2*i` people.\n2. Base case: `dp[0] = 1` (zero people means one valid arrangement).\n3. For each `i` from `1` to `numPeople/2`:\n    - Sum over all ways to split: `dp[i] = sum(dp[j] * dp[i-j-1])` for `j` from `0` to `i-1`.\n    - Apply modulo at each step to prevent overflow.\n4. Return `dp[numPeople/2]`.\n\n### Complexity\n\n- Time complexity: `O(numPeople^2)`\n\n- Space complexity: `O(numPeople)`",
+      "code": {
+        "python": "class Solution:\n    def numberOfWays(self, numPeople: int) -> int:\n        m = 1000000007\n        dp = [0] * (numPeople // 2 + 1)\n        dp[0] = 1\n\n        for i in range(1, numPeople // 2 + 1):\n            for j in range(i):\n                dp[i] += dp[j] * dp[i - j - 1]\n                dp[i] %= m\n\n        return dp[numPeople // 2]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/handshakes-that-dont-cross.md",
+      "id": "bottom-up-dynamic-programming"
+    },
+    {
+      "approach": "Top-Down Dynamic Programming (Memoization)",
+      "explanation": "### How it works\n\nThe same recurrence relation can be computed recursively with memoization. Instead of building up from smaller subproblems, we start from the target and recursively compute smaller cases as needed, caching results to avoid redundant work.\n\nThis approach is often more intuitive since it directly mirrors the problem structure: to solve for `n` pairs, we try all ways to pair the first person and recursively solve the resulting subproblems.\n\n### Steps\n\n1. Create a memoization array `dp` initialized to `-1`, with `dp[0] = 1`.\n2. Define a recursive function `calculateDP(i)`:\n    - If `dp[i]` is already computed, return it.\n    - Otherwise, compute `dp[i] = sum(calculateDP(j) * calculateDP(i-j-1))` for `j` from `0` to `i-1`.\n    - Apply modulo and cache the result.\n3. Call `calculateDP(numPeople/2)` and return the result.\n\n### Complexity\n\n- Time complexity: `O(numPeople^2)`\n\n- Space complexity: `O(numPeople)`",
+      "code": {
+        "python": "class Solution:\n    def numberOfWays(self, numPeople: int) -> int:\n        m = 1000000007\n        dp = [-1] * (numPeople // 2 + 1)\n        dp[0] = 1\n\n        def calculate_dp(i):\n            if dp[i] != -1:\n                return dp[i]\n            dp[i] = 0\n            for j in range(i):\n                dp[i] += calculate_dp(j) * calculate_dp(i - j - 1)\n            dp[i] %= m\n            return dp[i]\n\n        return calculate_dp(numPeople // 2)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/handshakes-that-dont-cross.md",
+      "id": "top-down-dynamic-programming-memoization"
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    int heightChecker(vector<int>& heights) {\n        int count[101] = {};\n        for (int h : heights) {\n            count[h]++;\n        }\n\n        vector<int> expected;\n        for (int h = 1; h <= 100; h++) {\n            int c = count[h];\n            for (int i = 0; i < c; i++) {\n                expected.push_back(h);\n            }\n        }\n\n        int res = 0;\n        for (int i = 0; i < heights.size(); i++) {\n            if (heights[i] != expected[i]) {\n                res++;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/height-checker.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/height-checker.md",
+  "alternatives": [
+    {
+      "approach": "Sorting",
+      "explanation": "### How it works\n\nThe problem asks us to count how many students are standing in the wrong position compared to where they should be if arranged by height.\nIf we sort the array, we get the \"expected\" order.\nBy comparing each position in the original array with the sorted version, we can count mismatches.\n\n### Steps\n\n1. Create a copy of the heights array and sort it to get the expected order.\n2. Initialize a counter `res` to `0`.\n3. Iterate through both arrays simultaneously.\n4. For each index, if the original height differs from the expected height, increment the counter.\n5. Return the count.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def heightChecker(self, heights: List[int]) -> int:\n        expected = sorted(heights)\n\n        res = 0\n        for i in range(len(heights)):\n            if heights[i] != expected[i]:\n                res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/height-checker.md",
+      "id": "sorting"
+    }
+  ]
 }

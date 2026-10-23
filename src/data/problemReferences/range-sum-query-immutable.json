@@ -7,5 +7,25 @@
     "cpp": "class SegmentTree {\nprivate:\n    vector<int> tree;\n    int n;\n\npublic:\n    SegmentTree(const vector<int>& nums) {\n        n = nums.size();\n        tree.resize(2 * n);\n        for (int i = 0; i < n; i++) {\n            tree[n + i] = nums[i];\n        }\n        for (int i = n - 1; i > 0; i--) {\n            tree[i] = tree[2 * i] + tree[2 * i + 1];\n        }\n    }\n\n    int query(int left, int right) {\n        int sum = 0;\n        left += n;\n        right += n + 1;\n        while (left < right) {\n            if (left % 2 == 1) sum += tree[left++];\n            if (right % 2 == 1) sum += tree[--right];\n            left /= 2;\n            right /= 2;\n        }\n        return sum;\n    }\n};\n\nclass NumArray {\nprivate:\n    SegmentTree segTree;\n\npublic:\n    NumArray(const vector<int>& nums) : segTree(nums) {}\n\n    int sumRange(int left, int right) {\n        return segTree.query(left, right);\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=2pndAmo_sMA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-immutable.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-immutable.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to iterate through the array from `left` to `right` and add up all the elements. This works correctly but is inefficient when we need to answer many queries, since each query requires scanning through the entire range.\n\n### Steps\n\n1. Store the original array.\n2. For each `sumRange(left, right)` query:\n    - Initialize `res = 0`.\n    - Loop through indices from `left` to `right`.\n    - Add each element to `res`.\n3. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)` for each `sumRange()` query.\n- Space complexity: `O(1)` since we only make a reference to the input array.",
+      "code": {
+        "python": "class NumArray:\n    def __init__(self, nums):\n        self.nums = nums\n\n    def sumRange(self, left, right):\n        res = 0\n        for i in range(left, right + 1):\n            res += self.nums[i]\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-immutable.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum - I",
+      "explanation": "### How it works\n\nWe can precompute a prefix sum array where `prefix[i]` stores the sum of all elements from index `0` to `i`. To find the sum of any range `[left, right]`, we take `prefix[right]` and subtract `prefix[left - 1]` (if `left > 0`). This gives us constant-time queries after a linear-time preprocessing step.\n\n### Steps\n\n1. Build a prefix sum array during construction:\n    - Maintain a running sum `cur`.\n    - For each element, add it to `cur` and store in `prefix`.\n2. For each `sumRange(left, right)` query:\n    - Get `rightSum = prefix[right]`.\n    - If `left > 0`, set `leftSum = prefix[left - 1]`, otherwise `leftSum = 0`.\n    - Return `rightSum - leftSum`.\n\n### Complexity\n\n- Time complexity: `O(1)` for each `sumRange()` query, `O(n)` for building the prefix sum array.\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class NumArray:\n    def __init__(self, nums):\n        self.prefix = []\n        cur = 0\n        for num in nums:\n            cur += num\n            self.prefix.append(cur)\n\n    def sumRange(self, left, right):\n        rightSum = self.prefix[right]\n        leftSum = self.prefix[left - 1] if left > 0 else 0\n        return rightSum - leftSum\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/range-sum-query-immutable.md",
+      "id": "prefix-sum-i"
+    }
+  ]
 }

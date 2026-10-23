@@ -1,0 +1,29 @@
+{
+  "problemId": "detect-capital",
+  "approach": "Whole-Word Case Predicates",
+  "explanation": "### How it works\n\nThe allowed capitalization forms are all uppercase, all lowercase, or one uppercase initial followed by lowercase letters. Python's case predicates express those three alternatives directly.\n\n### Steps\n\n1. Check all uppercase.\n2. Check all lowercase.\n3. Check title case.\n4. Accept if any allowed form holds.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space for ASCII-letter input.",
+  "code": {
+    "python": "class Solution:\n  def detectCapitalUse(self, word: str) -> bool:\n    return word.isupper() or word.islower() or word.istitle()\n",
+    "cpp": "class Solution {\n public:\n  bool detectCapitalUse(string word) {\n    for (int i = 1; i < word.length(); ++i)\n      if (isupper(word[1]) != isupper(word[i]) ||\n          islower(word[0]) && isupper(word[i]))\n        return false;\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/520.%20Detect%20Capital",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "count-uppercase-positions",
+      "approach": "Count Uppercase Positions",
+      "explanation": "### How it works\n\nThe uppercase count must be zero, the full word length, or exactly one at the first position.\n\n### Steps\n\n1. Count ASCII uppercase letters.\n2. Accept zero or all uppercase.\n3. Otherwise accept exactly one uppercase letter when it is the first character.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/520.%20Detect%20Capital",
+      "code": {
+        "python": "class Solution:\n    def detectCapitalUse(self, word: str) -> bool:\n        uppercase = sum('A' <= char <= 'Z' for char in word)\n        return uppercase == 0 or uppercase == len(word) or (uppercase == 1 and 'A' <= word[0] <= 'Z')\n"
+      }
+    }
+  ]
+}

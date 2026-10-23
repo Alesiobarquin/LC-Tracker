@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string makeGood(string s) {\n        int l = 0;\n        for (int r = 0; r < s.length(); r++) {\n            if (l > 0 && abs(s[r] - s[l - 1]) == 32) {\n                l--;\n            } else {\n                s[l++] = s[r];\n            }\n        }\n        return s.substr(0, l);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/make-the-string-great.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/make-the-string-great.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nA \"bad\" pair consists of the same letter in different cases adjacent to each other (like \"aA\" or \"Aa\"). We repeatedly scan the string looking for such pairs. When we find one, we remove both characters and restart the scan since removing a pair might create a new bad pair from previously non-adjacent characters.\n\n### Steps\n\n1. Start from index `0` and scan through the string.\n2. At each position `i`, check if the current character and the previous character form a bad pair (same letter, different cases).\n3. If a bad pair is found, remove both characters, decrease `i` by `2` to recheck, and update the string length.\n4. Continue until the entire string is scanned without finding any bad pairs.\n5. Return the resulting string.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def makeGood(self, s: str) -> str:\n        n = len(s)\n        i = 0\n        while i < n:\n            if i and s[i] != s[i - 1] and s[i].lower() == s[i - 1].lower():\n                s = s[:i - 1] + s[i + 1:]\n                n -= 2\n                i -= 2\n            i += 1\n        return s\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/make-the-string-great.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Stack - I",
+      "explanation": "### How it works\n\nA stack naturally handles the \"undo\" pattern we need. As we process each character, we compare it with the top of the stack. If they form a bad pair (same letter, different cases), we pop the stack, effectively removing both characters. Otherwise, we push the current character. This handles cascading removals automatically.\n\n### Steps\n\n1. Initialize an empty stack to build the result.\n2. Iterate through each character in the string.\n3. For each character, check if the stack is non-empty and the top character forms a bad pair with the current character (same letter when lowercased, but different original characters).\n4. If they form a bad pair, pop the stack.\n5. Otherwise, push the current character onto the stack.\n6. Return the stack contents joined as a string.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def makeGood(self, s: str) -> str:\n        def lower(c):\n            if ord(c) < ord('a'):\n                return chr(ord('a') + ord(c) - ord('A'))\n            return c\n\n        stack = []\n        i = 0\n        while i < len(s):\n            if stack and stack[-1] != s[i] and lower(stack[-1]) == lower(s[i]):\n                stack.pop()\n            else:\n                stack.append(s[i])\n            i += 1\n        return \"\".join(stack)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/make-the-string-great.md",
+      "id": "stack-i"
+    }
+  ]
 }

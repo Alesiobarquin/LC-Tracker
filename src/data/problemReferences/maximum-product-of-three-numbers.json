@@ -1,0 +1,28 @@
+{
+  "problemId": "maximum-product-of-three-numbers",
+  "approach": "Sorted Extremes",
+  "explanation": "### How it works\n\nThe maximum triple product uses either the three largest values or the largest value with the two smallest values, whose negative signs may cancel.\n\n### Steps\n\n1. Sort the input.\n2. Multiply the three largest values.\n3. Multiply the largest value and two smallest values.\n4. Return the larger product.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) worst-case Python sorting workspace.",
+  "code": {
+    "python": "class Solution:\n  def maximumProduct(self, nums: list[int]) -> int:\n    nums.sort()\n    return max(nums[-1] * nums[0] * nums[1],\n               nums[-1] * nums[-2] * nums[-3])\n",
+    "cpp": "class Solution {\n public:\n  int maximumProduct(vector<int>& nums) {\n    const int n = nums.size();\n    ranges::sort(nums);\n    return max(nums[n - 1] * nums[0] * nums[1],\n               nums[n - 1] * nums[n - 2] * nums[n - 3]);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/628.%20Maximum%20Product%20of%20Three%20Numbers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "five-running-extremes",
+      "approach": "Five Running Extremes",
+      "explanation": "### How it works\n\nOnly two minima and three maxima are needed. Maintain those five values in one pass and compare the same two product candidates.\n\n### Steps\n\n1. Initialize two minima and three maxima.\n2. Update them for each value, retaining duplicates.\n3. Compare the all-largest and two-smallest product choices.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/628.%20Maximum%20Product%20of%20Three%20Numbers/628-2.py",
+      "code": {
+        "python": "from math import inf\n\nclass Solution:\n  def maximumProduct(self, nums: list[int]) -> int:\n    min1 = inf   # the minimum\n    min2 = inf   # the second minimum\n    max1 = -inf  # the maximum\n    max2 = -inf  # the second maximum\n    max3 = -inf  # the third maximum\n\n    for num in nums:\n      if num <= min1:\n        min2 = min1\n        min1 = num\n      elif num <= min2:\n        min2 = num\n\n      if num >= max1:\n        max3 = max2\n        max2 = max1\n        max1 = num\n      elif num >= max2:\n        max3 = max2\n        max2 = num\n      elif num >= max3:\n        max3 = num\n\n    return max(max1 * min1 * min2, max1 * max2 * max3)\n"
+      }
+    }
+  ]
+}

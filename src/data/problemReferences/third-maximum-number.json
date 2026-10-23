@@ -10,5 +10,19 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/414.%20Third%20Maximum%20Number",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "three-value-min-heap",
+      "approach": "Three-Value Min-Heap",
+      "explanation": "### How it works\n\nKeep the three largest distinct values in a min-heap. A set prevents repeats from entering again. With three retained values, the root is the third maximum; otherwise return the overall maximum.\n\n### Steps\n\n1. Insert unseen values into the heap and set.\n2. Remove the minimum when the heap exceeds three values.\n3. Return the third maximum if present, otherwise the maximum.\n\n### Complexity\n\n- Time: `O(n)` because the heap holds at most three values.\n- Space: `O(u)` for u distinct values in the seen set; the heap is constant-sized.",
+      "explanationAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/414.%20Third%20Maximum%20Number/414-2.py",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "import heapq\n\nclass Solution:\n  def thirdMax(self, nums: list[int]) -> int:\n    minHeap = []\n    seen = set()\n\n    for num in nums:\n      if num not in seen:\n        seen.add(num)\n        heapq.heappush(minHeap, num)\n        if len(minHeap) > 3:\n          heapq.heappop(minHeap)\n\n    if len(minHeap) == 2:\n      heapq.heappop(minHeap)\n\n    return minHeap[0]\n"
+      }
+    }
+  ]
 }

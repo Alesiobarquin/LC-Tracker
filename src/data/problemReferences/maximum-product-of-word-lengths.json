@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/318.%20Maximum%20Product%20of%20Word%20Lengths",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "character-set-pair-checks",
+      "approach": "Character-Set Pair Checks",
+      "explanation": "### How it works\n\nRepresent each word by its set of letters. A pair is eligible when the two sets are disjoint, avoiding bit-mask encoding while keeping the pairwise search.\n\n### Steps\n\n1. Build one character set per word.\n2. Check every pair with isdisjoint.\n3. Keep the largest product of lengths for disjoint pairs.\n\n### Complexity\n\n- Time: `O(S + n² × a)` for S total characters and alphabet size a, at most 26.\n- Space: `O(n × a)` for letter sets.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/318.%20Maximum%20Product%20of%20Word%20Lengths",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def maxProduct(self, words: list[str]) -> int:\n        letters = [set(word) for word in words]\n        best = 0\n        for i in range(len(words)):\n            for j in range(i + 1, len(words)):\n                if letters[i].isdisjoint(letters[j]):\n                    best = max(best, len(words[i]) * len(words[j]))\n        return best\n"
+      }
+    }
+  ]
 }

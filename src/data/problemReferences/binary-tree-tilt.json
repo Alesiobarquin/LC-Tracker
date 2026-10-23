@@ -1,0 +1,29 @@
+{
+  "problemId": "binary-tree-tilt",
+  "approach": "Postorder Subtree Sums",
+  "explanation": "### How it works\n\nA node's tilt is the absolute difference between its left and right subtree sums. Postorder traversal computes those sums once while accumulating every node's tilt.\n\n### Steps\n\n1. Return zero for an empty subtree.\n2. Compute left and right sums recursively.\n3. Add their absolute difference to the total tilt.\n4. Return the node value plus both sums.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(h) recursion space.",
+  "code": {
+    "python": "class Solution:\n  def findTilt(self, root: TreeNode | None) -> int:\n    ans = 0\n\n    def summ(root: TreeNode | None) -> int:\n      nonlocal ans\n      if not root:\n        return 0\n\n      l = summ(root.left)\n      r = summ(root.right)\n      ans += abs(l - r)\n      return root.val + l + r\n\n    summ(root)\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  int findTilt(TreeNode* root) {\n    int ans = 0;\n    sum(root, ans);\n    return ans;\n  }\n\n private:\n  int sum(TreeNode* root, int& ans) {\n    if (root == nullptr)\n      return 0;\n\n    const int l = sum(root->left, ans);\n    const int r = sum(root->right, ans);\n    ans += abs(l - r);\n    return root->val + l + r;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/563.%20Binary%20Tree%20Tilt",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-postorder-sums",
+      "approach": "Iterative Postorder Sums",
+      "explanation": "### How it works\n\nAn explicit visited flag schedules each node after its children. Store computed subtree sums by node identity and calculate its tilt when both children are ready.\n\n### Steps\n\n1. Push the root with an unprocessed flag.\n2. Schedule each node for a later visit after its children.\n3. Read the stored child sums on that later visit.\n4. Store the total subtree sum and accumulate tilt.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) stored sums and traversal state.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/563.%20Binary%20Tree%20Tilt",
+      "code": {
+        "python": "class Solution:\n    def findTilt(self, root: 'TreeNode') -> int:\n        sums = {None: 0}\n        stack = [(root, False)] if root else []\n        total = 0\n        while stack:\n            node, ready = stack.pop()\n            if ready:\n                left, right = sums[node.left], sums[node.right]\n                total += abs(left - right)\n                sums[node] = node.val + left + right\n            else:\n                stack.append((node, True))\n                for child in (node.right, node.left):\n                    if child:\n                        stack.append((child, False))\n        return total\n"
+      }
+    }
+  ]
+}

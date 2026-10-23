@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int findContentChildren(vector<int>& g, vector<int>& s) {\n        sort(g.begin(), g.end());\n        sort(s.begin(), s.end());\n\n        int i = 0;\n        for (int j = 0; i < g.size() && j < s.size(); j++) {\n            if (g[i] <= s[j]) i++;\n        }\n        return i;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/assign-cookies.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/assign-cookies.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each child, we want to find the smallest cookie that can satisfy them. Using the smallest sufficient cookie for each child leaves larger cookies available for greedier children. We iterate through children, and for each one, scan all cookies to find the smallest one that works. Once a cookie is used, we mark it as unavailable.\n\n### Steps\n\n1. Sort the cookies array.\n2. For each child's greed factor, search through all cookies to find the smallest one that satisfies them (cookie size >= greed).\n3. If found, mark that cookie as used (set to `-1`) and increment the count.\n4. Return the total count of satisfied children.\n\n### Complexity\n\n- Time complexity: `O(n * m + m log m)`\n- Space complexity: `O(m)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `n` is the size of the array `g` and `m` is the size of the array `s`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findContentChildren(self, g: List[int], s: List[int]) -> int:\n        s.sort()\n        res = 0\n\n        for i in g:\n            minIdx = -1\n            for j in range(len(s)):\n                if s[j] < i:\n                    continue\n\n                if minIdx == -1 or s[minIdx] > s[j]:\n                    minIdx = j\n\n            if minIdx != -1:\n                s[minIdx] = -1\n                res += 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/assign-cookies.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Two Pointers - I",
+      "explanation": "### How it works\n\nIf both arrays are sorted, we can use two pointers to match children with cookies efficiently. Start with the least greedy child. If the current cookie is too small, move to the next larger cookie. Once we find a cookie that works, both pointers advance. This greedy matching ensures we never waste a cookie on a child who could be satisfied with a smaller one.\n\n### Steps\n\n1. Sort both the greed array and the cookie array.\n2. Use pointer `i` for children and `j` for cookies, both starting at 0.\n3. For each child, skip cookies that are too small (increment `j`).\n4. If a suitable cookie is found, increment both pointers.\n5. Return `i`, which represents the count of satisfied children.\n\n### Complexity\n\n- Time complexity: `O(n log n + m log m)`\n- Space complexity: `O(n + m)` worst-case auxiliary space for Python\\'s sort.\n\n> Where `n` is the size of the array `g` and `m` is the size of the array `s`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def findContentChildren(self, g: List[int], s: List[int]) -> int:\n        g.sort()\n        s.sort()\n\n        i = j = 0\n        while i < len(g):\n            while j < len(s) and g[i] > s[j]:\n                j += 1\n            if j == len(s):\n                break\n            i += 1\n            j += 1\n        return i\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/assign-cookies.md",
+      "id": "two-pointers-i"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxVowels(string s, int k) {\n        int mask = (1 << ('a' - 'a')) | (1 << ('e' - 'a')) |\n                   (1 << ('i' - 'a')) | (1 << ('o' - 'a')) |\n                   (1 << ('u' - 'a'));\n\n        int l = 0, cnt = 0, res = 0;\n        for (int r = 0; r < s.size(); r++) {\n            cnt += (mask >> (s[r] - 'a')) & 1;\n            if (r - l + 1 > k) {\n                cnt -= (mask >> (s[l] - 'a')) & 1;\n                l++;\n            }\n            res = max(res, cnt);\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=kEfPSzgL-Ss",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-vowels-in-a-substring-of-given-length.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-vowels-in-a-substring-of-given-length.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe most straightforward approach is to check every possible substring of length `k`. For each starting position, count the vowels in the window and track the maximum count seen.\n\nThis works correctly but is inefficient because we recount characters for overlapping windows.\n\n### Steps\n\n1. For each starting index `i` from `0` to `n - k`:\n    - Count the vowels in the substring `s[i..i+k-1]`.\n    - Update the result if this count is larger.\n2. Return the maximum vowel count found.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "class Solution:\n    def maxVowels(self, s: str, k: int) -> int:\n        vowel = {'a', 'e', 'i', 'o', 'u'}\n        res = 0\n\n        for i in range(len(s) - k + 1):\n            cnt = 0\n            for j in range(i, i + k):\n                cnt += 1 if s[j] in vowel else 0\n            res = max(res, cnt)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-vowels-in-a-substring-of-given-length.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Count",
+      "explanation": "### How it works\n\nWe can precompute a prefix sum array where `prefix[i]` stores the number of vowels in `s[0..i-1]`. Then, the vowel count in any window `s[i-k..i-1]` is simply `prefix[i] - prefix[i-k]`.\n\nThis allows us to answer each window query in O(1) time after O(n) preprocessing.\n\n### Steps\n\n1. Build a prefix array where `prefix[i+1] = prefix[i] + (1 if s[i] is a vowel else 0)`.\n2. For each ending position `i` from `k` to `n`:\n    - Calculate the vowel count as `prefix[i] - prefix[i-k]`.\n    - Update the maximum.\n3. Return the maximum vowel count.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def maxVowels(self, s: str, k: int) -> int:\n        vowel = {'a', 'e', 'i', 'o', 'u'}\n        prefix = [0] * (len(s) + 1)\n        for i in range(len(s)):\n            prefix[i + 1] = prefix[i] + (1 if s[i] in vowel else 0)\n\n        res = 0\n        for i in range(k, len(s) + 1):\n            res = max(res, prefix[i] - prefix[i - k])\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-number-of-vowels-in-a-substring-of-given-length.md",
+      "id": "prefix-count"
+    }
+  ]
 }

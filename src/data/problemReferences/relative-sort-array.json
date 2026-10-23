@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> relativeSortArray(vector<int>& arr1, vector<int>& arr2) {\n        unordered_map<int, int> index;\n        for (int i = 0; i < arr2.size(); i++) {\n            index[arr2[i]] = i;\n        }\n\n        sort(arr1.begin(), arr1.end(), [&](int a, int b) {\n            int ia = index.count(a) ? index[a] : 1000 + a;\n            int ib = index.count(b) ? index[b] : 1000 + b;\n            return ia < ib;\n        });\n\n        return arr1;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/relative-sort-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/relative-sort-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe straightforward approach is to process each element in `arr2` in order and find all matching elements in `arr1`. For each value in `arr2`, we scan through `arr1`, collect all occurrences, and mark them as used. After processing all elements from `arr2`, any remaining elements in `arr1` are sorted and appended to the result.\n\nThis approach directly mimics the problem requirements: first place elements in the order specified by `arr2`, then append the rest in sorted order.\n\n### Steps\n\n1. Create an empty result list.\n2. For each number in `arr2`:\n    - Scan through `arr1` and find all occurrences of this number.\n    - Add each occurrence to the result and mark the position in `arr1` as used (e.g., set to `-1`).\n3. Sort the modified `arr1` (marked positions will sort to the beginning).\n4. Append all unmarked elements (those not equal to `-1`) from `arr1` to the result.\n5. Return the result.\n\n### Complexity\n\n- Time complexity: `O(m * n + n log n)`\n- Space complexity:\n    - `O(n)` worst-case auxiliary space for Python\\'s sort.\n    - `O(n)` space for the output list.\n\n> Where `n` is the size of the array `arr1`, and `m` is the size of the array `arr2`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def relativeSortArray(self, arr1: List[int], arr2: List[int]) -> List[int]:\n        res = []\n\n        for num2 in arr2:\n            for i, num1 in enumerate(arr1):\n                if num1 == num2:\n                    res.append(num1)\n                    arr1[i] = -1\n\n        arr1.sort()\n        for i in range(len(res), len(arr1)):\n            res.append(arr1[i])\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/relative-sort-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of repeatedly scanning `arr1` for each element in `arr2`, we can first count the frequency of each element in `arr1` using a hash map. This allows O(1) lookups when building the result.\n\nWe also use a set to quickly identify which elements from `arr1` are not in `arr2`. These \"extra\" elements are collected separately, sorted, and appended to the end of the result.\n\n### Steps\n\n1. Create a set from `arr2` for `O(1)` membership checks.\n2. Count the frequency of each element in `arr1` using a hash map. While counting, collect elements not in `arr2` into a separate list.\n3. Sort the list of extra elements.\n4. Build the result: for each number in `arr2`, append it to the result as many times as it appears in `arr1`.\n5. Append the sorted extra elements to the result.\n6. Return the result.\n\n### Complexity\n\n- Time complexity: `O(n + m + n log n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the array `arr1`, and `m` is the size of the array `arr2`.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def relativeSortArray(self, arr1: List[int], arr2: List[int]) -> List[int]:\n        arr2_set = set(arr2)\n        arr1_count = defaultdict(int)\n        end = []\n\n        for num in arr1:\n            if num not in arr2_set:\n                end.append(num)\n            arr1_count[num] += 1\n        end.sort()\n\n        res = []\n        for num in arr2:\n            for _ in range(arr1_count[num]):\n                res.append(num)\n        return res + end\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/relative-sort-array.md",
+      "id": "hash-map"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "reshape-the-matrix",
+  "approach": "Row-Major Write Cursor",
+  "explanation": "### How it works\n\nA reshape preserves row-major element order. A single write index maps each visited original value to its new row and column.\n\n### Steps\n\n1. Reject a changed element count by returning the original matrix.\n2. Allocate the requested shape.\n3. Traverse the input row by row.\n4. Write index k at row k // c and column k % c.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(rc) returned matrix; O(1) extra cursor state.",
+  "code": {
+    "python": "class Solution:\n  def matrixReshape(self, nums: list[list[int]],\n                    r: int, c: int) -> list[list[int]]:\n    if nums == [] or r * c != len(nums) * len(nums[0]):\n      return nums\n\n    ans = [[0 for j in range(c)] for i in range(r)]\n    k = 0\n\n    for row in nums:\n      for num in row:\n        ans[k // c][k % c] = num\n        k += 1\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<vector<int>> matrixReshape(vector<vector<int>>& nums, int r, int c) {\n    if (nums.empty() || r * c != nums.size() * nums[0].size())\n      return nums;\n\n    vector<vector<int>> ans(r, vector<int>(c));\n    int k = 0;\n\n    for (const vector<int>& row : nums)\n      for (const int num : row) {\n        ans[k / c][k % c] = num;\n        ++k;\n      }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/566.%20Reshape%20the%20Matrix",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "flatten-then-slice",
+      "approach": "Flatten Then Slice",
+      "explanation": "### How it works\n\nMaterialize the shared row-major sequence, then divide it into c-wide rows. This trades an extra copy for a direct expression of reshape semantics.\n\n### Steps\n\n1. Check that the requested shape preserves element count.\n2. Flatten the matrix in row-major order.\n3. Slice consecutive groups of c values.\n\n### Complexity\n\n- Time: O(mn).\n- Space: O(mn) temporary flat storage, plus output.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/566.%20Reshape%20the%20Matrix",
+      "code": {
+        "python": "class Solution:\n    def matrixReshape(self, mat: list[list[int]], r: int, c: int) -> list[list[int]]:\n        if len(mat) * len(mat[0]) != r * c:\n            return mat\n        flat = [value for row in mat for value in row]\n        return [flat[i:i + c] for i in range(0, len(flat), c)]\n"
+      }
+    }
+  ]
+}

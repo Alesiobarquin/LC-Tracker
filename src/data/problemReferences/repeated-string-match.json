@@ -1,0 +1,29 @@
+{
+  "problemId": "repeated-string-match",
+  "approach": "Bounded Repetition and Substring Search",
+  "explanation": "### How it works\n\nAt least ceiling(len(b)/len(a)) copies are needed. If b appears at all, it fits within that many copies or one extra copy, because its start can be shifted into the first a block.\n\n### Steps\n\n1. Compute the minimum copy count covering b's length.\n2. Search b inside that repetition.\n3. Search once more after appending one a.\n4. Return the matching count or −1.\n\n### Complexity\n\n- Time: O((n + m) × m) conservative substring-search bound for lengths n and m.\n- Space: O(n + m) repeated text.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def repeatedStringMatch(self, a: str, b: str) -> int:\n    n = math.ceil(len(b) / len(a))\n    s = a * n\n    if b in s:\n      return n\n    if b in s + a:\n      return n + 1\n    return -1\n",
+    "cpp": "class Solution {\n public:\n  int repeatedStringMatch(string a, string b) {\n    const int n = ceil((double)b.length() / a.length());\n    string s;\n\n    for (int i = 0; i < n; ++i)\n      s += a;\n\n    if (s.find(b) != string::npos)\n      return n;\n    if ((s + a).find(b) != string::npos)\n      return n + 1;\n    return -1;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/686.%20Repeated%20String%20Match",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "kmp-over-a-virtual-repeated-string",
+      "approach": "KMP over a Virtual Repeated String",
+      "explanation": "### How it works\n\nBuild b's prefix-function table, then stream characters from the repeated a using modular indexing. KMP finds the earliest complete match without constructing the repeated text.\n\n### Steps\n\n1. Build the longest-prefix/suffix table for b.\n2. Read enough virtual copies of a to cover all possible match starts.\n3. Use failure links after mismatches.\n4. On the first complete match, return the copies needed to reach its ending position.\n\n### Complexity\n\n- Time: O(n + m).\n- Space: O(m) prefix-function table.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/686.%20Repeated%20String%20Match",
+      "code": {
+        "python": "class Solution:\n    def repeatedStringMatch(self, a: str, b: str) -> int:\n        prefix = [0] * len(b)\n        matched = 0\n        for i in range(1, len(b)):\n            while matched and b[i] != b[matched]:\n                matched = prefix[matched - 1]\n            if b[i] == b[matched]:\n                matched += 1\n            prefix[i] = matched\n        matched = 0\n        limit = ((len(b) + len(a) - 1) // len(a) + 1) * len(a)\n        for i in range(limit):\n            char = a[i % len(a)]\n            while matched and char != b[matched]:\n                matched = prefix[matched - 1]\n            if char == b[matched]:\n                matched += 1\n            if matched == len(b):\n                return (i + len(a)) // len(a)\n        return -1\n"
+      }
+    }
+  ]
+}

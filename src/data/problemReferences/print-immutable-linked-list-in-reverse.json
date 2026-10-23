@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    void printLinkedListInReverse(ImmutableListNode* head) {\n        ImmutableListNode* curr;\n        ImmutableListNode* end = NULL;\n\n        while (head != end) {\n            curr = head;\n            while (curr->getNext() != end) {\n                curr = curr->getNext();\n            }\n            curr->printValue();\n            end = curr;\n        }\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/print-immutable-linked-list-in-reverse.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/print-immutable-linked-list-in-reverse.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "### How it works\n\nRecursion naturally reverses the order of operations. When we recurse to the end of the list first and then print on the way back, we effectively print in reverse. The call stack holds all the nodes, and as each call returns, it prints its node's value.\n\n### Steps\n\n1. If the current node is `null`, return (base case).\n2. Recursively call the function on `head.getNext()`.\n3. After the recursive call returns, print the current node's value.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the linked list.",
+      "code": {
+        "python": "class Solution:\n    def printLinkedListInReverse(self, head: 'ImmutableListNode') -> None:\n        if head is not None:\n            self.printLinkedListInReverse(head.getNext())\n            head.printValue()\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/print-immutable-linked-list-in-reverse.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Using Stack",
+      "explanation": "### How it works\n\nA stack provides Last-In-First-Out (LIFO) ordering, which is exactly what we need to reverse the print order. We traverse the list once to push all nodes onto the `stack`, then pop them one by one to print in reverse order.\n\n### Steps\n\n1. Create an empty `stack`.\n2. Traverse the linked list from `head` to end, pushing each node onto the `stack`.\n3. Pop nodes from the `stack` one by one and print each node's value until the `stack` is empty.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`\n\n> Where `n` is the size of the linked list.",
+      "code": {
+        "python": "class Solution:\n    def printLinkedListInReverse(self, head: 'ImmutableListNode') -> None:\n        stack = []\n        while head:\n            stack.append(head)\n            head = head.getNext()\n\n        while stack:\n            node = stack.pop()\n            node.printValue()\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/print-immutable-linked-list-in-reverse.md",
+      "id": "using-stack"
+    }
+  ]
 }

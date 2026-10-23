@@ -1,0 +1,29 @@
+{
+  "problemId": "remove-comments",
+  "approach": "Comment-State Scanner",
+  "explanation": "### How it works\n\nTrack whether a block comment is active while scanning lines. Outside blocks, a line comment discards the rest of its line; a block comment may span lines and concatenate surviving code on either side.\n\n### Steps\n\n1. Scan each line while retaining block-comment state.\n2. Recognize opening and closing block markers.\n3. Stop a line on // only outside a block.\n4. Emit nonempty accumulated code when no block remains open.\n\n### Complexity\n\n- Time: O(L²) conservative bound for Python immutable-string accumulation; O(L) character scanning.\n- Space: O(L) accumulated code and output.\n\n### Things to watch for\n\n- Do not interpret // inside a block as a line comment.\n- Removing a multiline block can join code from different source lines.",
+  "code": {
+    "python": "class Solution:\n  def removeComments(self, source: list[str]) -> list[str]:\n    ans = []\n    commenting = False\n    modified = ''\n\n    for line in source:\n      i = 0\n      while i < len(line):\n        if i + 1 == len(line):\n          if not commenting:\n            modified += line[i]\n          i += 1\n          break\n        twoChars = line[i:i + 2]\n        if twoChars == '/*' and not commenting:\n          commenting = True\n          i += 2\n        elif twoChars == '*/' and commenting:\n          commenting = False\n          i += 2\n        elif twoChars == '//':\n          if not commenting:\n            break\n          else:\n            i += 2\n        else:\n          if not commenting:\n            modified += line[i]\n          i += 1\n      if modified and not commenting:\n        ans.append(modified)\n        modified = ''\n\n    return ans\n",
+    "cpp": "class Solution {\n public:\n  vector<string> removeComments(vector<string>& source) {\n    vector<string> ans;\n    bool commenting = false;\n    string modified;\n\n    for (const string& line : source) {\n      for (int i = 0; i < line.length();) {\n        if (i + 1 == line.length()) {\n          if (!commenting)\n            modified += line[i];\n          ++i;\n          break;\n        }\n        const string& twoChars = line.substr(i, 2);\n        if (twoChars == \"/*\" && !commenting) {\n          commenting = true;\n          i += 2;\n        } else if (twoChars == \"*/\" && commenting) {\n          commenting = false;\n          i += 2;\n        } else if (twoChars == \"//\") {\n          if (!commenting)\n            break;\n          else\n            i += 2;\n        } else {\n          if (!commenting)\n            modified += line[i];\n          ++i;\n        }\n      }\n      if (modified.length() > 0 && !commenting) {\n        ans.push_back(modified);\n        modified = \"\";\n      }\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/722.%20Remove%20Comments",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "ordered-comment-token-removal",
+      "approach": "Ordered Comment-Token Removal",
+      "explanation": "### How it works\n\nOn the complete newline-joined source, match a block comment or a line comment at its first opening marker. Non-greedy block matching stops at the first closing marker; line matching stops before a newline.\n\n### Steps\n\n1. Join source lines with newline characters.\n2. Remove block comments and line comments with one ordered regular expression.\n3. Split the remaining text into lines.\n4. Discard empty lines while preserving nonempty whitespace.\n\n### Complexity\n\n- Time: O(L²) conservative regular-expression search bound.\n- Space: O(L) joined and filtered text.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/722.%20Remove%20Comments",
+      "code": {
+        "python": "import re\n\nclass Solution:\n    def removeComments(self, source: list[str]) -> list[str]:\n        text = '\\n'.join(source)\n        cleaned = re.sub(r'/\\*.*?\\*/|//[^\\n]*', '', text, flags=re.DOTALL)\n        return [line for line in cleaned.split('\\n') if line]\n"
+      }
+    }
+  ]
+}

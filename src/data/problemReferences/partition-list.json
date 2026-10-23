@@ -7,5 +7,16 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* partition(ListNode* head, int x) {\n        ListNode leftDummy(0), rightDummy(0);\n        ListNode *ltail = &leftDummy, *rtail = &rightDummy;\n\n        while (head) {\n            if (head->val < x) {\n                ltail->next = head;\n                ltail = ltail->next;\n            } else {\n                rtail->next = head;\n                rtail = rtail->next;\n            }\n            head = head->next;\n        }\n\n        ltail->next = rightDummy.next;\n        rtail->next = nullptr;\n        return leftDummy.next;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=KT1iUciJr4g",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-list.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nWe need to partition the linked list so that all nodes with values less than `x` come before nodes with values greater than or equal to `x`, while preserving the original relative order within each group.\n\nThe brute force approach extracts all values into two separate lists based on the partition condition, then writes them back to the original nodes. This simplifies the logic but requires extra space proportional to the list size.\n\n### Steps\n\n1. Create two arrays: one for values less than `x`, another for values greater than or equal to `x`.\n2. Traverse the linked list once, appending each value to the appropriate array.\n3. Traverse the linked list again, overwriting node values in order: first all values from the \"less\" array, then all values from the \"greater\" array.\n4. Return the `head` of the modified list.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def partition(self, head: Optional[ListNode], x: int) -> Optional[ListNode]:\n        if not head:\n            return None\n\n        less, greater = [], []\n        cur = head\n        while cur:\n            if cur.val < x:\n                less.append(cur.val)\n            else:\n                greater.append(cur.val)\n            cur = cur.next\n\n        cur = head\n        for val in less:\n            cur.val = val\n            cur = cur.next\n\n        for val in greater:\n            cur.val = val\n            cur = cur.next\n\n        return head\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/partition-list.md",
+      "id": "brute-force"
+    }
+  ]
 }

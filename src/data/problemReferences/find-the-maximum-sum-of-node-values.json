@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    long long maximumValueSum(vector<int>& nums, int k, vector<vector<int>>& edges) {\n        int xorCnt = 0, minDiff = 1 << 30;\n        long long res = 0;\n\n        for (int& num : nums) {\n            int xorNum = num ^ k;\n            if (xorNum > num) {\n                res += xorNum;\n                xorCnt ^= 1;\n            } else {\n                res += num;\n            }\n            minDiff = min(minDiff, abs(xorNum - num));\n        }\n\n        return res - (xorCnt * minDiff);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-maximum-sum-of-node-values.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-maximum-sum-of-node-values.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nA key insight is that applying XOR with `k` on an edge affects both endpoints. If we apply the operation on the same edge twice, the effects cancel out. This means we can effectively choose any pair of nodes to XOR (not just adjacent ones) by applying operations along the path between them.\n\nFor each node, we have two choices: keep its original value or XOR it with `k`. However, since each operation affects two nodes simultaneously, we must XOR an even number of nodes in total. We use DFS to track two states for each subtree: the maximum sum when an even number of nodes are XORed, and when an odd number are XORed.\n\n### Steps\n\n1. Build an adjacency list from the given edges.\n2. Perform a DFS starting from node 0, passing the parent to avoid revisiting.\n3. For each node, maintain a pair `res[0]` (even XOR count) and `res[1]` (odd XOR count):\n   - Initially, `res[0] = nums[node]` and `res[1] = nums[node] ^ k`.\n4. For each child subtree with result `cur`, update:\n   - `res[0] = max(res[0] + cur[0], res[1] + cur[1])` (combining even+even or odd+odd gives even)\n   - `res[1] = max(res[1] + cur[0], res[0] + cur[1])` (combining odd+even or even+odd gives odd)\n5. Return `res[0]` from the root, representing the maximum sum with an even number of XOR operations.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maximumValueSum(self, nums: List[int], k: int, edges: List[List[int]]) -> int:\n        adj = [[] for _ in range(len(nums))]\n        for u, v in edges:\n            adj[u].append(v)\n            adj[v].append(u)\n\n        def dfs(node, par):\n            res = [nums[node], nums[node] ^ k]\n            for child in adj[node]:\n                if child == par:\n                    continue\n\n                cur = dfs(child, node)\n                tmp = []\n                tmp.append(max(res[0] + cur[0], res[1] + cur[1]))\n                tmp.append(max(res[1] + cur[0], res[0] + cur[1]))\n                res = tmp\n\n            return res\n\n        return dfs(0, -1)[0]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-maximum-sum-of-node-values.md",
+      "id": "depth-first-search"
+    },
+    {
+      "approach": "Dynamic Programming (Top-Down)",
+      "explanation": "### How it works\n\nSince we must XOR an even number of nodes, we can ignore the tree structure entirely and treat this as a selection problem. For each node, we decide whether to XOR it or not, while tracking whether we have selected an odd or even count so far. This naturally leads to a DP formulation where the state is the current index and the parity of nodes XORed.\n\n### Steps\n\n1. Create a memoization table `dp[i][xorCnt]` where `i` is the node index and `xorCnt` is `0` (even) or `1` (odd).\n2. Base case: `dp[n][0] = 0` (valid: even count at the end) and `dp[n][1] = -infinity` (invalid: odd count).\n3. For each position `i`, recursively compute:\n   - Option 1: Keep `nums[i]` as is, add to `dfs(i + 1, xorCnt)`.\n   - Option 2: Use `nums[i] ^ k`, add to `dfs(i + 1, xorCnt ^ 1)` (toggle parity).\n4. Take the maximum of both options.\n5. Return `dfs(0, 0)` to get the maximum sum starting with even parity.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def maximumValueSum(self, nums: List[int], k: int, edges: List[List[int]]) -> int:\n        dp = [[None] * 2 for _ in range(len(nums))] + [[0, float(\"-inf\")]]\n\n        def dfs(i, xorCnt):\n            if dp[i][xorCnt] is not None:\n                return dp[i][xorCnt]\n\n            res = nums[i] + dfs(i + 1, xorCnt)\n            res = max(res, (nums[i] ^ k) + dfs(i + 1, xorCnt ^ 1))\n            dp[i][xorCnt] = res\n            return res\n\n        return dfs(0, 0)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/find-the-maximum-sum-of-node-values.md",
+      "id": "dynamic-programming-top-down"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    int pairSum(ListNode* head) {\n        ListNode* slow = head, *fast = head, *prev = nullptr;\n\n        while (fast && fast->next) {\n            fast = fast->next->next;\n            ListNode* tmp = slow->next;\n            slow->next = prev;\n            prev = slow;\n            slow = tmp;\n        }\n\n        int res = 0;\n        while (slow) {\n            res = max(res, prev->val + slow->val);\n            prev = prev->next;\n            slow = slow->next;\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=doj95MelfSA",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-twin-sum-of-a-linked-list.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-twin-sum-of-a-linked-list.md",
+  "alternatives": [
+    {
+      "approach": "Convert To Array",
+      "explanation": "### How it works\n\nA twin sum pairs the `i`-th node from the start with the `i`-th node from the end. Since linked lists do not support random access, we first convert the list into an array. With an array, we can use two pointers starting at opposite ends to easily compute each twin sum and track the maximum.\n\n### Steps\n\n1. Traverse the linked list and store each node's value in an array `arr`.\n2. Initialize two pointers: `i` at the start and `j` at the end of the array.\n3. While `i < j`:\n    - Compute `arr[i] + arr[j]` and update `res` if this sum is larger.\n    - Move `i` forward and `j` backward.\n4. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def pairSum(self, head: Optional[ListNode]) -> int:\n        arr = []\n        cur = head\n        while cur:\n            arr.append(cur.val)\n            cur = cur.next\n\n        i, j = 0, len(arr) - 1\n        res = 0\n        while i < j:\n            res = max(res, arr[i] + arr[j])\n            i, j = i + 1, j - 1\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-twin-sum-of-a-linked-list.md",
+      "id": "convert-to-array"
+    },
+    {
+      "approach": "Reverse the Second Half",
+      "explanation": "### How it works\n\nTo avoid extra space from converting to an array, we can modify the list itself. Using the `slow` and `fast` pointer technique, we find the middle of the list. Then we reverse the second half in place. Now the first half and the reversed second half can be traversed simultaneously, allowing us to compute twin sums directly without extra storage.\n\n### Steps\n\n1. Use `slow` and `fast` pointers to find the start of the second half. When `fast` reaches the end, `slow` is at the midpoint.\n2. Reverse the second half of the list starting from `slow`.\n3. Initialize `first` at the head and `second` at the head of the reversed second half.\n4. While `second` is not null:\n    - Compute `first.val + second.val` and update `res` if larger.\n    - Advance both `first` and `second`.\n5. Return `res`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` extra space.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def pairSum(self, head: Optional[ListNode]) -> int:\n        slow, fast = head, head\n        while fast and fast.next:\n            slow = slow.next\n            fast = fast.next.next\n\n        prev, cur = None, slow\n        while cur:\n            nxt = cur.next\n            cur.next = prev\n            prev = cur\n            cur = nxt\n\n        res = 0\n        first, second = head, prev\n        while second:\n            res = max(res, first.val + second.val)\n            first, second = first.next, second.next\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-twin-sum-of-a-linked-list.md",
+      "id": "reverse-the-second-half"
+    }
+  ]
 }

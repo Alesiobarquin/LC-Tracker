@@ -7,5 +7,20 @@
     "cpp": "class Solution {\npublic:\n    bool areSentencesSimilar(vector<string>& sentence1, vector<string>& sentence2,\n                             vector<vector<string>>& similarPairs) {\n        if (sentence1.size() != sentence2.size()) {\n            return false;\n        }\n        unordered_map<string, unordered_set<string>> wordToSimilarWords;\n        for (auto& pair : similarPairs) {\n            wordToSimilarWords[pair[0]].insert(pair[1]);\n            wordToSimilarWords[pair[1]].insert(pair[0]);\n        }\n\n        for (int i = 0; i < sentence1.size(); i++) {\n            // If the words are equal, continue.\n            if (sentence1[i] == sentence2[i]) {\n                continue;\n            }\n            // If the words form a similar pair, continue.\n            if (wordToSimilarWords[sentence1[i]].count(sentence2[i])) {\n                continue;\n            }\n            return false;\n        }\n\n        return true;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sentence-similarity.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sentence-similarity.md",
+  "alternatives": [
+    {
+      "id": "scan-similarity-pairs-per-word",
+      "approach": "Scan Similarity Pairs per Word",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nFor each unequal aligned word pair, scan the supplied pairs for a direct match in either direction. Similarity is not transitive, so no graph reachability is inferred.\n\n### Steps\n\n1. Reject different sentence lengths.\n2. Skip equal aligned words.\n3. Scan pairs for a direct match in either order.\n4. Reject any unmatched position.\n\n### Complexity\n\n- Time: `O(n × p × L)` as a string-comparison bound for n positions, p pairs, and maximum word length L.\n- Space: `O(1)` auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/sentence-similarity.md",
+      "sourceName": "NeetCode’s source",
+      "licenseUrl": "/neetcode-license.txt",
+      "code": {
+        "python": "class Solution:\n    def areSentencesSimilar(self, sentence1: list[str], sentence2: list[str], similarPairs: list[list[str]]) -> bool:\n        if len(sentence1) != len(sentence2):\n            return False\n        for a, b in zip(sentence1, sentence2):\n            if a != b and not any((a == x and b == y) or (a == y and b == x) for x, y in similarPairs):\n                return False\n        return True\n"
+      }
+    }
+  ]
 }

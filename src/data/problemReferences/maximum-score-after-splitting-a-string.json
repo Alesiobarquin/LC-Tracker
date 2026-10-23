@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int maxScore(string s) {\n        // res = Max of all (leftZeros + rightOnes)\n        // res = Max of all (leftZeros + (totalOnes - leftOnes))\n        // res = totalOnes (constant) + Max of all (leftZeros - leftOnes)\n\n        int zeros = 0, ones = 0, res = INT_MIN;\n\n        if (s[0] == '0') {\n            zeros++;\n        } else {\n            ones++;\n        }\n\n        for (int i = 1; i < s.size(); i++) {\n            res = max(res, zeros - ones);\n            if (s[i] == '0') {\n                zeros++;\n            } else {\n                ones++;\n            }\n        }\n\n        return res + ones;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-after-splitting-a-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-after-splitting-a-string.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe score at any split point is the sum of zeros in the left substring plus the sum of ones in the right substring. The simplest approach is to try every valid split position and count directly. For each split, we scan the left portion to count zeros and the right portion to count ones, then track the maximum score found.\n\n### Steps\n\n1. Iterate through each valid split position `i` from index `1` to `n-1` (both substrings must be non-empty).\n2. For each split position:\n    - Count zeros in the left substring (indices `0` to `i-1`).\n    - Count ones in the right substring (indices `i` to `n-1`).\n    - Calculate the score as the sum of these two counts.\n3. Track and return the maximum score across all split positions.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def maxScore(self, s: str) -> int:\n        n, res = len(s), 0\n        for i in range(1, n):\n            left_zero = 0\n            for j in range(i):\n                if s[j] == '0':\n                    left_zero += 1\n            right_one = 0\n            for j in range(i, n):\n                if s[j] == '1':\n                    right_one += 1\n            res = max(res, left_zero + right_one)\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-after-splitting-a-string.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix & Suffix Arrays",
+      "explanation": "### How it works\n\nInstead of recounting zeros and ones for every split position, we can precompute cumulative counts. A prefix array stores the count of zeros up to each index, while a suffix array stores the count of ones from each index to the end. This way, evaluating any split becomes an O(1) lookup.\n\n### Steps\n\n1. Build a prefix array `left_zero` where `left_zero[i]` holds the count of zeros from index `0` to `i`.\n2. Build a suffix array `right_one` where `right_one[i]` holds the count of ones from index `i` to `n-1`.\n3. For each valid split position `i` (from `1` to `n-1`):\n    - The score is `left_zero[i-1] + right_one[i]`.\n4. Return the maximum score found.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "class Solution:\n    def maxScore(self, s: str) -> int:\n        n = len(s)\n        left_zero = [0] * n\n        right_one = [0] * n\n\n        if s[0] == '0':\n            left_zero[0] = 1\n        for i in range(1, n):\n            left_zero[i] = left_zero[i - 1]\n            if s[i] == '0':\n                left_zero[i] += 1\n\n        if s[n - 1] == '1':\n            right_one[n - 1] = 1\n        for i in range(n - 2, -1, -1):\n            right_one[i] = right_one[i + 1]\n            if s[i] == '1':\n                right_one[i] += 1\n\n        res = 0\n        for i in range(1, n):\n            res = max(res, left_zero[i - 1] + right_one[i])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/maximum-score-after-splitting-a-string.md",
+      "id": "prefix-suffix-arrays"
+    }
+  ]
 }

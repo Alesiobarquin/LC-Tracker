@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/334.%20Increasing%20Triplet%20Subsequence",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "quadratic-subsequence-dp",
+      "approach": "Quadratic Subsequence DP",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nCompute the longest increasing subsequence ending at each index. Reaching length three proves that an increasing triplet exists.\n\n### Steps\n\n1. Initialize each position with length one.\n2. For each earlier smaller value, extend its subsequence length.\n3. Return true once a length reaches three.\n\n### Complexity\n\n- Time: `O(n²)` time.\n- Space: `O(n)` for lengths.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/334.%20Increasing%20Triplet%20Subsequence",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "class Solution:\n    def increasingTriplet(self, nums: list[int]) -> bool:\n        lengths = [1] * len(nums)\n        for i in range(len(nums)):\n            for j in range(i):\n                if nums[j] < nums[i]:\n                    lengths[i] = max(lengths[i], lengths[j] + 1)\n            if lengths[i] >= 3:\n                return True\n        return False\n"
+      }
+    }
+  ]
 }

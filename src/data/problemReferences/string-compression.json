@@ -7,5 +7,17 @@
     "cpp": "class Solution {\npublic:\n    int compress(vector<char>& chars) {\n        int n = chars.size(), k = 0, i = 0;\n\n        while (i < n) {\n            chars[k++] = chars[i];\n            int j = i + 1;\n            while (j < n && chars[i] == chars[j]) {\n                j++;\n            }\n\n            if (j - i > 1) {\n                string cnt = to_string(j - i);\n                for (char c : cnt) {\n                    chars[k++] = c;\n                }\n            }\n            i = j;\n        }\n\n        return k;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-compression.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-compression.md",
+  "alternatives": [
+    {
+      "approach": "Using Extra Space",
+      "explanation": "This teaching baseline uses extra space proportional to the input and does not meet the problem's constant-extra-space requirement. Use the default two-pointer approach when that restriction applies.\n\n### How it works\n\nThe idea is to traverse the array and group consecutive identical characters together. For each group, we write the character followed by its count (only if count > 1). We first build the compressed string in a separate buffer, then copy it back to the original array. This approach is straightforward but uses extra space proportional to the output size.\n\n### Steps\n\n1. Initialize an empty string `s` to build the compressed result.\n2. Use a pointer `i` to traverse the array. For each position, find the extent of consecutive identical characters using a second pointer `j`.\n3. Append the character `chars[i]` to `s`.\n4. If the count `j - i` is greater than `1`, append the count as a string to `s`.\n5. Move `i` to `j` and repeat until the array is fully processed.\n6. Copy the compressed string `s` back to the `chars` array and return its length.\n\n### Complexity\n\nFor `n` input characters, repeated concatenation of immutable Python strings has a conservative worst-case bound of `O(n²)` time. The temporary compressed string uses `O(n)` auxiliary space. Copying it back is linear; the default two-pointer approach meets the constant-extra-space requirement.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def compress(self, chars: List[str]) -> int:\n        n = len(chars)\n        s = \"\"\n\n        i = 0\n        while i < n:\n            s += chars[i]\n            j = i + 1\n            while j < n and chars[i] == chars[j]:\n                j += 1\n\n            if j - i > 1:\n                s += str(j - i)\n            i = j\n\n        i = 0\n        while i < len(s):\n            chars[i] = s[i]\n            i += 1\n        return i\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/string-compression.md",
+      "explanationAuthor": "LC Tracker",
+      "id": "using-extra-space"
+    }
+  ]
 }

@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {\n        int orig = image[sr][sc];\n        if (orig == color) return image;\n        int m = image.size(), n = image[0].size();\n        queue<pair<int,int>> q;\n        q.emplace(sr, sc);\n        image[sr][sc] = color;\n        int dirs[4][2] = {{1,0},{-1,0},{0,1},{0,-1}};\n\n        while (!q.empty()) {\n            auto [r, c] = q.front(); q.pop();\n            for (auto &d : dirs) {\n                int nr = r + d[0], nc = c + d[1];\n                if (nr >= 0 && nr < m && nc >= 0 && nc < n && image[nr][nc] == orig) {\n                    image[nr][nc] = color;\n                    q.emplace(nr, nc);\n                }\n            }\n        }\n        return image;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flood-fill.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flood-fill.md",
+  "alternatives": [
+    {
+      "approach": "Depth First Search",
+      "explanation": "### How it works\n\nFlood fill is like using the paint bucket tool in image editors. Starting from a pixel, we want to change its color and spread to all connected pixels of the same original color. This naturally maps to a graph traversal problem where each pixel is a node connected to its four neighbors.\n\nDFS works well here because we recursively explore as far as possible in one direction before backtracking. By changing the color as we visit each pixel, we mark it as visited, preventing infinite loops. If the new color equals the original, we skip the operation entirely to avoid unnecessary work.\n\n### Steps\n\n1. Store the original color of the starting pixel.\n2. If the original color equals the new color, return immediately (no work needed).\n3. Define a recursive `dfs` function that takes row and column coordinates.\n4. In `dfs`: if out of bounds or the pixel color does not match the original, return.\n5. Otherwise, change the pixel to the new color and recursively call `dfs` on all four neighbors (up, down, left, right).\n6. Start `dfs` from the initial coordinates and return the modified image.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity: `O(m * n)`\n\n> Where `m` is the number of rows and `n` is the number of columns in the image.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:\n        orig = image[sr][sc]\n        if orig == color:\n            return image\n\n        m, n = len(image), len(image[0])\n\n        def dfs(r, c):\n            if r < 0 or r >= m or c < 0 or c >= n or image[r][c] != orig:\n                return\n\n            image[r][c] = color\n            dfs(r + 1, c)\n            dfs(r - 1, c)\n            dfs(r, c + 1)\n            dfs(r, c - 1)\n\n        dfs(sr, sc)\n        return image\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/flood-fill.md",
+      "id": "depth-first-search"
+    }
+  ]
 }

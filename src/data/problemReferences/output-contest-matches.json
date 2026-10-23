@@ -1,0 +1,28 @@
+{
+  "problemId": "output-contest-matches",
+  "approach": "Recursive Tournament Rounds",
+  "explanation": "### How it works\n\nPair the strongest remaining seed with the weakest, then recurse on the resulting ordered match strings. Each round halves the number of entries.\n\n### Steps\n\n1. Create one string per seed.\n2. Pair first with last, second with second-last, and so on.\n3. Wrap each pair in parentheses.\n4. Recurse until one tournament expression remains.\n\n### Complexity\n\n- Time: O(n log² n) conservative character-copy bound with decimal seed text.\n- Space: O(n log n) live character storage across rounds.",
+  "code": {
+    "python": "class Solution:\n  def findContestMatch(self, n: int) -> str:\n    def generateMatches(matches: list[str]) -> str:\n      if len(matches) == 1:\n        return matches[0]\n\n      nextMatches = []\n\n      for i in range(len(matches) // 2):\n        nextMatches.append(\n            '(' + matches[i] + ',' + matches[len(matches) - 1 - i] + ')')\n\n      return generateMatches(nextMatches)\n\n    return generateMatches([str(i + 1) for i in range(n)])\n",
+    "cpp": "class Solution {\n public:\n  string findContestMatch(int n) {\n    vector<string> matches(n);\n\n    for (int i = 0; i < n; ++i)\n      matches[i] = to_string(i + 1);\n\n    return generateMatches(matches);\n  }\n\n private:\n  string generateMatches(const vector<string>& matches) {\n    if (matches.size() == 1)\n      return matches[0];\n\n    vector<string> nextMatches;\n\n    for (int i = 0; i < matches.size() / 2; ++i)\n      nextMatches.push_back(\"(\" + matches[i] + \",\" +\n                            matches[matches.size() - 1 - i] + \")\");\n\n    return generateMatches(nextMatches);\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/544.%20Output%20Contest%20Matches",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-tournament-rounds",
+      "approach": "Iterative Tournament Rounds",
+      "explanation": "### How it works\n\nBuild the same balanced bracket from successive rounds in a reusable list. Only the active first half remains relevant after each round.\n\n### Steps\n\n1. Start with seed strings in rank order.\n2. Overwrite the first half with strongest-versus-weakest pair strings.\n3. Halve the active count.\n4. Return the single remaining bracket.\n\n### Complexity\n\n- Time: O(n log² n) conservative character-copy bound.\n- Space: O(n log n) live character storage.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/544.%20Output%20Contest%20Matches/544-2.py",
+      "code": {
+        "python": "class Solution:\n  def findContestMatch(self, n: int) -> str:\n    matches = [str(i + 1) for i in range(n)]\n\n    while n > 1:\n      for i in range(n // 2):\n        matches[i] = '(' + matches[i] + ',' + matches[n - 1 - i] + ')'\n      n //= 2\n\n    return matches[0]\n"
+      }
+    }
+  ]
+}

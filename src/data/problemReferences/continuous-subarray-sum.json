@@ -7,5 +7,16 @@
     "cpp": "class Solution {\npublic:\n    bool checkSubarraySum(vector<int>& nums, int k) {\n        unordered_map<int, int> remainder;\n        remainder[0] = -1;\n        int total = 0;\n\n        for (int i = 0; i < nums.size(); i++) {\n            total += nums[i];\n            int r = total % k;\n            if (remainder.find(r) == remainder.end()) {\n                remainder[r] = i;\n            } else if (i - remainder[r] > 1) {\n                return true;\n            }\n        }\n\n        return false;\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=OKcrLfR-8mE",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/continuous-subarray-sum.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/continuous-subarray-sum.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe straightforward approach is to check every possible subarray of size at least 2 and see if its sum is a multiple of `k`. A number is a multiple of `k` if dividing it by `k` leaves no remainder. We iterate through all starting and ending positions to examine every valid subarray.\n\n### Steps\n\n1. Iterate through all possible starting indices `i` from `0` to `n-2` (we need at least 2 elements).\n2. For each starting index, maintain a running sum starting with `nums[i]`.\n3. Extend the subarray by iterating through ending indices `j` from `i+1` to `n-1`, adding each element to the running sum.\n4. After adding each element, check if the sum is divisible by `k` (`sum % k == 0`).\n5. If we find such a subarray, return `true` immediately.\n6. If no valid subarray is found after checking all possibilities, return `false`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def checkSubarraySum(self, nums: List[int], k: int) -> bool:\n        for i in range(len(nums) - 1):\n            sum = nums[i]\n            for j in range(i + 1, len(nums)):\n                sum += nums[j]\n                if sum % k == 0:\n                    return True\n        return False\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/continuous-subarray-sum.md",
+      "id": "brute-force"
+    }
+  ]
 }

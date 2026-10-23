@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<int> minOperations(string boxes) {\n        int n = boxes.size();\n        vector<int> res(n, 0);\n\n        int balls = 0, moves = 0;\n        for (int i = 0; i < n; i++) {\n            res[i] = balls + moves;\n            moves += balls;\n            balls += boxes[i] - '0';\n        }\n\n        balls = moves = 0;\n        for (int i = n - 1; i >= 0; i--) {\n            res[i] += balls + moves;\n            moves += balls;\n            balls += boxes[i] - '0';\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-move-all-balls-to-each-box.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-move-all-balls-to-each-box.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each box position, we want to know the total number of moves needed to bring all balls to that position. A move shifts a ball one position left or right. The cost to move a ball from position `i` to position `pos` is simply the absolute difference `|pos - i|`.\n\nWe can compute this directly by iterating through all boxes for each target position and summing up the distances from each `ball`.\n\n### Steps\n\n1. Create a `res` array of size `n`.\n2. For each target position `pos`:\n    - Iterate through all boxes.\n    - If box `i` contains a `ball` (value is '1'), add `|pos - i|` to `res`.\n3. Return the `res` array.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(n)` space for the output list.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minOperations(self, boxes: str) -> List[int]:\n        n = len(boxes)\n        res = [0] * n\n\n        for pos in range(n):\n            for i in range(n):\n                if boxes[i] == '1':\n                    res[pos] += abs(pos - i)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-move-all-balls-to-each-box.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Prefix Sum",
+      "explanation": "### How it works\n\nWe can split the total cost for each position into contributions from the left and the right. For `balls` on the left, the cost is `i * count_left - sum_of_indices_left`. For `balls` on the right, the cost is `sum_of_indices_right - i * count_right`. Using prefix sums for both the `count` of `balls` and the sum of their `indices`, we can compute both parts efficiently.\n\n### Steps\n\n1. Build two prefix arrays:\n    - `prefix_count[i]` = number of `balls` in boxes 0 to `i-1`.\n    - `index_sum[i]` = sum of `indices` of `balls` in boxes 0 to `i-1`.\n2. For each position `i`:\n    - Left contribution: `i * left_count - left_sum`.\n    - Right contribution: `right_sum - i * right_count`.\n    - Add both to get the `res` for position `i`.\n3. Return the `res` array.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minOperations(self, boxes: str) -> List[int]:\n        n = len(boxes)\n        res = [0] * n\n\n        prefix_count = [0] * (n + 1)\n        index_sum = [0] * (n + 1)\n        for i in range(n):\n            prefix_count[i + 1] = prefix_count[i] + (boxes[i] == '1')\n            index_sum[i + 1] = index_sum[i] + (i if boxes[i] == '1' else 0)\n\n        for i in range(n):\n            left = prefix_count[i]\n            left_sum = index_sum[i]\n\n            right = prefix_count[n] - prefix_count[i + 1]\n            right_sum = index_sum[n] - index_sum[i + 1]\n\n            res[i] = (i * left - left_sum) + (right_sum - i * right)\n\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-operations-to-move-all-balls-to-each-box.md",
+      "id": "prefix-sum"
+    }
+  ]
 }

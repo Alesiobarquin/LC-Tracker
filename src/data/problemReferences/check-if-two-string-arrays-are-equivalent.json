@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    bool arrayStringsAreEqual(vector<string>& word1, vector<string>& word2) {\n        int w1 = 0, w2 = 0; // Index of word\n        int i = 0, j = 0;   // Index of character\n\n        while (w1 < word1.size() && w2 < word2.size()) {\n            if (word1[w1][i] != word2[w2][j]) {\n                return false;\n            }\n\n            i++;\n            j++;\n\n            if (i == word1[w1].size()) {\n                w1++;\n                i = 0;\n            }\n            if (j == word2[w2].size()) {\n                w2++;\n                j = 0;\n            }\n        }\n        return w1 == word1.size() && w2 == word2.size();\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-two-string-arrays-are-equivalent.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-two-string-arrays-are-equivalent.md",
+  "alternatives": [
+    {
+      "approach": "Concatenate Strings",
+      "explanation": "### How it works\n\nThe simplest approach is to concatenate all strings in each array into a single string, then compare the two resulting strings. If they match character by character, the arrays represent the same string.\n\n### Steps\n\n1. Join all strings in `word1` into a single string.\n2. Join all strings in `word2` into a single string.\n3. Compare the two concatenated strings.\n4. Return `true` if they are equal, `false` otherwise.\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n + m)`\n\n> Where `n` and `m` are the total number of characters in both the arrays `word1` and `word2`, respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def arrayStringsAreEqual(self, word1: List[str], word2: List[str]) -> bool:\n        return \"\".join(word1) == \"\".join(word2)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-two-string-arrays-are-equivalent.md",
+      "id": "concatenate-strings"
+    },
+    {
+      "approach": "Concatenate Strings Of One Array",
+      "explanation": "### How it works\n\nWe can reduce space usage by only concatenating one of the arrays. We then iterate through the second array character by character, comparing each character against the concatenated string. This way, we only build one full string instead of two.\n\n### Steps\n\n1. Concatenate all strings in `word1` into a single string `s1`.\n2. Initialize an index pointer `i` to `0`.\n3. Iterate through each string in `word2`, then through each character in that string.\n4. For each character, check if the index has exceeded `s1`'s length or if the characters do not match.\n5. If either condition is true, return `false` immediately.\n6. Increment the index after each successful comparison.\n7. After processing all of `word2`, return `true` only if `i` equals the length of `s1` (ensuring both have the same length).\n\n### Complexity\n\n- Time complexity: `O(n + m)`\n- Space complexity: `O(n)`\n\n> Where `n` and `m` are the total number of characters in both the arrays `word1` and `word2`, respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def arrayStringsAreEqual(self, word1: List[str], word2: List[str]) -> bool:\n        s1 = \"\".join(word1)\n        i = 0\n        for w in word2:\n            for c in w:\n                if i == len(s1) or s1[i] != c:\n                    return False\n                i += 1\n        return i == len(s1)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/check-if-two-string-arrays-are-equivalent.md",
+      "id": "concatenate-strings-of-one-array"
+    }
+  ]
 }

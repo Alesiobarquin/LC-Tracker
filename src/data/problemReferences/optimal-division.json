@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/553.%20Optimal%20Division",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "enumerate-parenthesizations",
+      "approach": "Enumerate Parenthesizations",
+      "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nTry every binary split and every left/right parenthesization, using exact rational arithmetic to compare results. This baseline derives the best expression without using the positive-number shortcut.\n\n### Steps\n\n1. A single number supplies its own value and expression.\n2. Split each interval at every position.\n3. Divide every left result by every right result, keeping the expressions.\n4. Return an expression with maximum exact value.\n\n### Complexity\n\n- Time: Exponential in the number of values: there are Catalan-many parenthesizations, plus rational-arithmetic costs.\n- Space: Exponential result storage; intended for small examples.\n\n### Things to watch for\n\n- Parentheses on a denominator with several values are necessary.\n- Exact rational comparisons avoid a floating-point ranking error.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/553.%20Optimal%20Division",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from fractions import Fraction\nfrom functools import cache\n\nclass Solution:\n    def optimalDivision(self, nums: list[int]) -> str:\n        @cache\n        def choices(left, right):\n            if right - left == 1:\n                return [(Fraction(nums[left]), str(nums[left]))]\n            result = []\n            for split in range(left + 1, right):\n                for a, expression_a in choices(left, split):\n                    for b, expression_b in choices(split, right):\n                        if b:\n                            denominator = '(' + expression_b + ')' if right - split > 1 else expression_b\n                            result.append((a / b, expression_a + '/' + denominator))\n            return result\n        return max(choices(0, len(nums)), key=lambda item: item[0])[1]\n"
+      }
+    }
+  ]
 }

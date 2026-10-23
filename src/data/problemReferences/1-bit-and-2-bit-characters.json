@@ -1,0 +1,29 @@
+{
+  "problemId": "1-bit-and-2-bit-characters",
+  "approach": "Forward Character Decoding",
+  "explanation": "### How it works\n\nA zero starts a one-bit character, while a one starts a two-bit character. Advance by that deterministic width until reaching or passing the final bit.\n\n### Steps\n\n1. Start at index zero.\n2. Before the last position, advance one for a zero or two for a one.\n3. Accept if decoding lands exactly on the final position.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+  "code": {
+    "python": "class Solution:\n  def isOneBitCharacter(self, bits: list[int]) -> bool:\n    i = 0\n    while i < len(bits) - 1:\n      i += bits[i] + 1\n\n    return i == len(bits) - 1\n",
+    "cpp": "class Solution {\n public:\n  bool isOneBitCharacter(vector<int>& bits) {\n    const int n = bits.size();\n\n    int i = 0;\n    while (i < n - 1)\n      if (bits[i] == 0)\n        i += 1;\n      else\n        i += 2;\n\n    return i == n - 1;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/717.%201-bit%20and%202-bit%20Characters",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "parity-of-ones-before-the-final-zero",
+      "approach": "Parity of Ones Before the Final Zero",
+      "explanation": "### How it works\n\nThe final bit is guaranteed zero. Consecutive ones immediately before it pair off as two-bit characters; an odd count consumes the final zero, while an even count leaves it as one bit.\n\n### Steps\n\n1. Start just before the last zero.\n2. Count consecutive preceding ones.\n3. Return whether that count is even.\n\n### Complexity\n\n- Time: O(n) worst case.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/717.%201-bit%20and%202-bit%20Characters",
+      "code": {
+        "python": "class Solution:\n    def isOneBitCharacter(self, bits: list[int]) -> bool:\n        index = len(bits) - 2\n        count = 0\n        while index >= 0 and bits[index] == 1:\n            count += 1\n            index -= 1\n        return count % 2 == 0\n"
+      }
+    }
+  ]
+}

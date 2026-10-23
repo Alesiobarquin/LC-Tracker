@@ -1,0 +1,29 @@
+{
+  "problemId": "shopping-offers",
+  "approach": "Ordered Offer Backtracking",
+  "explanation": "This teaching baseline is for small examples; its time, memory, recursion depth, or API-call count can exceed the full problem limits.\n\n### How it works\n\nCompare buying all remaining items individually with taking each fitting special offer. Restrict later offers to the current or a higher index so the same offer combination is not explored in different orders.\n\n### Steps\n\n1. Calculate the individual-purchase cost for the current needs.\n2. Try each fitting offer at or after the current index.\n3. Subtract quantities, recurse allowing reuse of that offer, and restore quantities.\n4. Return the cheapest option.\n\n### Complexity\n\n- Time: O(n × (k + 1)^(S + 1)) loose upper bound for n item types, k offers, and S total required items.\n- Space: O(S + n) live recursion and needs state.",
+  "code": {
+    "python": "class Solution:\n  def shoppingOffers(\n      self,\n      price: list[int],\n      special: list[list[int]],\n      needs: list[int]\n  ) -> int:\n    def dfs(s: int) -> int:\n      ans = 0\n      for i, need in enumerate(needs):\n        ans += need * price[i]\n\n      for i in range(s, len(special)):\n        offer = special[i]\n        if all(offer[j] <= need for j, need in enumerate(needs)):\n          # Use the special[i].\n          for j in range(len(needs)):\n            needs[j] -= offer[j]\n          ans = min(ans, offer[-1] + dfs(i))\n          # Unuse the special[i] (backtracking).\n          for j in range(len(needs)):\n            needs[j] += offer[j]\n\n      return ans\n\n    return dfs(0)\n",
+    "cpp": "class Solution {\n public:\n  int shoppingOffers(vector<int>& price, vector<vector<int>>& special,\n                     vector<int>& needs) {\n    return dfs(price, special, needs, 0);\n  }\n\n private:\n  int dfs(const vector<int>& price, const vector<vector<int>>& special,\n          vector<int>& needs, int s) {\n    int ans = 0;\n    for (int i = 0; i < price.size(); ++i)\n      ans += price[i] * needs[i];\n\n    for (int i = s; i < special.size(); ++i)\n      if (isValid(special[i], needs)) {\n        // Use the special[i].\n        for (int j = 0; j < needs.size(); ++j)\n          needs[j] -= special[i][j];\n        ans = min(ans, special[i].back() + dfs(price, special, needs, i));\n        // Unuse the special[i] (backtracking).\n        for (int j = 0; j < needs.size(); ++j)\n          needs[j] += special[i][j];\n      }\n\n    return ans;\n  }\n\n  // Returns true if this special offer is a valid one.\n  bool isValid(const vector<int>& offer, const vector<int>& needs) {\n    for (int i = 0; i < needs.size(); ++i)\n      if (needs[i] < offer[i])\n        return false;\n    return true;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/638.%20Shopping%20Offers",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "memoized-remaining-needs-states",
+      "approach": "Memoized Remaining-Needs States",
+      "explanation": "### How it works\n\nThe cheapest completion cost depends only on the remaining item quantities. Memoize each needs tuple so different offer orders share the same subproblem.\n\n### Steps\n\n1. Represent remaining quantities as an immutable tuple.\n2. Initialize its answer with individual purchases.\n3. Try every offer that does not exceed the remaining needs.\n4. Cache the minimum offer-plus-remainder cost.\n\n### Complexity\n\n- Time: O(k × n × P), where P = product(needs[i] + 1).\n- Space: O(n × P) for cached tuples and recursion.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/638.%20Shopping%20Offers",
+      "code": {
+        "python": "from functools import cache\n\nclass Solution:\n    def shoppingOffers(self, price: list[int], special: list[list[int]], needs: list[int]) -> int:\n        @cache\n        def cost(remaining):\n            best = sum(p * quantity for p, quantity in zip(price, remaining))\n            for offer in special:\n                if any(offer[:-1]) and all(offer[i] <= remaining[i] for i in range(len(price))):\n                    rest = tuple(remaining[i] - offer[i] for i in range(len(price)))\n                    best = min(best, offer[-1] + cost(rest))\n            return best\n        return cost(tuple(needs))\n"
+      }
+    }
+  ]
+}

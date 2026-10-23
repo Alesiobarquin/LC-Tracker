@@ -1,0 +1,28 @@
+{
+  "problemId": "binary-tree-upside-down",
+  "approach": "Recursive Left-Spine Rotation",
+  "explanation": "### How it works\n\nThe leftmost node becomes the new root. As recursion unwinds, each former left child takes its old sibling as its left child and its old parent as its right child.\n\n### Steps\n\n1. Stop at an empty node or a node without a left child.\n2. Recursively rotate the left subtree.\n3. Attach the old right child and parent beneath the old left child.\n4. Clear the old parent links and return the new root.\n\n### Complexity\n\n- Time: O(h) for the left-spine length h.\n- Space: O(h) recursion space.\n\n### Things to watch for\n\n- The problem guarantees that every right child is a leaf with a left sibling.\n- Clear the original links to avoid cycles.",
+  "code": {
+    "python": "class Solution:\n  def upsideDownBinaryTree(self, root: TreeNode | None) -> TreeNode | None:\n    if not root or not root.left:\n      return root\n\n    newRoot = self.upsideDownBinaryTree(root.left)\n    root.left.left = root.right  # 2's left = 3 (root's right)\n    root.left.right = root  # 2's right = 1 (root)\n    root.left = None\n    root.right = None\n    return newRoot\n",
+    "cpp": "class Solution {\n public:\n  TreeNode* upsideDownBinaryTree(TreeNode* root) {\n    if (root == nullptr || root->left == nullptr)\n      return root;\n\n    TreeNode* newRoot = upsideDownBinaryTree(root->left);\n    root->left->left = root->right;  // 2's left = 3 (root's right)\n    root->left->right = root;        // 2's right = 1 (root)\n    root->left = nullptr;\n    root->right = nullptr;\n    return newRoot;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/156.%20Binary%20Tree%20Upside%20Down",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "iterative-spine-rewiring",
+      "approach": "Iterative Spine Rewiring",
+      "explanation": "### How it works\n\nWalk down the original left spine while remembering the previous parent and its right child. These become the current node's new right and left children.\n\n### Steps\n\n1. Remember the next original left node.\n2. Replace the current left pointer with the previous right sibling.\n3. Save the original right child and link the current right pointer to the previous parent.\n4. Advance and return the final visited node.\n\n### Complexity\n\n- Time: O(h) for the left-spine length h.\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/blob/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/156.%20Binary%20Tree%20Upside%20Down/156-2.py",
+      "code": {
+        "python": "class Solution:\n  def upsideDownBinaryTree(self, root: TreeNode | None) -> TreeNode | None:\n    prevRoot = None\n    prevRightChild = None\n\n    while root:\n      nextRoot = root.left  # Cache the next root.\n      root.left = prevRightChild\n      prevRightChild = root.right\n      root.right = prevRoot\n      prevRoot = root  # Record the previous root.\n      root = nextRoot  # Update the root.\n\n    return prevRoot\n"
+      }
+    }
+  ]
+}

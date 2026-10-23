@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int firstUniqChar(string s) {\n        int res = s.size();\n\n        for (char ch = 'a'; ch <= 'z'; ch++) {\n            int firstIndex = s.find(ch);\n            if (firstIndex != string::npos && s.rfind(ch) == firstIndex) {\n                res = min(res, firstIndex);\n            }\n        }\n\n        return res == s.size() ? -1 : res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-unique-character-in-a-string.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-unique-character-in-a-string.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each character in the string, we check if it appears anywhere else. If a character has no duplicate, it is unique. The first such character we find (going left to right) is our answer.\n\n### Steps\n\n1. Iterate through each index `i` in the string.\n2. For each character at `i`, compare it with every other character at index `j`.\n3. If a match is found (where `i != j`), mark it as non-unique and break.\n4. If no match is found after checking all positions, return `i`.\n5. If no unique character exists, return `-1`.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "class Solution:\n    def firstUniqChar(self, s: str) -> int:\n        for i in range(len(s)):\n            flag = True\n            for j in range(len(s)):\n                if i == j:\n                    continue\n                if s[i] == s[j]:\n                    flag = False\n                    break\n            if flag:\n                return i\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-unique-character-in-a-string.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Map",
+      "explanation": "### How it works\n\nInstead of checking every pair of characters, we can count the frequency of each character in a single pass. Then, in a second pass, we find the first character whose count is exactly 1. This trades space for time.\n\n### Steps\n\n1. Create a hash map to store the count of each character.\n2. First pass: iterate through the string and increment the count for each character.\n3. Second pass: iterate through the string again and return the index of the first character with count equal to `1`.\n4. If no unique character is found, return `-1`.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)` since we have at most `26` different characters.",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def firstUniqChar(self, s: str) -> int:\n        count = defaultdict(int)\n        for c in s:\n            count[c] += 1\n\n        for i, c in enumerate(s):\n            if count[c] == 1:\n                return i\n        return -1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/first-unique-character-in-a-string.md",
+      "id": "hash-map"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class MovingAverage {\nprivate:\n    int size;\n    int head = 0;\n    int windowSum = 0;\n    int count = 0;\n    vector<int> queue;\n\npublic:\n    MovingAverage(int size) {\n        this->size = size;\n        queue = vector<int>(size);\n    }\n\n    double next(int val) {\n        ++count;\n\n        // calculate the new sum by shifting the window\n        int tail = (head + 1) % size;\n        windowSum = windowSum - queue[tail] + val;\n\n        // move on to the next head\n        head = (head + 1) % size;\n        queue[head] = val;\n        return windowSum * 1.0 / min(size, count);\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/moving-average-from-data-stream.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/moving-average-from-data-stream.md",
+  "alternatives": [
+    {
+      "approach": "Array or List",
+      "explanation": "### How it works\n\nThe most straightforward way to compute a moving average is to store all incoming values in a list and calculate the average of the last `size` elements each time. When a new value arrives, we append it to the list, then sum the most recent values up to the window size. This approach is simple to implement but recalculates the sum from scratch on every call.\n\n### Steps\n\n1. Initialize an empty list to store all incoming values and save the window size.\n2. When `next(val)` is called, append the new value to the list.\n3. Calculate the sum of the last `size` elements (or all elements if fewer than `size` exist).\n4. Return the sum divided by the number of elements in the window (minimum of list length and size).\n\n### Complexity\n\n- Time complexity: `O(N  ×  M)`\n- Space complexity: `O(M)`\n\n> Where `N` is the size of the moving window and `M` is the number of calls made to `next`.",
+      "code": {
+        "python": "class MovingAverage:\n    def __init__(self, size: int):\n        self.size = size\n        self.queue = []\n\n    def next(self, val: int) -> float:\n        size, queue = self.size, self.queue\n        queue.append(val)\n        # calculate the sum of the moving window\n        window_sum = sum(queue[-size:])\n\n        return window_sum / min(len(queue), size)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/moving-average-from-data-stream.md",
+      "id": "array-or-list"
+    },
+    {
+      "approach": "Double-ended Queue",
+      "explanation": "### How it works\n\nInstead of recalculating the sum each time, we can maintain a running sum and a queue that holds only the elements within the current window. When the window is full and a new element arrives, we remove the oldest element from both the queue and the running sum, then add the new element. This way, each `next()` call runs in constant time.\n\n### Steps\n\n1. Initialize a deque (double-ended queue), a running sum `window_sum`, and a `count` of elements seen.\n2. When `next(val)` is called:\n    - Increment the `count` and add the new value to the queue.\n    - If the `count` exceeds the window `size`, remove the front element from the queue and subtract it from the running sum.\n    - Add the new value to the running sum.\n3. Return the running sum divided by the current window size (minimum of `count` and `size`).\n\n### Complexity\n\n- Time complexity: `O(M)`\n    - Time complexity per `next()` call is `O(1)`. Therefore, the total time complexity for `M` calls is `O(M)`\n- Space complexity: `O(N)`\n\n> Where `N` is the size of the moving window and `M` is the number of calls made to `next`.",
+      "code": {
+        "python": "from collections import deque\n\nclass MovingAverage:\n    def __init__(self, size: int):\n        self.size = size\n        self.queue = deque()\n        # number of elements seen so far\n        self.window_sum = 0\n        self.count = 0\n\n    def next(self, val: int) -> float:\n        self.count += 1\n        # calculate the new sum by shifting the window\n        self.queue.append(val)\n        tail = self.queue.popleft() if self.count > self.size else 0\n\n        self.window_sum = self.window_sum - tail + val\n\n        return self.window_sum / min(self.size, self.count)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/moving-average-from-data-stream.md",
+      "id": "double-ended-queue"
+    }
+  ]
 }

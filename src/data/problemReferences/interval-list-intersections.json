@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> intervalIntersection(vector<vector<int>>& firstList, vector<vector<int>>& secondList) {\n        vector<vector<int>> res;\n        int i = 0, j = 0;\n\n        while (i < firstList.size() && j < secondList.size()) {\n            int startA = firstList[i][0], endA = firstList[i][1];\n            int startB = secondList[j][0], endB = secondList[j][1];\n\n            int start = max(startA, startB);\n            int end = min(endA, endB);\n\n            if (start <= end) {\n                res.push_back({start, end});\n            }\n\n            if (endA < endB) {\n                i++;\n            } else {\n                j++;\n            }\n        }\n\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/interval-list-intersections.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/interval-list-intersections.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest way to find intersections is to check every interval in the first list against every interval in the second list. Two intervals overlap when one starts before the other ends and vice versa. If they do overlap, the intersection spans from the later start point to the earlier end point. This approach is straightforward but involves redundant comparisons since we ignore the fact that both lists are already sorted.\n\n### Steps\n\n1. Initialize an empty result list.\n2. For each interval `[startA, endA]` in the first list:\n    - For each interval `[startB, endB]` in the second list:\n        - Check if they overlap by verifying that one interval's start falls within the other.\n        - If they overlap, compute the intersection as `[max(startA, startB), min(endA, endB)]` and add it to the result.\n3. Return the result list.\n\n### Complexity\n\n- Time complexity: `O(m * n)`\n- Space complexity:\n    - `O(1)` extra space.\n    - `O(m + n)` for the output list.\n\n> Where `m` and `n` are the sizes of the arrays `firstList` and `secondList`, respectively.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:\n        res = []\n        for i in range(len(firstList)):\n            startA, endA = firstList[i][0], firstList[i][1]\n            for j in range(len(secondList)):\n                startB, endB = secondList[j][0], secondList[j][1]\n                if (startA <= startB <= endA) or (startB <= startA <= endB):\n                    res.append([max(startA, startB), min(endA, endB)])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/interval-list-intersections.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Line Sweep",
+      "explanation": "### How it works\n\nLine sweep treats intervals as events on a number line. At each interval's start, we increment an \"active\" counter; at each interval's end plus one, we decrement it. When the active count equals `2`, it means both an interval from the first list and one from the second list are covering that point simultaneously. By processing all events in sorted order, we can identify exactly where overlaps occur without directly comparing pairs of intervals.\n\n### Steps\n\n1. Create a map to store events. For each interval `[start, end]`:\n    - Add `+1` at position `start`.\n    - Add `-1` at position `end + 1`.\n2. Sort all event positions.\n3. Traverse the events in order, maintaining an `active` counter:\n    - Before updating the counter, if `active == 2`, record the intersection from the previous position to the current position minus one.\n    - Update `active` by adding the event's value.\n    - Track the previous position for the next iteration.\n4. Return the collected intersections.\n\n### Complexity\n\n- Time complexity: `O((m + n) log (m + n))`\n- Space complexity: `O(m + n)`\n\n> Where `m` and `n` are the sizes of the arrays `firstList` and `secondList`, respectively.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:\n        mp = defaultdict(int)\n        for s, e in firstList:\n            mp[s] += 1\n            mp[e + 1] -= 1\n        for s, e in secondList:\n            mp[s] += 1\n            mp[e + 1] -= 1\n\n        res = []\n        active = 0\n        prev = None\n        for x in sorted(mp):\n            if active == 2:\n                res.append([prev, x - 1])\n            active += mp[x]\n            prev = x\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/interval-list-intersections.md",
+      "id": "line-sweep"
+    }
+  ]
 }

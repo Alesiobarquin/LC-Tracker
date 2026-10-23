@@ -7,5 +7,25 @@
     "cpp": "class Solution {\nprivate:\n    int K;\n\npublic:\n    vector<vector<int>> highFive(vector<vector<int>>& items) {\n        this->K = 5;\n        map<int, priority_queue<int, vector<int>, greater<int>>> allScores;\n        for (const auto &item: items) {\n            int id = item[0];\n            int score = item[1];\n            // insert the score in the min heap\n            allScores[id].push(score);\n            // remove the minimum element from the min heap in case the size of the min heap exceeds 5\n            if (allScores[id].size() > this->K)\n                allScores[id].pop();\n        }\n        vector<vector<int>> solution;\n        for (auto &[id, top_scores]: allScores) {\n            int total = 0;\n            // min heap contains the top 5 scores\n            for (int i = 0; i < this->K; ++i) {\n                total += top_scores.top();\n                top_scores.pop();\n            }\n            solution.push_back({id, total / this->K});\n        }\n        return solution;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/high-five.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/high-five.md",
+  "alternatives": [
+    {
+      "approach": "Using Sorting",
+      "explanation": "### How it works\n\nWe need to find each student's average of their top `5` scores.\nIf we sort all items by student ID (ascending) and by score (descending), then for each student, their first `5` entries will be their highest scores.\nWe can then group by student, sum their top `5` scores, and compute the average.\n\n### Steps\n\n1. Sort the items array by student ID in ascending order. For the same ID, sort by score in descending order.\n2. Iterate through the sorted array, processing one student at a time.\n3. For each student, sum their first `5` scores (which are the highest due to sorting).\n4. Skip any remaining scores for that student.\n5. Store the student ID and their average (sum divided by `5`) in the result.\n6. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(N log N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the total number of items.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def highFive(self, items: List[List[int]]) -> List[List[int]]:\n        K = 5\n        items.sort(key=lambda x: (x[0], -x[1]))\n\n        solution = []\n        n = len(items)\n        i = 0\n        while i < n:\n            id = items[i][0]\n            sum_val = 0\n            for k in range(i, i + K):\n                sum_val += items[k][1]\n            while i < n and items[i][0] == id:\n                i += 1\n            solution.append([id, sum_val // K])\n\n        return solution\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/high-five.md",
+      "id": "using-sorting"
+    },
+    {
+      "approach": "Using Map and Max Heap",
+      "explanation": "### How it works\n\nInstead of sorting all items, we can use a map to group scores by student ID and a max heap for each student.\nThe max heap naturally keeps the largest scores at the top, so extracting the top `5` is straightforward.\nUsing a TreeMap (or sorted map) ensures students are processed in ID order.\n\n### Steps\n\n1. Create a map where each key is a student ID and each value is a max heap of scores.\n2. Iterate through all items and push each score into the corresponding student's max heap.\n3. Iterate through the map in sorted order of student IDs.\n4. For each student, pop the top `5` scores from the max heap and compute their sum.\n5. Store the student ID and the average in the result.\n6. Return the result array.\n\n### Complexity\n\n- Time complexity: `O(N log N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the total number of items.",
+      "code": {
+        "python": "from typing import List\nfrom collections import defaultdict\nimport heapq\n\nclass Solution:\n    def highFive(self, items: List[List[int]]) -> List[List[int]]:\n        K = 5\n        all_scores = defaultdict(list)\n\n        for item in items:\n            student_id = item[0]\n            score = item[1]\n            heapq.heappush(all_scores[student_id], -score)\n\n        solution = []\n        for student_id in sorted(all_scores.keys()):\n            total = 0\n            for i in range(K):\n                total += -heapq.heappop(all_scores[student_id])\n            solution.append([student_id, total // K])\n\n        return solution\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/high-five.md",
+      "id": "using-map-and-max-heap"
+    }
+  ]
 }

@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    string destCity(vector<vector<string>>& paths) {\n        unordered_map<string, string> mp;\n        for (auto& p : paths) {\n            mp[p[0]] = p[1];\n        }\n\n        string start = paths[0][0];\n        while (mp.find(start) != mp.end()) {\n            start = mp[start];\n        }\n        return start;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/destination-city.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/destination-city.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe destination city is a city that appears as an endpoint but never as a starting point in any path. For each destination in the paths, we can check whether it ever appears as a starting city. The city that never starts a path is our answer.\n\n### Steps\n\n1. Iterate through each path and consider its destination city.\n2. For each destination, iterate through all paths again to check if this city appears as a starting point.\n3. If the destination never appears as a starting point in any path, return it as the answer.\n4. Return an empty string if no destination city is found (though the problem guarantees one exists).\n\n### Complexity\n\n- Time complexity: `O(n ^ 2)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def destCity(self, paths: List[List[str]]) -> str:\n        for i in range(len(paths)):\n            flag = True\n            for j in range(len(paths)):\n                if paths[i][1] == paths[j][0]:\n                    flag = False\n                    break\n            if flag:\n                return paths[i][1]\n        return \"\"\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/destination-city.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Hash Set",
+      "explanation": "### How it works\n\nInstead of checking each destination against all starting points in O(n) time, we can store all starting cities in a hash set for O(1) lookup. Any destination city that is not in the set of starting cities must be the final destination.\n\n### Steps\n\n1. Create a hash set and add all starting cities (the first element of each path) to it.\n2. Iterate through all paths and check each destination city (the second element).\n3. If a destination city is not found in the hash set, return it as the answer.\n4. The first destination not in the set is the final destination city.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def destCity(self, paths: List[List[str]]) -> str:\n        s = set()\n        for p in paths:\n            s.add(p[0])\n\n        for p in paths:\n            if p[1] not in s:\n                return p[1]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/destination-city.md",
+      "id": "hash-set"
+    }
+  ]
 }

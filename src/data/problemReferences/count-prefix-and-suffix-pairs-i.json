@@ -7,5 +7,16 @@
     "cpp": "class TrieNode {\npublic:\n    unordered_map<string, TrieNode*> children;\n    int count = 0;\n};\n\nclass Trie {\npublic:\n    TrieNode* root;\n    Trie() {\n        root = new TrieNode();\n    }\n\n    void add(string w) {\n        TrieNode* cur = root;\n        int n = w.size();\n        for (int i = 0; i < n; i++) {\n            string key = string(1, w[i]) + w[n - 1 - i];\n            if (cur->children.find(key) == cur->children.end()) {\n                cur->children[key] = new TrieNode();\n            }\n            cur = cur->children[key];\n            cur->count++;\n        }\n    }\n\n    int count(string w) {\n        TrieNode* cur = root;\n        int n = w.size();\n        for (int i = 0; i < n; i++) {\n            string key = string(1, w[i]) + w[n - 1 - i];\n            if (cur->children.find(key) == cur->children.end()) return 0;\n            cur = cur->children[key];\n        }\n        return cur->count;\n    }\n};\n\nclass Solution {\npublic:\n    int countPrefixSuffixPairs(vector<string>& words) {\n        int res = 0;\n        Trie root;\n        for (int i = words.size() - 1; i >= 0; i--) {\n            res += root.count(words[i]);\n            root.add(words[i]);\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-prefix-and-suffix-pairs-i.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-prefix-and-suffix-pairs-i.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nFor each pair of indices `(i, j)` where `i < j`, we need to check if `words[i]` is both a prefix and suffix of `words[j]`. We compare characters at the beginning and end of `words[j]` with `words[i]`.\n\n### Steps\n\n1. Create a helper function that checks if `s1` is both a prefix and suffix of `s2`.\n2. First verify `s1` is not longer than `s2`.\n3. Compare `s1` character by character with the start of `s2` (prefix check).\n4. Compare `s1` character by character with the end of `s2` (suffix check).\n5. Iterate through all pairs `(i, j)` with `i < j` and count valid prefix-suffix pairs.\n\n### Complexity\n\n- Time complexity: `O(n ^ 2 * m)`\n- Space complexity: `O(1)`\n\n> Where `n` is the size of the input array `words`, and `m` is the maximum length of a string.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countPrefixSuffixPairs(self, words: List[str]) -> int:\n        def isPrefixAndSuffix(s1, s2):\n            if len(s1) > len(s2):\n                return False\n\n            for i in range(len(s1)):\n                if s1[i] != s2[i]:\n                    return False\n\n            j = 0\n            for i in range(len(s2) - len(s1), len(s2)):\n                if s1[j] != s2[i]:\n                    return False\n                j += 1\n\n            return True\n\n        res = 0\n        for i in range(len(words)):\n            for j in range(i + 1, len(words)):\n                res += isPrefixAndSuffix(words[i], words[j])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/count-prefix-and-suffix-pairs-i.md",
+      "id": "brute-force"
+    }
+  ]
 }

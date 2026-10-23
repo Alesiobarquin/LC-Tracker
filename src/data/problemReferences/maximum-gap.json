@@ -1,0 +1,29 @@
+{
+  "problemId": "maximum-gap",
+  "approach": "Minimum-Gap Buckets",
+  "explanation": "### How it works\n\nThe largest adjacent sorted gap is at least the ceiling of the total range divided by n − 1. Buckets of that width cannot contain the winning larger gap internally, so only nonempty bucket boundaries need comparison.\n\n### Steps\n\n1. Handle fewer than two values and an all-equal range.\n2. Allocate at most n buckets using the minimum possible maximum gap as their width.\n3. Record each bucket's minimum and maximum.\n4. Compare each nonempty minimum with the previous nonempty maximum.\n\n### Complexity\n\n- Time: O(n) for n values.\n- Space: O(n) for buckets.",
+  "code": {
+    "python": "import math\n\nclass Bucket:\n  def __init__(self, mn: int, mx: int):\n    self.mn = mn\n    self.mx = mx\n\n\nclass Solution:\n  def maximumGap(self, nums: list[int]) -> int:\n    if len(nums) < 2:\n      return 0\n\n    mn = min(nums)\n    mx = max(nums)\n    if mn == mx:\n      return 0\n\n    gap = math.ceil((mx - mn) / (len(nums) - 1))\n    bucketSize = (mx - mn) // gap + 1\n    buckets = [Bucket(math.inf, -math.inf) for _ in range(bucketSize)]\n\n    for num in nums:\n      i = (num - mn) // gap\n      buckets[i].mn = min(buckets[i].mn, num)\n      buckets[i].mx = max(buckets[i].mx, num)\n\n    ans = 0\n    prevMax = mn\n\n    for bucket in buckets:\n      if bucket.mn == math.inf:\n        continue  # empty bucket\n      ans = max(ans, bucket.mn - prevMax)\n      prevMax = bucket.mx\n\n    return ans\n",
+    "cpp": "struct Bucket {\n  int mn;\n  int mx;\n};\n\nclass Solution {\n public:\n  int maximumGap(vector<int>& nums) {\n    if (nums.size() < 2)\n      return 0;\n\n    const int mn = ranges::min(nums);\n    const int mx = ranges::max(nums);\n    if (mn == mx)\n      return 0;\n\n    const int gap = ceil((mx - mn) / (double)(nums.size() - 1));\n    const int bucketSize = (mx - mn) / gap + 1;\n    vector<Bucket> buckets(bucketSize, {INT_MAX, INT_MIN});\n\n    for (const int num : nums) {\n      const int i = (num - mn) / gap;\n      buckets[i].mn = min(buckets[i].mn, num);\n      buckets[i].mx = max(buckets[i].mx, num);\n    }\n\n    int ans = 0;\n    int prevMax = mn;\n\n    for (const Bucket& bucket : buckets) {\n      if (bucket.mn == INT_MAX)\n        continue;  // empty bucket\n      ans = max(ans, bucket.mn - prevMax);\n      prevMax = bucket.mx;\n    }\n\n    return ans;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/164.%20Maximum%20Gap",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sort-and-compare-neighbors",
+      "approach": "Sort and Compare Neighbors",
+      "explanation": "### How it works\n\nSorting makes every candidate gap explicit. The largest difference between adjacent sorted values is the answer.\n\n### Steps\n\n1. Sort the values.\n2. Compute each consecutive difference.\n3. Return the largest difference, or zero for a single value.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) for the sorted copy and sorting workspace.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/164.%20Maximum%20Gap",
+      "code": {
+        "python": "class Solution:\n    def maximumGap(self, nums: list[int]) -> int:\n        ordered = sorted(nums)\n        return max((b - a for a, b in zip(ordered, ordered[1:])), default=0)\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "problemId": "additive-number",
+  "approach": "Choose Two Numbers, Match Sums",
+  "explanation": "### How it works\n\nThe first two numbers determine every later number. Enumerate valid initial splits and recursively match each decimal sum against the next text prefix.\n\n### Steps\n\n1. Try nonempty first and second numbers while leaving room for their sum.\n2. Reject multi-digit numbers with a leading zero.\n3. Match the next exact sum and advance the pair.\n4. Accept when the sequence consumes the entire text.\n\n### Complexity\n\n- Time: O(n³) conservative bound on decimal-character work.\n- Space: O(n²) conservative bound for live recursive decimal strings and integers.\n\n### Things to watch for\n\n- The sequence must contain at least three numbers.\n- The C++ numeric bounds rely on the 35-digit limit and initial-split length checks.",
+  "code": {
+    "python": "class Solution:\n  def isAdditiveNumber(self, num: str) -> bool:\n    n = len(num)\n\n    def dfs(firstNum: int, secondNum: int, s: int) -> bool:\n      if s == len(num):\n        return True\n\n      thirdNum = firstNum + secondNum\n      thirdNumStr = str(thirdNum)\n\n      return (num.find(thirdNumStr, s) == s and\n              dfs(secondNum, thirdNum, s + len(thirdNumStr)))\n\n    # num[0..i] = firstNum\n    for i in range(n // 2):\n      if i > 0 and num[0] == '0':\n        return False\n      firstNum = int(num[:i + 1])\n      # num[i + 1..j] = secondNum\n      # |thirdNum| >= max(|firstNum|, |secondNum|)\n      j = i + 1\n      while max(i, j - i) < n - j:\n        if j > i + 1 and num[i + 1] == '0':\n          break\n        secondNum = int(num[i + 1:j + 1])\n        if dfs(firstNum, secondNum, j + 1):\n          return True\n        j += 1\n\n    return False\n",
+    "cpp": "class Solution {\n public:\n  bool isAdditiveNumber(string num) {\n    const int n = num.length();\n\n    // num[0..i] = firstNum\n    for (int i = 0; i < n / 2; ++i) {\n      if (i > 0 && num[0] == '0')\n        return false;\n      const long firstNum = stol(num.substr(0, i + 1));\n      // num[i + 1..j] = secondNum\n      // |thirdNum| >= max(|firstNum|, |secondNum|)\n      for (int j = i + 1; max(i, j - i) < n - j; ++j) {\n        if (j > i + 1 && num[i + 1] == '0')\n          break;\n        const long secondNum = stol(num.substr(i + 1, j - i));\n        if (dfs(num, firstNum, secondNum, j + 1))\n          return true;\n      }\n    }\n\n    return false;\n  }\n\n private:\n  bool dfs(const string& num, long firstNum, long secondNum, long s) {\n    if (s == num.length())\n      return true;\n\n    const long thirdNum = firstNum + secondNum;\n    const string& thirdNumStr = to_string(thirdNum);\n    return num.find(thirdNumStr, s) == s &&\n           dfs(num, secondNum, thirdNum, s + thirdNumStr.length());\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/306.%20Additive%20Number",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "backtrack-over-all-next-numbers",
+      "approach": "Backtrack Over All Next Numbers",
+      "explanation": "### How it works\n\nParse a sequence one number at a time. Before two numbers exist, every valid next substring is possible; afterward, prune candidates below the required sum and stop once they exceed it.\n\n### Steps\n\n1. Extend the next numeric substring digit by digit.\n2. Stop a multi-digit candidate that begins with zero.\n3. After the first two values, require the sum of the last pair.\n4. Backtrack until at least three numbers consume the entire text.\n\n### Complexity\n\n- Time: O(n³) conservative decimal-operation bound.\n- Space: O(n) stored sequence values in a conservative O(n²)-bit bound.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/306.%20Additive%20Number",
+      "code": {
+        "python": "class Solution:\n    def isAdditiveNumber(self, num: str) -> bool:\n        sequence = []\n        def search(start):\n            if start == len(num):\n                return len(sequence) >= 3\n            value = 0\n            for end in range(start, len(num)):\n                if end > start and num[start] == '0':\n                    break\n                value = value * 10 + int(num[end])\n                if len(sequence) >= 2:\n                    expected = sequence[-2] + sequence[-1]\n                    if value < expected:\n                        continue\n                    if value > expected:\n                        break\n                sequence.append(value)\n                if search(end + 1):\n                    return True\n                sequence.pop()\n            return False\n        return search(0)\n"
+      }
+    }
+  ]
+}

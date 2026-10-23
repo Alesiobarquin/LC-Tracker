@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int countElements(vector<int>& arr) {\n        std::sort(arr.begin(), arr.end());\n        int count = 0;\n        int runLength = 1;\n        for (int i = 1; i < arr.size(); i++) {\n            if (arr[i - 1] != arr[i]) {\n                if (arr[i - 1] + 1 == arr[i]) {\n                    count += runLength;\n                }\n                runLength = 0;\n            }\n            runLength++;\n        }\n        return count;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-elements.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-elements.md",
+  "alternatives": [
+    {
+      "approach": "Search with Array",
+      "explanation": "### How it works\n\nFor each element `x` in the array, we need to check whether `x + 1` also exists in the array. The straightforward approach is to scan through the entire array for each element to verify if its successor is present. While this works correctly, it requires a linear search for every element.\n\n### Steps\n\n1. Initialize a counter to `0`.\n2. For each element `x` in the array, iterate through the array to check if `x + 1` exists.\n3. If `x + 1` is found, increment the counter.\n4. Return the final count.\n\n### Complexity\n\n- Time complexity: `O(N^2)`\n- Space complexity: `O(1)` constant space\n\n> Where `N` is the length of the input array `arr`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countElements(self, arr: List[int]) -> int:\n        count = 0\n        for x in arr:\n            if x + 1 in arr:\n                count += 1\n        return count\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-elements.md",
+      "id": "search-with-array"
+    },
+    {
+      "approach": "Search with HashSet",
+      "explanation": "### How it works\n\nThe brute force approach is slow because checking if `x + 1` exists requires scanning the entire array. A hash set provides `O(1)` lookup time, so we can first store all elements in a set, then check for each element's successor in constant time.\n\n### Steps\n\n1. Insert all elements from the array into a hash set.\n2. Initialize a counter to `0`.\n3. For each element `x` in the array, check if `x + 1` exists in the hash set.\n4. If it does, increment the counter.\n5. Return the final count.\n\n### Complexity\n\n- Time complexity: `O(N)`\n- Space complexity: `O(N)`\n\n> Where `N` is the length of the input array `arr`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def countElements(self, arr: List[int]) -> int:\n        hash_set = set(arr)\n        count = 0\n        for x in arr:\n            if x + 1 in hash_set:\n                count += 1\n        return count\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/counting-elements.md",
+      "id": "search-with-hashset"
+    }
+  ]
 }

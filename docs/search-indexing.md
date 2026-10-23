@@ -21,8 +21,8 @@ hides the static reference and offers a resume link until the interactive recall
 guard takes over. It only reads the existing draft; it never modifies it.
 
 `npm run build` runs Vite, prerenders the public pages, and verifies the output.
-At this revision that produces 872 canonical public pages: seven main pages,
-29 pattern lessons, and 836 explanations. These counts are build output, not
+At this revision that produces 992 canonical public pages: seven main pages,
+29 pattern lessons, and 956 explanations. These counts are build output, not
 observed indexed-page counts. The generated sitemap index at `/sitemap.xml`
 links to `sitemap-pages.xml`, `sitemap-patterns.xml`, and
 `sitemap-explanations.xml`. Do not maintain a separate sitemap in `public/`.

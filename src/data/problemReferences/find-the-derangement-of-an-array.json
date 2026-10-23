@@ -1,0 +1,29 @@
+{
+  "problemId": "find-the-derangement-of-an-array",
+  "approach": "Derangement Table",
+  "explanation": "### How it works\n\nChoose the destination of the first element. There are n − 1 choices; the displaced element either returns to the first position, leaving n − 2 elements, or participates in a larger cycle, leaving a derangement subproblem of size n − 1.\n\n### Steps\n\n1. Initialize D(0) = 1 and D(1) = 0.\n2. For each size i, compute (i − 1) × (D(i − 1) + D(i − 2)).\n3. Reduce every step modulo 10^9 + 7.\n4. Return D(n).\n\n### Complexity\n\n- Time: O(n).\n- Space: O(n) for the table.",
+  "code": {
+    "python": "class Solution:\n  def findDerangement(self, n: int) -> int:\n    MOD = 1_000_000_007\n    dp = [1] + [0] * n\n\n    for i in range(2, n + 1):\n      dp[i] = (i - 1) * (dp[i - 1] + dp[i - 2]) % MOD\n\n    return dp[n]\n",
+    "cpp": "class Solution {\n public:\n  int findDerangement(int n) {\n    constexpr int kMod = 1'000'000'007;\n    vector<int> dp(n + 1);\n\n    dp[0] = 1;\n\n    for (int i = 2; i <= n; ++i)\n      dp[i] = (i - 1L) * (dp[i - 1] + dp[i - 2]) % kMod;\n\n    return dp[n];\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/634.%20Find%20the%20Derangement%20of%20An%20Array",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "alternating-single-state-recurrence",
+      "approach": "Alternating Single-State Recurrence",
+      "explanation": "### How it works\n\nThe equivalent recurrence D(i) = i × D(i − 1) + (−1)^i follows by combining the standard recurrence at consecutive sizes. Only the preceding answer is needed.\n\n### Steps\n\n1. Start from the empty derangement count one.\n2. For sizes one through n, multiply by the size.\n3. Add one for an even size or subtract one for an odd size.\n4. Reduce modulo 10^9 + 7.\n\n### Complexity\n\n- Time: O(n).\n- Space: O(1) auxiliary space.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/634.%20Find%20the%20Derangement%20of%20An%20Array",
+      "code": {
+        "python": "class Solution:\n    def findDerangement(self, n: int) -> int:\n        result = 1\n        for size in range(1, n + 1):\n            result = (size * result + (1 if size % 2 == 0 else -1)) % 1_000_000_007\n        return result\n"
+      }
+    }
+  ]
+}

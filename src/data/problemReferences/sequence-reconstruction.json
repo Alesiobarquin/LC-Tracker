@@ -1,0 +1,29 @@
+{
+  "problemId": "sequence-reconstruction",
+  "approach": "Unique Topological Order",
+  "explanation": "### How it works\n\nConsecutive values in each subsequence form directed edges. A unique reconstruction requires exactly one available zero-indegree value at every topological-sort step, matching the next original value.\n\n### Steps\n\n1. Validate and record all observed values and subsequence edges.\n2. Initialize the zero-indegree queue.\n3. Reject ambiguity whenever more than one value is available.\n4. Require every popped value to match the original sequence and consume all values.\n\n### Complexity\n\n- Time: O(n + S) for n original values and S total subsequence entries.\n- Space: O(n + S) for the graph and indegrees.\n\n### Things to watch for\n\n- Every original value must appear in the supplied sequences.",
+  "code": {
+    "python": "import collections\n\nclass Solution:\n  def sequenceReconstruction(\n      self,\n      org: list[int],\n      seqs: list[list[int]],\n  ) -> bool:\n    if not seqs:\n      return False\n\n    if set(org) != {value for sequence in seqs for value in sequence}:\n      return False\n\n    n = len(org)\n    graph = [[] for _ in range(n)]\n    inDegrees = [0] * n\n\n    # Build the graph.\n    for seq in seqs:\n      for u, v in zip(seq, seq[1:]):\n        if u < 1 or u > n or v < 1 or v > n:\n          return False\n        graph[u - 1].append(v - 1)\n        inDegrees[v - 1] += 1\n\n    # Perform topological sorting.\n    q = collections.deque([i for i, d in enumerate(inDegrees) if d == 0])\n    i = 0  # org's index\n\n    while q:\n      if len(q) > 1:\n        return False\n      u = q.popleft()\n      if u != org[i] - 1:\n        return False\n      i += 1\n      for v in graph[u]:\n        inDegrees[v] -= 1\n        if inDegrees[v] == 0:\n          q.append(v)\n\n    return i == n\n",
+    "cpp": "class Solution {\n public:\n  bool sequenceReconstruction(vector<int>& org, vector<vector<int>>& seqs) {\n    if (seqs.empty())\n      return false;\n\n    const int n = org.size();\n    unordered_set<int> observed;\n    for (const auto& seq : seqs)\n      for (int value : seq) {\n        if (value < 1 || value > n) return false;\n        observed.insert(value);\n      }\n    if (observed.size() != org.size()) return false;\n    vector<vector<int>> graph(n);\n    vector<int> inDegrees(n);\n\n    // Build the graph.\n    for (const vector<int>& seq : seqs) {\n      for (int i = 0; i + 1 < seq.size(); ++i) {\n        const int u = seq[i];\n        const int v = seq[i + 1];\n        if (u < 1 || u > n || v < 1 || v > n)\n          return false;\n        graph[u - 1].push_back(v - 1);\n        ++inDegrees[v - 1];\n      }\n    }\n\n    // Perform topological sorting.\n    queue<int> q;\n\n    for (int i = 0; i < n; ++i)\n      if (inDegrees[i] == 0)\n        q.push(i);\n\n    int i = 0;  // org's index\n\n    while (!q.empty()) {\n      if (q.size() > 1)\n        return false;\n      const int u = q.front();\n      q.pop();\n      if (u != org[i] - 1)\n        return false;\n      ++i;\n      for (const int v : graph[u])\n        if (--inDegrees[v] == 0)\n          q.push(v);\n    }\n\n    return i == n;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/444.%20Sequence%20Reconstruction",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "adjacent-pair-coverage",
+      "approach": "Adjacent-Pair Coverage",
+      "explanation": "### How it works\n\nEvery subsequence must respect the original order. Once that holds, the reconstruction is unique precisely when each adjacent pair of original values is explicitly constrained somewhere.\n\n### Steps\n\n1. Map each original value to its position.\n2. Reject unknown values and nonincreasing subsequence positions.\n3. Record original adjacent pairs that appear consecutively in a subsequence.\n4. Require all values and all n − 1 adjacent pairs to be covered.\n\n### Complexity\n\n- Time: Expected O(n + S).\n- Space: O(n) for positions and coverage sets.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/444.%20Sequence%20Reconstruction",
+      "code": {
+        "python": "class Solution:\n    def sequenceReconstruction(self, nums: list[int], sequences: list[list[int]]) -> bool:\n        positions = {value: i for i, value in enumerate(nums)}\n        seen, edges = set(), set()\n        for sequence in sequences:\n            for value in sequence:\n                if value not in positions:\n                    return False\n                seen.add(value)\n            for a, b in zip(sequence, sequence[1:]):\n                if positions[a] >= positions[b]:\n                    return False\n                if positions[b] == positions[a] + 1:\n                    edges.add((a, b))\n        return len(seen) == len(nums) and len(edges) == len(nums) - 1\n"
+      }
+    }
+  ]
+}

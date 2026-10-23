@@ -7,5 +7,25 @@
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int rob(TreeNode* root) {\n        auto result = dfs(root);\n        return max(result.first, result.second);\n    }\n\nprivate:\n    pair<int, int> dfs(TreeNode* root) {\n        if (!root) {\n            return {0, 0};\n        }\n\n        auto leftPair = dfs(root->left);\n        auto rightPair = dfs(root->right);\n\n        int withRoot = root->val + leftPair.second + rightPair.second;\n        int withoutRoot = max(leftPair.first, leftPair.second) +\n                          max(rightPair.first, rightPair.second);\n\n        return {withRoot, withoutRoot};\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=nHR8ytpzz7c",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber-iii.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber-iii.md",
+  "alternatives": [
+    {
+      "approach": "Recursion",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThis is a tree version of the classic house robber problem.\nAt each node, we have two choices: rob it or skip it.\nIf we rob the current node, we cannot rob its immediate children, so we must skip to the grandchildren.\nIf we skip the current node, we can consider robbing its children.\nWe take the maximum of these two options.\n\n### Steps\n\n1. If the node is `null`, return `0`.\n2. Calculate the value if we rob the current node: add the node's value plus the result from its grandchildren (`left.left`, `left.right`, `right.left`, `right.right`).\n3. Calculate the value if we skip the current node: add the results from robbing the left and right children.\n4. Return the maximum of these two values.\n\n### Complexity\n\n- Time complexity: `O(2 ^ n)`\n- Space complexity: `O(n)` for recursion stack.",
+      "code": {
+        "python": "from typing import Optional\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rob(self, root: Optional[TreeNode]) -> int:\n        if not root:\n            return 0\n\n        res = root.val\n        if root.left:\n            res += self.rob(root.left.left) + self.rob(root.left.right)\n        if root.right:\n            res += self.rob(root.right.left) + self.rob(root.right.right)\n\n        res = max(res, self.rob(root.left) + self.rob(root.right))\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber-iii.md",
+      "id": "recursion"
+    },
+    {
+      "approach": "Dynamic Programming (Memoization)",
+      "explanation": "### How it works\n\nThe recursive solution recomputes results for the same nodes multiple times.\nBy storing computed results in a cache (hash map), we avoid redundant work.\nEach node is processed at most once, significantly improving efficiency.\n\n### Steps\n\n1. Create a cache (hash map) to store computed results for each node.\n2. Define a recursive function that checks the cache before computing.\n3. If the node is in the cache, return the cached result.\n4. Otherwise, compute the result using the same logic as the basic recursion: max of robbing current node (plus grandchildren) vs skipping current node (plus children).\n5. Store the result in the cache and return it.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(n)`",
+      "code": {
+        "python": "from typing import Optional\nfrom functools import cache\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rob(self, root: Optional[TreeNode]) -> int:\n        cache = { None : 0 }\n\n        def dfs(root):\n            if root in cache:\n                return cache[root]\n\n            cache[root] = root.val\n            if root.left:\n                cache[root] += dfs(root.left.left) + dfs(root.left.right)\n            if root.right:\n                cache[root] += dfs(root.right.left) + dfs(root.right.right)\n\n            cache[root] = max(cache[root], dfs(root.left) + dfs(root.right))\n            return cache[root]\n\n        return dfs(root)\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/house-robber-iii.md",
+      "id": "dynamic-programming-memoization"
+    }
+  ]
 }

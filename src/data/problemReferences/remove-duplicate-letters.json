@@ -10,5 +10,20 @@
   "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/316.%20Remove%20Duplicate%20Letters",
   "sourceName": "walkccc / Peng-Yu Chen",
   "licenseUrl": "/walkccc-license.txt",
-  "explanationAuthor": "LC Tracker"
+  "explanationAuthor": "LC Tracker",
+  "alternatives": [
+    {
+      "id": "recursive-smallest-feasible-prefix",
+      "approach": "Recursive Smallest Feasible Prefix",
+      "explanation": "### How it works\n\nChoose the smallest first character that leaves every required character available. The scan stops when the last remaining copy of any character is reached. Remove later copies of the chosen character and recurse on the suffix.\n\n### Steps\n\n1. Count characters in the current string.\n2. Scan until a remaining count reaches zero, remembering the smallest character seen.\n3. Choose that character next.\n4. Remove its copies from the following suffix and recurse.\n\n### Complexity\n\n- Time: `O(a × n)` for n characters and a distinct letters, at most 26 here.\n- Space: `O(a × n)` as a conservative bound for recursive substring copies.",
+      "explanationAuthor": "LC Tracker",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/316.%20Remove%20Duplicate%20Letters",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "code": {
+        "python": "from collections import Counter\n\nclass Solution:\n    def removeDuplicateLetters(self, s: str) -> str:\n        if not s:\n            return ''\n        remaining = Counter(s)\n        position = 0\n        for i, char in enumerate(s):\n            if char < s[position]:\n                position = i\n            remaining[char] -= 1\n            if remaining[char] == 0:\n                break\n        char = s[position]\n        return char + self.removeDuplicateLetters(s[position + 1:].replace(char, ''))\n"
+      }
+    }
+  ]
 }

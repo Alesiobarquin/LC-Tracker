@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int singleNonDuplicate(vector<int>& nums) {\n        int l = 0, r = nums.size() - 1;\n\n        while (l < r) {\n            int m = (l + r) >> 1;\n            if (nums[m] != nums[m ^ 1]) {\n                r = m;\n            } else {\n                l = m + 1;\n            }\n        }\n\n        return nums[l];\n    }\n};\n"
   },
   "videoUrl": "https://www.youtube.com/watch?v=HGtqdzyUJ3k",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-element-in-a-sorted-array.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-element-in-a-sorted-array.md",
+  "alternatives": [
+    {
+      "approach": "Brute Force",
+      "explanation": "This baseline is useful for understanding the problem on small inputs; it can exceed the time or recursion limits on large inputs.\n\n### How it works\n\nThe simplest approach is to scan the array and check each element against its neighbors. If an element is different from both its left and right neighbors, it must be the single element. This works because every other element appears exactly twice and must be adjacent to its duplicate in a sorted array.\n\n### Steps\n\n1. Iterate through the array with index `i`.\n2. For each element, check if it equals its left neighbor (if exists) or right neighbor (if exists).\n3. If the element matches neither neighbor, return it as the single element.\n\n### Complexity\n\n- Time complexity: `O(n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNonDuplicate(self, nums: List[int]) -> int:\n        n = len(nums)\n        for i in range(n):\n            if ((i and nums[i] == nums[i - 1]) or\n                (i < n - 1 and nums[i] == nums[i + 1])\n            ):\n                continue\n            return nums[i]\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-element-in-a-sorted-array.md",
+      "id": "brute-force"
+    },
+    {
+      "approach": "Binary Search",
+      "explanation": "### How it works\n\nSince the array is sorted and every element except one appears twice, we can use binary search. Before the single element, pairs start at even indices (`0`, `2`, `4`...). After the single element, this pattern shifts. By checking whether the middle element pairs correctly with its neighbor, we can determine which half contains the single element.\n\n### Steps\n\n1. Initialize two pointers `l` and `r` at the start and end of the array.\n2. While `l <= r`:\n    - Compute the middle index `m`.\n    - If `nums[m]` differs from both neighbors, return `nums[m]`.\n    - Calculate the size of the left portion (excluding the pair containing `m`).\n    - If the left size is odd, the single element is on the left; move `r` to `m - 1`.\n    - Otherwise, the single element is on the right; move `l` to `m + 1`.\n3. Return the found element.\n\n### Complexity\n\n- Time complexity: `O(log n)`\n- Space complexity: `O(1)`",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def singleNonDuplicate(self, nums: List[int]) -> int:\n        l, r = 0, len(nums) - 1\n\n        while l <= r:\n            m = l + ((r - l) // 2)\n            if ((m - 1 < 0 or nums[m - 1] != nums[m]) and\n                (m + 1 == len(nums) or nums[m] != nums[m + 1])):\n                return nums[m]\n\n            leftSize = m - 1 if nums[m - 1] == nums[m] else m\n            if leftSize % 2:\n                r = m - 1\n            else:\n                l = m + 1\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/single-element-in-a-sorted-array.md",
+      "id": "binary-search"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "problemId": "line-reflection",
+  "approach": "Global Reflection Axis and Point Set",
+  "explanation": "### How it works\n\nThe vertical reflection axis must lie halfway between the minimum and maximum x coordinates. Every point must have its reflected partner at the same y coordinate.\n\n### Steps\n\n1. Find the minimum and maximum x coordinates.\n2. Store distinct points in a hash set.\n3. Reflect x as minX + maxX − x.\n4. Require every reflected point to exist.\n\n### Complexity\n\n- Time: Expected O(n).\n- Space: O(n) distinct points.\n\n### Things to watch for\n\n- Repeated copies of a point do not alter the geometric point set.",
+  "code": {
+    "python": "import math\n\nclass Solution:\n  def isReflected(self, points: list[list[int]]) -> bool:\n    minX = math.inf\n    maxX = -math.inf\n    seen = set()\n\n    for x, y in points:\n      minX = min(minX, x)\n      maxX = max(maxX, x)\n      seen.add((x, y))\n\n    summ = minX + maxX\n    # (leftX + rightX) / 2 = (minX + maxX) / 2\n    #  leftX = minX + maxX - rightX\n    # rightX = minX + maxX - leftX\n\n    return all((summ - x, y) in seen for x, y in points)\n",
+    "cpp": "class Solution {\n public:\n  bool isReflected(vector<vector<int>>& points) {\n    int minX = INT_MAX;\n    int maxX = INT_MIN;\n    unordered_set<pair<int, int>, PairHash> seen;\n\n    for (const vector<int>& p : points) {\n      const int x = p[0];\n      const int y = p[1];\n      minX = min(minX, x);\n      maxX = max(maxX, x);\n      seen.insert({x, y});\n    }\n\n    const int sum = minX + maxX;\n    // (leftX + rightX) / 2 = (minX + maxX) / 2\n    //  leftX = minX + maxX - rightX\n    // rightX = minX + maxX - leftX\n\n    for (const vector<int>& p : points)\n      if (!seen.contains({sum - p[0], p[1]}))\n        return false;\n\n    return true;\n  }\n\n private:\n  struct PairHash {\n    size_t operator()(const pair<int, int>& p) const {\n      return p.first ^ p.second;\n    }\n  };\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/356.%20Line%20Reflection",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sorted-horizontal-rows",
+      "approach": "Sorted Horizontal Rows",
+      "explanation": "### How it works\n\nGroup points by y coordinate and deduplicate each row. Every row must be symmetric about the same global axis, which can be checked by pairing its smallest and largest x values.\n\n### Steps\n\n1. Compute the global sum of extreme x coordinates.\n2. Group distinct x values by y.\n3. Sort each row.\n4. Check that every mirrored pair has the global x sum.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) for grouped coordinates.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/356.%20Line%20Reflection",
+      "code": {
+        "python": "from collections import defaultdict\n\nclass Solution:\n    def isReflected(self, points: list[list[int]]) -> bool:\n        rows = defaultdict(set)\n        for x, y in points:\n            rows[y].add(x)\n        axis_sum = min(x for x, _ in points) + max(x for x, _ in points)\n        for row in rows.values():\n            xs = sorted(row)\n            if any(a + b != axis_sum for a, b in zip(xs, reversed(xs))):\n                return False\n        return True\n"
+      }
+    }
+  ]
+}

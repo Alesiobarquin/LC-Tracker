@@ -1,0 +1,29 @@
+{
+  "problemId": "wiggle-sort-ii",
+  "approach": "Quickselect and Virtual-Index Partition",
+  "explanation": "### How it works\n\nSelect a median and apply three-way partitioning through virtual indices that visit odd positions before even positions. Large values occupy peaks, small values occupy valleys, and median values fill the middle.\n\n### Steps\n\n1. Quickselect the median value.\n2. Map logical index i to (1 + 2i) modulo (n \n3.  1).\n4. Partition values greater than, equal to, and less than the median through that mapping.\n5. Reuse the original array for the strict wiggle arrangement.\n\n### Complexity\n\n- Time: Expected O(n); O(n²) worst case for quickselect.\n- Space: O(1) auxiliary space with iterative three-way Python quickselect.\n\n### Things to watch for\n\n- The problem guarantees that a strict wiggle arrangement exists.\n- Do not advance the scan after swapping in an unclassified value from the end.",
+  "code": {
+    "python": "import random\n\nclass Solution:\n  def wiggleSort(self, nums: list[int]) -> None:\n    n = len(nums)\n    median = self._findKthLargest(nums, (n + 1) // 2)\n\n    def A(i: int):\n      return (1 + 2 * i) % (n | 1)\n\n    i = 0\n    j = 0\n    k = n - 1\n\n    while i <= k:\n      if nums[A(i)] > median:\n        nums[A(i)], nums[A(j)] = nums[A(j)], nums[A(i)]\n        i, j = i + 1, j + 1\n      elif nums[A(i)] < median:\n        nums[A(i)], nums[A(k)] = nums[A(k)], nums[A(i)]\n        k -= 1\n      else:\n        i += 1\n\n  def _findKthLargest(self, nums: list[int], k: int) -> int:\n    target = len(nums) - k\n    low, high = 0, len(nums) - 1\n    while low <= high:\n      pivot = nums[random.randint(low, high)]\n      left, scan, right = low, low, high\n      while scan <= right:\n        if nums[scan] < pivot:\n          nums[left], nums[scan] = nums[scan], nums[left]\n          left += 1\n          scan += 1\n        elif nums[scan] > pivot:\n          nums[scan], nums[right] = nums[right], nums[scan]\n          right -= 1\n        else:\n          scan += 1\n      if target < left:\n        high = left - 1\n      elif target > right:\n        low = right + 1\n      else:\n        return pivot\n    raise ValueError('k outside the input range')\n",
+    "cpp": "class Solution {\n public:\n  void wiggleSort(vector<int>& nums) {\n    const int n = nums.size();\n    const auto it = nums.begin() + n / 2;\n    nth_element(nums.begin(), it, nums.end());\n    const int median = *it;\n\n// index-rewiring\n#define A(i) nums[(1 + 2 * i) % (n | 1)]\n\n    for (int i = 0, j = 0, k = n - 1; i <= k;)\n      if (A(i) > median)\n        swap(A(i++), A(j++));\n      else if (A(i) < median)\n        swap(A(i), A(k--));\n      else\n        ++i;\n  }\n};\n"
+  },
+  "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/324.%20Wiggle%20Sort%20II",
+  "sourceName": "walkccc / Peng-Yu Chen",
+  "licenseUrl": "/walkccc-license.txt",
+  "explanationAuthor": "LC Tracker",
+  "videoUrl": "",
+  "alternatives": [
+    {
+      "id": "sorted-reversed-halves",
+      "approach": "Sorted Reversed Halves",
+      "explanation": "### How it works\n\nSort the values, then place the lower half in decreasing order into even positions and the upper half in decreasing order into odd positions. Reversal separates repeated median values when a strict arrangement exists.\n\n### Steps\n\n1. Sort a copy of the array.\n2. Split after ceiling(n/2) values.\n3. Assign the reversed lower half to even indices.\n4. Assign the reversed upper half to odd indices.\n\n### Complexity\n\n- Time: O(n log n).\n- Space: O(n) for the sorted copy and slices.",
+      "explanationAuthor": "LC Tracker",
+      "sourceName": "walkccc / Peng-Yu Chen",
+      "licenseUrl": "/walkccc-license.txt",
+      "codeAuthor": "LC Tracker",
+      "sourceUrl": "https://github.com/walkccc/LeetCode/tree/9b85aa15e086d0b5dc1ead7184bca547942e6ff6/solutions/324.%20Wiggle%20Sort%20II",
+      "code": {
+        "python": "class Solution:\n    def wiggleSort(self, nums: list[int]) -> None:\n        ordered = sorted(nums)\n        middle = (len(nums) + 1) // 2\n        nums[::2] = ordered[:middle][::-1]\n        nums[1::2] = ordered[middle:][::-1]\n"
+      }
+    }
+  ]
+}

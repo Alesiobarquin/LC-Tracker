@@ -7,5 +7,25 @@
     "cpp": "class Solution {\npublic:\n    int minMovesToSeat(vector<int>& seats, vector<int>& students) {\n        int maxSeat = *max_element(seats.begin(), seats.end());\n        int maxStudent = *max_element(students.begin(), students.end());\n\n        vector<int> count_seats(maxSeat + 1, 0);\n        vector<int> count_students(maxStudent + 1, 0);\n\n        for (int s : seats) count_seats[s]++;\n        for (int s : students) count_students[s]++;\n\n        int remain = seats.size(), i = 0, j = 0, res = 0;\n        while (remain > 0) {\n            if (count_seats[i] == 0) {\n                i++;\n                continue;\n            }\n            if (count_students[j] == 0) {\n                j++;\n                continue;\n            }\n            int tmp = min(count_seats[i], count_students[j]);\n            res += abs(i - j) * tmp;\n            count_seats[i] -= tmp;\n            count_students[j] -= tmp;\n            remain -= tmp;\n        }\n        return res;\n    }\n};\n"
   },
   "videoUrl": "",
-  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-moves-to-seat-everyone.md"
+  "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-moves-to-seat-everyone.md",
+  "alternatives": [
+    {
+      "approach": "Greedy + Sorting",
+      "explanation": "### How it works\n\nTo minimize total movement, pair the closest seats with the closest students. Sorting both arrays puts them in order, allowing us to match the `i`-th smallest student with the `i`-th smallest seat. This greedy pairing ensures we never have crossing assignments, which would increase total distance.\n\nWhy does this work? If we had two students at positions `a < b` and two seats at positions `x < y`, pairing `(a, y)` and `(b, x)` would create crossing paths. Simple algebra shows `|a - x| + |b - y|` is always less than or equal to `|a - y| + |b - x|` when `a < b` and `x < y`.\n\n### Steps\n\n1. Sort both the seats and students arrays.\n2. For each index `i`, add the absolute difference between `seats[i]` and `students[i]` to the result.\n3. Return the total.\n\n### Complexity\n\n- Time complexity: `O(n log n)`\n- Space complexity: `O(n)` worst-case auxiliary space for Python\\'s sort.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minMovesToSeat(self, seats: List[int], students: List[int]) -> int:\n        seats.sort()\n        students.sort()\n\n        res = 0\n        for i in range(len(seats)):\n            res += abs(seats[i] - students[i])\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-moves-to-seat-everyone.md",
+      "id": "greedy-sorting"
+    },
+    {
+      "approach": "Counting Sort",
+      "explanation": "### How it works\n\nWhen the range of positions is bounded, counting sort can be faster than comparison-based sorting. We create frequency arrays for both seats and students, then simulate the sorted pairing by walking through positions from smallest to largest.\n\nTwo pointers traverse the count arrays, finding the next available seat and next waiting student. Each match contributes its distance to the `res`.\n\n### Steps\n\n1. Create count arrays for seats and students up to the maximum position.\n2. Use two pointers `i` and `j` starting at position 0.\n3. While unmatched pairs remain:\n    - Advance `i` until `count_seats[i] > 0`.\n    - Advance `j` until `count_students[j] > 0`.\n    - Add `|i - j|` to `res`, decrement both counts.\n4. Return the total.\n\n### Complexity\n\n- Time complexity: `O(n + m1 + m2)`\n- Space complexity: `O(m1 + m2)`\n\n> Where `n` is the size of the input arrays, `m1` is the maximum value in the array `seats`, and `m2` is the maximum value in the array `students`.",
+      "code": {
+        "python": "from typing import List\n\nclass Solution:\n    def minMovesToSeat(self, seats: List[int], students: List[int]) -> int:\n        max_index = max(max(seats), max(students)) + 1\n        count_seats = [0] * max_index\n        count_students = [0] * max_index\n\n        for seat in seats:\n            count_seats[seat] += 1\n        for student in students:\n            count_students[student] += 1\n\n        i = j = res = 0\n        remain = len(seats)\n        while remain:\n            if count_seats[i] == 0:\n                i += 1\n            if count_students[j] == 0:\n                j += 1\n            if count_seats[i] and count_students[j]:\n                res += abs(i - j)\n                count_seats[i] -= 1\n                count_students[j] -= 1\n                remain -= 1\n        return res\n"
+      },
+      "sourceUrl": "https://github.com/neetcode-gh/leetcode/blob/3186ede2ea4c4788e87be4b509bf2b66d5eba0e9/articles/minimum-number-of-moves-to-seat-everyone.md",
+      "id": "counting-sort"
+    }
+  ]
 }

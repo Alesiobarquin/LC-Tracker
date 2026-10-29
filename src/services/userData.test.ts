@@ -152,7 +152,7 @@ describe('transactional user-data service', () => {
     expect(mocks.or).toHaveBeenCalledWith(expect.stringContaining(`id.lt.${operationId}`));
     expect(mocks.order).toHaveBeenCalledWith('id', { ascending: false });
   });
-  it('saves recall atomically without appending a coding rating', async () => {
+  it('saves successive recalls atomically without appending coding ratings', async () => {
     const history = [{ date: '2020-01-01T00:00:00Z', rating: 4 }];
     mocks.rows.set('problem_progress', [{ problem_id: 'two-sum', version: 2, first_solved_at: timing.date,
       last_reviewed_at: timing.date, next_review_at: timing.date, review_count: 0, history,
@@ -172,6 +172,27 @@ describe('transactional user-data service', () => {
     expect(request.p_payload.timings[0].elapsed_seconds).toBe(177);
     expect(request.p_payload.progress[0].study_state.recallHistory[0].elapsedSeconds).toBe(177);
     expect(request.p_payload.isNew).toBe(false);
+
+    const firstSaved = request.p_payload.progress[0];
+    mocks.rows.set('problem_progress', [{ ...firstSaved, version: 3 }]);
+    const nextAttempt = { id: '00000000-0000-4000-8000-000000000002', date: '2026-10-06T12:03:00Z',
+      elapsedSeconds: 133, outcome: 'recalled' as const, answer: 'A later original answer', checkedAgainst: 'notes' as const };
+    await saveRecallSession('user_test', { problemId: 'two-sum', attempt: nextAttempt });
+    const nextRequest = mocks.rpc.mock.calls[1][1];
+    expect(nextRequest.p_operation_id).toBe(nextAttempt.id);
+    expect(nextRequest.p_expected.progress).toEqual({ 'two-sum': 3 });
+    expect(nextRequest.p_payload.progress[0]).toMatchObject({
+      history, review_count: firstSaved.review_count, last_reviewed_at: firstSaved.last_reviewed_at,
+      study_state: {
+        recallHistory: [...firstSaved.study_state.recallHistory, nextAttempt],
+        nextCodingAt: firstSaved.study_state.nextCodingAt,
+      },
+    });
+    expect(nextRequest.p_payload.timings).toEqual([expect.objectContaining({
+      id: nextAttempt.id, elapsed_seconds: 133, session_type: 'recall',
+    })]);
+    expect(request.p_payload.timings[0]).toMatchObject({ id: operationId, elapsed_seconds: 177 });
+    expect(firstSaved.study_state.recallHistory).toHaveLength(1);
   });
   it('does not recreate a removed problem or write after a failed recall source read', async () => {
     const input = { problemId: 'two-sum', attempt: { id: operationId, date: timing.date, elapsedSeconds: 180,

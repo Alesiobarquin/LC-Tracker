@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Play, ArrowRight, CircleCheck, ArrowUpRight } from "lucide-react";
+import { format } from "date-fns";
 import {
   useProblemProgress,
   useSessionTimings,
@@ -41,6 +42,7 @@ export function Dashboard() {
   const { streak } = useStreak();
   const activeSession = useStore((state) => state.activeSession);
   const activeRecall = useStore((state) => state.activeRecall);
+  const reviewOnlyDate = useStore((state) => state.reviewOnlyDate);
   const [explainedTask, setExplainedTask] = useState<StudyTask | null>(null);
   const closeExplanation = useCallback(() => setExplainedTask(null), []);
   const explanationButton = (task: StudyTask) => (
@@ -52,6 +54,7 @@ export function Dashboard() {
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState(false);
   const [now, setNow] = useState(new Date());
+  const reviewsOnly = reviewOnlyDate === format(now, "yyyy-MM-dd");
   useEffect(() => {
     void ensureExtendedCatalogLoaded()
       .then(() => setCatalogReady(true))
@@ -79,6 +82,7 @@ export function Dashboard() {
   const plan = useMemo(
     () =>
       buildStudyPlan({
+        mode: reviewsOnly ? "reviews" : "full",
         progress,
         settings,
         timings: timingQuery.sessionTimings,
@@ -107,6 +111,7 @@ export function Dashboard() {
       activeRecall,
       timerSeconds,
       recallSeconds,
+      reviewsOnly,
     ],
   );
   const evidence = useMemo(() => {
@@ -136,6 +141,11 @@ export function Dashboard() {
     }
     if (activeRecall) {
       navigate(`/recall/${activeRecall.problemId}`);
+      return;
+    }
+    const startedAt = new Date();
+    if (reviewsOnly !== (reviewOnlyDate === format(startedAt, "yyyy-MM-dd"))) {
+      setNow(startedAt);
       return;
     }
     if (task.kind === "recall") {
@@ -194,6 +204,7 @@ export function Dashboard() {
     month: "long",
     day: "numeric",
   });
+  const reviewHelp = "Review familiar problems using today’s remaining time. Turn off to return to the full plan. Resets tomorrow.";
   const budget = (
     <>
       <p className="register-label">Time available today</p>
@@ -215,7 +226,29 @@ export function Dashboard() {
       <PageHeader
         className="today-heading"
         title="Today’s study plan"
-        description={dateLabel}
+        description={
+          <div className="today-context">
+            <span>{dateLabel}</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="today-mode min-h-8 px-2 py-1"
+              aria-pressed={reviewsOnly}
+              aria-describedby="today-review-help"
+              title={reviewHelp}
+              onClick={() => {
+                const changedAt = new Date();
+                setNow(changedAt);
+                useStore.getState().setReviewOnlyDate(reviewsOnly ? null : format(changedAt, "yyyy-MM-dd"));
+                setExplainedTask(null);
+              }}
+            >
+              <CircleCheck size={13} aria-hidden="true" className={reviewsOnly ? undefined : "opacity-0"} />
+              Reviews only
+            </Button>
+            <span id="today-review-help" className="sr-only">{reviewHelp}</span>
+          </div>
+        }
         actions={
           <Link
             to="/settings#section-schedule"
@@ -271,7 +304,7 @@ export function Dashboard() {
                       ? "Session ended · outcome ready to save"
                       : "Session in progress · draft saved"
                     : primaryTask?.kind === "recall"
-                      ? "Recall warm-up · up next"
+                      ? reviewsOnly ? "Recall review · up next" : "Recall warm-up · up next"
                       : "Coding practice · up next"}
                 </div>
                 <h2 className="study-next-title">
@@ -322,7 +355,7 @@ export function Dashboard() {
                         onClick={() => start(primaryTask!)}
                       >
                         {primaryTask?.kind === "recall"
-                          ? "Start recall check"
+                          ? reviewsOnly ? "Start review" : "Start recall check"
                           : "Start practice block"}
                         <ArrowRight size={14} />
                       </Button>
@@ -373,10 +406,15 @@ export function Dashboard() {
             ) : activeProblemId ? null : !hasPlannedWork ? (
               <section className="empty-register">
                 <CircleCheck size={22} className="text-success mb-3" />
-                <h2 className="text-xl font-medium">Today’s plan is complete</h2>
+                <h2 className="text-xl font-medium">{reviewsOnly
+                  ? plan.remainingMinutes < 3 ? "No more reviews fit today" : "No more reviews in today’s queue"
+                  : "Today’s plan is complete"}</h2>
                 <p className="text-sm text-muted mt-2">
-                  No additional assignment fits into the remaining time. Your
-                  queue will be ready on your next study day.
+                  {reviewsOnly
+                    ? plan.remainingMinutes < 3
+                      ? "There’s less than 3 minutes left in today’s budget. Stop here and pick up your reviews another day."
+                      : "No more due reviews for today. Your coding checks remain separate; return to the full plan when you have time."
+                    : "No additional assignment fits into the remaining time. Your queue will be ready on your next study day."}
                 </p>
               </section>
             ) : (
@@ -428,7 +466,7 @@ export function Dashboard() {
                       </div>
                     </section>
                   ))}
-                {(primaryTask?.kind === "recall" ||
+                {!reviewsOnly && (primaryTask?.kind === "recall" ||
                   (!primaryTask && plan.recallTasks.length > 0)) && (
                   <section className="study-step practice-plan-step">
                     <TraceIndex>
@@ -545,8 +583,9 @@ export function Dashboard() {
           <section className="rail-section">
             <h2 className="register-label mb-3">Study rhythm</h2>
             <p className="text-xs text-muted leading-relaxed">
-              Recall, implement, revisit. Brief retrieval stays within about 30%
-              of your budget, protecting time for new learning.
+              {reviewsOnly
+                ? "Today’s remaining time is available for due recall checks. Successful recall does not complete or postpone your coding checks."
+                : "Recall, implement, revisit. The full plan reserves about 30% of your budget for brief retrieval, protecting time for coding."}
             </p>
             <p className="text-[11px] text-subtle mt-3">
               {streak.current} day activity streak

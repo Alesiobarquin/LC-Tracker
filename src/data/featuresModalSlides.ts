@@ -16,12 +16,13 @@ export const FEATURE_SLIDES: FeatureSlide[] = [
   {
     id: 'dashboard',
     title: 'Dashboard',
-    subtitle: 'Your daily execution view for retention-focused prep.',
+    subtitle: 'Choose a full plan or a lighter review session.',
     icon: LayoutDashboard,
     highlights: [
       'Daily plan within your remaining study time',
-      'Recall, repair blocks, and protected unfamiliar checks',
-      'Immediate next actions so sessions start without context switching',
+      'Full plan mixes recall, coding, and protected unfamiliar checks',
+      'Reviews only works through familiar problems with short written answers',
+      'Save an outcome, choose Next review, and finish whenever you need',
     ],
     tabId: 'dashboard',
   },

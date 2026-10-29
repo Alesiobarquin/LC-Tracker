@@ -74,6 +74,207 @@ async function fixture(page: Page, rows = [progressRow()]) {
   return stored;
 }
 
+async function recordReview(page: Page, minutes: number) {
+  await page.getByLabel("Your attempt · explanation or pseudocode").fill(
+    "Recall the key invariant, choose the matching approach, and check its edge cases.",
+  );
+  await page.getByRole("button", { name: "Compare with a reference" }).click();
+  await page.getByRole("button", { name: "I’ve compared my answer — continue" }).click();
+  await page.getByRole("spinbutton", { name: "Minutes spent" }).fill(String(minutes));
+  await page.getByRole("spinbutton", { name: "Seconds spent" }).fill("0");
+  await page.getByRole("button", { name: /^Recalled/ }).click();
+}
+
+for (const theme of ["light", "dark"]) {
+  for (const width of [1440, 390]) {
+    test(`reviews continue to a different due problem after an exact retry at ${width}px in ${theme}`, async ({ page }, testInfo) => {
+      await page.clock.install({ time: new Date("2026-10-09T12:00:00") });
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript(theme => localStorage.setItem("lc-tracker-theme", theme), theme);
+      const stored = await fixture(page, ["two-sum", "valid-anagram"].map(progressRow));
+      const saves: any[] = [];
+      await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+        const request = route.request().postDataJSON();
+        saves.push(request);
+        if (saves.length !== 2) {
+          stored.progress = stored.progress.map(row => {
+            const changed = request.p_payload.progress.find((entry: any) => entry.problem_id === row.problem_id);
+            return changed ? { ...changed, version: row.version + 1 } : row;
+          });
+          stored.timings.push(...request.p_payload.timings);
+        }
+        await route.fulfill({
+          status: saves.length === 1 ? 503 : 200,
+          contentType: "application/json",
+          body: saves.length === 1
+            ? '{"code":"XX000","message":"Lost response after commit"}'
+            : JSON.stringify({ duplicate: saves.length === 2 }),
+        });
+      });
+      await page.goto("/dashboard");
+      await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Start practice block" })).toHaveCount(0);
+      await page.getByRole("button", { name: "Start review", exact: true }).click();
+      await expect(page).toHaveURL(/\/recall\//);
+      const firstUrl = page.url();
+      await expect(page.getByLabel("Your attempt · explanation or pseudocode")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath("review-check.png"), fullPage: true, animations: "disabled" });
+      await recordReview(page, 3);
+      await expect(page.getByRole("alert").filter({ hasText: "Your answer and attempt are preserved" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Next review", exact: true })).toHaveCount(0);
+      await page.reload();
+      await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toHaveValue("3");
+      await expect(page.getByRole("spinbutton", { name: "Minutes spent" })).toBeDisabled();
+      await page.getByRole("button", { name: /^Retry: Recalled/ }).click();
+      await expect(page.getByRole("heading", { name: "Review saved", exact: true })).toBeVisible();
+      await expect(page).toHaveURL(firstUrl);
+      await page.reload();
+      await expect(page.getByRole("heading", { name: "Review saved", exact: true })).toBeVisible();
+      await expect(page.getByRole("region", { name: "Review complete", exact: true })).toBeFocused();
+      await expect(page.getByRole("button", { name: "Next review", exact: true })).toBeInViewport();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath("review-saved.png"), fullPage: true, animations: "disabled" });
+      expect(await page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeRecall,
+      )).toBeNull();
+      expect(saves).toHaveLength(2);
+      expect(saves[1].p_operation_id).toBe(saves[0].p_operation_id);
+      expect(saves[1].p_payload.timings).toEqual(saves[0].p_payload.timings);
+      expect(saves[1].p_payload.progress[0].study_state.recallHistory).toEqual(saves[0].p_payload.progress[0].study_state.recallHistory);
+      expect(stored.timings).toHaveLength(1);
+      expect(stored.progress.find(row => row.problem_id === saves[0].p_payload.progress[0].problem_id)?.history).toEqual(originalHistory);
+      await page.getByRole("button", { name: "Next review", exact: true }).click();
+      await expect(page).toHaveURL(/\/recall\//);
+      expect(page.url()).not.toBe(firstUrl);
+      await expect(page.getByLabel("Your attempt · explanation or pseudocode")).toBeEditable();
+      await expect.poll(() => page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeRecall.answer,
+      )).toBe("");
+      await recordReview(page, 3);
+      await expect(page.getByRole("heading", { name: "Review saved", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Next review", exact: true })).toHaveCount(0);
+      await page.getByRole("button", { name: "Finish reviewing", exact: true }).click();
+      await expect(page).toHaveURL(/\/dashboard/);
+      await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "true");
+      await expect(page.getByRole("button", { name: "Start review", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Start practice block" })).toHaveCount(0);
+      expect(stored.timings).toHaveLength(2);
+      expect(new Set(stored.timings.map(timing => timing.problem_id)).size).toBe(2);
+    });
+  }
+}
+
+test("reviews share the full plan budget and stop when that budget is used", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-09T12:00:00") });
+  const stored = await fixture(page, ["two-sum", "valid-anagram", "valid-parentheses"].map(progressRow));
+  stored.settings.settings_json.settings.studySchedule.weekdayMinutes = 9;
+  stored.settings.settings_json.settings.studySchedule.weekendMinutes = 9;
+  await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+    const saved = route.request().postDataJSON();
+    stored.progress = stored.progress.map(row => {
+      const changed = saved.p_payload.progress.find((entry: any) => entry.problem_id === row.problem_id);
+      return changed ? { ...changed, version: row.version + 1 } : row;
+    });
+    stored.timings.push(...saved.p_payload.timings);
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"duplicate":false}' });
+  });
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await page.getByRole("button", { name: "Start review", exact: true }).click();
+  await recordReview(page, 3);
+  await page.getByRole("button", { name: "Finish reviewing", exact: true }).click();
+  await expect(page.getByText("3 min used", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByText("3 min used", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await page.getByRole("button", { name: "Start review", exact: true }).click();
+  await recordReview(page, 6);
+  await expect(page.getByRole("heading", { name: "Review saved", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next review", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Finish reviewing", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Your time target is complete", exact: true })).toBeVisible();
+  await expect(page.getByText("9 min used", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start review", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Start practice block" })).toHaveCount(0);
+  expect(stored.timings.reduce((total, timing) => total + timing.elapsed_seconds, 0)).toBe(9 * 60);
+});
+
+test("review mode survives reload and new tabs, resets tomorrow, and preserves an active coding draft", async ({ page, context }) => {
+  await page.clock.install({ time: new Date("2026-10-09T12:00:00") });
+  await fixture(page, [progressRow("two-sum"), progressRow("valid-anagram")]);
+  await page.goto("/timer/two-sum");
+  await expect(page.getByRole("button", { name: "I'm Done", exact: true })).toBeVisible();
+  const activeId = await page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession.id,
+  );
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Resume session", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start review", exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const newTab = await context.newPage();
+  await newTab.clock.install({ time: new Date("2026-10-09T12:00:00") });
+  await fixture(newTab, [progressRow("two-sum"), progressRow("valid-anagram")]);
+  await newTab.goto("/dashboard");
+  await expect(newTab.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "true");
+  expect(await newTab.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession,
+  )).toBeNull();
+  await newTab.close();
+  await page.clock.fastForward(24 * 60 * 60 * 1000);
+  await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("link", { name: "Resume session", exact: true })).toBeVisible();
+  expect(await page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeSession.id,
+  )).toBe(activeId);
+});
+
+test("review actions recheck midnight before the screen refreshes its date", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-09T23:59:50"));
+  const stored = await fixture(page, ["two-sum", "valid-anagram"].map(progressRow));
+  await page.route("https://test.supabase.co/rest/v1/rpc/commit_user_change", async route => {
+    const saved = route.request().postDataJSON();
+    stored.progress = stored.progress.map(row => {
+      const changed = saved.p_payload.progress.find((entry: any) => entry.problem_id === row.problem_id);
+      return changed ? { ...changed, version: row.version + 1 } : row;
+    });
+    stored.timings.push(...saved.p_payload.timings);
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"duplicate":false}' });
+  });
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await page.getByRole("button", { name: "Start review", exact: true }).click();
+  await recordReview(page, 3);
+  await expect(page.getByRole("heading", { name: "Review saved", exact: true })).toBeVisible();
+  const checkpointUrl = page.url();
+  await expect(page.getByRole("button", { name: "Next review", exact: true })).toBeVisible();
+
+  await page.clock.setFixedTime(new Date("2026-10-10T00:00:05"));
+  await page.getByRole("button", { name: "Next review", exact: true }).click();
+  await expect(page).toHaveURL(checkpointUrl);
+  await expect(page.getByText("Reviews only has ended for today.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next review", exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeRecall,
+  )).toBeNull();
+  await page.getByRole("button", { name: "Finish reviewing", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "false");
+
+  await page.getByRole("button", { name: "Reviews only", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Start review", exact: true })).toBeVisible();
+  await page.clock.setFixedTime(new Date("2026-10-11T00:00:05"));
+  await page.getByRole("button", { name: "Start review", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByRole("button", { name: "Reviews only", exact: true })).toHaveAttribute("aria-pressed", "false");
+  expect(await page.evaluate(() =>
+    JSON.parse(sessionStorage.getItem("lc-tracker-active-session")!).state.activeRecall,
+  )).toBeNull();
+  expect(stored.timings).toHaveLength(1);
+});
+
 test("recall conceals references, preserves a draft, and retries a lost response exactly once", async ({
   page,
 }, testInfo) => {
@@ -1291,7 +1492,7 @@ for (const theme of ["light", "dark"]) {
       await why.click();
       await dialog.getByRole("link", { name: "How the planner works" }).click();
       await expect(page.getByRole("heading", { name: "How the planner works", exact: true })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Why you get more coding", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "How your time is allocated", exact: true })).toBeVisible();
       await expect(page.getByRole("img", { name: /Example daily budget:/ })).toBeVisible();
       await page.screenshot({ path: testInfo.outputPath("planner-overview.png"), fullPage: true, animations: "disabled" });
       await page.getByText("Time budget and recall allocation", { exact: true }).click();

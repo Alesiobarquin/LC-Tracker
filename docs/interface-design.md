@@ -42,6 +42,18 @@ Settings pair section explanations with compact controls on desktop and use the
 same reading order on mobile. Syntax practice uses the indexed checkpoint and
 ruled session record, with focus-managed help and exit dialogs.
 
+Today keeps a compact Reviews only toggle beside the date. Turning it off returns
+to the full plan; its explanation stays in contextual help instead of a separate
+block above the task. This is a temporary choice for the attention available
+today, so the schedule section
+explains it and links back to Today instead of adding another saved setting.
+The selected mode keeps one prominent next action. Reviews only uses familiar
+recall checks and offers Next review or Finish reviewing after a confirmed save;
+the queue ending never substitutes a coding task. Short written bullets keep
+the existing retrieve, compare, and record protocol. Both modes share the daily
+budget and preserve saved sessions. The product tour and setup tips introduce
+the choice without requiring a menu or a schedule edit to discover it.
+
 ## Implementation
 
 Semantic colors, type roles, radii, the four-pixel spacing unit, motion durations,

@@ -7,10 +7,11 @@ const rules = [
     title: "Time budget and recall allocation",
     items: [
       "Start with your weekday or weekend budget, rounded down to whole minutes. Subtract today's recorded study time plus unsaved active time, rounded up to whole minutes.",
-      "Recall allowance = floor(daily budget × 30%) − ceil(recall minutes already used), with a minimum of zero. An unfamiliar check first reserves up to 35 minutes from the remaining daily budget.",
+      "In Full plan, recall allowance = floor(daily budget × 30%) − ceil(recall minutes already used), with a minimum of zero. An unfamiliar check first reserves up to 35 minutes from the remaining daily budget.",
       "Each recall check is allocated three minutes. Due recall checks first mix different patterns, then fill any remaining recall capacity. The selected coding problem is excluded from recall.",
       "Coding gets the smaller of its full-attempt estimate and the time left after allocated recall. A new coding block needs at least five minutes. One due syntax card can use three leftover minutes.",
       "Saving recalculates the plan using actual elapsed time, so it can offer another coding block. The daily allowance limits recall time, rather than the number of coding blocks.",
+      "Reviews only uses the remaining daily budget for due familiar problems, with no coding, unfamiliar, or syntax assignments. Each review needs three available minutes. Actual time still counts toward the shared budget, including when you return to Full plan. The choice resets on the next local calendar day.",
     ],
   },
   {
@@ -67,7 +68,7 @@ const priorities = [
 ];
 
 const detailLabels = [
-  ["Daily time", "Recall allowance", "Recall queue", "Coding and syntax", "After each save"],
+  ["Daily time", "Recall allowance", "Recall queue", "Coding and syntax", "After each save", "Reviews only"],
   ["Weekly check", "Maintenance", "Continuation", "Repair", "Learning days", "Other days"],
   ["When assignments pause", "Which questions can appear", "Due-date priority", "New-question ranking", "Guided category order"],
   ["Unfamiliar eligibility", "Unfamiliar ranking", "Other unfamiliar practice", "Continuation rotation", "Time estimates"],
@@ -81,15 +82,15 @@ export function StudyPlanGuide() {
       <PageHeader title="How the planner works" description="One daily budget. Recall and coding share the time left." />
 
       <section aria-labelledby="budget-guide-title" className="space-y-5">
-        <h2 id="budget-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Why you get more coding</h2>
-        <p className="text-lg leading-relaxed text-body">Recall uses up to <strong className="text-foreground">30% of your daily budget</strong>. Once that allowance is used, the time left goes to coding.</p>
+        <h2 id="budget-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">How your time is allocated</h2>
+        <p className="text-lg leading-relaxed text-body">In <strong className="text-foreground">Full plan</strong>, recall uses up to <strong className="text-foreground">30% of your daily budget</strong>. Once that allowance is used, the time left goes to coding.</p>
         <figure className="rounded-md border border-line bg-surface p-5 sm:p-6 space-y-5">
-          <figcaption className="text-sm font-semibold text-muted">Example · a 60-minute day</figcaption>
+          <figcaption className="text-sm font-semibold text-muted">Example · Full plan on a 60-minute day</figcaption>
           <div className="grid grid-cols-2 gap-5">
             <div><p className="text-3xl font-semibold text-foreground">18 <span className="text-base font-normal text-muted">min</span></p><p className="mt-1 text-base text-body">Recall allowance</p></div>
             <div><p className="text-3xl font-semibold text-accent">20 <span className="text-base font-normal text-muted">min</span></p><p className="mt-1 text-base text-body">Recall already done</p></div>
           </div>
-          <p className="border-l-2 border-success pl-3 text-base leading-relaxed text-body"><strong className="text-foreground">Recall is done for today.</strong> With 29 minutes left, the next block can be coding.</p>
+          <p className="border-l-2 border-success pl-3 text-base leading-relaxed text-body"><strong className="text-foreground">The full plan’s recall allowance is used.</strong> With 29 minutes left, the next block can be coding.</p>
           <div className="flex h-5 overflow-hidden rounded-sm" role="img" aria-label="Example daily budget: 31 minutes already used, 22 minutes for the next coding block, 7 minutes left afterward. Total 60 minutes.">
             <span className="bg-line-strong" style={{ width: `${31 / 60 * 100}%` }} />
             <span className="bg-accent" style={{ width: `${22 / 60 * 100}%` }} />
@@ -102,12 +103,14 @@ export function StudyPlanGuide() {
           </div>
           <p className="text-sm text-muted">Already used includes recall and coding. Actual elapsed time counts toward your budget.</p>
         </figure>
-        <p className="text-base leading-relaxed text-body"><strong className="text-foreground">The plan updates after every save.</strong> More coding blocks can appear until your time runs out. An unfamiliar check can reserve coding time before recall.</p>
+        <p className="text-base leading-relaxed text-body"><strong className="text-foreground">The plan updates after every save.</strong> In Full plan, more coding blocks can appear until your time runs out. An unfamiliar check can reserve coding time before recall.</p>
+        <p className="text-base leading-relaxed text-body">For a lighter session, choose <Link to="/dashboard" className="text-accent underline">Reviews only on Today</Link>. Use short written bullets to recall familiar problems, compare with a reference, and record the outcome. Choose <strong className="text-foreground">Next review</strong> after saving, or <strong className="text-foreground">Finish reviewing</strong> whenever you need.</p>
+        <p className="text-base leading-relaxed text-body">Reviews can use all the time left in your daily budget. No coding block is added when the review queue ends. Switch back anytime; the choice resets tomorrow. Coding checks remain separate, and saved sessions still come first.</p>
       </section>
 
       <section aria-labelledby="priority-guide-title" className="space-y-5">
         <h2 id="priority-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Why this question?</h2>
-        <p className="text-base text-body leading-relaxed">For coding, the first rule that applies wins.</p>
+        <p className="text-base text-body leading-relaxed">In Full plan, the first coding rule that applies wins.</p>
         <ol className="divide-y divide-line border-y border-line">
           {priorities.map(([title, description], index) => (
             <li key={title} className="flex gap-4 py-4">

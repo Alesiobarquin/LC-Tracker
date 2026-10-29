@@ -70,6 +70,26 @@ SELECT pg_temp.study_assert((SELECT reviewed=3 FROM public.activity_log), 'quick
 SELECT pg_temp.study_assert((SELECT count(*)=1 FROM public.session_timings WHERE id='00000000-0000-4000-8000-000000000306'), 'quick completion timing counted once');
 SELECT pg_temp.study_assert((SELECT elapsed_seconds=750 FROM public.session_timings WHERE id='00000000-0000-4000-8000-000000000306'), 'corrected coding time retained exactly');
 SELECT pg_temp.study_assert((public.export_user_data()->'progress'->0->'history'->1->'confidenceReported')='false'::jsonb, 'backup retains skipped confidence');
+
+-- The next review is a distinct operation; it retains earlier recall and coding evidence.
+SELECT public.commit_user_change('00000000-0000-4000-8000-000000000307','recall','{"progress":{"two-sum":4}}',
+ jsonb_build_object('problemId','two-sum','progress',jsonb_build_array(pg_temp.study_progress() ||
+ jsonb_build_object('history',(SELECT history FROM public.problem_progress WHERE problem_id='two-sum'),
+ 'study_state',pg_temp.study_state() || jsonb_build_object('recallHistory',(pg_temp.study_state()->'recallHistory') ||
+ '[{"id":"00000000-0000-4000-8000-000000000307","date":"2026-10-06T12:03:00Z","elapsedSeconds":133,"outcome":"recalled","answer":"A later original answer","checkedAgainst":"notes"}]'::jsonb))),
+ 'timings',jsonb_build_array(pg_temp.study_timing('00000000-0000-4000-8000-000000000307') || '{"recorded_at":"2026-10-06T12:03:00Z","elapsed_seconds":133}'::jsonb),
+ 'logDate','2026-10-06','isNew',false));
+SELECT pg_temp.study_assert((SELECT jsonb_array_length(study_state->'recallHistory')=2 AND
+ study_state->'recallHistory'->0->>'answer'='Approach and invariant' AND
+ study_state->'recallHistory'->1->>'answer'='A later original answer' AND
+ study_state->>'nextCodingAt'=pg_temp.study_state()->>'nextCodingAt' AND
+ jsonb_array_length(history)=2 AND history->1->'codingOutcome'='{"correctness":"passed","assistance":"none","explanation":"clear"}'::jsonb
+ FROM public.problem_progress WHERE problem_id='two-sum'), 'successive recall preserves original answers and separate coding evidence');
+SELECT pg_temp.study_assert((public.commit_user_change('00000000-0000-4000-8000-000000000307','recall','{"progress":{"two-sum":4}}','{"problemId":"two-sum"}')->>'duplicate')::boolean, 'next review has its own retry receipt');
+SELECT pg_temp.study_assert((SELECT reviewed=4 FROM public.activity_log), 'successive recall counted once');
+SELECT pg_temp.study_assert((SELECT count(*)=2 AND sum(elapsed_seconds)=310 FROM public.session_timings WHERE session_type='recall'), 'successive recall retains both exact timings');
+SELECT pg_temp.study_assert(jsonb_array_length(public.export_user_data()->'progress'->0->'study_state'->'recallHistory')=2, 'backup retains every recall answer');
+SELECT pg_temp.study_assert((public.export_user_data()->'timings') @> '[{"id":"00000000-0000-4000-8000-000000000301","elapsed_seconds":177},{"id":"00000000-0000-4000-8000-000000000307","elapsed_seconds":133}]'::jsonb, 'backup retains every recall timing');
 SELECT set_config('request.jwt.claims', '{"sub":"user_study_other","role":"authenticated"}', false);
 SELECT pg_temp.study_assert((SELECT count(*)=0 FROM public.problem_progress), 'recall answers isolated by account');
 RESET ROLE;

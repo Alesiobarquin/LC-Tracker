@@ -1,13 +1,51 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useStore } from "./useStore";
+import { preferenceStorage } from "../lib/safeStorage";
 
 describe("useStore session persistence", () => {
   beforeEach(() => {
+    const preferences = new Map<string, string>();
+    vi.spyOn(preferenceStorage, "getItem").mockImplementation((key) => preferences.get(key) ?? null);
+    vi.spyOn(preferenceStorage, "setItem").mockImplementation((key, value) => { preferences.set(key, value); });
     useStore.setState({
       activeSession: null,
       activeRecall: null,
       sessionReturnTo: null,
+      sessionUserId: null,
+      reviewOnlyDate: null,
     });
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it("restores today’s review choice for the same account without replacing a draft", () => {
+    useStore.getState().setSessionUser("user_first");
+    useStore.getState().startRecall("two-sum");
+    const draft = useStore.getState().activeRecall;
+    useStore.getState().setReviewOnlyDate("2026-10-28");
+    const persisted = useStore.persist.getOptions().partialize!(useStore.getState());
+    useStore.setState({ reviewOnlyDate: null, sessionUserId: null });
+    const restored = useStore.persist.getOptions().merge!(persisted, useStore.getState());
+    useStore.setState(restored);
+    useStore.getState().setSessionUser("user_first");
+    expect(useStore.getState().reviewOnlyDate).toBe("2026-10-28");
+    expect(useStore.getState().activeRecall).toEqual(draft);
+    useStore.getState().setReviewOnlyDate(null);
+    expect(useStore.getState().reviewOnlyDate).toBeNull();
+    expect(useStore.getState().activeRecall).toEqual(draft);
+  });
+
+  it("does not transfer a review choice to another account or legacy stored state", () => {
+    useStore.getState().setSessionUser("user_first");
+    useStore.getState().setReviewOnlyDate("2026-10-28");
+    useStore.getState().setSessionUser("user_second");
+    expect(useStore.getState().reviewOnlyDate).toBeNull();
+    useStore.getState().setSessionUser("user_first");
+    expect(useStore.getState().reviewOnlyDate).toBe("2026-10-28");
+    useStore.getState().setSessionUser(null);
+    expect(useStore.getState().reviewOnlyDate).toBeNull();
+    const merge = useStore.persist.getOptions().merge!;
+    expect(merge({}, useStore.getState()).reviewOnlyDate).toBeNull();
+    expect(merge({ reviewOnlyDate: { date: "2026-10-28" } }, useStore.getState()).reviewOnlyDate).toBeNull();
   });
 
   it("clears sessions when the signed-in account changes", () => {

@@ -451,6 +451,8 @@ export function estimateCodingMinutes(
       : 22;
 }
 
+export type StudyMode = "full" | "reviews";
+
 export interface StudyTask {
   problemId: string;
   kind: "recall" | PracticeKind;
@@ -458,6 +460,7 @@ export interface StudyTask {
   estimatedMinutes: number;
   reason: string;
   explanation: {
+    mode: StudyMode;
     title: string;
     summary: string;
     dailyMinutes: number;
@@ -496,6 +499,7 @@ export function buildStudyPlan(params: {
   activeSeconds?: number;
   activeRecallSeconds?: number;
   hasActiveSession?: boolean;
+  mode?: StudyMode;
   now?: Date;
 }): StudyPlan {
   const {
@@ -508,6 +512,7 @@ export function buildStudyPlan(params: {
     activeSeconds = 0,
     activeRecallSeconds = 0,
     hasActiveSession = false,
+    mode = "full",
     now = new Date(),
   } = params;
   const day = now.getDay();
@@ -774,7 +779,9 @@ export function buildStudyPlan(params: {
     repair &&
     (evaluation.needsRemediation || repeatedTopicGaps);
   const protectedVariant = unseenDue && variantCandidate;
-  const mainId = protectedVariant
+  const mainId = mode === "reviews"
+    ? undefined
+    : protectedVariant
     ? protectedVariant.id
     : day === maintenanceDay && codingCandidate
       ? codingCandidate
@@ -798,17 +805,18 @@ export function buildStudyPlan(params: {
       independentCoverage(problemMap[mainId]) >= 2);
   // On check days a small budget goes to the check, instead of a recall warm-up
   // making a feasible independent attempt unnecessarily short.
-  let recallBudget = Math.min(
+  let recallBudget = mode === "reviews" ? remainingMinutes : Math.min(
     unfamiliarMain
       ? Math.max(0, remainingMinutes - UNSEEN_CHECK_MINUTES)
       : remainingMinutes,
     Math.max(0, Math.floor(dailyMinutes * 0.3) - Math.ceil(recallSpent)),
   );
-  const recallAllowance = Math.floor(dailyMinutes * 0.3);
+  const recallAllowance = mode === "reviews" ? dailyMinutes : Math.floor(dailyMinutes * 0.3);
   const recallCandidates = dueRecall.filter(
     (id) => !touched.has(id) && id !== mainId,
   );
   const allocationExplanation = {
+    mode,
     dailyMinutes,
     spentMinutes,
     remainingMinutes,
@@ -852,8 +860,10 @@ export function buildStudyPlan(params: {
         estimatedMinutes: 3,
         explanation: {
           ...allocationExplanation,
-          title: "Recall is due",
-          summary: "Check what you remember before reopening the solution.",
+          title: mode === "reviews" ? "Reviews only" : "Recall is due",
+          summary: mode === "reviews"
+            ? "Use your remaining daily time for due recall checks, without starting a coding block."
+            : "Check what you remember before reopening the solution.",
         },
         reason:
           getLearningStatus(progress[id]) === "needs_assessment"
@@ -907,7 +917,7 @@ export function buildStudyPlan(params: {
   const syntaxDue = Object.entries(syntaxProgress).filter(([, value]) =>
     isDue(value.nextReviewAt),
   );
-  if (capacity >= 3 && syntaxDue.length) {
+  if (mode === "full" && capacity >= 3 && syntaxDue.length) {
     plan.syntaxCards = [syntaxDue[0][0]];
     capacity -= 3;
   }

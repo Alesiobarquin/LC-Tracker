@@ -63,6 +63,13 @@ theme script and React theme controller use the same canvas colors. The SVG mark
 and favicon variants share a source; `node scripts/render-brand-assets.mjs`
 renders the raster variants with Playwright.
 
+Public HTML is also generated during the build so the library, pattern lessons,
+syntax reference, and problem explanations can be read without JavaScript. It
+uses the same palette and source content; the interactive workspace replaces it
+after startup. The explanation index uses an open, ruled list with two columns
+on desktop and one on mobile. See `docs/search-indexing.md` for metadata,
+discovery, generated sitemaps, and the verification/release workflow.
+
 Problem explanations show each available approach as a title button in a
 wrapping row. Copper identifies the selected option, and `aria-pressed` exposes
 that state to assistive technology. Titles wrap inside their boxes on narrow

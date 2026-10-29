@@ -37,4 +37,5 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run build
+      - run: npm run test:seo:built
       - run: npm audit --audit-level=low

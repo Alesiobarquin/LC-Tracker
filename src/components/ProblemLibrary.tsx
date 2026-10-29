@@ -25,7 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { useUser } from "@clerk/react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { clsx } from "clsx";
 import { useProblemProgress, useUserSettings } from "../hooks/useUserData";
 import { ProblemLibrarySkeleton } from "./loadingSkeletons";
@@ -525,6 +525,10 @@ export const ProblemLibrary: React.FC = () => {
           </div>
         }
       />
+
+      <Link to="/library/explanations" className="inline-flex text-sm text-accent hover:underline">
+        Browse all problem explanations
+      </Link>
 
       <div className="flex flex-col gap-4">
         {/* Tabs */}

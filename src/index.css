@@ -4142,3 +4142,28 @@ button:active:not(:disabled),
 }
 .recall-record:focus-visible { outline: 2px solid var(--palette-accent); outline-offset: 6px; }
 .reference-code .cm-content { caret-color: var(--palette-foreground); }
+
+/* Public HTML stays readable before JavaScript loads and without it. */
+.public-recall-guard { display: none; }
+html[data-public-recall-problem] [data-public-page] [data-public-reference] { display: none; }
+html[data-public-recall-problem] [data-public-page] .public-recall-guard { display: block; }
+.public-reference { overflow-wrap: anywhere; }
+.public-reference :is(h1, h2, h3) { color: var(--palette-foreground); font-weight: 600; line-height: 1.35; }
+.public-reference h1 { font-size: 30px; letter-spacing: -0.025em; margin-bottom: 16px; }
+.public-reference h2 { font-size: 21px; margin-bottom: 14px; }
+.public-reference h3 { font-size: 17px; margin-block: 16px 10px; }
+.public-reference p { max-width: 72ch; line-height: 1.8; margin-block: 12px; }
+.public-reference > section, .public-reference > article { border-top: 1px solid var(--palette-line); padding-top: 24px; margin-top: 32px; }
+.public-reference :is(ul, ol) { padding-left: 20px; line-height: 1.8; }
+.public-reference ul { list-style: disc; }
+.public-reference ol { list-style: decimal; }
+.public-reference a { color: var(--palette-accent); }
+.public-reference-code { max-width: 100%; overflow-x: auto; padding: 16px; border: 1px solid var(--palette-line); border-radius: 4px; background: var(--palette-muted-surface); color: var(--palette-foreground); font: 13px/1.8 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.public-reference-footer { display: flex; flex-wrap: wrap; gap: 16px 24px; max-width: 76rem; margin-inline: auto; padding: 24px 20px; color: var(--palette-muted); font-size: 12px; }
+.explanation-directory-list { list-style: none !important; padding: 0 !important; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.explanation-directory-list li { min-width: 0; overflow-wrap: anywhere; }
+.explanation-directory :is(a, input):focus-visible, .public-reference a:focus-visible { outline: 2px solid var(--palette-accent); outline-offset: 4px; }
+@media (max-width: 767px) {
+  .explanation-directory-list { grid-template-columns: minmax(0, 1fr); }
+  .public-reference h1 { font-size: 28px; }
+}

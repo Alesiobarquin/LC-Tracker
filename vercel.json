@@ -1,8 +1,11 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!api(?:/|$)|assets(?:/|$)).*)",
-      "destination": "/index.html"
+      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sso-callback|timer|recall)(/.*)?",
+      "destination": "/app"
     }
   ],
   "functions": {
@@ -11,6 +14,14 @@
     }
   },
   "headers": [
+    {
+      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sso-callback|timer|recall|app)(/.*)?",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, follow" }]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
     {
       "source": "/(.*)",
       "headers": [

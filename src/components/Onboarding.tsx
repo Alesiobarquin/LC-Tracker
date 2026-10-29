@@ -334,6 +334,10 @@ const StepLaunch: React.FC<{
 }> = ({ state, onLaunch, isLaunching, launchError }) => {
   const tips = [
     {
+      icon: <BookOpen size={16} className="text-accent" />,
+      text: "Short on focus? Choose Reviews only on Today for familiar problems and brief written recall. Switch back anytime; the choice resets tomorrow.",
+    },
+    {
       icon: <CheckCircle size={16} className="text-accent" />,
       text: "Your streak counts when you complete at least one problem or review session per day, with one grace day per week.",
     },

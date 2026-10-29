@@ -1,16 +1,19 @@
 import { SectionHeading } from "./ui/StudyTrace";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { format } from "date-fns";
 import { ExternalLink, ArrowLeft, Clock, Pause, Play } from "lucide-react";
 import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
 import { patterns } from "../data/patterns";
 import { getPatternForProblem } from "../utils/patternMapping";
 import { getPatternLessonMeta } from "../data/patternLessonMeta";
-import { useProblemProgress } from "../hooks/useUserData";
+import { useProblemProgress, useSessionTimings, useUserSettings } from "../hooks/useUserData";
 import { useStore } from "../store/useStore";
 import { canPersistTimer } from "../lib/safeStorage";
 import { TimeSpentInput } from "./TimeSpentInput";
 import { parseTimeSpent } from "../utils/sessionTime";
+import { buildStudyPlan } from "../utils/study";
+import { Button } from "./ui/Button";
 import type { RecallAttempt } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
 import {
@@ -32,11 +35,28 @@ const button =
   "rounded-md bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
 export function RecallPage() {
   const { problemId } = useParams();
+  return <RecallCheck key={problemId} problemId={problemId} />;
+}
+
+function RecallCheck({ problemId }: { problemId?: string }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const reviewSaved = (location.state as { reviewSaved?: boolean } | null)?.reviewSaved === true;
   const { progress, isLoading, error, refetch, saveRecall } =
     useProblemProgress();
+  const settingsQuery = useUserSettings();
+  const timingQuery = useSessionTimings();
   const draft = useStore((state) => state.activeRecall);
   const activeSession = useStore((state) => state.activeSession);
+  const reviewOnlyDate = useStore((state) => state.reviewOnlyDate);
+  const [now, setNow] = useState(new Date());
+  const reviewsOnly = reviewOnlyDate === format(now, "yyyy-MM-dd");
+  const queueError = (reviewsOnly || reviewSaved) && (settingsQuery.error || timingQuery.error);
+  const queueLoading = (reviewsOnly || reviewSaved) && (settingsQuery.isLoading || timingQuery.isLoading);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
   const { startRecall, updateRecall, endRecall } = useStore.getState();
   const updateAnswer = useCallback(
     (answer: string) => updateRecall({ answer }),
@@ -52,9 +72,12 @@ export function RecallPage() {
   const closed = useRef(false);
   const comparisonSection = useRef<HTMLElement>(null);
   const recordSection = useRef<HTMLElement>(null);
+  const savedSection = useRef<HTMLElement>(null);
   useEffect(() => {
     if (isLoading || error || !catalogReady) return;
-    const section = draft?.compared || draft?.completion
+    const section = reviewSaved && !draft
+      ? savedSection.current
+      : draft?.compared || draft?.completion
       ? recordSection.current
       : draft?.revealed
         ? comparisonSection.current
@@ -69,7 +92,7 @@ export function RecallPage() {
       observer.observe(comparisonSection.current);
       return () => observer.disconnect();
     }
-  }, [isLoading, error, catalogReady, draft?.revealed, draft?.compared, draft?.completion]);
+  }, [isLoading, error, catalogReady, draft?.revealed, draft?.compared, draft?.completion, draft?.id, reviewSaved, settingsQuery.isLoading, timingQuery.isLoading]);
   const [storageAvailable] = useState(canPersistTimer);
   useEffect(() => {
     void ensureExtendedCatalogLoaded()
@@ -80,22 +103,28 @@ export function RecallPage() {
     if (
       !isLoading &&
       !error &&
+      !queueError &&
+      !queueLoading &&
       catalogReady &&
       problemId &&
       progress[problemId] &&
       !draft &&
       !activeSession &&
+      !reviewSaved &&
       !closed.current
     )
       startRecall(problemId);
   }, [
     isLoading,
     error,
+    queueError,
+    queueLoading,
     catalogReady,
     problemId,
     progress,
     draft,
     activeSession,
+    reviewSaved,
   ]);
   useEffect(() => {
     if (!draft) return;
@@ -192,8 +221,13 @@ export function RecallPage() {
       await saveRecall({ problemId: draft.problemId, ...completion });
       closed.current = true;
       if (useStore.getState().activeRecall?.id === draft.id) endRecall();
-      navigate("/dashboard", {
+      const savedAt = new Date();
+      const continueReviews = useStore.getState().reviewOnlyDate === format(savedAt, "yyyy-MM-dd");
+      setNow(savedAt);
+      navigate(continueReviews ? `/recall/${draft.problemId}` : "/dashboard", {
+        replace: continueReviews,
         state: {
+          reviewSaved: continueReviews,
           studyMessage:
             outcome === "recalled"
               ? "Approach recalled. Your coding check remains separate."
@@ -210,15 +244,15 @@ export function RecallPage() {
     }
   }
 
-  if (error || catalogError)
+  if (error || catalogError || queueError)
     return (
       <QueryErrorBanner
         onRetry={() =>
-          catalogError ? window.location.reload() : void refetch()
+          catalogError || queueError ? window.location.reload() : void refetch()
         }
       />
     );
-  if (isLoading || !catalogReady)
+  if (isLoading || !catalogReady || queueLoading)
     return (
       <p role="status" className="text-muted">
         Loading recall check…
@@ -256,6 +290,53 @@ export function RecallPage() {
         </Link>
       </div>
     );
+  if (reviewSaved && !draft) {
+    const plan = buildStudyPlan({
+      mode: "reviews",
+      progress,
+      settings: settingsQuery.settings,
+      timings: timingQuery.sessionTimings,
+      now,
+    });
+    const nextReview = reviewsOnly ? plan.recallTasks[0] : undefined;
+    const stopMessage = !reviewsOnly
+      ? "Reviews only has ended for today. Return to today’s plan to choose what’s next."
+      : plan.isBlackout || plan.isRestDay
+        ? "Your schedule is paused. No more assignments today."
+        : plan.remainingMinutes === 0
+          ? "Your time target is complete. Pick up your reviews another day."
+          : plan.remainingMinutes < 3
+            ? "There’s less than 3 minutes left in today’s budget. Stop here and pick up your reviews another day."
+            : "No more due reviews for today.";
+    return (
+      <section ref={savedSection} tabIndex={-1} className="recall-workspace recall-complete mx-auto space-y-6 pb-12" aria-label="Review complete">
+        <PageHeader title="Review saved" description="Your answer and time have been recorded." />
+        <p role="status" className="text-sm text-success">Recall saved. Your coding check remains separate.</p>
+        {nextReview ? (
+          <div className="space-y-3 border-y border-line py-5">
+            <p className="register-label">Next recall check / about 3 min</p>
+            <h2 className="text-2xl font-medium tracking-tight">{problemMap[nextReview.problemId].title}</h2>
+            <p className="text-sm text-muted">{plan.remainingMinutes} min left today. Continue when you’re ready, or finish here.</p>
+          </div>
+        ) : <p className="text-body">{stopMessage}</p>}
+        <div className="flex flex-wrap items-center gap-3">
+          {nextReview && (
+            <Button variant="primary" onClick={() => {
+              const startedAt = new Date();
+              setNow(startedAt);
+              if (reviewOnlyDate === format(startedAt, "yyyy-MM-dd"))
+                navigate(`/recall/${nextReview.problemId}`, { replace: true, state: null });
+            }}>
+              Next review
+            </Button>
+          )}
+          <Button variant={nextReview ? "secondary" : "primary"} onClick={() => navigate("/dashboard")}>
+            Finish reviewing
+          </Button>
+        </div>
+      </section>
+    );
+  }
   if (!draft) return <p role="status">Preparing recall check…</p>;
   const pattern = patterns.find((p) => p.id === getPatternForProblem(problem));
   const lesson = pattern
@@ -403,6 +484,7 @@ export function RecallPage() {
             </ol>
           </aside>
           <div className="recall-writing-sheet">
+            {reviewsOnly && <p className="text-sm text-muted mb-3">Reviews only · short written bullets are enough. No full implementation needed.</p>}
             <RecallEditor
               value={draft.answer}
               readOnly={frozen}

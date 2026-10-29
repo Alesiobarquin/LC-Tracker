@@ -45,6 +45,8 @@ around the work. Copper identifies the next action and current location.
   Add these details when the information warrants them, not as decoration.
 - Keep secondary actions compact and quiet. Use restrained Lucide icons for
   navigation or meaning, not repeated oversized icon tiles.
+- Keep Today’s Reviews only toggle beside the date. Explain it through contextual
+  help, settings, and the tour so it does not push the next task down.
 - Preserve the flat surfaces and small corners. Avoid introducing decorative
   gradients, glow, large shadows, pill-shaped section containers, equal-weight
   KPI grids, or repeated feature-card grids into the established compositions.

@@ -35,7 +35,7 @@ describe('backup validation', () => {
   });
 });
 
-it('round-trips original recall, corrections, built-in reference type, and personal code', () => {
+it('round-trips successive recall answers, corrections, exact timings, and personal code', () => {
   const date = '2026-10-06T12:00:00Z';
   const progress = { 'two-sum': { firstSolvedAt: date, lastReviewedAt: date, nextReviewAt: date,
     reviewCount: 0, history: [], retired: false, consecutiveThrees: 0,
@@ -44,10 +44,15 @@ it('round-trips original recall, corrections, built-in reference type, and perso
       nextRecallAt: date, nextCodingAt: date, lapses: 0, recallHistory: [{
         id: '00000000-0000-4000-8000-000000000001', date, elapsedSeconds: 177,
         outcome: 'partial', answer: 'Original from memory', revisedAnswer: 'Corrected after comparing', checkedAgainst: 'solution',
+      }, {
+        id: '00000000-0000-4000-8000-000000000002', date: '2026-10-06T12:03:00Z', elapsedSeconds: 133,
+        outcome: 'recalled', answer: 'A later original answer', checkedAgainst: 'notes',
       }],
     } } };
   const sessionTimings = [{ id: '00000000-0000-4000-8000-000000000001', problemId: 'two-sum',
-    category: 'Arrays & Hashing', date, elapsedSeconds: 177, sessionType: 'recall', rating: 3 }];
+    category: 'Arrays & Hashing', date, elapsedSeconds: 177, sessionType: 'recall', rating: 3 },
+  { id: '00000000-0000-4000-8000-000000000002', problemId: 'two-sum', category: 'Arrays & Hashing',
+    date: '2026-10-06T12:03:00Z', elapsedSeconds: 133, sessionType: 'recall', rating: 4 }];
   const backup = validateBackup(JSON.parse(JSON.stringify({ formatVersion: 2, progress, sessionTimings })));
   expect(backup.progress).toEqual(progress);
   expect(backup.sessionTimings).toEqual(sessionTimings);

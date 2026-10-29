@@ -78,6 +78,100 @@ describe("capacity and backlog planning", () => {
       .slice(0, 43)
       .map((p) => [p.id, base()]),
   );
+  it("uses the remaining budget for reviews instead of reserving an unfamiliar coding block", () => {
+    const params = { progress: backlog, settings: settings(), now };
+    const full = buildStudyPlan(params);
+    expect(full.mainTask?.kind).toBe("variant");
+    expect(full.recallTasks).toHaveLength(0);
+    const reviews = buildStudyPlan({ ...params, mode: "reviews" });
+    expect(reviews.recallTasks).toHaveLength(10);
+    expect(reviews.mainTask).toBeNull();
+    expect(reviews.syntaxCards).toEqual([]);
+    expect(reviews.plannedMinutes).toBe(30);
+    expect(reviews.recallTasks[0].explanation).toMatchObject({
+      mode: "reviews",
+      recallAllowance: 30,
+      recallMinutesAvailable: 30,
+      unfamiliarReservation: false,
+    });
+    expect(buildStudyPlan({ ...params, mode: "full" })).toEqual(full);
+  });
+  it("keeps review time in the shared budget after the normal recall allowance is used", () => {
+    const timings: SessionTiming[] = [{
+      rating: 4, id: "recall-budget", problemId: "not-in-pool", category: "Other",
+      date: now.toISOString(), elapsedSeconds: 9 * 60, sessionType: "recall",
+    }, {
+      rating: 4, id: "coding-budget", problemId: "another-outside-pool", category: "Other",
+      date: now.toISOString(), elapsedSeconds: 5 * 60, sessionType: "review",
+    }];
+    const params = { progress: backlog, settings: settings(), timings, activeSeconds: 61, activeRecallSeconds: 61, now };
+    const reviews = buildStudyPlan({ ...params, mode: "reviews" });
+    expect(reviews.spentMinutes).toBe(16);
+    expect(reviews.remainingMinutes).toBe(14);
+    expect(reviews.recallTasks).toHaveLength(4);
+    expect(reviews.plannedMinutes).toBe(12);
+    expect(reviews.recallTasks[0].explanation.recallUsed).toBe(11);
+    expect(buildStudyPlan(params).recallTasks).toHaveLength(0);
+  });
+  it.each([0, 1, 2, 3, 5, 30, 120])("fits review-only work into a %i-minute budget", (minutes) => {
+    const plan = buildStudyPlan({ progress: backlog, settings: settings(minutes), mode: "reviews", now });
+    expect(plan.recallTasks).toHaveLength(Math.min(Object.keys(backlog).length, Math.floor(minutes / 3)));
+    expect(plan.mainTask).toBeNull();
+    expect(plan.plannedMinutes).toBe(plan.recallTasks.length * 3);
+    expect(plan.plannedMinutes).toBeLessThanOrEqual(minutes);
+  });
+  it("does not replace an empty review queue with learning, coding, or syntax", () => {
+    const progress = { "two-sum": { ...base(), studyState: {
+      ...getStudyState(base()), nextRecallAt: addDays(now, 1).toISOString(),
+    } } };
+    const plan = buildStudyPlan({
+      progress, settings: settings(), mode: "reviews", now,
+      syntaxProgress: { example: { lastPracticedAt: old, nextReviewAt: old, confidenceRating: 3, reviewCount: 1 } },
+    });
+    expect(plan.eligibleRecallCount).toBe(0);
+    expect(plan.recallTasks).toEqual([]);
+    expect(plan.mainTask).toBeNull();
+    expect(plan.syntaxCards).toEqual([]);
+    expect(plan.plannedMinutes).toBe(0);
+    expect(buildStudyPlan({ progress: {}, settings: settings(), mode: "reviews", now }).plannedMinutes).toBe(0);
+  });
+  it("excludes swapped, recorded, and inaccessible reviews without mutating the source data", () => {
+    const ids = Object.keys(backlog);
+    const premium = allProblems.find(isProblemPremium)!;
+    const progress = { ...backlog, [premium.id]: base(), [ids[2]]: applyRecall(base(), ids[2], recall()) };
+    const before = JSON.stringify(progress);
+    const timings: SessionTiming[] = [{
+      rating: 4, id: "already-reviewed", problemId: ids[0], category: problemMap[ids[0]].category,
+      date: now.toISOString(), elapsedSeconds: 60, sessionType: "recall",
+    }];
+    const params = { progress, settings: settings(120), mode: "reviews" as const, timings, excludedIds: [ids[1]], now };
+    const plan = buildStudyPlan(params);
+    const selected = plan.recallTasks.map((task) => task.problemId);
+    expect(selected).not.toContain(ids[0]);
+    expect(selected).not.toContain(ids[1]);
+    expect(selected).not.toContain(ids[2]);
+    expect(selected).not.toContain(premium.id);
+    expect(new Set(selected).size).toBe(selected.length);
+    expect(buildStudyPlan(params)).toEqual(plan);
+    expect(JSON.stringify(progress)).toBe(before);
+  });
+  it("keeps reviews paused for rest days, inclusive breaks, active sessions, and exhausted time", () => {
+    const rest = settings();
+    rest.studySchedule.restDay = now.getDay();
+    const blackout = settings();
+    blackout.studySchedule.blackoutDates = [{ start: "2026-10-06", end: "2026-10-06" }];
+    for (const params of [
+      { settings: rest },
+      { settings: blackout },
+      { settings: settings(), hasActiveSession: true },
+      { settings: settings(), activeSeconds: 30 * 60 },
+    ]) {
+      const plan = buildStudyPlan({ progress: backlog, mode: "reviews", now, ...params });
+      expect(plan.recallTasks).toEqual([]);
+      expect(plan.mainTask).toBeNull();
+      expect(plan.plannedMinutes).toBe(0);
+    }
+  });
   it("explains why spent recall allowance leaves successive coding blocks", () => {
     const timings: SessionTiming[] = [{
       rating: 4, id: "recall-budget", problemId: "not-in-pool", category: "Arrays & Hashing",

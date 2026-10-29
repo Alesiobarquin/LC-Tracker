@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Settings as SettingsIcon,
   RefreshCw,
@@ -134,7 +135,7 @@ export function Settings() {
             <details className="settings-policy">
               <summary>How the planner uses evidence</summary>
               <p className="text-xs text-muted leading-relaxed mt-3">
-                All modes mix recall, independent coding, and new learning.
+                The full plan mixes recall, independent coding, and new learning.
                 Repeated measured failures shift ordinary blocks toward repair.
                 A related unfamiliar check keeps a place every seven days when
                 an accessible problem is available, including near an interview.
@@ -267,9 +268,17 @@ export function Settings() {
               Daily schedule
             </h2>
             <p className="text-sm text-muted">
-              About 30% of your budget is reserved for brief recall. The main
-              block alternates learning with implementation checks. Recorded
-              study time reduces the remaining budget.
+              In the full plan, about 30% of your budget is reserved for brief
+              recall. The main block alternates learning with implementation
+              checks. Recorded study time reduces the remaining budget.
+            </p>
+            <p className="text-sm text-muted">
+              Have a lighter day? Choose{" "}
+              <Link to="/dashboard" className="text-accent underline">
+                Reviews only on Today
+              </Link>{" "}
+              to use the time left for familiar problems. Your choice resets
+              tomorrow; your schedule stays the same.
             </p>
           </div>
           <div className="settings-section-fields space-y-5">

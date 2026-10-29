@@ -190,7 +190,7 @@ export const RecallEditor = memo(function RecallEditor({
           indentWithTab={!readOnly}
           minHeight="280px"
           maxHeight="32rem"
-          placeholder="Write the code you remember. Use plain English for the rest."
+          placeholder="Recall the approach in a few bullets. Add pseudocode or code if it helps."
           basicSetup={basicSetup}
         />
         <div className="recall-editor-status">

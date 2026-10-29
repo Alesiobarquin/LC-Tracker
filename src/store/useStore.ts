@@ -2,13 +2,15 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ActiveSession, RecallDraft } from "../types";
 import { safeUUID } from "../utils/uuid";
-import { timerStorage } from "../lib/safeStorage";
+import { preferenceStorage, timerStorage } from "../lib/safeStorage";
 import { recallAttemptSchema } from "../utils/studySchemas";
 import { isTimeSpentDraft } from "../utils/sessionTime";
 
 interface UIState {
   sessionUserId: string | null;
   setSessionUser: (userId: string | null) => void;
+  reviewOnlyDate: string | null;
+  setReviewOnlyDate: (date: string | null) => void;
   activeSession: ActiveSession | null;
   activeRecall: RecallDraft | null;
   startRecall: (problemId: string) => void;
@@ -102,6 +104,7 @@ export const useStore = create<UIState>()(
       setSessionUser: (userId) =>
         set((state) => ({
           sessionUserId: userId,
+          reviewOnlyDate: userId ? preferenceStorage.getItem(`lc-tracker-review-only:${userId}`) : null,
           activeSession:
             !userId ||
             (state.activeSession?.userId &&
@@ -119,6 +122,12 @@ export const useStore = create<UIState>()(
                 : null,
           sessionReturnTo: !userId ? null : state.sessionReturnTo,
         })),
+      reviewOnlyDate: null,
+      setReviewOnlyDate: (date) => {
+        const userId = get().sessionUserId;
+        if (userId) preferenceStorage.setItem(`lc-tracker-review-only:${userId}`, date ?? "");
+        set({ reviewOnlyDate: date });
+      },
       activeSession: null,
       activeRecall: null,
       startRecall: (problemId) =>

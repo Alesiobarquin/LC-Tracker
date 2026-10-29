@@ -17,12 +17,15 @@ export function RecommendationDialog({ task, onClose }: {
   const nextCoding = task?.kind === "learning" ? "a new coding question"
     : task?.kind === "variant" ? "an unfamiliar coding check"
     : "a coding review";
-  const recallTitle = recallUsed ? "Recall done for today"
+  const recallTitle = details?.mode === "reviews" ? "Reviews only"
+    : recallUsed ? "Recall done for today"
     : recallReserved ? "Coding time protected"
     : recallTooSmall ? "No room for another recall"
     : details?.recallEligibleCount === 0 ? "No other recall checks due"
     : "Room for recall, too";
-  const recallDetail = recallUsed ? (
+  const recallDetail = details?.mode === "reviews"
+    ? `${details.recallMinutesAvailable} min available for due reviews. The full plan’s 30% recall allowance does not apply in this mode. Coding checks remain separate.`
+    : recallUsed ? (
     <>You’ve spent <strong className="font-semibold text-foreground">{details.recallUsed} min on recall today</strong>, using your {details.recallAllowance} min allowance. Next: {nextCoding}.</>
   )
     : recallReserved ? "Up to 35 min reserved before recall."

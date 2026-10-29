@@ -27,6 +27,7 @@ const surfaces = [
   { name: "onboarding", path: "/onboarding", heading: "Welcome to LC Tracker" },
   { name: "landing", path: "/", heading: "Know what to solve next." },
   { name: "today", path: "/dashboard", heading: "Today’s study plan" },
+  { name: "reviews", path: "/dashboard", heading: "Today’s study plan" },
   { name: "library", path: "/library", heading: "Problem Library" },
   { name: "patterns", path: "/patterns", heading: "Pattern learning" },
   { name: "lesson", path: "/patterns/two-pointers", heading: /Two Pointer/i },
@@ -108,6 +109,20 @@ for (const theme of ["light", "dark"] as const) {
           page.getByRole("heading", { name: surface.heading }).first(),
         ).toBeVisible();
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+        if (surface.name === "reviews") {
+          const mode = page.getByRole("button", { name: "Reviews only", exact: true });
+          await expect(mode).toHaveAccessibleDescription(/Review familiar problems using today’s remaining time/);
+          await mode.focus();
+          await page.keyboard.press("Space");
+          await expect(mode).toHaveAttribute("aria-pressed", "true");
+          await expect(mode).toBeFocused();
+          await mode.evaluate((element) => element.blur());
+          const nextAction = await page.getByRole("region", { name: "Your next action", exact: true }).boundingBox();
+          expect(nextAction?.y).toBeLessThan(width === 390 ? 360 : 300);
+          await expect(page.getByRole("button", { name: "Start review", exact: true })).toBeInViewport();
+          await expect(page.getByRole("button", { name: "Start practice block" })).toHaveCount(0);
+          await expect(page.getByRole("heading", { name: "Main practice block" })).toHaveCount(0);
+        }
         if (surface.name === "syntax") {
           const row = await page.locator(".syntax-card").first().boundingBox();
           const book = await page.locator(".syntax-book").boundingBox();

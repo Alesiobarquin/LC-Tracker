@@ -30,10 +30,20 @@ there is no automatic judge or AI grader in this release.
 
 `src/utils/study.ts` owns task selection and allocation. Recorded timing and uncommitted active session time reduce
 the daily budget without double counting a saved timing ID. Each problem appears at most once in a plan, across all task
-kinds. The three-minute recall allocation is approximately 30% of the daily
-budget minus recall time already recorded. Selection first mixes patterns, then
+kinds. In Full plan, the three-minute recall allocation is approximately 30% of
+the daily budget minus recall time already recorded. Selection first mixes patterns, then
 fills available recall capacity. Rest days and inclusive scheduled breaks have
 no automatic assignments. Skipped assignments affect the current view only.
+
+Today also offers Reviews only for a lighter session. This temporary local choice
+resets on the next calendar day and does not change the saved schedule. It uses
+the remaining daily budget for due, previously encountered problems, mixing
+patterns with the same eligibility and deduplication rules. It assigns no coding,
+new learning, unfamiliar checks, or syntax cards, and does not reserve time for
+an unfamiliar block. Each recall allocation still needs three available minutes;
+actual recorded and active time reduce the shared budget in either mode. Queue
+or budget exhaustion ends the review sequence without adding a coding task.
+Rest days, breaks, and saved active sessions still pause new assignments.
 
 Sunday, Monday, Wednesday, and Friday normally build new coverage, except the
 maintenance day. Within 30 days of an upcoming interview, ordinary main blocks
@@ -54,7 +64,7 @@ two currently independent representatives. Checks rotate categories and prefer
 curated NeetCode 250 problems, then related extended-catalog items when curated
 choices are exhausted. No finite catalog can supply unfamiliar problems forever.
 
-The unfamiliar block reserves up to 35 minutes before recall warm-ups, so a small
+In Full plan, the unfamiliar block reserves up to 35 minutes before recall warm-ups, so a small
 daily budget can go entirely to the check. Dashboard and timer hide its topic and difficulty cues. The user codes on LeetCode without
 notes or hints, checks tests, and explains correctness, complexity, and edge cases.
 The timer marks the end of the block; it never auto-grades or auto-saves. A shorter
@@ -112,6 +122,13 @@ reloads and retry with the same operation ID. A completion is fixed once saving
 starts so a lost response cannot change its payload. Recall timers support
 pause/resume and pause when leaving the page. See [reference provenance and
 verification](problem-references.md).
+
+Reviews only reuses this written retrieve, compare, and record flow; short bullets
+are sufficient, and implementation is not required. A confirmed save offers Next
+review or Finish reviewing instead of returning to Today after every problem.
+An unconfirmed save must retain its frozen completion and operation ID before
+another review can start. Successful recall still changes only recall evidence
+and its interval, leaving the coding check separate.
 
 Before saving a coding or recall outcome, time spent can be entered in minutes
 and seconds to correct a timer left running. Edits survive reloads and reduce

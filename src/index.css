@@ -660,6 +660,19 @@ button:active:not(:disabled),
 .today-heading > div:first-child > div {
   font: 11px var(--font-mono);
 }
+.today-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.today-mode {
+  font-family: var(--font-sans);
+}
+.today-mode[aria-pressed="true"] {
+  color: var(--palette-accent);
+  background: var(--palette-muted-surface);
+}
 .plan-track {
   padding-left: 15px;
 }
@@ -1400,6 +1413,9 @@ button:active:not(:disabled),
 }
 .recall-workspace {
   max-width: 67rem;
+}
+.recall-complete:focus-visible {
+  outline: none;
 }
 .attempt-page-heading {
   padding-bottom: 0;

@@ -23,5 +23,16 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "src",
+    "api",
+    "server",
+    "e2e",
+    "scripts",
+    "vite-plugins",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
 }

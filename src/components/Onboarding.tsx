@@ -132,6 +132,8 @@ const StepLeetCode: React.FC<{
       <div className="space-y-3">
         <div className="onboarding-connect-row flex gap-2">
           <input
+            id="onboarding-leetcode-username"
+            aria-label="LeetCode username"
             type="text"
             value={username}
             onChange={(e) => {
@@ -270,6 +272,8 @@ const StepPlan: React.FC<{
           Interview date (optional)
         </span>
         <input
+          id="onboarding-interview-date"
+          aria-label="Interview date"
           type="date"
           value={state.targetInterviewDate}
           onChange={(e) => onChangeDate(e.target.value)}
@@ -313,6 +317,8 @@ const StepPlan: React.FC<{
           Weekday study minutes ({state.weekdayMinutes})
         </span>
         <input
+          id="onboarding-weekday-minutes"
+          aria-label="Weekday study minutes"
           type="range"
           min={15}
           max={120}

@@ -20,14 +20,17 @@ export default defineConfig(({ mode, command }) => {
           manualChunks(id) {
             if (id.includes('leetcodeExtendedCatalog.json')) return 'extended-catalog';
             if (id.includes('leetcodePremiumStatus.json')) return 'premium-status';
+            if (id.includes('leetcodeProblemNumbers.json')) return 'problem-numbers';
             if (id.includes('node_modules/@clerk')) return 'clerk';
+            if (id.includes('node_modules/@supabase')) return 'supabase';
+            if (id.includes('node_modules/zod')) return 'zod';
+            if (id.includes('node_modules/date-fns')) return 'date-fns';
             if (id.includes('node_modules/@codemirror') || id.includes('node_modules/@uiw/react-codemirror')) {
               return 'codemirror';
             }
             if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) {
               return 'motion';
             }
-            if (id.includes('node_modules/recharts')) return 'recharts';
           },
         },
       },

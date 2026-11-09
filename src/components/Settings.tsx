@@ -587,6 +587,7 @@ export function Settings() {
             </div>
             <input
               ref={importInput}
+              aria-label="Import study backup file"
               className="hidden"
               type="file"
               accept="application/json,.json"

@@ -25,11 +25,12 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { getPhase } from "../utils/dateUtils";
 import { useUserSettings } from "../hooks/useUserData";
 import { useUser, useClerk } from "@clerk/react";
-import { FeedbackModal } from "./FeedbackModal";
-import { FeaturesModal } from "./FeaturesModal";
 import { Logo } from "./Logo";
 import { Modal } from "./ui/Modal";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+
+const FeedbackModal = React.lazy(() => import("./FeedbackModal").then(m => ({ default: m.FeedbackModal })));
+const FeaturesModal = React.lazy(() => import("./FeaturesModal").then(m => ({ default: m.FeaturesModal })));
 import {
   FEATURES_MODAL_STORAGE_KEY,
   FEATURES_MODAL_VERSION,
@@ -499,14 +500,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Absolute Viewport Modal (fixes scrolling issues) */}
       {createPortal(
         <>
-          <FeaturesModal
-            isOpen={isFeaturesOpen}
-            onClose={() => setIsFeaturesOpen(false)}
-          />
-          <FeedbackModal
-            isOpen={isFeedbackOpen}
-            onClose={() => setIsFeedbackOpen(false)}
-          />
+          <React.Suspense fallback={null}>
+            {isFeaturesOpen && (
+              <FeaturesModal
+                isOpen={isFeaturesOpen}
+                onClose={() => setIsFeaturesOpen(false)}
+              />
+            )}
+            {isFeedbackOpen && (
+              <FeedbackModal
+                isOpen={isFeedbackOpen}
+                onClose={() => setIsFeedbackOpen(false)}
+              />
+            )}
+          </React.Suspense>
 
           <Modal
             isOpen={!!authModalTarget}

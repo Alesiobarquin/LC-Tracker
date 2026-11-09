@@ -1,13 +1,10 @@
 import React, { Suspense, useEffect, lazy } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
 import { useUser, AuthenticateWithRedirectCallback } from '@clerk/react';
 import { useUserSettings } from './hooks/useUserData';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { TermsOfService } from './components/TermsOfService';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { isAdminUser } from './utils/adminAuth';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -17,6 +14,9 @@ import { userDataQueryKeys } from './lib/userDataQueryKeys';
 import { PublicPageFallback } from './components/PublicPageFallback';
 import { NotFound } from './components/NotFound';
 
+const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy').then((m) => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./components/TermsOfService').then((m) => ({ default: m.TermsOfService })));
 const ExplanationDirectory = lazy(() => import('./components/ExplanationDirectory').then(m => ({ default: m.ExplanationDirectory })));
 const StudyPlanGuide = lazy(() => import('./components/StudyPlanGuide').then(m => ({ default: m.StudyPlanGuide })));
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));
@@ -87,8 +87,8 @@ export default function App() {
   }, [path]);
 
   // Public routes — no auth needed
-  if (path === '/privacy') return <PrivacyPolicy />;
-  if (path === '/terms') return <TermsOfService />;
+  if (path === '/privacy') return <Suspense fallback={<RouteFallback />}><PrivacyPolicy /></Suspense>;
+  if (path === '/terms') return <Suspense fallback={<RouteFallback />}><TermsOfService /></Suspense>;
   if (path === '/sso-callback') return <AuthenticateWithRedirectCallback />;
 
   // Landing: render immediately so guests never sit on an empty dark splash
@@ -131,7 +131,7 @@ export default function App() {
 
   // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
   if (!user) {
-    if (path === '/login') return <Login />;
+    if (path === '/login') return <Suspense fallback={<RouteFallback />}><Login /></Suspense>;
     if (!isPublicAppRoute) {
       const isPrivateRoute = /^\/(dashboard|study-plan|analytics|settings|onboarding|admin|timer|recall)(\/|$)/.test(path);
       return isPrivateRoute ? <Navigate to="/" replace /> : <NotFound />;

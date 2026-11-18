@@ -124,6 +124,23 @@ as the implementation reference; `docs/interface-design.md` explains why it look
 that way. Ignored `test-results/art-review` screenshots may exist locally, but
 agents on a fresh checkout should generate their own fixture screenshots.
 
+### Study Chat
+
+Use `src/coach/CoachHost.tsx` for the drawer and full-page `/coach` surface,
+`CoachPanel.tsx` for the conversation, and `CoachSetup.tsx` for the shared
+Settings and optional onboarding form. Keep user messages right-aligned and
+assistant replies left-aligned with the Study Chat icon. Preserve Alt+Shift+C,
+Escape and launcher focus restoration, Enter to send, Shift+Enter for a new
+line, and IME composition.
+
+Keep the funding label and provider disclosure by the composer. At a free limit,
+show the reset in the learner’s local time and link to
+`/settings#section-study-chat`. Keep the draft available when a request is
+rejected. A failed availability check belongs to the optional chat surface and
+must leave onboarding usable. For changes here, run
+`npm run test:e2e -- e2e/coach*.spec.ts` and check the drawer, full-page view, and
+provider setup at desktop and mobile widths in both themes. [Interface rationale](../../../docs/interface-design.md)
+
 ## Responsive behavior and interaction
 
 Preserve the intended reading order, not just the desktop layout squeezed smaller.

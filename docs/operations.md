@@ -33,6 +33,75 @@ PLAYWRIGHT_BASE_URL=https://lc-tracker.app npm run test:e2e -- e2e/smoke.spec.ts
 
 These public checks do not perform a real sign-in or authenticated database write.
 
+## Free Study Chat and personal keys
+
+**Rollout status on November 18, 2026.** Production supports built-in shortcuts
+and personal OpenRouter keys. The hosted allowance and direct Gemini and Claude
+connections passed local fixture checks. Production activation requires the
+migration, server configuration, and staged verification. The project owner
+still needs to supply the shared prepaid key and the separate owner key.
+`.env.example` leaves both key values blank. Local previews use scripted replies.
+
+Apply `20261118000000_coach_turns.sql` before enabling server-side chat. The
+private ledger holds turn metadata, reservations and charges for 35 days. It
+tracks usage by UTC day and month, outside learner backups.
+
+1. In the linked Vercel project, set the server-only `COACH_ALLOWED_ORIGINS`
+   to the exact allowed app origins, separated by commas. Use a separate list
+   and isolated Supabase and Clerk instances for testing. Set
+   `COACH_SUPABASE_SECRET_KEY` to a dedicated Supabase server secret.
+2. For free access, set `COACH_OPENROUTER_API_KEY` to a dedicated key on prepaid
+   OpenRouter with auto-top-up off. This one server key funds the free allowance
+   for every eligible signed-in account. Set an OpenRouter key limit as a second
+   spending control. Set `COACH_MONTHLY_BUDGET_MICROS=5000000` for a $5 monthly
+   inference cap. The shared daily cap is the lesser of $1 or the configured
+   monthly cap. Each signed-in account gets two questions per UTC day. OpenRouter
+   credit purchase fees are separate from this inference cap.
+3. For the owner, set `COACH_OWNER_USER_ID` to the verified Clerk user ID. Set
+   `COACH_OWNER_OPENROUTER_API_KEY` to a different key with separate funding.
+   The server compares the verified Clerk subject against `COACH_OWNER_USER_ID`.
+   Once this ID is set, hosted access for that account requires its separate key.
+   The owner uses the provider's limits without an app-funded allowance. Keep
+   the balances separate so owner usage cannot drain public credits.
+4. Keep these credentials in Vercel server environment variables. Use
+   `COACH_HOSTED_ENABLED=true` and redeploy after the ledger and keys are
+   ready. Confirm a signed-in test user can use both free questions, sees the
+   next reset, and can still use the built-in shortcuts. Confirm the owner label
+   and billing in OpenRouter Activity. Run a staged `/api/health` and
+   `/api/leetcode-ac` smoke check before promotion.
+
+The hosted route reserves $0.004 per question for intent selection and optional
+synthesis. The reservation is based on the pinned model's price ceilings,
+bounded text and output, and zero per-request fees. The ledger settles reported
+costs upward to the next microdollar. When cost is unavailable, it keeps the
+per-call ceiling. A lost settlement keeps the original hold. An unexpected charge
+above the per-call ceiling blocks further free reservations in the current
+month. Inspect `coach_private.turns` and OpenRouter Activity for reconciliation.
+Never log request bodies, headers, provider keys or chat content.
+[OpenRouter usage and spend controls](https://openrouter.ai/blog/tutorials/team-spend-controls-setup/)
+
+Set `COACH_HOSTED_ENABLED=false` and redeploy to stop hosted access. Disable the
+dedicated OpenRouter keys for an immediate stop across all deployments. The
+ledger prunes expired rows on new admissions. If the route is left inactive,
+the database owner can delete rows older than 35 days. If hosted accounting is
+lost during recovery, keep hosted access off until the current billing period's
+usage is reconciled.
+
+The same authenticated route supports personal Gemini and Claude keys once the
+server-only origins and ledger secret are set, independent of the hosted flag.
+They use Gemini 3.1 Flash-Lite and Claude Haiku 4.5 and retain provider rate and
+spending limits. Use a billing-enabled Gemini project or a Claude Console key
+scoped to a workspace. Personal OpenRouter keys go directly from the tab to
+OpenRouter and use GPT-4.1 Nano on Azure. Direct OpenAI key entry is pending a
+supported connection flow.
+
+`npm run test:e2e -- e2e/coach*.spec.ts` uses scripted replies and fixture
+credentials. The local Vite fixture exercises the chat UI without a live model
+call. `npm run test:db` checks the private ledger, and `npm run test:api` races
+authenticated requests against an isolated PostgREST instance at the budget
+boundary. Check live provider replies and billed usage separately with synthetic
+study data on a protected deployment.
+
 ## Email and password sign-in
 
 In the existing LC Tracker Clerk instance, go to **User & authentication**.

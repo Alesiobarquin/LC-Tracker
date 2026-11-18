@@ -1,6 +1,6 @@
 ---
 name: lc-tracker-reliability
-description: Verify LC Tracker persistence migrations, retry handling, backup recovery, and deployment readiness when changing user data or fixing reliability regressions. Ordinary styling changes do not need the database workflow.
+description: Verify LC Tracker persistence migrations, retry handling, backup recovery, Study Chat allowances, and deployment readiness. Ordinary styling changes do not need the database workflow.
 ---
 
 # LC Tracker reliability
@@ -62,3 +62,23 @@ Export uses `export_user_data` under the same lock as writes; restore validates
 all records and commits them together. Preserve all session timings, including
 ones outside the usual 90-day analytics window. Ignore imported ownership and
 revision metadata. Do not infer ratings or rewrite user data during reads.
+
+## Study Chat accounting
+
+Read the [Study Chat runbook](../../../docs/operations.md#free-study-chat-and-personal-keys)
+before changing funding, credentials, or release configuration. `api/coach.ts`
+verifies Clerk identity and origin. The owner exemption uses a server-only
+Clerk user ID and a separately funded key. Keep public and owner balances
+separate and keep the route disabled until the migration and keys are ready.
+
+The private ledger reserves the cost of the whole turn before inference.
+Preserve the turn UUID after an unconfirmed response, bind synthesis to the
+same subject and funding choice, and claim each step once. Keep unknown costs
+reserved. The ledger stores accounting metadata outside learner backups.
+Keep prompts, provider keys, and raw replies out of it and out of logs.
+
+Run `supabase/tests/coach.sql` through `npm run test:db` and the budget-boundary
+race through `npm run test:api`. The function and browser checks live in
+`server/coachFunction.test.ts` and `e2e/coach-access.spec.ts`. Fixture tests cover
+admission, retries, and the upgrade flow. A funded provider and staging account
+are needed to check live charges.

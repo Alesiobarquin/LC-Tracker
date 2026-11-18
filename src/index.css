@@ -90,6 +90,7 @@
   --palette-code-number: #c2410c;
   --palette-code-operator: #007782;
   --palette-code-property: #a11b64;
+  --palette-code-selection: #c9ddef;
 }
 
 :root[data-theme="dark"] {
@@ -120,6 +121,7 @@
   --palette-code-number: #ff9862;
   --palette-code-operator: #36d6cf;
   --palette-code-property: #ff82c3;
+  --palette-code-selection: #354d65;
 }
 
 @theme inline {

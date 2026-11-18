@@ -19,6 +19,7 @@ test("Study chat setup is optional and the final step launches without a key", a
     return route.fulfill({ json: path.endsWith("/user_settings") ? settings : [] });
   });
   const modelRequests: string[] = [];
+  await page.route("**/api/coach", (route) => route.fulfill({ status: 503, json: { code: "disabled" } }));
   await page.route("**/__coach_fixture", (route) => {
     modelRequests.push(route.request().url());
     return route.abort();
@@ -31,11 +32,11 @@ test("Study chat setup is optional and the final step launches without a key", a
   await continueSetup.click();
 
   const chat = page.getByRole("region", { name: "Study chat Optional" });
-  await expect(chat).toContainText("plan and evidence shortcuts without a key");
+  await expect(chat).toContainText("Plan and evidence shortcuts work without a key");
   await expect(chat).toContainText("later under Study chat in Settings");
   const key = chat.getByLabel("OpenRouter API key", { exact: true });
   await expect(key).toBeHidden();
-  await chat.getByText("Set up Study chat", { exact: true }).click();
+  await chat.getByText("Connect a provider", { exact: true }).click();
   await expect(key).toBeVisible();
   await expect(key).toHaveAttribute("type", "password");
   await expect(chat.getByRole("button", { name: "Connect OpenRouter" })).toBeDisabled();

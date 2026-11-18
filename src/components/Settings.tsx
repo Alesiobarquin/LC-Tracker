@@ -710,7 +710,7 @@ export function Settings() {
         >
           <div className="settings-section-intro space-y-3">
             <h2 id="study-chat-settings-heading" className="text-lg font-semibold text-foreground">Study chat</h2>
-            <p className="text-sm text-muted">Use the study plan and progress shortcuts without a key. Connect OpenRouter to ask custom questions about your practice.</p>
+            <p className="text-sm text-muted">Ask about your practice or use built-in shortcuts to work with your study plan and progress.</p>
           </div>
           <div className="settings-section-fields">
             <CoachSetup />

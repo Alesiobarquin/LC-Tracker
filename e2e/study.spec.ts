@@ -436,6 +436,30 @@ test('recall editor supports IDE keys and keeps code mixed with plain English th
   await expect(answer).toContainText('count this run in plain English');
 });
 
+for (const theme of ['light', 'dark']) {
+  for (const width of [1440, 390]) {
+    test(`recall selection stays visible over comments in ${theme} at ${width}px`, async ({ page }, testInfo) => {
+      await fixture(page);
+      await page.setViewportSize({ width, height: 1000 });
+      await page.addInitScript(theme => localStorage.setItem('lc-tracker-theme', theme), theme);
+      await page.goto('/recall/two-sum');
+      const answer = page.getByLabel('Your attempt · explanation or pseudocode');
+      await answer.fill('# Check complements before inserting\nreturn "matching index"');
+      await answer.press('ControlOrMeta+Home');
+      await answer.press('Shift+End');
+      const selection = page.locator('.recall-editor .cm-selectionBackground').first();
+      await expect(selection).toBeVisible();
+      await expect(selection).toHaveCSS('background-color', theme === 'light' ? 'rgb(201, 221, 239)' : 'rgb(53, 77, 101)');
+      // An opaque active-line background hides the selection underneath it.
+      await expect(page.locator('.recall-editor .cm-activeLine')).toHaveCSS('background-color', /(?:rgba\([^)]*, 0\.3\)|color\([^)]*\/ 0\.3\))/);
+      await page.screenshot({ path: testInfo.outputPath('comment-selection.png') });
+      await answer.press('ControlOrMeta+a');
+      await expect.poll(() => page.locator('.recall-editor .cm-selectionBackground:visible').count()).toBeGreaterThanOrEqual(2);
+      await page.screenshot({ path: testInfo.outputPath('multiline-selection.png') });
+    });
+  }
+}
+
 test('recall editor supports both Windows redo shortcuts', async ({ page }) => {
   await fixture(page);
   await page.addInitScript(() => Object.defineProperty(navigator, 'platform', { value: 'Win32' }));

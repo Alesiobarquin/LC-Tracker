@@ -8,6 +8,21 @@ Review planning runs in the browser; this repository has no scheduled tutor or
 reminder delivery service. Read `docs/reliability-review.md` for the service map
 and `docs/operations.md` for migration, verification, and rollback instructions.
 
+## Study Chat
+
+- Chat and Today share `src/hooks/useTodayPlan.ts` and existing workspace actions.
+  Keep tool availability tied to the active screen, owner, and session. Reuse
+  native handlers and confirm model-proposed writes in the UI. Live state updates
+  and built-in commands use zero provider calls.
+- Keep personal keys and transcripts in account-scoped tab memory. Only send
+  bounded questions, recent context, and explicit `modelData` projections to
+  the selected provider. Preserve the funding choice across both model calls.
+- Hosted availability and spend are server-side. Read the
+  [Study Chat runbook](docs/operations.md#free-study-chat-and-personal-keys)
+  before enabling it. A passing fixture or example environment file provides no
+  production credentials. Keep provider and Supabase secrets out of browser
+  environment variables and logs.
+
 ## Data changes
 
 - Keep user-data reads and writes in `src/services/userData.ts`; hooks in

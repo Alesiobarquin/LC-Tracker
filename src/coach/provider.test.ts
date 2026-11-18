@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveSession } from '../types';
 import { localCoachIntent } from './localIntent';
-import { chooseCoachIntent, COACH_ENDPOINT, COACH_FIXTURE, summarizeCoachEvidence } from './provider';
+import { chooseCoachIntent, COACH_ENDPOINT, COACH_FIXTURE, summarizeCoachEvidence, type CoachTurn } from './provider';
 
 const tools = [
   { name: 'today_plan', description: 'Read today', kind: 'read' as const },
@@ -11,6 +11,8 @@ const tools = [
 function reply(content: unknown) {
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }));
 }
+
+const openRouterTurn = (key = ''): CoachTurn => ({ id: 'test-turn', source: { provider: 'openrouter', key } });
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -23,11 +25,11 @@ describe('Study chat provider boundary', () => {
       reply({ calls: [{ name: 'today_plan', arguments: '{}' }], clarification: '' }));
     vi.stubGlobal('fetch', fakeFetch);
     const key = 'sk-or-v1-test-key';
-    const result = await chooseCoachIntent('Can you explain today?', [], tools, key, new AbortController().signal);
+    const result = await chooseCoachIntent('Can you explain today?', [], tools, openRouterTurn(key), new AbortController().signal);
     expect(result.calls).toEqual([{ name: 'today_plan', args: {} }]);
     const [url, init] = fakeFetch.mock.calls[0];
     expect(url).toBe(COACH_ENDPOINT);
-    expect(init.headers).toMatchObject({ Authorization: `Bearer ${key}` });
+    expect(new Headers(init.headers).get('Authorization')).toBe(`Bearer ${key}`);
     expect(init.body).not.toContain(key);
     expect(init).toMatchObject({ credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer' });
     expect(JSON.parse(init.body as string)).toMatchObject({
@@ -42,9 +44,9 @@ describe('Study chat provider boundary', () => {
     vi.stubEnv('MODE', 'e2e');
     const fakeFetch = vi.fn(async (_url: string, _init: RequestInit) => reply({ calls: [], clarification: 'Fixture reply' }));
     vi.stubGlobal('fetch', fakeFetch);
-    await chooseCoachIntent('Fixture question', [], tools, 'never-forward', new AbortController().signal);
+    await chooseCoachIntent('Fixture question', [], tools, openRouterTurn('never-forward'), new AbortController().signal);
     expect(fakeFetch.mock.calls[0][0]).toBe(COACH_FIXTURE);
-    expect(fakeFetch.mock.calls[0][1].headers).not.toHaveProperty('Authorization');
+    expect(new Headers(fakeFetch.mock.calls[0][1].headers).has('Authorization')).toBe(false);
   });
 
   it.each([
@@ -53,21 +55,21 @@ describe('Study chat provider boundary', () => {
     [{ name: 'today_plan', arguments: '{}' }, { name: 'start_practice', arguments: '{}' }],
   ])('rejects unregistered tools, invalid arguments and mixed intent', async (...calls) => {
     vi.stubGlobal('fetch', vi.fn(async () => reply({ calls, clarification: '' })));
-    await expect(chooseCoachIntent('Ask', [], tools, '', new AbortController().signal)).rejects.toThrow();
+    await expect(chooseCoachIntent('Ask', [], tools, openRouterTurn(), new AbortController().signal)).rejects.toThrow();
   });
 
   it('accepts only a suggestion from the synthesis step', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => reply({ suggestion: 'Try a review.', action: 'start_practice' })));
-    await expect(summarizeCoachEvidence('Ask', [{ minutes: 20 }], '', new AbortController().signal)).rejects.toThrow();
+    await expect(summarizeCoachEvidence('Ask', [{ minutes: 20 }], openRouterTurn(), new AbortController().signal)).rejects.toThrow();
   });
 
   it('does not send an oversized projection, or replay a provider error', async () => {
     const fakeFetch = vi.fn(async () => new Response('sensitive provider details', { status: 402 }));
     vi.stubGlobal('fetch', fakeFetch);
     const signal = new AbortController().signal;
-    await expect(summarizeCoachEvidence('Ask', ['z'.repeat(7000)], '', signal)).resolves.toBe('');
+    await expect(summarizeCoachEvidence('Ask', ['z'.repeat(7000)], openRouterTurn(), signal)).resolves.toBe('');
     expect(fakeFetch).not.toHaveBeenCalled();
-    await expect(chooseCoachIntent('Ask', [], tools, '', signal)).rejects.toThrow('run out of available credit');
+    await expect(chooseCoachIntent('Ask', [], tools, openRouterTurn(), signal)).rejects.toThrow('no available credit');
     expect(fakeFetch).toHaveBeenCalledTimes(1);
   });
 
@@ -78,7 +80,7 @@ describe('Study chat provider boundary', () => {
       name: `tool_${index}`, kind: 'action' as const,
       description: 'Apply a validated patch using optional workingTime, kind, and askBeforeReplacing booleans.',
     }));
-    await chooseCoachIntent('q'.repeat(1950), ['🏃'.repeat(200), '🏃'.repeat(200)], siteTools, '', new AbortController().signal);
+    await chooseCoachIntent('q'.repeat(1950), ['🏃'.repeat(200), '🏃'.repeat(200)], siteTools, openRouterTurn(), new AbortController().signal);
     const sent = fakeFetch.mock.calls[0][1].body as string;
     expect(sent).toContain('tool_26');
     expect(sent).toContain('askBeforeReplacing');

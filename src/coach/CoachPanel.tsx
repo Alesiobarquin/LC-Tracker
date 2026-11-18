@@ -1,20 +1,19 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../components/ui/Button';
 import { TextArea } from '../components/ui/Field';
 import { useStore } from '../store/useStore';
+import { safeUUID } from '../utils/uuid';
 import { useCoachTools } from './commands';
 import { localCoachIntent } from './localIntent';
 import { CoachIcon } from './CoachLauncher';
 import {
-  chooseCoachIntent, CoachRequestError, MAX_QUESTION_LENGTH, summarizeCoachEvidence,
+  chooseCoachIntent, CoachRequestError, MAX_QUESTION_LENGTH, summarizeCoachEvidence, type CoachTurn,
 } from './provider';
-
-import { COACH_FIXTURE_MODE, useCoachConnection } from './connection';
-
-const KEY_IN_CHAT = /sk-or-v1-[A-Za-z0-9_-]{10,}/i;
+import { containsCoachKey, FREE_QUESTIONS_PER_DAY, personalProviderInfo, type CoachAllowance } from './protocol';
+import { COACH_FIXTURE_MODE, COACH_SETUP_PATH, useCoachAccess, useCoachConnection } from './connection';
 const actionSchema = z.object({ label: z.string().min(1).max(140), name: z.string(), args: z.record(z.string(), z.unknown()).optional() });
 const resultSchema = z.object({
   message: z.string(),
@@ -68,37 +67,60 @@ function CoachFacts({ value, depth = 0 }: { value: unknown; depth?: number }) {
   </dl>;
 }
 
-export function CoachPanel({ visible, owner, children }: { visible: boolean; owner: string; children: ReactNode }) {
+export function CoachPanel({ visible, owner, onOpenSetup, children }: {
+  visible: boolean; owner: string; onOpenSetup: () => void; children: ReactNode;
+}) {
   const tools = useCoachTools();
   const location = useLocation();
-  const { apiKey } = useCoachConnection();
+  const { personal } = useCoachConnection();
+  const { data: access, isPending: checkingAccess } = useCoachAccess();
+  const hosted = access?.hosted === 'free' || access?.hosted === 'owner';
   const activePractice = useStore(practiceScope);
   const practice = activePractice ?? (/^\/(recall|timer)\/[^/]+/.test(location.pathname) ? 'practice-route' : undefined);
   const scope = `${location.key}:${practice ?? 'workspace'}`;
-  const latest = useRef({ owner, scope, visible, tools, apiKey });
-  latest.current = { owner, scope, visible, tools, apiKey };
+  const latest = useRef({ owner, scope, visible, tools, personal });
+  latest.current = { owner, scope, visible, tools, personal };
   const questionId = useId();
   const composer = useRef<HTMLTextAreaElement>(null);
   const history = useRef<HTMLDivElement>(null);
   const followLatest = useRef(true);
   const request = useRef<AbortController | null>(null);
+  const retryTurn = useRef<{ id: string; text: string; scope: string } | null>(null);
   const runningCommand = useRef(false);
   const messageId = useRef(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState(() => ({ text: '', practice }));
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'model' | 'command' | null>(null);
+  const [allowance, setAllowance] = useState<CoachAllowance>();
+  const [budgetReset, setBudgetReset] = useState<string>();
 
   useEffect(() => {
     setError('');
     return () => request.current?.abort();
   }, [owner, scope, visible]);
 
-  const hadKey = useRef(Boolean(apiKey));
+  const previousConnection = useRef(personal);
   useEffect(() => {
-    if (!apiKey && hadKey.current) clearChat();
-    hadKey.current = Boolean(apiKey);
-  }, [apiKey]);
+    if (personal !== previousConnection.current) clearChat(true);
+    previousConnection.current = personal;
+  }, [personal]);
+
+  const limitReset = budgetReset ?? allowance?.resetAt;
+  useEffect(() => {
+    if (!limitReset) return;
+    let timeout: number;
+    function refreshAtReset() {
+      const remaining = Date.parse(limitReset!) - Date.now();
+      if (remaining > 0) timeout = window.setTimeout(refreshAtReset, Math.min(2_147_000_000, remaining));
+      else {
+        setBudgetReset(undefined);
+        setAllowance(current => current && Date.parse(current.resetAt) <= Date.now() ? undefined : current);
+      }
+    }
+    refreshAtReset();
+    return () => window.clearTimeout(timeout);
+  }, [limitReset]);
 
   const question = draft.practice === practice ? draft.text : '';
   const displayMessages = messages.filter((message) => message.practice === practice || message.receipt);
@@ -131,6 +153,7 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
       context: result?.modelData === undefined ? undefined : JSON.stringify(result.modelData).slice(0, 1200),
       ...options,
     }]);
+    return id;
   }
 
   const currentOwner = () => latest.current.owner === owner && useStore.getState().sessionUserId === owner;
@@ -179,22 +202,21 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
   async function send() {
     const text = question.trim();
     if (!text || request.current || runningCommand.current || !currentOwner()) return;
-    if (KEY_IN_CHAT.test(text)) {
+    if (containsCoachKey(text, personal?.key)) {
       setError('Remove the API key from your message before sending.');
       return;
     }
     const local = localCoachIntent(text, useStore.getState());
     const localAction = local && visibleTools.some(([name]) => name === local.name) ? local : null;
-    if (!localAction && !practice && !apiKey && !COACH_FIXTURE_MODE) {
-      setError(location.pathname === '/onboarding'
-        ? 'Open the optional Study chat setup on the final onboarding step.'
-        : 'Connect an OpenRouter key in Settings → Study chat to ask custom questions.');
+    if (!localAction && !practice && !personal && !hosted && !COACH_FIXTURE_MODE) {
+      setError(checkingAccess ? 'Checking whether free AI is available. Try again in a moment.'
+        : 'Use your own API key to ask custom questions.');
       return;
     }
     setError('');
     followLatest.current = true;
     setQuestion('');
-    addMessage('user', text);
+    const submitted = addMessage('user', text);
     if (localAction) {
       await runAction({ ...localAction, label: displayLabel(localAction.name) });
       return;
@@ -206,14 +228,22 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
     const controller = new AbortController();
     request.current = controller;
     setBusy('model');
-    const canApply = () => !controller.signal.aborted && latest.current.visible && latest.current.apiKey === apiKey && currentOwner() && currentScope();
+    const canApply = () => !controller.signal.aborted && latest.current.visible && latest.current.personal === personal && currentOwner() && currentScope();
+    const retry = retryTurn.current;
+    const turn: CoachTurn = {
+      id: retry?.text === text && retry.scope === scope ? retry.id : safeUUID(),
+      source: personal ?? { provider: hosted ? 'hosted' : 'fixture' },
+      onAllowance: next => { if (currentOwner()) setAllowance(next); },
+    };
+    retryTurn.current = null;
+    let factsShown = false;
     try {
       const descriptions = visibleTools.map(([name, tool]) => ({
         name, description: tool.description, kind: tool.kind ?? 'action' as const,
       }));
       const previous = displayMessages.flatMap((message) =>
         message.role === 'user' ? [message.text] : message.context ? [message.context] : []);
-      const intent = await chooseCoachIntent(text, previous, descriptions, apiKey, controller.signal);
+      const intent = await chooseCoachIntent(text, previous, descriptions, turn, controller.signal);
       if (!canApply()) return;
       const results: unknown[] = [];
       for (const call of intent.calls) {
@@ -230,17 +260,25 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
         const result = await runTool(call);
         if (!canApply()) return;
         addMessage('assistant', result.message, result);
+        factsShown = true;
         if (result.modelData !== undefined) results.push(result.modelData);
       }
       if (results.length) {
-        const suggestion = await summarizeCoachEvidence(text, results, apiKey, controller.signal);
+        const suggestion = await summarizeCoachEvidence(text, results, turn, controller.signal);
         if (canApply() && suggestion) addMessage('assistant', suggestion);
       } else if (!intent.calls.length && intent.clarification) {
         addMessage('assistant', intent.clarification);
       }
     } catch (failure) {
       if (canApply()) {
-        setDraft((current) => current.text ? current : { text, practice });
+        if (!factsShown) {
+          setDraft((current) => current.text ? current : { text, practice });
+          setMessages(current => current.filter(message => message.id !== submitted));
+        }
+        if (failure instanceof CoachRequestError) {
+          if (failure.code === 'unconfirmed') retryTurn.current = { id: turn.id, text, scope };
+          if (failure.code === 'daily_budget' || failure.code === 'monthly_budget') setBudgetReset(failure.resetAt);
+        }
         setError(failure instanceof CoachRequestError ? failure.message : 'Study chat could not finish that request. Try again.');
       }
     } finally {
@@ -251,14 +289,15 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
     }
   }
 
-  function clearChat() {
+  function clearChat(keepDraft = false) {
     request.current?.abort();
     request.current = null;
+    retryTurn.current = null;
     setBusy(null);
     setMessages([]);
     followLatest.current = true;
     setError('');
-    setQuestion('');
+    if (!keepDraft) setQuestion('');
   }
 
   function renderActions(actions: Action[] | undefined, consumed?: number) {
@@ -272,6 +311,15 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
       </div>
     ) : null;
   }
+
+  const setupPath = location.pathname === '/onboarding' ? '/onboarding#onboarding-study-chat' : COACH_SETUP_PATH;
+  const limitReached = access?.hosted === 'free' && (allowance?.remaining === 0 || Boolean(budgetReset));
+  const providerLabel = personal ? `${personalProviderInfo[personal.provider].label} · Your key`
+    : access?.hosted === 'owner' ? 'Owner AI'
+    : access?.hosted === 'free' ? budgetReset ? 'Free AI · shared budget reached' : allowance
+      ? `Free AI · ${allowance.remaining} of ${FREE_QUESTIONS_PER_DAY} left today`
+      : `Free AI · ${FREE_QUESTIONS_PER_DAY} questions per day`
+      : 'Study shortcuts';
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col text-sm text-body">
@@ -341,6 +389,23 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
       </div>
       <form className="shrink-0 space-y-2 border-t border-line bg-surface px-4 py-3" onSubmit={(event) => { event.preventDefault(); void send(); }}>
         {error && <p role="alert" className="text-xs text-danger">{error}</p>}
+        {!practice && (
+          <div className="space-y-1 text-xs">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-medium text-foreground" aria-live="polite">{providerLabel}</span>
+              {!personal && (limitReached || (!hosted && error)) && (
+                <Link to={setupPath} className="text-accent underline" onClick={onOpenSetup}>Use your own API key</Link>
+              )}
+            </div>
+            {!personal && limitReached && limitReset ? (
+              <p className="text-muted">
+                Resets {new Date(limitReset).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Study shortcuts are available.
+              </p>
+            ) : !personal && hosted && (
+              <p className="text-muted">AI questions share your message, recent context, and selected study facts with OpenRouter and Microsoft Azure.</p>
+            )}
+          </div>
+        )}
         <label htmlFor={questionId} className="sr-only">Message</label>
         <div className="flex items-end gap-2">
           <TextArea
@@ -365,7 +430,7 @@ export function CoachPanel({ visible, owner, children }: { visible: boolean; own
         </div>
         <div className="flex min-h-6 flex-wrap items-center gap-x-2 text-xs">
           {busy === 'model' && <Button size="sm" onClick={() => { request.current?.abort(); }}>Stop</Button>}
-          <button type="button" className="quiet-action py-1 text-xs" disabled={busy === 'command'} onClick={clearChat}>New chat</button>
+          <button type="button" className="quiet-action py-1 text-xs" disabled={busy === 'command'} onClick={() => clearChat()}>New chat</button>
           {busy && <span role="status" className="text-xs text-muted">{busy === 'command' ? 'Applying…' : 'Waiting for a reply…'}</span>}
           <span className="ml-auto hidden text-[11px] text-subtle sm:inline">Shift+Enter for a new line</span>
         </div>

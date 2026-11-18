@@ -28,6 +28,11 @@ signing in. An account is needed to save study settings and history. Analytics
 shows recorded practice and outcomes; a successful recall check remains separate
 from a coding pass.
 
+Signed-in learners can open Study Chat to see the next task, ask for recent
+evidence, or start and resume practice. For example, starting a recommended
+review in chat puts the same session in progress on Today. The built-in
+shortcuts work without a provider key. [Study Chat guide and rollout status](docs/operations.md#free-study-chat-and-personal-keys)
+
 ## Implementation
 
 | Part | Responsibility | Code |
@@ -36,6 +41,7 @@ from a coding pass.
 | Zustand and TanStack Query | Session drafts in sessionStorage; fetching and refreshing saved data | [session store](src/store/useStore.ts), [data hooks](src/hooks/useUserData.ts) |
 | Clerk and Supabase PostgreSQL | Authentication, account ownership through row-level security, and transactional saves | [client setup](src/lib/supabase.ts), [user-data service](src/services/userData.ts), [migrations](supabase/migrations) |
 | Vercel | Static hosting and a read-only proxy for recent accepted LeetCode submissions | [proxy](api/leetcode-ac.ts), [readiness endpoint](api/health.ts) |
+| Study Chat | Shared study actions, optional personal provider keys, and a configurable hosted inference allowance | [live plan and commands](src/coach/TodayCoach.tsx), [hosted inference route](api/coach.ts) |
 
 Planning runs in the browser. Related session records—progress, timing, activity,
 and applicable sprint state—save in one database transaction. The browser freezes
@@ -64,6 +70,12 @@ build, and a dependency audit. The [browser tests](e2e/study.spec.ts) cover draf
 corrected timings, failed saves, reloads, and retries in desktop and mobile layouts
 and both themes. Authenticated browser tests use simulated Clerk and Supabase
 responses; they do not verify the hosted sign-in integration.
+
+Study Chat browser tests exercise starting and saving from both Today and chat.
+Scripted replies exercise the limit, retry, and personal-key screens. Isolated
+PostgreSQL and PostgREST checks cover account isolation and concurrent requests
+at the budget boundary. Live model replies and billing require staged checks.
+[Study Chat tests](e2e/coach.spec.ts) · [Allowance flow](e2e/coach-access.spec.ts) · [Accounting tests](supabase/tests/coach.sql)
 
 The [planner simulations](src/utils/studySimulation.test.ts) exercise multiweek
 budgets, imported backlogs, unfinished attempts, and unfamiliar checks using
@@ -105,6 +117,10 @@ npm run test:api
 Those checks create and remove a local database cluster without loading production
 credentials. Setup, migration order, backups, and rollback are documented in
 [operations.md](docs/operations.md).
+
+To exercise Study Chat without keys or provider charges, run
+`npm run test:e2e -- e2e/coach*.spec.ts`. Hosted chat and the native Gemini and
+Claude connections require the separate [server configuration](docs/operations.md#free-study-chat-and-personal-keys).
 
 ## Attribution
 

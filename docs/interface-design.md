@@ -42,6 +42,15 @@ Settings pair section explanations with compact controls on desktop and use the
 same reading order on mobile. Syntax practice uses the indexed checkpoint and
 ruled session record, with focus-managed help and exit dialogs.
 
+Study Chat uses the same conversation in a drawer or on `/coach`. User bubbles
+sit on the right. Replies sit on the left beside the Study Chat icon, with
+recorded facts under Details and live study actions above the transcript.
+Alt+Shift+C toggles chat. Enter sends and Shift+Enter starts a new line. The
+composer shows whose allowance the next AI question uses. When free access
+runs out it shows the local reset time and a link to use a personal key.
+Settings owns the same provider form offered as an optional step in onboarding.
+[Chat layout](../src/coach/CoachPanel.tsx) · [Provider setup](../src/coach/CoachSetup.tsx)
+
 Today keeps a compact Reviews only toggle beside the date. Turning it off returns
 to the full plan; its explanation stays in contextual help instead of a separate
 block above the task. This is a temporary choice for the attention available

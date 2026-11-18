@@ -418,11 +418,11 @@ const StepLaunch: React.FC<{
           Study chat <span className="ml-1 text-xs font-normal text-muted">Optional</span>
         </h3>
         <p className="text-xs leading-relaxed text-muted">
-          Use plan and evidence shortcuts without a key. Connect an OpenRouter key for custom
-          questions here or later under Study chat in Settings.
+          Ask about your practice with free AI when available. Plan and evidence shortcuts work
+          without a key. You can add your own key here or later under Study chat in Settings.
         </p>
         <details>
-          <summary className="cursor-pointer text-sm text-accent">Set up Study chat</summary>
+          <summary className="cursor-pointer text-sm text-accent">Connect a provider</summary>
           <div className="mt-3">
             <CoachSetup />
           </div>

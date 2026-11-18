@@ -24,7 +24,7 @@ try {
   started = true;
   const args = ['-X', '-v', 'ON_ERROR_STOP=1', '-h', socket, '-p', '55439', '-d', 'postgres'];
   run('psql', args, readFileSync('supabase/tests/bootstrap.sql', 'utf8'));
-  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql', '20261006000001_clerk_feedback_storage.sql', '20261006000002_postgrest_conflict_status.sql', '20261006000003_study_evidence.sql']) {
+  for (const name of ['20260321_001_normalized_schema.sql', '20260326000003_clerk_auth_rls.sql', '20260407000000_fix_session_rating_constraint.sql', '20261006000000_reliable_user_writes.sql', '20261006000001_clerk_feedback_storage.sql', '20261006000002_postgrest_conflict_status.sql', '20261006000003_study_evidence.sql', '20261118000000_coach_turns.sql']) {
     run('psql', args, readFileSync(`supabase/migrations/${name}`, 'utf8'));
   }
   const output = run('psql', args, readFileSync('supabase/tests/reliability.sql', 'utf8'));
@@ -33,6 +33,8 @@ try {
   console.log(study.split('\n').find(line => line.includes('Recall persistence'))?.trim());
   const storage = run('psql', args, readFileSync('supabase/tests/storage.sql', 'utf8'));
   console.log(storage.split('\n').find((line) => line.includes('Clerk storage'))?.trim());
+  const coach = run('psql', args, readFileSync('supabase/tests/coach.sql', 'utf8'));
+  console.log(coach.split('\n').find((line) => line.includes('Study Chat quota'))?.trim());
   const raceSql = (operationId, version, reviewCount) => {
     const payload = JSON.stringify({ problemId: 'two-sum', progress: [{ problem_id: 'two-sum',
       first_solved_at: '2026-10-01T00:00:00Z', last_reviewed_at: '2026-10-06T00:00:00Z', next_review_at: '2026-10-09T00:00:00Z',
@@ -53,7 +55,7 @@ try {
   if (counts.trim() !== '1,1') throw new Error('Concurrent retry lost or duplicated activity');
   console.log('Concurrent devices serialize changes and retry without losing activity.');
   if (process.argv.includes('--api')) {
-    run('psql', args, 'CREATE ROLE authenticator NOINHERIT LOGIN; GRANT authenticated,anon TO authenticator; GRANT SELECT ON public.problem_progress TO anon;');
+    run('psql', args, 'CREATE ROLE authenticator NOINHERIT LOGIN; GRANT authenticated,anon,service_role TO authenticator; GRANT SELECT ON public.problem_progress TO anon;');
     const { testPostgrest } = await import('./test-postgrest.mjs');
     await testPostgrest(socket);
   }

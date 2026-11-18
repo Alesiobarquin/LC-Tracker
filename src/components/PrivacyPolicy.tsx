@@ -56,6 +56,11 @@ export function PrivacyPolicy() {
           <section id="information-we-collect" className="scroll-mt-20">
             <h2 className="text-2xl font-semibold text-foreground mb-4">2. Information We Collect</h2>
             <p>
+              <strong>Email and password accounts.</strong> Clerk uses your email address to verify your
+              account and help you recover access. Clerk manages passwords. LC Tracker uses your Clerk
+              account ID to identify your study data.
+            </p>
+            <p>
               <strong>Google Account Information:</strong> When you sign in using Google OAuth, we receive
               your basic Google profile information — specifically your name, email address, and Google
               account ID. This is the only data we receive from Google and it is used solely to create and
@@ -74,7 +79,7 @@ export function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold text-foreground mb-4">3. How We Use Your Information</h2>
             <p>We use the information we collect solely to provide and improve the Service:</p>
             <ul className="list-disc list-inside space-y-2 mt-4 ml-4">
-              <li>To authenticate your identity and manage your account via Google Sign-In.</li>
+              <li>To authenticate your identity and manage your account through Clerk.</li>
               <li>To store and sync your problem-solving progress and review schedule.</li>
               <li>To display your analytics, streaks, and performance history within the app.</li>
             </ul>

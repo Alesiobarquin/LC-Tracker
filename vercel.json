@@ -4,7 +4,7 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sso-callback|timer|recall|coach)(/.*)?",
+      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sign-up|sso-callback|timer|recall|coach)(/.*)?",
       "destination": "/app"
     }
   ],
@@ -15,7 +15,7 @@
   },
   "headers": [
     {
-      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sso-callback|timer|recall|coach|app)(/.*)?",
+      "source": "/(dashboard|study-plan|analytics|settings|onboarding|admin|login|sign-up|sso-callback|timer|recall|coach|app)(/.*)?",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, follow" }]
     },
     {

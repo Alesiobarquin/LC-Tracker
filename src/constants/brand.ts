@@ -7,9 +7,4 @@ export const BRAND = {
     feedbackButton: 'Report issue',
     logoutButton: 'Sign out',
   },
-  login: {
-    title: 'LC Tracker',
-    subtitle: 'Plan your practice and keep recall checks, coding attempts, and notes together.',
-    backLabel: 'Back',
-  },
 } as const;

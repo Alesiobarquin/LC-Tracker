@@ -42,9 +42,12 @@ test('the explanation index exposes deep links and updates metadata during navig
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://lc-tracker.app/library/explanations');
 });
 
-test('sign-in and missing pages do not inherit indexable homepage metadata', async ({ page }) => {
-  await page.goto('/login');
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+test('auth and missing pages do not inherit indexable homepage metadata', async ({ page }) => {
+  for (const path of ['/login', '/sign-up']) {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://lc-tracker.app${path}`);
+  }
   await page.goto('/this-page-does-not-exist');
   await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');

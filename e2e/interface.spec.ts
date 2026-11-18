@@ -24,6 +24,7 @@ const progress = ["two-sum", "valid-anagram", "contains-duplicate"].map(
 
 const surfaces = [
   { name: "login", path: "/login", heading: "Sign in to LC Tracker" },
+  { name: "sign-up", path: "/sign-up", heading: "Create your LC Tracker account" },
   { name: "onboarding", path: "/onboarding", heading: "Welcome to LC Tracker" },
   { name: "landing", path: "/", heading: "Know what to solve next." },
   { name: "today", path: "/dashboard", heading: "Today’s study plan" },
@@ -55,7 +56,7 @@ for (const theme of ["light", "dark"] as const) {
             if (signedIn)
               localStorage.setItem("lc-e2e-user", "user_interface_fixture");
           },
-          { theme, signedIn: !["landing", "login"].includes(surface.name) },
+          { theme, signedIn: !["landing", "login", "sign-up"].includes(surface.name) },
         );
         const timings = [15, 30, 25, 18, 35, 22].map((minutes, i) => ({
           id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`,

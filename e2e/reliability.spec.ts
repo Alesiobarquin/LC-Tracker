@@ -7,8 +7,7 @@ const operationId = '00000000-0000-4000-8000-000000000001';
 const timing = { id: operationId, problemId: 'two-sum', category: 'Arrays & Hashing',
   date: '2026-10-06T12:00:00Z', elapsedSeconds: 120, sessionType: 'new', rating: 3 };
 
-async function signIn(page: Page) {
-  await page.addInitScript(({ userId }) => { localStorage.setItem('lc-e2e-user', userId); }, { userId });
+async function mockSavedWorkspace(page: Page) {
   await page.route('https://test.supabase.co/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
     const data = path.endsWith('/user_settings')
@@ -16,6 +15,11 @@ async function signIn(page: Page) {
       : path.endsWith('/sprint_state') ? null : [];
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
   });
+}
+
+async function signIn(page: Page) {
+  await page.addInitScript(({ userId }) => { localStorage.setItem('lc-e2e-user', userId); }, { userId });
+  await mockSavedWorkspace(page);
 }
 
 test('failed timer saves preserve the operation across reload and retry', async ({ page }) => {
@@ -156,11 +160,32 @@ test('study time target conflicts keep the draft until saved values are explicit
   expect(stored.settings_json.settings.studySchedule).toMatchObject({ weekdayMinutes: 120, restDay: 2 });
 });
 
-test('Google sign-in failures show a recovery message', async ({ page }) => {
+test('returning Google users open their existing workspace after sign-in', async ({ page }) => {
+  await mockSavedWorkspace(page);
   await page.goto('/login');
+  const settingsRead = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname.endsWith('/user_settings') && url.searchParams.get('user_id') === `eq.${userId}`;
+  });
   await page.getByRole('button', { name: 'Continue with Google' }).click();
-  await expect(page.getByRole('alert')).toContainText('Google sign-in failed');
-  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeEnabled();
+  await settingsRead;
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole('heading', { name: 'Today’s study plan' })).toBeVisible();
+  await page.goto('/sign-up');
+  await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test('a new email account enters onboarding after the Clerk session is active', async ({ page }) => {
+  await page.route('https://test.supabase.co/rest/v1/user_settings*', async (route) => {
+    expect(new URL(route.request().url()).searchParams.get('user_id')).toBe('eq.user_new_e2e');
+    await route.fulfill({ json: null });
+  });
+  await page.goto('/sign-up');
+  await page.getByLabel('Email address').fill('new@example.invalid');
+  await page.getByLabel('Password').fill('fixture-password');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page.getByRole('heading', { name: 'Welcome to LC Tracker' })).toBeVisible();
 });
 
 test('finished timers and draft notes survive reload before a rating is submitted', async ({ page }) => {

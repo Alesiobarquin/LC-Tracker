@@ -95,7 +95,7 @@ export function LandingPage() {
                 solve, and why.
               </p>
               <div className="landing-hero-actions">
-                <a href="/login" className="landing-primary-action">
+                <a href="/sign-up" className="landing-primary-action">
                   Build my study plan <ArrowRight size={16} />
                 </a>
                 <a href="#plan-preview" className="landing-text-action">
@@ -223,7 +223,7 @@ export function LandingPage() {
               <p className="landing-eyebrow landing-eyebrow--quiet">START WITH YOUR NEXT GOAL</p>
               <h2 id="landing-close-title">Let your practice history<br />help choose what comes next.</h2>
             </div>
-            <a href="/login" className="landing-primary-action">
+            <a href="/sign-up" className="landing-primary-action">
               Build my study plan <ArrowRight size={16} />
             </a>
           </section>

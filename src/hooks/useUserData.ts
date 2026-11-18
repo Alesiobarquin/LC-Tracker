@@ -40,13 +40,14 @@ export function useUserSettings() {
     queryFn: () => fetchUserSettings(userId!), enabled: !!userId,
   });
   const mutation = useMutation({
-    mutationFn: (updater: (current: UserSettingsData) => UserSettingsData) => {
+    mutationFn: ({ updater, operationId }: { updater: (current: UserSettingsData) => UserSettingsData; operationId?: string }) => {
       if (!userId) throw new Error('No authenticated user');
-      return saveUserSettings(userId, updater);
+      return saveUserSettings(userId, updater, operationId);
     },
     onSettled: () => userId ? refreshUserData(userId) : undefined,
   });
-  const updateUserSettings = (updater: (current: UserSettingsData) => UserSettingsData) => observeMutation(mutation.mutateAsync(updater));
+  const updateUserSettings = (updater: (current: UserSettingsData) => UserSettingsData, operationId?: string) =>
+    observeMutation(mutation.mutateAsync({ updater, operationId }));
   const data = query.data ?? DEFAULT_USER_SETTINGS;
   return {
     data, isLoading: query.isLoading, isSuccess: query.isSuccess, error: query.error, refetch: query.refetch,
@@ -107,15 +108,16 @@ export function useUserSettings() {
         setLastSync(new Date().toISOString());
         setLastSyncCount(result.imported);
         await refreshUserData(userId);
+        return result.imported;
       } catch (error) {
         setSyncError(error instanceof Error ? error.message : 'Failed to sync with LeetCode');
         throw error;
       }
     },
     exportBackup,
-    restoreBackup: async (backup: unknown) => {
+    restoreBackup: async (backup: unknown, operationId?: string) => {
       if (!userId) throw new Error('No authenticated user');
-      try { await restoreUserBackup(userId, backup); }
+      try { await restoreUserBackup(userId, backup, operationId); }
       finally { await refreshUserData(userId); }
     },
   };
@@ -142,9 +144,9 @@ export function useProblemProgress() {
     onSettled: () => userId ? refreshUserData(userId) : undefined,
   });
   const removeMutation = useMutation({
-    mutationFn: (problemId: string) => {
+    mutationFn: ({ problemId, operationId, expectedVersion }: { problemId: string; operationId?: string; expectedVersion?: number }) => {
       if (!userId) throw new Error('No authenticated user');
-      return removeProblemProgress(userId, problemId);
+      return removeProblemProgress(userId, problemId, operationId, expectedVersion);
     },
     onSettled: () => userId ? refreshUserData(userId) : undefined,
   });
@@ -159,7 +161,8 @@ export function useProblemProgress() {
       additionalData?: Record<string, unknown>) => observeMutation(mutation.mutateAsync({
         operationId: safeUUID(), problemId, rating, notes, additionalData,
       })),
-    removeProblem: (problemId: string) => observeMutation(removeMutation.mutateAsync(problemId)),
+    removeProblem: (problemId: string, operationId?: string, expectedVersion?: number) =>
+      observeMutation(removeMutation.mutateAsync({ problemId, operationId, expectedVersion })),
   };
 }
 
@@ -233,10 +236,10 @@ export function useSyntaxProgress() {
   const { data, isLoading, error, updateUserData } = useUserSettings();
   return {
     data: data.syntaxProgress, syntaxProgress: data.syntaxProgress, isLoading, error,
-    logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3) => updateUserData((current) => ({
+    logSyntaxPractice: (cardId: string, rating: 1 | 2 | 3, operationId?: string) => updateUserData((current) => ({
       ...current, syntaxProgress: { ...current.syntaxProgress, [cardId]: computeNewSyntaxProgress(
         current.syntaxProgress[cardId], rating, current.settings.srAggressiveness) },
-    })),
+    }), operationId),
   };
 }
 export function useStreak() {

@@ -38,6 +38,8 @@ import { BRAND } from "../constants/brand";
 import { isAdminUser } from "../utils/adminAuth";
 import { supabase } from "../lib/supabase";
 import { isMissingRelationError } from "../utils/supabaseErrors";
+import { useRegisterCoachTools } from "../coach/commands";
+import { CoachLauncher } from "../coach/CoachLauncher";
 
 interface FeedbackRow {
   id: string;
@@ -70,7 +72,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [unreadAdminTicketCount, setUnreadAdminTicketCount] = useState(0);
   const featuresAutoOpenRef = useRef(false);
   const { user } = useUser();
-  const { signOut } = useClerk();
+  const { signOut, openUserProfile } = useClerk();
+  useRegisterCoachTools(user ? {
+    open_tour: { description: "Open the LC Tracker product tour. No arguments.", run: args => {
+      if (Object.keys(args).length) return { message: "This action takes no arguments." };
+      setIsFeaturesOpen(true);
+      return { message: "Opened the product tour." };
+    } },
+    open_account: { description: "Open Clerk account controls. No arguments.", run: args => {
+      if (Object.keys(args).length) return { message: "This action takes no arguments." };
+      openUserProfile?.();
+      return { message: "Opened your account controls." };
+    } },
+  } : {});
   const isAdmin = isAdminUser(user);
   const { targetInterviewDate, targetEvents } = useUserSettings();
   const daysUntilInterview = differenceInDays(
@@ -248,6 +262,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <ThemeSwitcher compact />
+            {user && <CoachLauncher aria-label="Open study chat" className="workspace-tool" />}
             <Link
               to={user ? "/settings" : "/login"}
               aria-label="Settings"
@@ -426,6 +441,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <CircleHelp size={15} />
                 Product tour
               </button>
+              {user && <CoachLauncher onClick={() => setIsMobileMenuOpen(false)}>Study chat</CoachLauncher>}
               <button
                 onClick={() => {
                   setIsFeedbackOpen(true);
@@ -505,6 +521,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
           <FeedbackModal
             isOpen={isFeedbackOpen}
+            onOpen={() => setIsFeedbackOpen(true)}
             onClose={() => setIsFeedbackOpen(false)}
           />
 

@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { z } from 'zod';
 import type { AppSettings } from '../types';
+import { useRegisterCoachTools } from '../coach/commands';
 
 const MINUTES = { min: 15, max: 120, step: 15 };
+const targetMinutes = z.number().int().min(MINUTES.min).max(MINUTES.max).multipleOf(MINUTES.step);
 const TARGETS = [
     { key: 'weekdayMinutes', label: 'Weekday Daily Target' },
     { key: 'weekendMinutes', label: 'Weekend Daily Target' },
@@ -26,21 +29,25 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState('');
+    const savingRef = useRef(false);
     const values = draft ?? settings.studySchedule;
     const changed = draft !== null && TARGETS.some(({ key }) => draft[key] !== draft.base.studySchedule[key]);
 
-    function edit(key: typeof TARGETS[number]['key'], value: number) {
+    function edit(fields: Partial<Pick<Draft, 'weekdayMinutes' | 'weekendMinutes'>>) {
         setDraft((current) => ({
             ...(current ?? { base: settings, weekdayMinutes: settings.studySchedule.weekdayMinutes,
                 weekendMinutes: settings.studySchedule.weekendMinutes }),
-            [key]: value,
+            ...fields,
         }));
         setSaved(false);
         setError('');
     }
 
     async function save() {
-        if (!draft || !changed || saving || !ready) return;
+        if (!draft || !changed || savingRef.current || !ready) {
+            return { message: 'There are no changes ready to save.' };
+        }
+        savingRef.current = true;
         setSaving(true);
         setError('');
         try {
@@ -48,14 +55,43 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
                 weekdayMinutes: draft.weekdayMinutes, weekendMinutes: draft.weekendMinutes } }, draft.base);
             setDraft(null);
             setSaved(true);
+            return { message: 'Study time targets saved.' };
         } catch (failure) {
             setError((failure as { code?: string })?.code === 'PT409'
                 ? 'Your study time targets changed on another device. Select Use saved targets before editing again.'
                 : 'Could not save your study time targets. Your selections are still here; check your connection and retry.');
+            return { message: 'The save was not confirmed. Review the targets in Settings.' };
         } finally {
+            savingRef.current = false;
             setSaving(false);
         }
     }
+
+    useRegisterCoachTools(ready ? {
+        settings_read_time_targets: {
+            kind: 'read',
+            description: 'Read current study target sliders and whether a draft is pending. No arguments.',
+            run: () => ({
+                message: draft && changed ? 'Study time target changes are awaiting Save.' : 'Current study time targets.',
+                data: { weekdayMinutes: values.weekdayMinutes, weekendMinutes: values.weekendMinutes, saving, saved, conflictOrError: Boolean(error) },
+            }),
+        },
+        settings_prepare_time_targets: {
+            description: 'Edit the actual study time target draft. Optional weekdayMinutes and weekendMinutes, 15 to 120 in multiples of 15.',
+            run: (args) => {
+                const parsed = z.strictObject({ weekdayMinutes: targetMinutes.optional(), weekendMinutes: targetMinutes.optional() }).safeParse(args);
+                if (!parsed.success || !Object.keys(parsed.data).length || savingRef.current) {
+                    return { message: 'Choose a weekday or weekend target from 15 to 120 minutes, in 15-minute steps.' };
+                }
+                edit(parsed.data);
+                return { message: 'Study time target draft updated. Use Save study time targets to apply it.' };
+            },
+        },
+        settings_save_time_targets: {
+            description: 'Save the current study time target draft after the user explicitly requests Save. No arguments.',
+            run: (args) => Object.keys(args).length ? { message: 'Save takes no arguments.' } : save(),
+        },
+    } : {});
 
     return (
         <div className="space-y-6">
@@ -73,7 +109,7 @@ export function StudyTimeTargets({ settings, ready, onSave }: Props) {
                         max={MINUTES.max}
                         step={MINUTES.step}
                         value={values[key]}
-                        onChange={(event) => edit(key, Number(event.target.value))}
+                        onChange={(event) => edit({ [key]: Number(event.target.value) })}
                         disabled={!ready || saving}
                         className="w-full h-2 bg-muted-surface rounded-lg appearance-none cursor-pointer accent-warning disabled:opacity-50"
                     />

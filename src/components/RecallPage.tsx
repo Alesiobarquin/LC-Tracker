@@ -3,19 +3,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ExternalLink, ArrowLeft, Clock, Pause, Play } from "lucide-react";
-import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
+import { problemMap } from "../data/problems";
 import { patterns } from "../data/patterns";
 import { getPatternForProblem } from "../utils/patternMapping";
 import { getPatternLessonMeta } from "../data/patternLessonMeta";
-import { useProblemProgress, useSessionTimings, useUserSettings } from "../hooks/useUserData";
+import { useProblemProgress } from "../hooks/useUserData";
+import { useTodayPlan } from "../hooks/useTodayPlan";
 import { useStore } from "../store/useStore";
 import { canPersistTimer } from "../lib/safeStorage";
 import { TimeSpentInput } from "./TimeSpentInput";
-import { parseTimeSpent } from "../utils/sessionTime";
-import { buildStudyPlan } from "../utils/study";
+import { parseTimeSpent, recallElapsedSeconds, timeSpentDraft } from "../utils/sessionTime";
 import { Button } from "./ui/Button";
-import type { RecallAttempt } from "../types";
+import type { RecallAttempt, TimeSpentDraft } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
+import { Modal } from "./ui/Modal";
+import { useRegisterCoachTools } from "../coach/commands";
+import { z } from "zod";
 import {
   hasProblemReference,
   type ReferenceLanguage,
@@ -33,6 +36,14 @@ import {
 
 const button =
   "rounded-md bg-accent px-4 py-3 text-sm font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-40";
+const recallCommand = z.strictObject({
+  action: z.enum(["pause", "resume", "correct_time", "use_timer", "answer", "reveal", "compare", "notes", "save", "retry", "discard", "next_review", "finish_reviews"]),
+  sessionId: z.string().optional(),
+  minutes: z.number().int().nonnegative().optional(),
+  seconds: z.number().int().min(0).max(59).optional(),
+  text: z.string().max(20000).optional(),
+  outcome: z.enum(["recalled", "partial", "forgot"]).optional(),
+});
 export function RecallPage() {
   const { problemId } = useParams();
   return <RecallCheck key={problemId} problemId={problemId} />;
@@ -44,30 +55,20 @@ function RecallCheck({ problemId }: { problemId?: string }) {
   const reviewSaved = (location.state as { reviewSaved?: boolean } | null)?.reviewSaved === true;
   const { progress, isLoading, error, refetch, saveRecall } =
     useProblemProgress();
-  const settingsQuery = useUserSettings();
-  const timingQuery = useSessionTimings();
-  const draft = useStore((state) => state.activeRecall);
-  const activeSession = useStore((state) => state.activeSession);
-  const reviewOnlyDate = useStore((state) => state.reviewOnlyDate);
-  const [now, setNow] = useState(new Date());
-  const reviewsOnly = reviewOnlyDate === format(now, "yyyy-MM-dd");
-  const queueError = (reviewsOnly || reviewSaved) && (settingsQuery.error || timingQuery.error);
-  const queueLoading = (reviewsOnly || reviewSaved) && (settingsQuery.isLoading || timingQuery.isLoading);
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
+  const today = useTodayPlan();
+  const { activeRecall: draft, activeSession, catalogReady, catalogError, reviewsOnly } = today;
+  const queueError = (reviewsOnly || reviewSaved) && today.error;
+  const queueLoading = (reviewsOnly || reviewSaved) && today.loading;
   const { startRecall, updateRecall, endRecall } = useStore.getState();
   const updateAnswer = useCallback(
     (answer: string) => updateRecall({ answer }),
     [updateRecall],
   );
-  const [catalogReady, setCatalogReady] = useState(false);
-  const [catalogError, setCatalogError] = useState(false);
   const [promptsExpanded, setPromptsExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const [elapsed, setElapsed] = useState(0);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const elapsed = draft ? recallElapsedSeconds({ ...draft, timeSpentDraft: undefined }) : 0;
   const submitting = useRef(false);
   const closed = useRef(false);
   const comparisonSection = useRef<HTMLElement>(null);
@@ -92,13 +93,8 @@ function RecallCheck({ problemId }: { problemId?: string }) {
       observer.observe(comparisonSection.current);
       return () => observer.disconnect();
     }
-  }, [isLoading, error, catalogReady, draft?.revealed, draft?.compared, draft?.completion, draft?.id, reviewSaved, settingsQuery.isLoading, timingQuery.isLoading]);
+  }, [isLoading, error, catalogReady, draft?.revealed, draft?.compared, draft?.completion, draft?.id, reviewSaved, queueLoading]);
   const [storageAvailable] = useState(canPersistTimer);
-  useEffect(() => {
-    void ensureExtendedCatalogLoaded()
-      .then(() => setCatalogReady(true))
-      .catch(() => setCatalogError(true));
-  }, []);
   useEffect(() => {
     if (
       !isLoading &&
@@ -127,29 +123,6 @@ function RecallCheck({ problemId }: { problemId?: string }) {
     reviewSaved,
   ]);
   useEffect(() => {
-    if (!draft) return;
-    const tick = () =>
-      setElapsed(
-        draft.completion?.attempt.elapsedSeconds ??
-          Math.max(
-            0,
-            Math.floor((Date.now() - draft.startedAt) / 1000) -
-              (draft.pausedSeconds ?? 0) -
-              (draft.pausedAt
-                ? Math.floor((Date.now() - draft.pausedAt) / 1000)
-                : 0),
-          ),
-      );
-    tick();
-    const timer = window.setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [
-    draft?.startedAt,
-    draft?.completion,
-    draft?.pausedAt,
-    draft?.pausedSeconds,
-  ]);
-  useEffect(() => {
     const pause = () => {
       const current = useStore.getState().activeRecall;
       if (
@@ -166,83 +139,221 @@ function RecallCheck({ problemId }: { problemId?: string }) {
       pause();
     };
   }, [draft?.id]);
-  function togglePause() {
-    if (!draft || draft.completion) return;
-    if (draft.pausedAt)
+  function setPaused(paused: boolean) {
+    const current = useStore.getState().activeRecall;
+    if (!current || current.id !== draft?.id || current.completion || paused === (current.pausedAt != null)) return;
+    if (current.pausedAt != null)
       updateRecall({
         pausedSeconds:
-          (draft.pausedSeconds ?? 0) +
-          Math.floor((Date.now() - draft.pausedAt) / 1000),
+          (current.pausedSeconds ?? 0) +
+          Math.floor((Date.now() - current.pausedAt) / 1000),
         pausedAt: null,
       });
     else updateRecall({ pausedAt: Date.now() });
   }
 
   async function finish(outcome: RecallAttempt["outcome"]) {
-    if (!draft || submitting.current || (!draft.compared && !draft.completion))
-      return;
-    const correctedElapsed = draft.timeSpentDraft ? parseTimeSpent(draft.timeSpentDraft) : elapsed;
-    if (!draft.completion && correctedElapsed === null) {
-      setSaveError("Enter a valid time spent before saving.");
-      return;
+    const current = useStore.getState().activeRecall;
+    if (!current || current.id !== draft?.id || submitting.current || (!current.compared && !current.completion))
+      return "Compare the original answer before recording the result.";
+    const correctedElapsed = current.timeSpentDraft ? parseTimeSpent(current.timeSpentDraft) : recallElapsedSeconds(current);
+    if (!current.completion && correctedElapsed === null) {
+      const message = "Enter a valid time spent before saving.";
+      setSaveError(message);
+      return message;
     }
-    const originalAnswer = draft.retrievedAnswer ?? draft.answer;
-    if (outcome !== "forgot" && !originalAnswer.trim()) {
-      setSaveError(
-        "Your original attempt was empty. Record Forgot; a correction after comparison does not count as unaided recall.",
-      );
-      return;
+    const originalAnswer = current.retrievedAnswer ?? current.answer;
+    if (!current.completion && outcome !== "forgot" && !originalAnswer.trim()) {
+      const message = "Your original attempt was empty. Record Forgot; a correction after comparison does not count as unaided recall.";
+      setSaveError(message);
+      return message;
     }
-    if ((draft.notes?.length ?? 0) > 20000) {
-      setSaveError(
-        "Keep your personal explanation and code within 20,000 characters.",
-      );
-      return;
+    if (!current.completion && (current.notes?.length ?? 0) > 20000) {
+      const message = "Keep your personal explanation and code within 20,000 characters.";
+      setSaveError(message);
+      return message;
     }
     submitting.current = true;
     setSaving(true);
     setSaveError("");
-    const completion = draft.completion ?? {
+    const completion = current.completion ?? {
       attempt: {
-        id: draft.id,
+        id: current.id,
         date: new Date().toISOString(),
         elapsedSeconds: correctedElapsed ?? elapsed,
         outcome,
         answer: originalAnswer,
-        ...(originalAnswer !== draft.answer
-          ? { revisedAnswer: draft.answer }
+        ...(originalAnswer !== current.answer
+          ? { revisedAnswer: current.answer }
           : {}),
-        checkedAgainst: draft.checkedAgainst,
+        checkedAgainst: current.checkedAgainst,
       },
-      notes: draft.notes,
+      notes: current.notes,
     };
     updateRecall({ completion });
     try {
-      await saveRecall({ problemId: draft.problemId, ...completion });
+      await saveRecall({ problemId: current.problemId, ...completion });
+      if (useStore.getState().activeRecall?.id !== current.id) return "Recall result saved.";
       closed.current = true;
-      if (useStore.getState().activeRecall?.id === draft.id) endRecall();
+      endRecall();
       const savedAt = new Date();
       const continueReviews = useStore.getState().reviewOnlyDate === format(savedAt, "yyyy-MM-dd");
-      setNow(savedAt);
-      navigate(continueReviews ? `/recall/${draft.problemId}` : "/dashboard", {
+      navigate(continueReviews ? `/recall/${current.problemId}` : "/dashboard", {
         replace: continueReviews,
         state: {
           reviewSaved: continueReviews,
           studyMessage:
-            outcome === "recalled"
+            completion.attempt.outcome === "recalled"
               ? "Approach recalled. Your coding check remains separate."
               : "Recall saved. A future coding practice block will help close the gap.",
         },
       });
+      return "Recall result saved.";
     } catch {
-      setSaveError(
-        "Could not confirm your save. Your answer and attempt are preserved. Retry to save it once.",
-      );
+      const message = "Could not confirm your save. Your answer and attempt are preserved. Retry to save it once.";
+      setSaveError(message);
+      return message;
     } finally {
       submitting.current = false;
       setSaving(false);
     }
   }
+
+  const hasBuiltIn = !!problemId && hasProblemReference(problemId);
+  const comparisonReference = draft?.checkedAgainst === "notes" || !hasBuiltIn
+    ? "notes"
+    : "solution";
+  function revealReference() {
+    const current = useStore.getState().activeRecall;
+    if (!current || current.id !== draft?.id || current.revealed) return;
+    const notes = progress[current.problemId]?.notes ?? "";
+    updateRecall({
+      revealed: true,
+      retrievedAnswer: current.answer,
+      notes,
+      checkedAgainst: hasBuiltIn ? "solution" : notes ? "notes" : "external",
+    });
+  }
+  function compareAnswer() {
+    updateRecall({ compared: true, checkedAgainst: comparisonReference });
+  }
+  function changeTimeSpent(timeSpentDraft: TimeSpentDraft | undefined) {
+    updateRecall({ timeSpentDraft });
+    setSaveError("");
+  }
+  function discardDraft() {
+    const current = useStore.getState().activeRecall;
+    if (!current || current.id !== draft?.id || current.completion) return;
+    closed.current = true;
+    endRecall();
+    navigate("/dashboard");
+  }
+
+  const savedPlan = reviewSaved && !draft && today.plan;
+  const nextReview = reviewsOnly && savedPlan ? savedPlan.recallTasks[0] : undefined;
+  function continueToNextReview() {
+    const { activeSession, activeRecall, reviewOnlyDate } = useStore.getState();
+    if (!nextReview || activeSession || activeRecall || reviewOnlyDate !== format(new Date(), "yyyy-MM-dd")) return false;
+    const path = today.startTask(nextReview);
+    if (!path) return false;
+    navigate(path, { replace: true, state: null });
+    return true;
+  }
+
+  useRegisterCoachTools((draft?.problemId === problemId || reviewSaved) && !isLoading && !error && !queueError && !queueLoading && catalogReady ? {
+    recall_status: {
+      kind: "read",
+      duringPractice: true,
+      description: "Read the active recall stage, elapsed seconds, and save state without revealing any answers. No arguments.",
+      run: () => {
+        const current = useStore.getState().activeRecall;
+        if (!current || current.id !== draft?.id)
+          return reviewSaved ? {
+            message: "Recall saved.",
+            actions: [
+              ...(nextReview ? [{ label: "Next review", name: "recall_session", args: { action: "next_review" } }] : []),
+              { label: "Finish reviewing", name: "recall_session", args: { action: "finish_reviews" } },
+            ],
+          } : { message: "There is no matching recall draft." };
+        const status = submitting.current ? "saving" : current.completion ? "save unconfirmed"
+          : current.compared ? "record outcome" : current.revealed ? "compare" : "retrieve";
+        const seconds = recallElapsedSeconds(current);
+        const action = status === "save unconfirmed" ? "retry" : status === "compare" ? "compare" : status === "retrieve" ? "reveal" : undefined;
+        return {
+          message: `Recall stage: ${status} · ${seconds} seconds spent${current.pausedAt ? " · paused" : ""}.`,
+          data: { seconds, status, paused: current.pausedAt != null },
+          actions: status === "record outcome"
+            ? (["Recalled", "Partial", "Forgot"] as const).map(label => ({
+              label: `Save ${label.toLowerCase()}`,
+              name: "recall_session",
+              args: { action: "save", sessionId: current.id, outcome: label.toLowerCase() },
+            }))
+            : action ? [{ label: action === "retry" ? "Retry save" : action === "compare" ? "I’ve compared my answer" : "Compare with a reference", name: "recall_session", args: { action, sessionId: current.id } }] : undefined,
+        };
+      },
+    },
+    recall_session: {
+      duringPractice: true,
+      description: "Operate recall using action (pause, resume, correct_time, use_timer, answer, reveal, compare, notes, save, retry, discard, next_review, finish_reviews). Optional sessionId binds the current draft. correct_time takes numeric minutes and seconds. answer and notes take exact user-supplied text; reveal opens the built-in comparison on the page. compare means the learner has completed comparison. save needs the learner's outcome (recalled, partial or forgot). next_review and finish_reviews are available after saving.",
+      run: async (args) => {
+        const parsed = recallCommand.safeParse(args);
+        if (!parsed.success) return { message: "Specify a valid recall action and its values." };
+        const { action, sessionId, minutes, seconds, text, outcome } = parsed.data;
+        const current = useStore.getState().activeRecall;
+        if (action === "next_review" || action === "finish_reviews") {
+          if (current || !savedPlan || sessionId) return { message: "Record the current recall check first." };
+          if (action === "finish_reviews") {
+            navigate("/dashboard");
+            return { message: "Returned to Today." };
+          }
+          if (!continueToNextReview())
+            return { message: "There is no next recall check in today's review queue." };
+          return { message: "Opened the next recall check." };
+        }
+        if (!current || current.id !== draft?.id || (sessionId && current.id !== sessionId))
+          return { message: "That recall draft is no longer active." };
+        if (submitting.current) return { message: "The recall result is still saving." };
+        if (current.completion && action !== "save" && action !== "retry")
+          return { message: "The attempted save is frozen. Retry the saved result." };
+        if (action === "save" || action === "retry") {
+          if (action === "retry" && !current.completion)
+            return { message: "There is no unconfirmed recall save to retry." };
+          const reported = current.completion?.attempt.outcome ?? outcome;
+          if (!reported) return { message: "Report recalled, partial, or forgot after comparing your answer." };
+          return { message: await finish(reported) };
+        }
+        if (action === "pause" || action === "resume") {
+          setPaused(action === "pause");
+          return { message: action === "pause" ? "Recall timer paused." : "Recall timer running." };
+        }
+        if (action === "discard") {
+          setConfirmDiscard(true);
+          return { message: "Review the discard confirmation on the recall page." };
+        }
+        if (action === "correct_time" || action === "use_timer") {
+          const total = (minutes ?? 0) * 60 + (seconds ?? 0);
+          if (action === "correct_time" && ((minutes === undefined && seconds === undefined) || !Number.isSafeInteger(total) || total > 2_147_483_647))
+            return { message: "Enter a valid duration in minutes and seconds." };
+          changeTimeSpent(action === "use_timer" ? undefined : timeSpentDraft(total));
+          return { message: action === "use_timer" ? "Using the measured recall time." : `Time spent set to ${total} seconds.` };
+        }
+        if (action === "reveal") {
+          revealReference();
+          return { message: "The comparison is open on the recall page." };
+        }
+        if (action === "compare") {
+          if (!current.revealed) return { message: "Open the comparison before marking it complete." };
+          compareAnswer();
+          return { message: "Report your unaided recall in the outcome form." };
+        }
+        if (text === undefined) return { message: "Supply the text to place in your recall draft." };
+        if (action === "notes" && !current.revealed) return { message: "Personal explanations are available after revealing the reference." };
+        if (action === "notes") updateRecall({ notes: text });
+        else updateAnswer(text);
+        return { message: action === "notes" ? "Personal explanation updated in the draft." : "Recall answer updated in the draft." };
+      },
+    },
+  } : {});
 
   if (error || catalogError || queueError)
     return (
@@ -290,15 +401,8 @@ function RecallCheck({ problemId }: { problemId?: string }) {
         </Link>
       </div>
     );
-  if (reviewSaved && !draft) {
-    const plan = buildStudyPlan({
-      mode: "reviews",
-      progress,
-      settings: settingsQuery.settings,
-      timings: timingQuery.sessionTimings,
-      now,
-    });
-    const nextReview = reviewsOnly ? plan.recallTasks[0] : undefined;
+  if (savedPlan) {
+    const plan = savedPlan;
     const stopMessage = !reviewsOnly
       ? "Reviews only has ended for today. Return to today’s plan to choose what’s next."
       : plan.isBlackout || plan.isRestDay
@@ -321,12 +425,7 @@ function RecallCheck({ problemId }: { problemId?: string }) {
         ) : <p className="text-body">{stopMessage}</p>}
         <div className="flex flex-wrap items-center gap-3">
           {nextReview && (
-            <Button variant="primary" onClick={() => {
-              const startedAt = new Date();
-              setNow(startedAt);
-              if (reviewOnlyDate === format(startedAt, "yyyy-MM-dd"))
-                navigate(`/recall/${nextReview.problemId}`, { replace: true, state: null });
-            }}>
+            <Button variant="primary" onClick={continueToNextReview}>
               Next review
             </Button>
           )}
@@ -344,12 +443,8 @@ function RecallCheck({ problemId }: { problemId?: string }) {
     : null;
   const frozen = !!draft.completion;
   const compared = !!draft.compared || frozen;
-  const hasBuiltIn = hasProblemReference(problem.id);
   // Older drafts retain their recorded source. Display a usable reference even
   // when their external/pattern option is no longer part of the selector.
-  const comparisonReference = draft.checkedAgainst === "notes" || !hasBuiltIn
-    ? "notes"
-    : "solution";
   const parsedPersonal = parsePersonalExplanation(
     draft.notes ?? progress[problem.id].notes ?? "",
   );
@@ -357,19 +452,6 @@ function RecallCheck({ problemId }: { problemId?: string }) {
     ...parsedPersonal,
     language: draft.notesLanguage ?? parsedPersonal.language,
   };
-  function revealReference() {
-    if (!draft || draft.revealed) return;
-    updateRecall({
-      revealed: true,
-      retrievedAnswer: draft.answer,
-      notes: progress[problem!.id].notes ?? "",
-      checkedAgainst: hasProblemReference(problem!.id)
-        ? "solution"
-        : progress[problem!.id].notes
-          ? "notes"
-          : "external",
-    });
-  }
   function updatePersonal(
     explanation: string,
     code: string,
@@ -432,7 +514,7 @@ function RecallCheck({ problemId }: { problemId?: string }) {
                 <button
                   type="button"
                   className="text-accent inline-flex w-[7.5rem] shrink-0 items-center justify-start gap-1.5"
-                  onClick={togglePause}
+                  onClick={() => setPaused(draft.pausedAt == null)}
                   aria-pressed={!!draft.pausedAt}
                 >
                   {draft.pausedAt ? <Play size={14} /> : <Pause size={14} />}
@@ -532,15 +614,18 @@ function RecallCheck({ problemId }: { problemId?: string }) {
       {!frozen && (
         <button
           className="text-xs text-subtle underline"
-          onClick={() => {
-            closed.current = true;
-            endRecall();
-            navigate("/dashboard");
-          }}
+          onClick={() => setConfirmDiscard(true)}
         >
           Discard unsaved check
         </button>
       )}
+      <Modal isOpen={confirmDiscard && !frozen} onClose={() => setConfirmDiscard(false)} title="Discard recall check?" size="sm">
+        <p className="mb-4 text-sm text-muted">Your unsaved answer and timer will be cleared.</p>
+        <div className="flex gap-2">
+          <Button onClick={() => setConfirmDiscard(false)}>Keep check</Button>
+          <Button variant="danger" onClick={discardDraft}>Discard check</Button>
+        </div>
+      </Modal>
       {draft.revealed && (
         <section
           ref={comparisonSection}
@@ -704,7 +789,7 @@ function RecallCheck({ problemId }: { problemId?: string }) {
               </p>
               <button
                 className={button}
-                onClick={() => updateRecall({ compared: true, checkedAgainst: comparisonReference })}
+                onClick={compareAnswer}
               >
                 I’ve compared my answer — continue
               </button>
@@ -728,10 +813,7 @@ function RecallCheck({ problemId }: { problemId?: string }) {
             timerSeconds={elapsed}
             draft={frozen ? undefined : draft.timeSpentDraft}
             disabled={saving || frozen}
-            onChange={(timeSpentDraft) => {
-              updateRecall({ timeSpentDraft });
-              setSaveError("");
-            }}
+            onChange={changeTimeSpent}
           />
           {!frozen && (
             <button

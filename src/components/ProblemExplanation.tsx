@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
 import ReactMarkdown from "react-markdown";
 import { ExternalLink, Play } from "lucide-react";
 import {
@@ -45,9 +47,13 @@ export function ExplanationLinks({ problem }: { problem: Problem }) {
   );
 }
 
-export function ProblemExplanationFootnote({ reference }: { reference: Omit<ProblemApproach, 'id'> }) {
+export function ProblemExplanationFootnote({ reference, open, onToggle }: {
+  reference: Omit<ProblemApproach, 'id'>;
+  open?: boolean;
+  onToggle?: (open: boolean) => void;
+}) {
   return (
-    <details className="explanation-footnote">
+    <details className="explanation-footnote" open={open} onToggle={(event) => onToggle?.(event.currentTarget.open)}>
       <summary>Source and license</summary>
       <p>
         {reference.codeAuthor
@@ -75,12 +81,14 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
   const [retry, setRetry] = useState(0);
   const [language, setLanguage] = useState<ReferenceLanguage>("python");
   const [approachId, setApproachId] = useState("default");
+  const [sourceOpen, setSourceOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(false);
     setReference(null);
     setApproachId("default");
+    setSourceOpen(false);
     void loadProblemReference(problem.id)
       .then((data) => {
         if (!cancelled) setReference(data);
@@ -95,6 +103,45 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
       cancelled = true;
     };
   }, [problem.id, retry]);
+  const approaches = reference?.problemId === problem.id ? getProblemApproaches(reference) : [];
+  const selected = approaches.find((approach) => approach.id === approachId) ?? approaches[0];
+  const target = z.string().refine((id) => id === problem.id).optional();
+  useRegisterCoachTools(!loading && !error && selected ? {
+    explanation_read_approaches: {
+      kind: "read",
+      description: "List the built-in approaches available in this explanation. Optional problemId must match the active explanation.",
+      run: (args) => {
+        if (!z.strictObject({ problemId: target }).safeParse(args).success) return { message: "Open that explanation first." };
+        const data = {
+          problemId: problem.id, selectedApproach: selected.id, language, sourceOpen,
+          approaches: approaches.slice(0, 5).map(({ id, approach, sourceName }) => ({ id, approach, sourceName })),
+        };
+        return { message: "Available attributed approaches.", data, modelData: data };
+      },
+    },
+    explanation_select: {
+      description: "Select the built-in approach by approachId from explanation_read_approaches, optional language (python/cpp), optional matching problemId.",
+      run: (args) => {
+        const input = z.strictObject({
+          problemId: target, approachId: z.string().max(100), language: z.enum(["python", "cpp"]).optional(),
+        }).safeParse(args);
+        const next = input.success && approaches.find(({ id }) => id === input.data.approachId);
+        if (!input.success || !next) return { message: "Choose a listed approach." };
+        if (input.data.language && !next.code[input.data.language]) return { message: "That language is not available for this approach." };
+        setApproachId(next.id);
+        if (input.data.language) setLanguage(input.data.language);
+        return { message: `Showing the ${next.approach} approach.` };
+      },
+    },
+    explanation_open_source: {
+      description: "Show source and license links for the current approach. Optional matching problemId.",
+      run: (args) => {
+        if (!z.strictObject({ problemId: target }).safeParse(args).success) return { message: "Open that explanation first." };
+        setSourceOpen(true);
+        return { message: "The source and license links are open below the selected approach." };
+      },
+    },
+  } : {});
   if (loading)
     return (
       <p role="status" className="text-muted">
@@ -110,15 +157,13 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
         </button>
       </div>
     );
-  if (!reference)
+  if (!reference || !selected)
     return (
       <p className="text-muted text-sm">
         A built-in explanation isn’t available for this full-catalog problem
         yet. Use the LeetCode explanation or your own notes.
       </p>
     );
-  const approaches = getProblemApproaches(reference);
-  const selected = approaches.find((approach) => approach.id === approachId) ?? approaches[0];
   const selectedLanguage = selected.code[language] ? language : "python";
   const [reasoning, pitfalls] = selected.explanation.split(
     "\n\n### Things to watch for\n\n",
@@ -188,7 +233,7 @@ export function ProblemExplanation({ problem }: { problem: Problem }) {
           </div>
         </details>
       )}
-      <ProblemExplanationFootnote reference={selected} />
+      <ProblemExplanationFootnote reference={selected} open={sourceOpen} onToggle={setSourceOpen} />
     </div>
   );
 }

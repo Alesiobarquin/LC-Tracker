@@ -1,13 +1,45 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { useRegisterCoachTools } from '../coach/commands';
 import type { Problem } from '../data/problems';
 import { getReferenceProblems } from '../seo/catalog';
 import { Input, PageHeader } from './ui';
 
 export function ExplanationDirectoryContent({ problems }: { problems: Problem[] }) {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const filtered = problems.filter(problem => `${problem.title} ${problem.category}`.toLowerCase().includes(search.toLowerCase()));
   const categories = [...new Set(filtered.map(problem => problem.category))];
+  useRegisterCoachTools({
+    explanations_read_index: {
+      kind: 'read',
+      description: 'Read up to five matching titles and identifiers from the open explanation directory.',
+      run: () => {
+        const data = { count: filtered.length, problems: filtered.slice(0, 5).map(({ id, title, category }) => ({ id, title, category })) };
+        return { message: `${filtered.length} explanations match.`, data, modelData: data };
+      },
+    },
+    explanations_search: {
+      description: 'Filter the explanation directory by title or topic. Provide query.',
+      run: (args) => {
+        const parsed = z.strictObject({ query: z.string().trim().max(100) }).safeParse(args);
+        if (!parsed.success) return { message: 'Enter a title or topic.' };
+        setSearch(parsed.data.query);
+        return { message: 'Explanation search updated.' };
+      },
+    },
+    explanations_open: {
+      description: 'Open a known reference from the explanation index using problemId.',
+      run: (args) => {
+        const parsed = z.strictObject({ problemId: z.string().max(150) }).safeParse(args);
+        const problem = parsed.success && problems.find(({ id }) => id === parsed.data.problemId);
+        if (!problem) return { message: 'Select a problem from the explanation directory.' };
+        navigate(`/library/${encodeURIComponent(problem.id)}/explanation`);
+        return { message: `Opened the attributed explanation for ${problem.title}.` };
+      },
+    },
+  });
   return (
     <div className="explanation-directory space-y-8 pb-12">
       <nav aria-label="Breadcrumb" className="text-sm text-muted flex flex-wrap gap-2">

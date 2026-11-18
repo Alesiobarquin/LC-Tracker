@@ -16,6 +16,8 @@ import { queryClient } from './lib/queryClient';
 import { userDataQueryKeys } from './lib/userDataQueryKeys';
 import { PublicPageFallback } from './components/PublicPageFallback';
 import { NotFound } from './components/NotFound';
+import { CoachHost } from './coach/CoachHost';
+import { CoachLauncher } from './coach/CoachLauncher';
 
 const ExplanationDirectory = lazy(() => import('./components/ExplanationDirectory').then(m => ({ default: m.ExplanationDirectory })));
 const StudyPlanGuide = lazy(() => import('./components/StudyPlanGuide').then(m => ({ default: m.StudyPlanGuide })));
@@ -45,16 +47,8 @@ function RealtimeSyncHost({ userId }: { userId: string | null }) {
 }
 
 export default function App() {
-  const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
   const { user, isLoaded: authLoaded } = useUser();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const rawPath = location.pathname;
-  const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
-  const isAuthPage = path === '/login' || path === '/sign-up';
-  const [bootTimedOut, setBootTimedOut] = React.useState(false);
   const previousUserId = React.useRef<string | null>(null);
-
   useEffect(() => {
     if (!authLoaded) return;
     const userId = user?.id ?? null;
@@ -68,6 +62,22 @@ export default function App() {
     previousUserId.current = userId;
     useStore.getState().setSessionUser(userId);
   }, [authLoaded, user?.id]);
+
+
+  return user
+    ? <CoachHost key={user.id} owner={user.id} user={user}><Workspace /></CoachHost>
+    : <Workspace />;
+}
+
+function Workspace() {
+  const { onboardingComplete, isLoading: settingsLoading, error: settingsError } = useUserSettings();
+  const { user, isLoaded: authLoaded } = useUser();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const rawPath = location.pathname;
+  const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
+  const isAuthPage = path === '/login' || path === '/sign-up';
+  const [bootTimedOut, setBootTimedOut] = React.useState(false);
 
   const handleOnboardingComplete = () => {
     navigate('/dashboard');
@@ -136,7 +146,7 @@ export default function App() {
 
   if (!user) {
     if (!isPublicAppRoute) {
-      const isPrivateRoute = /^\/(dashboard|study-plan|analytics|settings|onboarding|admin|timer|recall)(\/|$)/.test(path);
+      const isPrivateRoute = /^\/(dashboard|study-plan|analytics|settings|onboarding|admin|timer|recall|coach)(\/|$)/.test(path);
       return isPrivateRoute ? <Navigate to="/" replace /> : <NotFound />;
     }
   }
@@ -146,6 +156,7 @@ export default function App() {
       return (
         <>
           <RealtimeSyncHost userId={user.id} />
+          <CoachLauncher className="quiet-action m-4">Study chat</CoachLauncher>
           <Suspense fallback={<RouteFallback />}>
             <AdminDashboard />
           </Suspense>
@@ -186,6 +197,7 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/study-plan" element={<StudyPlanGuide />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/coach" element={<div id="coach-page" />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/recall/:problemId" element={<RecallPage />} />
                 <Route path="/timer" element={<TimerPage />} />

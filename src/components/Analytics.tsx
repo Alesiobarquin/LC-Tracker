@@ -30,6 +30,9 @@ import type { SessionTiming } from "../types";
 import { PageHeader, QueryErrorBanner } from "./ui";
 import { SectionHeading } from "./ui/StudyTrace";
 import { AnalyticsSkeleton } from "./loadingSkeletons";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
+import { CoachLauncher } from "../coach/CoachLauncher";
 
 const percent = (passes: number, total: number) =>
   total ? `${Math.round((passes / total) * 100)}%` : "—";
@@ -147,6 +150,37 @@ export function Analytics() {
   const viewedCoding = viewedProgress?.history.find(
     (h) => h.sessionId === viewing?.id || h.date === viewing?.date,
   );
+  useRegisterCoachTools(user && catalogReady && !progressQuery.error && !timingQuery.error ? {
+    evidence_history: {
+      description: "Use Evidence history. action list, earlier, or inspect. Inspect accepts the id from a listed history record.",
+      run: async args => {
+        const parsed = z.strictObject({ action: z.enum(["list", "earlier", "inspect"]).default("list"), id: z.string().max(80).optional() }).safeParse(args);
+        if (!parsed.success) return { message: "Choose list, earlier, or a session ID from this history." };
+        if (parsed.data.action === "earlier") {
+          await loadOlder();
+          return { message: "Check the loaded entries or any read error in Evidence." };
+        }
+        if (parsed.data.action === "inspect") {
+          const entry = history.find(record => record.id === parsed.data.id);
+          if (!entry) return { message: "That session is outside the currently loaded history." };
+          setViewing(entry);
+          return { message: "Opened the saved session record." };
+        }
+        const data = history.slice(0, 5).map(record => ({
+          title: problemMap[record.problemId]?.title ?? "Historical problem",
+          date: record.date, elapsedSeconds: record.elapsedSeconds, kind: record.sessionType,
+        }));
+        return {
+          message: history.length ? `${history.length} loaded session records.` : "There are no loaded session records.",
+          data,
+          actions: history.slice(0, 5).map(record => ({
+            label: `Inspect ${problemMap[record.problemId]?.title ?? "session"}`,
+            name: "evidence_history", args: { action: "inspect", id: record.id },
+          })),
+        };
+      },
+    },
+  } : {});
   if (
     catalogError ||
     progressQuery.error ||
@@ -158,6 +192,7 @@ export function Analytics() {
     return <AnalyticsSkeleton />;
   return (
     <div className="evidence-page space-y-7 pb-12">
+      <CoachLauncher className="quiet-action">Ask about these results</CoachLauncher>
       <PageHeader
         title="Learning evidence"
         description="Track delayed implementation, recall, transfer to new problems, and sustainable study time."

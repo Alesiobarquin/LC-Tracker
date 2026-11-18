@@ -16,6 +16,8 @@ flowchart LR
   Browser --> Proxy[Vercel /api/leetcode-ac]
   Proxy --> LeetCode[LeetCode GraphQL]
   Browser --> Fallback[Alfa LeetCode API on Render]
+  Browser --> OpenRouter[OpenRouter via user key]
+  OpenRouter --> Azure[Microsoft Azure inference]
 ```
 
 | Layer | Role | Code |
@@ -30,17 +32,26 @@ flowchart LR
 | Zustand | Timer, owner, stable operation ID, and pending completion in sessionStorage | `src/store/useStore.ts` |
 | Scheduling helpers | Review intervals, daily plans, sprint progression, streaks | `src/utils/progressHelpers.ts`, `src/utils/dateUtils.ts` |
 | LeetCode integration | Up to 50 recent accepted submissions; same-origin proxy with external fallback | `src/services/leetcode.ts`, `server/leetcodeAc.ts` |
+| Study chat | Optional browser-to-OpenRouter inference. Commands run through the signed-in app and its existing data services. | `src/coach/` |
 | Versioned datasets | Catalog, premium metadata, patterns, and syntax cards | `src/data/`, `scripts/` |
 | Monitoring | Read-only provider readiness, hourly GitHub checks, optional sanitized Sentry events | `api/health.ts`, `.github/workflows/`, `src/lib/telemetry.ts` |
 
-There is no scheduled reminder delivery service or running AI tutor in the
-inspected application. Recommendations are computed when the app is used. The
+Recommendations are computed when the app is used. The
 Alfa API is external; the repository does not establish ownership of its Render
 service. Clerk IDs are text; a historical migration replaces Supabase auth UUIDs
 and updates RLS. Browser admin flags control the UI, not database authorization.
 Production also has a feedback insert trigger calling Formspree through
 `supabase_functions.http_request`; this provider-managed trigger was discovered
 in the database export. It is disabled in the isolated restore check.
+
+Study chat holds the learner's OpenRouter key and conversation in tab memory.
+Custom questions can make one intent request and one synthesis request using
+explicitly projected study facts. The pinned route is GPT-4.1 Nano on Microsoft
+Azure. The app requires structured outputs, zero data retention, disabled data
+collection and no provider fallback. Inference uses the learner's OpenRouter
+account. The price ceiling selected on November 18, 2026 is $0.10 per million input
+tokens and $0.40 per million output tokens. The scripted provider verifies the
+client contract and isolates development from live billing. [OpenRouter model and provider details](https://openrouter.ai/openai/gpt-4.1-nano) · [Routing parameters](https://openrouter.ai/docs/guides/routing/provider-selection)
 
 ## Reliability repairs
 

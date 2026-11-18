@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useCallback,
+  useRef,
 } from "react";
 import { SyntaxCard } from "../data/syntaxCards";
 import {
@@ -26,6 +27,10 @@ import { SyntaxHighlightedCode } from "./SyntaxHighlightedCode";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { TraceIndex } from "./ui/StudyTrace";
 import { Modal } from "./ui/Modal";
+import { useRegisterCoachTools, type CoachToolResult } from "../coach/commands";
+import { CoachLauncher } from "../coach/CoachLauncher";
+import { safeUUID } from "../utils/uuid";
+import { z } from "zod";
 
 export type SessionOrderMode = "random" | "category";
 
@@ -34,10 +39,17 @@ interface SyntaxFlashcardSessionProps {
   title: string;
   orderMode?: SessionOrderMode;
   onClose: () => void;
+  autoBegin?: boolean;
 }
 
 type Phase = "active" | "summary";
 type Rating = 1 | 2 | 3;
+const flashcardCommand = z.strictObject({
+  action: z.enum(["begin", "flip", "next", "previous", "rate", "retry", "retry_all", "retry_struggled", "exit"]),
+  cardHandle: z.string().optional(),
+  flipped: z.boolean().optional(),
+  rating: z.enum(["know", "again"]).optional(),
+});
 
 interface SessionResult {
   cardId: string;
@@ -331,6 +343,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
   title,
   orderMode: initialOrderMode = "random",
   onClose,
+  autoBegin = false,
 }) => {
   const { logSyntaxPractice } = useSyntaxProgress();
 
@@ -352,9 +365,15 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
   const [startTime, setStartTime] = useState(Date.now());
   const [elapsed, setElapsed] = useState(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [showHelp, setShowHelp] = useState(true);
+  const [showHelp, setShowHelp] = useState(!autoBegin);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [hasLeftHelp, setHasLeftHelp] = useState(false);
+  const [hasLeftHelp, setHasLeftHelp] = useState(autoBegin);
+  const [initialHandle] = useState(safeUUID);
+  const cardHandle = useRef(initialHandle);
+  const pendingRating = useRef<{ id: string; handle: string; rating: Rating } | null>(null);
+  const saving = useRef(false);
+  const [ratingError, setRatingError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const currentCard = queue[currentIndex];
   const currentRating = currentCard
@@ -393,13 +412,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     }
   }, [orderMode]);
 
-  const handleFlip = useCallback(() => {
+  const handleFlip = useCallback((flipped?: boolean) => {
     if (phase !== "active" || !currentCard) return;
-    setIsFlipped((flipped) => !flipped);
+    setIsFlipped((previous) => flipped ?? !previous);
   }, [phase, currentCard]);
 
   const goPrevious = useCallback(() => {
-    if (currentIndex === 0) return;
+    if (currentIndex === 0 || pendingRating.current) return;
+    cardHandle.current = safeUUID();
     setCurrentIndex((index) => Math.max(index - 1, 0));
     setIsFlipped(false);
     setShowExplanation(false);
@@ -407,10 +427,29 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
   const applyRatingAndAdvance = useCallback(
     async (rating: Rating) => {
-      if (!currentCard || phase !== "active") return;
+      if (!currentCard || phase !== "active" || saving.current) return false;
+      const operation = pendingRating.current ?? { id: safeUUID(), handle: cardHandle.current, rating };
+      if (operation.handle !== cardHandle.current || operation.rating !== rating) {
+        setRatingError("Retry the pending card rating before changing it.");
+        return false;
+      }
+      pendingRating.current = operation;
+      saving.current = true;
+      setIsSaving(true);
+      setRatingError("");
+      try {
+        await logSyntaxPractice(currentCard.id, rating, operation.id);
+      } catch {
+        setRatingError("Could not confirm the rating. Retry to record it once.");
+        return false;
+      } finally {
+        saving.current = false;
+        setIsSaving(false);
+      }
+      pendingRating.current = null;
+      cardHandle.current = safeUUID();
 
       const previousRating = sessionRatings[currentCard.id];
-      await logSyntaxPractice(currentCard.id, rating);
       setSessionRatings((prev) => ({ ...prev, [currentCard.id]: rating }));
       setResults((prev) => {
         const without = prev.filter((r) => r.cardId !== currentCard.id);
@@ -427,7 +466,6 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
           setQueue(nextQueue);
         }
       }
-
       if (currentIndex >= nextQueue.length - 1) {
         setPhase("summary");
         setIsFlipped(false);
@@ -439,6 +477,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         setIsFlipped(false);
         setShowExplanation(false);
       }
+      return true;
     },
     [
       currentCard,
@@ -451,18 +490,19 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
   );
 
   const goNext = useCallback(async () => {
-    if (!currentCard || currentIndex >= queue.length - 1) return;
+    if (!currentCard || currentIndex >= queue.length - 1 || pendingRating.current) return false;
 
     if (!sessionRatings[currentCard.id]) {
-      await applyRatingAndAdvance(1);
-      return;
+      return applyRatingAndAdvance(1);
     }
 
+    cardHandle.current = safeUUID();
     const nextIndex = currentIndex + 1;
     setCurrentIndex(nextIndex);
     setMaxVisitedIndex((prev) => Math.max(prev, nextIndex));
     setIsFlipped(false);
     setShowExplanation(false);
+    return true;
   }, [
     currentCard,
     currentIndex,
@@ -475,13 +515,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
     async (choice: 1 | 2) => {
       if (!currentCard || phase !== "active") return;
       const srsRating = choice === 1 ? 1 : 3;
-      await applyRatingAndAdvance(srsRating);
+      return applyRatingAndAdvance(srsRating);
     },
     [currentCard, phase, applyRatingAndAdvance],
   );
 
   const restartSession = useCallback(
     (nextCards: SyntaxCard[], nextTitle: string) => {
+      cardHandle.current = safeUUID();
       setQueue(orderSessionCards(nextCards, orderMode));
       setCurrentIndex(0);
       setIsFlipped(false);
@@ -502,6 +543,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
   const handleCloseHelp = useCallback(() => {
     if (!hasLeftHelp) {
+      cardHandle.current = safeUUID();
       setQueue(orderSessionCards(cards, orderMode));
       setHasLeftHelp(true);
     }
@@ -509,6 +551,91 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
   }, [cards, hasLeftHelp, orderMode]);
 
   const struggledCards = cards.filter((card) => sessionRatings[card.id] === 1);
+  const exitSession = () => {
+    if (pendingRating.current) {
+      setRatingError("Retry the pending card rating before leaving.");
+      return;
+    }
+    if (phase === "summary" || results.length === 0) onClose();
+    else setShowExitConfirm(true);
+  };
+  const handle = cardHandle.current;
+  const cardState = { cardHandle: handle, position: currentIndex + 1, total: queue.length, flipped: isFlipped };
+  const cardStatus: CoachToolResult = phase === "summary"
+    ? { message: `${results.length} cards rated. ${struggledCards.length} to review again.`, actions: [
+      ...(struggledCards.length ? [{ label: "Review struggled", name: "flashcards", args: { action: "retry_struggled" } }] : []),
+      { label: "Retry all", name: "flashcards", args: { action: "retry_all" } },
+    ] }
+    : showHelp ? { message: "The syntax deck is ready.", actions: [{ label: "Begin cards", name: "flashcards", args: { action: "begin" } }] }
+      : {
+        message: `Card ${currentIndex + 1} of ${queue.length}. ${isFlipped ? "Answer shown." : "Answer hidden."}${isSaving ? " Saving rating." : ratingError ? ` ${ratingError}` : ""}`,
+        data: cardState,
+        modelData: cardState,
+        actions: isSaving ? [] : pendingRating.current
+          ? [{ label: "Retry rating", name: "flashcards", args: { action: "retry", cardHandle: handle } }]
+          : [
+            { label: isFlipped ? "Hide answer" : "Reveal answer", name: "flashcards", args: { action: "flip", cardHandle: handle, flipped: !isFlipped } },
+            { label: "Know it", name: "flashcards", args: { action: "rate", cardHandle: handle, rating: "know" } },
+            { label: "Practice again", name: "flashcards", args: { action: "rate", cardHandle: handle, rating: "again" } },
+          ],
+      };
+  useRegisterCoachTools({
+    flashcard_status: {
+      kind: "read",
+      description: "Read the current syntax deck position and current cardHandle. No arguments.",
+      live: cardStatus,
+      run: () => cardStatus,
+    },
+    flashcards: {
+      description: "Operate the open syntax deck. action is begin, flip, next, previous, rate, retry, retry_all, retry_struggled, or exit. Card actions require cardHandle from flashcard_status. flip needs desired boolean flipped. rate needs the learner's self-report rating (know or again).",
+      run: async (args) => {
+        const parsed = flashcardCommand.safeParse(args);
+        if (!parsed.success) return { message: "Specify a valid flashcard action and its values." };
+        const { action, cardHandle: target, flipped, rating } = parsed.data;
+        if (action === "exit") {
+          exitSession();
+          return { message: pendingRating.current ? "Confirm the pending rating before leaving." : "Exit requested." };
+        }
+        if (action === "begin") {
+          if (showHelp) handleCloseHelp();
+          return { message: "Syntax practice is open." };
+        }
+        if (action === "retry_all" || action === "retry_struggled") {
+          if (phase !== "summary") return { message: "Complete the current deck first." };
+          const nextCards = action === "retry_all" ? cards : struggledCards;
+          if (!nextCards.length) return { message: "There are no struggled cards to review." };
+          restartSession(nextCards, action === "retry_all" ? title : `${title} · struggled`);
+          return { message: `Opened ${nextCards.length} cards.` };
+        }
+        if (showHelp || showExitConfirm || phase !== "active" || !currentCard)
+          return { message: "Open the active card to use this control." };
+        if (!target || target !== cardHandle.current)
+          return { message: "The displayed card changed. Read the current card before acting." };
+        if (saving.current) return { message: "The current rating is saving." };
+        if (pendingRating.current && action !== "retry") return { message: "Retry the pending card rating first." };
+        if (action === "flip") {
+          if (flipped === undefined) return { message: "Choose whether to show or hide the answer." };
+          handleFlip(flipped);
+          return { message: flipped ? "Answer shown on the card." : "Answer hidden." };
+        }
+        if (action === "previous") {
+          if (!canGoPrevious) return { message: "This is the first card." };
+          goPrevious();
+          return { message: "Opened the previous card." };
+        }
+        if (action === "next") {
+          if (!canGoNext) return { message: "Rate the final card to finish." };
+          if (!currentRating) return { message: "Rate the current card before advancing." };
+          const moved = await goNext();
+          return { message: moved ? "Opened the next card." : "The rating is unconfirmed. Retry to continue." };
+        }
+        const reported = action === "retry" ? pendingRating.current?.rating : rating === "know" ? 3 : rating === "again" ? 1 : undefined;
+        if (reported === undefined) return { message: "Report whether you knew the answer or need to practice it again." };
+        const saved = await applyRatingAndAdvance(reported);
+        return { message: saved ? "Card rating saved." : "The rating is unconfirmed. Retry to continue." };
+      },
+    },
+  });
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -523,7 +650,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         return;
       }
 
-      if (isTypingTarget(e.target)) return;
+      if (isTypingTarget(e.target) || (e.target instanceof HTMLElement && e.target.closest('[aria-label="Study chat"]'))) return;
+      if (pendingRating.current && e.key === "Escape") return;
 
       if (phase === "active") {
         if (e.key === "Escape") {
@@ -649,6 +777,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
         </div>
 
         <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+          <CoachLauncher aria-label="Study chat" className="quiet-action p-2" />
           <ThemeSwitcher compact />
           {phase !== "summary" && (
             <div className="hidden sm:flex items-center gap-2 text-sm text-subtle font-mono tabular-nums">
@@ -670,10 +799,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
           <button
             aria-label="Exit session"
-            onClick={() => {
-              if (phase === "summary" || results.length === 0) onClose();
-              else setShowExitConfirm(true);
-            }}
+            onClick={exitSession}
             className="p-2.5 rounded-xl text-subtle hover:text-body hover:bg-muted-surface transition-colors"
             title="Exit (Esc)"
           >
@@ -1006,7 +1132,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                   >
                     <button
                       type="button"
-                      onClick={handleFlip}
+                      onClick={() => handleFlip()}
                       aria-pressed={isFlipped}
                       className="flex h-full w-full flex-col justify-between p-5 sm:p-10 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
                     >
@@ -1113,7 +1239,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                       <div
                         role="button"
                         tabIndex={0}
-                        onClick={handleFlip}
+                        onClick={() => handleFlip()}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
@@ -1163,6 +1289,14 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
               </div>
 
               <div className="flex-shrink-0 border-t border-line/80 bg-canvas/90 px-4 sm:px-6 py-5 sm:py-6">
+                {ratingError && (
+                  <div role="alert" className="mb-4 text-center text-sm text-danger">
+                    {ratingError}{" "}
+                    <button type="button" className="quiet-action" disabled={isSaving} onClick={() => {
+                      if (pendingRating.current) void applyRatingAndAdvance(pendingRating.current.rating);
+                    }}>Retry rating</button>
+                  </div>
+                )}
                 <p className="hidden sm:block text-center text-sm text-subtle mb-5">
                   Press <span className="text-muted">Space</span> to flip ·{" "}
                   <span className="text-muted">E</span> to explain ·{" "}
@@ -1176,7 +1310,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                   <button
                     type="button"
                     onClick={goPrevious}
-                    disabled={!canGoPrevious}
+                    disabled={!canGoPrevious || !!pendingRating.current}
                     aria-label="Previous card"
                     className={clsx(
                       "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-lg border transition-colors",
@@ -1194,6 +1328,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                       void handleBinaryChoice(1);
                     }}
                     aria-label="Don't know · practice again"
+                    disabled={!!pendingRating.current}
                     className="flex flex-1 min-h-12 items-center justify-center gap-2 sm:gap-3 rounded-lg border border-line-strong bg-surface px-3 sm:px-6 py-3 sm:py-4 hover:bg-muted-surface transition-colors group text-body"
                   >
                     <X size={18} className="hidden sm:block" />
@@ -1214,6 +1349,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                       void handleBinaryChoice(2);
                     }}
                     aria-label="Know it · continue"
+                    disabled={!!pendingRating.current}
                     className="flex flex-1 min-h-12 items-center justify-center gap-2 sm:gap-3 rounded-lg border border-line-strong bg-surface px-3 sm:px-6 py-3 sm:py-4 hover:bg-muted-surface transition-colors group text-body"
                   >
                     <span className="hidden sm:inline text-lg font-mono tabular-nums">
@@ -1233,7 +1369,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
                     onClick={() => {
                       void goNext();
                     }}
-                    disabled={!canGoNext}
+                    disabled={!canGoNext || !!pendingRating.current}
                     aria-label="Next card"
                     className={clsx(
                       "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-lg border transition-colors",

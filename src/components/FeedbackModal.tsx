@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { z } from 'zod';
+import { useRegisterCoachTools } from '../coach/commands';
 import { X, Send, AlertCircle, CheckCircle2, ImagePlus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useUser } from '@clerk/react';
@@ -6,17 +8,69 @@ import { safeUUID } from '../utils/uuid';
 
 interface FeedbackModalProps {
   isOpen: boolean;
+  onOpen?: () => void;
   onClose: () => void;
 }
 
-export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
+export function FeedbackModal({ isOpen, onOpen, onClose }: FeedbackModalProps) {
   const { user } = useUser();
   const [type, setType] = useState('feature_request');
   const [message, setMessage] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitting = useRef(false);
+  const imageInput = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<'idle' | 'success' | string>('idle');
+  const [sentFeedback, setSentFeedback] = useState(false);
+  useEffect(() => {
+    setMessage('');
+    setImageFile(null);
+    setImagePreview(null);
+    setStatus('idle');
+    setSentFeedback(false);
+  }, [user?.id]);
+  useEffect(() => () => { if (imagePreview) URL.revokeObjectURL(imagePreview); }, [imagePreview]);
+
+  useRegisterCoachTools(user && (isOpen || onOpen) ? {
+    feedback_draft: {
+      description: 'Open the native feedback form with optional type (feature_request/bug/general) and message (the requested draft). The user chooses attachments and explicitly presses Send Feedback.',
+      run: (args) => {
+        const parsed = z.strictObject({
+          type: z.enum(['feature_request', 'bug', 'general']).optional(),
+          message: z.string().trim().min(1).max(4000).optional(),
+        }).safeParse(args);
+        if (!parsed.success || submitting.current || status === 'success') {
+          return { message: 'The feedback draft cannot be changed right now.' };
+        }
+        if (parsed.data.type) setType(parsed.data.type);
+        if (parsed.data.message) setMessage(parsed.data.message);
+        if (!isOpen) onOpen?.();
+        return { message: 'Feedback form opened. Review the draft, choose an optional image, and press Send Feedback there.' };
+      },
+    },
+    feedback_status: {
+      kind: 'read',
+      description: 'Read feedback draft and delivery state without message text or attachment contents.',
+      run: () => ({
+        message: status === 'success' || (sentFeedback && !isOpen) ? 'Feedback sent.' : isOpen ? 'The feedback form is open.' : 'The feedback form is closed.',
+        data: { type, hasDraft: Boolean(message.trim()), hasImage: Boolean(imageFile), isSubmitting, lastSendConfirmed: sentFeedback, failed: status.includes('Failed') },
+      }),
+    },
+    ...(isOpen && !imageFile ? {
+      feedback_attach_image: {
+        description: 'Open the native image picker for the current feedback draft. Takes no arguments.',
+        run: (args: Record<string, unknown>) => {
+          if (Object.keys(args).length || submitting.current) return { message: 'This image picker is unavailable.' };
+          if (navigator.userActivation?.isActive) {
+            imageInput.current?.click();
+            return { message: 'Select an image in the browser picker.' };
+          }
+          return { message: 'Select Image in the feedback form to choose an attachment.' };
+        },
+      },
+    } : {}),
+  } : {});
 
   if (!isOpen) return null;
 
@@ -26,8 +80,10 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       setStatus('Please sign in to send feedback.');
       return;
     }
-    if (!message.trim()) return;
+    if (!message.trim() || submitting.current || status === 'success') return;
 
+    submitting.current = true;
+    setSentFeedback(false);
     setIsSubmitting(true);
     setStatus('idle');
 
@@ -72,6 +128,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       if (error) throw error;
 
       setStatus('success');
+      setSentFeedback(true);
       setTimeout(() => {
         onClose();
         setStatus('idle');
@@ -85,13 +142,14 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       console.error('Operation failed: Error submitting feedback');
       setStatus('Failed to send. Please try again.');
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/50"
       onClick={onClose}
     >
       <div
@@ -135,8 +193,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-body">Type of Feedback</label>
+            <label htmlFor="feedback-type" className="text-sm font-medium text-body">Type of Feedback</label>
             <select
+              id="feedback-type"
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="w-full bg-canvas border border-line rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
@@ -148,8 +207,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-body">Message</label>
+            <label htmlFor="feedback-message" className="text-sm font-medium text-body">Message</label>
             <textarea
+              id="feedback-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Tell us what you think..."
@@ -179,6 +239,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             ) : (
               <div>
                 <input
+                  ref={imageInput}
                   type="file"
                   id="screenshot-upload"
                   accept="image/png, image/jpeg, image/webp"
@@ -213,7 +274,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
           <button
             type="submit"
-            disabled={isSubmitting || !message.trim() || !user}
+            disabled={isSubmitting || status === 'success' || !message.trim() || !user}
             className="w-full flex items-center justify-center gap-2 py-3 bg-accent hover:bg-accent-strong disabled:opacity-50 disabled:hover:bg-accent text-on-accent font-medium rounded-lg transition-colors"
           >
             {isSubmitting ? 'Sending...' : 'Send Feedback'}

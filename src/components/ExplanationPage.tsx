@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
 import { ensureExtendedCatalogLoaded, problemMap } from "../data/problems";
 import { useProblemProgress } from "../hooks/useUserData";
 import { useStore } from "../store/useStore";
@@ -38,6 +40,22 @@ export function ExplanationPage() {
       });
     return () => { cancelled = true; };
   }, [problemId]);
+
+  const notes = problem ? progress[problem.id]?.notes : undefined;
+  const awaitingRecall = Boolean(problem && activeRecall?.problemId === problem.id && !activeRecall.revealed);
+  useRegisterCoachTools(problem && !awaitingRecall ? {
+    explanation_set_reference: {
+      description: "Switch between the current problem's personal or built-in explanation. Provide source (personal or built_in) and optional matching problemId.",
+      run: (args) => {
+        const input = z.strictObject({
+          source: z.enum(["personal", "built_in"]), problemId: z.string().refine((id) => id === problem.id).optional(),
+        }).safeParse(args);
+        if (!input.success || (input.data.source === "personal" && !notes)) return { message: "That explanation source is unavailable." };
+        setPersonal(input.data.source === "personal");
+        return { message: input.data.source === "personal" ? "Your saved explanation is displayed." : "The built-in explanation is displayed." };
+      },
+    },
+  } : {});
   if (!problem && catalogError)
     return (
       <div role="alert">
@@ -58,7 +76,7 @@ export function ExplanationPage() {
         </Link>
       </p>
     );
-  if (activeRecall?.problemId === problem.id && !activeRecall.revealed)
+  if (awaitingRecall)
     return (
       <div className="premium-card p-6 space-y-4">
         <p>
@@ -70,7 +88,6 @@ export function ExplanationPage() {
         </Link>
       </div>
     );
-  const notes = progress[problem.id]?.notes;
   const custom = parsePersonalExplanation(notes ?? "");
   return (
     <div className="recall-workspace mx-auto space-y-6 pb-12">

@@ -19,7 +19,7 @@ for (const sitemap of sitemaps) {
 }
 assert.equal(new Set(routes).size, routes.length, 'Duplicate sitemap URLs');
 const knownRoutes = new Set(routes);
-const privatePath = /^\/(login|dashboard|study-plan|settings|analytics|timer|recall|onboarding|admin|sso-callback)(\/|$)/;
+const privatePath = /^\/(login|dashboard|study-plan|settings|analytics|timer|recall|onboarding|admin|sso-callback|coach)(\/|$)/;
 const titles = new Set();
 let codePages = 0;
 for (const route of routes) {

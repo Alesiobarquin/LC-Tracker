@@ -1,6 +1,9 @@
 import { Logo } from "./Logo";
 import { TraceIndex } from "./ui/StudyTrace";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
+import { CoachLauncher } from "../coach/CoachLauncher";
 import { fetchLeetCodeProfile } from "../services/leetcode";
 import {
   BookOpen,
@@ -16,6 +19,7 @@ import { clsx } from "clsx";
 import { useUserSettings } from "../hooks/useUserData";
 import type { AppSettings } from "../types";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { CoachSetup } from "../coach/CoachSetup";
 
 // ─────────────────────────────────────────────────────────
 // Types
@@ -73,22 +77,37 @@ const StepLeetCode: React.FC<{
   const [syncCount, setSyncCount] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleConnect = async () => {
-    if (!username.trim()) return;
+  const handleConnect = async (value = username) => {
+    if (!value.trim() || status === "loading") return { message: "Enter your LeetCode username to connect." };
     setStatus("loading");
     setErrorMsg("");
     try {
-      const subs = await fetchLeetCodeProfile(username.trim());
+      const subs = await fetchLeetCodeProfile(value.trim());
       setSyncCount(subs.length);
       setStatus("success");
-      onSuccess(username.trim());
+      onSuccess(value.trim());
+      return { message: `LeetCode profile confirmed. Found ${subs.length} recent accepted submissions.` };
     } catch {
       setStatus("error");
       setErrorMsg(
         "Couldn't reach LeetCode's API. It may be rate-limited or temporarily unavailable.",
       );
+      return { message: "Could not confirm the LeetCode profile. Retry in setup." };
     }
   };
+
+  useRegisterCoachTools({
+    onboarding_check_leetcode: {
+      description: "Connect a LeetCode profile during setup. Provide the user's username.",
+      run: (args) => {
+        const parsed = z.strictObject({ username: z.string().trim().regex(/^@?[\w-]{1,60}$/) }).safeParse(args);
+        if (!parsed.success) return { message: "Provide a valid LeetCode username." };
+        const name = parsed.data.username.replace(/^@/, "");
+        onChange(name);
+        return handleConnect(name);
+      },
+    },
+  });
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -142,7 +161,7 @@ const StepLeetCode: React.FC<{
             className="min-w-0 flex-1 bg-canvas border border-line rounded-md px-4 py-3 text-foreground placeholder-subtle focus:outline-none focus:border-accent/50 transition-colors"
           />
           <button
-            onClick={handleConnect}
+            onClick={() => void handleConnect()}
             disabled={status === "loading" || !username.trim()}
             className="brand-button-secondary px-4 py-3 disabled:opacity-40 disabled:cursor-not-allowed text-sm rounded-md transition-colors flex items-center gap-2 shrink-0"
           >
@@ -394,6 +413,22 @@ const StepLaunch: React.FC<{
         </div>
       </div>
 
+      <section aria-labelledby="onboarding-study-chat" className="space-y-2 border-y border-line py-4">
+        <h3 id="onboarding-study-chat" className="text-sm font-medium text-foreground">
+          Study chat <span className="ml-1 text-xs font-normal text-muted">Optional</span>
+        </h3>
+        <p className="text-xs leading-relaxed text-muted">
+          Use plan and evidence shortcuts without a key. Connect an OpenRouter key for custom
+          questions here or later under Study chat in Settings.
+        </p>
+        <details>
+          <summary className="cursor-pointer text-sm text-accent">Set up Study chat</summary>
+          <div className="mt-3">
+            <CoachSetup />
+          </div>
+        </details>
+      </section>
+
       <div className="space-y-2">
         <p className="text-xs font-semibold text-subtle uppercase tracking-wider">
           Quick tips
@@ -444,6 +479,7 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
 
   const [step, setStep] = useState(1);
   const [isLaunching, setIsLaunching] = useState(false);
+  const launching = useRef(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
 
   const [obState, setObState] = useState<OnboardingState>(() => {
@@ -488,6 +524,8 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
   );
 
   const commitSettingsAndLaunch = async () => {
+    if (launching.current) return { message: "Setup is already saving." };
+    launching.current = true;
     setIsLaunching(true);
     setLaunchError(null);
     try {
@@ -507,11 +545,15 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
       await setOnboardingComplete();
       localStorage.removeItem(ONBOARDING_DRAFT_KEY);
       onComplete();
+      return { message: "Setup saved. Today is ready." };
     } catch {
       setLaunchError(
         "Could not save your setup. Check your connection and try again.",
       );
       setIsLaunching(false);
+      return { message: "Setup was not confirmed. Your selections remain available to retry." };
+    } finally {
+      launching.current = false;
     }
   };
 
@@ -522,6 +564,50 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
     setTimeout(() => setStep(2), 1200);
   };
 
+  useRegisterCoachTools({
+    onboarding_read: {
+      kind: "read",
+      description: "Read the current setup step and selected study settings.",
+      run: () => ({
+        message: `Setup step ${step} of ${TOTAL_STEPS}.`,
+        data: {
+          step, leetcodeConnected: Boolean(obState.leetcodeUsername),
+          targetCurriculum: obState.targetCurriculum, learningMode: obState.learningMode,
+          weekdayMinutes: obState.weekdayMinutes, interviewDate: obState.targetInterviewDate, isLaunching,
+        },
+      }),
+    },
+    onboarding_update: {
+      description: "Change setup selections. Optional learningMode (CURRICULUM/EXPLORE), targetCurriculum (NEET_75/NEET_150/NEET_250/EXTENDED), targetInterviewDate (YYYY-MM-DD or empty), weekdayMinutes (15 to 120 in five-minute steps).",
+      run: (args) => {
+        const parsed = z.strictObject({
+          learningMode: z.enum(["CURRICULUM", "EXPLORE"]).optional(),
+          targetCurriculum: z.enum(["NEET_75", "NEET_150", "NEET_250", "EXTENDED"]).optional(),
+          targetInterviewDate: z.union([z.iso.date(), z.literal("")]).optional(),
+          weekdayMinutes: z.number().int().min(15).max(120).multipleOf(5).optional(),
+        }).safeParse(args);
+        if (!parsed.success || launching.current) return { message: "These setup choices are unavailable." };
+        setObState((previous) => ({ ...previous, ...parsed.data }));
+        return { message: "Setup choices updated. Review and launch to save them." };
+      },
+    },
+    onboarding_step: {
+      description: "Show a setup step by number (step: 1–4). Step 4 is the review before launch.",
+      run: (args) => {
+        const parsed = z.strictObject({ step: z.number().int().min(1).max(TOTAL_STEPS) }).safeParse(args);
+        if (!parsed.success || launching.current) return { message: "Choose a setup step from 1 to 4." };
+        setStep(parsed.data.step);
+        return { message: `Showing setup step ${parsed.data.step}.` };
+      },
+    },
+    onboarding_launch: {
+      description: "Save the user's selected setup and launch Today from the final setup step. No arguments.",
+      run: (args) => Object.keys(args).length || step !== TOTAL_STEPS
+        ? { message: "Review the setup choices on step 4 before launching." }
+        : commitSettingsAndLaunch(),
+    },
+  });
+
   return (
     <div className="onboarding-page min-h-screen bg-canvas">
       <header className="flex justify-between items-center border-b border-line px-5 sm:px-8 py-4">
@@ -529,7 +615,10 @@ export const Onboarding: React.FC<Props> = ({ onComplete }) => {
           <Logo className="text-accent" size={26} />
           LC Tracker
         </a>
-        <ThemeSwitcher />
+        <div className="flex items-center gap-2">
+          <CoachLauncher aria-label="Open study chat" className="workspace-tool" />
+          <ThemeSwitcher />
+        </div>
       </header>
       <main className="onboarding-layout">
         <aside>

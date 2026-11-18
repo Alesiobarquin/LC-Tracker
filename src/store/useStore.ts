@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ActiveSession, RecallDraft } from "../types";
+import type { StudyTask } from "../utils/study";
 import { safeUUID } from "../utils/uuid";
 import { preferenceStorage, timerStorage } from "../lib/safeStorage";
 import { recallAttemptSchema } from "../utils/studySchemas";
@@ -11,6 +12,9 @@ interface UIState {
   setSessionUser: (userId: string | null) => void;
   reviewOnlyDate: string | null;
   setReviewOnlyDate: (date: string | null) => void;
+  dayPlan: { date: string; skipped: string[]; choice?: Pick<StudyTask, "problemId" | "kind" | "minutes"> } | null;
+  skipPlanTask: (date: string, problemId: string) => void;
+  choosePlanTask: (date: string, choice?: Pick<StudyTask, "problemId" | "kind" | "minutes">) => void;
   activeSession: ActiveSession | null;
   activeRecall: RecallDraft | null;
   startRecall: (problemId: string) => void;
@@ -24,6 +28,7 @@ interface UIState {
     isColdSolve?: boolean,
     startTimestamp?: number,
     returnTo?: string | null,
+    allocation?: Pick<ActiveSession, "practiceKind" | "plannedMinutes">,
   ) => void;
   setSessionStartTimestamp: (startTimestamp: number) => void;
   updateActiveSession: (patch: Partial<ActiveSession>) => void;
@@ -104,6 +109,7 @@ export const useStore = create<UIState>()(
       setSessionUser: (userId) =>
         set((state) => ({
           sessionUserId: userId,
+          dayPlan: userId === state.sessionUserId ? state.dayPlan : null,
           reviewOnlyDate: userId ? preferenceStorage.getItem(`lc-tracker-review-only:${userId}`) : null,
           activeSession:
             !userId ||
@@ -123,10 +129,21 @@ export const useStore = create<UIState>()(
           sessionReturnTo: !userId ? null : state.sessionReturnTo,
         })),
       reviewOnlyDate: null,
+      dayPlan: null,
+      skipPlanTask: (date, problemId) => set(({ dayPlan }) => ({
+        dayPlan: {
+          date,
+          skipped: [...new Set([...(dayPlan?.date === date ? dayPlan.skipped : []), problemId])],
+          choice: dayPlan?.date === date && dayPlan.choice?.problemId !== problemId ? dayPlan.choice : undefined,
+        },
+      })),
+      choosePlanTask: (date, choice) => set(({ dayPlan }) => ({
+        dayPlan: { date, skipped: dayPlan?.date === date ? dayPlan.skipped : [], choice },
+      })),
       setReviewOnlyDate: (date) => {
         const userId = get().sessionUserId;
         if (userId) preferenceStorage.setItem(`lc-tracker-review-only:${userId}`, date ?? "");
-        set({ reviewOnlyDate: date });
+        set(({ dayPlan }) => ({ reviewOnlyDate: date, dayPlan: dayPlan && { ...dayPlan, choice: undefined } }));
       },
       activeSession: null,
       activeRecall: null,
@@ -163,6 +180,7 @@ export const useStore = create<UIState>()(
         isColdSolve = false,
         startTimestamp = Date.now(),
         returnTo = null,
+        allocation,
       ) =>
         set((state) =>
           state.activeSession || state.activeRecall
@@ -178,6 +196,7 @@ export const useStore = create<UIState>()(
                   practiceKind:
                     isReview || isColdSolve ? "coding_review" : "learning",
                   pausedSeconds: 0,
+                  ...allocation,
                   pausedAt: null,
                 },
                 sessionReturnTo: returnTo,

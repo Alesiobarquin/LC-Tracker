@@ -30,7 +30,7 @@ describe('search metadata', () => {
   });
 
   it('never indexes private screens, unknown URLs, or invented lessons', async () => {
-    for (const route of ['/dashboard', '/analytics', '/settings', '/login', '/onboarding', '/study-plan', '/admin', '/sso-callback', '/timer/two-sum', '/recall/two-sum', '/missing', '/patterns/missing', '/library/missing/explanation']) {
+    for (const route of ['/coach', '/dashboard', '/analytics', '/settings', '/login', '/onboarding', '/study-plan', '/admin', '/sso-callback', '/timer/two-sum', '/recall/two-sum', '/missing', '/patterns/missing', '/library/missing/explanation']) {
       const meta = await getPageMetadata(route);
       expect(meta.indexable, route).toBe(false);
       expect(meta.robots, route).toBe('noindex,follow');

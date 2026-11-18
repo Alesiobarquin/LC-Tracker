@@ -1,25 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Play, ArrowRight, CircleCheck, ArrowUpRight } from "lucide-react";
-import { format } from "date-fns";
-import {
-  useProblemProgress,
-  useSessionTimings,
-  useUserSettings,
-  useSyntaxProgress,
-  useStreak,
-} from "../hooks/useUserData";
-import {
-  buildStudyPlan,
-  getLearningStatus,
-  hasDelayedIndependentPass,
-  getStudyEvaluation,
-  type StudyTask,
-} from "../utils/study";
+import { useStreak } from "../hooks/useUserData";
+import { useTodayPlan } from "../hooks/useTodayPlan";
+import { getLearningStatus, getStudyEvaluation, hasDelayedIndependentPass, type StudyTask } from "../utils/study";
+import { CoachLauncher } from "../coach/CoachLauncher";
 import {
   problemMap,
   getNumberedProblemTitle,
-  ensureExtendedCatalogLoaded,
   TARGET_CURRICULUM_LABELS,
   problemsPoolForTargetCurriculum,
 } from "../data/problems";
@@ -29,20 +17,14 @@ import { PageHeader, QueryErrorBanner } from "./ui";
 import { BudgetMeter, TraceIndex } from "./ui/StudyTrace";
 import { Button } from "./ui/Button";
 import { RecommendationDialog } from "./RecommendationDialog";
-import { codingElapsedSeconds, recallElapsedSeconds } from "../utils/sessionTime";
 import { DashboardSkeleton } from "./loadingSkeletons";
 
 export function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const settingsQuery = useUserSettings();
-  const progressQuery = useProblemProgress();
-  const timingQuery = useSessionTimings();
-  const syntaxQuery = useSyntaxProgress();
+  const { plan, progress, settings, now, date, reviewsOnly, activeSession, activeRecall,
+    error, loading, catalogReady, startTask, setReviewsOnly } = useTodayPlan();
   const { streak } = useStreak();
-  const activeSession = useStore((state) => state.activeSession);
-  const activeRecall = useStore((state) => state.activeRecall);
-  const reviewOnlyDate = useStore((state) => state.reviewOnlyDate);
   const [explainedTask, setExplainedTask] = useState<StudyTask | null>(null);
   const closeExplanation = useCallback(() => setExplainedTask(null), []);
   const explanationButton = (task: StudyTask) => (
@@ -50,70 +32,7 @@ export function Dashboard() {
       Why this recommendation?
     </button>
   );
-  const [excludedIds, setExcludedIds] = useState<string[]>([]);
-  const [catalogReady, setCatalogReady] = useState(false);
-  const [catalogError, setCatalogError] = useState(false);
-  const [now, setNow] = useState(new Date());
-  const reviewsOnly = reviewOnlyDate === format(now, "yyyy-MM-dd");
-  useEffect(() => {
-    void ensureExtendedCatalogLoaded()
-      .then(() => setCatalogReady(true))
-      .catch(() => setCatalogError(true));
-  }, []);
-  useEffect(() => {
-    const timer = window.setInterval(
-      () => setNow(new Date()),
-      activeSession || activeRecall ? 1000 : 60000,
-    );
-    return () => clearInterval(timer);
-  }, [activeSession?.id, activeRecall?.id]);
-  const { settings, targetInterviewDate } = settingsQuery;
-  const { progress } = progressQuery;
   const evaluation = getStudyEvaluation(progress, now);
-  const timedIds = new Set(timingQuery.sessionTimings.map((t) => t.id));
-  const timerSeconds =
-    activeSession && !timedIds.has(activeSession.id)
-      ? codingElapsedSeconds(activeSession, now.getTime())
-      : 0;
-  const recallSeconds =
-    activeRecall && !timedIds.has(activeRecall.id)
-      ? recallElapsedSeconds(activeRecall, now.getTime())
-      : 0;
-  const plan = useMemo(
-    () =>
-      buildStudyPlan({
-        mode: reviewsOnly ? "reviews" : "full",
-        progress,
-        settings,
-        timings: timingQuery.sessionTimings,
-        syntaxProgress: syntaxQuery.syntaxProgress,
-        targetInterviewDate,
-        excludedIds: [
-          ...excludedIds,
-          ...(activeSession ? [activeSession.problemId] : []),
-          ...(activeRecall ? [activeRecall.problemId] : []),
-        ],
-        activeSeconds: timerSeconds + recallSeconds,
-        activeRecallSeconds: recallSeconds,
-        hasActiveSession: Boolean(activeSession || activeRecall),
-        now,
-      }),
-    [
-      progress,
-      settings,
-      timingQuery.sessionTimings,
-      syntaxQuery.syntaxProgress,
-      targetInterviewDate,
-      excludedIds,
-      now,
-      catalogReady,
-      activeSession,
-      activeRecall,
-      timerSeconds,
-      recallSeconds,
-      reviewsOnly,
-    ],
-  );
   const evidence = useMemo(() => {
     const pool = problemsPoolForTargetCurriculum(settings.targetCurriculum);
     const covered = new Set(
@@ -135,51 +54,36 @@ export function Dashboard() {
     };
   }, [progress, settings.targetCurriculum, catalogReady]);
   function start(task: StudyTask) {
-    if (activeSession) {
-      navigate(`/timer/${activeSession.problemId}`);
-      return;
-    }
-    if (activeRecall) {
-      navigate(`/recall/${activeRecall.problemId}`);
-      return;
-    }
-    const startedAt = new Date();
-    if (reviewsOnly !== (reviewOnlyDate === format(startedAt, "yyyy-MM-dd"))) {
-      setNow(startedAt);
-      return;
-    }
-    if (task.kind === "recall") {
-      navigate(`/recall/${task.problemId}`);
-      return;
-    }
-    const store = useStore.getState();
-    store.startSession(
-      task.problemId,
-      task.kind === "coding_review",
-      task.kind === "variant",
-      Date.now(),
-      "/dashboard",
-    );
-    store.updateActiveSession({
-      practiceKind: task.kind,
-      plannedMinutes: task.minutes,
-    });
-    navigate(`/timer/${task.problemId}`, { state: { returnTo: "/dashboard" } });
+    const path = startTask(task);
+    if (path) navigate(path, { state: { returnTo: "/dashboard" } });
   }
-  const error =
-    settingsQuery.error ||
-    progressQuery.error ||
-    timingQuery.error ||
-    syntaxQuery.error;
-  if (error || catalogError)
-    return <QueryErrorBanner onRetry={() => window.location.reload()} />;
-  if (
-    settingsQuery.isLoading ||
-    progressQuery.isLoading ||
-    timingQuery.isLoading ||
-    !catalogReady
-  )
-    return <DashboardSkeleton />;
+
+  function skip(task: StudyTask) {
+    useStore.getState().skipPlanTask(date, task.problemId);
+  }
+
+  function alternateChoices(task: StudyTask) {
+    const alternatives = (plan.mainAlternatives ?? []).filter(id => id !== task.problemId).slice(0, 3);
+    if (task.kind === "recall" || task.kind === "variant" || !alternatives.length) return null;
+    return (
+      <details className="text-sm">
+        <summary className="quiet-action cursor-pointer">Select a different coding block</summary>
+        <ul className="mt-2 space-y-1">
+          {alternatives.map(id => (
+            <li key={id}>
+              <Button size="sm" variant="ghost" onClick={() =>
+                useStore.getState().choosePlanTask(date, { problemId: id, kind: task.kind, minutes: task.minutes })}>
+                Select {problemMap[id].title}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </details>
+    );
+  }
+
+  if (error) return <QueryErrorBanner onRetry={() => window.location.reload()} />;
+  if (loading) return <DashboardSkeleton />;
   const savedMessage = (location.state as { studyMessage?: string } | null)
     ?.studyMessage;
   const nextTask = plan.recallTasks[0] ?? plan.mainTask;
@@ -237,9 +141,7 @@ export function Dashboard() {
               aria-describedby="today-review-help"
               title={reviewHelp}
               onClick={() => {
-                const changedAt = new Date();
-                setNow(changedAt);
-                useStore.getState().setReviewOnlyDate(reviewsOnly ? null : format(changedAt, "yyyy-MM-dd"));
+                setReviewsOnly(!reviewsOnly);
                 setExplainedTask(null);
               }}
             >
@@ -250,6 +152,7 @@ export function Dashboard() {
           </div>
         }
         actions={
+          <div className="flex flex-wrap items-center gap-3">
           <Link
             to="/settings#section-schedule"
             aria-label="Adjust study time"
@@ -258,6 +161,8 @@ export function Dashboard() {
             <span className="hidden sm:inline">Adjust study time</span>{" "}
             <ArrowUpRight size={14} />
           </Link>
+          <CoachLauncher className="quiet-action min-h-9">Ask study chat</CoachLauncher>
+          </div>
         }
       />
       {savedMessage && (
@@ -360,12 +265,7 @@ export function Dashboard() {
                         <ArrowRight size={14} />
                       </Button>
                       <button
-                        onClick={() =>
-                          setExcludedIds((ids) => [
-                            ...ids,
-                            primaryTask!.problemId,
-                          ])
-                        }
+                        onClick={() => skip(primaryTask!)}
                         aria-label={
                           primaryTask?.kind === "recall"
                             ? `Swap ${focusedProblem?.title} today`
@@ -377,6 +277,7 @@ export function Dashboard() {
                           ? "Swap today"
                           : "Choose another"}
                       </button>
+                      {primaryTask && alternateChoices(primaryTask)}
                     </>
                   )}
                 </div>
@@ -454,9 +355,7 @@ export function Dashboard() {
                             Start recall check <ArrowUpRight size={13} />
                           </button>
                           <button
-                            onClick={() =>
-                              setExcludedIds((ids) => [...ids, task.problemId])
-                            }
+                            onClick={() => skip(task)}
                             aria-label={`Swap ${problemMap[task.problemId].title} today`}
                             className="quiet-action text-subtle"
                           >
@@ -499,17 +398,13 @@ export function Dashboard() {
                             Start practice block <ArrowUpRight size={13} />
                           </button>
                           <button
-                            onClick={() =>
-                              setExcludedIds((ids) => [
-                                ...ids,
-                                plan.mainTask!.problemId,
-                              ])
-                            }
+                            onClick={() => skip(plan.mainTask!)}
                             className="quiet-action text-subtle"
                           >
                             Choose another
                           </button>
                         </div>
+                        {alternateChoices(plan.mainTask)}
                       </>
                     ) : (
                       <p className="text-sm text-muted mt-3">

@@ -356,6 +356,7 @@ export interface SaveProblemInput {
   operationId: string;
   problemId: string;
   rating: ProblemSessionRating;
+  expectedProgressVersion?: number;
   notes?: string;
   additionalData?: Record<string, unknown>;
   timing?: SessionTiming;
@@ -389,7 +390,7 @@ export async function saveProblemSession(userId: string, input: SaveProblemInput
     }
     return commit(input.operationId, 'session', {
       settings: settings.version, sprint: sprint.version,
-      progress: { [input.problemId]: existing?.version ?? 0 },
+      progress: { [input.problemId]: input.expectedProgressVersion ?? existing?.version ?? 0 },
     }, payload, userId);
   });
 }
@@ -419,8 +420,7 @@ export async function saveRecallSession(userId: string, input: SaveRecallInput) 
   });
 }
 
-export async function saveUserSettings(userId: string, updater: (current: UserSettingsData) => UserSettingsData) {
-  const operationId = safeUUID();
+export async function saveUserSettings(userId: string, updater: (current: UserSettingsData) => UserSettingsData, operationId = safeUUID()) {
   return retryConflict(async () => {
     const current = await fetchUserSettings(userId);
     const next = updater(current);
@@ -453,9 +453,9 @@ export async function importSubmissions(userId: string, submissions: Array<{ tit
   }, userId);
 }
 
-export async function removeProblemProgress(userId: string, problemId: string) {
-  const progress = await fetchProblemProgress(userId);
-  return commit(safeUUID(), 'remove', { progress: { [problemId]: progress[problemId]?.version ?? 0 } }, { problemId }, userId);
+export async function removeProblemProgress(userId: string, problemId: string, operationId = safeUUID(), expectedVersion?: number) {
+  const version = expectedVersion ?? (await fetchProblemProgress(userId))[problemId]?.version ?? 0;
+  return commit(operationId, 'remove', { progress: { [problemId]: version } }, { problemId }, userId);
 }
 
 export async function exportBackup(): Promise<UserBackup> {
@@ -475,7 +475,7 @@ export async function exportBackup(): Promise<UserBackup> {
   });
 }
 
-export async function restoreUserBackup(userId: string, value: unknown) {
+export async function restoreUserBackup(userId: string, value: unknown, operationId = safeUUID()) {
   const backup = validateBackup(value); // Validate the entire file before writing anything.
   const payload: Record<string, unknown> = {
     progress: Object.entries(backup.progress ?? {}).map(([id, entry]) => progressToRow(userId, id, entry)),
@@ -487,7 +487,7 @@ export async function restoreUserBackup(userId: string, value: unknown) {
     const current = await fetchSprintState(userId);
     payload.sprint = sprintToRow(userId, backup.sprintState === undefined ? current.sprintState : backup.sprintState,
       backup.sprintHistory ?? current.sprintHistory);
-    return commit(safeUUID(), 'restore', { sprint: current.version }, payload, userId);
+    return commit(operationId, 'restore', { sprint: current.version }, payload, userId);
   }
-  return commit(safeUUID(), 'restore', {}, payload, userId);
+  return commit(operationId, 'restore', {}, payload, userId);
 }

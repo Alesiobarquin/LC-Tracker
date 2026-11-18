@@ -486,6 +486,7 @@ export interface StudyPlan {
   isRestDay: boolean;
   isBlackout: boolean;
   learningDay: boolean;
+  mainAlternatives?: string[];
 }
 
 /** One planner owns every minute and assignment. Eligibility is a queue, not debt. */
@@ -501,6 +502,8 @@ export function buildStudyPlan(params: {
   hasActiveSession?: boolean;
   mode?: StudyMode;
   now?: Date;
+  includeAlternatives?: boolean;
+  choice?: { problemId: string; kind: StudyTask["kind"]; minutes?: number };
 }): StudyPlan {
   const {
     progress,
@@ -514,6 +517,8 @@ export function buildStudyPlan(params: {
     hasActiveSession = false,
     mode = "full",
     now = new Date(),
+    includeAlternatives = false,
+    choice,
   } = params;
   const day = now.getDay();
   const dailyMinutes = Math.max(
@@ -753,15 +758,14 @@ export function buildStudyPlan(params: {
     );
   };
   const repair = availableCoding.find(demonstratedGap);
-  const delayedCheck = availableCoding.find(
-    (id) =>
+  const isDelayedCheck = (id: string) =>
       isIndependentPass(progress[id].history.at(-1)?.codingOutcome) &&
       !hasDelayedIndependentPass(progress[id]) &&
       differenceInCalendarDays(
         now,
         new Date(progress[id].history.at(-1)!.date),
-      ) >= 7,
-  );
+      ) >= 7;
+  const delayedCheck = availableCoding.find(isDelayedCheck);
   const codingCandidate =
     day === maintenanceDay
       ? availableCoding[0]
@@ -779,7 +783,7 @@ export function buildStudyPlan(params: {
     repair &&
     (evaluation.needsRemediation || repeatedTopicGaps);
   const protectedVariant = unseenDue && variantCandidate;
-  const mainId = mode === "reviews"
+  const defaultMainId = mode === "reviews"
     ? undefined
     : protectedVariant
     ? protectedVariant.id
@@ -792,17 +796,34 @@ export function buildStudyPlan(params: {
             ? newCandidate.id
             : (codingCandidate ?? newCandidate?.id)));
 
+  const isUnfamiliar = (id: string) =>
+    !progress[id] &&
+    (!!protectedVariant || !newCandidateIds.has(id) || independentCoverage(problemMap[id]) >= 2);
+  const codingPriority = (id: string) =>
+    continuation.has(id) ? "continue" : demonstratedGap(id) ? "repair" :
+      isDelayedCheck(id) ? "delayed" : "review";
+  const alternatives = defaultMainId && !isUnfamiliar(defaultMainId) && (includeAlternatives || choice)
+    ? progress[defaultMainId]
+      ? availableCoding.filter(id => codingPriority(id) === codingPriority(defaultMainId))
+      : newCandidates.filter(problem =>
+          !isUnfamiliar(problem.id) &&
+          problem.difficulty === problemMap[defaultMainId].difficulty &&
+          (settings.learningMode === "EXPLORE" ||
+            unmetPrerequisites(problem) === unmetPrerequisites(problemMap[defaultMainId])) &&
+          Math.min(patternCoverage(problem), 2) === Math.min(patternCoverage(problemMap[defaultMainId]), 2))
+        .map(problem => problem.id)
+    : [];
+  const chosenMain = choice && choice.kind !== "recall" &&
+    alternatives.includes(choice.problemId) &&
+    choice.kind === (progress[choice.problemId] ? "coding_review" : "learning")
+      ? choice : undefined;
+  const mainId = chosenMain?.problemId ?? defaultMainId;
   const recallSpent =
     todayTimings
       .filter((t) => t.sessionType === "recall")
       .reduce((s, t) => s + t.elapsedSeconds / 60, 0) +
     Math.max(0, activeRecallSeconds) / 60;
-  const unfamiliarMain =
-    mainId &&
-    !progress[mainId] &&
-    (protectedVariant ||
-      !newCandidateIds.has(mainId) ||
-      independentCoverage(problemMap[mainId]) >= 2);
+  const unfamiliarMain = mainId && isUnfamiliar(mainId);
   // On check days a small budget goes to the check, instead of a recall warm-up
   // making a feasible independent attempt unnecessarily short.
   let recallBudget = mode === "reviews" ? remainingMinutes : Math.min(
@@ -871,6 +892,10 @@ export function buildStudyPlan(params: {
             : "Retrieve the approach before looking at your notes.",
       });
     }
+  if (choice?.kind === "recall") {
+    const index = plan.recallTasks.findIndex(task => task.problemId === choice.problemId);
+    if (index > 0) plan.recallTasks.unshift(...plan.recallTasks.splice(index, 1));
+  }
   let capacity = remainingMinutes - plan.recallTasks.length * 3;
   if (mainId && capacity >= MIN_CODING_BLOCK_MINUTES) {
     const problem = problemMap[mainId];
@@ -890,7 +915,7 @@ export function buildStudyPlan(params: {
       problemId: mainId,
       kind,
       estimatedMinutes,
-      minutes: Math.min(estimatedMinutes, capacity),
+      minutes: Math.min(estimatedMinutes, capacity, Math.max(MIN_CODING_BLOCK_MINUTES, chosenMain?.minutes ?? Infinity)),
       explanation: {
         ...allocationExplanation,
         ...selectionExplanation,
@@ -902,17 +927,18 @@ export function buildStudyPlan(params: {
       reason:
         kind === "variant"
           ? `${protectedVariant ? "Protected unfamiliar check" : "Unfamiliar check"}: choose the approach yourself, code without hints, then test and explain.`
-          : unfinished === mainId
+          : continuation.has(mainId)
             ? "Continue your unfinished attempt. Long attempts rotate with other practice."
-            : remediation && mainId === repair
+            : remediation && demonstratedGap(mainId)
               ? "Recent attempts show a gap. Rebuild the approach, then code and test it independently."
               : kind === "learning"
                 ? "Build coverage with a representative problem from your target list."
-                : delayedCheck === mainId
+                : isDelayedCheck(mainId)
                   ? "Test retained implementation after at least a week."
                   : "Check implementation independently; recall alone cannot verify it.",
     };
     capacity -= plan.mainTask.minutes;
+    if (includeAlternatives) plan.mainAlternatives = alternatives;
   }
   const syntaxDue = Object.entries(syntaxProgress).filter(([, value]) =>
     isDue(value.nextReviewAt),

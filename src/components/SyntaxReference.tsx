@@ -21,6 +21,8 @@ import { useNavigate } from "react-router-dom";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "motion/react";
 import { useSyntaxProgress } from "../hooks/useUserData";
+import { useRegisterCoachTools } from "../coach/commands";
+import { z } from "zod";
 
 const SESSION_ORDER_KEY = "syntax-session-order";
 
@@ -48,10 +50,18 @@ function matchesSyntaxSearch(card: SyntaxCard, query: string): boolean {
     .every((term) => haystack.includes(term));
 }
 
+const syntaxCommand = z.strictObject({
+  action: z.enum(["status", "search", "due", "start"]),
+  language: z.enum(["python", "cpp"]).optional(),
+  query: z.string().max(200).optional(),
+  category: z.string().max(80).optional(),
+  deck: z.enum(["due", "all"]).optional(),
+});
+
 export const SyntaxReference: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-  const { syntaxProgress } = useSyntaxProgress();
+  const { syntaxProgress, isLoading, error } = useSyntaxProgress();
   const [viewMode, setViewMode] = useState<"due" | "browse">("due");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<
@@ -61,6 +71,7 @@ export const SyntaxReference: React.FC = () => {
   const [showOnlyWeak, setShowOnlyWeak] = useState(false);
   const [sessionCards, setSessionCards] = useState<SyntaxCard[] | null>(null);
   const [sessionTitle, setSessionTitle] = useState("");
+  const [autoBegin, setAutoBegin] = useState(false);
   const [sessionOrderMode, setSessionOrderMode] =
     useState<SessionOrderMode>(readStoredOrderMode);
 
@@ -133,15 +144,54 @@ export const SyntaxReference: React.FC = () => {
     });
   }, [searchQuery, selectedLanguage, showOnlyWeak, syntaxProgress]);
 
-  const launchSession = (cards: SyntaxCard[], title: string) => {
+  const launchSession = (cards: SyntaxCard[], title: string, begin = false) => {
     if (!user) {
       navigate("/login");
       return;
     }
-    if (cards.length === 0) return;
+    if (cards.length === 0 || sessionCards) return;
     setSessionCards(cards);
     setSessionTitle(title);
+    setAutoBegin(begin);
   };
+
+  useRegisterCoachTools(user && !sessionCards ? {
+    syntax_reference: {
+      description: "Use the syntax reference. action is status, search, due, or start. Optional language (python or cpp), query, category, and deck (due or all, defaults to due) for start.",
+      run: (args) => {
+        const parsed = syntaxCommand.safeParse(args);
+        if (!parsed.success) return { message: "Specify a valid syntax reference action or filter." };
+        const { action, language = selectedLanguage, query = searchQuery, category, deck = "due" } = parsed.data;
+        if (error || isLoading) return { message: "Syntax progress is unavailable. Wait for it to load or retry." };
+        const now = Date.now();
+        const dueOnly = action === "due" || (action === "start" && deck === "due") || (action === "status" && viewMode === "due");
+        const matching = allSyntaxCards.filter(card => {
+          if (card.language !== language || (category && card.category.toLowerCase() !== category.toLowerCase())) return false;
+          if (action === "start" && deck === "all") return matchesSyntaxSearch(card, (parsed.data.query ?? "").trim().toLowerCase());
+          const progress = syntaxProgress[card.id];
+          return matchesSyntaxSearch(card, query.trim().toLowerCase()) &&
+            (!showOnlyWeak || Boolean(progress && progress.confidenceRating < 3)) &&
+            (!dueOnly || !progress || Date.parse(progress.nextReviewAt) <= now);
+        });
+        if (action === "start") {
+          if (!matching.length) return { message: "No syntax cards match the requested deck." };
+          setSelectedLanguage(language);
+          launchSession(matching, `${deck === "due" ? "Due Now" : category ?? "Practice"} · ${language}`, true);
+          return { message: `Started ${matching.length} syntax cards.` };
+        }
+        if (action === "search" || action === "due") {
+          setSelectedLanguage(language);
+          setSearchQuery(action === "due" ? "" : [query, category].filter(Boolean).join(" "));
+          setViewMode(action === "due" ? "due" : "browse");
+        }
+        return {
+          message: `${matching.length} ${language} cards ${dueOnly ? "due" : "match the filters"}.`,
+          data: matching.slice(0, 10).map(card => ({ description: card.description, category: card.category })),
+          actions: matching.length ? [{ label: "Practice matching cards", name: "syntax_reference", args: { action: "start", deck: dueOnly ? "due" : "all", language, query, ...(category && { category }) } }] : [],
+        };
+      },
+    },
+  } : {});
 
   // Overall stats for the selected language only
   const totalCardsForLang = allSyntaxCards.filter(
@@ -171,6 +221,7 @@ export const SyntaxReference: React.FC = () => {
             cards={sessionCards}
             title={sessionTitle}
             orderMode={sessionOrderMode}
+            autoBegin={autoBegin}
             onClose={() => setSessionCards(null)}
           />,
           document.body,

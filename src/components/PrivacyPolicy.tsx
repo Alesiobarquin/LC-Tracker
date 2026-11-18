@@ -13,6 +13,7 @@ const SECTIONS = [
   { id: 'data-retention', title: '7. Data Retention & Deletion' },
   { id: 'security', title: '8. Security' },
   { id: 'contact', title: '9. Contact' },
+  { id: 'study-chat', title: '10. Study chat' },
 ] as const;
 
 export function PrivacyPolicy() {
@@ -25,7 +26,7 @@ export function PrivacyPolicy() {
           <Shield className="w-8 h-8 text-accent" />
           <div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Privacy Policy</h1>
-            <p className="text-subtle text-sm mt-1">Last updated: March 26, 2026</p>
+            <p className="text-subtle text-sm mt-1">Last updated November 18, 2026</p>
           </div>
         </div>
 
@@ -102,8 +103,9 @@ export function PrivacyPolicy() {
           <section id="sharing" className="scroll-mt-20">
             <h2 className="text-2xl font-semibold text-foreground mb-4">5. Sharing Your Information</h2>
             <p>
-              We do not sell, trade, or rent your personal information. We share data only with Clerk
-              (authentication) and Supabase (database hosting) as required to operate the Service.
+              We do not sell, trade, or rent your personal information. Clerk handles authentication
+              and Supabase hosts study data. Optional Study chat sends the limited data described
+              below when you connect your key and ask a question.
             </p>
           </section>
 
@@ -136,6 +138,24 @@ export function PrivacyPolicy() {
             <p>
               Questions about this policy can be sent through the in-app feedback channel or the project
               GitHub repository.
+            </p>
+          </section>
+
+          <section id="study-chat" className="scroll-mt-20">
+            <h2 className="text-2xl font-semibold text-foreground mb-4">10. Study chat</h2>
+            <p>
+              When you use your own OpenRouter key, your browser sends your question and limited recent
+              context directly to OpenRouter. Microsoft Azure runs the selected model. Follow-up calls
+              may include selected study facts such as problem titles, elapsed time, and reported outcomes.
+              Your OpenRouter account pays for these requests.
+            </p>
+            <p className="mt-4">
+              LC Tracker keeps the key and conversation in tab memory. Disconnect or close the tab to
+              clear them from the app. You can revoke the key in your OpenRouter account. Provider handling
+              is described in the{' '}
+              <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer" className="text-accent underline">
+                OpenRouter Privacy Policy
+              </a>.
             </p>
           </section>
         </div>

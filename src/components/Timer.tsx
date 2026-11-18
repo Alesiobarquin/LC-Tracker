@@ -1,7 +1,7 @@
 import { TraceIndex } from "./ui/StudyTrace";
 import React, { useState, useEffect, useRef } from "react";
 import { Problem } from "../data/problems";
-import type { ProblemSessionRating, CodingOutcome } from "../types";
+import type { ProblemSessionRating, CodingOutcome, TimeSpentDraft } from "../types";
 import { isIndependentPass, UNSEEN_CHECK_MINUTES } from "../utils/study";
 import { useStore } from "../store/useStore";
 import {
@@ -18,7 +18,12 @@ import { getDifficultyColor } from "../utils/uiHelpers";
 import { MAX_BACKDATE_HOURS, validateStartTimestamp } from "../utils/dateUtils";
 import { canPersistTimer } from "../lib/safeStorage";
 import { TimeSpentInput } from "./TimeSpentInput";
-import { parseTimeSpent } from "../utils/sessionTime";
+import { Modal } from "./ui/Modal";
+import { Button } from "./ui/Button";
+import { codingElapsedSeconds, parseTimeSpent, timeSpentDraft } from "../utils/sessionTime";
+import { codingOutcomeSchema } from "../utils/studySchemas";
+import { useRegisterCoachTools } from "../coach/commands";
+import { z } from "zod";
 
 interface TimerProps {
   problem: Problem;
@@ -53,6 +58,18 @@ const parseTimeInputToTimestamp = (value: string): number | null => {
   candidate.setHours(hour, minute, 0, 0);
   return candidate.getTime();
 };
+
+const codingCommand = z.strictObject({
+  action: z.enum(["pause", "resume", "correct_time", "use_timer", "finish", "outcome", "notes", "save", "retry", "discard"]),
+  sessionId: z.string().optional(),
+  minutes: z.number().int().nonnegative().optional(),
+  seconds: z.number().int().min(0).max(59).optional(),
+  correctness: codingOutcomeSchema.shape.correctness.optional(),
+  assistance: codingOutcomeSchema.shape.assistance.optional(),
+  explanation: codingOutcomeSchema.shape.explanation.optional(),
+  confidence: z.literal([1, 2, 3, 4, 5]).nullable().optional(),
+  text: z.string().max(20000).optional(),
+});
 
 export const Timer: React.FC<TimerProps> = ({
   problem,
@@ -225,17 +242,15 @@ export const Timer: React.FC<TimerProps> = ({
     setStartTimeError(null);
   };
 
-  const handlePauseResume = () => {
-    if (isPaused) {
+  const handlePauseResume = (paused = !isPaused) => {
+    const current = useStore.getState().activeSession;
+    if (!current || current.id !== activeSession?.id || current.completion ||
+      current.finishedElapsed !== undefined || paused === (current.pausedAt != null)) return;
+    if (current.pausedAt != null) {
       // Resuming: accumulate how long we were paused
-      let nextPausedSeconds = pausedSecondsRef.current;
-      if (pausedAtRef.current !== null) {
-        nextPausedSeconds += Math.floor(
-          (Date.now() - pausedAtRef.current) / 1000,
-        );
-        pausedSecondsRef.current = nextPausedSeconds;
-        pausedAtRef.current = null;
-      }
+      const nextPausedSeconds = (current.pausedSeconds ?? 0) + Math.floor((Date.now() - current.pausedAt) / 1000);
+      pausedSecondsRef.current = nextPausedSeconds;
+      pausedAtRef.current = null;
       setIsPaused(false);
       updateActiveSession({ pausedSeconds: nextPausedSeconds, pausedAt: null });
     } else {
@@ -251,16 +266,16 @@ export const Timer: React.FC<TimerProps> = ({
   };
 
   const handleDone = () => {
+    const current = useStore.getState().activeSession;
+    if (!current || current.id !== activeSession?.id || current.finishedElapsed !== undefined || current.completion) return;
     if (intervalRef.current) clearInterval(intervalRef.current);
     // If paused when Done is clicked, add remaining paused time first
-    if (isPaused && pausedAtRef.current !== null) {
+    if (current.pausedAt != null) {
       pausedSecondsRef.current += Math.floor(
-        (Date.now() - pausedAtRef.current) / 1000,
+        (Date.now() - current.pausedAt) / 1000,
       );
     }
-    const raw = activeSession
-      ? Math.floor((Date.now() - activeSession.startTimestamp) / 1000)
-      : elapsed;
+    const raw = Math.floor((Date.now() - current.startTimestamp) / 1000);
     const finalElapsed = Math.max(0, raw - pausedSecondsRef.current);
     setFrozenElapsed(finalElapsed);
 
@@ -274,18 +289,43 @@ export const Timer: React.FC<TimerProps> = ({
     setPhase("rating");
   };
 
+  const changeNotes = (text: string) => {
+    notesEdited.current = true;
+    setNotes(text);
+    updateActiveSession({ draftNotes: text });
+  };
+  const changeConfidence = (confidenceRating: ProblemSessionRating | undefined) => {
+    setConfidenceRating(confidenceRating);
+    updateActiveSession({ confidenceRating });
+  };
+  const changeTimeSpent = (timeSpentDraft: TimeSpentDraft | undefined) => {
+    updateActiveSession({ timeSpentDraft });
+    setSubmitError(null);
+  };
+  const discardSession = () => {
+    const current = useStore.getState().activeSession;
+    if (!current || current.id !== activeSession?.id || current.completion) return;
+    abandonSession();
+    onComplete();
+  };
+
   const handleSave = async () => {
-    if (submittingRef.current || !activeSession) return;
-    const correctedElapsed = activeSession.timeSpentDraft
-      ? parseTimeSpent(activeSession.timeSpentDraft)
-      : frozenElapsed;
-    if (!activeSession.completion && correctedElapsed === null) {
-      setSubmitError("Enter a valid time spent before saving.");
-      return;
+    const current = useStore.getState().activeSession;
+    if (submittingRef.current || !current || current.id !== activeSession?.id)
+      return "The coding session is unavailable or already saving.";
+    const correctedElapsed = current.timeSpentDraft
+      ? parseTimeSpent(current.timeSpentDraft)
+      : current.finishedElapsed ?? frozenElapsed;
+    if (!current.completion && correctedElapsed === null) {
+      const message = "Enter a valid time spent before saving.";
+      setSubmitError(message);
+      return message;
     }
-    if (!activeSession.completion && !outcomeComplete) {
-      setSubmitError("Choose a result and answer the follow-ups before saving.");
-      return;
+    const parsedOutcome = codingOutcomeSchema.safeParse(current.codingOutcome);
+    if (!current.completion && !parsedOutcome.success) {
+      const message = "Choose a result and answer the follow-ups before saving.";
+      setSubmitError(message);
+      return message;
     }
     submittingRef.current = true;
     setIsSubmitting(true);
@@ -293,19 +333,19 @@ export const Timer: React.FC<TimerProps> = ({
 
     // Prefer cold_solve over review — cold solves may also carry isReview=false explicitly,
     // but never classify a cold solve as a spaced-repetition review.
-    const sessionType = activeSession?.isColdSolve
+    const sessionType = current.isColdSolve
       ? "cold_solve"
-      : activeSession?.isReview
+      : current.isReview
         ? "review"
         : "new";
 
     // The legacy numeric field remains required by the database. An unreported
     // placeholder is marked in history and never displayed as self-confidence.
     // Scheduling uses the coding outcome, so this value does not change intervals.
-    const rating = confidenceRating ?? 3;
-    const completion = activeSession.completion ?? {
+    const rating = current.confidenceRating ?? 3;
+    const completion = current.completion ?? {
       timing: {
-        id: activeSession.id,
+        id: current.id,
         problemId: problem.id,
         category: problem.category,
         date: new Date().toISOString(),
@@ -314,10 +354,10 @@ export const Timer: React.FC<TimerProps> = ({
         rating,
       },
       rating,
-      confidenceReported: confidenceRating !== undefined,
-      notes: notesEdited.current ? notes : undefined,
-      codingOutcome: codingOutcome as CodingOutcome,
-      practiceKind: activeSession.practiceKind,
+      confidenceReported: current.confidenceRating !== undefined,
+      notes: current.draftNotes,
+      codingOutcome: parsedOutcome.data,
+      practiceKind: current.practiceKind,
     };
     // Persist the exact attempted completion before sending. Retries after an
     // ambiguous timeout or a page reload retain both the operation ID and payload.
@@ -343,15 +383,100 @@ export const Timer: React.FC<TimerProps> = ({
         endSession();
         onComplete();
       }
+      return "Coding result saved.";
     } catch {
-      setSubmitError(
-        "Could not confirm your save. Your session is preserved. Retry to save it once.",
-      );
+      const message = "Could not confirm your save. Your session is preserved. Retry to save it once.";
+      setSubmitError(message);
+      return message;
     } finally {
       submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
+
+  useRegisterCoachTools(activeSession && activeSession.problemId === problem.id ? {
+    coding_status: {
+      kind: "read",
+      duringPractice: true,
+      description: "Read the active coding session's timer, stage, and save state. No arguments.",
+      run: () => {
+        const current = useStore.getState().activeSession;
+        if (!current || current.id !== activeSession.id) return { message: "There is no matching coding session." };
+        const seconds = codingElapsedSeconds(current);
+        const status = submittingRef.current ? "saving" : current.completion ? "save unconfirmed"
+          : current.finishedElapsed !== undefined ? "record outcome" : current.pausedAt != null ? "paused" : "running";
+        const timerAction = status === "running" ? "pause" : status === "paused" ? "resume" : undefined;
+        const actions = timerAction
+          ? [{ label: timerAction === "pause" ? "Pause timer" : "Resume timer", action: timerAction }, { label: "Finish timer", action: "finish" }]
+          : status === "save unconfirmed" ? [{ label: "Retry save", action: "retry" }]
+            : status === "record outcome" && codingOutcomeSchema.safeParse(current.codingOutcome).success
+              ? [{ label: "Save coding result", action: "save" }] : undefined;
+        return {
+          message: `Coding session: ${status} · ${fmtTime(seconds)}.`,
+          data: { seconds, status }, modelData: { seconds, status },
+          actions: actions?.map(({ label, action }) => ({ label, name: "coding_session", args: { action, sessionId: current.id } })),
+        };
+      },
+    },
+    coding_session: {
+      duringPractice: true,
+      description: "Operate the active coding session using action (pause, resume, correct_time, use_timer, finish, outcome, notes, save, retry, discard). Optional sessionId binds the current session. correct_time uses numeric minutes and seconds. outcome uses the learner's correctness (passed, failed, unfinished, unchecked), assistance (none, hint, solution), explanation (clear, partial, not_yet), and optional confidence (1–5 or null). notes uses exact user-supplied text. finish opens the assessment; save records the learner's reported outcome.",
+      run: async (args) => {
+        const parsed = codingCommand.safeParse(args);
+        if (!parsed.success) return { message: "Specify a valid coding action and its values." };
+        const { action, sessionId, minutes, seconds, correctness, assistance, explanation, confidence, text } = parsed.data;
+        const current = useStore.getState().activeSession;
+        if (!current || current.id !== activeSession.id || (sessionId && sessionId !== current.id))
+          return { message: "That coding session is no longer active." };
+        if (submittingRef.current) return { message: "The coding result is still saving." };
+        if (current.completion && action !== "save" && action !== "retry")
+          return { message: "The attempted save is frozen. Retry the saved result." };
+        if (action === "retry" && !current.completion)
+          return { message: "There is no unconfirmed coding save to retry." };
+        if (action === "save" || action === "retry") {
+          if (current.finishedElapsed === undefined && !current.completion)
+            return { message: "Finish the timer and report your result before saving." };
+          return { message: await handleSave() };
+        }
+        if (action === "discard") {
+          setShowCancelConfirm(true);
+          return { message: "Review the discard confirmation on the timer." };
+        }
+        if (action === "pause" || action === "resume" || action === "finish") {
+          if (phase !== "running" || current.finishedElapsed !== undefined) return { message: "The timer is already at the result form." };
+          if (action === "finish") {
+            handleDone();
+            return { message: "The timer is stopped. Report the result in the assessment." };
+          }
+          handlePauseResume(action === "pause");
+          return { message: action === "pause" ? "Coding timer paused." : "Coding timer running." };
+        }
+        if (action === "correct_time" || action === "use_timer") {
+          const total = (minutes ?? 0) * 60 + (seconds ?? 0);
+          if (action === "correct_time" && ((minutes === undefined && seconds === undefined) || !Number.isSafeInteger(total) || total > 2_147_483_647))
+            return { message: "Enter a valid duration in minutes and seconds." };
+          changeTimeSpent(action === "use_timer" ? undefined : timeSpentDraft(total));
+          return { message: action === "use_timer" ? "Using the measured timer duration." : `Time spent set to ${fmtTime(total)}.` };
+        }
+        if (action === "notes") {
+          if (text === undefined) return { message: "Supply the notes you want to keep." };
+          changeNotes(text);
+          return { message: "Coding notes updated in the local draft." };
+        }
+        if (phase !== "rating") return { message: "Finish the timer before reporting the result." };
+        if (correctness === undefined && assistance === undefined && explanation === undefined && confidence === undefined)
+          return { message: "Report your result, assistance, explanation or confidence." };
+        changeOutcome({
+          ...current.codingOutcome,
+          ...(correctness && { correctness }),
+          ...(assistance && { assistance }),
+          ...(explanation && { explanation }),
+        });
+        if (confidence !== undefined) changeConfidence(confidence ?? undefined);
+        return { message: "Coding assessment updated in the local draft." };
+      },
+    },
+  } : {});
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -404,16 +529,20 @@ export const Timer: React.FC<TimerProps> = ({
   if (phase === "rating") {
     return (
       <div className="timer-assessment animate-in">
+        <Modal isOpen={showCancelConfirm && !activeSession?.completion} onClose={() => setShowCancelConfirm(false)} title="Discard this session?" size="sm">
+          <p className="mb-4 text-sm text-muted">Your unsaved timer and assessment will be cleared.</p>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowCancelConfirm(false)}>Keep session</Button>
+            <Button variant="danger" onClick={discardSession}>Discard session</Button>
+          </div>
+        </Modal>
         <div className="timer-assessment-body">
           <div className="mb-6 border-b border-line pb-5">
             <TimeSpentInput
               timerSeconds={activeSession?.completion?.timing.elapsedSeconds ?? frozenElapsed}
               draft={activeSession?.completion ? undefined : activeSession?.timeSpentDraft}
               disabled={isSubmitting || !!activeSession?.completion}
-              onChange={(timeSpentDraft) => {
-                updateActiveSession({ timeSpentDraft });
-                setSubmitError(null);
-              }}
+              onChange={changeTimeSpent}
             />
           </div>
 
@@ -510,11 +639,7 @@ export const Timer: React.FC<TimerProps> = ({
                 <textarea
                   id="session-notes"
                   value={notes}
-                  onChange={(e) => {
-                    notesEdited.current = true;
-                    setNotes(e.target.value);
-                    updateActiveSession({ draftNotes: e.target.value });
-                  }}
+                  onChange={(e) => changeNotes(e.target.value)}
                   disabled={isSubmitting || !!activeSession?.completion}
                   placeholder="Jot down the key trick or pattern for this problem..."
                   className="w-full bg-canvas border border-line rounded-md px-3 py-2 text-foreground resize-none h-20 text-sm"
@@ -528,8 +653,7 @@ export const Timer: React.FC<TimerProps> = ({
                   disabled={isSubmitting || !!activeSession?.completion}
                   onChange={(e) => {
                     const next = e.target.value ? Number(e.target.value) as ProblemSessionRating : undefined;
-                    setConfidenceRating(next);
-                    updateActiveSession({ confidenceRating: next });
+                    changeConfidence(next);
                   }}
                   className="w-full rounded-md border border-line-strong bg-canvas p-2.5 text-sm"
                 >
@@ -702,10 +826,7 @@ export const Timer: React.FC<TimerProps> = ({
                     Go Back
                   </button>
                   <button
-                    onClick={() => {
-                      abandonSession();
-                      onComplete();
-                    }}
+                  onClick={discardSession}
                     className="px-4 py-2.5 border border-danger/30 text-danger rounded-md text-sm"
                   >
                     Yes, Cancel
@@ -715,7 +836,7 @@ export const Timer: React.FC<TimerProps> = ({
             ) : (
               <>
                 <button
-                  onClick={handlePauseResume}
+                  onClick={() => handlePauseResume()}
                   title={isPaused ? "Resume" : "Pause"}
                   aria-label={isPaused ? "Resume session" : "Pause session"}
                   className="brand-button-secondary min-w-11 min-h-11 rounded-md flex items-center justify-center"

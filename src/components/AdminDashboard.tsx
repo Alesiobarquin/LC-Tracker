@@ -6,6 +6,9 @@ import { useUser } from '@clerk/react';
 import { clsx } from 'clsx';
 import { isMissingRelationError } from '../utils/supabaseErrors';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { useRegisterCoachTools } from '../coach/commands';
+import { z } from 'zod';
+import { isAdminUser } from '../utils/adminAuth';
 
 interface Ticket {
   id: string;
@@ -21,6 +24,7 @@ interface Ticket {
 interface AdminReadMarker {
   feedback_id: string;
 }
+const statusSchema = z.enum(['open', 'in_progress', 'resolved']);
 
 export function AdminDashboard() {
   const { user } = useUser();
@@ -29,6 +33,8 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [adminConfigWarning, setAdminConfigWarning] = useState<string | null>(null);
+  const [verifiedOwner, setVerifiedOwner] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Ticket['status'] | 'all'>('all');
 
   const unreadCount = useMemo(
     () => tickets.reduce((count, ticket) => count + (viewedTicketIds.has(ticket.id) ? 0 : 1), 0),
@@ -68,6 +74,7 @@ export function AdminDashboard() {
 
   const fetchTickets = async () => {
     setLoading(true);
+    setVerifiedOwner(null);
     setErrorMessage(null);
     setAdminConfigWarning(null);
 
@@ -87,6 +94,8 @@ export function AdminDashboard() {
         );
       } else if (!adminRows || adminRows.length === 0) {
         setAdminConfigWarning('This account is not registered in admin_users, so only your own tickets are visible.');
+      } else {
+        setVerifiedOwner(user.id);
       }
     }
 
@@ -128,7 +137,7 @@ export function AdminDashboard() {
   };
 
   const markTicketViewed = async (ticketId: string) => {
-    if (!user?.id) return;
+    if (!user?.id) return false;
 
     const { error } = await supabase
       .from('admin_feedback_reads')
@@ -146,7 +155,7 @@ export function AdminDashboard() {
     if (error) {
       console.error('Operation failed: Could not mark ticket as viewed');
       setErrorMessage('Could not mark ticket as viewed.');
-      return;
+      return false;
     }
 
     setViewedTicketIds((previous) => {
@@ -154,21 +163,87 @@ export function AdminDashboard() {
       next.add(ticketId);
       return next;
     });
+    return true;
   };
 
-  const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
+  const updateStatus = async (id: string, newStatus: Ticket['status']) => {
+    const { data, error } = await supabase
       .from('user_feedback')
       .update({ status: newStatus })
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .maybeSingle();
 
-    if (error) {
+    if (error || !data) {
       console.error('Operation failed: Error updating status');
-    } else {
-      await markTicketViewed(id);
-      void fetchTickets();
+      setErrorMessage('Could not confirm the ticket status change.');
+      return false;
     }
+    await markTicketViewed(id);
+    await fetchTickets();
+    return true;
   };
+
+  const filteredTickets = statusFilter === 'all' ? sortedTickets : sortedTickets.filter((ticket) => ticket.status === statusFilter);
+  useRegisterCoachTools(user && isAdminUser(user) && user.id === verifiedOwner && !loading && !errorMessage ? {
+    admin_list_tickets: {
+      kind: 'read',
+      description: 'Read aggregate counts and up to five redacted feedback ticket handles from the current filter. Takes no arguments.',
+      run: () => {
+        const data = {
+          statusFilter, openCount, inProgressCount, resolvedCount, unreadCount,
+          tickets: filteredTickets.slice(0, 5).map(({ id, type, status }) => ({
+            handle: id, type, status, viewed: viewedTicketIds.has(id),
+          })),
+        };
+        return { message: `${filteredTickets.length} tickets in the current filter.`, data, modelData: data };
+      },
+    },
+    admin_filter_tickets: {
+      description: 'Set the Admin feedback status filter (status: all/open/in_progress/resolved).',
+      run: (args) => {
+        const parsed = z.strictObject({ status: z.union([statusSchema, z.literal('all')]) }).safeParse(args);
+        if (!parsed.success) return { message: 'Choose a valid ticket filter.' };
+        setStatusFilter(parsed.data.status);
+        return { message: 'Admin ticket filter updated.' };
+      },
+    },
+    admin_open_ticket: {
+      description: 'Show the selected feedback ticket locally in the admin dashboard. Provide ticketHandle from admin_list_tickets.',
+      run: (args) => {
+        const parsed = z.strictObject({ ticketHandle: z.string().max(80) }).safeParse(args);
+        if (!parsed.success || !tickets.some(({ id }) => id === parsed.data.ticketHandle)) {
+          return { message: 'Choose an available ticket.' };
+        }
+        setStatusFilter('all');
+        const id = parsed.data.ticketHandle;
+        requestAnimationFrame(() => document.getElementById(`feedback-ticket-${id}`)?.scrollIntoView({ block: 'center' }));
+        return { message: 'Ticket displayed in the admin dashboard.' };
+      },
+    },
+    admin_mark_viewed: {
+      description: 'Mark an available ticket viewed using ticketHandle from admin_list_tickets.',
+      run: async (args) => {
+        const parsed = z.strictObject({ ticketHandle: z.string().max(80) }).safeParse(args);
+        if (!parsed.success || !tickets.some(({ id }) => id === parsed.data.ticketHandle)) {
+          return { message: 'Choose an available ticket.' };
+        }
+        const ok = await markTicketViewed(parsed.data.ticketHandle);
+        return { message: ok ? 'Ticket marked viewed.' : 'Could not confirm the viewed marker.' };
+      },
+    },
+    admin_set_status: {
+      description: 'Update feedback ticket status using ticketHandle and status (open/in_progress/resolved).',
+      run: async (args) => {
+        const parsed = z.strictObject({ ticketHandle: z.string().max(80), status: statusSchema }).safeParse(args);
+        if (!parsed.success || !tickets.some(({ id }) => id === parsed.data.ticketHandle)) {
+          return { message: 'Choose an available ticket and valid status.' };
+        }
+        const ok = await updateStatus(parsed.data.ticketHandle, parsed.data.status);
+        return { message: ok ? 'Ticket status saved.' : 'Could not confirm the ticket status update.' };
+      },
+    },
+  } : {});
 
   const getTypeIcon = (type: string) => {
     if (type === 'bug') return <AlertCircle className="w-5 h-5 text-danger" />;
@@ -200,6 +275,20 @@ export function AdminDashboard() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeSwitcher compact />
+              <select
+                aria-label="Filter feedback by status"
+                value={statusFilter}
+                onChange={(event) => {
+                  const parsed = z.union([statusSchema, z.literal('all')]).safeParse(event.target.value);
+                  if (parsed.success) setStatusFilter(parsed.data);
+                }}
+                className="bg-canvas border border-line text-sm rounded-lg px-2 py-2 text-foreground"
+              >
+                <option value="all">All tickets</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In progress</option>
+                <option value="resolved">Resolved</option>
+              </select>
               <button
                 type="button"
                 onClick={() => void fetchTickets()}
@@ -247,17 +336,18 @@ export function AdminDashboard() {
           <div className="premium-card p-8 text-muted">Loading tickets...</div>
         ) : (
           <div className="grid gap-4">
-            {tickets.length === 0 ? (
+            {filteredTickets.length === 0 ? (
               <div className="premium-card p-8 text-subtle italic border border-dashed border-line-strong text-center">
-                Inbox is clear. No tickets found.
+                No tickets match this status.
               </div>
             ) : (
-              sortedTickets.map((ticket) => {
+              filteredTickets.map((ticket) => {
                 const isViewed = viewedTicketIds.has(ticket.id);
 
                 return (
                   <div
                     key={ticket.id}
+                    id={`feedback-ticket-${ticket.id}`}
                     className={clsx(
                       'premium-card p-5 sm:p-6 relative overflow-hidden border flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6',
                       isViewed ? 'bg-surface/55 border-line-strong/70' : 'bg-warning/[0.08] border-warning/45',
@@ -321,7 +411,10 @@ export function AdminDashboard() {
 
                       <select
                         value={ticket.status}
-                        onChange={(e) => updateStatus(ticket.id, e.target.value)}
+                        onChange={(e) => {
+                          const parsed = statusSchema.safeParse(e.target.value);
+                          if (parsed.success) void updateStatus(ticket.id, parsed.data);
+                        }}
                         className="bg-canvas border border-line text-sm rounded-lg px-3 py-2 text-foreground outline-none focus:ring-1 focus:ring-accent"
                       >
                         <option value="open">Open</option>

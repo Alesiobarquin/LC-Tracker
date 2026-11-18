@@ -4,7 +4,10 @@ import {
   LEARNING_STATUS_LABELS,
 } from "../utils/study";
 import { preferenceStorage } from "../lib/safeStorage";
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
+import { safeUUID } from "../utils/uuid";
 import {
   problems,
   allProblems,
@@ -32,7 +35,7 @@ import { ProblemLibrarySkeleton } from "./loadingSkeletons";
 import { getDifficultyColor } from "../utils/uiHelpers";
 import { isDueToday } from "../utils/dateUtils";
 import type { ProblemProgress } from "../types";
-import { Modal, PageHeader } from "./ui";
+import { Button, Modal, PageHeader } from "./ui";
 import { hasProblemReference } from "../data/problemReferences";
 
 const VIRTUALIZE_THRESHOLD = 200;
@@ -119,6 +122,13 @@ const isRecentSolve = (prog: ProblemProgress): boolean => {
   });
 };
 
+async function resolveLibraryProblem(args: Record<string, unknown>) {
+  const parsed = z.strictObject({ problemId: z.string().min(1).max(150) }).safeParse(args);
+  if (!parsed.success) return;
+  await ensureExtendedCatalogLoaded();
+  return Object.hasOwn(problemMap, parsed.data.problemId) ? problemMap[parsed.data.problemId] : undefined;
+}
+
 const ariaSortValue = (
   sortConfig: { key: SortKey; direction: "asc" | "desc" } | null,
   key: SortKey,
@@ -131,7 +141,7 @@ export const ProblemLibrary: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { progress, logProblem, removeProblem, isLoading } =
+  const { progress, saveSession, removeProblem, isLoading, error: progressError } =
     useProblemProgress();
   const { settings } = useUserSettings();
   const [catalogReady, setCatalogReady] = useState(
@@ -199,7 +209,15 @@ export const ProblemLibrary: React.FC = () => {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [pendingImportId, setPendingImportId] = useState<string | null>(null);
-  const closeImportDialog = useCallback(() => setPendingImportId(null), []);
+  const pendingOperationId = useRef<string | null>(null);
+  const pendingRating = useRef<3 | 4 | null>(null);
+  const writeInProgress = useRef(false);
+  const [writeBusy, setWriteBusy] = useState(false);
+  const [writeError, setWriteError] = useState("");
+  const [pendingRemoval, setPendingRemoval] = useState<{ problemId: string; version: number } | null>(null);
+  const closeImportDialog = useCallback(() => {
+    if (!writeInProgress.current) setPendingImportId(null);
+  }, []);
   const [pendingPremiumStartId, setPendingPremiumStartId] = useState<
     string | null
   >(null);
@@ -439,22 +457,39 @@ export const ProblemLibrary: React.FC = () => {
       navigate("/login");
       return;
     }
-    if (isSolved) {
-      void removeProblem(problemId);
-      return;
-    }
-    setPendingImportId(problemId);
+    if (pendingRemoval || pendingImportId || writeInProgress.current) return;
+    setWriteError("");
+    pendingOperationId.current = safeUUID();
+    pendingRating.current = null;
+    if (isSolved) setPendingRemoval({ problemId, version: progress[problemId]?.version ?? 0 });
+    else setPendingImportId(problemId);
   };
 
-  const confirmImportSolve = (rating: 3 | 4) => {
-    if (!pendingImportId) return;
-    void logProblem(
-      pendingImportId,
-      rating,
-      true,
-      rating === 4 ? "Imported strong solve" : "Imported solve",
-    );
-    setPendingImportId(null);
+  async function confirmProgressChange(rating?: 3 | 4) {
+    const operationId = pendingOperationId.current;
+    if (writeInProgress.current || !operationId) return;
+    writeInProgress.current = true;
+    setWriteBusy(true);
+    setWriteError("");
+    try {
+      if (rating && pendingImportId) {
+        pendingRating.current ??= rating;
+        await saveSession({
+          operationId, problemId: pendingImportId, rating: pendingRating.current,
+          expectedProgressVersion: 0,
+          notes: pendingRating.current === 4 ? "Imported strong solve" : "Imported solve",
+        });
+      } else if (pendingRemoval) {
+        await removeProblem(pendingRemoval.problemId, operationId, pendingRemoval.version);
+      }
+      setPendingImportId(null);
+      setPendingRemoval(null);
+    } catch {
+      setWriteError("The change could not be confirmed. Retry this action or close the dialog and check the current record.");
+    } finally {
+      writeInProgress.current = false;
+      setWriteBusy(false);
+    }
   };
 
   const handleStartSession = (problemId: string, isPremium: boolean) => {
@@ -477,15 +512,19 @@ export const ProblemLibrary: React.FC = () => {
     setPendingPremiumStartId(null);
   };
 
-  const copySolvedProblems = () => {
+  const copySolvedProblems = async () => {
     const solvedList = allProblems
       .filter((p) => progress[p.id])
       .map((p) => p.title)
       .join("\n");
-    navigator.clipboard.writeText(solvedList).then(() => {
+    try {
+      await navigator.clipboard.writeText(solvedList);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
-    });
+      return { message: "Copied the solved problem list." };
+    } catch {
+      return { message: "The browser could not access the clipboard. Use Copy List in the library." };
+    }
   };
 
   // Conditionally navigate to timer if a session starts
@@ -498,6 +537,112 @@ export const ProblemLibrary: React.FC = () => {
 
   const solvedInTab = tabProblems.filter((p) => progress[p.id]).length;
   const totalInTab = tabProblems.length;
+
+  useRegisterCoachTools(user ? {
+    library_read: {
+      kind: "read",
+      description: "Read current library filters, solved count, and up to five matching problems. Takes no arguments.",
+      run: () => {
+        if (isLoading || progressError || !catalogReady) return { message: "Library data is loading or unavailable." };
+        const data = {
+          tab: activeTab, category: activeCategory, savedView, difficulty: difficultyFilter,
+          status: statusFilter, premium: premiumFilter, sort: sortConfig, solvedInTab, totalInTab,
+          problems: filteredProblems.slice(0, 5).map(({ id, title, category, difficulty }) => ({
+            id, title, category, difficulty, status: getLearningStatus(progress[id]),
+          })),
+          progressChangePending: Boolean(pendingImportId || pendingRemoval),
+        };
+        return { message: `${filteredProblems.length} matching problems in the library.`, data, modelData: data };
+      },
+    },
+    library_filter: {
+      description: "Apply Library filters. Optional query, tab (pareto/neetcode-75/neetcode-150/neetcode-250/catalog/solved), category (exact category or All), difficulty (All/Easy/Medium/Hard), status (all/unsolved/rotation/retired), premium (all/free/premium), view (all/due/weak/essentials/recent).",
+      run: (args) => {
+        const parsed = z.strictObject({
+          query: z.string().trim().max(100).optional(),
+          tab: z.enum(["pareto","neetcode-75","neetcode-150","neetcode-250","catalog","solved"]).optional(),
+          category: z.string().refine((value) => value === "All" || allProblems.some((p) => p.category === value)).optional(),
+          difficulty: z.enum(["All","Easy","Medium","Hard"]).optional(),
+          status: z.enum(["all","unsolved","rotation","retired"]).optional(),
+          premium: z.enum(["all","free","premium"]).optional(),
+          view: z.enum(["all","due","weak","essentials","recent"]).optional(),
+        }).safeParse(args);
+        if (!parsed.success) return { message: "Some filters are unsupported. Read the library filters first." };
+        const { query, tab, category, difficulty, status, premium, view } = parsed.data;
+        updateFilterParams({
+          ...(query !== undefined && { q: query }),
+          ...(tab !== undefined && { tab, cat: null }),
+          ...(category !== undefined && { cat: category === "All" ? null : category }),
+          ...(difficulty !== undefined && { diff: difficulty === "All" ? null : difficulty }),
+          ...(status !== undefined && { status: status === "all" ? null : status }),
+          ...(premium !== undefined && { premium: premium === "all" ? null : premium }),
+          ...(view !== undefined && { view: view === "all" ? null : view }),
+        });
+        return { message: "Library filters updated." };
+      },
+    },
+    library_sort: {
+      description: "Sort the library using key (title/category/difficulty/status) and direction (asc/desc).",
+      run: (args) => {
+        const parsed = z.strictObject({ key: z.enum(["title","category","difficulty","status"]), direction: z.enum(["asc","desc"]) }).safeParse(args);
+        if (!parsed.success) return { message: "Choose a supported sort column and direction." };
+        setSortConfig(parsed.data);
+        return { message: "Library sort updated." };
+      },
+    },
+    library_open_explanation: {
+      description: "Open an attributed explanation for a catalog problem using its problemId.",
+      run: async (args) => {
+        const problem = await resolveLibraryProblem(args);
+        if (!problem) return { message: "Choose a problem ID from the current library." };
+        navigate(`/library/${encodeURIComponent(problem.id)}/explanation`);
+        return { message: "Opened the explanation page." };
+      },
+    },
+    library_start: {
+      description: "Start practice in the native Library workflow. Provide problemId and kind (coding or recall).",
+      run: async (args) => {
+        const parsed = z.strictObject({ problemId: z.string().max(150), kind: z.enum(["coding", "recall"]) }).safeParse(args);
+        if (!parsed.success || isLoading || progressError) return { message: "Choose a supported problem and practice kind." };
+        const problem = await resolveLibraryProblem({ problemId: parsed.data.problemId });
+        if (!problem) return { message: "Choose a problem ID from the current library." };
+        if (parsed.data.kind === "recall") {
+          if (!progress[problem.id]) return { message: "A recall check needs a previous solve or attempt." };
+          navigate(`/recall/${encodeURIComponent(problem.id)}`);
+          return { message: "Opened the recall workflow." };
+        }
+        handleStartSession(problem.id, isProblemPremium(problem));
+        return { message: isProblemPremium(problem) && !settings.includePremiumInAssignments
+          ? "Confirm the premium problem in the Library." : "Opened the coding workflow." };
+      },
+    },
+    library_report_solve: {
+      description: "Open the native dialog where the learner reports a previous solve. Provide problemId.",
+      run: async (args) => {
+        const problem = await resolveLibraryProblem(args);
+        if (!problem || isLoading || progressError || progress[problem.id]) {
+          return { message: "Choose an unrecorded problem once Library data is ready." };
+        }
+        toggleSolved(problem.id, false);
+        return { message: "Confirm the previous solve in the Library." };
+      },
+    },
+    library_remove_progress: {
+      description: "Preview removal of the selected progress record. Provide problemId. The user confirms in the Library.",
+      run: async (args) => {
+        const problem = await resolveLibraryProblem(args);
+        if (!problem || isLoading || progressError || !progress[problem.id]) {
+          return { message: "Choose a problem with saved progress." };
+        }
+        toggleSolved(problem.id, true);
+        return { message: "Review the selected record and confirm removal in the Library." };
+      },
+    },
+    library_copy_solved: {
+      description: "Copy the solved problem list using the browser clipboard.",
+      run: () => isLoading || progressError ? { message: "Progress data is unavailable." } : copySolvedProblems(),
+    },
+  } : {});
 
   const virtualRowStyle: React.CSSProperties | undefined =
     displayedProblems.length >= VIRTUALIZE_THRESHOLD
@@ -749,28 +894,47 @@ export const ProblemLibrary: React.FC = () => {
             Record your prior solve and an honest self-rating. A recall check
             and independent coding attempts will assess current ability.
           </p>
+          {writeError && <p role="alert" className="text-sm text-danger">{writeError}</p>}
           <div className="flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
               onClick={closeImportDialog}
+              disabled={writeBusy}
               className="px-3 py-2 rounded-sm text-xs font-medium bg-muted-surface hover:bg-hover-surface text-body border border-line-strong focus-visible:ring-2 focus-visible:ring-accent"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={() => confirmImportSolve(3)}
+              onClick={() => void confirmProgressChange(3)}
+              disabled={writeBusy || (pendingRating.current !== null && pendingRating.current !== 3)}
               className="px-3 py-2 rounded-sm text-xs font-semibold bg-muted-surface hover:bg-hover-surface text-body border border-line-strong focus-visible:ring-2 focus-visible:ring-accent"
             >
               Acceptable (3)
             </button>
             <button
               type="button"
-              onClick={() => confirmImportSolve(4)}
+              onClick={() => void confirmProgressChange(4)}
+              disabled={writeBusy || (pendingRating.current !== null && pendingRating.current !== 4)}
               className="px-3 py-2 rounded-sm text-xs font-semibold bg-accent hover:bg-accent-strong text-on-accent focus-visible:ring-2 focus-visible:ring-accent"
             >
               Strong (4)
             </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={pendingRemoval !== null}
+        onClose={() => { if (!writeInProgress.current) setPendingRemoval(null); }}
+        title="Remove saved progress?"
+        description={pendingRemoval ? problemMap[pendingRemoval.problemId]?.title : undefined}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-body">This removes the problem's progress record, including its notes and study history.</p>
+          {writeError && <p role="alert" className="text-sm text-danger">{writeError}</p>}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="danger" disabled={writeBusy} onClick={() => void confirmProgressChange()}>Remove progress</Button>
+            <Button disabled={writeBusy} onClick={() => setPendingRemoval(null)}>Cancel</Button>
           </div>
         </div>
       </Modal>

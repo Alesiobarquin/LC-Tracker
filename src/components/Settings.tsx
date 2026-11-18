@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useUser } from "@clerk/react";
+import { z } from "zod";
 import {
   Settings as SettingsIcon,
   RefreshCw,
@@ -9,16 +11,36 @@ import {
 } from "lucide-react";
 import { useUserSettings } from "../hooks/useUserData";
 import { TARGET_CURRICULUM_LABELS } from "../data/problems";
-import { PageHeader, QueryErrorBanner } from "./ui";
+import { Button, Modal, PageHeader, QueryErrorBanner } from "./ui";
 import { StudyTimeTargets } from "./StudyTimeTargets";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { useTheme } from "./ThemeProvider";
 import type { AppSettings } from "../types";
+import { useRegisterCoachTools } from "../coach/commands";
+import { CoachSetup } from "../coach/CoachSetup";
+import { COACH_SETUP_SECTION } from "../coach/connection";
+import { validateBackup } from "../utils/backup";
+import { safeUUID } from "../utils/uuid";
 
 const input =
   "w-full rounded-xl border border-line-strong bg-canvas p-3 text-foreground";
 const button =
   "rounded-xl border border-line-strong px-4 py-2 text-sm text-body hover:border-accent disabled:opacity-40";
+const editSettings = z.strictObject({
+  targetCurriculum: z.enum(["NEET_75", "NEET_150", "NEET_250", "EXTENDED"]).optional(),
+  learningMode: z.enum(["CURRICULUM", "EXPLORE"]).optional(),
+  language: z.enum(["Python", "Java", "JavaScript"]).optional(),
+  srAggressiveness: z.enum(["RELAXED", "BALANCED", "AGGRESSIVE"]).optional(),
+  includePremiumInAssignments: z.boolean().optional(),
+  restDay: z.number().int().min(-1).max(6).optional(),
+}).refine((value) => Object.keys(value).length > 0);
+const breakRange = z.strictObject({ start: z.iso.date(), end: z.iso.date() })
+  .refine(({ start, end }) => start <= end);
+
 export function Settings() {
+  const { user } = useUser();
+  const { hash } = useLocation();
+  const { preference, setPreference } = useTheme();
   const query = useUserSettings();
   const {
     settings,
@@ -36,26 +58,44 @@ export function Settings() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [backup, setBackup] = useState<{
+    owner: string;
+    name: string;
+    data: ReturnType<typeof validateBackup>;
+    operationId: string;
+  } | null>(null);
+  const operationInProgress = useRef(false);
   const importInput = useRef<HTMLInputElement>(null);
   useEffect(
     () => setUsername(query.leetcodeUsername ?? ""),
     [query.leetcodeUsername],
   );
-  async function run(action: () => Promise<unknown>, success: string) {
-    if (busy) return;
+  useEffect(() => setBackup(null), [user?.id]);
+  useEffect(() => {
+    if (hash === `#${COACH_SETUP_SECTION}`) document.getElementById(COACH_SETUP_SECTION)?.scrollIntoView();
+  }, [hash]);
+  async function run(action: () => Promise<unknown>, success: string | (() => string)) {
+    if (operationInProgress.current || !query.isSuccess) {
+      return { message: "Wait for the current Settings operation to finish." };
+    }
+    operationInProgress.current = true;
     setBusy(true);
     setError("");
     setMessage("");
     try {
       await action();
-      setMessage(success);
+      const status = typeof success === "string" ? success : success();
+      setMessage(status);
+      return { message: status };
     } catch (failure) {
       setError(
         failure instanceof Error
           ? failure.message
           : "Could not confirm this change. Your draft is preserved; retry when connected.",
       );
+      return { message: "Could not confirm the change. Check the status in Settings." };
     } finally {
+      operationInProgress.current = false;
       setBusy(false);
     }
   }
@@ -70,6 +110,139 @@ export function Settings() {
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function saveAndSync(value: string) {
+    let imported = 0;
+    return run(async () => {
+      await query.setLeetCodeUsername(value);
+      imported = await query.syncLeetCode(value);
+    }, () => `${imported} recent accepted submissions imported. New imports await recall assessment.`);
+  }
+
+  function editBreak(range: z.output<typeof breakRange>, include: boolean) {
+    return run(() => query.updateUserData((current) => {
+      const schedule = current.settings.studySchedule;
+      const matches = (value: typeof range) => value.start === range.start && value.end === range.end;
+      const blackoutDates = include
+        ? schedule.blackoutDates.some(matches) ? schedule.blackoutDates : [...schedule.blackoutDates, range]
+        : schedule.blackoutDates.filter((value) => !matches(value));
+      return { ...current, settings: { ...current.settings, studySchedule: { ...schedule, blackoutDates } } };
+    }), include ? "Break saved." : "Break removed.");
+  }
+
+  useRegisterCoachTools(user ? {
+    settings_read: {
+      kind: "read",
+      description: "Read confirmed study settings, interview date, event handles, appearance, and local operation status.",
+      run: () => {
+        if (!query.isSuccess) return { message: "Study settings are loading or unavailable." };
+        const { studySchedule, targetCurriculum, learningMode, language, srAggressiveness, includePremiumInAssignments } = settings;
+        const data = {
+          studySchedule: { ...studySchedule, blackoutDates: studySchedule.blackoutDates.slice(0, 8) },
+          targetCurriculum, learningMode, language, srAggressiveness, includePremiumInAssignments,
+          targetInterviewDate, targetEvents: targetEvents.slice(0, 8).map(({ id, date }) => ({ id, date })),
+          theme: preference, leetcodeConnected: Boolean(query.leetcodeUsername), lastSyncCount: query.lastSyncCount,
+          backupSelected: backup?.owner === user.id, operationFailed: Boolean(error),
+        };
+        return {
+          message: busy ? "A Settings operation is in progress." : message || "Current study settings.",
+          data,
+          modelData: data,
+        };
+      },
+    },
+    settings_update: {
+      description: "Save confirmed settings. Optional fields: targetCurriculum (NEET_75/NEET_150/NEET_250/EXTENDED), learningMode (CURRICULUM/EXPLORE), language (Python/Java/JavaScript), srAggressiveness (RELAXED/BALANCED/AGGRESSIVE), includePremiumInAssignments (boolean), restDay (-1 none, 0 Sunday, …6 Saturday).",
+      run: (args) => {
+        const parsed = editSettings.safeParse(args);
+        if (!parsed.success) return { message: "Choose values supported in Study settings." };
+        const { restDay, ...fields } = parsed.data;
+        return run(() => updateSettings({
+          ...fields, ...(restDay === undefined ? {} : { studySchedule: { ...settings.studySchedule, restDay } }),
+        }, settings), "Study settings saved.");
+      },
+    },
+    settings_set_break: {
+      description: "Add or remove a break with range {start, end} (YYYY-MM-DD) and include (boolean).",
+      run: (args) => {
+        const parsed = z.strictObject({ range: breakRange, include: z.boolean() }).safeParse(args);
+        if (!parsed.success) return { message: "Provide a valid date range and whether to include it." };
+        return editBreak(parsed.data.range, parsed.data.include);
+      },
+    },
+    settings_set_interview: {
+      description: "Save the next interview date. Provide date (YYYY-MM-DD or empty string to clear).",
+      run: (args) => {
+        const parsed = z.strictObject({ date: z.union([z.iso.date(), z.literal("")]) }).safeParse(args);
+        if (!parsed.success) return { message: "Use YYYY-MM-DD or an empty date." };
+        return run(async () => {
+          await setTargetInterviewDate(parsed.data.date);
+          setInterviewDraft(null);
+        }, "Interview date saved.");
+      },
+    },
+    settings_add_event: {
+      description: "Add a recruiting date using a user-supplied title and date (YYYY-MM-DD).",
+      run: (args) => {
+        const parsed = z.strictObject({ date: z.iso.date(), title: z.string().trim().min(1).max(160) }).safeParse(args);
+        if (!parsed.success) return { message: "Provide an event title and date." };
+        const { title, date } = parsed.data;
+        const event = { id: safeUUID(), title, date, type: "Recruiting" };
+        return run(() => query.updateUserData((current) => {
+          const duplicate = current.targetEvents.some((entry) => entry.title === title && entry.date === date);
+          return duplicate ? current : {
+            ...current, targetEvents: [...current.targetEvents, event].sort((a, b) => a.date.localeCompare(b.date)),
+          };
+        }), "Recruiting date saved.");
+      },
+    },
+    settings_remove_event: {
+      description: "Remove a recruiting event using its id from settings_read.",
+      run: (args) => {
+        const parsed = z.strictObject({ id: z.string().max(100) }).safeParse(args);
+        if (!parsed.success || !targetEvents.some(({ id }) => id === parsed.data.id)) {
+          return { message: "Choose a current event from Study settings." };
+        }
+        return run(() => query.removeTargetEvent(parsed.data.id), "Recruiting date removed.");
+      },
+    },
+    settings_theme: {
+      description: "Change the browser color theme. Provide theme (light, dark, or system).",
+      run: (args) => {
+        const parsed = z.strictObject({ theme: z.enum(["light", "dark", "system"]) }).safeParse(args);
+        if (!parsed.success) return { message: "Choose Light, Dark, or System." };
+        setPreference(parsed.data.theme);
+        return { message: "Browser theme updated." };
+      },
+    },
+    settings_sync_leetcode: {
+      description: "Import recent accepted submissions. Provide an optional user-supplied username, otherwise sync the saved account.",
+      run: (args) => {
+        const decoded = z.strictObject({ username: z.string().trim().regex(/^@?[\w-]{1,60}$/).optional() }).safeParse(args);
+        if (!decoded.success) return { message: "Enter a valid LeetCode username." };
+        const name = decoded.data.username ?? query.leetcodeUsername;
+        if (!name) return { message: "Enter your LeetCode username in Settings first." };
+        if (decoded.data.username) setUsername(name);
+        return saveAndSync(name);
+      },
+    },
+    settings_export_backup: {
+      description: "Download a snapshot backup with the browser download control. Takes no arguments.",
+      run: (args) => Object.keys(args).length ? { message: "Export takes no arguments." } : run(exportData, "Backup exported."),
+    },
+    settings_restore_backup: {
+      description: "Open the local backup workflow. User chooses and confirms the file in Settings. Takes no arguments.",
+      run: (args) => {
+        if (Object.keys(args).length) return { message: "Restore takes no arguments." };
+        if (busy || !query.isSuccess) return { message: "Wait for Settings to finish loading or saving." };
+        document.getElementById("section-backup")?.scrollIntoView({ block: "start" });
+        if (navigator.userActivation?.isActive) {
+          importInput.current?.click();
+          return { message: "Choose a backup in the file picker, then confirm its preview in Settings." };
+        }
+        return { message: "Choose Restore backup in Settings to pick a file, then confirm the preview there." };
+      },
+    },
+  } : {});
   if (query.error)
     return <QueryErrorBanner onRetry={() => void query.refetch()} />;
   return (
@@ -86,10 +259,11 @@ export function Settings() {
           "schedule",
           "targets",
           "leetcode",
+          "study-chat",
           "backup",
         ].map((id) => (
           <a key={id} href={`#section-${id}`}>
-            {id[0].toUpperCase() + id.slice(1)}
+            {id === "study-chat" ? "Study chat" : id[0].toUpperCase() + id.slice(1)}
           </a>
         ))}
       </nav>
@@ -355,21 +529,13 @@ export function Settings() {
                     !blackoutEnd ||
                     blackoutEnd < blackoutStart
                   }
-                  onClick={() =>
-                    void run(async () => {
-                      await updateSettings({
-                        studySchedule: {
-                          ...settings.studySchedule,
-                          blackoutDates: [
-                            ...settings.studySchedule.blackoutDates,
-                            { start: blackoutStart, end: blackoutEnd },
-                          ],
-                        },
-                      });
+                  onClick={async () => {
+                    const result = await editBreak({ start: blackoutStart, end: blackoutEnd }, true);
+                    if (result.message === "Break saved.") {
                       setBlackoutStart("");
                       setBlackoutEnd("");
-                    }, "Break saved.")
-                  }
+                    }
+                  }}
                 >
                   Add break
                 </button>
@@ -384,21 +550,7 @@ export function Settings() {
                   </span>
                   <button
                     aria-label={`Remove break ${range.start}`}
-                    onClick={() =>
-                      void run(
-                        () =>
-                          updateSettings({
-                            studySchedule: {
-                              ...settings.studySchedule,
-                              blackoutDates:
-                                settings.studySchedule.blackoutDates.filter(
-                                  (_, i) => i !== index,
-                                ),
-                            },
-                          }),
-                        "Break removed.",
-                      )
-                    }
+                    onClick={() => void editBreak(range, false)}
                   >
                     <X size={16} />
                   </button>
@@ -541,12 +693,7 @@ export function Settings() {
             <button
               className={button}
               disabled={!username.trim()}
-              onClick={() =>
-                void run(async () => {
-                  await query.setLeetCodeUsername(username);
-                  await query.syncLeetCode(username);
-                }, "Recent accepted submissions imported. New imports await recall assessment.")
-              }
+              onClick={() => void saveAndSync(username)}
             >
               <RefreshCw size={15} className="inline mr-2" /> Save and sync
             </button>
@@ -554,6 +701,19 @@ export function Settings() {
               Imports preserve the original solve date and leave current
               confidence unknown. Existing study history is retained.
             </p>
+          </div>
+        </section>
+        <section
+          id={COACH_SETUP_SECTION}
+          aria-labelledby="study-chat-settings-heading"
+          className="premium-card settings-section p-5 sm:p-6 scroll-mt-24"
+        >
+          <div className="settings-section-intro space-y-3">
+            <h2 id="study-chat-settings-heading" className="text-lg font-semibold text-foreground">Study chat</h2>
+            <p className="text-sm text-muted">Use the study plan and progress shortcuts without a key. Connect OpenRouter to ask custom questions about your practice.</p>
+          </div>
+          <div className="settings-section-fields">
+            <CoachSetup />
           </div>
         </section>
         <section
@@ -592,18 +752,43 @@ export function Settings() {
               accept="application/json,.json"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (!file) return;
+                e.target.value = "";
+                if (!file || !user) return;
                 void run(async () => {
                   if (file.size > 20 * 1024 * 1024)
                     throw new Error("Backup files must be smaller than 20 MB.");
-                  await query.restoreBackup(JSON.parse(await file.text()));
-                  if (importInput.current) importInput.current.value = "";
-                }, "Backup restored.");
+                  const data = validateBackup(JSON.parse(await file.text()));
+                  setBackup({ owner: user.id, name: file.name, data, operationId: safeUUID() });
+                }, "Backup verified. Review it before restoring.");
               }}
             />
           </div>
         </section>
       </fieldset>
+      <Modal
+        isOpen={Boolean(backup && backup.owner === user?.id)}
+        onClose={() => { if (!operationInProgress.current) setBackup(null); }}
+        title="Restore selected backup?"
+        description="The restore can replace matching study records and settings in this account."
+      >
+        {backup?.owner === user?.id && backup && (
+          <div className="space-y-4">
+            <p className="break-words text-sm text-body">{backup.name}</p>
+            <p className="text-sm text-muted">
+              {Object.keys(backup.data.progress ?? {}).length} problem records · {backup.data.sessionTimings?.length ?? 0} session timings
+              {backup.data.userSettings ? " · Study settings included" : ""}
+            </p>
+            {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+            <div className="flex flex-wrap gap-2">
+              <Button variant="danger" disabled={busy} onClick={() => void run(async () => {
+                await query.restoreBackup(backup.data, backup.operationId);
+                setBackup(null);
+              }, "Backup restored.")}>Confirm restore</Button>
+              <Button disabled={busy} onClick={() => setBackup(null)}>Cancel</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

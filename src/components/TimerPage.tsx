@@ -10,6 +10,7 @@ import { useProblemProgress } from "../hooks/useUserData";
 import { problemMap, ensureExtendedCatalogLoaded } from "../data/problems";
 import { Timer } from "./Timer";
 import { QueryErrorBanner } from "./ui";
+import { startPractice, useTodayPlan } from "../hooks/useTodayPlan";
 
 export const TimerPage: React.FC = () => {
   const { problemId } = useParams<{ problemId: string }>();
@@ -20,6 +21,8 @@ export const TimerPage: React.FC = () => {
   const sessionReturnTo = useStore((state) => state.sessionReturnTo);
   const clearSessionReturnTo = useStore((state) => state.clearSessionReturnTo);
   const startSession = useStore((state) => state.startSession);
+  const today = useTodayPlan();
+  const selectedId = useStore(state => state.dayPlan?.date === today.date ? state.dayPlan.choice?.problemId : undefined);
   const {
     progress,
     isLoading: progressLoading,
@@ -56,9 +59,17 @@ export const TimerPage: React.FC = () => {
       return;
     const problem = problemMap[targetProblemId];
     if (!problem) return;
+    if (selectedId === problem.id && today.loading && !today.error) return;
     // Opening this route starts at most one attempt. Clearing a saved/cancelled
     // attempt can render here again while the destination route is loading.
     sessionOpened.current = true;
+    if (selectedId === problem.id && !today.error && !today.loading) {
+      const choice = today.freshPlan().mainTask;
+      if (choice?.problemId === problem.id && choice.kind !== "variant") {
+        startPractice(choice, returnTo);
+        return;
+      }
+    }
     startSession(
       problem.id,
       Boolean(progress[problem.id]),
@@ -76,6 +87,8 @@ export const TimerPage: React.FC = () => {
     returnTo,
     startSession,
     targetProblemId,
+    selectedId,
+    today,
   ]);
 
   if (activeRecall)

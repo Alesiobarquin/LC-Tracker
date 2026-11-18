@@ -3,6 +3,10 @@ import { getLearningStatus, LEARNING_STATUS_LABELS } from "../utils/study";
 import { TraceIndex } from "./ui/StudyTrace";
 import { preferenceStorage } from "../lib/safeStorage";
 import React, { useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
+import { z } from "zod";
+import { useRegisterCoachTools } from "../coach/commands";
+import { activePracticePath, startPractice, useTodayPlan } from "../hooks/useTodayPlan";
 import { Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
@@ -144,6 +148,7 @@ const PatternList: React.FC<{
   onRetry?: () => void;
 }> = ({ patternData, isLoading, error, onRetry }) => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = preferenceStorage.getItem("patternViewMode");
     if (saved === "extensive" || saved === "complete") return "complete";
@@ -200,6 +205,47 @@ const PatternList: React.FC<{
     }
     return [...map.entries()].filter(([, items]) => items.length > 0);
   }, [visiblePatternData]);
+
+  useRegisterCoachTools(user ? {
+    patterns_read: {
+      kind: "read",
+      description: "Read the pattern roadmap's current filters and coverage. No arguments.",
+      run: () => {
+        if (error || isLoading) return { message: "Pattern coverage is loading or unavailable." };
+        const data = {
+          viewMode, statusFilter, masteredCount, dueCount, totalProblems,
+          patterns: visiblePatternData.slice(0, 5).map(({ id, name, problemsCount, completedCount, dueCount, masteredCount }) =>
+            ({ id, name, problemsCount, completedCount, dueCount, masteredCount })),
+        };
+        return { message: `${visiblePatternData.length} matching patterns in the roadmap.`, data, modelData: data };
+      },
+    },
+    patterns_filter: {
+      description: "Filter the pattern roadmap using optional query, view (essential/complete), and status (all/next/due/mastered).",
+      run: (args) => {
+        const input = z.strictObject({
+          query: z.string().trim().max(100).optional(),
+          view: z.enum(["essential", "complete"]).optional(),
+          status: z.enum(["all", "next", "due", "mastered"]).optional(),
+        }).safeParse(args);
+        if (!input.success) return { message: "Choose supported roadmap filters." };
+        if (input.data.query !== undefined) setQuery(input.data.query);
+        if (input.data.view) setViewMode(input.data.view);
+        if (input.data.status) setStatusFilter(input.data.status);
+        return { message: "Pattern filters updated." };
+      },
+    },
+    patterns_open: {
+      description: "Open the selected pattern lesson using patternId from patterns_read.",
+      run: (args) => {
+        const input = z.strictObject({ patternId: z.string().max(100) }).safeParse(args);
+        const selected = input.success && patternData.find(({ id }) => id === input.data.patternId);
+        if (!selected) return { message: "Choose a pattern from the roadmap." };
+        navigate(`/patterns/${selected.id}`);
+        return { message: `Opened ${selected.name}.` };
+      },
+    },
+  } : {});
 
   if (isLoading && patternData.length === 0) {
     return <PatternSkeleton />;
@@ -444,6 +490,7 @@ const PatternDetail: React.FC<{
   const { user } = useUser();
   const { logProblem, removeProblem } = useProblemProgress();
   const { settings } = useUserSettings();
+  const today = useTodayPlan();
   const settingsLanguage = (settings.language || "Python").toLowerCase();
   const initialTemplateLang: TemplateLanguage =
     settingsLanguage.includes("java") && !settingsLanguage.includes("script")
@@ -459,6 +506,81 @@ const PatternDetail: React.FC<{
   const lesson = pattern
     ? getPatternLessonMeta(pattern.id, pattern.isCore)
     : null;
+  const template = language === "python" ? pattern?.templateCodePython : pattern?.templateCodeJs;
+  const lessonTarget = z.string().refine((id) => id === patternId).optional();
+
+  function startLessonProblem(problemId: string) {
+    if (!user || !pattern) {
+      navigate("/login");
+      return;
+    }
+    const returnTo = `/patterns/${pattern.id}`;
+    const existing = activePracticePath();
+    const dayPlan = useStore.getState().dayPlan;
+    if (existing) {
+      navigate(existing);
+      return;
+    }
+    if (!today.loading && !today.error && dayPlan?.date === format(new Date(), "yyyy-MM-dd") && dayPlan.choice?.problemId === problemId) {
+      const task = today.freshPlan().mainTask;
+      if (task?.problemId === problemId && task.kind !== "variant") {
+        const destination = startPractice(task, returnTo);
+        if (destination) navigate(destination, { state: { returnTo } });
+        return;
+      }
+    }
+    startSession(problemId, Boolean(problemProgress[problemId]), false, Date.now(), returnTo);
+    navigate(activePracticePath() ?? `/timer/${problemId}`, { state: { returnTo } });
+  }
+
+  async function copyTemplate(selectedLanguage = language) {
+    const contents = selectedLanguage === "python" ? pattern?.templateCodePython : pattern?.templateCodeJs;
+    if (!contents) return { message: "There is no template for that language." };
+    try {
+      await navigator.clipboard.writeText(contents);
+      setLanguage(selectedLanguage);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+      return { message: "Copied the selected template." };
+    } catch {
+      setCopied(false);
+      return { message: "The browser could not access the clipboard. Try Copy in the lesson." };
+    }
+  }
+
+  useRegisterCoachTools(user && pattern && lesson ? {
+    lesson_read: {
+      kind: "read",
+      description: "Read a mounted pattern lesson's title, progress and available practice problems, optionally matching patternId.",
+      run: (args) => {
+        if (!z.strictObject({ patternId: lessonTarget }).safeParse(args).success) return { message: "Open that lesson first." };
+        const data = {
+          patternId: pattern.id, language, completedCount: pattern.completedCount, masteredCount: pattern.masteredCount,
+          problems: pattern.mappedProblems.slice(0, 5).map(({ id, title, difficulty }) => ({ id, title, difficulty })),
+        };
+        return { message: pattern.name, data, modelData: data };
+      },
+    },
+    lesson_copy_template: {
+      description: "Copy the selected lesson's template locally. Optional language (python or javascript) and patternId.",
+      run: (args) => {
+        const input = z.strictObject({ patternId: lessonTarget, language: z.enum(["python", "javascript"]).optional() }).safeParse(args);
+        if (!input.success) return { message: "Choose an available language in this lesson." };
+        return copyTemplate(input.data.language);
+      },
+    },
+    lesson_start: {
+      description: "Start a problem from the active lesson. Provide problemId and optional patternId.",
+      run: (args) => {
+        const input = z.strictObject({ patternId: lessonTarget, problemId: z.string().max(150) }).safeParse(args);
+        if (!input.success || !pattern.mappedProblems.some(({ id }) => id === input.data.problemId)) {
+          return { message: "Choose a problem from the active lesson." };
+        }
+        startLessonProblem(input.data.problemId);
+        return { message: "Opened the lesson practice workflow." };
+      },
+    },
+  } : {});
 
   if (!isLoading && !pattern) {
     return (
@@ -480,8 +602,6 @@ const PatternDetail: React.FC<{
     );
   }
 
-  const template =
-    language === "python" ? pattern.templateCodePython : pattern.templateCodeJs;
   const learnProblems = pattern.mappedProblems.slice(
     0,
     Math.min(5, pattern.mappedProblems.length),
@@ -498,16 +618,6 @@ const PatternDetail: React.FC<{
       void removeProblem(problemId);
     } else {
       void logProblem(problemId, 3, true, "Imported solve");
-    }
-  };
-
-  const copyTemplate = async () => {
-    try {
-      await navigator.clipboard.writeText(template);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      setCopied(false);
     }
   };
 
@@ -585,22 +695,7 @@ const PatternDetail: React.FC<{
                   </a>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!user) {
-                        navigate("/login");
-                        return;
-                      }
-                      startSession(
-                        prob.id,
-                        Boolean(problemProgress[prob.id]),
-                        false,
-                        Date.now(),
-                        `/patterns/${pattern.id}`,
-                      );
-                      navigate(`/timer/${prob.id}`, {
-                        state: { returnTo: `/patterns/${pattern.id}` },
-                      });
-                    }}
+                    onClick={() => startLessonProblem(prob.id)}
                     className="row-action"
                   >
                     <Play size={14} />

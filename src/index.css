@@ -3857,7 +3857,7 @@ button:active:not(:disabled),
 
 .login-page {
   min-height: 100vh;
-  padding: 150px max(24px, calc((100vw - 1024px) / 2)) 40px;
+  padding: 112px max(24px, calc((100vw - 1024px) / 2)) 40px;
 }
 .login-composition {
   display: grid;
@@ -3866,9 +3866,9 @@ button:active:not(:disabled),
   align-items: start;
 }
 .login-form {
-  padding-top: 28px;
+  min-width: 0;
 }
-.login-form h1 {
+.login-form .login-heading {
   font-size: 30px;
   letter-spacing: -0.045em;
   line-height: 1.15;
@@ -3932,22 +3932,18 @@ button:active:not(:disabled),
   .login-composition {
     gap: 64px;
   }
-  .login-page {
-    padding-top: 130px;
-  }
 }
 @media (max-width: 767px) {
   .login-page {
-    padding: 110px 24px 32px;
+    padding: 88px 24px 32px;
   }
   .login-composition {
     display: block;
   }
   .login-form {
-    padding: 0;
     max-width: 420px;
   }
-  .login-form h1 {
+  .login-form .login-heading {
     font-size: 28px;
   }
   .login-notebook {

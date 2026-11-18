@@ -10,7 +10,7 @@ export default defineConfig(({ mode, command }) => {
     plugins: [react(), tailwindcss(), leetcodeAcDevApi()],
     resolve: {
       alias: [
-        ...(mode === 'e2e' ? [{ find: /^@clerk\/react(?:\/legacy)?$/, replacement: path.resolve(__dirname, 'e2e/fixtures/clerk.tsx') }] : []),
+        ...(mode === 'e2e' ? [{ find: /^@clerk\/react$/, replacement: path.resolve(__dirname, 'e2e/fixtures/clerk.tsx') }] : []),
         { find: '@', replacement: path.resolve(__dirname, '.') },
       ],
     },

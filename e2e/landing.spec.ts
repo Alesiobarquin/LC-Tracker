@@ -45,8 +45,11 @@ test('landing explains the planner and updates its sample from the goal', async 
   }
 
   await page.getByRole('link', { name: 'Build my study plan' }).first().click();
+  await expect(page).toHaveURL(/\/sign-up$/);
+  await expect(page.getByRole('heading', { name: 'Create your LC Tracker account' })).toBeVisible();
+  await page.getByRole('link', { name: 'Sign in', exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByText(/Continue with Google|Google/i).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign in to LC Tracker' })).toBeVisible();
 });
 
 test('shared header takes utility pages to the landing story section', async ({ page }) => {

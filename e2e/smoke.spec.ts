@@ -54,9 +54,16 @@ test.describe('public smoke', () => {
     await expect(page.getByRole('heading', { name: /Terms of Service/i })).toBeVisible();
   });
 
-  test('login shows recoverable google CTA', async ({ page }) => {
-    await page.goto('/login');
-    await waitForAppShell(page);
-    await expect(page.getByText(/Continue with Google|Google/i).first()).toBeVisible();
-  });
+  for (const path of ['/login', '/sign-up']) {
+    test(`${path} offers email and shows the Google logo on the sign-in button`, async ({ page }) => {
+      await page.goto(path);
+      const googleButton = page.getByRole('button', { name: /^(?:Continue with )?Google$/ });
+      await expect(googleButton).toBeVisible();
+      await expect(googleButton.locator('.cl-socialButtonsProviderIcon__google')).toBeVisible();
+      await expect(page.getByLabel('Email address')).toBeVisible();
+      const password = page.getByLabel('Password', { exact: true });
+      if (path === '/sign-up') await expect(password).toBeVisible();
+      else await expect(password).toBeAttached();
+    });
+  }
 });

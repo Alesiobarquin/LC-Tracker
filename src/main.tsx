@@ -23,35 +23,43 @@ if (!clerkPubKey) {
 }
 
 const clerkAppearance = {
+  options: {
+    elevation: 'flush',
+    socialButtonsPlacement: 'bottom',
+    socialButtonsVariant: 'blockButton',
+    autoFocus: false,
+  },
   variables: {
-    colorBackground: 'var(--palette-surface)',
-    colorInputBackground: 'var(--palette-canvas)',
-    colorText: 'var(--palette-foreground)',
-    colorTextSecondary: 'var(--palette-muted)',
+    colorBackground: 'var(--palette-canvas)',
+    colorInput: 'var(--palette-surface)',
+    colorForeground: 'var(--palette-foreground)',
+    colorMutedForeground: 'var(--palette-muted)',
     colorPrimary: 'var(--palette-accent)',
+    colorPrimaryForeground: 'var(--palette-on-accent)',
     colorDanger: 'var(--palette-danger)',
-    colorInputText: 'var(--palette-foreground)',
-    colorNeutral: 'var(--palette-subtle)',
+    colorInputForeground: 'var(--palette-foreground)',
+    colorNeutral: 'var(--palette-foreground)',
+    colorBorder: 'var(--palette-line-strong)',
+    colorRing: 'var(--palette-accent)',
     borderRadius: '0.375rem',
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif',
+    fontFamily: 'var(--font-sans)',
   },
   elements: {
-    card: 'bg-surface border border-line shadow-lg',
-    navbar: 'bg-surface border-line',
-    navbarButton: 'text-body hover:text-foreground',
-    headerTitle: 'text-foreground',
-    headerSubtitle: 'text-muted',
-    socialButtonsBlockButton: 'bg-canvas border border-line hover:bg-muted-surface text-foreground',
-    socialButtonsBlockButtonText: 'text-foreground font-semibold',
-    dividerLine: 'bg-muted-surface',
-    dividerText: 'text-subtle',
-    formFieldLabel: 'text-body',
-    formFieldInput: 'bg-canvas border border-line text-foreground',
-    formButtonPrimary: 'bg-accent hover:bg-accent-strong text-on-accent font-bold',
-    footerActionText: 'text-muted',
-    footerActionLink: 'text-accent hover:text-accent',
-    identityPreviewText: 'text-body',
-    identityPreviewEditButtonIcon: 'text-accent',
+    rootBox: { width: '100%' },
+    cardBox: { width: '100%', maxWidth: '100%' },
+    headerTitle: 'login-heading',
+    formFieldInput: 'min-h-11',
+    formButtonPrimary: 'min-h-11',
+    socialButtonsBlockButton: 'min-h-11',
+  },
+} as const;
+
+const clerkLocalization = {
+  signIn: {
+    start: { title: 'Sign in to LC Tracker', subtitle: 'Open your study plan and practice history.' },
+  },
+  signUp: {
+    start: { title: 'Create your LC Tracker account', subtitle: 'Set up a study plan and save your practice history.' },
   },
 };
 
@@ -70,7 +78,12 @@ createRoot(document.getElementById('root')!).render(
               <ClerkProvider
                 publishableKey={clerkPubKey || ''}
                 afterSignOutUrl="/"
+                signInUrl="/login"
+                signUpUrl="/sign-up"
+                signInFallbackRedirectUrl="/"
+                signUpFallbackRedirectUrl="/"
                 appearance={clerkAppearance}
+                localization={clerkLocalization}
               >
                 <ErrorBoundary>
                   <Suspense fallback={<PublicPageFallback />}>

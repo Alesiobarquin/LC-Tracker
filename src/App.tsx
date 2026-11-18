@@ -51,6 +51,7 @@ export default function App() {
   const navigate = useNavigate();
   const rawPath = location.pathname;
   const path = rawPath === '/' ? rawPath : rawPath.replace(/\/+$/, '');
+  const isAuthPage = path === '/login' || path === '/sign-up';
   const [bootTimedOut, setBootTimedOut] = React.useState(false);
   const previousUserId = React.useRef<string | null>(null);
 
@@ -129,9 +130,11 @@ export default function App() {
     );
   }
 
-  // Not logged in — /login shows the sign-in widget, allow public app routes, everything else goes to landing
+  if (isAuthPage) {
+    return user ? <Navigate to="/" replace /> : <Login createAccount={path === '/sign-up'} />;
+  }
+
   if (!user) {
-    if (path === '/login') return <Login />;
     if (!isPublicAppRoute) {
       const isPrivateRoute = /^\/(dashboard|study-plan|analytics|settings|onboarding|admin|timer|recall)(\/|$)/.test(path);
       return isPrivateRoute ? <Navigate to="/" replace /> : <NotFound />;

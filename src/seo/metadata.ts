@@ -21,7 +21,7 @@ const pages = {
 } as const;
 
 const privatePages: Record<string, string> = {
-  '/login': 'Sign In', '/sso-callback': 'Signing In', '/dashboard': 'Today’s Study Plan',
+  '/login': 'Sign In', '/sign-up': 'Create an Account', '/sso-callback': 'Signing In', '/dashboard': 'Today’s Study Plan',
   '/study-plan': 'Your Study Plan', '/analytics': 'Learning Evidence', '/settings': 'Settings',
   '/onboarding': 'Set Up Your Study Plan', '/admin': 'Admin', '/timer': 'Coding Session',
 };

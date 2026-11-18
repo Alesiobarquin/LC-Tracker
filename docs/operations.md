@@ -33,6 +33,59 @@ PLAYWRIGHT_BASE_URL=https://lc-tracker.app npm run test:e2e -- e2e/smoke.spec.ts
 
 These public checks do not perform a real sign-in or authenticated database write.
 
+## Email and password sign-in
+
+In the existing LC Tracker Clerk instance, go to **User & authentication**.
+Under **Email**, enable **Sign-up with email**, **Require email address**,
+**Verify at sign-up** with an email verification code, and **Sign-in with
+email**. Under **Password**, enable **Sign-up with password**. Keep the
+passwordless sign-in methods under **Sign-in with email** off so Clerk asks for
+a password after the user enters their email address. Password recovery still
+uses an emailed verification code.
+Keep the existing Google connection enabled. The Clerk forms at `/login` and
+`/sign-up` reflect the instance settings. See
+[Clerk's sign-up and sign-in options](https://clerk.com/docs/guides/configure/auth-strategies/sign-up-sign-in-options).
+
+Before promoting the release, use dedicated test accounts to verify email
+sign-up, verification, onboarding, password sign-in, and password reset. Use a
+Google test account that already completed onboarding to confirm its Clerk user
+ID, saved plan, and history survive signing out and back in. Compare the Clerk
+user ID with the same account before the change. A separate Clerk instance has
+different user IDs and cannot verify continuity for existing production accounts.
+
+When email and password are enabled, Clerk shows **Forgot password?** in the
+password sign-in flow. Confirm that a test user can receive the emailed reset
+code, set a new password, and sign in to the same workspace. [Clerk password reset flow](https://clerk.com/docs/guides/development/custom-flows/authentication/forgot-password)
+
+## Adding another sign-in provider
+
+Once deployed, the Clerk widgets on `/login` and `/sign-up` show the providers
+configured on their Clerk instance. To try GitHub in development, go to
+**SSO connections** in the Clerk Dashboard, select **Add connection** →
+**For all users** → **GitHub**, and use Clerk's shared credentials.
+
+### GitHub in production
+
+1. Select the existing LC Tracker production instance. In **SSO connections**,
+   add **GitHub** for all users. Enable it for sign-up and sign-in, choose
+   **Use custom credentials**, and select **GitHub App**. Copy the
+   callback URL Clerk provides.
+2. In GitHub, use a **GitHub App** with `https://lc-tracker.app` as its homepage
+   and the exact Clerk callback as its redirect URI. Allow **Any account**,
+   keep user token expiration on, turn off webhooks and authorization during
+   installation, and grant **Read-only** access to **Account permissions →
+   Email addresses**. Generate a client secret under **Credentials → Client
+   secrets**.
+3. Enter the GitHub Client ID and Client Secret in the Clerk connection and
+   save it. Keep the secret in Clerk and keep Google enabled.
+4. In a signed-out browser, try GitHub on `/login` with a test account. Verify
+   that an existing test user with the same verified email on GitHub and Clerk
+   reaches the same workspace. Also check that Google still opens that user's
+   saved plan and history.
+
+For other providers, follow the matching Clerk guide for credentials and
+callback setup. [GitHub setup](https://clerk.com/docs/guides/configure/auth-strategies/social-connections/github) · [Social connections](https://clerk.com/docs/guides/configure/auth-strategies/social-connections/overview) · [Account linking](https://clerk.com/docs/guides/configure/auth-strategies/social-connections/account-linking)
+
 ## Release order
 
 1. Export the current Supabase database using the provider's database backup/export

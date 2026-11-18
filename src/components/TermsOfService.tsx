@@ -51,7 +51,7 @@ export function TermsOfService() {
           <section id="registration" className="scroll-mt-20">
             <h2 className="text-2xl font-semibold text-foreground mb-4">2. Account Registration</h2>
             <p>
-              You must register for an account using Google OAuth to access the full features of the Service.
+              You must register for an account to access the full features of the Service.
               You are responsible for safeguarding the credentials that you use to access the Service and for
               any activities or actions under your account.
             </p>

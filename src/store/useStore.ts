@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ActiveSession, RecallDraft } from "../types";
-import type { StudyTask } from "../utils/study";
+import type { StudyPlanChoice } from "../utils/study";
 import { safeUUID } from "../utils/uuid";
 import { preferenceStorage, timerStorage } from "../lib/safeStorage";
 import { recallAttemptSchema } from "../utils/studySchemas";
@@ -12,9 +12,9 @@ interface UIState {
   setSessionUser: (userId: string | null) => void;
   reviewOnlyDate: string | null;
   setReviewOnlyDate: (date: string | null) => void;
-  dayPlan: { date: string; skipped: string[]; choice?: Pick<StudyTask, "problemId" | "kind" | "minutes"> } | null;
+  dayPlan: { date: string; skipped: string[]; choice?: StudyPlanChoice } | null;
   skipPlanTask: (date: string, problemId: string) => void;
-  choosePlanTask: (date: string, choice?: Pick<StudyTask, "problemId" | "kind" | "minutes">) => void;
+  choosePlanTask: (date: string, choice?: StudyPlanChoice) => void;
   activeSession: ActiveSession | null;
   activeRecall: RecallDraft | null;
   startRecall: (problemId: string) => void;

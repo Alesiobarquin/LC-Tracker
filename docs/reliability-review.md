@@ -17,6 +17,10 @@ flowchart LR
   Proxy --> LeetCode[LeetCode GraphQL]
   Browser --> Fallback[Alfa LeetCode API on Render]
   Browser --> OpenRouter[OpenRouter via user key]
+  Browser --> Coach[Vercel /api/coach]
+  Coach --> Ledger[Private Supabase allowance ledger]
+  Coach --> OpenRouter
+  Coach --> Native[Gemini or Claude with user key]
   OpenRouter --> Azure[Microsoft Azure inference]
 ```
 
@@ -32,7 +36,7 @@ flowchart LR
 | Zustand | Timer, owner, stable operation ID, and pending completion in sessionStorage | `src/store/useStore.ts` |
 | Scheduling helpers | Review intervals, daily plans, sprint progression, streaks | `src/utils/progressHelpers.ts`, `src/utils/dateUtils.ts` |
 | LeetCode integration | Up to 50 recent accepted submissions; same-origin proxy with external fallback | `src/services/leetcode.ts`, `server/leetcodeAc.ts` |
-| Study chat | Optional browser-to-OpenRouter inference. Commands run through the signed-in app and its existing data services. | `src/coach/` |
+| Study chat | Hosted allowance and optional personal credentials. Commands run through the signed-in app and its existing data services. | `src/coach/`, `api/coach.ts` |
 | Versioned datasets | Catalog, premium metadata, patterns, and syntax cards | `src/data/`, `scripts/` |
 | Monitoring | Read-only provider readiness, hourly GitHub checks, optional sanitized Sentry events | `api/health.ts`, `.github/workflows/`, `src/lib/telemetry.ts` |
 
@@ -44,14 +48,22 @@ Production also has a feedback insert trigger calling Formspree through
 `supabase_functions.http_request`; this provider-managed trigger was discovered
 in the database export. It is disabled in the isolated restore check.
 
-Study chat holds the learner's OpenRouter key and conversation in tab memory.
+Study Chat holds each conversation and personal key in tab memory.
 Custom questions can make one intent request and one synthesis request using
-explicitly projected study facts. The pinned route is GPT-4.1 Nano on Microsoft
-Azure. The app requires structured outputs, zero data retention, disabled data
-collection and no provider fallback. Inference uses the learner's OpenRouter
-account. The price ceiling selected on November 18, 2026 is $0.10 per million input
-tokens and $0.40 per million output tokens. The scripted provider verifies the
-client contract and isolates development from live billing. [OpenRouter model and provider details](https://openrouter.ai/openai/gpt-4.1-nano) · [Routing parameters](https://openrouter.ai/docs/guides/routing/provider-selection)
+selected study facts. Hosted and personal OpenRouter requests pin GPT-4.1 Nano
+on Microsoft Azure and require structured output and zero data retention. The
+request caps pricing at $0.10 per million input tokens and $0.40 per million
+output tokens, with provider fallback off. Native Gemini and Claude connections
+send requests through Vercel under the learner's key and provider data terms.
+The hosted ledger keeps allowance and charge metadata outside study backups.
+[OpenRouter model route](https://openrouter.ai/openai/gpt-4.1-nano) · [Hosted operations](operations.md#free-study-chat-and-personal-keys)
+
+The chat and Today read the same workspace state. Model output can propose a
+typed command, and the app validates the current scope and requires approval
+before a model-proposed write. Confirmed study data updates use the ordinary
+client actions and can refresh the chat without another provider call. The
+inference route handles identity, quotas and model calls. The browser retains
+control of study data actions. [Tool registration](../src/coach/commands.tsx) · [Shared plan](../src/hooks/useTodayPlan.ts)
 
 ## Reliability repairs
 

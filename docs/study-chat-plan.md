@@ -1,6 +1,13 @@
 # LC Tracker study chat
 
-Implementation brief · Proposed feature · November 18, 2026
+Implementation plan · Started November 18, 2026
+
+The site-wide planner tools and personal OpenRouter flow are in production.
+Hosted funding and direct Gemini and Claude connections are implemented
+locally. Production activation needs the migration, credentials and staged
+checks. Study Chat can now compare today's assignments with recent practice
+and recall and coding due dates for a topic. The rest of ticket 5 remains planned.
+[Current rollout status](operations.md#free-study-chat-and-personal-keys)
 
 ## What to build first
 
@@ -76,6 +83,8 @@ Run site tools in the signed-in app. The model can request named reads and propo
 | `progress_summary(scope)` · all, one known category or one known pattern | Last 14 local calendar days, measured passes/attempts, recall outcomes, delayed and unfamiliar evidence, recorded minutes, missing observations and evidence handles | First release |
 | `problem_timeline(problemId)` · one resolved catalog or owned historical ID | Encounter source, due dates, latest status, up to five dated attempts with outcome/assistance and optional reported rating. Include a truncation flag. | First release |
 | `today_plan()` | Current assignment or resume action, task reason, allocation and time remaining, or the actual blocking state. Protected tasks get opaque handles. | First release |
+| `review_schedule(topic?)` · category or tracked pattern | Latest recorded coding and recall, imported acceptance when recorded, and due dates by review type. Current Today assignments include their queue positions. With no topic, check the next visible task's category. | Coaching |
+| `next_task_options(topic?, avoidTopic?, problem?, minutes?)` | A bounded set of eligible first-task choices across due recall, due coding and fresh practice. The learner can apply one choice or delegate it by pressing **Let AI choose next task**. | Coaching |
 | `practice_options(minutes?, topic?, avoidTopic?)` | Up to three eligible **substitutes for one slot**, each with planned minutes, estimate, evidence and reason. Returns a blocked result if no substitute qualifies. | First release |
 | `compare_periods(scope)`, `confidence_followups(scope)` | Two adjacent complete windows, or matched rating/follow-up pairs; include denominators, unknowns and contributing records | Investigations |
 | `read_attachment(handle)`, `reference_excerpt(problemId, approachId?)` | Only the exact text the user selected for this turn, or a short attributed excerpt when the study stage permits it | Debrief |
@@ -145,37 +154,60 @@ Later, allow debriefs after reveal or completion and optional hints during ordin
 
 ## Funding, privacy and operations
 
-### First release with the learner's key
+### Personal-key setup and data boundaries
 
-Use **OpenRouter as the first provider** so one integration can support both funding modes. The smallest pilot accepts a dedicated, spend-limited OpenRouter inference key in a masked field. The tab calls a fixed OpenRouter endpoint directly. Hold the key in memory outside persisted Zustand and query caches. Clear it and conversation data on sign-out, account switch, disconnect or refresh. Abort outstanding calls and discard late responses from the previous owner. Recommend provider-side key expiry and show how to revoke it. Clearing the tab disconnects this app; revocation happens at the provider. A browser-held key is exposed to scripts running on that origin, which is why the pilot should use a dedicated low-limit key. As a convenience upgrade, OpenRouter supports user-controlled keys via OAuth PKCE with user-editable credit limit and expiry. Use S256, state bound to the signed-in user, a fixed HTTPS callback and one-time verifier if implementing that flow. [OpenRouter user-controlled keys](https://openrouter.ai/docs/guides/overview/auth/oauth)
+Settings and onboarding share a masked key field and disclose the selected
+provider, billing source, and data sent. Keep keys and conversations in
+account-scoped tab memory. Clear personal credentials on refresh, disconnect,
+sign-out, or account switch. Reject late responses from the prior connection.
+Revocation happens in the provider account. A dedicated key with a spending
+limit reduces exposure if a script running in the tab can read it.
+[Provider setup](../src/coach/CoachSetup.tsx)
 
-Use one pinned, inexpensive model ID with structured-output support. Pick the lowest-cost candidate that passes the fixture suite and a consented synthetic live smoke test. Record the selected model/endpoint, price ceiling, test date and results at implementation time. Use a fixed route with required parameter support and restrictive data handling. Avoid automatic model upgrades or fallbacks to a different recipient or higher price. If the route is unavailable, display the local evidence. [Structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs) · [Provider routing](https://openrouter.ai/docs/guides/routing/provider-selection)
+The model receives the question, bounded recent context, and selected
+`modelData` facts. Keep account identifiers, session tokens, credentials,
+backup contents, raw history, notes, code, and solutions out of automatic
+projections. The learner's typed text is sent as part of an AI question.
+Reviewed excerpts or attachments belong to the planned coaching work.
+[Provider protocol](../src/coach/protocol.ts)
 
-Before first Send, name OpenRouter and the selected inference provider, say whose credits are used, and show what leaves the device. Default payload is the question, bounded follow-up context and selected structured facts. Keep names, email, Clerk subject/JWT, LeetCode username, credentials, the backup, raw history, solutions, answers, code and notes out of automatic projection. Later attachments require item-level selection. Disclose that text the learner types is also sent. Permit clearing a thread or removing a shared excerpt from future context, including earlier messages derived from it. Start a fresh thread when necessary. Review the actual provider settings and current Privacy Policy before enabling chat. Provider retention and logging vary by endpoint and account settings. [OpenRouter data collection](https://openrouter.ai/docs/guides/privacy/data-collection)
+Pin a model and route with structured output for each provider. Present provider
+failures in chat and leave local evidence accessible. Render replies as plain
+text and app-owned blocks. Keep prompts and replies out of logs and exports.
+[Provider routing and privacy](reliability-review.md#service-map)
 
-Render generated output as plain text plus app-owned blocks, with no raw HTML, remote images or model-selected URLs. Keep prompts, keys, responses, attachments and headers out of Sentry, Vercel logs, feedback webhooks and exports. Persist zero transcripts in the pilot. A user who wants to keep a debrief explicitly saves an edited note through a supported write flow.
+### Hosted allowance and personal keys
 
-### Optional owner-funded messages
+The authenticated `/api/coach` route serves the prepaid OpenRouter allowance
+and the direct Gemini and Claude personal-key adapters. Personal OpenRouter
+requests still go directly from the tab to the pinned Azure route. The project
+owner configures the shared key and funding separately from their own account.
+See the [runbook](operations.md#free-study-chat-and-personal-keys) for current
+limits, credential names, rollout status, and verification.
 
-Add hosted access only when there is an explicit owner budget. User-funded and sponsored modes should be visible choices. Never silently switch the bill to either party. Reuse the same evidence projections and response schema; send sponsored calls through a new signed-in `POST /api/coach`. The owner credential lives only in server configuration.
+A hosted question creates a turn UUID and reserves both potential inference
+calls before sending the intent request. The server builds the model payload
+from bounded input and checks Clerk identity and allowed origin. A validated
+read intent can be followed by one synthesis call under the same UUID. A
+model-proposed action returns to the UI for confirmation. The private ledger
+binds both steps to the same account, question and funding choice. It claims
+each step once and accounts against the original UTC buckets. A retry after
+an unconfirmed response uses the original UUID. Unknown costs keep their
+reservation.
 
-| Control | Proposed implementation |
-| --- | --- |
-| Entry and identity | Start with a small server-side pilot allowlist. Verify a Clerk session token and authorized origin/party. Derive the subject server-side. Accept only bounded question, context and valid tool/result shapes. The server supplies roles, instructions, tool schemas, model, provider and prices. Caller-supplied facts confer no access or billing rights. [Clerk request verification](https://clerk.com/docs/reference/backend/authenticate-request) |
-| Allowance | Illustrative pilot settings are 3 turns per account per UTC day, 1 active turn per account, a short cooldown and the same two-call ceiling. Return remaining turns, reset time and a stable limit reason. Apply burst protection before expensive processing and use global limits even during account creation spikes. |
-| Monetary ceiling | Require configured global daily **and** monthly dollar ceilings, per-turn cost ceiling and approved maximum unit rates. Default hosted access to disabled when any bound is missing or stale. Keep a dedicated provider key with a separate limit, funded balance and auto top-up disabled where available. Set billing alerts as a secondary control. |
-| Reservation | Before a paid call, atomically reserve its worst-case cost or reserve the entire two-call turn up front. Include system text, tool payloads, conversation, bounded output/reasoning, per-request charges and rounding. Select an endpoint whose full billable dimensions can be bounded. Use integer monetary units and round reservations up. Disable hosted calls if the rate lookup or limiter is unavailable. |
-| Concurrent callers and retries | Use a forward migration for a private spend ledger and an atomic reserve/settle operation. Grant it only to a restricted server identity. Bind a client-generated turn UUID to the verified subject, funding mode, request fingerprint and UTC budget buckets. A unique turn and step number claim each provider call before dispatch. Identical retries return status; changed input under the same ID is rejected. No browser-writable allowance and no in-memory serverless counter. |
-| Lost response and cancellation | A request may have been billed after disconnect, crash, Stop or timeout. Keep unknown charges reserved; close stale concurrency leases independently. Settle known usage once from the provider response or verified reconciliation. If the amount stays unknown, debit the reserved maximum for that budget period. Avoid duplicate model calls to recover an answer. Inform the learner when the answer was lost. |
-| Operators | Record turn/step ID, model/price version, pseudonymous account handle where feasible, reserved/actual spend, status, token counts, latency and time. Separate this restricted operational data from study backups and transcript content. Give the owner daily spend, projected exhaustion, top limit reasons, mismatches and a server-side off switch. Define retention (proposed 35 days for settled per-turn metadata, longer only for outstanding reconciliation) and document deletion before rollout. |
+When changing providers or token limits, recompute the maximum cost of each
+request from input and output limits, rates, any per-request charges, and
+rounding. The configured route caps model pricing, and the ledger reserves
+cost in integer microdollars. Keep a provider-level spend limit and prepaid
+balance as independent controls. See [the pricing and reservation code](../server/coachProvider.ts)
+and [the ledger migration](../supabase/migrations/20261118000000_coach_turns.sql).
 
-**Budget worksheet.** For one turn, reserve the sum over possible model calls of `(max input tokens × maximum input price + max output tokens × maximum output price) / 1,000,000`, using prices per million tokens, plus all other billable dimensions. Account for provider fees if budgeting cash outlay. For illustration only, if an evaluated configuration costs at most $0.01 per turn, a $30 monthly model budget can cover at most 3,000 turns at that ceiling. A $1 daily ceiling admits at most 100 unreconciled one-cent reservations that day. Real prices and actual usage must replace the example. Define whether the owner's total also includes hosting and database costs, and reserve headroom accordingly. The app's ledger only bounds traffic through this endpoint. [Provider usage accounting](https://openrouter.ai/docs/cookbook/administration/usage-accounting)
-
-**Hosted request sequence.** The first POST reserves the turn and dispatches synthesis for a preset or intent selection for free text. For an action intent, return the typed command to the app for local authorization and execution, then settle the used step. For an evidence question, return bounded tool arguments and record the allowed next step. The browser POSTs read projections under the same turn ID. Validate the expected tool, arguments, shape and size, then claim the final step exactly once. Billing retries never replay app commands. Pin UTC buckets and price version at reservation so a turn crossing midnight or a month boundary settles against its original reservation. Respond with safe errors and `Cache-Control: no-store`. Vercel currently configures `api/*.ts` for 15 seconds in this repo. Measure the route with realistic inputs, set a bounded per-request timeout inside the function deadline and configure only the coach route if a longer duration is needed. [Vercel function duration](https://vercel.com/docs/functions/configuring-functions/duration)
-
-**When to expand access.** Run a small, opt-in pilot and review cost per answered question, p95 cost and latency, rejected requests, usefulness of recommendations, actual versus reserved spend and reconciliation failures. An example launch gate is a full week within the owner's cap, every dispatched step accounted for, zero cross-account leaks or double dispatches, and a tested kill switch. Estimate funded users from observed turns per active user and cost per turn, then set the next cohort size. Opening to all signed-in users requires the same global cap even if the per-user allowance becomes smaller. Exhaustion leaves the deterministic study flow available.
-
-For planning the cohort, use `monthly model budget / (observed mean cost per turn × expected monthly turns per active learner)` as an estimate. Stress-test it with the high-usage cohort and conservative pricing. Example pilot review signals are how often a learner opened supporting records, chose an eligible alternative, or marked the answer useful. Use opt-in, content-free measurement or a moderated pilot. Compare the chosen options against Today's default on the same fixture to see whether the model actually honored the learner's stated preference. Starting a problem shows the recommendation was used; only a subsequent recorded attempt supplies learning evidence.
+Before raising allowances, measure observed cost and latency per usable answer
+in staging with synthetic study data. Check that every dispatched step is
+accounted for and that the off switch works. Compare recommendations against
+Today's default on the same fixture to see whether the model honored the
+learner's preference. A subsequent recorded attempt supplies the learning
+evidence.
 
 ## Implementation tickets
 
@@ -188,7 +220,10 @@ For planning the cohort, use `monthly model budget / (observed mean cost per tur
 | 5 · Improve the coaching | Add confidence/follow-up pairs, period comparisons, selected excerpts, post-save debriefs, what-if previews, and ordinary coding hints with persisted assistance. Extend session/backup checks for hint tracking. | On a synthetic history, the user can trace a recommendation back to measured evidence, run it from chat, share a correction after reveal and inspect the saved outcome. A hinted attempt cannot save as independent after a reload. |
 | 6 · Hosted pilot | Implement Clerk-authenticated `api/coach.ts` with explicit local `.js` server imports, a restricted budget ledger, server configuration, operations notes and kill switch. Use separate development and production credentials. Cover Vite development via the existing `vite-plugins` pattern as needed. | Parallel requests at the final cent, replay under a different account, ambiguous timeout, ledger outage, stale price, duplicate settle and budget rollover all leave spend within bounds. Owner-funded calls cease when disabled, including the second step of an in-flight turn. |
 
-Tickets 1–4 deliver the site-wide user-funded assistant. Ticket 1 is the first implementation checkpoint. Complete the coverage table before calling site integration finished. Ticket 5 extends the learning features and ticket 6 adds the optional payment mode.
+Tickets 1–4 describe the released site-wide assistant. Ticket 5 extends the
+learning features. Ticket 6 describes hosted funding through implementation
+and staged release. Re-run the relevant coverage-table journeys when changing
+a workspace tool.
 
 ## How to verify usefulness and correctness
 
@@ -219,6 +254,12 @@ For provider selection, maintain a small versioned set of prompts and expected f
 
 Run Node 24, `npm run lint`, `npm test` and `npm run build` for application changes. Add a focused coach browser suite and run the interface, theme and study suites for shell changes. Inspect at 390px and 1440px in both themes, with keyboard and long replies. For persistence or hosted accounting changes, add SQL ownership/concurrency tests and run `npm run test:db`, `npm run test:api` and `npm run test:e2e`. Include a compiled native-function test for the hosted route. Local auth and provider fixtures cannot establish real OAuth, current model behavior or actual billing. Verify those separately in a protected staging deployment with synthetic study data and a deliberately small, authorized test allowance. Follow the repository's preview, migration and release order. [Operations](operations.md)
 
-## Handoff to the implementing agent
+## Handoff
 
-> Implement the site-wide, user-funded study assistant in tickets 1–4 of `docs/study-chat-plan.md`. Start by proving the recommend → select → start → save → next-task journey in both directions. Then complete the whole-site tool coverage table, including commands, actual writes and UI-to-chat updates. Reuse the existing planner, session actions, hooks, RLS and save receipts. Use a scripted provider for repeatable tests, run the repository checks and show the local preview. Ticket 5 adds richer coaching. Implement ticket 6 when sponsored access is requested and an owner budget is set.
+For practice or tool changes, reproduce the affected Today ↔ chat journey and
+verify the saved result through the existing app and study hooks. The
+[chat browser suite](../e2e/coach.spec.ts) covers both directions. For funding
+or provider work, start with the [runbook](operations.md#free-study-chat-and-personal-keys)
+and the [allowance browser test](../e2e/coach-access.spec.ts). Use its fixtures
+for local verification. Live provider and cost checks need a staged environment
+and funded test credentials.

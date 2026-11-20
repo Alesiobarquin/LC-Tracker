@@ -160,7 +160,7 @@ export function CoachHost({ owner, user, children }: {
 
   const Title = fullPage ? "h1" : "h2";
   return (
-    <CoachConnection>
+    <CoachConnection owner={owner}>
       <CoachCommands open={show} fallback={fallback} lookup={tools}>
         {children}
         <WorkspaceNavigation admin={admin} />
@@ -209,7 +209,7 @@ export function CoachHost({ owner, user, children }: {
               </button>
             </header>
             <Suspense fallback={<p role="status" className="p-4 text-sm text-muted">Loading study chat…</p>}>
-              <CoachPanel owner={owner} visible={visible}>
+              <CoachPanel owner={owner} visible={visible} onOpenSetup={() => setOpen(false)}>
                 <TodayCoach visible={visible} />
               </CoachPanel>
             </Suspense>

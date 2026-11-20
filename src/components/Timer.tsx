@@ -480,16 +480,9 @@ export const Timer: React.FC<TimerProps> = ({
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.tagName === "SELECT" ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
+      if (e.defaultPrevented || e.isComposing || e.repeat) return;
+      const target = e.target instanceof Element ? e.target : null;
+      if (target?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
       if (e.key === "Escape") {
         if (phase === "running" && !showCancelConfirm) {
           e.preventDefault();
@@ -500,6 +493,7 @@ export const Timer: React.FC<TimerProps> = ({
         }
         return;
       }
+      if (target?.closest('a[href], button, summary, [role="button"]')) return;
       if (e.code === "Space" || e.key === " ") {
         if (phase === "idle") {
           e.preventDefault();

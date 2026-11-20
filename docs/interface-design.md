@@ -42,6 +42,15 @@ Settings pair section explanations with compact controls on desktop and use the
 same reading order on mobile. Syntax practice uses the indexed checkpoint and
 ruled session record, with focus-managed help and exit dialogs.
 
+Study Chat uses the same conversation in a drawer or on `/coach`. User bubbles
+sit on the right. Replies sit on the left beside the Study Chat icon, with
+recorded facts under Details and live study actions above the transcript.
+Alt+Shift+C toggles chat. Enter sends and Shift+Enter starts a new line. The
+composer shows whose allowance the next AI question uses. When free access
+runs out it shows the local reset time and a link to use a personal key.
+Settings owns the same provider form offered as an optional step in onboarding.
+[Chat layout](../src/coach/CoachPanel.tsx) · [Provider setup](../src/coach/CoachSetup.tsx)
+
 Today keeps a compact Reviews only toggle beside the date. Turning it off returns
 to the full plan; its explanation stays in contextual help instead of a separate
 block above the task. This is a temporary choice for the attention available
@@ -53,6 +62,19 @@ the queue ending never substitutes a coding task. Short written bullets keep
 the existing retrieve, compare, and record protocol. Both modes share the daily
 budget and preserve saved sessions. The product tour and setup tips introduce
 the choice without requiring a menu or a schedule edit to discover it.
+
+### Public landing
+
+The centered hero leads into an interactive Today preview. Copper highlights
+the primary action and the first task. The graphite and warm paper themes use
+the same page structure and semantic colors. The preview shows the practice
+queue beside its budget and example history on desktop, then stacks them on
+phones.
+
+The sample runs the same planner as Today against a fixed history. At two
+months, Two Sum returns as a recall check alongside a new coding problem. At
+three weeks, Two Sum becomes an independent coding review and the assigned time
+updates with it. [Interactive planner sample](../src/components/LandingPlanPreview.tsx)
 
 ## Implementation
 

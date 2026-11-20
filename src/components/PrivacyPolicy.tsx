@@ -109,8 +109,8 @@ export function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold text-foreground mb-4">5. Sharing Your Information</h2>
             <p>
               We do not sell, trade, or rent your personal information. Clerk handles authentication
-              and Supabase hosts study data. Optional Study chat sends the limited data described
-              below when you connect your key and ask a question.
+              and Supabase hosts study data. When you send an AI question in Study Chat, the
+              service sends the limited data described below.
             </p>
           </section>
 
@@ -149,18 +149,33 @@ export function PrivacyPolicy() {
           <section id="study-chat" className="scroll-mt-20">
             <h2 className="text-2xl font-semibold text-foreground mb-4">10. Study chat</h2>
             <p>
-              When you use your own OpenRouter key, your browser sends your question and limited recent
-              context directly to OpenRouter. Microsoft Azure runs the selected model. Follow-up calls
-              may include selected study facts such as problem titles, elapsed time, and reported outcomes.
-              Your OpenRouter account pays for these requests.
+              When you send an AI question, the selected provider receives your message and limited
+              recent chat context. A follow-up call may include selected study facts such as problem
+              titles, elapsed time, and reported outcomes. Built-in Study Chat shortcuts run inside
+              LC Tracker.
             </p>
             <p className="mt-4">
-              LC Tracker keeps the key and conversation in tab memory. Disconnect or close the tab to
-              clear them from the app. You can revoke the key in your OpenRouter account. Provider handling
-              is described in the{' '}
+              Free AI questions run through LC Tracker and OpenRouter on Microsoft Azure. If you
+              supply an OpenRouter key, your browser sends the requests directly and uses your
+              OpenRouter balance. Gemini and Claude requests go through LC Tracker to Google or
+              Anthropic and use the provider account that issued your key. Their handling of
+              requests is described in the{' '}
               <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer" className="text-accent underline">
                 OpenRouter Privacy Policy
+              </a>,{' '}
+              <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer" className="text-accent underline">
+                Gemini API Terms
+              </a>, and{' '}
+              <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-accent underline">
+                Anthropic Privacy Policy
               </a>.
+            </p>
+            <p className="mt-4">
+              LC Tracker keeps the conversation and your personal key in tab memory. Refresh or
+              disconnect to clear them. You can revoke the key with your provider. LC Tracker
+              keeps private accounting records for the authenticated route, including your account
+              ID, turn timing and usage, to enforce allowances and reconcile costs. It removes records
+              older than 35 days when new turns are admitted.
             </p>
           </section>
         </div>

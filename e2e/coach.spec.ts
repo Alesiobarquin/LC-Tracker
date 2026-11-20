@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 test.skip(!!process.env.PLAYWRIGHT_BASE_URL, "Study chat uses the local fixture provider and account");
 
-async function fixture(page: Page, call = { name: "practice_options", arguments: "{}" }) {
+async function fixture(page: Page, call = { name: "practice_options", arguments: "{}" }, weekdayMinutes = 30) {
   const userId = "user_study_chat_fixture";
   const progress: Record<string, unknown>[] = [];
   const timings: Record<string, unknown>[] = [];
@@ -23,7 +23,7 @@ async function fixture(page: Page, call = { name: "practice_options", arguments:
     if (path.endsWith("/user_settings")) data = {
       version: 1, onboarding_complete: true, leetcode_username: null, target_interview_date: "",
       settings_json: { settings: { learningMode: "EXPLORE", studySchedule: {
-        weekdayMinutes: 30, weekendMinutes: 30, restDay: -1, blackoutDates: [],
+        weekdayMinutes, weekendMinutes: weekdayMinutes, restDay: -1, blackoutDates: [],
       } } },
     };
     else if (path.endsWith("/problem_progress")) data = progress.slice(offset, offset + limit);
@@ -45,7 +45,7 @@ async function fixture(page: Page, call = { name: "practice_options", arguments:
       { calls: [call], clarification: "" };
     return route.fulfill({ json: { choices: [{ finish_reason: "stop", message: { content: JSON.stringify(payload) } }] } });
   });
-  return { saves, calls: () => calls };
+  return { progress, saves, calls: () => calls };
 }
 
 const chat = (page: Page) => page.getByRole("complementary", { name: "Study chat", exact: true });
@@ -196,4 +196,149 @@ test("a Today mode change retires a previously offered coding action in open cha
   await page.getByRole("button", { name: "Reviews only", exact: true }).click();
   await expect(chat(page).getByRole("button", { name: "Start selected problem" })).toHaveCount(0);
   expect(stored.calls()).toBe(0);
+});
+
+test("Study Chat can put a due coding review first and respects a later manual plan change", async ({ page }, testInfo) => {
+  const { progress, saves } = await fixture(page);
+  const lastAttempt = "2026-11-10T12:00:00";
+  progress.push({ problem_id: "number-of-islands", version: 1, first_solved_at: lastAttempt, last_reviewed_at: lastAttempt,
+    next_review_at: "2026-11-16T08:00:00", history: [{ date: lastAttempt, rating: 2,
+      codingOutcome: { correctness: "failed", assistance: "none", explanation: "partial" } }],
+    study_state: { version: 1, source: "practice", recallIntervalDays: 8, codingIntervalDays: 6, lapses: 1,
+      nextRecallAt: "2026-11-18T12:00:00", nextCodingAt: "2026-11-16T08:00:00", recallHistory: [] } });
+  const intentTools: string[] = [];
+  let answers = 0;
+  let delay: Promise<void> | undefined;
+  const explanation = "I'd put Number of Islands first. The last implementation failed its tests, and a 20-minute coding review fits today.";
+  await page.route("**/__coach_fixture", async route => {
+    const { response_format, messages } = route.request().postDataJSON();
+    const isAnswer = response_format.json_schema.name === "answer";
+    let data;
+    if (isAnswer) {
+      const wait = delay;
+      delay = undefined;
+      answers++;
+      const input = JSON.parse(messages[1].content);
+      const pick = input.evidence[0].facts.options.find((option: { kind: string }) => option.kind === "coding_review")?.pick;
+      data = { suggestion: explanation, pick: pick ?? "keep" };
+      if (wait) await wait;
+    } else {
+      intentTools.push(messages[1].content);
+      data = { calls: [{ name: "next_task_options", arguments: '{"topic":"Graphs","minutes":20}' }], clarification: "" };
+    }
+    return route.fulfill({ json: { choices: [{ finish_reason: "stop", message: { content: JSON.stringify(data) } }] } });
+  });
+
+  await page.goto("/dashboard");
+  const heading = next(page).getByRole("heading");
+  const original = await heading.innerText();
+  expect(original).not.toContain("Number of Islands");
+  await page.getByRole("button", { name: "Ask study chat" }).click();
+  await message(page, "Would focusing on graphs today make more sense?");
+  const proposed = chat(page).getByRole("button", { name: "Put Number of Islands first" });
+  await expect(proposed).toBeVisible();
+  await expect(heading).toHaveText(original);
+  await proposed.click();
+  await expect(heading).toContainText("Number of Islands");
+  await next(page).getByRole("button", { name: "Restore planner’s pick" }).click();
+  await expect(heading).toHaveText(original);
+
+  let releaseAnswer!: () => void;
+  delay = new Promise<void>(resolve => { releaseAnswer = resolve; });
+  const delegate = chat(page).getByRole("button", { name: "Let AI choose next task" });
+  await delegate.click();
+  await expect.poll(() => answers).toBe(2);
+  const reviewMode = page.getByRole("button", { name: "Reviews only", exact: true });
+  await reviewMode.click();
+  releaseAnswer();
+  await expect(chat(page).getByRole("alert")).toContainText("Today changed");
+  await expect(reviewMode).toHaveAttribute("aria-pressed", "true");
+  await reviewMode.click();
+  await expect(heading).toHaveText(original);
+
+  await chat(page).getByRole("button", { name: "New chat" }).click();
+  await chat(page).getByRole("textbox", { name: "Message" }).fill("Focus on graphs. I have 20 minutes.");
+  await delegate.click();
+  await expect(heading).toContainText("Number of Islands");
+  await expect(next(page)).toContainText("Study Chat pick");
+  await expect(live(page)).toContainText("Number of Islands · 20 min");
+  await expect(chat(page).getByText("Number of Islands is now first on Today, with 20 min planned.")).toBeVisible();
+  expect(intentTools.every(input => !input.includes("apply_plan_pick"))).toBe(true);
+  expect(intentTools.slice(1).every(input => !input.includes("start_practice"))).toBe(true);
+  expect(await activeDraft(page)).toBeFalsy();
+  await page.screenshot({ path: testInfo.outputPath("study-chat-pick.png"), animations: "disabled" });
+
+  await next(page).getByRole("button", { name: "Start practice block" }).click();
+  await expect(page).toHaveURL(/\/timer\/number-of-islands$/);
+  expect(await activeDraft(page)).toMatchObject({ problemId: "number-of-islands", practiceKind: "coding_review", plannedMinutes: 20 });
+  expect(saves).toHaveLength(0);
+  expect(answers).toBe(3);
+});
+
+test("chat explains a topic's place in today's plan and follows up on its coding due date", async ({ page }) => {
+  const { progress, saves } = await fixture(page, undefined, 45);
+  const row = (problemId: string, first: string, recallDue: string, codingDue: string, source = "practice") => ({
+    problem_id: problemId, version: 1, first_solved_at: first, last_reviewed_at: first, next_review_at: recallDue,
+    history: [], notes: "fixture-private-note",
+    study_state: { version: 1, source, recallIntervalDays: 3, codingIntervalDays: 7, lapses: 0,
+      nextRecallAt: recallDue, nextCodingAt: codingDue, recallHistory: [] },
+  });
+  const islands = row("number-of-islands", "2026-10-29", "2026-11-18T12:00:00", "2026-11-21T12:00:00");
+  progress.push(
+    { ...islands, history: [{ date: "2026-10-29T12:00:00", rating: 4, rawCode: "fixture-private-code",
+      codingOutcome: { correctness: "passed", assistance: "hint", explanation: "partial" } }],
+    study_state: { ...islands.study_state, recallHistory: [{ id: "55878c4f-cdbb-4615-b449-61469bc46a1a",
+      date: "2026-11-02T12:00:00", elapsedSeconds: 90, outcome: "recalled", checkedAgainst: "solution",
+      answer: "fixture-private-recall" }] } },
+    row("max-area-of-island", "2026-10-15T12:00:00", "2026-11-14T12:00:00", "2026-11-24T12:00:00", "leetcode_import"),
+    row("two-sum", "2026-10-12T12:00:00", "2026-10-25T12:00:00", "2026-11-23T12:00:00"),
+  );
+  const first = "Do I need today's problems? I haven't practiced graphs in a while.";
+  const followUp = "When is the coding one due?";
+  const reply = "I'd keep today's plan. Max Area of Island is your second task today, a recall check. Your last saved graph coding attempt was Number of Islands on October 29 and you used a hint. Its coding check is due November 21, when you can try the implementation independently.";
+  const requests: Array<{ step: string; messages: Array<{ content: string }> }> = [];
+  await page.route("**/__coach_fixture", route => {
+    const { response_format, messages } = route.request().postDataJSON();
+    const step = response_format.json_schema.name;
+    requests.push({ step, messages });
+    const topic = { name: "review_schedule", arguments: '{"topic":"Graph"}' };
+    const data = step === "answer"
+      ? { suggestion: JSON.parse(messages[1].content).question === first ? reply : "Number of Islands is due for coding on November 21." }
+      : { calls: messages.at(-1).content === first ? [{ name: "today_plan", arguments: "{}" }, topic] : [topic], clarification: "" };
+    return route.fulfill({ json: { choices: [{ finish_reason: "stop", message: { content: JSON.stringify(data) } }] } });
+  });
+
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Ask study chat" }).click();
+  await message(page, first);
+  await expect(chat(page).getByText(reply, { exact: true })).toBeVisible();
+  const log = chat(page).getByRole("log");
+  await expect(log.getByRole("article", { name: "Study chat", exact: true }).first()).toContainText(reply);
+
+  const initialAnswer = JSON.parse(requests[1].messages[1].content);
+  expect(initialAnswer.evidence).toMatchObject([
+    { tool: "today_plan", facts: { next: { title: "Two Sum", position: 1 }, second: { title: "Max Area of Island", position: 2 } } },
+    { tool: "review_schedule", facts: {
+      topic: "Graphs", trackedProblems: 2,
+      lastCoding: { title: "Number of Islands", date: "2026-10-29", correctness: "passed", assistance: "hint" },
+      lastRecall: { title: "Number of Islands", date: "2026-11-02", outcome: "recalled" },
+      lastImportedAcceptance: { title: "Max Area of Island", date: "2026-10-15" },
+      recallDueDates: { dueCount: 1, oldestDue: { title: "Max Area of Island", date: "2026-11-14" },
+        nextFutureDue: { title: "Number of Islands", date: "2026-11-18" } },
+      codingDueDates: { dueCount: 0, nextFutureDue: { title: "Number of Islands", date: "2026-11-21" } },
+      todayAssignedCount: 1, todayAssignments: [{ position: 2, title: "Max Area of Island", kind: "recall" }],
+    } },
+  ]);
+  expect(initialAnswer.evidence[0].facts.laterCodingBlock).toEqual({
+    title: "Unfamiliar check", position: 3, kind: "variant", minutes: 35, reason: expect.any(String),
+  });
+  await message(page, followUp);
+  await expect(chat(page).getByText("Number of Islands is due for coding on November 21.", { exact: true })).toBeVisible();
+  expect(requests.map(request => request.step)).toEqual(["intent", "answer", "intent", "answer"]);
+  expect(requests[2].messages[1].content).toContain("review_schedule (read)");
+  expect(requests[2].messages[2].content).toContain(first);
+  expect(requests[2].messages[2].content).toContain('"topic":"Graphs"');
+  expect(JSON.parse(requests[3].messages[1].content).context).toContain(first);
+  expect(JSON.stringify(requests)).not.toContain("fixture-private-");
+  expect(saves).toHaveLength(0);
 });

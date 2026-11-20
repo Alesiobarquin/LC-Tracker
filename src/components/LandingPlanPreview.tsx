@@ -1,40 +1,30 @@
 import { useMemo, useState } from "react";
-import { addDays } from "date-fns";
-import { ArrowRight, CalendarDays, Clock3, Sparkles } from "lucide-react";
+import { addDays, format } from "date-fns";
+import { BookOpen, Braces, CalendarDays, GitBranch, History, LayoutDashboard } from "lucide-react";
 import { DEFAULT_SETTINGS, type ProblemProgress } from "../types";
-import {
-  buildStudyPlan,
-  type StudyTask,
-} from "../utils/study";
+import { buildStudyPlan, orderedStudyTasks, type StudyTask } from "../utils/study";
 import { getNumberedProblemTitle, problemMap } from "../data/problems";
+import { TraceIndex } from "./ui/StudyTrace";
 import { Logo } from "./Logo";
 
-type GoalHorizon = "soon" | "later";
-
-// This fixed Monday and its practice history are synthetic, private-free demo inputs.
 const EXAMPLE_NOW = new Date(2026, 9, 12, 12);
-const exampleDate = (days: number) => addDays(EXAMPLE_NOW, days).toISOString();
+const previousAttempt = addDays(EXAMPLE_NOW, -8).toISOString();
+const due = addDays(EXAMPLE_NOW, -1).toISOString();
 const SAMPLE_PROGRESS: Record<string, ProblemProgress> = {
   "two-sum": {
-    firstSolvedAt: exampleDate(-8),
-    lastReviewedAt: exampleDate(-8),
-    nextReviewAt: exampleDate(-1),
+    firstSolvedAt: previousAttempt,
+    lastReviewedAt: previousAttempt,
+    nextReviewAt: due,
     reviewCount: 1,
-    history: [
-      {
-        date: exampleDate(-8),
-        rating: 3,
-        confidenceReported: false,
-        elapsedSeconds: 1100,
-        sessionType: "review",
-        codingOutcome: {
-          correctness: "failed",
-          assistance: "none",
-          explanation: "partial",
-        },
-        practiceKind: "coding_review",
-      },
-    ],
+    history: [{
+      date: previousAttempt,
+      rating: 3,
+      confidenceReported: false,
+      elapsedSeconds: 1100,
+      sessionType: "review",
+      codingOutcome: { correctness: "failed", assistance: "none", explanation: "partial" },
+      practiceKind: "coding_review",
+    }],
     retired: false,
     consecutiveThrees: 0,
     studyState: {
@@ -42,8 +32,8 @@ const SAMPLE_PROGRESS: Record<string, ProblemProgress> = {
       source: "practice",
       recallIntervalDays: 1,
       codingIntervalDays: 2,
-      nextRecallAt: exampleDate(-1),
-      nextCodingAt: exampleDate(-1),
+      nextRecallAt: due,
+      nextCodingAt: due,
       lapses: 1,
       recallHistory: [],
     },
@@ -62,157 +52,112 @@ const SAMPLE_SETTINGS = {
 
 const taskLabels: Record<StudyTask["kind"], string> = {
   recall: "Recall check",
-  learning: "New problem",
+  learning: "New coding problem",
   coding_review: "Independent coding",
   variant: "Unseen variation",
 };
-
-function taskTitle(task: StudyTask) {
-  const problem = problemMap[task.problemId];
-  return problem ? getNumberedProblemTitle(problem) : "Next problem";
-}
-
-function taskReason(task: StudyTask, horizon: GoalHorizon) {
-  if (task.problemId === "two-sum" && horizon === "soon") {
-    return "A prior coding attempt failed tests, and its independent coding check is due.";
-  }
-  return task.reason;
-}
+const timelines = [[21, "3 weeks"], [60, "2 months"]] as const;
 
 export function LandingPlanPreview() {
-  const [horizon, setHorizon] = useState<GoalHorizon>("soon");
-  const targetInterviewDate = useMemo(
-    () =>
-      addDays(EXAMPLE_NOW, horizon === "soon" ? 21 : 60)
-        .toISOString()
-        .slice(0, 10),
-    [horizon],
-  );
-  const plan = useMemo(
-    () =>
-      buildStudyPlan({
-        progress: SAMPLE_PROGRESS,
-        settings: SAMPLE_SETTINGS,
-        targetInterviewDate,
-        now: EXAMPLE_NOW,
-      }),
-    [targetInterviewDate],
-  );
-  const plannedPercent = plan.dailyMinutes
-    ? Math.round((plan.plannedMinutes / plan.dailyMinutes) * 100)
-    : 0;
-  const mainTask = plan.mainTask;
-  const mainProblem = mainTask ? problemMap[mainTask.problemId] : undefined;
-  const exampleGoal = horizon === "soon" ? "Interview in 3 weeks" : "Interview in 2 months";
+  const [horizon, setHorizon] = useState(60);
+  const plan = useMemo(() => buildStudyPlan({
+    progress: SAMPLE_PROGRESS,
+    settings: SAMPLE_SETTINGS,
+    targetInterviewDate: format(addDays(EXAMPLE_NOW, horizon), "yyyy-MM-dd"),
+    now: EXAMPLE_NOW,
+  }), [horizon]);
+  const tasks = orderedStudyTasks(plan);
 
   return (
-    <figure className="landing-plan-figure" id="plan-preview" tabIndex={-1} aria-labelledby="landing-plan-title">
+    <section className="landing-plan-figure" id="plan-preview" tabIndex={-1} aria-labelledby="landing-plan-title">
       <div className="landing-plan-frame">
         <div className="landing-plan-topbar">
-          <div className="landing-plan-brand">
-            <span className="landing-plan-mark"><Logo size={15} /></span>
-            <span>LC Tracker</span>
-          </div>
-          <span className="landing-plan-window-label">DAILY PLAN</span>
-          <span className="landing-plan-status"><span aria-hidden="true" /> Example</span>
+          <span><Logo size={18} className="text-accent" /> LC Tracker</span>
+          <span>Interactive sample</span>
         </div>
 
-        <div className="landing-plan-content">
-          <div className="landing-plan-heading">
-            <div>
-              <p className="landing-plan-kicker">MONDAY · SAMPLE WORKSPACE</p>
-              <h2 id="landing-plan-title">Today’s plan</h2>
-            </div>
-            <span className="landing-plan-calendar" aria-hidden="true"><CalendarDays size={17} /></span>
-          </div>
+        <div className="landing-plan-workspace">
+          <nav className="landing-plan-nav" aria-label="Sample workspace">
+            <span aria-current="page"><LayoutDashboard size={15} aria-hidden="true" /> Today</span>
+            <a href="/library"><BookOpen size={15} aria-hidden="true" /> Library</a>
+            <a href="/patterns"><GitBranch size={15} aria-hidden="true" /> Patterns</a>
+            <a href="/syntax"><Braces size={15} aria-hidden="true" /> Syntax</a>
+          </nav>
 
-          <div className="landing-plan-context">
-            <div>
-              <span>INTERVIEW TARGET</span>
-              <strong>{exampleGoal}</strong>
-            </div>
-            <div>
-              <span>TIME AVAILABLE</span>
-              <strong>{plan.dailyMinutes} min / day</strong>
-            </div>
-          </div>
+          <div className="landing-plan-main">
+            <header className="landing-plan-header">
+              <div>
+                <p className="landing-kicker"><CalendarDays size={13} aria-hidden="true" /> {format(EXAMPLE_NOW, "EEEE, MMMM d")}</p>
+                <h2 id="landing-plan-title">Today’s plan</h2>
+              </div>
+              <fieldset className="landing-plan-controls">
+                <legend className="sr-only">Example interview timeline</legend>
+                <span aria-hidden="true">Interview in</span>
+                <div className="landing-plan-toggle">
+                  {timelines.map(([days, label]) => (
+                    <label key={days}>
+                      <input
+                        className="sr-only"
+                        type="radio"
+                        name="example-interview"
+                        value={days}
+                        aria-label={`In ${label}`}
+                        checked={horizon === days}
+                        onChange={() => setHorizon(days)}
+                      />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </header>
 
-          <div className="landing-plan-budget">
-            <div className="landing-plan-budget-copy">
-              <span>Planned for today</span>
-              <strong>{plan.plannedMinutes}<small> / {plan.dailyMinutes} min</small></strong>
-            </div>
-            <div
-              className="landing-plan-progress"
-              role="progressbar"
-              aria-label="Minutes assigned in the sample daily plan"
-              aria-valuemin={0}
-              aria-valuemax={plan.dailyMinutes}
-              aria-valuenow={plan.plannedMinutes}
-            >
-              <span style={{ width: plannedPercent + "%" }} />
-            </div>
-          </div>
+            <div className="landing-plan-content" aria-live="polite" aria-atomic="true">
+              <div className="landing-plan-result">
+                <h3 className="landing-kicker">Practice queue</h3>
+                <ol className="landing-plan-tasks">
+                  {tasks.map((task, index) => (
+                    <li key={task.problemId} className={`landing-plan-task landing-plan-task--${task.kind === "recall" ? "recall" : "main"}`}>
+                      <TraceIndex active={index === 0}>{String(index + 1).padStart(2, "0")}</TraceIndex>
+                      <div>
+                        <p className="landing-plan-task-label">{taskLabels[task.kind]}</p>
+                        <h4>{getNumberedProblemTitle(problemMap[task.problemId])}</h4>
+                        <p>{task.kind === "coding_review" ? "The last attempt failed tests. A coding check is due." : task.reason}</p>
+                      </div>
+                      <span className="landing-plan-duration">{task.minutes} min</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
 
-          <div className="landing-plan-tasks" aria-live="polite">
-            {plan.recallTasks.map((task, index) => (
-              <div className="landing-plan-task landing-plan-task--recall" key={task.problemId}>
-                <span className="landing-plan-step">{String(index + 1).padStart(2, "0")}</span>
-                <div className="landing-plan-task-copy">
-                  <div className="landing-plan-task-meta">
-                    <span>{taskLabels[task.kind]}</span>
-                    <span>{task.minutes} min</span>
+              <div className="landing-plan-evidence">
+                <div className="landing-plan-budget">
+                  <h3 className="landing-kicker">Daily budget</h3>
+                  <p><strong>{plan.plannedMinutes}</strong> / {plan.dailyMinutes} min</p>
+                  <div
+                    className="landing-plan-progress"
+                    role="progressbar"
+                    aria-label="Time allocated"
+                    aria-valuemax={plan.dailyMinutes}
+                    aria-valuenow={plan.plannedMinutes}
+                    aria-valuetext={`${plan.plannedMinutes} of ${plan.dailyMinutes} minutes planned`}
+                  >
+                    {tasks.map(task => (
+                      <span key={task.problemId} data-kind={task.kind} style={{ width: `${task.minutes / plan.dailyMinutes * 100}%` }} />
+                    ))}
                   </div>
-                  <strong>{taskTitle(task)}</strong>
-                  <p>{task.reason}</p>
+                </div>
+
+                <div className="landing-plan-history">
+                  <h3 className="landing-kicker"><History size={14} aria-hidden="true" /> Example practice history</h3>
+                  <p>Two Sum <span>8 days ago</span></p>
+                  <p>Tests failed <span>No hints</span></p>
                 </div>
               </div>
-            ))}
-
-            {mainTask && (
-              <div className="landing-plan-task landing-plan-task--main">
-                <span className="landing-plan-step">{String(plan.recallTasks.length + 1).padStart(2, "0")}</span>
-                <div className="landing-plan-task-copy">
-                  <div className="landing-plan-task-meta">
-                    <span>{taskLabels[mainTask.kind]}</span>
-                    <span><Clock3 size={12} /> {mainTask.minutes} min</span>
-                  </div>
-                  <strong>{mainProblem ? getNumberedProblemTitle(mainProblem) : "Next problem"}</strong>
-                  <p>{taskReason(mainTask, horizon)}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="landing-plan-history">
-            <span className="landing-plan-history-icon" aria-hidden="true"><Sparkles size={14} /></span>
-            <p><strong>From your history</strong><span>Two Sum · tests failed · no hints · 8 days ago</span></p>
-          </div>
-
-          <div className="landing-plan-footnote">
-            <span>One plan, shaped by the goal and what you’ve recorded.</span>
-            <span aria-hidden="true"><ArrowRight size={14} /></span>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="landing-plan-controls">
-        <div className="landing-plan-control-copy">
-          <span>TRY THE EXAMPLE</span>
-          <p>Change the interview timeline.</p>
-        </div>
-        <div className="landing-plan-toggle" role="group" aria-label="Example interview timeline">
-          <button type="button" aria-pressed={horizon === "soon"} onClick={() => setHorizon("soon")}>
-            In 3 weeks
-          </button>
-          <button type="button" aria-pressed={horizon === "later"} onClick={() => setHorizon("later")}>
-            In 2 months
-          </button>
-        </div>
-      </div>
-      <figcaption className="landing-plan-caption">
-        Example practice history. Change the goal to see what changes in today’s plan.
-      </figcaption>
-    </figure>
+    </section>
   );
 }

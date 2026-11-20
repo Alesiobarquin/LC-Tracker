@@ -43,7 +43,9 @@ test('failed timer saves preserve the operation across reload and retry', async 
   await expect(page.getByRole('heading', { name: 'Session Complete' })).toBeVisible();
   await page.getByRole('button', { name: 'Retry save' }).click();
   await expect(page.getByText('Could not confirm your save.', { exact: false })).toBeVisible();
-  await page.reload();
+  await page.goto('/library');
+  await expect(page.getByRole('button', { name: 'Abandon session' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Return to save' }).click();
   await expect(page.getByRole('heading', { name: 'Session Complete' })).toBeVisible();
   await expect(page.getByPlaceholder(/Jot down/)).toHaveValue('Preserved notes');
   await page.getByRole('button', { name: 'Retry save' }).click();

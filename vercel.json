@@ -9,7 +9,13 @@
     }
   ],
   "functions": {
-    "api/*.ts": {
+    "api/coach.ts": {
+      "maxDuration": 30
+    },
+    "api/health.ts": {
+      "maxDuration": 15
+    },
+    "api/leetcode-ac.ts": {
       "maxDuration": 15
     }
   },

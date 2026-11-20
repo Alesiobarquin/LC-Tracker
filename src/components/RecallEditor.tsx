@@ -44,11 +44,15 @@ const editorTheme = EditorView.theme({
     color: "var(--palette-subtle)",
     borderRight: "1px solid var(--palette-line)",
   },
-  ".cm-activeLine, .cm-activeLineGutter": {
+  ".cm-activeLineGutter": {
     backgroundColor: "var(--palette-muted-surface)",
   },
-  ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-    backgroundColor: "var(--palette-hover-surface)",
+  // The active line sits above CodeMirror's selection layer.
+  ".cm-activeLine": {
+    backgroundColor: "color-mix(in srgb, var(--palette-muted-surface) 30%, transparent)",
+  },
+  ".cm-selectionBackground, &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+    backgroundColor: "var(--palette-code-selection)",
   },
   ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--palette-foreground)" },
   ".cm-placeholder": { color: "var(--palette-subtle)" },
@@ -188,7 +192,7 @@ export const RecallEditor = memo(function RecallEditor({
           readOnly={readOnly}
           editable={!readOnly}
           indentWithTab={!readOnly}
-          minHeight="280px"
+          minHeight="var(--recall-editor-min-height, 280px)"
           maxHeight="32rem"
           placeholder="Recall the approach in a few bullets. Add pseudocode or code if it helps."
           basicSetup={basicSetup}

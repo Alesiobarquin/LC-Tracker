@@ -26,8 +26,15 @@ When changing this behavior:
   not an assumed strong pass. Read paths must not rewrite old dates or ratings.
   Distinguish encounter/coverage from measured coding outcomes in UI and analytics.
 - Reveal references after retrieval. Label general pattern guidance and user notes
-  accurately. If adding an AI tutor, separate assistance from an independent
-  attempt and check generated claims; do not make chat a prerequisite for review.
+  accurately. Keep active practice on built-in controls and enforce the reveal
+  and protected-task rules when extending coaching. Record assistance
+  separately from independent attempts.
+- Chat uses `src/hooks/useTodayPlan.ts` and the same native start, resume, and
+  save actions as Today. Recheck eligibility and the active session before
+  applying a suggested task. Let native updates drive live chat state without
+  requesting inference. Expose only deliberate `modelData` projections, and use
+  the existing evidence windows and denominators. Exercise the recommend →
+  start → save → next-task flow from both surfaces in `e2e/coach.spec.ts`.
 - Distinguish research-supported principles from app-specific numeric defaults.
   Use primary research for new scientific claims and identify extrapolation to
   coding. Validate defaults with observed outcomes rather than claiming neural

@@ -1,6 +1,5 @@
 import React, { Suspense, useEffect, lazy } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { Layout } from './components/Layout';
 import { Login } from './components/Login';
 import { LandingPage } from './components/LandingPage';
 import { Logo } from './components/Logo';
@@ -16,9 +15,10 @@ import { queryClient } from './lib/queryClient';
 import { userDataQueryKeys } from './lib/userDataQueryKeys';
 import { PublicPageFallback } from './components/PublicPageFallback';
 import { NotFound } from './components/NotFound';
-import { CoachHost } from './coach/CoachHost';
 import { CoachLauncher } from './coach/CoachLauncher';
 
+const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
+const CoachHost = lazy(() => import('./coach/CoachHost').then(m => ({ default: m.CoachHost })));
 const ExplanationDirectory = lazy(() => import('./components/ExplanationDirectory').then(m => ({ default: m.ExplanationDirectory })));
 const StudyPlanGuide = lazy(() => import('./components/StudyPlanGuide').then(m => ({ default: m.StudyPlanGuide })));
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })));

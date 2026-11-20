@@ -29,8 +29,12 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 let browser;
 try {
   browser = await chromium.launch();
-  const noScript = await browser.newContext({ javaScriptEnabled: false });
+  const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const staticPage = await noScript.newPage();
+  await staticPage.goto(origin);
+  assert(await staticPage.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Library', exact: true }).isVisible(), 'Mobile public navigation needs to work without JavaScript');
+  assert(await staticPage.getByRole('heading', { name: 'Today’s plan' }).isVisible(), 'The sample needs to be readable before JavaScript runs');
+  assert.equal(await staticPage.getByRole('progressbar', { name: 'Time allocated' }).getAttribute('aria-valuetext'), '25 of 45 minutes planned');
   await staticPage.goto(`${origin}/library/two-sum/explanation`);
   assert(await staticPage.locator('.problem-explanation').isVisible(), 'Public explanations need to be readable without JavaScript');
   assert((await staticPage.locator('.public-reference-code').first().textContent()).includes('twoSum'));

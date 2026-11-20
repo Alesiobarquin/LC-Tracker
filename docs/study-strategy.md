@@ -54,6 +54,14 @@ Other coding blocks prioritize demonstrated gaps, then an independent pass that
 is due for a delayed coding check. Imported backlog cannot crowd out that delayed
 check on ordinary implementation days.
 
+Study Chat can move a due recall check to the front or choose an eligible
+coding block across the usual priorities. A learner can apply its suggestion
+or delegate the next pick from chat. The pick lasts for Today in the current
+tab. A chosen coding block reserves its minutes first, with recall using the
+remaining time up to its normal allowance. The protected unfamiliar check,
+Reviews only, and the study day and session checks still apply. Today can
+restore the planner's pick.
+
 A related unfamiliar problem receives a protected block when no first unseen
 attempt has been recorded in the previous seven calendar days. This applies near
 an interview and takes priority over old imports and unfinished work. The slot
@@ -90,8 +98,9 @@ Mixed order also favors under-covered patterns. The selected curriculum defines
 core coverage; related checks can come from the larger catalog. The premium
 preference constrains all assignments. A coding block may be shorter than the
 estimated full attempt and supports unfinished continuation. The planner starts
-a new coding assignment only when at least five minutes remain; a smaller
-leftover does not create another problem for the day. While a coding or recall
+a new coding assignment only when at least five minutes remain. When a coding
+candidate fits, the planner reserves at least five minutes before allocating
+recall. A smaller leftover can still fit a due recall check. While a coding or recall
 session is saved and active, the dashboard holds other assignments until that
 session is recorded.
 

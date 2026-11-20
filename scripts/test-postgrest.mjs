@@ -17,9 +17,9 @@ export async function testPostgrest(socket) {
   const exited = new Promise((resolve) => server.once('exit', resolve));
   let startupError;
   server.on('error', (error) => { startupError = error; });
-  const token = (sub) => {
+  const token = (sub, role = 'authenticated') => {
     const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-    const body = Buffer.from(JSON.stringify({ sub, role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 120 })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({ sub, role, exp: Math.floor(Date.now() / 1000) + 120 })).toString('base64url');
     return `${head}.${body}.${createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url')}`;
   };
   const headers = { Authorization: `Bearer ${token('user_api_test')}`, 'Content-Type': 'application/json' };
@@ -83,6 +83,19 @@ export async function testPostgrest(socket) {
     assert.equal(recallTimings[0].session_type, 'recall');
     const isolated = await request('/problem_progress?select=study_state', { headers: { Authorization: `Bearer ${token('another_api_user')}` } });
     assert.deepEqual(await isolated.json(), []);
+    const claim = (userId, jwt = token('coach_worker', 'service_role')) => request('/rpc/claim_coach_turn', {
+      method: 'POST', headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        p_id: randomUUID(), p_user_id: userId, p_funding: 'free', p_step: 'intent', p_fingerprint: 'fixture',
+        p_step_micros: 2000, p_daily_budget_micros: 4000, p_monthly_budget_micros: 4000, p_daily_limit: 2,
+      }),
+    });
+    assert.equal((await claim('user_coach_a', token('user_coach_a'))).ok, false);
+    const claims = await Promise.all([claim('user_coach_a'), claim('user_coach_b')]);
+    assert.ok(claims.every(result => result.ok));
+    const codes = await Promise.all(claims.map(async result => (await result.json()).code));
+    assert.deepEqual(codes.sort(), ['monthly_budget', 'ok']);
+    console.log('PostgREST restricts coach accounting to the server and admits only one concurrent turn at the budget boundary.');
     console.log('PostgREST recall state, modality, exact-once retry, and answer privacy passed.');
     console.log('PostgREST HTTP conflicts return 409 without pool starvation; retry receipts and JWT RLS passed.');
   } finally {

@@ -1,6 +1,7 @@
 -- Minimal Supabase roles/auth surfaces needed by the actual migration files.
 CREATE ROLE authenticated;
 CREATE ROLE anon;
+CREATE ROLE service_role;
 CREATE SCHEMA auth;
 CREATE TABLE auth.users (id uuid PRIMARY KEY);
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE SQL STABLE AS $$ SELECT NULL::uuid $$;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   LayoutDashboard,
   Library,
@@ -19,10 +20,9 @@ import {
 } from "lucide-react";
 import { FloatingSessionIndicator } from "./FloatingSessionIndicator";
 import { clsx } from "clsx";
-import { differenceInDays } from "date-fns";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { getPhase } from "../utils/dateUtils";
+import { getDaysUntilInterview, getPhase } from "../utils/dateUtils";
 import { useUserSettings } from "../hooks/useUserData";
 import { useUser, useClerk } from "@clerk/react";
 import { FeedbackModal } from "./FeedbackModal";
@@ -30,10 +30,6 @@ import { FeaturesModal } from "./FeaturesModal";
 import { Logo } from "./Logo";
 import { Modal } from "./ui/Modal";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import {
-  FEATURES_MODAL_STORAGE_KEY,
-  FEATURES_MODAL_VERSION,
-} from "../constants/featuresModal";
 import { BRAND } from "../constants/brand";
 import { isAdminUser } from "../utils/adminAuth";
 import { supabase } from "../lib/supabase";
@@ -70,7 +66,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [unreadAdminTicketCount, setUnreadAdminTicketCount] = useState(0);
-  const featuresAutoOpenRef = useRef(false);
   const { user } = useUser();
   const { signOut, openUserProfile } = useClerk();
   useRegisterCoachTools(user ? {
@@ -87,31 +82,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   } : {});
   const isAdmin = isAdminUser(user);
   const { targetInterviewDate, targetEvents } = useUserSettings();
-  const daysUntilInterview = differenceInDays(
-    new Date(targetInterviewDate),
-    new Date(),
-  );
-  const phase = getPhase(new Date(), targetInterviewDate);
+  const now = new Date();
+  const daysUntilInterview = getDaysUntilInterview(targetInterviewDate, now);
+  const interviewLabel = daysUntilInterview === 0 ? "Interview today"
+    : daysUntilInterview === 1 ? "1 day to interview"
+    : Number.isFinite(daysUntilInterview) && daysUntilInterview > 0 ? `${daysUntilInterview} days to interview`
+    : "No upcoming interview";
+  const phase = getPhase(now, targetInterviewDate);
   const phaseProgress =
     phase === 1
       ? "Build pattern coverage"
       : phase === 2
         ? "Practice integration"
         : "Independent interview practice";
-
-  useEffect(() => {
-    if (activeTab !== "dashboard") return;
-    if (featuresAutoOpenRef.current) return;
-    let stored: string | null = null;
-    try {
-      stored = localStorage.getItem(FEATURES_MODAL_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-    if (stored === FEATURES_MODAL_VERSION) return;
-    featuresAutoOpenRef.current = true;
-    setIsFeaturesOpen(true);
-  }, [activeTab]);
 
   useEffect(() => {
     let cancelled = false;
@@ -202,12 +185,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isStudySession = activeTab === "timer" || activeTab === "recall";
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMobileMenuOpen(false);
-    };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, []);
+    if (!isMobileMenuOpen) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => { if (desktop.matches) setIsMobileMenuOpen(false); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, [isMobileMenuOpen]);
 
   const navigation = (mobile = false) =>
     navItems
@@ -240,6 +223,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       });
 
   return (
+    <Dialog.Root open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
     <div className="brand-shell workspace-shell min-h-screen text-foreground font-sans">
       <a href="#main-content" className="skip-link">
         Skip to content
@@ -329,15 +313,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
               </div>
             </details>
-            <button
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMobileMenuOpen}
-              aria-controls="app-sidebar"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            <Dialog.Trigger
+              aria-label="Open menu"
               className="workspace-tool workspace-tool-mobile"
             >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+              <Menu size={20} aria-hidden="true" />
+            </Dialog.Trigger>
           </div>
         </div>
       </header>
@@ -353,9 +334,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         {user ? (
           <details className="schedule-context">
             <summary className="inline-flex items-center gap-2 cursor-pointer">
-              {Number.isFinite(daysUntilInterview) && daysUntilInterview >= 0
-                ? `${daysUntilInterview} days to interview`
-                : "No upcoming interview"}
+              {interviewLabel}
               <ChevronDown size={12} />
             </summary>
             <div className="workspace-popover">
@@ -384,32 +363,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
         )}
       </div>
-      {isMobileMenuOpen && (
-        <>
-          <button
-            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-            aria-label="Close navigation"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          <div id="app-sidebar" className="mobile-navigation lg:hidden">
+      <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+          <Dialog.Content className="mobile-navigation" aria-describedby={undefined}>
             <div className="flex justify-between items-center mb-4">
-              <span className="text-xs font-mono text-subtle">Navigation</span>
-              <button
+              <Dialog.Title className="text-sm font-semibold text-foreground">Workspace</Dialog.Title>
+              <Dialog.Close
                 aria-label="Close menu"
                 className="workspace-tool"
-                onClick={() => setIsMobileMenuOpen(false)}
               >
-                <X size={18} />
-              </button>
+                <X size={18} aria-hidden="true" />
+              </Dialog.Close>
             </div>
             <nav aria-label="Workspace">{navigation(true)}</nav>
             {user && (
               <details className="border-t border-line mt-4 pt-4 text-xs text-muted">
                 <summary className="cursor-pointer">
-                  {Number.isFinite(daysUntilInterview) &&
-                  daysUntilInterview >= 0
-                    ? `Interview in ${daysUntilInterview} days`
-                    : "No upcoming interview"}
+                  {interviewLabel}
                 </summary>
                 <div className="space-y-3 mt-3">
                   <p>{phaseProgress}</p>
@@ -452,7 +422,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Report issue
               </button>
               {isAdmin && (
-                <Link to="/admin">
+                <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
                   <Shield size={15} />
                   Admin · {unreadAdminTicketCount} unread
                 </Link>
@@ -463,15 +433,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   Sign out
                 </button>
               ) : (
-                <Link to="/login">
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   <LogIn size={15} />
                   Sign in
                 </Link>
               )}
             </div>
-          </div>
-        </>
-      )}
+          </Dialog.Content>
+      </Dialog.Portal>
       <main
         id="main-content"
         tabIndex={-1}
@@ -554,5 +523,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         document.body,
       )}
     </div>
+    </Dialog.Root>
   );
 };

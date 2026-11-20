@@ -16,7 +16,7 @@ import {
 import { patterns } from "../data/patterns";
 import { getPatternLessonMeta } from "../data/patternLessonMeta";
 import { getPatternForProblem } from "./patternMapping";
-import { getSrIntervalMultiplier } from "./dateUtils";
+import { getDaysUntilInterview, getSrIntervalMultiplier } from "./dateUtils";
 import type {
   AppSettings,
   CodingOutcome,
@@ -473,6 +473,12 @@ export interface StudyTask {
     unfamiliarReservation: boolean;
   };
 }
+
+export type StudyPlanChoice = Pick<StudyTask, "problemId" | "kind"> & {
+  minutes?: number;
+  source?: "coach";
+};
+
 export interface StudyPlan {
   dailyMinutes: number;
   spentMinutes: number;
@@ -487,6 +493,15 @@ export interface StudyPlan {
   isBlackout: boolean;
   learningDay: boolean;
   mainAlternatives?: string[];
+  coachTask?: StudyTask;
+  coachCandidates?: Record<Exclude<StudyTask["kind"], "variant">, string[]>;
+}
+
+export function orderedStudyTasks(plan: StudyPlan) {
+  if (!plan.mainTask) return plan.recallTasks;
+  return plan.mainTask === plan.coachTask
+    ? [plan.mainTask, ...plan.recallTasks]
+    : [...plan.recallTasks, plan.mainTask];
 }
 
 /** One planner owns every minute and assignment. Eligibility is a queue, not debt. */
@@ -503,7 +518,8 @@ export function buildStudyPlan(params: {
   mode?: StudyMode;
   now?: Date;
   includeAlternatives?: boolean;
-  choice?: { problemId: string; kind: StudyTask["kind"]; minutes?: number };
+  includeCoachCandidates?: boolean;
+  choice?: StudyPlanChoice;
 }): StudyPlan {
   const {
     progress,
@@ -518,6 +534,7 @@ export function buildStudyPlan(params: {
     mode = "full",
     now = new Date(),
     includeAlternatives = false,
+    includeCoachCandidates = false,
     choice,
   } = params;
   const day = now.getDay();
@@ -581,12 +598,7 @@ export function buildStudyPlan(params: {
     .sort(
       (a, b) => priority(b, true) - priority(a, true) || a.localeCompare(b),
     );
-  const daysToInterview = targetInterviewDate
-    ? differenceInCalendarDays(
-        new Date(`${targetInterviewDate.slice(0, 10)}T12:00:00`),
-        now,
-      )
-    : Infinity;
+  const daysToInterview = getDaysUntilInterview(targetInterviewDate, now);
   const interviewSoon = daysToInterview >= 0 && daysToInterview <= 30;
   const maintenanceDay =
     (settings.studySchedule.restDay >= 0
@@ -799,10 +811,22 @@ export function buildStudyPlan(params: {
   const isUnfamiliar = (id: string) =>
     !progress[id] &&
     (!!protectedVariant || !newCandidateIds.has(id) || independentCoverage(problemMap[id]) >= 2);
+  const coachChoice = choice?.source === "coach" ? choice : undefined;
+  const coachCanChooseCoding = mode === "full" && remainingMinutes >= MIN_CODING_BLOCK_MINUTES &&
+    (!defaultMainId || !isUnfamiliar(defaultMainId));
+  const guided = settings.learningMode !== "EXPLORE";
+  const minimumPrerequisites = guided && newCandidates[0] ? unmetPrerequisites(newCandidates[0]) : 0;
+  const canCoachLearn = (id: string) => newCandidateIds.has(id) && !isUnfamiliar(id) &&
+    (!guided || unmetPrerequisites(problemMap[id]) === minimumPrerequisites);
+  const coachedMain = coachCanChooseCoding && coachChoice && (
+    (coachChoice.kind === "coding_review" && availableCoding.includes(coachChoice.problemId)) ||
+    (coachChoice.kind === "learning" && canCoachLearn(coachChoice.problemId))
+  ) ? coachChoice : undefined;
+  const coachedEstimate = coachedMain && estimateCodingMinutes(problemMap[coachedMain.problemId], timings, progress);
   const codingPriority = (id: string) =>
     continuation.has(id) ? "continue" : demonstratedGap(id) ? "repair" :
       isDelayedCheck(id) ? "delayed" : "review";
-  const alternatives = defaultMainId && !isUnfamiliar(defaultMainId) && (includeAlternatives || choice)
+  const alternatives = defaultMainId && !coachedMain && !isUnfamiliar(defaultMainId) && (includeAlternatives || choice)
     ? progress[defaultMainId]
       ? availableCoding.filter(id => codingPriority(id) === codingPriority(defaultMainId))
       : newCandidates.filter(problem =>
@@ -813,10 +837,11 @@ export function buildStudyPlan(params: {
           Math.min(patternCoverage(problem), 2) === Math.min(patternCoverage(problemMap[defaultMainId]), 2))
         .map(problem => problem.id)
     : [];
-  const chosenMain = choice && choice.kind !== "recall" &&
+  const manualChoice = choice && !coachChoice && choice.kind !== "recall" &&
     alternatives.includes(choice.problemId) &&
     choice.kind === (progress[choice.problemId] ? "coding_review" : "learning")
       ? choice : undefined;
+  const chosenMain = coachedMain ?? manualChoice;
   const mainId = chosenMain?.problemId ?? defaultMainId;
   const recallSpent =
     todayTimings
@@ -824,18 +849,38 @@ export function buildStudyPlan(params: {
       .reduce((s, t) => s + t.elapsedSeconds / 60, 0) +
     Math.max(0, activeRecallSeconds) / 60;
   const unfamiliarMain = mainId && isUnfamiliar(mainId);
+  const canFitMain = Boolean(mainId) && remainingMinutes >= MIN_CODING_BLOCK_MINUTES;
+  const reservedCodingMinutes = canFitMain
+    ? unfamiliarMain ? UNSEEN_CHECK_MINUTES : MIN_CODING_BLOCK_MINUTES
+    : 0;
   // On check days a small budget goes to the check, instead of a recall warm-up
   // making a feasible independent attempt unnecessarily short.
   let recallBudget = mode === "reviews" ? remainingMinutes : Math.min(
-    unfamiliarMain
-      ? Math.max(0, remainingMinutes - UNSEEN_CHECK_MINUTES)
-      : remainingMinutes,
+    Math.max(0, remainingMinutes - reservedCodingMinutes),
     Math.max(0, Math.floor(dailyMinutes * 0.3) - Math.ceil(recallSpent)),
   );
   const recallAllowance = mode === "reviews" ? dailyMinutes : Math.floor(dailyMinutes * 0.3);
+  if (coachedMain && coachedEstimate !== undefined) {
+    const reserved = Math.min(coachedEstimate, Math.max(MIN_CODING_BLOCK_MINUTES, coachedMain.minutes ?? Infinity));
+    recallBudget = Math.min(recallBudget, Math.max(0, remainingMinutes - reserved));
+  }
   const recallCandidates = dueRecall.filter(
-    (id) => !touched.has(id) && id !== mainId,
+    (id) => !touched.has(id) && (!canFitMain || id !== mainId),
   );
+  if (includeCoachCandidates) {
+    plan.coachCandidates = {
+      recall: recallBudget >= 3 ? recallCandidates : [],
+      coding_review: coachCanChooseCoding ? availableCoding : [],
+      learning: coachCanChooseCoding ? newCandidates.map(problem => problem.id).filter(canCoachLearn) : [],
+    };
+  }
+  const coachedRecall = coachChoice?.kind === "recall" && recallBudget >= 3
+    ? recallCandidates.indexOf(coachChoice.problemId) : -1;
+  if (coachedRecall > 0) recallCandidates.unshift(...recallCandidates.splice(coachedRecall, 1));
+  const coachExplanation = {
+    title: "Study Chat picked this task",
+    summary: "Study Chat placed this task first. Open the conversation to see its reasoning.",
+  };
   const allocationExplanation = {
     mode,
     dailyMinutes,
@@ -845,7 +890,7 @@ export function buildStudyPlan(params: {
     recallUsed: Math.ceil(recallSpent),
     recallMinutesAvailable: recallBudget,
     recallEligibleCount: recallCandidates.length,
-    unfamiliarReservation: !!unfamiliarMain,
+    unfamiliarReservation: canFitMain && !!unfamiliarMain,
   };
   const selectionExplanation = protectedVariant
     ? { title: "Weekly unfamiliar check", summary: "Your weekly check is due. Try an unseen question without hints." }
@@ -885,6 +930,7 @@ export function buildStudyPlan(params: {
           summary: mode === "reviews"
             ? "Use your remaining daily time for due recall checks, without starting a coding block."
             : "Check what you remember before reopening the solution.",
+          ...(coachedRecall >= 0 && id === coachChoice?.problemId ? coachExplanation : {}),
         },
         reason:
           getLearningStatus(progress[id]) === "needs_assessment"
@@ -895,6 +941,7 @@ export function buildStudyPlan(params: {
   if (choice?.kind === "recall") {
     const index = plan.recallTasks.findIndex(task => task.problemId === choice.problemId);
     if (index > 0) plan.recallTasks.unshift(...plan.recallTasks.splice(index, 1));
+    if (index >= 0 && coachedRecall >= 0) plan.coachTask = plan.recallTasks[0];
   }
   let capacity = remainingMinutes - plan.recallTasks.length * 3;
   if (mainId && capacity >= MIN_CODING_BLOCK_MINUTES) {
@@ -907,10 +954,10 @@ export function buildStudyPlan(params: {
         ? "variant"
         : "learning"
       : "coding_review";
-    const estimatedMinutes =
+    const estimatedMinutes = coachedEstimate ?? (
       kind === "variant"
         ? UNSEEN_CHECK_MINUTES
-        : estimateCodingMinutes(problem, timings, progress);
+        : estimateCodingMinutes(problem, timings, progress));
     plan.mainTask = {
       problemId: mainId,
       kind,
@@ -923,6 +970,7 @@ export function buildStudyPlan(params: {
           title: "Unfamiliar practice",
           summary: "Practice choosing an approach without hints.",
         } : {}),
+        ...(coachedMain ? coachExplanation : {}),
       },
       reason:
         kind === "variant"
@@ -938,6 +986,7 @@ export function buildStudyPlan(params: {
                   : "Check implementation independently; recall alone cannot verify it.",
     };
     capacity -= plan.mainTask.minutes;
+    if (coachedMain) plan.coachTask = plan.mainTask;
     if (includeAlternatives) plan.mainAlternatives = alternatives;
   }
   const syntaxDue = Object.entries(syntaxProgress).filter(([, value]) =>

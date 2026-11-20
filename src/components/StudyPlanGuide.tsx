@@ -110,7 +110,7 @@ export function StudyPlanGuide() {
 
       <section aria-labelledby="priority-guide-title" className="space-y-5">
         <h2 id="priority-guide-title" className="text-2xl font-semibold tracking-tight text-foreground">Why this question?</h2>
-        <p className="text-base text-body leading-relaxed">In Full plan, the first coding rule that applies wins.</p>
+        <p className="text-base text-body leading-relaxed">In Full plan, the planner uses the first coding rule that applies. Use <strong className="text-foreground">Let AI choose next task</strong> in Study Chat to let it compare eligible tasks and put its pick first on Today.</p>
         <ol className="divide-y divide-line border-y border-line">
           {priorities.map(([title, description], index) => (
             <li key={title} className="flex gap-4 py-4">

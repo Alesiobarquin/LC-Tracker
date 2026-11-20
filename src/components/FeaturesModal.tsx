@@ -1,12 +1,7 @@
-import { preferenceStorage } from "../lib/safeStorage";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FEATURE_SLIDES } from "../data/featuresModalSlides";
-import {
-  FEATURES_MODAL_STORAGE_KEY,
-  FEATURES_MODAL_VERSION,
-} from "../constants/featuresModal";
 import { Modal } from "./ui/Modal";
 import { Button } from "./ui/Button";
 import { TraceIndex } from "./ui/StudyTrace";
@@ -30,19 +25,12 @@ export function FeaturesModal({
         Math.min(Math.max(0, initialSlide), FEATURE_SLIDES.length - 1),
       );
   }, [isOpen, initialSlide]);
-  const handleDismiss = useCallback(() => {
-    preferenceStorage.setItem(
-      FEATURES_MODAL_STORAGE_KEY,
-      FEATURES_MODAL_VERSION,
-    );
-    onClose();
-  }, [onClose]);
   const slide = FEATURE_SLIDES[slideIndex];
   if (!slide) return null;
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleDismiss}
+      onClose={onClose}
       title="How LC Tracker works"
       size="lg"
     >
@@ -112,7 +100,7 @@ export function FeaturesModal({
               className="quiet-action"
               onClick={() => {
                 navigate(`/${slide.tabId}`);
-                handleDismiss();
+                onClose();
               }}
             >
               Open in app <ArrowUpRight size={14} />
@@ -120,7 +108,7 @@ export function FeaturesModal({
           ) : (
             <span />
           )}
-          <Button variant="primary" onClick={handleDismiss}>
+          <Button variant="primary" onClick={onClose}>
             Continue
           </Button>
         </div>

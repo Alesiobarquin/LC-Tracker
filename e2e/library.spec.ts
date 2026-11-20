@@ -87,7 +87,7 @@ for (const theme of ['light', 'dark'] as const) {
       expect(saves).toHaveLength(0);
 
       await trigger.click();
-      await page.getByRole('button', { name: 'Close dialog backdrop', exact: true }).click({ position: { x: 5, y: 5 } });
+      await page.locator('[data-dialog-backdrop]').click({ position: { x: 5, y: 5 } });
       await expect(dialog).not.toBeVisible();
       await expect(trigger).toBeFocused();
       expect(saves).toHaveLength(0);

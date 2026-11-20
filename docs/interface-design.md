@@ -63,6 +63,19 @@ the existing retrieve, compare, and record protocol. Both modes share the daily
 budget and preserve saved sessions. The product tour and setup tips introduce
 the choice without requiring a menu or a schedule edit to discover it.
 
+### Public landing
+
+The centered hero leads into an interactive Today preview. Copper highlights
+the primary action and the first task. The graphite and warm paper themes use
+the same page structure and semantic colors. The preview shows the practice
+queue beside its budget and example history on desktop, then stacks them on
+phones.
+
+The sample runs the same planner as Today against a fixed history. At two
+months, Two Sum returns as a recall check alongside a new coding problem. At
+three weeks, Two Sum becomes an independent coding review and the assigned time
+updates with it. [Interactive planner sample](../src/components/LandingPlanPreview.tsx)
+
 ## Implementation
 
 Semantic colors, type roles, radii, the four-pixel spacing unit, motion durations,

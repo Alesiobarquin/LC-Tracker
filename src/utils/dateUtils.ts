@@ -1,4 +1,4 @@
-import { isBefore, startOfDay, addDays, isSameDay } from 'date-fns';
+import { isBefore, startOfDay, addDays, isSameDay, differenceInCalendarDays } from 'date-fns';
 import type { ProblemSessionRating, SrAggressiveness } from '../types';
 
 /** Shorter gaps between reviews as aggressiveness increases (RELAXED → BALANCED → AGGRESSIVE). */
@@ -15,10 +15,15 @@ export function getSrIntervalMultiplier(sr: SrAggressiveness): number {
   }
 }
 
+export function getDaysUntilInterview(target?: string, now = new Date()) {
+  return target
+    ? differenceInCalendarDays(new Date(`${target.slice(0, 10)}T12:00:00`), now)
+    : Infinity;
+}
+
 /** Preparation stage follows an optional upcoming interview, never fixed calendar dates. */
 export const getPhase = (date: Date = new Date(), targetInterviewDate?: string) => {
-  if (!targetInterviewDate) return 1;
-  const days = (new Date(`${targetInterviewDate.slice(0, 10)}T12:00:00`).getTime() - date.getTime()) / 86400000;
+  const days = getDaysUntilInterview(targetInterviewDate, date);
   if (!Number.isFinite(days) || days < 0) return 1;
   if (days <= 14) return 3;
   return days <= 60 ? 2 : 1;

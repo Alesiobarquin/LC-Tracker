@@ -823,6 +823,9 @@ for (const theme of ["light", "dark"]) {
       const seconds = page.getByRole("spinbutton", { name: "Seconds spent" });
       await page.goto("/timer/two-sum");
       await expect(page.getByRole("button", { name: "I'm Done", exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Adjust start time" }).press("Enter");
+      await expect(page.getByRole("button", { name: "I'm Done", exact: true })).toBeVisible();
+      await expect(page.getByLabel("Session start time (today)", { exact: true })).toBeVisible();
       await page.clock.fastForward(90 * 60 * 1000);
       await page.getByRole("button", { name: "I'm Done", exact: true }).click();
       await expect(minutes).toHaveValue("90");

@@ -640,6 +640,7 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.isComposing || e.repeat) return;
       if (showExitConfirm) {
         if (e.key === "Escape") setShowExitConfirm(false);
         return;
@@ -652,6 +653,8 @@ export const SyntaxFlashcardSession: React.FC<SyntaxFlashcardSessionProps> = ({
 
       if (isTypingTarget(e.target) || (e.target instanceof HTMLElement && e.target.closest('[aria-label="Study chat"]'))) return;
       if (pendingRating.current && e.key === "Escape") return;
+      if ((e.key === " " || e.key === "Enter") &&
+        e.target instanceof Element && e.target.closest('button, a[href], summary, [role="button"]')) return;
 
       if (phase === "active") {
         if (e.key === "Escape") {

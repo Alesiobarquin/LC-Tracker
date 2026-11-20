@@ -26,7 +26,7 @@ const surfaces = [
   { name: "login", path: "/login", heading: "Sign in to LC Tracker" },
   { name: "sign-up", path: "/sign-up", heading: "Create your LC Tracker account" },
   { name: "onboarding", path: "/onboarding", heading: "Welcome to LC Tracker" },
-  { name: "landing", path: "/", heading: "Know what to solve next." },
+  { name: "landing", path: "/", heading: "Know what to practice next." },
   { name: "today", path: "/dashboard", heading: "Today’s study plan" },
   { name: "reviews", path: "/dashboard", heading: "Today’s study plan" },
   { name: "library", path: "/library", heading: "Problem Library" },
@@ -140,10 +140,18 @@ for (const theme of ["light", "dark"] as const) {
             page.getByRole("cell", { name: /^Two Sum/ }).first(),
           ).toBeVisible();
         }
-        if (surface.name === "recall")
+        if (surface.name === "recall") {
           await page
             .getByLabel("Your attempt · explanation or pseudocode")
             .fill("Check complements using a hash map. O(n) time and space.");
+          if (width === 390) {
+            const compare = await page.getByRole("button", { name: "Compare with a reference" }).boundingBox();
+            const dock = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
+            expect(compare).not.toBeNull();
+            expect(dock).not.toBeNull();
+            expect(compare!.y + compare!.height).toBeLessThanOrEqual(dock!.y);
+          }
+        }
         expect(
           await page.evaluate(() => document.documentElement.scrollWidth),
         ).toBeLessThanOrEqual(width);
@@ -216,15 +224,16 @@ for (const theme of ["light", "dark"] as const) {
         }
         if (surface.name === "today") {
           if (width === 390) {
-            await page.getByRole("button", { name: "Open menu" }).click();
+            const menuTrigger = page.getByRole("button", { name: "Open menu" });
+            await menuTrigger.click();
+            await expect(page.getByRole("dialog", { name: "Workspace" }).getByRole("button", { name: "Close menu" })).toBeFocused();
             await expect(
               page.getByRole("navigation", { name: "Workspace" }),
             ).toBeVisible();
             await page.keyboard.press("Escape");
-            await expect(
-              page.getByRole("button", { name: "Open menu" }),
-            ).toHaveAttribute("aria-expanded", "false");
-            await page.getByRole("button", { name: "Open menu" }).click();
+            await expect(menuTrigger).toHaveAttribute("aria-expanded", "false");
+            await expect(menuTrigger).toBeFocused();
+            await menuTrigger.click();
           } else {
             await page
               .locator('summary[aria-label="Workspace options"]')

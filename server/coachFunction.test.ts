@@ -62,8 +62,10 @@ beforeEach(() => {
     if (url.endsWith('/claim_coach_turn')) return Response.json(claim, { status: ledgerUp ? 200 : 503 });
     if (url.endsWith('/settle_coach_step')) return Response.json(true);
     if (url === COACH_ENDPOINT) {
-      const step = JSON.parse(body).response_format.json_schema.name;
-      const content = JSON.stringify(step === 'answer' ? { suggestion: 'Try a timed review.' } : choice);
+      const schema = JSON.parse(body).response_format.json_schema;
+      const content = JSON.stringify(schema.name === 'answer'
+        ? { suggestion: 'Try a timed review.', ...(schema.schema.properties.pick && { pick: '1' }) }
+        : choice);
       return Response.json({ choices: [{ finish_reason: 'stop', message: { content } }], usage: { cost: usageCost } });
     }
     if (url.startsWith('https://generativelanguage.googleapis.com/')) {
@@ -92,11 +94,11 @@ describe('Study Chat function', () => {
     expect(sent.every(call => call.url === issuer + '/.well-known/jwks.json')).toBe(true);
   });
 
-  it('reserves before model use, settles in integer microdollars, and binds the two steps', async () => {
+  it.each([undefined, true] as const)('reserves and binds both steps with replan=%s', async (replan) => {
     claim = { code: 'ok', allowance: { remaining: 1, resetAt } };
     const id = randomUUID();
     const token = await session();
-    const result = await invoke(token, { provider: 'hosted', turnId: id, input: question });
+    const result = await invoke(token, { provider: 'hosted', turnId: id, input: { ...question, replan } });
     expect(result.status).toBe(200);
     expect(result.headers.get('Cache-Control')).toBe('no-store');
     expect(await result.json()).toEqual({ data: choice, allowance: claim.allowance });
@@ -119,9 +121,9 @@ describe('Study Chat function', () => {
 
     sent.length = 0;
     const answer = await invoke(token, {
-      provider: 'hosted', turnId: id, input: { step: 'answer', question: question.question, evidence: [{ minutes: 20 }] },
+      provider: 'hosted', turnId: id, input: { step: 'answer', question: question.question, evidence: [{ minutes: 20 }], replan },
     });
-    expect(await answer.json()).toMatchObject({ data: { suggestion: 'Try a timed review.' } });
+    expect(await answer.json()).toMatchObject({ data: { suggestion: 'Try a timed review.', ...(replan && { pick: '1' }) } });
     expect(JSON.parse(sent[0].body)).toMatchObject({ p_id: id, p_step: 'answer', p_fingerprint: reservation.p_fingerprint });
   });
 

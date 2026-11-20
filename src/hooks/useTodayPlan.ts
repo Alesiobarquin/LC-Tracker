@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ensureExtendedCatalogLoaded } from "../data/problems";
 import { useStore } from "../store/useStore";
 import { codingElapsedSeconds, recallElapsedSeconds } from "../utils/sessionTime";
-import { buildStudyPlan, type StudyTask } from "../utils/study";
+import { buildStudyPlan, type StudyPlanChoice, type StudyTask } from "../utils/study";
 import { useProblemProgress, useSessionTimings, useUserSettings } from "./useUserData";
 
 export function activePracticePath() {
@@ -55,7 +55,8 @@ export function useTodayPlan() {
   }, [activeSession?.id, activeRecall?.id]);
 
   const timedIds = useMemo(() => new Set(sessionTimings.map(row => row.id)), [sessionTimings]);
-  const build = (at: Date, store: Pick<ReturnType<typeof useStore.getState>, "activeSession" | "activeRecall" | "reviewOnlyDate" | "dayPlan">) => {
+  const build = (at: Date, store: Pick<ReturnType<typeof useStore.getState>, "activeSession" | "activeRecall" | "reviewOnlyDate" | "dayPlan">,
+    options?: { choice?: StudyPlanChoice | null; includeCoachCandidates?: boolean }) => {
     const dateKey = format(at, "yyyy-MM-dd");
     const choices = store.dayPlan?.date === dateKey ? store.dayPlan : null;
     const timer = store.activeSession;
@@ -66,7 +67,8 @@ export function useTodayPlan() {
       progress, settings, timings: sessionTimings, syntaxProgress, targetInterviewDate,
       mode: store.reviewOnlyDate === dateKey ? "reviews" : "full",
       excludedIds: choices?.skipped,
-      choice: choices?.choice,
+      choice: options?.choice === null ? undefined : options?.choice ?? choices?.choice,
+      includeCoachCandidates: options?.includeCoachCandidates,
       includeAlternatives: true,
       activeSeconds: timerSeconds + recallSeconds,
       activeRecallSeconds: recallSeconds,
@@ -82,7 +84,7 @@ export function useTodayPlan() {
   return {
     now, date, plan, activeSession, activeRecall, reviewsOnly, progress, settings, sessionTimings,
     catalogReady, catalogError, error, loading,
-    freshPlan: () => build(new Date(), useStore.getState()),
+    freshPlan: (options?: Parameters<typeof build>[2]) => build(new Date(), useStore.getState(), options),
     setReviewsOnly: (enabled: boolean) => useStore.getState().setReviewOnlyDate(enabled ? format(new Date(), "yyyy-MM-dd") : null),
     startTask: (task: StudyTask) => {
       const existing = activePracticePath();

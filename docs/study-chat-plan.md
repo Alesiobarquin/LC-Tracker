@@ -5,7 +5,8 @@ Implementation plan · Started November 18, 2026
 The site-wide planner tools and personal OpenRouter flow are in production.
 Hosted funding and direct Gemini and Claude connections are implemented
 locally. Production activation needs the migration, credentials and staged
-checks. The richer coaching work in ticket 5 remains planned.
+checks. Study Chat can now compare today's assignments with recent practice
+and recall and coding due dates for a topic. The rest of ticket 5 remains planned.
 [Current rollout status](operations.md#free-study-chat-and-personal-keys)
 
 ## What to build first
@@ -82,6 +83,8 @@ Run site tools in the signed-in app. The model can request named reads and propo
 | `progress_summary(scope)` · all, one known category or one known pattern | Last 14 local calendar days, measured passes/attempts, recall outcomes, delayed and unfamiliar evidence, recorded minutes, missing observations and evidence handles | First release |
 | `problem_timeline(problemId)` · one resolved catalog or owned historical ID | Encounter source, due dates, latest status, up to five dated attempts with outcome/assistance and optional reported rating. Include a truncation flag. | First release |
 | `today_plan()` | Current assignment or resume action, task reason, allocation and time remaining, or the actual blocking state. Protected tasks get opaque handles. | First release |
+| `review_schedule(topic?)` · category or tracked pattern | Latest recorded coding and recall, imported acceptance when recorded, and due dates by review type. Current Today assignments include their queue positions. With no topic, check the next visible task's category. | Coaching |
+| `next_task_options(topic?, avoidTopic?, problem?, minutes?)` | A bounded set of eligible first-task choices across due recall, due coding and fresh practice. The learner can apply one choice or delegate it by pressing **Let AI choose next task**. | Coaching |
 | `practice_options(minutes?, topic?, avoidTopic?)` | Up to three eligible **substitutes for one slot**, each with planned minutes, estimate, evidence and reason. Returns a blocked result if no substitute qualifies. | First release |
 | `compare_periods(scope)`, `confidence_followups(scope)` | Two adjacent complete windows, or matched rating/follow-up pairs; include denominators, unknowns and contributing records | Investigations |
 | `read_attachment(handle)`, `reference_excerpt(problemId, approachId?)` | Only the exact text the user selected for this turn, or a short attributed excerpt when the study stage permits it | Debrief |

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Play, ArrowRight, CircleCheck, ArrowUpRight } from "lucide-react";
 import { useStreak } from "../hooks/useUserData";
 import { useTodayPlan } from "../hooks/useTodayPlan";
-import { getLearningStatus, getStudyEvaluation, hasDelayedIndependentPass, type StudyTask } from "../utils/study";
+import { getLearningStatus, getStudyEvaluation, hasDelayedIndependentPass, orderedStudyTasks, type StudyTask } from "../utils/study";
 import { CoachLauncher } from "../coach/CoachLauncher";
 import {
   problemMap,
@@ -86,7 +86,7 @@ export function Dashboard() {
   if (loading) return <DashboardSkeleton />;
   const savedMessage = (location.state as { studyMessage?: string } | null)
     ?.studyMessage;
-  const nextTask = plan.recallTasks[0] ?? plan.mainTask;
+  const [nextTask] = orderedStudyTasks(plan);
   const activeProblemId = activeSession?.problemId ?? activeRecall?.problemId;
   const activeSessionNeedsOutcome = Boolean(
     activeSession?.completion || activeSession?.finishedElapsed !== undefined,
@@ -208,9 +208,11 @@ export function Dashboard() {
                     ? activeSessionNeedsOutcome
                       ? "Session ended · outcome ready to save"
                       : "Session in progress · draft saved"
-                    : primaryTask?.kind === "recall"
-                      ? reviewsOnly ? "Recall review · up next" : "Recall warm-up · up next"
-                      : "Coding practice · up next"}
+                    : plan.coachTask
+                      ? "Study Chat pick · up next"
+                      : primaryTask?.kind === "recall"
+                        ? reviewsOnly ? "Recall review · up next" : "Recall warm-up · up next"
+                        : "Coding practice · up next"}
                 </div>
                 <h2 className="study-next-title">
                   {getNumberedProblemTitle(focusedProblem)}
@@ -278,6 +280,11 @@ export function Dashboard() {
                           : "Choose another"}
                       </button>
                       {primaryTask && alternateChoices(primaryTask)}
+                      {plan.coachTask && (
+                        <button type="button" className="quiet-action text-subtle" onClick={() => useStore.getState().choosePlanTask(date)}>
+                          Restore planner’s pick
+                        </button>
+                      )}
                     </>
                   )}
                 </div>

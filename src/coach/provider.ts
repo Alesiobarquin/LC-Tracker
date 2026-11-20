@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { getClerkToken } from '../lib/clerkToken';
 import {
-  answerResponse, COACH_ENDPOINT, coachAccessSchema, coachAllowanceSchema, coachMessages, containsCoachKey, fitsInput,
+  COACH_ENDPOINT, coachAccessSchema, coachAllowanceSchema, coachAnswerResponse, coachMessages, containsCoachKey, fitsInput,
   MAX_QUESTION_LENGTH, openRouterRequest, openRouterResponse, parseCoachIntent, personalProviderInfo,
   type CoachAllowance, type CoachInput, type PersonalConnection, type ToolDescription,
 } from './protocol';
@@ -88,7 +88,7 @@ async function complete(input: CoachInput, turn: CoachTurn, signal: AbortSignal)
       const headers = new Headers({ 'Content-Type': 'application/json' });
       const options = {
         ...privateRequest, method: 'POST', headers, signal: requestSignal,
-        body: JSON.stringify(openRouterRequest(input.step, messages)),
+        body: JSON.stringify(openRouterRequest(input, messages)),
       };
       let response: Response;
       if (import.meta.env.MODE === 'e2e') {
@@ -96,7 +96,7 @@ async function complete(input: CoachInput, turn: CoachTurn, signal: AbortSignal)
         if (response.status === 404 || response.headers.get('Content-Type')?.includes('text/html')) {
           return input.step === 'intent'
             ? { calls: [], clarification: 'Try “What should I practice next?” or “Show my recent progress” in this preview.' }
-            : { suggestion: 'Use the next eligible task to build on your recorded practice.' };
+            : { suggestion: 'Use the next eligible task to build on your recorded practice.', ...(input.replan && { pick: 'keep' }) };
         }
       } else if (source.provider === 'openrouter') {
         headers.set('Authorization', `Bearer ${source.key}`);
@@ -136,10 +136,10 @@ async function complete(input: CoachInput, turn: CoachTurn, signal: AbortSignal)
 }
 
 export async function chooseCoachIntent(
-  question: string, previous: string[], tools: ToolDescription[], turn: CoachTurn, signal: AbortSignal,
+  question: string, context: string, tools: ToolDescription[], turn: CoachTurn, signal: AbortSignal, replan?: true,
 ) {
   if (question.length > MAX_QUESTION_LENGTH) throw new CoachRequestError('Shorten your message and try again.');
-  const input: CoachInput = { step: 'intent', question, context: previous.slice(-2).join('\n').slice(-1200), tools };
+  const input: CoachInput = { step: 'intent', question, context, tools, replan };
   if (!fitsInput(coachMessages(input))) input.context = '';
   const result = await complete(input, turn, signal);
   try {
@@ -150,12 +150,16 @@ export async function chooseCoachIntent(
 }
 
 export async function summarizeCoachEvidence(
-  question: string, evidence: unknown[], turn: CoachTurn, signal: AbortSignal,
-): Promise<string> {
-  if (!evidence.length || evidence.length > 2) return '';
-  const input: CoachInput = { step: 'answer', question, evidence };
-  if (!fitsInput(coachMessages(input))) return '';
-  const result = answerResponse.safeParse(await complete(input, turn, signal));
+  question: string, evidence: unknown[], turn: CoachTurn, signal: AbortSignal, context?: string, replan?: true,
+): Promise<{ suggestion: string; pick?: string }> {
+  if (!evidence.length || evidence.length > 2) return { suggestion: '' };
+  const input: CoachInput = { step: 'answer', question, evidence, context, replan };
+  if (input.context && !fitsInput(coachMessages(input))) delete input.context;
+  if (!fitsInput(coachMessages(input))) {
+    if (replan) throw new CoachRequestError('Try a shorter message so there’s room to compare the eligible tasks.');
+    return { suggestion: '' };
+  }
+  const result = coachAnswerResponse(input).safeParse(await complete(input, turn, signal));
   if (!result.success) throw apiError('invalid_reply', undefined, turn.source);
-  return result.data.suggestion;
+  return result.data;
 }

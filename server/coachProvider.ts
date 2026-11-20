@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {
-  answerResponse, COACH_ENDPOINT, coachOutputSchema, containsCoachKey, MAX_OUTPUT_TOKENS,
+  COACH_ENDPOINT, coachAnswerResponse, coachOutputSchema, containsCoachKey, MAX_OUTPUT_TOKENS,
   openRouterRequest, openRouterResponse, parseCoachIntent,
   type CoachInput, type CoachMessages, type PersonalProvider,
 } from '../src/coach/protocol.js';
@@ -29,14 +29,14 @@ export class CoachProviderError extends Error {
 
 export async function runCoachProvider(provider: PersonalProvider, key: string, input: CoachInput, messages: CoachMessages) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const schema = coachOutputSchema(input.step);
+  const schema = coachOutputSchema(input);
   const [system, ...content] = messages;
   let url: string;
   let body: unknown;
   switch (provider) {
     case 'openrouter':
       url = COACH_ENDPOINT;
-      body = openRouterRequest(input.step, messages);
+      body = openRouterRequest(input, messages);
       headers.Authorization = `Bearer ${key}`;
       break;
     case 'gemini':
@@ -79,7 +79,7 @@ export async function runCoachProvider(provider: PersonalProvider, key: string, 
     if (containsCoachKey(text, key)) throw new CoachProviderError('invalid_reply');
     const data: unknown = JSON.parse(text);
     const canSummarize = input.step === 'intent' && parseCoachIntent(data, input.tools).canSummarize;
-    if (input.step === 'answer') answerResponse.parse(data);
+    if (input.step === 'answer') coachAnswerResponse(input).parse(data);
     const usage = provider === 'openrouter' ? openRouterUsage.safeParse(result) : undefined;
     return { data, canSummarize, costMicros: usage?.success ? Math.ceil(usage.data.usage.cost * 1_000_000) : null };
   } catch (error) {

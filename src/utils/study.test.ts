@@ -26,6 +26,7 @@ import {
   getUnseenAttempts,
   estimateCodingMinutes,
   hasCurrentIndependentPass,
+  orderedStudyTasks,
 } from "./study";
 import { getPatternForProblem } from "./patternMapping";
 import {
@@ -69,6 +70,62 @@ const recall = (
   outcome,
   answer: "A closed-notes attempt with an invariant and complexity.",
   checkedAgainst: "external",
+});
+
+describe("Study Chat choices", () => {
+  const monday = new Date("2026-10-05T12:00:00");
+  const graphs = "number-of-islands";
+  const codingChoice = { source: "coach", problemId: graphs, kind: "coding_review", minutes: 19 } as const;
+
+  it("can replace a learning block with a due coding review and reserve its time", () => {
+    const progress = { [graphs]: base(), "two-sum": base(), "valid-parentheses": base() };
+    const params = { progress, now: monday, settings: settings(20), includeAlternatives: true };
+    const standard = buildStudyPlan({ ...params, includeCoachCandidates: true });
+    expect(standard.mainTask?.kind).toBe("learning");
+    expect(standard.mainAlternatives).not.toContain(graphs);
+    expect(standard.coachCandidates?.coding_review).toContain(graphs);
+    expect(standard.recallTasks.length).toBeGreaterThan(0);
+
+    const coached = buildStudyPlan({ ...params, choice: codingChoice });
+    expect(orderedStudyTasks(coached)[0]).toBe(coached.coachTask);
+    expect(coached.coachTask).toMatchObject({ problemId: graphs, kind: "coding_review", minutes: 19 });
+    expect(coached.recallTasks).toEqual([]);
+    expect(coached.plannedMinutes).toBe(19);
+
+    const withRecall = buildStudyPlan({ ...params, settings: settings(40), choice: codingChoice });
+    const tasks = orderedStudyTasks(withRecall);
+    expect(tasks[0]).toBe(withRecall.mainTask);
+    expect(tasks.slice(1).every(task => task.kind === "recall")).toBe(true);
+    expect(tasks).toHaveLength(3);
+    expect(new Set(tasks.map(task => task.problemId)).size).toBe(tasks.length);
+    expect(withRecall.plannedMinutes).toBe(25);
+  });
+
+  it("can bring a due recall into a full review allocation", () => {
+    const params = { mode: "reviews" as const, now: monday, settings: settings(3),
+      progress: { [graphs]: base(), "two-sum": base() } };
+    expect(buildStudyPlan(params).recallTasks[0].problemId).toBe(graphs);
+    const selected = buildStudyPlan({ ...params, choice: { source: "coach", problemId: "two-sum", kind: "recall", minutes: 3 } });
+    expect(selected.recallTasks).toHaveLength(1);
+    expect(selected.coachTask).toMatchObject({ problemId: "two-sum", kind: "recall", minutes: 3 });
+    expect(selected.mainTask).toBeNull();
+  });
+
+  it("rejects a coding override when the slot is protected, unavailable, or already used", () => {
+    const params = { progress: { [graphs]: base() }, now: monday, settings: settings(), choice: codingChoice };
+    const protectedPlan = buildStudyPlan({ ...params,
+      progress: { ...params.progress, "max-area-of-island": base() }, includeCoachCandidates: true });
+    expect(protectedPlan.mainTask?.kind).toBe("variant");
+    expect(protectedPlan.coachCandidates).toMatchObject({ coding_review: [], learning: [] });
+    expect(protectedPlan.coachTask).toBeUndefined();
+
+    const rest = settings();
+    rest.studySchedule.restDay = monday.getDay();
+    for (const overrides of [
+      { mode: "reviews" as const }, { hasActiveSession: true }, { activeSeconds: 30 * 60 },
+      { excludedIds: [graphs] }, { settings: rest },
+    ]) expect(buildStudyPlan({ ...params, ...overrides }).coachTask).toBeUndefined();
+  });
 });
 
 describe("capacity and backlog planning", () => {
@@ -336,6 +393,24 @@ describe("capacity and backlog planning", () => {
       now,
     });
     expect(plan.mainTask?.minutes).toBe(5);
+  });
+  it("preserves a feasible coding block and falls back to recall when coding cannot fit", () => {
+    const params = {
+      progress: { "two-sum": base(), "number-of-islands": base() },
+      settings: settings(30),
+      now,
+    };
+    const tight = buildStudyPlan({ ...params, activeSeconds: 24 * 60 });
+    expect(tight.recallTasks).toHaveLength(0);
+    expect(tight.mainTask?.minutes).toBe(6);
+
+    const final = buildStudyPlan({
+      ...params,
+      progress: { "two-sum": base() },
+      activeSeconds: 27 * 60,
+    });
+    expect(final.mainTask).toBeNull();
+    expect(final.recallTasks).toMatchObject([{ problemId: "two-sum", minutes: 3 }]);
   });
   it("keeps assigning unseen transfer problems when the core list has been covered", () => {
     const core = problemsPoolForTargetCurriculum("NEET_75").filter(

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getNextReviewDate, getSrIntervalMultiplier, getPhase, validateStartTimestamp, MAX_BACKDATE_HOURS } from './dateUtils';
+import { getDaysUntilInterview, getNextReviewDate, getSrIntervalMultiplier, getPhase, validateStartTimestamp, MAX_BACKDATE_HOURS } from './dateUtils';
 
 describe('getPhase', () => {
   const now = new Date('2026-10-06T12:00:00');
@@ -13,6 +13,12 @@ describe('getPhase', () => {
     expect(getPhase(now, '2027-03-01')).toBe(1);
     expect(getPhase(now, '2026-11-01')).toBe(2);
     expect(getPhase(now, '2026-10-13')).toBe(3);
+  });
+  it('counts calendar dates and keeps interview day active through the evening', () => {
+    const evening = new Date('2026-11-18T23:30:00');
+    expect(getDaysUntilInterview('2026-11-19', evening)).toBe(1);
+    expect(getDaysUntilInterview('2026-11-18', evening)).toBe(0);
+    expect(getPhase(evening, '2026-11-18')).toBe(3);
   });
 });
 

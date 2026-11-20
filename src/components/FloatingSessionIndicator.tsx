@@ -47,6 +47,7 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
     const probName = prob?.title ?? 'Problem';
     const truncated = probName.length > 22 ? probName.slice(0, 22) + '…' : probName;
     const isPaused = activeSession.pausedAt != null;
+    const saveUnconfirmed = Boolean(activeSession.completion);
 
     return (
         <div className="fixed bottom-20 lg:bottom-5 right-4 lg:right-5 z-50 select-none">
@@ -77,31 +78,31 @@ export const FloatingSessionIndicator: React.FC<FloatingSessionIndicatorProps> =
                         }`}>
                         {activeSession.isColdSolve ? 'Cold Solve' : activeSession.isReview ? 'Review' : 'New Problem'}
                     </span>
-                    <span className="text-subtle text-[10px]">{isPaused ? 'paused' : 'in progress'}</span>
+                    <span className="text-subtle text-[10px]">{saveUnconfirmed ? 'save unconfirmed' : isPaused ? 'paused' : 'in progress'}</span>
                 </div>
 
                 {/* Buttons */}
-                {!confirmAbandon ? (
+                {!confirmAbandon || saveUnconfirmed ? (
                     <div className="flex gap-2 mt-1">
                         <button
                             onClick={() => navigate('/timer')}
                             className="flex-1 flex items-center justify-center gap-1.5 min-h-10 py-1.5 px-3 bg-accent hover:bg-accent-strong text-on-accent rounded-lg text-xs font-semibold transition-colors"
                         >
                             <ArrowRight size={12} />
-                            Return
+                            {saveUnconfirmed ? 'Return to save' : 'Return'}
                         </button>
-                        <button
+                        {!saveUnconfirmed && <button
                             onClick={() => setConfirmAbandon(true)}
                             className="flex items-center justify-center w-10 h-10 bg-surface hover:bg-danger/10 text-muted hover:text-danger rounded-lg transition-colors border border-line"
                             aria-label="Abandon session"
                             title="Abandon session"
                         >
                             <X size={14} />
-                        </button>
+                        </button>}
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1.5 mt-1">
-                        <p className="text-[11px] text-danger text-center font-medium">Clear the local session? A save already sent may have completed.</p>
+                        <p className="text-[11px] text-danger text-center font-medium">Discard this unsaved session?</p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => { abandonSession(); setConfirmAbandon(false); }}
